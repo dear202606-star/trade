@@ -4,6 +4,21 @@
 
 对「买入上一年涨幅前 N 名」的横截面动量策略做系统回测，比较 11 种持有模型，并给出可执行的建仓方案。
 
+## 🌐 在线看板
+
+| 页面 | 网址 |
+|---|---|
+| 策略模型研究与行动步骤 | https://dear202606-star.github.io/trade/ |
+| 实时信号看板 | https://dear202606-star.github.io/trade/signals.html |
+
+两个页面由 GitHub Actions 每月自动重建，打开即是最新数据。
+
+## 🔔 自动通知
+
+每月运行后会自动在 [Issues](https://github.com/dear202606-star/trade/issues) 的「📊 月度信号看板」下追加一条评论，内容包括当期持仓、建议权重、大盘开关、与上期的变化。
+
+GitHub 会对 Issue 参与人发送**邮件通知**（必要时在手机 App 打开推送）。想改通知方式：右上角 Watch → Custom → 勾选 Issues。
+
 > **每月自动选股已上线**：查看最新名单 → [`output/monthly/latest.md`](output/monthly/latest.md)
 
 ## 核心结论
