@@ -1,24 +1,42 @@
 # -*- coding: utf-8 -*-
-"""market_data.py — 多源行情获取 + 交叉校验
+"""market_data.py — 行情数据层：多源获取 + 口径归一 + 交叉核对
 
-优先级：Yahoo Finance（国外，含部分退市股）→ Sina（国内，全历史）
-校验：月份连续、价格序列无异常跳变、最新数据不过期、≥13 个月
+设计原则
+--------
+1. **口径唯一**：全部只用「拆股复权」，不用分红复权。
+   Yahoo 的 adjclose 含分红，会系统性抬高分红股的收益，必须用
+   close + 官方拆股事件表重建复权序列，才与新浪口径一致。
+2. **符号归一**：新浪 BRK.B ↔ Yahoo BRK-B。
+3. **交叉核对**：同一只票两个源都取，比较 12 个月收益；
+   差异超过阈值就"隔离"该票，绝不静默采用其中一个。
+4. **可审计**：每次运行输出数据质量统计（各源条数、隔离名单）。
+
 返回统一结构：[[ym, adj_close, raw_close, month_volume], ...]
 """
 import json
-import os
-import time
 import re
+import time
 import datetime as dt
 
 import requests
 import pandas as pd
 
-UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36"
-NICE = [1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 10, 12, 15, 20, 25, 30, 40, 50, 100]
+UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+      "(KHTML, like Gecko) Chrome/128.0 Safari/537.36")
 PAT = re.compile(r"\(\s*(\[.*\])\s*\)", re.S)
+NICE = [1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 10, 12, 15, 20, 25, 30, 40, 50, 100]
 
-STATS = {"yahoo": 0, "sina": 0, "fail": 0}
+TOL_RET = 0.015          # 12 个月收益允许偏差（绝对）
+TOL_PX = 0.02            # 同月末收盘价允许偏差（相对）
+
+STATS = {"sina": 0, "yahoo": 0, "both": 0, "quarantine": 0, "fail": 0}
+QUARANTINE = {}          # ticker -> 原因
+
+
+def reset_stats():
+    for k in STATS:
+        STATS[k] = 0
+    QUARANTINE.clear()
 
 
 def _nice(k, tol=0.04):
@@ -26,60 +44,87 @@ def _nice(k, tol=0.04):
     return best if abs(best - k) / k <= tol else None
 
 
+def to_yahoo(tk):
+    return tk.replace(".", "-")
+
+
+def to_sina(tk):
+    return tk.replace("-", ".")
+
+
 # ---------------------------------------------------------------- Yahoo
 def fetch_yahoo(tk, years=26):
+    """只用 close + 官方拆股事件重建复权，得到与新浪同口径的序列"""
+    sym = to_yahoo(tk)
     now = int(time.time())
     start = now - int(years * 365.25 * 86400)
-    url = (f"https://query2.finance.yahoo.com/v8/finance/chart/{tk}"
-           f"?period1={start}&period2={now}&interval=1mo&events=div%2Csplit")
-    r = requests.get(url, headers={"User-Agent": UA}, timeout=8)
-    if r.status_code != 200:
-        return None
-    j = r.json()
-    res = (j.get("chart") or {}).get("result") or []
-    if not res:
-        return None
-    res = res[0]
-    ts = res.get("timestamp") or []
-    ind = res.get("indicators") or {}
-    q = (ind.get("quote") or [{}])[0]
-    adj = ((ind.get("adjclose") or [{}])[0]).get("adjclose") or q.get("close") or []
-    close = q.get("close") or []
-    vol = q.get("volume") or []
-    if len(ts) < 13:
-        return None
-    out = []
-    for i, t in enumerate(ts):
-        try:
-            c = close[i]
-            a = adj[i] if i < len(adj) and adj[i] is not None else c
+    url = (f"https://query2.finance.yahoo.com/v8/finance/chart/{sym}"
+           f"?period1={start}&period2={now}&interval=1mo&events=split")
+    try:
+        r = requests.get(url, headers={"User-Agent": UA}, timeout=8)
+        if r.status_code != 200:
+            return None
+        res = ((r.json().get("chart") or {}).get("result") or [])
+        if not res:
+            return None
+        res = res[0]
+        ts = res.get("timestamp") or []
+        q = (res.get("indicators") or {}).get("quote") or [{}]
+        q = q[0]
+        close = q.get("close") or []
+        vol = q.get("volume") or []
+        if len(ts) < 13:
+            return None
+
+        # 拆股事件：splits 里 numerator/denominator
+        splits = (((res.get("events") or {}).get("splits")) or {})
+        sp = []
+        for k, v in splits.items():
+            try:
+                sp.append((int(v.get("date") or k), float(v["numerator"]) / float(v["denominator"])))
+            except Exception:
+                continue
+        sp.sort()
+
+        rows = []
+        for i, t in enumerate(ts):
+            c = close[i] if i < len(close) else None
+            if c is None or c <= 0:
+                continue
+            d = dt.datetime.utcfromtimestamp(t)
+            # 该月之后发生的拆股，全部前复权乘回去
+            f = 1.0
+            for sd, ratio in sp:
+                if sd > t:
+                    f *= ratio
             v = vol[i] if i < len(vol) and vol[i] is not None else 0
-        except Exception:
-            continue
-        if c is None or a is None or c <= 0:
-            continue
-        d = dt.datetime.utcfromtimestamp(t)
-        ym = d.strftime("%Y-%m")
-        out.append([ym, float(a), float(c), float(v)])
-    # 同月取最后一个交易日
-    ded = {}
-    for row in out:
-        ded[row[0]] = row
-    return [ded[k] for k in sorted(ded)]
+            rows.append([d.strftime("%Y-%m"), float(c) * f, float(c), float(v)])
+
+        ded = {}
+        for row in rows:
+            ded[row[0]] = row
+        return [ded[k] for k in sorted(ded)]
+    except Exception:
+        return None
 
 
 # ---------------------------------------------------------------- Sina
 def fetch_sina(tk):
+    sym = to_sina(tk)
     url = ("https://stock.finance.sina.com.cn/usstock/api/jsonp_v2.php/x/"
-           f"US_MinKService.getDailyK?symbol={tk}")
-    r = requests.get(url, headers={"User-Agent": UA,
-                                   "Referer": "https://finance.sina.com.cn"}, timeout=30)
-    m = PAT.search(r.text)
-    if not m:
+           f"US_MinKService.getDailyK?symbol={sym}")
+    try:
+        r = requests.get(url, headers={"User-Agent": UA,
+                                       "Referer": "https://finance.sina.com.cn"}, timeout=10)
+        m = PAT.search(r.text)
+        if not m:
+            return None
+        arr = json.loads(m.group(1))
+        if not arr:
+            return None
+    except Exception:
         return None
-    arr = json.loads(m.group(1))
-    if not arr:
-        return None
+
     out, factor = [], 1.0
     prev_c = prev_v = None
     cur_ym = cur_adj = cur_raw = None
@@ -123,7 +168,7 @@ def fetch_sina(tk):
     return out
 
 
-# ---------------------------------------------------------------- 校验
+# ---------------------------------------------------------------- 校验与对齐
 def validate(rows, max_age_days=10):
     if not rows or len(rows) < 13:
         return False, "月份不足"
@@ -134,8 +179,7 @@ def validate(rows, max_age_days=10):
         if not (r[1] and r[1] > 0 and r[2] and r[2] > 0):
             return False, "价格非正"
     last = pd.Timestamp(ym[-1] + "-01") + pd.offsets.MonthEnd(0)
-    today = pd.Timestamp(dt.date.today())
-    if (today - last).days > max_age_days + 31:
+    if (pd.Timestamp(dt.date.today()) - last).days > max_age_days + 31:
         return False, f"数据过期 {ym[-1]}"
     tail = [r[1] for r in rows[-13:]]
     for a, b in zip(tail, tail[1:]):
@@ -144,42 +188,64 @@ def validate(rows, max_age_days=10):
     return True, "ok"
 
 
-_YAHOO_OK = None
+def alignment(r1, r2):
+    """比较两源能否对上：共同月份数、12 个月收益差、同月末收盘价差"""
+    d1 = {r[0]: r for r in r1}
+    d2 = {r[0]: r for r in r2}
+    common = sorted(set(d1) & set(d2))
+    if len(common) < 13:
+        return False, len(common), None, None
+    # 同月末原始收盘价（未复权）应在同一量级
+    pxs = [abs(d1[m][2] / d2[m][2] - 1) for m in common[-6:] if d2[m][2] > 0]
+    px_diff = max(pxs) if pxs else None
+    # 12 个月收益（复权）
+    m0, m12 = common[-1], common[-13]
+    try:
+        r_a = d1[m0][1] / d1[m12][1] - 1
+        r_b = d2[m0][1] / d2[m12][1] - 1
+        ret_diff = abs(r_a - r_b)
+    except Exception:
+        return False, len(common), px_diff, None
+    ok = (ret_diff <= TOL_RET) and (px_diff is None or px_diff <= TOL_PX)
+    return ok, len(common), px_diff, ret_diff
 
 
-def yahoo_available():
-    """探测 Yahoo 是否可达（国内网络会被墙），只探一次"""
-    global _YAHOO_OK
-    if _YAHOO_OK is None:
-        try:
-            _YAHOO_OK = fetch_yahoo("AAPL") is not None
-        except Exception:
-            _YAHOO_OK = False
-        print(f"      Yahoo 可用: {_YAHOO_OK}", flush=True)
-    return _YAHOO_OK
+def get_history(tk, dual=True, yahoo_ok=None):
+    """取一只票的历史。dual=True 时两源都取并核对。"""
+    a = fetch_sina(tk)
+    ok_a, _ = validate(a) if a else (False, "")
+    b = None
+    if dual and (yahoo_ok if yahoo_ok is not None else True):
+        b = fetch_yahoo(tk)
+        ok_b, _ = validate(b) if b else (False, "")
+        if not ok_b:
+            b = None
 
+    if a and ok_a and b:
+        ok, ncom, pxd, retd = alignment(a, b)
+        STATS["both"] += 1
+        if ok:
+            STATS["sina"] += 1
+            return a, "sina+yahoo"          # 两源一致，用新浪（与回测同源）
+        QUARANTINE[tk] = (f"两源 12 月收益差 {retd*100:.1f}%"
+                          if retd is not None else "两源无法对齐")
+        STATS["quarantine"] += 1
+        return None, "quarantine"
 
-def get_history(tk, prefer=None):
-    """按优先级取数，返回 (rows, source)"""
-    if prefer is None:
-        # 主源固定新浪：回测（29.4% 那套数字）就是新浪数据算的，
-        # 实盘信号必须同源，否则同一策略换个数据源会给出不同答案。
-        # Yahoo 只做兜底（新浪失败时）与退市股补充。
-        prefer = ("sina", "yahoo") if yahoo_available() else ("sina",)
-    for src in prefer:
-        try:
-            rows = fetch_yahoo(tk) if src == "yahoo" else fetch_sina(tk)
-        except Exception:
-            rows = None
-        if rows:
-            ok, why = validate(rows)
-            if ok:
-                STATS[src] = STATS.get(src, 0) + 1
-                return rows, src
+    if a and ok_a:
+        STATS["sina"] += 1
+        return a, "sina"
+    if b:
+        ok_b, _ = validate(b)
+        if ok_b:
+            STATS["yahoo"] += 1
+            return b, "yahoo"
     STATS["fail"] += 1
     return None, None
 
 
-def reset_stats():
-    for k in STATS:
-        STATS[k] = 0
+def probe_yahoo():
+    try:
+        return fetch_yahoo("AAPL") is not None
+    except Exception:
+        return False

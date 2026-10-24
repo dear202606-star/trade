@@ -1,0 +1,55 @@
+name: 数据质量核对
+
+on:
+  schedule:
+    # 每月 1 日 02:00 UTC（选股后一小时）
+    - cron: "0 2 1 * *"
+  workflow_dispatch:
+  push:
+    paths:
+      - market_data.py
+      - crosscheck.py
+      - .github/workflows/data-check.yml
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - run: pip install -r requirements.txt
+
+      - name: 交叉核对两个数据源
+        run: python crosscheck.py
+
+      - name: 提交报告
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add output/data_quality.md output/data_quality.json
+          if git diff --staged --quiet; then
+            echo "无变化"
+          else
+            git commit -m "chore: 数据质量核对 $(date -u +%Y-%m)"
+            git push
+          fi
+
+      - name: 摘要
+        if: always()
+        run: |
+          echo "### 数据质量核对" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f output/data_quality.md ]; then
+            cat output/data_quality.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "未生成报告" >> "$GITHUB_STEP_SUMMARY"
+          fi

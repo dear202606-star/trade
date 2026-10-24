@@ -195,7 +195,10 @@ def main():
         tickers = tickers[: args.limit]
     print(f"      {len(tickers)} 只", flush=True)
 
-    print("[2/5] 拉取行情（新浪，自建拆股复权）...", flush=True)
+    print("[2/5] 拉取行情（新浪主源 + Yahoo 交叉核对）...", flush=True)
+    yahoo_ok = market_data.probe_yahoo()
+    market_data.reset_stats()
+    print(f"      Yahoo 可达: {yahoo_ok}", flush=True)
     data, fail = {}, []
     t0 = time.time()
     with ThreadPoolExecutor(max_workers=args.workers) as ex:
@@ -203,7 +206,7 @@ def main():
         for i, fu in enumerate(as_completed(futs), 1):
             t = futs[fu]
             try:
-                r, _src = market_data.get_history(t)
+                r, _src = market_data.get_history(t, yahoo_ok, yahoo_ok)
             except Exception:
                 r, _src = None, None
             if r and len(r) >= 14:
@@ -213,7 +216,11 @@ def main():
             if i % 100 == 0:
                 print(f"      {i}/{len(tickers)+1}  用时 {time.time()-t0:.0f}s", flush=True)
 
-    print(f"      成功 {len(data)-1} / 失败 {len(fail)}  |  数据源 {market_data.STATS}", flush=True)
+    print(f"      成功 {len(data)-1} / 失败 {len(fail)}", flush=True)
+    print(f"      数据质量 {market_data.STATS}", flush=True)
+    if market_data.QUARANTINE:
+        print(f"      两源不一致已隔离 {len(market_data.QUARANTINE)} 只: "
+              + ", ".join(list(market_data.QUARANTINE)[:12]), flush=True)
     if "SPY" not in data:
         print("ERROR: SPY 行情获取失败", file=sys.stderr)
         sys.exit(1)
