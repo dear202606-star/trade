@@ -162,7 +162,10 @@ def yahoo_available():
 def get_history(tk, prefer=None):
     """按优先级取数，返回 (rows, source)"""
     if prefer is None:
-        prefer = ("yahoo", "sina") if yahoo_available() else ("sina",)
+        # 主源固定新浪：回测（29.4% 那套数字）就是新浪数据算的，
+        # 实盘信号必须同源，否则同一策略换个数据源会给出不同答案。
+        # Yahoo 只做兜底（新浪失败时）与退市股补充。
+        prefer = ("sina", "yahoo") if yahoo_available() else ("sina",)
     for src in prefer:
         try:
             rows = fetch_yahoo(tk) if src == "yahoo" else fetch_sina(tk)
