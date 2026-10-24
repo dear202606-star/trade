@@ -55,6 +55,7 @@ h3{{font-size:15px;color:var(--gold);margin:24px 0 6px}}
 
 <div class="tabs">
   <div class="tab on" data-p="now">本期信号</div>
+  <div class="tab" data-p="track">实盘跟踪</div>
   <div class="tab" data-p="hist">历史记录</div>
   <div class="tab" data-p="how">策略说明</div>
 </div>
@@ -64,6 +65,12 @@ h3{{font-size:15px;color:var(--gold);margin:24px 0 6px}}
   <div class="hero" id="hero"></div>
   <div id="official"></div>
   <div id="picks"></div>
+</div>
+
+<div class="panel" id="track">
+  <div id="trackSummary"></div>
+  <div id="trackTable"></div>
+  <div class="note">从首期信号开始记账：每期按正式持仓的权重 × 仓位计算组合收益，与标普 500、回测预期（年化 29.4%）对照。<b>不足 12 期时，偏差主要反映运气，不足以判断策略失效。</b></div>
 </div>
 
 <div class="panel" id="hist">
@@ -82,7 +89,7 @@ h3{{font-size:15px;color:var(--gold);margin:24px 0 6px}}
   <div class="note"><b>换仓</b>：<b>每年 12 月最后一个交易日</b>按当时排名换仓，之后全年不变。其余月份只检查大盘开关，不动持仓——这是回测验证过的关键纪律（改成月度再平衡会让年化掉约 8 个百分点）。</div>
   <div class="note"><b>开关</b>：标普 500 上月收盘低于 10 个月均线时，整体仓位降至 50%；否则满仓。</div>
   <div class="note"><b>仓位</b>：策略总仓位 ≤ 股票资产的 30%（上表"占总资产"已按此折算），单只 ≤ 总资产 10%，不设个股止损。</div>
-  <div class="note" style="border-left-color:var(--red)"><b>风险</b>：回测存在生存者偏差（退市股缺失），真实收益预计打 7–8 折；行业集中度高，单赛道崩塌会同步回撤。本页面仅供研究，不构成投资建议。</div>
+  <div class="note" style="border-left-color:var(--red)"><b>风险</b>：生存者偏差已量化——覆盖 2008 年 93%、2012 年 98.6%、2021 年后 100%，累计仅缺 38 只（雷曼、贝尔斯登、华盛顿互惠等 2008–2010 倒闭金融股），对"选出赢家"的影响集中在 2009–2010 反弹年。行业集中度高，单赛道崩塌会同步回撤。本页面仅供研究，不构成投资建议。</div>
 </div>
 
 <div class="foot">数据来源：新浪财经日线 · 标普500 成分。页面由 GitHub Actions 每月自动生成。</div>
@@ -167,7 +174,44 @@ function initHist(){{
   if(DATA.length) renderHist(DATA[0]);
 }}
 
+function renderTrack(rec){{
+  const t = rec.track || {{}};
+  const el = document.getElementById('trackSummary');
+  const pct = v => (v==null ? '—' : ((v*100>=0?'+':'') + (v*100).toFixed(1) + '%'));
+  const rows = (rec.track_records || []).slice().reverse();
+  if(!t.months){{
+    el.innerHTML = '<div class="note">尚未产生已结算月份。首期信号已记录，下个月运行后开始计算收益。</div>';
+  }} else {{
+    el.innerHTML = `
+      <div class="hero" style="grid-template-columns:repeat(4,1fr)">
+        <div class="card"><div class="v">${{pct(t.strategy)}}</div><div class="l">策略累计（${{t.months}} 期）</div>
+          <div class="s">起始 ${{esc(t.start)}}</div></div>
+        <div class="card"><div class="v">${{pct(t.spy)}}</div><div class="l">标普500 同期</div>
+          <div class="s">超额 ${{pct(t.excess_vs_spy)}}</div></div>
+        <div class="card"><div class="v">${{pct(t.expected)}}</div><div class="l">回测预期</div>
+          <div class="s">按 29.4% 年化折算</div></div>
+        <div class="card"><div class="v">${{pct(t.gap_vs_backtest)}}</div><div class="l">与回测的偏差</div>
+          <div class="s">正=跑赢回测</div></div>
+      </div>`;
+  }}
+  document.getElementById('trackTable').innerHTML = `
+    <table><thead><tr><th>期次</th><th>正式持仓</th><th class="num">仓位</th>
+    <th class="num">策略收益</th><th class="num">标普500</th><th class="num">超额</th></tr></thead><tbody>
+    ${{rows.map(r=>{{
+      const pos = (r.picks||[]).map(p=>esc(p.ticker)).join(' / ');
+      const ex = (r.ret!=null && r.spy_ret!=null) ? r.ret - r.spy_ret : null;
+      const col = v => v==null ? '#6f8199' : (v>=0 ? '#2ecc71' : '#ff5a5f');
+      return `<tr><td>${{esc(r.month)}}</td><td class="tk">${{pos}}</td>
+        <td class="num">${{(r.exposure*100).toFixed(0)}}%</td>
+        <td class="num" style="color:${{col(r.ret)}}">${{r.ret==null?'待结算':pct(r.ret)}}</td>
+        <td class="num">${{r.spy_ret==null?'—':pct(r.spy_ret)}}</td>
+        <td class="num" style="color:${{col(ex)}}">${{ex==null?'—':pct(ex)}}</td></tr>`;
+    }}).join('')}}
+    </tbody></table>`;
+}}
+
 renderNow(DATA[0]);
+renderTrack(DATA[0]);
 initHist();
 </script>
 </body></html>"""

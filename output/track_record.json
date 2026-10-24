@@ -1,0 +1,42 @@
+{
+  "start": "2026-10",
+  "equity": 1.0,
+  "records": [
+    {
+      "date": "2026-10-24",
+      "month": "2026-10",
+      "picks": [
+        {
+          "ticker": "LITE",
+          "weight": 0.3,
+          "px": 756.17
+        },
+        {
+          "ticker": "MU",
+          "weight": 0.3,
+          "px": 877.55
+        },
+        {
+          "ticker": "HOOD",
+          "weight": 0.4,
+          "px": 95.07
+        }
+      ],
+      "exposure": 1.0,
+      "spy_px": 759.97,
+      "ret": null,
+      "spy_ret": null
+    }
+  ],
+  "spy_equity": 1.0,
+  "months": 0,
+  "summary": {
+    "start": "2026-10",
+    "months": 0,
+    "strategy": 0.0,
+    "spy": 0.0,
+    "expected": 0.02171,
+    "excess_vs_spy": 0.0,
+    "gap_vs_backtest": -0.02171
+  }
+}

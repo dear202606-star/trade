@@ -54,6 +54,13 @@ jobs:
         id: site
         run: python site_build.py
 
+      - name: 生存者偏差审计（尝试用 Yahoo 补齐退市标的）
+        if: steps.pick.outcome == 'success'
+        continue-on-error: true
+        run: |
+          git clone --depth 1 https://github.com/fja05680/sp500.git /tmp/sp500 2>/dev/null || true
+          python survivorship.py --probe || echo "审计跳过"
+
       - name: 上传 Pages 产物
         if: steps.pick.outcome == 'success'
         uses: actions/upload-pages-artifact@v3
@@ -67,6 +74,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add output/current_picks.csv output/current_picks_full.csv \
                   output/monthly output/signal_history.json output/dashboard.html \
+                  output/track_record.json output/survivorship.json output/survivorship.md \
                   "output/策略模型研究与行动步骤.html"
           if git diff --staged --quiet; then
             echo "本期无变更，跳过提交"

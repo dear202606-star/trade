@@ -15,6 +15,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 import pandas as pd
 
+import market_data
+
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0"
 PAT = re.compile(r"\(\s*(\[.*\])\s*\)", re.S)
 NICE = [1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 10, 12, 15, 20, 25, 30, 40, 50, 100]
@@ -200,9 +202,9 @@ def main():
         for i, fu in enumerate(as_completed(futs), 1):
             t = futs[fu]
             try:
-                r = fu.result()
+                r, _src = market_data.get_history(t)
             except Exception:
-                r = None
+                r, _src = None, None
             if r and len(r) >= 14:
                 data[t] = month_end_series(r)
             else:
@@ -210,7 +212,7 @@ def main():
             if i % 100 == 0:
                 print(f"      {i}/{len(tickers)+1}  用时 {time.time()-t0:.0f}s", flush=True)
 
-    print(f"      成功 {len(data)-1} / 失败 {len(fail)}", flush=True)
+    print(f"      成功 {len(data)-1} / 失败 {len(fail)}  |  数据源 {market_data.STATS}", flush=True)
     if "SPY" not in data:
         print("ERROR: SPY 行情获取失败", file=sys.stderr)
         sys.exit(1)
@@ -338,6 +340,18 @@ def main():
         if prev.get("official_month") != rec["official_month"]:
             msgs.append(f"年度换仓：{rec['official_month']} 新组合生效")
         rec["change"] = "；".join(msgs) if msgs else "无变化"
+
+    # ---- 实盘跟踪账本 ----
+    try:
+        import track_record
+        prices = {tk: float(df.at[latest, "raw"]) for tk, df in data.items()
+                  if tk != "SPY" and latest in df.index}
+        tr = track_record.update(official, prices, float(spy_px), latest, today)
+        rec["track"] = tr.get("summary", {})
+        rec["track_records"] = tr.get("records", [])[-24:]
+        print("      跟踪: " + json.dumps(rec["track"], ensure_ascii=False))
+    except Exception as e:
+        print(f"WARN: 跟踪账本失败 {e}", file=sys.stderr)
 
     hist = [h for h in hist if h.get("month") != latest]
     hist.insert(0, rec)
