@@ -7,19 +7,19 @@
       "month": "2026-10",
       "picks": [
         {
+          "ticker": "ECHO",
+          "weight": 0.4,
+          "px": 89.08
+        },
+        {
           "ticker": "LITE",
           "weight": 0.3,
           "px": 756.17
         },
         {
-          "ticker": "MU",
+          "ticker": "WDC",
           "weight": 0.3,
-          "px": 877.55
-        },
-        {
-          "ticker": "HOOD",
-          "weight": 0.4,
-          "px": 95.07
+          "px": 343.67
         }
       ],
       "exposure": 1.0,
