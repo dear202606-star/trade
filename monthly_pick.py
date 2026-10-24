@@ -234,9 +234,12 @@ def main():
     print("[4/4] 生成报告 ...", flush=True)
     os.makedirs("output/monthly", exist_ok=True)
     top10 = q.head(TOPN_LIST)
+    runner = "GitHub Actions" if os.environ.get("GITHUB_ACTIONS") else "本地"
+    sha = (os.environ.get("GITHUB_SHA") or "local")[:7]
     lines = [
         f"# 月度选股 · {latest}", "",
-        f"> 生成时间 {today} ｜ 数据截至 {latest} 月末 ｜ 股票池 {len(q)} 只（标普500 过滤后）", "",
+        f"> 生成时间 {today} ｜ 数据截至 {latest} 月末 ｜ 股票池 {len(q)} 只（标普500 过滤后）",
+        f"> 运行环境 {runner} ｜ 代码版本 {sha}", "",
         "## 大盘开关", "",
         f"- SPY 最新收盘：**{spy_px:,.2f}**",
         f"- 10 月均线：**{ma10:,.2f}**",
