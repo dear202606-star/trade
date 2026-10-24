@@ -20,6 +20,7 @@ import market_data
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0"
 PAT = re.compile(r"\(\s*(\[.*\])\s*\)", re.S)
 NICE = [1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 10, 12, 15, 20, 25, 30, 40, 50, 100]
+PIPELINE_VERSION = "2.1"   # 数据同源(新浪)+年度锁定+实盘跟踪
 MIN_PRICE = 5.0
 MIN_DV = 20e6
 TOPN_LIST = 10
