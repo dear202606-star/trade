@@ -1,0 +1,37 @@
+# 数据缓存（体积过大，不纳入版本控制）
+data/
+*.pkl
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# 系统
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 临时
+~$*
+*.tmp
+
+# ---- 以下为个人/无关内容，禁止入库 ----
+# 个人持仓与投资方案文档（含隐私信息）
+持仓诊断*.md
+执行手册*.md
+执行方案*.md
+调研报告*.md
+赚钱最优方案*.md
+最终方案*.md
+风险偏好测评*.md
+对抗性审查*.md
+# 其他项目
+futu-lowfreq/
+_research/
+# 个人账户脚本
+read_positions.py
+rebalance.py
+probe2.py
+probe3.py
