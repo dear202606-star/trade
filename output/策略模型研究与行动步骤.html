@@ -59,7 +59,7 @@ padding:2px 9px;margin-right:6px;font-family:Consolas,monospace;font-weight:700;
     <div class="row">
       <div><div class="k">最新信号</div><div class="v" id="lb-month">—</div></div>
       <div><div class="k">大盘开关</div><div class="v"><span class="pill" id="lb-trend">—</span></div></div>
-      <div><div class="k">本期持仓</div><div class="v" id="lb-picks">—</div></div>
+      <div><div class="k">正式持仓（年度锁定）</div><div class="v" id="lb-picks">—</div></div>
       <div><div class="k">建议仓位</div><div class="v" id="lb-exp">—</div></div>
       <div style="margin-left:auto"><a href="signals.html">查看信号看板与历史 →</a></div>
     </div>
@@ -179,18 +179,18 @@ padding:2px 9px;margin-right:6px;font-family:Consolas,monospace;font-weight:700;
 </div>
 <script>
 (function(){
-  var h = [{"month": "2026-10", "date": "2026-10-24", "data_date": "2026-10", "trend": "满仓", "exposure": 1.0, "spy": 759.97, "ma": 728.69, "picks": [{"rank": 1, "ticker": "MRNA", "name": "Moderna", "sector": "Health Care", "ret12": 6.3675, "weight": 0.4}, {"rank": 2, "ticker": "SNDK", "name": "Sandisk", "sector": "Information Technology", "ret12": 5.211, "weight": 0.3}, {"rank": 3, "ticker": "MU", "name": "Micron Technology", "sector": "Information Technology", "ret12": 2.9217, "weight": 0.3}], "bench": [{"rank": 4, "ticker": "LITE", "sector": "Information Technology", "ret12": 2.7516}, {"rank": 5, "ticker": "DELL", "sector": "Information Technology", "ret12": 1.8174}, {"rank": 6, "ticker": "VLO", "sector": "Energy", "ret12": 1.4728}, {"rank": 7, "ticker": "STX", "sector": "Information Technology", "ret12": 1.464}, {"rank": 8, "ticker": "MRVL", "sector": "Information Technology", "ret12": 1.4377}, {"rank": 9, "ticker": "MPC", "sector": "Energy", "ret12": 1.3458}, {"rank": 10, "ticker": "HPE", "sector": "Information Technology", "ret12": 1.3215}], "change": "持仓与开关均无变化"}];
+  var h = [{"month": "2026-10", "date": "2026-10-24", "official_month": "2025-12", "trend": "满仓", "exposure": 1.0, "spy": 759.97, "ma": 728.69, "action": "本月不换仓：持有 2026 年度组合（基准 2025-12）；大盘在 10 月均线上方（760 ≥ 729），维持满仓", "official": [{"rank": 1, "ticker": "LITE", "name": "Lumentum", "sector": "Information Technology", "ret12": 3.3906, "weight": 0.3}, {"rank": 2, "ticker": "MU", "name": "Micron Technology", "sector": "Information Technology", "ret12": 2.3913, "weight": 0.3}, {"rank": 3, "ticker": "HOOD", "name": "Robinhood Markets", "sector": "Financials", "ret12": 2.0354, "weight": 0.4}], "picks": [{"rank": 1, "ticker": "MRNA", "name": "Moderna", "sector": "Health Care", "ret12": 6.3675, "weight": 0.4}, {"rank": 2, "ticker": "SNDK", "name": "Sandisk", "sector": "Information Technology", "ret12": 5.211, "weight": 0.3}, {"rank": 3, "ticker": "MU", "name": "Micron Technology", "sector": "Information Technology", "ret12": 2.9217, "weight": 0.3}], "bench": [{"rank": 1, "ticker": "MRNA", "sector": "Health Care", "ret12": 6.3675}, {"rank": 2, "ticker": "SNDK", "sector": "Information Technology", "ret12": 5.211}, {"rank": 3, "ticker": "MU", "sector": "Information Technology", "ret12": 2.9217}, {"rank": 4, "ticker": "LITE", "sector": "Information Technology", "ret12": 2.7516}, {"rank": 5, "ticker": "DELL", "sector": "Information Technology", "ret12": 1.8174}, {"rank": 6, "ticker": "VLO", "sector": "Energy", "ret12": 1.4728}, {"rank": 7, "ticker": "STX", "sector": "Information Technology", "ret12": 1.464}, {"rank": 8, "ticker": "MRVL", "sector": "Information Technology", "ret12": 1.4377}, {"rank": 9, "ticker": "MPC", "sector": "Energy", "ret12": 1.3458}, {"rank": 10, "ticker": "HPE", "sector": "Information Technology", "ret12": 1.3215}], "change": "无变化"}];
   if(!h || !h.length) return;
   var r = h[0];
   document.getElementById('lb-month').textContent = r.month;
   var t = document.getElementById('lb-trend');
   t.textContent = r.trend; t.className = 'pill ' + (r.trend==='满仓'?'on':'off');
-  document.getElementById('lb-picks').innerHTML = r.picks.map(function(p){
+  document.getElementById('lb-picks').innerHTML = (r.official||r.picks).map(function(p){
     return '<span class="tk">'+p.ticker+' '+(p.weight*100).toFixed(0)+'%</span>';
   }).join('');
   document.getElementById('lb-exp').textContent = (r.exposure*100).toFixed(0)+'%';
   document.getElementById('lb-note').textContent =
-    '数据截至 '+r.month+' ｜ 生成于 '+r.date+' ｜ 共 '+h.length+' 期信号 ｜ 仅供研究，不构成投资建议';
+    (r.action ? r.action+' ｜ ' : '') + '生成于 '+r.date+' ｜ 共 '+h.length+' 期信号 ｜ 仅供研究，不构成投资建议';
 })();
 </script>
 </body></html>

@@ -42,7 +42,7 @@ LIVE_HTML = """
     <div class="row">
       <div><div class="k">最新信号</div><div class="v" id="lb-month">—</div></div>
       <div><div class="k">大盘开关</div><div class="v"><span class="pill" id="lb-trend">—</span></div></div>
-      <div><div class="k">本期持仓</div><div class="v" id="lb-picks">—</div></div>
+      <div><div class="k">正式持仓（年度锁定）</div><div class="v" id="lb-picks">—</div></div>
       <div><div class="k">建议仓位</div><div class="v" id="lb-exp">—</div></div>
       <div style="margin-left:auto"><a href="signals.html">查看信号看板与历史 →</a></div>
     </div>
@@ -60,12 +60,12 @@ LIVE_JS = """
   document.getElementById('lb-month').textContent = r.month;
   var t = document.getElementById('lb-trend');
   t.textContent = r.trend; t.className = 'pill ' + (r.trend==='满仓'?'on':'off');
-  document.getElementById('lb-picks').innerHTML = r.picks.map(function(p){
+  document.getElementById('lb-picks').innerHTML = (r.official||r.picks).map(function(p){
     return '<span class="tk">'+p.ticker+' '+(p.weight*100).toFixed(0)+'%</span>';
   }).join('');
   document.getElementById('lb-exp').textContent = (r.exposure*100).toFixed(0)+'%';
   document.getElementById('lb-note').textContent =
-    '数据截至 '+r.month+' ｜ 生成于 '+r.date+' ｜ 共 '+h.length+' 期信号 ｜ 仅供研究，不构成投资建议';
+    (r.action ? r.action+' ｜ ' : '') + '生成于 '+r.date+' ｜ 共 '+h.length+' 期信号 ｜ 仅供研究，不构成投资建议';
 })();
 </script>
 """

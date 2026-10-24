@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 """publish_signal.py — 把本期信号发到 GitHub Issue（触发邮件/App 通知）
 
-用法：在 Actions 里运行，环境变量 GH_TOKEN 由 github.token 注入。
 行为：
-  - 找带 signal 标签的未关闭 Issue，作为「信号看板」长期更新
-  - 不存在则创建（指派给仓库所有者）
-  - 每次运行在该 Issue 下追加一条评论 → 触发通知
+  - 维护一个带 signal 标签的长驻 Issue「📊 月度信号看板」
+  - 首次创建并指派给仓库所有者；之后每次运行追加评论 → 触发通知
 """
 import json
 import os
@@ -38,35 +36,39 @@ def main():
     if not hist:
         return
     r = hist[0]
+    official = r.get("official") or r.get("picks") or []
+    page = f"https://{OWNER}.github.io/{REPO.split('/')[-1]}/"
 
-    # 确保标签存在
     gh("label", "create", LABEL, "--description", "策略信号",
        "--color", "FBCA04", "--force", check=False)
 
     lines = [
-        f"## {r['month']} 信号 · {r['trend']}（仓位 {r['exposure']*100:.0f}%）",
+        f"## {r['month']} 信号 · {r['trend']}（目标仓位 {r['exposure']*100:.0f}%）",
         "",
-        "| # | 代码 | 公司 | 行业 | 12月涨幅 | 建议权重 |",
-        "|---|---|---|---|---|---|",
+        f"> **本月动作**：{r.get('action','—')}",
+        "",
+        f"### 正式持仓（{r.get('official_month','—')} 锁定，本年度有效）",
+        "",
+        "| # | 代码 | 公司 | 行业 | 基准涨幅 | 策略内权重 | 占总资产 |",
+        "|---|---|---|---|---|---|---|",
     ]
-    for p in r["picks"]:
+    for p in official:
         lines.append(f"| {p['rank']} | **{p['ticker']}** | {p['name']} | {p['sector']} "
-                     f"| +{p['ret12']*100:.1f}% | {p['weight']*r['exposure']*100:.1f}% |")
+                     f"| +{p['ret12']*100:.0f}% | {p['weight']*100:.0f}% "
+                     f"| {p['weight']*r['exposure']*0.30*100:.1f}% |")
     lines += [
         "",
-        f"**变化**：{r.get('change','—')}",
+        f"**与上期相比**：{r.get('change','—')}",
         f"**大盘**：SPY {r['spy']:,.2f} vs 10 月均线 {r['ma']:,.2f}",
         "",
-        f"[查看网页看板](https://{OWNER}.github.io/{REPO.split('/')[-1]}/signals.html) ｜ "
-        f"[策略说明](https://{OWNER}.github.io/{REPO.split('/')[-1]}/)",
+        f"[网页版]({page}) ｜ [信号看板]({page}signals.html)",
         "",
-        "<sub>自动生成，仅供研究，不构成投资建议。</sub>",
+        "<sub>换仓日为每年 12 月最后一个交易日；其余月份只看开关。自动生成，仅供研究，不构成投资建议。</sub>",
     ]
     body = "\n".join(lines)
     with open("_signal_body.md", "w", encoding="utf-8") as f:
         f.write(body)
 
-    # 找现有 Issue
     out = gh("issue", "list", "--label", LABEL, "--state", "open",
              "--json", "number,title", "--limit", "5", check=False)
     num = None
@@ -83,8 +85,7 @@ def main():
                 "--label", LABEL]
         if OWNER:
             args += ["--assignee", OWNER]
-        url = gh(*args)
-        print(f"已创建信号 Issue: {url}")
+        print(f"已创建信号 Issue: {gh(*args)}")
     else:
         gh("issue", "comment", str(num), "--body-file", "_signal_body.md")
         print(f"已在 Issue #{num} 追加评论（会触发通知）")

@@ -1,39 +1,45 @@
-# 月度选股 · 2026-10
+# 月度信号 · 2026-10
 
-> 生成时间 2026-10-24 ｜ 数据截至 2026-10 月末 ｜ 股票池 495 只（标普500 过滤后）
-> 运行环境 GitHub Actions ｜ 代码版本 83e4ee5
+> 生成时间 2026-10-24 ｜ 数据截至 2026-10 ｜ 排名池 495 只
+> 运行环境 本地 ｜ 代码版本 local
+
+## 本月动作
+
+**本月不换仓：持有 2026 年度组合（基准 2025-12）；大盘在 10 月均线上方（760 ≥ 729），维持满仓**
 
 ## 大盘开关
 
-- SPY 最新收盘：**759.97**
-- 10 月均线：**728.69**
-- 状态：**满仓** → 建议仓位 100%
+- SPY 最新收盘：**759.97** ｜ 10 月均线：**728.69**
+- 状态：**满仓** → 目标仓位 100%
 
-## 本期持仓（前 3 名）
+## 正式持仓（2025-12 锁定，本年度有效）
 
-| 排名 | 代码 | 公司 | 行业 | 12月涨幅 | 建议权重 |
-|---|---|---|---|---|---|
-| 1 | **MRNA** | Moderna | Health Care | +636.7% | 40.0% |
-| 2 | **SNDK** | Sandisk | Information Technology | +521.1% | 30.0% |
-| 3 | **MU** | Micron Technology | Information Technology | +292.2% | 30.0% |
+| # | 代码 | 公司 | 行业 | 基准涨幅 | 策略内权重 | 占总资产 |
+|---|---|---|---|---|---|---|
+| 1 | **LITE** | Lumentum | Information Technology | +339% | 30% | 9.0% |
+| 2 | **MU** | Micron Technology | Information Technology | +239% | 30% | 9.0% |
+| 3 | **HOOD** | Robinhood Markets | Financials | +204% | 40% | 12.0% |
 
-## 备选池（第 4–10 名）
+## 若现在重排（参考，不据此换仓）
 
-| 排名 | 代码 | 行业 | 12月涨幅 |
+| # | 代码 | 行业 | 12月涨幅 |
 |---|---|---|---|
-| 4 | LITE | Information Technology | +275.2% |
-| 5 | DELL | Information Technology | +181.7% |
-| 6 | VLO | Energy | +147.3% |
-| 7 | STX | Information Technology | +146.4% |
-| 8 | MRVL | Information Technology | +143.8% |
-| 9 | MPC | Energy | +134.6% |
-| 10 | HPE | Information Technology | +132.1% |
+| 1 | MRNA | Health Care | +637% |
+| 2 | SNDK | Information Technology | +521% |
+| 3 | MU | Information Technology | +292% |
+| 4 | LITE | Information Technology | +275% |
+| 5 | DELL | Information Technology | +182% |
+| 6 | VLO | Energy | +147% |
+| 7 | STX | Information Technology | +146% |
+| 8 | MRVL | Information Technology | +144% |
+| 9 | MPC | Energy | +135% |
+| 10 | HPE | Information Technology | +132% |
 
-## 操作提示
+## 纪律
 
-- 本次调仓：维持，目标仓位 100%
-- 换仓日：每年 12 月最后一个交易日（月度报告仅用于监控开关状态）
-- 单只不超过总资产 10%，策略总仓位不超过股票资产 30%
+- 换仓日：每年 12 月最后一个交易日；其余月份只看开关，不动持仓
+- 策略总仓位 ≤ 股票资产的 30%，单只 ≤ 总资产 10%
+- 不设个股止损；只看大盘开关
 
 ---
 

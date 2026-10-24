@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
-"""monthly_pick.py — 月度自动选股（GitHub Actions 专用，无需本地缓存）
+"""monthly_pick.py — 月度信号（GitHub Actions 专用，无需本地缓存）
 
-规则（与 output/排名策略对比.html 一致）：
+严格对齐策略口径（output/排名策略对比.html）：
   1. 股票池：当前标普500 成分股
   2. 过滤：股价 >= 5 美元；过去 12 个月日均成交额 >= 2000 万美元
-  3. 排序：过去 12 个自然月涨幅
-  4. 持仓：前 3 名，等权；同一 GICS 行业最多 2 只，超过则行业权重压到 60%
-  5. 开关：标普500 上月收盘 < 10 月均线 -> 仓位减半
+  3. 排序：过去 12 个自然月涨幅（adj）
+  4. 持仓：前 3 名；同一 GICS 行业最多 2 只，出现 2 只时该行业权重上限 60%
+  5. 换仓：**每年 12 月末锁定**，次年全年不变；其余月份只监控开关
+  6. 开关：标普500 上月收盘 < 10 月均线 -> 整体仓位减半
 """
 import os, sys, json, re, time, argparse, datetime as dt
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -114,8 +115,67 @@ def fetch_history(tk):
 
 def month_end_series(rows):
     df = pd.DataFrame(rows, columns=["ym", "adj", "raw", "vol"])
-    df = df.drop_duplicates("ym").set_index("ym").sort_index()
-    return df
+    return df.drop_duplicates("ym").set_index("ym").sort_index()
+
+
+def ranking_at(data, months, sp, m):
+    """按 as-of 月份 m 的 12 个月动量排名，返回 (前10 DataFrame, 排名池大小)"""
+    if m not in months:
+        return None, 0
+    i = months.index(m)
+    if i < 12:
+        return None, 0
+    base = months[i - 12]
+    rows = []
+    for tk, df in data.items():
+        if tk == "SPY":
+            continue
+        if base not in df.index or m not in df.index:
+            continue
+        win = df.loc[base:m]
+        if len(win) != 13:                              # 13 个月必须连续
+            continue
+        ratio = (win["adj"] / win["adj"].shift(1)).dropna()
+        if len(ratio) < 12 or ratio.max() > 8 or ratio.min() < 1 / 8:
+            continue                                    # 剔除代码复用/拆股异常
+        px = df.at[m, "raw"]
+        if px < MIN_PRICE:
+            continue
+        seg = win.iloc[:-1]
+        dv = (seg["raw"] * seg["vol"]).mean()
+        if dv < MIN_DV:
+            continue
+        rows.append({"ticker": tk, "ret12": df.at[m, "adj"] / df.at[base, "adj"] - 1,
+                     "price": px, "dv": dv})
+    if not rows:
+        return None, 0
+    q = pd.DataFrame(rows).merge(sp, on="ticker", how="left")
+    q = q.sort_values("ret12", ascending=False).reset_index(drop=True)
+    q["rank"] = q.index + 1
+    return q, len(q)
+
+
+def select_holdings(q):
+    """前 3 名 + 行业约束，返回 [(row, weight), ...]"""
+    picks, sec_cnt = [], {}
+    for _, r in q.iterrows():
+        if len(picks) >= FINAL_N:
+            break
+        s = r["sector"] if isinstance(r["sector"], str) else "Unknown"
+        if sec_cnt.get(s, 0) >= 2:
+            continue
+        picks.append(r)
+        sec_cnt[s] = sec_cnt.get(s, 0) + 1
+    secs = [p["sector"] for p in picks]
+    dup = [s for s, c in pd.Series(secs).value_counts().items() if c >= 2]
+    if dup:
+        cap, rest = SECTOR_WEIGHT_CAP / 2, 1 - SECTOR_WEIGHT_CAP
+        w = [cap if p["sector"] in dup else rest / max(1, len(picks) - 2) for p in picks]
+        tot = sum(w)
+        w = [x / tot for x in w]
+    else:
+        w = [1 / len(picks)] * len(picks)
+    return list(zip(picks, w))
 
 
 def main():
@@ -125,14 +185,14 @@ def main():
     args = ap.parse_args()
 
     today = dt.date.today().isoformat()
-    print(f"[1/4] 获取标普500 成分股 ...", flush=True)
+    print("[1/5] 获取标普500 成分股 ...", flush=True)
     sp = fetch_sp500()
     tickers = sp.ticker.tolist()
     if args.limit:
         tickers = tickers[: args.limit]
     print(f"      {len(tickers)} 只", flush=True)
 
-    print("[2/4] 拉取行情（新浪，自建拆股复权）...", flush=True)
+    print("[2/5] 拉取行情（新浪，自建拆股复权）...", flush=True)
     data, fail = {}, []
     t0 = time.time()
     with ThreadPoolExecutor(max_workers=args.workers) as ex:
@@ -155,133 +215,110 @@ def main():
         print("ERROR: SPY 行情获取失败", file=sys.stderr)
         sys.exit(1)
     if len(data) - 1 < 0.5 * len(tickers):
-        print(f"ERROR: 行情成功率过低 ({len(data)-1}/{len(tickers)})，疑似接口不可用", file=sys.stderr)
+        print(f"ERROR: 行情成功率过低 ({len(data)-1}/{len(tickers)})", file=sys.stderr)
         sys.exit(1)
 
-    print("[3/4] 计算 12 个月涨幅与流动性 ...", flush=True)
+    print("[3/5] 计算动量排名（当月 + 上一年 12 月）...", flush=True)
     months = sorted(data["SPY"].index)
     latest = months[-1]
-    i_latest = months.index(latest)
-    base_m = months[i_latest - 12] if i_latest >= 12 else None
-    if base_m is None:
-        print("ERROR: 历史不足 13 个月", file=sys.stderr)
+
+    q_now, pool = ranking_at(data, months, sp, latest)
+    if q_now is None:
+        print("ERROR: 排名结果为空", file=sys.stderr)
         sys.exit(1)
 
-    rows = []
-    for tk, df in data.items():
-        if tk == "SPY" or base_m not in df.index or latest not in df.index:
-            continue
-        # ---- 数据质量校验 ----
-        win = df.loc[base_m:latest]
-        if len(win) != 13:                      # 13 个月必须连续，防止代码复用/停牌
-            continue
-        ratio = (win["adj"] / win["adj"].shift(1)).dropna()
-        if len(ratio) < 12 or ratio.max() > 8 or ratio.min() < 1 / 8:
-            continue
-        if (win["adj"] / win["raw"]).max() > 2000:   # 复权因子漂移
-            continue
-        r12 = df.at[latest, "adj"] / df.at[base_m, "adj"] - 1
-        px = df.at[latest, "raw"]
-        seg = df.loc[base_m:].iloc[:-1]
-        dv = (seg["raw"] * seg["vol"]).mean() if len(seg) else 0
-        rows.append({"ticker": tk, "ret12": r12, "price": px, "dv": dv})
+    # ---- 正式持仓：以「上一年 12 月」为基准锁定 ----
+    official_month = f"{int(latest[:4]) - 1}-12"
+    q_off, _ = ranking_at(data, months, sp, official_month)
+    if q_off is None:                       # 数据不足时退回当月
+        q_off, official_month = q_now, latest
+    official = select_holdings(q_off)
+    preview = select_holdings(q_now)
 
-    q = pd.DataFrame(rows).merge(sp, on="ticker", how="left")
-    q = q[(q.price >= MIN_PRICE) & (q.dv >= MIN_DV)].copy()
-    q = q.sort_values("ret12", ascending=False).reset_index(drop=True)
-    q["rank"] = q.index + 1
-    q.to_csv("output/current_picks_full.csv", index=False, encoding="utf-8-sig")
-
-    # 趋势开关
+    # ---- 趋势开关 ----
     spy = data["SPY"]
     ma10 = spy["raw"].iloc[-10:].mean()
     spy_px = spy["raw"].iloc[-1]
     trend_on = bool(spy_px >= ma10)
     exposure = 1.0 if trend_on else 0.5
 
-    # 选前 3，行业最多 2 只
-    picks, sector_cnt = [], {}
-    for _, r in q.iterrows():
-        if len(picks) >= FINAL_N:
-            break
-        s = r["sector"] if isinstance(r["sector"], str) else "Unknown"
-        if sector_cnt.get(s, 0) >= 2:
-            continue
-        picks.append(r)
-        sector_cnt[s] = sector_cnt.get(s, 0) + 1
-
-    # 权重：若两只同行业，该行业合计 60%
-    secs = [p["sector"] for p in picks]
-    dup = [s for s, c in pd.Series(secs).value_counts().items() if c >= 2]
-    if dup:
-        cap = SECTOR_WEIGHT_CAP / 2
-        rest = 1 - SECTOR_WEIGHT_CAP
-        w = []
-        for p in picks:
-            w.append(cap if p["sector"] in dup else rest / max(1, len(picks) - 2))
-        tot = sum(w)
-        w = [x / tot for x in w]
-    else:
-        w = [1 / len(picks)] * len(picks)
+    print(f"      当月排名池 {pool} 只；正式持仓基准 {official_month}", flush=True)
 
     out = pd.DataFrame([{
         "名次": int(p["rank"]), "代码": p["ticker"], "公司": str(p["name"])[:40],
         "行业": p["sector"], "过去12月涨幅": round(float(p["ret12"]), 4),
-        "股价": round(float(p["price"]), 2), "建议权重": round(float(wi) * exposure, 4),
-    } for p, wi in zip(picks, w)])
+        "股价": round(float(p["price"]), 2),
+        "策略内权重": round(float(wi), 4),
+        "占总资产(按30%仓位)": round(float(wi) * exposure * 0.30, 4),
+    } for p, wi in preview])
     out.to_csv("output/current_picks.csv", index=False, encoding="utf-8-sig")
+    q_now.head(50).to_csv("output/current_picks_full.csv", index=False, encoding="utf-8-sig")
 
-    print("[4/4] 生成报告 ...", flush=True)
+    # ---- 本期该做什么 ----
+    this_year = int(latest[:4])
+    is_rebalance_month = latest.endswith("-12")
+    acts = []
+    if is_rebalance_month:
+        acts.append(f"⚠️ 本月末为年度换仓日：按当月前 3 名换仓（{', '.join(p['ticker'] for p, _ in preview)}）")
+    else:
+        acts.append(f"本月不换仓：持有 {this_year} 年度组合（基准 {official_month}）")
+    if not trend_on:
+        acts.append(f"大盘跌破 10 月均线（{spy_px:,.0f} < {ma10:,.0f}），整体仓位降至 50%")
+    else:
+        acts.append(f"大盘在 10 月均线上方（{spy_px:,.0f} ≥ {ma10:,.0f}），维持满仓")
+    action = "；".join(acts)
+
+    print("[4/5] 生成报告 ...", flush=True)
     os.makedirs("output/monthly", exist_ok=True)
-    top10 = q.head(TOPN_LIST)
     runner = "GitHub Actions" if os.environ.get("GITHUB_ACTIONS") else "本地"
     sha = (os.environ.get("GITHUB_SHA") or "local")[:7]
+
     lines = [
-        f"# 月度选股 · {latest}", "",
-        f"> 生成时间 {today} ｜ 数据截至 {latest} 月末 ｜ 股票池 {len(q)} 只（标普500 过滤后）",
+        f"# 月度信号 · {latest}", "",
+        f"> 生成时间 {today} ｜ 数据截至 {latest} ｜ 排名池 {pool} 只",
         f"> 运行环境 {runner} ｜ 代码版本 {sha}", "",
+        "## 本月动作", "",
+        f"**{action}**", "",
         "## 大盘开关", "",
-        f"- SPY 最新收盘：**{spy_px:,.2f}**",
-        f"- 10 月均线：**{ma10:,.2f}**",
-        f"- 状态：**{'满仓' if trend_on else '半仓（跌破 10 月均线）'}** → 建议仓位 {exposure*100:.0f}%", "",
-        "## 本期持仓（前 3 名）", "",
-        "| 排名 | 代码 | 公司 | 行业 | 12月涨幅 | 建议权重 |",
-        "|---|---|---|---|---|---|",
+        f"- SPY 最新收盘：**{spy_px:,.2f}** ｜ 10 月均线：**{ma10:,.2f}**",
+        f"- 状态：**{'满仓' if trend_on else '半仓'}** → 目标仓位 {exposure*100:.0f}%", "",
+        f"## 正式持仓（{official_month} 锁定，本年度有效）", "",
+        "| # | 代码 | 公司 | 行业 | 基准涨幅 | 策略内权重 | 占总资产 |",
+        "|---|---|---|---|---|---|---|",
     ]
-    for p, wi in zip(picks, w):
-        lines.append(f"| {int(p['rank'])} | **{p['ticker']}** | {str(p['name'])[:28]} | "
-                     f"{p['sector']} | +{p['ret12']*100:.1f}% | {wi*exposure*100:.1f}% |")
-    lines += ["", "## 备选池（第 4–10 名）", "",
-              "| 排名 | 代码 | 行业 | 12月涨幅 |", "|---|---|---|---|"]
-    for _, p in top10.iloc[len(picks):].iterrows():
-        lines.append(f"| {int(p['rank'])} | {p['ticker']} | {p['sector']} | +{p['ret12']*100:.1f}% |")
-    lines += ["", "## 操作提示", "",
-              f"- 本次调仓：{'维持' if trend_on else '减半'}，目标仓位 {exposure*100:.0f}%",
-              "- 换仓日：每年 12 月最后一个交易日（月度报告仅用于监控开关状态）",
-              "- 单只不超过总资产 10%，策略总仓位不超过股票资产 30%", "",
-              "---", "", "由 GitHub Actions 自动生成，仅供研究，不构成投资建议。"]
+    for i_off, (p, wi) in enumerate(official, 1):
+        lines.append(f"| {i_off} | **{p['ticker']}** | {str(p['name'])[:24]} | {p['sector']} "
+                     f"| +{p['ret12']*100:.0f}% | {wi*100:.0f}% | {wi*exposure*0.30*100:.1f}% |")
+    lines += ["", "## 若现在重排（参考，不据此换仓）", "",
+              "| # | 代码 | 行业 | 12月涨幅 |", "|---|---|---|---|"]
+    for _, p in q_now.head(TOPN_LIST).iterrows():
+        lines.append(f"| {int(p['rank'])} | {p['ticker']} | {p['sector']} | +{p['ret12']*100:.0f}% |")
+    lines += ["", "## 纪律", "",
+              "- 换仓日：每年 12 月最后一个交易日；其余月份只看开关，不动持仓",
+              "- 策略总仓位 ≤ 股票资产的 30%，单只 ≤ 总资产 10%",
+              "- 不设个股止损；只看大盘开关",
+              "", "---", "", "由 GitHub Actions 自动生成，仅供研究，不构成投资建议。"]
 
     path = f"output/monthly/{latest}.md"
-    with open(path, "w", encoding="utf-8") as f:
-        f.write("\n".join(lines))
-    with open("output/monthly/latest.md", "w", encoding="utf-8") as f:
-        f.write("\n".join(lines))
+    for p_ in (path, "output/monthly/latest.md"):
+        with open(p_, "w", encoding="utf-8") as f:
+            f.write("\n".join(lines))
+    print("\n".join(lines[:26]))
 
-    print("\n" + "\n".join(lines[:40]))
-    print(f"\n已写入 {path}")
+    # ---- 结构化信号 ----
+    def pack(picks):
+        return [{"rank": i_, "ticker": p["ticker"], "name": str(p["name"])[:40],
+                 "sector": p["sector"], "ret12": round(float(p["ret12"]), 4),
+                 "weight": round(float(wi), 4)} for i_, (p, wi) in enumerate(picks, 1)]
 
-    # ---------- 结构化信号 + 历史 + 看板 ----------
     rec = {
-        "month": latest, "date": today, "data_date": latest,
+        "month": latest, "date": today, "official_month": official_month,
         "trend": "满仓" if trend_on else "半仓", "exposure": round(float(exposure), 3),
         "spy": round(float(spy_px), 2), "ma": round(float(ma10), 2),
-        "picks": [{"rank": int(p["rank"]), "ticker": p["ticker"],
-                   "name": str(p["name"])[:40], "sector": p["sector"],
-                   "ret12": round(float(p["ret12"]), 4), "weight": round(float(wi), 4)}
-                  for p, wi in zip(picks, w)],
+        "action": action,
+        "official": pack(official), "picks": pack(preview),
         "bench": [{"rank": int(r["rank"]), "ticker": r["ticker"], "sector": r["sector"],
-                   "ret12": round(float(r["ret12"]), 4)}
-                  for _, r in top10.iloc[len(picks):].iterrows()],
+                   "ret12": round(float(r["ret12"]), 4)} for _, r in q_now.head(TOPN_LIST).iterrows()],
     }
 
     hist_path = os.path.join("output", "signal_history.json")
@@ -291,28 +328,28 @@ def main():
             hist = json.load(open(hist_path, encoding="utf-8"))
         except Exception:
             hist = []
-    prev = hist[0] if hist else None
+    prev = next((h for h in hist if h.get("month") != latest), hist[0] if hist else None)
     if prev is None:
         rec["change"] = "首次生成"
     else:
-        old = [p["ticker"] for p in prev.get("picks", [])]
-        new = [p["ticker"] for p in rec["picks"]]
         msgs = []
-        if set(old) != set(new):
-            msgs.append("换仓 " + " / ".join(old) + " → " + " / ".join(new))
         if prev.get("trend") != rec["trend"]:
             msgs.append(f"大盘开关 {prev.get('trend')} → {rec['trend']}")
-        rec["change"] = "；".join(msgs) if msgs else "持仓与开关均无变化"
+        if prev.get("official_month") != rec["official_month"]:
+            msgs.append(f"年度换仓：{rec['official_month']} 新组合生效")
+        rec["change"] = "；".join(msgs) if msgs else "无变化"
 
     hist = [h for h in hist if h.get("month") != latest]
     hist.insert(0, rec)
     hist.sort(key=lambda x: x.get("month", ""), reverse=True)
-    json.dump(hist, open(hist_path, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+    with open(hist_path, "w", encoding="utf-8") as f:
+        json.dump(hist, f, ensure_ascii=False, indent=2)
 
+    print("[5/5] 更新看板 ...", flush=True)
     try:
         import dashboard
         dashboard.build(hist)
-        print("看板已更新: output/dashboard.html")
+        print("      看板: output/dashboard.html")
     except Exception as e:
         print(f"WARN: 看板生成失败 {e}", file=sys.stderr)
 
