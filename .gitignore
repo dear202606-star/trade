@@ -69,3 +69,8 @@ probe3.py
 
 # 站点构建产物（由 Actions 生成并部署）
 docs/
+
+_archive/
+
+# 长图（本地导出，不入库）
+output/*-长图*.png

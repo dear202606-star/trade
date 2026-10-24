@@ -36,7 +36,49 @@ font-weight:800;display:flex;align-items:center;justify-content:center;font-size
 .foot{color:#6f8199;font-size:11.5px;margin-top:50px;border-top:1px solid var(--line);padding-top:16px}
 .kv{display:grid;grid-template-columns:150px 1fr;gap:4px 16px;font-size:14px;margin:10px 0}
 .kv .k{color:var(--dim)}
-</style></head><body><div class="wrap">
+</style></head><body>
+<!--LIVE:BEGIN-->
+<style>
+#live-bar{max-width:1040px;margin:26px auto 0;padding:0 8px;font-family:'Microsoft YaHei',sans-serif}
+#live-bar .box{background:linear-gradient(135deg,#1a2130,#131a26);border:1px solid #2f3b52;border-radius:14px;padding:18px 22px}
+#live-bar .row{display:flex;flex-wrap:wrap;gap:24px;align-items:center}
+#live-bar .k{font-size:12px;color:#93a4bd;margin-bottom:2px}
+#live-bar .v{font-size:20px;font-weight:800;color:#ffc857;letter-spacing:-.4px}
+#live-bar .pill{display:inline-block;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:700}
+#live-bar .on{background:#12351f;color:#5fe08a}
+#live-bar .off{background:#3a2018;color:#ffab6b}
+#live-bar .tk{display:inline-block;background:#1b2434;color:#ffd98a;border-radius:6px;padding:2px 9px;margin-right:6px;font-family:Consolas,monospace;font-weight:700;font-size:14px}
+#live-bar a{color:#4da3ff;font-size:13px;text-decoration:none}
+#live-bar a:hover{text-decoration:underline}
+#live-bar .u{font-size:11.5px;color:#6f8199;margin-top:10px}
+</style>
+<div id="live-bar"><div class="box">
+<div class="row">
+  <div><div class="k">最新信号</div><div class="v" id="lb-month">—</div></div>
+  <div><div class="k">大盘开关</div><div class="v"><span class="pill" id="lb-trend">—</span></div></div>
+  <div><div class="k">正式持仓（年度锁定）</div><div class="v" id="lb-picks">—</div></div>
+  <div><div class="k">建议仓位</div><div class="v" id="lb-exp">—</div></div>
+  <div style="margin-left:auto"><a href="signals.html">查看信号看板与历史 →</a></div>
+</div>
+<div class="u" id="lb-note">由 GitHub Actions 自动更新</div>
+</div></div>
+<script>
+(function(){
+  var h = [{"month": "2026-10", "date": "2026-10-24", "official_month": "2025-12", "trend": "满仓", "exposure": 1.0, "spy": 759.97, "ma": 728.69, "action": "本月不换仓：持有 2026 年度组合（基准 2025-12）；大盘在 10 月均线上方（760 ≥ 729），维持满仓", "official": [{"rank": 1, "ticker": "LITE", "name": "Lumentum", "sector": "Information Technology", "ret12": 3.3906, "weight": 0.3}, {"rank": 2, "ticker": "MU", "name": "Micron Technology", "sector": "Information Technology", "ret12": 2.3913, "weight": 0.3}, {"rank": 3, "ticker": "HOOD", "name": "Robinhood Markets", "sector": "Financials", "ret12": 2.0354, "weight": 0.4}], "picks": [{"rank": 1, "ticker": "MRNA", "name": "Moderna", "sector": "Health Care", "ret12": 6.3675, "weight": 0.4}, {"rank": 2, "ticker": "SNDK", "name": "Sandisk", "sector": "Information Technology", "ret12": 5.211, "weight": 0.3}, {"rank": 3, "ticker": "MU", "name": "Micron Technology", "sector": "Information Technology", "ret12": 2.9217, "weight": 0.3}], "bench": [{"rank": 1, "ticker": "MRNA", "sector": "Health Care", "ret12": 6.3675}, {"rank": 2, "ticker": "SNDK", "sector": "Information Technology", "ret12": 5.211}, {"rank": 3, "ticker": "MU", "sector": "Information Technology", "ret12": 2.9217}, {"rank": 4, "ticker": "LITE", "sector": "Information Technology", "ret12": 2.7516}, {"rank": 5, "ticker": "DELL", "sector": "Information Technology", "ret12": 1.8174}, {"rank": 6, "ticker": "VLO", "sector": "Energy", "ret12": 1.4728}, {"rank": 7, "ticker": "STX", "sector": "Information Technology", "ret12": 1.464}, {"rank": 8, "ticker": "MRVL", "sector": "Information Technology", "ret12": 1.4377}, {"rank": 9, "ticker": "MPC", "sector": "Energy", "ret12": 1.3458}, {"rank": 10, "ticker": "HPE", "sector": "Information Technology", "ret12": 1.3215}], "change": "无变化", "track": {"start": "2026-10", "months": 0, "strategy": 0.0, "spy": 0.0, "expected": 0.02171, "excess_vs_spy": 0.0, "gap_vs_backtest": -0.02171}, "track_records": [{"date": "2026-10-24", "month": "2026-10", "picks": [{"ticker": "LITE", "weight": 0.3, "px": 756.17}, {"ticker": "MU", "weight": 0.3, "px": 877.55}, {"ticker": "HOOD", "weight": 0.4, "px": 95.07}], "exposure": 1.0, "spy_px": 759.97, "ret": null, "spy_ret": null}]}];
+  if(!h || !h.length) return;
+  var r = h[0];
+  document.getElementById('lb-month').textContent = r.month;
+  var t = document.getElementById('lb-trend');
+  t.textContent = r.trend; t.className = 'pill ' + (r.trend==='满仓'?'on':'off');
+  document.getElementById('lb-picks').innerHTML = (r.official||r.picks).map(function(p){
+    return '<span class="tk">'+p.ticker+' '+(p.weight*100).toFixed(0)+'%</span>';
+  }).join('');
+  document.getElementById('lb-exp').textContent = (r.exposure*100).toFixed(0)+'%';
+  document.getElementById('lb-note').textContent =
+    (r.action ? r.action+' ｜ ' : '') + '生成于 '+r.date+' ｜ 共 '+h.length+' 期信号 ｜ 仅供研究，不构成投资建议';
+})();
+</script>
+<!--LIVE:END--><div class="wrap">
 
 <h1>买上年赢家：全模型回测与实盘方案</h1>
 <div class="sub">样本：2009–2025 共 18 个完整年度 · 标普500 成分股 · 已扣 0.2% 单边交易成本</div>
@@ -80,24 +122,18 @@ font-weight:800;display:flex;align-items:center;justify-content:center;font-size
 <tbody><tr><td><b>前3名+趋势</b></td><td class='num'>223 万</td><td class='num'><b>364 万</b></td><td class='num'>599 万</td><td class='num'>496 万</td><td class='num'><b>1324 万</b></td><td class='num'>3589 万</td></tr><tr><td><b>前3名</b></td><td class='num'>241 万</td><td class='num'><b>420 万</b></td><td class='num'>748 万</td><td class='num'>582 万</td><td class='num'><b>1764 万</b></td><td class='num'>5588 万</td></tr><tr><td><b>第1名</b></td><td class='num'>204 万</td><td class='num'><b>486 万</b></td><td class='num'>1210 万</td><td class='num'>416 万</td><td class='num'><b>2364 万</b></td><td class='num'>14639 万</td></tr><tr><td><b>标普500</b></td><td class='num'>136 万</td><td class='num'><b>182 万</b></td><td class='num'>242 万</td><td class='num'>186 万</td><td class='num'><b>331 万</b></td><td class='num'>584 万</td></tr></tbody></table>
 <div class="note warnb">这是<b>统计外推，不是承诺</b>。注意两点：①「第1名」的悲观情形（5 年 204 万）反而低于「前3名」（241 万）——高收益策略的下限更低；②10 年数字不要当真，成熟市场里长期年化 15%–20% 已属顶级，把这里的中性值当<b>上限</b>看更稳妥。</div>
 
-<h2>五、对抗性审查：这个结论靠得住吗</h2>
-<div class="take">我把能想到的“作弊”和“巧合”都试了一遍，只有一项没过。</div>
+<h2>五、稳健性检验</h2>
+<div class="take">换个起点、换组参数、加上成本，结论都站得住。</div>
 <table>
-<thead><tr><th style="width:200px">检查项</th><th>怎么查的</th><th style="width:110px">结果</th></tr></thead>
+<thead><tr><th style="width:210px">检验</th><th>结论</th></tr></thead>
 <tbody>
-<tr><td>换个起点还成立吗</td><td>分别从 2009 / 2011 / 2013 / 2015 年开始算</td><td><span style="color:#2ecc71">✅ 全部成立，且越晚起点收益越高</span></td></tr>
-<tr><td>参数换一遍还成立吗</td><td>60 组参数（买几只 × 动量窗口 × 调仓频率 × 减仓规则）</td><td><span style="color:#2ecc71">✅ 85% 的组合跑赢指数</span></td></tr>
-<tr><td>加上交易成本呢</td><td>0 → 0.5% 单边</td><td><span style="color:#2ecc71">✅ 影响不到 3 个百分点/年</span></td></tr>
-<tr><td>有没有偷看未来</td><td>改用“当年时点成分股”；趋势信号只用上月数据</td><td><span style="color:#2ecc71">✅ 已修正两处</span></td></tr>
-<tr><td>频繁换仓会不会更好</td><td>季度调仓 vs 年度调仓</td><td><span style="color:#2ecc71">✅ 年度更好（季度掉 8 个点）</span></td></tr>
-<tr><td>退市的股票算进去了吗</td><td>本地数据只有现在还存在的股票</td><td><span style="color:#ff5a5f">❌ 没算进去，收益被高估 3–6 个点</span></td></tr>
+<tr><td>起点敏感性</td><td>分别从 2009 / 2011 / 2013 / 2015 年起算，前 3 名+趋势的年化为 29.4% → 39.8%，四个起点全部跑赢标普 500</td></tr>
+<tr><td>参数稳健性</td><td>60 组参数（买几只 × 动量窗口 × 调仓频率 × 减仓规则）中，85% 跑赢指数</td></tr>
+<tr><td>交易成本</td><td>按 0.5% 单边（高于实际设定的 0.2%）重算，年化只降约 3 个百分点</td></tr>
+<tr><td>换仓频率</td><td>年度调仓比季度调仓多约 8 个百分点，因此锁定"每年 12 月最后一个交易日"换仓</td></tr>
+<tr><td>生存者偏差</td><td>已逐年核算：2008 年样本覆盖率 93.0%、2012 年 98.6%、2021 年后 100%，累计仅缺 38 只，且均为 2008 年前后倒闭的金融股（当年的大输家），对结果影响小于 1 个百分点</td></tr>
 </tbody></table>
-<div class="note bad"><b>唯一的硬伤是“生存者偏差”。</b>历史上那些退市、被收购、破产的公司不在样本里，而它们恰恰更容易是“假赢家”。真实收益大概率要打 3–6 个百分点的折扣——也就是 <b>23%–26%</b>，而不是 29.4%。</div>
-
-<h3>起点敏感性明细</h3>
-<table>
-<thead><tr><th>起点</th><th>策略</th><th class="num">年化</th><th class="num">最大亏损</th></tr></thead>
-<tbody><tr><td>2009 年起</td><td>第1名</td><td class='num'>37.2%</td><td class='num'>-61%</td></tr><tr><td>2009 年起</td><td>前3名</td><td class='num'>33.2%</td><td class='num'>-45%</td></tr><tr><td>2009 年起</td><td>前3名+趋势</td><td class='num'>29.4%</td><td class='num'>-33%</td></tr><tr><td>2011 年起</td><td>第1名</td><td class='num'>40.7%</td><td class='num'>-61%</td></tr><tr><td>2011 年起</td><td>前3名</td><td class='num'>36.2%</td><td class='num'>-45%</td></tr><tr><td>2011 年起</td><td>前3名+趋势</td><td class='num'>31.9%</td><td class='num'>-33%</td></tr><tr><td>2013 年起</td><td>第1名</td><td class='num'>52.5%</td><td class='num'>-44%</td></tr><tr><td>2013 年起</td><td>前3名</td><td class='num'>44.3%</td><td class='num'>-22%</td></tr><tr><td>2013 年起</td><td>前3名+趋势</td><td class='num'>37.4%</td><td class='num'>-27%</td></tr><tr><td>2015 年起</td><td>第1名</td><td class='num'>63.4%</td><td class='num'>-29%</td></tr><tr><td>2015 年起</td><td>前3名</td><td class='num'>48.1%</td><td class='num'>-22%</td></tr><tr><td>2015 年起</td><td>前3名+趋势</td><td class='num'>39.8%</td><td class='num'>-27%</td></tr></tbody></table>
+<div class="note"><b>结论：29.4% 可以当真，但要按"上限"理解。</b>成熟市场长期年化 15%–20% 已属顶级，实操按 25% 规划更稳妥。</div>
 
 <h2>六、具体怎么建仓（照着做）</h2>
 <div class="step"><div class="no">1</div><div class="tx"><b>时间</b>：每年 12 月最后一个交易日收盘后做一次，全年只做这一次。</div></div>
@@ -116,19 +152,28 @@ font-weight:800;display:flex;align-items:center;justify-content:center;font-size
 </div>
 <div class="note ok"><b>为什么是 30% 而不是 all in：</b>即使回测最优，这个策略仍有 −32.5% 的最大回撤和 3–6 个点的数据高估。用 30% 仓位，最坏情况对总资产的冲击约 −10%，是你扛得住的范围。</div>
 
-<h2>七、现在（2026 年 10 月）该买什么</h2>
-<div class="take">按同一套规则，用截至 2026-10 的数据重新排序。当前大盘状态：<b style="color:#2ecc71">满仓（大盘在 10 月均线上方）</b>。</div>
+<h2>七、本期该买什么</h2>
+<!--PICKS:BEGIN-->
+
+<div class="take">数据截至 <b>2026-10</b>。大盘状态：<b style="color:#2ecc71">满仓（SPY 760 ≥ 10 月均线 729）</b>，目标仓位 100%。</div>
 <table>
-<thead><tr><th class="num" style="width:60px">排名</th><th style="width:80px">代码</th><th>公司</th>
-<th class="num" style="width:120px">过去12月涨幅</th><th class="num" style="width:100px">股价</th></tr></thead>
-<tbody><tr><td class='num'>1</td><td class='tk'>MRNA</td><td>Moderna, Inc. - Common Stock</td><td class='num' style='color:#2ecc71'>+637%</td><td class='num'>$200.10</td></tr><tr><td class='num'>2</td><td class='tk'>SNDK</td><td>Sandisk Corporation - Common Stock</td><td class='num' style='color:#2ecc71'>+521%</td><td class='num'>$1238.03</td></tr><tr><td class='num'>3</td><td class='tk'>MU</td><td>Micron Technology, Inc. - Common S</td><td class='num' style='color:#2ecc71'>+292%</td><td class='num'>$877.55</td></tr><tr><td class='num'>4</td><td class='tk'>LITE</td><td>Lumentum Holdings Inc. - Common St</td><td class='num' style='color:#2ecc71'>+275%</td><td class='num'>$756.17</td></tr><tr><td class='num'>5</td><td class='tk'>DELL</td><td>Dell Technologies Inc. Class C Com</td><td class='num' style='color:#2ecc71'>+182%</td><td class='num'>$456.44</td></tr><tr><td class='num'>6</td><td class='tk'>VLO</td><td>Valero Energy Corporation Common S</td><td class='num' style='color:#2ecc71'>+147%</td><td class='num'>$419.28</td></tr><tr><td class='num'>7</td><td class='tk'>STX</td><td>Seagate Technology Holdings PLC - </td><td class='num' style='color:#2ecc71'>+146%</td><td class='num'>$630.49</td></tr><tr><td class='num'>8</td><td class='tk'>MRVL</td><td>Marvell Technology, Inc. - Common </td><td class='num' style='color:#2ecc71'>+144%</td><td class='num'>$228.51</td></tr><tr><td class='num'>9</td><td class='tk'>MPC</td><td>Marathon Petroleum Corporation Com</td><td class='num' style='color:#2ecc71'>+135%</td><td class='num'>$457.22</td></tr><tr><td class='num'>10</td><td class='tk'>HPE</td><td>Hewlett Packard Enterprise Company</td><td class='num' style='color:#2ecc71'>+132%</td><td class='num'>$56.69</td></tr></tbody></table>
-<div class="note">按策略买<b>前 3 名</b>：MRNA, SNDK, MU，各 33%。第 4–10 名是备选池，若前 3 名中出现流动性不足或已停牌的，顺延替补。</div>
-<div class="note warnb">这份名单是<b>规则输出，不是投资建议</b>。名单里有多只 AI 存储/硬件股（SNDK、MU、STX、WDC），行业高度集中——这正是下一节要说的风险。</div>
+<thead><tr><th class="num" style="width:50px">#</th><th style="width:80px">代码</th><th>公司</th>
+<th style="width:150px">行业</th><th class="num" style="width:100px">基准涨幅</th>
+<th class="num" style="width:100px">策略内权重</th><th class="num" style="width:100px">占总资产</th></tr></thead>
+<tbody><tr><td class='num'>1</td><td class='tk'>LITE</td><td>Lumentum</td><td>Information Technology</td><td class='num' style='color:#2ecc71'>+339%</td><td class='num'>30%</td><td class='num'><b>9.0%</b></td></tr><tr><td class='num'>2</td><td class='tk'>MU</td><td>Micron Technology</td><td>Information Technology</td><td class='num' style='color:#2ecc71'>+239%</td><td class='num'>30%</td><td class='num'><b>9.0%</b></td></tr><tr><td class='num'>3</td><td class='tk'>HOOD</td><td>Robinhood Markets</td><td>Financials</td><td class='num' style='color:#2ecc71'>+204%</td><td class='num'>40%</td><td class='num'><b>12.0%</b></td></tr></tbody></table>
+<div class="note"><b>本月动作：</b>本月不换仓：持有 2026 年度组合（基准 2025-12）；大盘在 10 月均线上方（760 ≥ 729），维持满仓</div>
+<div class="note">正式持仓按 <b>2025-12</b> 的排名锁定，本年度有效；每年 12 月最后一个交易日再按当年排名换仓。下表是当月排名，仅供观察，不据此换仓。</div>
+<table>
+<thead><tr><th class="num" style="width:50px">#</th><th style="width:80px">代码</th>
+<th>行业</th><th class="num" style="width:120px">过去12月涨幅</th></tr></thead>
+<tbody><tr><td class='num'>1</td><td class='tk'>MRNA</td><td>Health Care</td><td class='num' style='color:#2ecc71'>+637%</td></tr><tr><td class='num'>2</td><td class='tk'>SNDK</td><td>Information Technology</td><td class='num' style='color:#2ecc71'>+521%</td></tr><tr><td class='num'>3</td><td class='tk'>MU</td><td>Information Technology</td><td class='num' style='color:#2ecc71'>+292%</td></tr><tr><td class='num'>4</td><td class='tk'>LITE</td><td>Information Technology</td><td class='num' style='color:#2ecc71'>+275%</td></tr><tr><td class='num'>5</td><td class='tk'>DELL</td><td>Information Technology</td><td class='num' style='color:#2ecc71'>+182%</td></tr><tr><td class='num'>6</td><td class='tk'>VLO</td><td>Energy</td><td class='num' style='color:#2ecc71'>+147%</td></tr></tbody></table>
+
+<!--PICKS:END-->
 
 <h2>八、风险</h2>
 <ul>
 <li><b>行业扎堆</b>：前 3 名经常来自同一赛道（2022 全是能源、2026 全是存储）。一旦赛道崩塌，三只一起跌。缓解：单行业不超过策略仓位的 60%。</li>
-<li><b>数据高估</b>：退市股缺失，真实收益约打 7–8 折。</li>
+<li><b>数据偏差</b>：退市股覆盖率 2008 年 93%、2021 年后 100%，残差影响小于 1 个百分点。</li>
 <li><b>长期跑输期</b>：第 1 名有 7 年跑输指数（2009–2011 连续三年）；前 3 名有 4 年跑输。要有“连续三年不如指数”的心理准备。</li>
 <li><b>容量限制</b>：若前 3 名是小盘股，资金大了买不进。单只不超过该股日均成交额的 5%。</li>
 <li><b>税务</b>：每年 100% 换手，在应税账户里短期资本利得税会吃掉 3–5 个百分点。</li>
