@@ -1,0 +1,82 @@
+[
+  {
+    "month": "2026-10",
+    "date": "2026-10-24",
+    "data_date": "2026-10",
+    "trend": "满仓",
+    "exposure": 1.0,
+    "spy": 759.97,
+    "ma": 728.69,
+    "picks": [
+      {
+        "rank": 1,
+        "ticker": "MRNA",
+        "name": "Moderna",
+        "sector": "Health Care",
+        "ret12": 6.3675,
+        "weight": 0.4
+      },
+      {
+        "rank": 2,
+        "ticker": "SNDK",
+        "name": "Sandisk",
+        "sector": "Information Technology",
+        "ret12": 5.211,
+        "weight": 0.3
+      },
+      {
+        "rank": 3,
+        "ticker": "MU",
+        "name": "Micron Technology",
+        "sector": "Information Technology",
+        "ret12": 2.9217,
+        "weight": 0.3
+      }
+    ],
+    "bench": [
+      {
+        "rank": 4,
+        "ticker": "LITE",
+        "sector": "Information Technology",
+        "ret12": 2.7516
+      },
+      {
+        "rank": 5,
+        "ticker": "DELL",
+        "sector": "Information Technology",
+        "ret12": 1.8174
+      },
+      {
+        "rank": 6,
+        "ticker": "VLO",
+        "sector": "Energy",
+        "ret12": 1.4728
+      },
+      {
+        "rank": 7,
+        "ticker": "STX",
+        "sector": "Information Technology",
+        "ret12": 1.464
+      },
+      {
+        "rank": 8,
+        "ticker": "MRVL",
+        "sector": "Information Technology",
+        "ret12": 1.4377
+      },
+      {
+        "rank": 9,
+        "ticker": "MPC",
+        "sector": "Energy",
+        "ret12": 1.3458
+      },
+      {
+        "rank": 10,
+        "ticker": "HPE",
+        "sector": "Information Technology",
+        "ret12": 1.3215
+      }
+    ],
+    "change": "首次生成"
+  }
+]

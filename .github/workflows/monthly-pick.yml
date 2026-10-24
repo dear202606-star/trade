@@ -11,11 +11,17 @@ on:
     branches: [main]
     paths:
       - monthly_pick.py
+      - dashboard.py
+      - site_build.py
+      - publish_signal.py
       - requirements.txt
       - .github/workflows/monthly-pick.yml
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
+  issues: write
 
 concurrency:
   group: monthly-pick
@@ -44,20 +50,35 @@ jobs:
         id: pick
         run: python monthly_pick.py --workers 10
 
+      - name: 生成站点
+        id: site
+        run: python site_build.py
+
+      - name: 上传 Pages 产物
+        if: steps.pick.outcome == 'success'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
       - name: 提交结果
         id: commit
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add output/current_picks.csv output/current_picks_full.csv output/monthly
+          git add output/current_picks.csv output/current_picks_full.csv \
+                  output/monthly output/signal_history.json output/dashboard.html
           if git diff --staged --quiet; then
-            echo "本月无变更，跳过提交"
-            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "本期无变更，跳过提交"
           else
             git commit -m "chore: 月度选股更新 $(date -u +%Y-%m)"
             git push
-            echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: 发布信号通知
+        if: steps.pick.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python publish_signal.py
 
       - name: 摘要
         if: always()
@@ -65,7 +86,20 @@ jobs:
           echo "### 月度选股结果" >> "$GITHUB_STEP_SUMMARY"
           if [ "${{ steps.pick.outcome }}" = "success" ] && [ -f output/monthly/latest.md ]; then
             tail -n +3 output/monthly/latest.md >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "🌐 https://dear202606-star.github.io/trade/signals.html" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo "❌ 本次运行失败，未生成新报告，请查看上方日志。" >> "$GITHUB_STEP_SUMMARY"
           fi
+
+  deploy:
+    needs: pick
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 部署到 GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

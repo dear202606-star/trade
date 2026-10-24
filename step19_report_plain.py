@@ -228,11 +228,11 @@ font-weight:800;display:flex;align-items:center;justify-content:center;font-size
 <div class="foot">数据：新浪财经美股全历史日线（自建拆股复权）、NASDAQ Trader 股票清单、fja05680/sp500 时点成分。统计：6 个月分块 bootstrap 重抽样 4000 次。本报告仅供研究，不构成投资建议。</div>
 </div></body></html>"""
 
-    p = os.path.join(OUT, "排名策略对比.html")
+    p = os.path.join(OUT, "策略模型研究与行动步骤.html")
     open(p, "w", encoding="utf-8").write(html)
     print("report:", p, len(html))
 
-    xp = os.path.join(OUT, "排名策略对比.xlsx")
+    xp = os.path.join(OUT, "策略模型研究与行动步骤.xlsx")
     with pd.ExcelWriter(xp, engine="xlsxwriter") as w:
         d.round(4).to_excel(w, sheet_name="全部模型")
         sens.round(4).to_excel(w, sheet_name="起点敏感性", index=False)

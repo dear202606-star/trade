@@ -66,3 +66,6 @@ read_positions.py
 rebalance.py
 probe2.py
 probe3.py
+
+# 站点构建产物（由 Actions 生成并部署）
+docs/

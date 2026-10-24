@@ -269,6 +269,53 @@ def main():
 
     print("\n" + "\n".join(lines[:40]))
     print(f"\n已写入 {path}")
+
+    # ---------- 结构化信号 + 历史 + 看板 ----------
+    rec = {
+        "month": latest, "date": today, "data_date": latest,
+        "trend": "满仓" if trend_on else "半仓", "exposure": round(float(exposure), 3),
+        "spy": round(float(spy_px), 2), "ma": round(float(ma10), 2),
+        "picks": [{"rank": int(p["rank"]), "ticker": p["ticker"],
+                   "name": str(p["name"])[:40], "sector": p["sector"],
+                   "ret12": round(float(p["ret12"]), 4), "weight": round(float(wi), 4)}
+                  for p, wi in zip(picks, w)],
+        "bench": [{"rank": int(r["rank"]), "ticker": r["ticker"], "sector": r["sector"],
+                   "ret12": round(float(r["ret12"]), 4)}
+                  for _, r in top10.iloc[len(picks):].iterrows()],
+    }
+
+    hist_path = os.path.join("output", "signal_history.json")
+    hist = []
+    if os.path.exists(hist_path):
+        try:
+            hist = json.load(open(hist_path, encoding="utf-8"))
+        except Exception:
+            hist = []
+    prev = hist[0] if hist else None
+    if prev is None:
+        rec["change"] = "首次生成"
+    else:
+        old = [p["ticker"] for p in prev.get("picks", [])]
+        new = [p["ticker"] for p in rec["picks"]]
+        msgs = []
+        if set(old) != set(new):
+            msgs.append("换仓 " + " / ".join(old) + " → " + " / ".join(new))
+        if prev.get("trend") != rec["trend"]:
+            msgs.append(f"大盘开关 {prev.get('trend')} → {rec['trend']}")
+        rec["change"] = "；".join(msgs) if msgs else "持仓与开关均无变化"
+
+    hist = [h for h in hist if h.get("month") != latest]
+    hist.insert(0, rec)
+    hist.sort(key=lambda x: x.get("month", ""), reverse=True)
+    json.dump(hist, open(hist_path, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+
+    try:
+        import dashboard
+        dashboard.build(hist)
+        print("看板已更新: output/dashboard.html")
+    except Exception as e:
+        print(f"WARN: 看板生成失败 {e}", file=sys.stderr)
+
     if len(fail) > 0.3 * len(tickers):
         print(f"WARN: 失败率过高 {len(fail)}/{len(tickers)}", file=sys.stderr)
 
