@@ -11,9 +11,13 @@ on:
     branches: [main]
     paths:
       - monthly_pick.py
+      - market_data.py
       - dashboard.py
       - site_build.py
+      - report_live.py
       - publish_signal.py
+      - track_record.py
+      - survivorship.py
       - requirements.txt
       - .github/workflows/monthly-pick.yml
 
