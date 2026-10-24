@@ -14,6 +14,7 @@
 返回统一结构：[[ym, adj_close, raw_close, month_volume], ...]
 """
 import json
+import os
 import re
 import time
 import datetime as dt
@@ -28,6 +29,33 @@ NICE = [1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 10, 12, 15, 20, 25, 30, 40, 50, 100]
 
 TOL_RET = 0.015          # 12 个月收益允许偏差（绝对）
 TOL_MONTH = 0.02         # 单月收益允许偏差（绝对）
+
+SPLITS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                            "output", "splits.json")
+_SPLIT_CACHE = {}
+
+
+def load_splits():
+    """启动时载入已缓存的拆股表（仓库内 output/splits.json）"""
+    global _SPLIT_CACHE
+    if _SPLIT_CACHE:
+        return _SPLIT_CACHE
+    try:
+        with open(SPLITS_FILE, encoding="utf-8") as f:
+            _SPLIT_CACHE = json.load(f)
+    except Exception:
+        _SPLIT_CACHE = {}
+    return _SPLIT_CACHE
+
+
+def save_splits():
+    try:
+        os.makedirs(os.path.dirname(SPLITS_FILE), exist_ok=True)
+        with open(SPLITS_FILE, "w", encoding="utf-8") as f:
+            json.dump(_SPLIT_CACHE, f, ensure_ascii=False, separators=(",", ":"))
+    except Exception:
+        pass
+
 
 STATS = {"sina": 0, "yahoo": 0, "both": 0, "quarantine": 0, "fail": 0}
 QUARANTINE = {}          # ticker -> 原因
@@ -107,7 +135,10 @@ def fetch_yahoo(tk, years=26):
 
 
 def fetch_splits(tk, years=26):
-    """取权威拆股表 [(拆股日, 比例)]，用于校准新浪的启发式复权"""
+    """取权威拆股表 [(拆股日, 比例)]，优先用缓存，保证跨环境一致"""
+    cache = load_splits()
+    if tk in cache:
+        return [tuple(x) for x in cache[tk]] if cache[tk] else []
     sym = to_yahoo(tk)
     now = int(time.time())
     start = now - int(years * 365.25 * 86400)
@@ -129,6 +160,7 @@ def fetch_splits(tk, years=26):
             except Exception:
                 continue
         out.sort()
+        cache[tk] = [[a, b] for a, b in out]
         return out
     except Exception:
         return None

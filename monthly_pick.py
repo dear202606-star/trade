@@ -217,6 +217,7 @@ def main():
                 print(f"      {i}/{len(tickers)+1}  用时 {time.time()-t0:.0f}s", flush=True)
 
     print(f"      成功 {len(data)-1} / 失败 {len(fail)}", flush=True)
+    market_data.save_splits()
     print(f"      数据质量 {market_data.STATS}", flush=True)
     if market_data.QUARANTINE:
         print(f"      两源不一致已隔离 {len(market_data.QUARANTINE)} 只: "

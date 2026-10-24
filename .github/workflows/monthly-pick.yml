@@ -78,7 +78,7 @@ jobs:
           git add output/current_picks.csv output/current_picks_full.csv \
                   output/monthly output/signal_history.json output/dashboard.html \
                   output/track_record.json output/survivorship.json output/survivorship.md \
-                  "output/排名策略对比.html" "output/策略模型研究与行动步骤.html"
+                  "output/排名策略对比.html" "output/策略模型研究与行动步骤.html" output/splits.json
           if git diff --staged --quiet; then
             echo "本期无变更，跳过提交"
           else

@@ -40,7 +40,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add output/data_quality.md output/data_quality.json output/yahoo_probe.txt
+          git add output/data_quality.md output/data_quality.json output/yahoo_probe.txt output/splits.json
           if git diff --staged --quiet; then
             echo "无变化"
           else

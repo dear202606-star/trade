@@ -69,6 +69,7 @@ def main(limit=None, workers=8):
             if d:
                 detail.append(d)
 
+    md.save_splits()
     df = pd.DataFrame(detail)
     n = len(df)
     bad = df[~df.ok] if n else df
