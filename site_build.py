@@ -1,24 +1,28 @@
 # -*- coding: utf-8 -*-
-"""site_build.py — 把研究报告 + 实时信号合成 GitHub Pages 站点
+"""site_build.py — 用原始研究报告 + 最新信号，生成「策略模型研究与行动步骤」
 
-产物：
-  docs/index.html    策略模型研究与行动步骤（顶部带实时信号卡）
-  docs/signals.html  信号看板（可切换月份）
+输入：output/排名策略对比.html      （原始研究报告，永不改动）
+      output/signal_history.json   （每月由 monthly_pick.py 更新）
+输出：output/策略模型研究与行动步骤.html   （报告 + 顶部实时信号卡，入库）
+      docs/index.html                       （同内容，供 GitHub Pages）
+      docs/signals.html                     （信号看板）
 """
 import os, json, shutil
 
 import dashboard
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-REPORT = os.path.join(BASE, "output", "策略模型研究与行动步骤.html")
+SRC = os.path.join(BASE, "output", "排名策略对比.html")
 HIST = os.path.join(BASE, "output", "signal_history.json")
+OUT_HTML = os.path.join(BASE, "output", "策略模型研究与行动步骤.html")
 DOCS = os.path.join(BASE, "docs")
 
 LIVE_CSS = """
 <style id="live-css">
-#live-bar{background:linear-gradient(135deg,#1a2130,#131a26);border:1px solid #2f3b52;
-border-radius:14px;padding:18px 22px;margin:0 0 26px}
-#live-bar .row{display:flex;flex-wrap:wrap;gap:22px;align-items:center}
+#live-bar{max-width:1040px;margin:26px auto 0;padding:0 8px;font-family:'Microsoft YaHei',sans-serif}
+#live-bar .box{background:linear-gradient(135deg,#1a2130,#131a26);border:1px solid #2f3b52;
+border-radius:14px;padding:18px 22px}
+#live-bar .row{display:flex;flex-wrap:wrap;gap:24px;align-items:center}
 #live-bar .k{font-size:12px;color:#93a4bd;margin-bottom:2px}
 #live-bar .v{font-size:20px;font-weight:800;color:#ffc857;letter-spacing:-.4px}
 #live-bar .pill{display:inline-block;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:700}
@@ -33,15 +37,17 @@ padding:2px 9px;margin-right:6px;font-family:Consolas,monospace;font-weight:700;
 """
 
 LIVE_HTML = """
-<div id="live-bar" style="max-width:1100px;margin:26px auto 0;font-family:'Microsoft YaHei',sans-serif">
-  <div class="row">
-    <div><div class="k">最新信号</div><div class="v" id="lb-month">—</div></div>
-    <div><div class="k">大盘开关</div><div class="v"><span class="pill" id="lb-trend">—</span></div></div>
-    <div><div class="k">本期持仓</div><div class="v" id="lb-picks">—</div></div>
-    <div><div class="k">建议仓位</div><div class="v" id="lb-exp">—</div></div>
-    <div style="margin-left:auto"><a href="signals.html">查看信号看板与历史 →</a></div>
+<div id="live-bar">
+  <div class="box">
+    <div class="row">
+      <div><div class="k">最新信号</div><div class="v" id="lb-month">—</div></div>
+      <div><div class="k">大盘开关</div><div class="v"><span class="pill" id="lb-trend">—</span></div></div>
+      <div><div class="k">本期持仓</div><div class="v" id="lb-picks">—</div></div>
+      <div><div class="k">建议仓位</div><div class="v" id="lb-exp">—</div></div>
+      <div style="margin-left:auto"><a href="signals.html">查看信号看板与历史 →</a></div>
+    </div>
+    <div class="u" id="lb-note">由 GitHub Actions 自动更新</div>
   </div>
-  <div class="u" id="lb-note">由 GitHub Actions 自动更新</div>
 </div>
 """
 
@@ -65,43 +71,39 @@ LIVE_JS = """
 """
 
 
+def render(hist):
+    with open(SRC, encoding="utf-8") as f:
+        html = f.read()
+    html = html.replace("</head>", LIVE_CSS + "</head>")
+    idx = html.find("<body>")
+    html = html[: idx + 6] + LIVE_HTML + html[idx + 6:] if idx > 0 else LIVE_HTML + html
+    html = html.replace("</body>", LIVE_JS.replace("__DATA__", json.dumps(hist, ensure_ascii=False)) + "</body>")
+    return html
+
+
 def main():
     hist = []
     if os.path.exists(HIST):
         with open(HIST, encoding="utf-8") as f:
             hist = json.load(f)
 
-    os.makedirs(DOCS, exist_ok=True)
-
-    # ---------- index.html ----------
-    with open(REPORT, encoding="utf-8") as f:
-        html = f.read()
-    if 'id="live-css"' not in html:
-        html = html.replace("</head>", LIVE_CSS + "</head>")
-    if 'id="live-bar"' not in html:
-        idx = html.find("<body>")
-        if idx > 0:
-            html = html[: idx + 6] + LIVE_HTML + html[idx + 6:]
-        else:
-            html = LIVE_HTML + html
-    if "/*LIVE_JS*/" not in html and 'lb-month' in html:
-        html = html.replace("</body>", LIVE_JS.replace("__DATA__", json.dumps(hist, ensure_ascii=False)) + "</body>")
-
-    out = os.path.join(DOCS, "index.html")
-    with open(out, "w", encoding="utf-8") as f:
+    html = render(hist)
+    with open(OUT_HTML, "w", encoding="utf-8") as f:
         f.write(html)
 
-    # ---------- signals.html ----------
+    os.makedirs(DOCS, exist_ok=True)
+    with open(os.path.join(DOCS, "index.html"), "w", encoding="utf-8") as f:
+        f.write(html)
+
     dashboard.build(hist, os.path.join(DOCS, "signals.html"))
 
-    # ---------- 附带下载 ----------
     for fn in ("策略模型研究与行动步骤.pdf", "策略模型研究与行动步骤.xlsx"):
         src = os.path.join(BASE, "output", fn)
         if os.path.exists(src):
             shutil.copy2(src, os.path.join(DOCS, fn))
 
-    print(f"站点已生成: {out}")
-    print(f"信号看板: {os.path.join(DOCS, 'signals.html')}  ({len(hist)} 期)")
+    print(f"已生成: {OUT_HTML}")
+    print(f"站点:   {os.path.join(DOCS, 'index.html')}  /  signals.html  ({len(hist)} 期信号)")
 
 
 if __name__ == "__main__":

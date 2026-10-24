@@ -36,7 +36,37 @@ font-weight:800;display:flex;align-items:center;justify-content:center;font-size
 .foot{color:#6f8199;font-size:11.5px;margin-top:50px;border-top:1px solid var(--line);padding-top:16px}
 .kv{display:grid;grid-template-columns:150px 1fr;gap:4px 16px;font-size:14px;margin:10px 0}
 .kv .k{color:var(--dim)}
-</style></head><body><div class="wrap">
+</style>
+<style id="live-css">
+#live-bar{max-width:1040px;margin:26px auto 0;padding:0 8px;font-family:'Microsoft YaHei',sans-serif}
+#live-bar .box{background:linear-gradient(135deg,#1a2130,#131a26);border:1px solid #2f3b52;
+border-radius:14px;padding:18px 22px}
+#live-bar .row{display:flex;flex-wrap:wrap;gap:24px;align-items:center}
+#live-bar .k{font-size:12px;color:#93a4bd;margin-bottom:2px}
+#live-bar .v{font-size:20px;font-weight:800;color:#ffc857;letter-spacing:-.4px}
+#live-bar .pill{display:inline-block;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:700}
+#live-bar .on{background:#12351f;color:#5fe08a}
+#live-bar .off{background:#3a2018;color:#ffab6b}
+#live-bar .tk{display:inline-block;background:#1b2434;color:#ffd98a;border-radius:6px;
+padding:2px 9px;margin-right:6px;font-family:Consolas,monospace;font-weight:700;font-size:14px}
+#live-bar a{color:#4da3ff;font-size:13px;text-decoration:none}
+#live-bar a:hover{text-decoration:underline}
+#live-bar .u{font-size:11.5px;color:#6f8199;margin-top:10px}
+</style>
+</head><body>
+<div id="live-bar">
+  <div class="box">
+    <div class="row">
+      <div><div class="k">最新信号</div><div class="v" id="lb-month">—</div></div>
+      <div><div class="k">大盘开关</div><div class="v"><span class="pill" id="lb-trend">—</span></div></div>
+      <div><div class="k">本期持仓</div><div class="v" id="lb-picks">—</div></div>
+      <div><div class="k">建议仓位</div><div class="v" id="lb-exp">—</div></div>
+      <div style="margin-left:auto"><a href="signals.html">查看信号看板与历史 →</a></div>
+    </div>
+    <div class="u" id="lb-note">由 GitHub Actions 自动更新</div>
+  </div>
+</div>
+<div class="wrap">
 
 <h1>买上年赢家：全模型回测与实盘方案</h1>
 <div class="sub">样本：2009–2025 共 18 个完整年度 · 标普500 成分股 · 已扣 0.2% 单边交易成本</div>
@@ -146,4 +176,21 @@ font-weight:800;display:flex;align-items:center;justify-content:center;font-size
 <div class="note"><b>不满足第 1 条就不要进入第 3 条。</b>数据不干净时，任何回测都是自我安慰。</div>
 
 <div class="foot">数据：新浪财经美股全历史日线（自建拆股复权）、NASDAQ Trader 股票清单、fja05680/sp500 时点成分。统计：6 个月分块 bootstrap 重抽样 4000 次。本报告仅供研究，不构成投资建议。</div>
-</div></body></html>
+</div>
+<script>
+(function(){
+  var h = [{"month": "2026-10", "date": "2026-10-24", "data_date": "2026-10", "trend": "满仓", "exposure": 1.0, "spy": 759.97, "ma": 728.69, "picks": [{"rank": 1, "ticker": "MRNA", "name": "Moderna", "sector": "Health Care", "ret12": 6.3675, "weight": 0.4}, {"rank": 2, "ticker": "SNDK", "name": "Sandisk", "sector": "Information Technology", "ret12": 5.211, "weight": 0.3}, {"rank": 3, "ticker": "MU", "name": "Micron Technology", "sector": "Information Technology", "ret12": 2.9217, "weight": 0.3}], "bench": [{"rank": 4, "ticker": "LITE", "sector": "Information Technology", "ret12": 2.7516}, {"rank": 5, "ticker": "DELL", "sector": "Information Technology", "ret12": 1.8174}, {"rank": 6, "ticker": "VLO", "sector": "Energy", "ret12": 1.4728}, {"rank": 7, "ticker": "STX", "sector": "Information Technology", "ret12": 1.464}, {"rank": 8, "ticker": "MRVL", "sector": "Information Technology", "ret12": 1.4377}, {"rank": 9, "ticker": "MPC", "sector": "Energy", "ret12": 1.3458}, {"rank": 10, "ticker": "HPE", "sector": "Information Technology", "ret12": 1.3215}], "change": "持仓与开关均无变化"}];
+  if(!h || !h.length) return;
+  var r = h[0];
+  document.getElementById('lb-month').textContent = r.month;
+  var t = document.getElementById('lb-trend');
+  t.textContent = r.trend; t.className = 'pill ' + (r.trend==='满仓'?'on':'off');
+  document.getElementById('lb-picks').innerHTML = r.picks.map(function(p){
+    return '<span class="tk">'+p.ticker+' '+(p.weight*100).toFixed(0)+'%</span>';
+  }).join('');
+  document.getElementById('lb-exp').textContent = (r.exposure*100).toFixed(0)+'%';
+  document.getElementById('lb-note').textContent =
+    '数据截至 '+r.month+' ｜ 生成于 '+r.date+' ｜ 共 '+h.length+' 期信号 ｜ 仅供研究，不构成投资建议';
+})();
+</script>
+</body></html>
