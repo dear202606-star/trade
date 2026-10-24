@@ -29,6 +29,10 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      - name: 实测 Yahoo 字段语义
+        continue-on-error: true
+        run: python probe_yahoo.py
+
       - name: 交叉核对两个数据源
         run: python crosscheck.py
 
@@ -36,7 +40,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add output/data_quality.md output/data_quality.json
+          git add output/data_quality.md output/data_quality.json output/yahoo_probe.txt
           if git diff --staged --quiet; then
             echo "无变化"
           else
