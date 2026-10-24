@@ -1,0 +1,57 @@
+name: 月度选股
+
+on:
+  schedule:
+    # 每月 1 日 01:00 UTC = 北京时间 09:00
+    - cron: "0 1 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: monthly-pick
+  cancel-in-progress: false
+
+jobs:
+  pick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+
+      - name: 安装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: 安装依赖
+        run: pip install --quiet requests pandas
+
+      - name: 运行月度选股
+        run: python monthly_pick.py --workers 10
+
+      - name: 提交结果
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add output/current_picks.csv output/current_picks_full.csv output/monthly
+          if git diff --staged --quiet; then
+            echo "本月无变更，跳过提交"
+          else
+            git commit -m "chore: 月度选股更新 $(date -u +%Y-%m)"
+            git push
+          fi
+
+      - name: 摘要
+        if: always()
+        run: |
+          echo "### 月度选股结果" >> $GITHUB_STEP_SUMMARY
+          if [ -f output/monthly/latest.md ]; then
+            tail -n +3 output/monthly/latest.md >> $GITHUB_STEP_SUMMARY
+          else
+            echo "未生成报告，请检查日志" >> $GITHUB_STEP_SUMMARY
+          fi

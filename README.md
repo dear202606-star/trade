@@ -56,6 +56,27 @@ python step18_plain.py        # 全模型对比
 python step19_report_plain.py # 生成报告
 ```
 
+## 月度自动选股
+
+仓库配置了 GitHub Actions（`.github/workflows/monthly-pick.yml`），**每月 1 日北京时间 09:00 自动运行**：
+
+1. 拉取最新标普 500 成分股（含 GICS 行业）
+2. 对每只股票取新浪全历史日线，自建拆股复权
+3. 计算过去 12 个月涨幅，过滤股价 < $5、日均成交额 < $2,000 万
+4. 按规则选出前 3 名，同行业最多 2 只、行业权重上限 60%
+5. 检查标普 500 是否跌破 10 月均线，决定满仓 / 半仓
+6. 把结果写回 `output/monthly/YYYY-MM.md` 和 `output/current_picks.csv` 并自动提交
+
+也可以手动触发：仓库页面 → Actions → 月度选股 → Run workflow。
+
+本地运行：
+
+```bash
+python monthly_pick.py --workers 10
+```
+
+输出示例见 `output/monthly/latest.md`。
+
 ## 已知局限
 
 1. **生存者偏差**：本地行情仅含当前仍可查询的标的，退市与被并购公司缺失，估计高估收益 3–6 个百分点/年
