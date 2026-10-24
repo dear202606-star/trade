@@ -27,7 +27,7 @@ PAT = re.compile(r"\(\s*(\[.*\])\s*\)", re.S)
 NICE = [1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 10, 12, 15, 20, 25, 30, 40, 50, 100]
 
 TOL_RET = 0.015          # 12 个月收益允许偏差（绝对）
-TOL_PX = 0.02            # 同月末收盘价允许偏差（相对）
+TOL_MONTH = 0.02         # 单月收益允许偏差（绝对）
 
 STATS = {"sina": 0, "yahoo": 0, "both": 0, "quarantine": 0, "fail": 0}
 QUARANTINE = {}          # ticker -> 原因
@@ -92,14 +92,11 @@ def fetch_yahoo(tk, years=26):
             if c is None or c <= 0:
                 continue
             d = dt.datetime.utcfromtimestamp(t)
-            # 后复权：拆股之后的价格乘以拆股比例（2:1 拆股 → 后段价格 ×2）
-            # 收益 = adj(t1)/adj(t0)，跨拆股时比例自动抵消，与新浪口径一致
-            f = 1.0
-            for sd, ratio in sp:
-                if sd <= t:
-                    f *= ratio
+            # 注意：Yahoo chart API 的 close 已经是「按拆股前复权」的连续序列。
+            # 实测 KLAC（2026-06-12 拆 10:1）：2026-05 的 close 显示 192 而非 1920。
+            # 所以这里不能再乘拆股因子，否则等于复权两次。
             v = vol[i] if i < len(vol) and vol[i] is not None else 0
-            rows.append([d.strftime("%Y-%m"), float(c) * f, float(c), float(v)])
+            rows.append([d.strftime("%Y-%m"), float(c), float(c), float(v)])
 
         ded = {}
         for row in rows:
@@ -107,6 +104,50 @@ def fetch_yahoo(tk, years=26):
         return [ded[k] for k in sorted(ded)]
     except Exception:
         return None
+
+
+def fetch_splits(tk, years=26):
+    """取权威拆股表 [(拆股日, 比例)]，用于校准新浪的启发式复权"""
+    sym = to_yahoo(tk)
+    now = int(time.time())
+    start = now - int(years * 365.25 * 86400)
+    url = (f"https://query2.finance.yahoo.com/v8/finance/chart/{sym}"
+           f"?period1={start}&period2={now}&interval=1mo&events=split")
+    try:
+        r = requests.get(url, headers={"User-Agent": UA}, timeout=8)
+        if r.status_code != 200:
+            return None
+        res = ((r.json().get("chart") or {}).get("result") or [])
+        if not res:
+            return None
+        splits = (((res[0].get("events") or {}).get("splits")) or {})
+        out = []
+        for k, v in splits.items():
+            try:
+                out.append((int(v.get("date") or k),
+                            float(v["numerator"]) / float(v["denominator"])))
+            except Exception:
+                continue
+        out.sort()
+        return out
+    except Exception:
+        return None
+
+
+def apply_split_table(rows, splits):
+    """用权威拆股表把原始价重算成后复权序列（拆股后的价格 × 比例）"""
+    if not splits:
+        return rows
+    out = []
+    for ym, _adj, raw, vol in rows:
+        me = pd.Timestamp(ym + "-01") + pd.offsets.MonthEnd(0)
+        me_ts = int(me.timestamp()) + 86399
+        f = 1.0
+        for sd, ratio in splits:
+            if sd <= me_ts:
+                f *= ratio
+        out.append([ym, raw * f, raw, vol])
+    return out
 
 
 # ---------------------------------------------------------------- Sina
@@ -190,57 +231,66 @@ def validate(rows, max_age_days=10):
 
 
 def alignment(r1, r2):
-    """比较两源能否对上：共同月份数、12 个月收益差、同月末收盘价差"""
+    """比较两源能否对上：只看「复权后」的月度收益序列，不看绝对价格
+
+    两源绝对价可能相差一个常数（前复权 vs 后复权），但月度收益必须一致。
+    """
     d1 = {r[0]: r for r in r1}
     d2 = {r[0]: r for r in r2}
     common = sorted(set(d1) & set(d2))
     if len(common) < 13:
         return False, len(common), None, None
-    # 同月末原始收盘价（未复权）应在同一量级
-    pxs = [abs(d1[m][2] / d2[m][2] - 1) for m in common[-6:] if d2[m][2] > 0]
-    px_diff = max(pxs) if pxs else None
-    # 12 个月收益（复权）
-    m0, m12 = common[-1], common[-13]
+    k = min(13, len(common))
+    months = common[-k:]
     try:
-        r_a = d1[m0][1] / d1[m12][1] - 1
-        r_b = d2[m0][1] / d2[m12][1] - 1
-        ret_diff = abs(r_a - r_b)
+        ra = [d1[months[t]][1] / d1[months[t - 1]][1] - 1 for t in range(1, k)]
+        rb = [d2[months[t]][1] / d2[months[t - 1]][1] - 1 for t in range(1, k)]
     except Exception:
-        return False, len(common), px_diff, None
-    ok = (ret_diff <= TOL_RET) and (px_diff is None or px_diff <= TOL_PX)
-    return ok, len(common), px_diff, ret_diff
+        return False, len(common), None, None
+    diffs = [abs(x - y) for x, y in zip(ra, rb)]
+    max_month_diff = max(diffs) if diffs else None
+    ret_diff = abs((d1[months[-1]][1] / d1[months[0]][1] - 1)
+                   - (d2[months[-1]][1] / d2[months[0]][1] - 1))
+    ok = (ret_diff <= TOL_RET) and (max_month_diff is None or max_month_diff <= TOL_MONTH)
+    return ok, len(common), max_month_diff, ret_diff
 
 
 def get_history(tk, dual=True, yahoo_ok=None):
-    """取一只票的历史。dual=True 时两源都取并核对。"""
+    """取一只票的历史
+
+    新浪原始价 × Yahoo 权威拆股表 = 后复权序列；
+    Yahoo 的 close 本身已是前复权序列，两者只差一个常数，收益应完全一致。
+    """
     a = fetch_sina(tk)
-    ok_a, _ = validate(a) if a else (False, "")
+    if a:
+        sp = fetch_splits(tk) if (dual or yahoo_ok) else None
+        if sp:
+            a = apply_split_table(a, sp)
+    ok_a = validate(a)[0] if a else False
+
     b = None
-    if dual and (yahoo_ok if yahoo_ok is not None else True):
+    if dual or yahoo_ok:
         b = fetch_yahoo(tk)
-        ok_b, _ = validate(b) if b else (False, "")
-        if not ok_b:
+        if b and not validate(b)[0]:
             b = None
 
     if a and ok_a and b:
-        ok, ncom, pxd, retd = alignment(a, b)
+        ok, ncom, mdiff, retdiff = alignment(a, b)
         STATS["both"] += 1
         if ok:
             STATS["sina"] += 1
-            return a, "sina+yahoo"          # 两源一致，用新浪（与回测同源）
-        QUARANTINE[tk] = (f"两源 12 月收益差 {retd*100:.1f}%"
-                          if retd is not None else "两源无法对齐")
+            return a, "sina+yahoo"
+        QUARANTINE[tk] = (f"两源月收益最大差 {mdiff*100:.2f}%"
+                          if mdiff is not None else "两源无法对齐")
         STATS["quarantine"] += 1
         return None, "quarantine"
 
     if a and ok_a:
         STATS["sina"] += 1
         return a, "sina"
-    if b:
-        ok_b, _ = validate(b)
-        if ok_b:
-            STATS["yahoo"] += 1
-            return b, "yahoo"
+    if b and validate(b)[0]:
+        STATS["yahoo"] += 1
+        return b, "yahoo"
     STATS["fail"] += 1
     return None, None
 

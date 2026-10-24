@@ -57,9 +57,9 @@ def main(limit=None, workers=8):
             ok_b, _ = md.validate(b)
             if not (ok_a and ok_b):
                 return None
-            ok, ncom, pxd, retd = md.alignment(a, b)
+            ok, ncom, mdiff, retd = md.alignment(a, b)
             return {"ticker": t, "ok": ok, "common_months": ncom,
-                    "px_diff": pxd, "ret_diff": retd}
+                    "month_diff": mdiff, "ret_diff": retd}
         futs = {ex.submit(check, t): t for t in tickers}
         for fu in as_completed(futs):
             try:
@@ -82,9 +82,10 @@ def main(limit=None, workers=8):
         f"- 两源不一致（已隔离，不参与排名）：**{len(bad)}** 只",
         "",
         "## 判定标准", "",
-        f"- 12 个月收益偏差 ≤ {md.TOL_RET*100:.1f}%",
-        f"- 同月末收盘价偏差 ≤ {md.TOL_PX*100:.0f}%",
-        "- 复权口径统一为「仅拆股」，不使用含分红的 adjclose",
+        f"- 12 个月累计收益偏差 ≤ {md.TOL_RET*100:.1f}%",
+        f"- 任一月度收益偏差 ≤ {md.TOL_MONTH*100:.1f}%",
+        "- 复权口径：新浪原始价 × Yahoo 权威拆股表（后复权）；"
+        "Yahoo close 本身已是前复权，两者只差常数，收益必须一致",
         "",
         "## 运行统计", "",
         f"- 新浪成功：{s['sina']}",
@@ -96,9 +97,9 @@ def main(limit=None, workers=8):
     ]
     if len(bad):
         lines += ["## 不一致明细", "",
-                  "| 代码 | 共同月份 | 价格差 | 12月收益差 |", "|---|---|---|---|"]
+                  "| 代码 | 共同月份 | 单月最大差 | 12月累计差 |", "|---|---|---|---|"]
         for _, r in bad.sort_values("ret_diff", ascending=False).head(40).iterrows():
-            px = f"{r['px_diff']*100:.2f}%" if pd.notna(r["px_diff"]) else "—"
+            px = f"{r['month_diff']*100:.2f}%" if pd.notna(r["month_diff"]) else "—"
             rd = f"{r['ret_diff']*100:.2f}%" if pd.notna(r["ret_diff"]) else "—"
             lines.append(f"| {r['ticker']} | {r['common_months']} | {px} | {rd} |")
     else:
