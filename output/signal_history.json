@@ -11,6 +11,14 @@
     "official": [
       {
         "rank": 1,
+        "ticker": "ECHO",
+        "name": "EchoStar",
+        "sector": "Communication Services",
+        "ret12": 3.7467,
+        "weight": 0.4
+      },
+      {
+        "rank": 2,
         "ticker": "LITE",
         "name": "Lumentum",
         "sector": "Information Technology",
@@ -18,20 +26,12 @@
         "weight": 0.3
       },
       {
-        "rank": 2,
-        "ticker": "MU",
-        "name": "Micron Technology",
-        "sector": "Information Technology",
-        "ret12": 2.3913,
-        "weight": 0.3
-      },
-      {
         "rank": 3,
-        "ticker": "HOOD",
-        "name": "Robinhood Markets",
-        "sector": "Financials",
-        "ret12": 2.0354,
-        "weight": 0.4
+        "ticker": "WDC",
+        "name": "Western Digital",
+        "sector": "Information Technology",
+        "ret12": 2.8368,
+        "weight": 0.3
       }
     ],
     "picks": [
@@ -56,7 +56,7 @@
         "ticker": "MU",
         "name": "Micron Technology",
         "sector": "Information Technology",
-        "ret12": 2.9217,
+        "ret12": 2.9261,
         "weight": 0.3
       }
     ],
@@ -77,7 +77,7 @@
         "rank": 3,
         "ticker": "MU",
         "sector": "Information Technology",
-        "ret12": 2.9217
+        "ret12": 2.9261
       },
       {
         "rank": 4,
@@ -89,37 +89,37 @@
         "rank": 5,
         "ticker": "DELL",
         "sector": "Information Technology",
-        "ret12": 1.8174
+        "ret12": 1.8471
       },
       {
         "rank": 6,
         "ticker": "VLO",
         "sector": "Energy",
-        "ret12": 1.4728
+        "ret12": 1.5252
       },
       {
         "rank": 7,
         "ticker": "STX",
         "sector": "Information Technology",
-        "ret12": 1.464
+        "ret12": 1.4785
       },
       {
         "rank": 8,
         "ticker": "MRVL",
         "sector": "Information Technology",
-        "ret12": 1.4377
+        "ret12": 1.4418
       },
       {
         "rank": 9,
         "ticker": "MPC",
         "sector": "Energy",
-        "ret12": 1.3458
+        "ret12": 1.385
       },
       {
         "rank": 10,
         "ticker": "HPE",
         "sector": "Information Technology",
-        "ret12": 1.3215
+        "ret12": 1.3633
       }
     ],
     "change": "无变化",
@@ -138,19 +138,19 @@
         "month": "2026-10",
         "picks": [
           {
+            "ticker": "ECHO",
+            "weight": 0.4,
+            "px": 89.08
+          },
+          {
             "ticker": "LITE",
             "weight": 0.3,
             "px": 756.17
           },
           {
-            "ticker": "MU",
+            "ticker": "WDC",
             "weight": 0.3,
-            "px": 877.55
-          },
-          {
-            "ticker": "HOOD",
-            "weight": 0.4,
-            "px": 95.07
+            "px": 343.67
           }
         ],
         "exposure": 1.0,
