@@ -1,6 +1,10 @@
 # 美股排名动量策略研究
 
+[![月度选股](https://github.com/dear202606-star/trade/actions/workflows/monthly-pick.yml/badge.svg)](https://github.com/dear202606-star/trade/actions/workflows/monthly-pick.yml)
+
 对「买入上一年涨幅前 N 名」的横截面动量策略做系统回测，比较 11 种持有模型，并给出可执行的建仓方案。
+
+> **每月自动选股已上线**：查看最新名单 → [`output/monthly/latest.md`](output/monthly/latest.md)
 
 ## 核心结论
 
@@ -68,6 +72,20 @@ python step19_report_plain.py # 生成报告
 6. 把结果写回 `output/monthly/YYYY-MM.md` 和 `output/current_picks.csv` 并自动提交
 
 也可以手动触发：仓库页面 → Actions → 月度选股 → Run workflow。
+
+**触发方式**
+
+| 方式 | 条件 |
+|---|---|
+| 定时 | 每月 1 日 01:00 UTC（北京时间 09:00） |
+| 手动 | Actions → 月度选股 → Run workflow |
+| 推送 | 修改 `monthly_pick.py` / `requirements.txt` / 本工作流时自动跑一次 |
+
+机器人用 `GITHUB_TOKEN` 提交，不会反过来触发工作流，因此不会死循环。
+
+**注意**：GitHub 会在仓库 60 天无提交后自动暂停定时任务，任意一次 push 即可恢复。
+
+**查看结果**：`output/monthly/YYYY-MM.md`（当月）+ `output/monthly/latest.md`（最新）+ `output/current_picks.csv`（可直接导入表格）。
 
 本地运行：
 
