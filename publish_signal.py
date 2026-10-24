@@ -24,6 +24,22 @@ def gh(*args, check=True):
     return r.stdout.strip()
 
 
+def quality_line():
+    """附带数据质量一行（两个源是否一致、隔离几只）"""
+    import os
+    if not os.path.exists("output/data_quality.json"):
+        return "**数据质量**：本次未做两源核对"
+    try:
+        d = json.load(open("output/data_quality.json", encoding="utf-8"))
+        total, bad = d.get("total") or 0, d.get("bad") or 0
+        if not total:
+            return "**数据质量**：两源无法核对（Yahoo 不可达）"
+        return (f"**数据质量**：两源一致 {total - bad}/{total} "
+                f"= {(total - bad) / total * 100:.1f}%｜隔离 {bad} 只")
+    except Exception:
+        return "**数据质量**：读取失败"
+
+
 def main():
     if not os.environ.get("GH_TOKEN"):
         print("未设置 GH_TOKEN，跳过通知", file=sys.stderr)
@@ -59,6 +75,7 @@ def main():
     lines += [
         "",
         f"**与上期相比**：{r.get('change','—')}",
+        quality_line(),
         f"**大盘**：SPY {r['spy']:,.2f} vs 10 月均线 {r['ma']:,.2f}",
         "",
         f"[网页版]({page}) ｜ [信号看板]({page}signals.html)",
