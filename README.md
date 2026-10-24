@@ -95,6 +95,22 @@ python monthly_pick.py --workers 10
 
 输出示例见 `output/monthly/latest.md`。
 
+## 隐私保护
+
+本仓库**不包含任何个人持仓、账户或截图**，并有三道防线：
+
+1. **`.gitignore` 黑名单**：`持仓*`、`*截图*`、`*.jpg`、`*.jpeg`、`*.webp`、`截图*`、`screenshot*` 等一律忽略；仓库只允许 `output/img/` 下的研究图表。
+2. **提交前拦截钩子**（`.githooks/pre-commit`）：检测到敏感文件名或非 `output/img/` 的图片时直接拒绝提交。新机器克隆后执行一次：
+   ```bash
+   git config core.hooksPath .githooks
+   ```
+3. **历史审计**：任何时刻可执行下面的命令确认历史里没有混入个人文件：
+   ```bash
+   git log --all --name-only --pretty=format: | sort -u | grep -Ei '持仓|诊断|截图|screenshot'
+   ```
+
+> 钩子必须带 `-c core.quotePath=false`，否则 Git 会把中文文件名转义成 `\346\214\201` 导致匹配失效。
+
 ## 已知局限
 
 1. **生存者偏差**：本地行情仅含当前仍可查询的标的，退市与被并购公司缺失，估计高估收益 3–6 个百分点/年
