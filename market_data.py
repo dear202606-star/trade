@@ -92,10 +92,11 @@ def fetch_yahoo(tk, years=26):
             if c is None or c <= 0:
                 continue
             d = dt.datetime.utcfromtimestamp(t)
-            # 该月之后发生的拆股，全部前复权乘回去
+            # 后复权：拆股之后的价格乘以拆股比例（2:1 拆股 → 后段价格 ×2）
+            # 收益 = adj(t1)/adj(t0)，跨拆股时比例自动抵消，与新浪口径一致
             f = 1.0
             for sd, ratio in sp:
-                if sd > t:
+                if sd <= t:
                     f *= ratio
             v = vol[i] if i < len(vol) and vol[i] is not None else 0
             rows.append([d.strftime("%Y-%m"), float(c) * f, float(c), float(v)])
