@@ -39,7 +39,47 @@
    "dur": 4.6,
    "ok": true,
    "tail": "净值 205 个交易日（20251231 起）｜策略 +55.02% ｜标普 +11.45% ｜ 最大回撤 -34.8%"
+  },
+  {
+   "ts": "2026-10-25T10:39:23Z",
+   "step": "quotes.py",
+   "rc": 0,
+   "dur": 9.1,
+   "ok": true,
+   "tail": "行情 508 / 510，汇率 6.6702，缺失 2"
+  },
+  {
+   "ts": "2026-10-25T10:39:30Z",
+   "step": "equity.py",
+   "rc": 0,
+   "dur": 6.3,
+   "ok": true,
+   "tail": "净值 205 个交易日（20251231 起）｜策略 +55.02% ｜标普 +11.45% ｜ 最大回撤 -34.8%"
+  },
+  {
+   "ts": "2026-10-25T10:43:20Z",
+   "step": "strategy_history.py",
+   "rc": 0,
+   "dur": 230.6,
+   "ok": true,
+   "tail": "逐年记录 16 年，涉及 40 只股票\n  2020 AMD LRCX TGT ret=+63.5% dd=-16.6%\n  2021 TSLA ETSY NVDA ret=+66.0% dd=-12.1%\n  2022 DVN MRNA FTNT ret=-7.2% dd=-18.7%\n  2023 OXY MPC FSLR ret=+12.7% dd=-13.1%\n  2024 NVDA META RCL ret=+104.9% dd=-5.4%\n  2025 PLTR VST NVDA ret=+59.0% dd=-15.3%"
+  },
+  {
+   "ts": "2026-10-25T10:43:20Z",
+   "step": "site_build.py",
+   "rc": 0,
+   "dur": 0.0,
+   "ok": true,
+   "tail": "站点已构建：5 个静态文件 → /home/runner/work/trade/trade/docs\n  index / portfolio / strategy / signals / report\n  数据：signal.json history.json quality.json（1 期信号）"
+  },
+  {
+   "ts": "2026-10-25T10:43:20Z",
+   "step": "selftest.py",
+   "rc": 0,
+   "dur": 0.0,
+   "ok": true,
+   "tail": "=== 部署前自检 ===\n  ✅ 页面 index.html\n  ✅ 页面 portfolio.html\n  ✅ 页面 strategy.html\n  ✅ 信号有正式持仓\n  ✅ 行情 508/510 只（100%）\n  ✅ 净值 205 个交易日\n  ✅ 逐年记录 16 年\n  ✅ 质量核对 496 只\n  ✅ 行情 0.1 小时前更新\n  ✅ 净值末值 1.550175\n  ✅ 最大回撤 -34.8%\n通过 11 · 警告 0 · 失败 0"
   }
  ],
- "updated": "2026-10-25T10:23:26Z"
+ "updated": "2026-10-25T10:43:20Z"
 }
