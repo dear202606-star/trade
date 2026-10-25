@@ -232,13 +232,43 @@ def main():
                        "total_ret": round(tot - 1, 4) if s["rets"] else None})
     stocks.sort(key=lambda x: (-x["n"], -(x["total_ret"] or -9)))
 
-    out = {"years": years, "stocks": stocks,
+    # 全周期汇总（用逐年收益复利，口径与页面逐年记录一致）
+    eq = [1.0]
+    for r in years:
+        eq.append(eq[-1] * (1 + (r["ret"] or 0)))
+    peak, mdd = 1.0, 0.0
+    for v in eq[1:]:
+        peak = max(peak, v)
+        mdd = min(mdd, v / peak - 1)
+    n = len(years)
+    total = eq[-1] - 1
+    cagr = (eq[-1] ** (1 / n) - 1) if n > 0 and eq[-1] > 0 else None
+    wins = sum(1 for r in years if (r["ret"] or 0) > 0)
+    summary = {
+        "start": years[0]["year"] if years else None,
+        "end": years[-1]["year"] if years else None,
+        "years": n,
+        "total": round(total, 4),
+        "cagr": round(cagr, 4) if cagr is not None else None,
+        "mdd": round(mdd, 4),
+        "wins": wins,
+        "losses": n - wins,
+        "avg": round(sum((r["ret"] or 0) for r in years) / n, 4) if n else None,
+        "best": max(((r["ret"] or 0), r["year"]) for r in years) if years else None,
+        "worst": min(((r["ret"] or 0), r["year"]) for r in years) if years else None,
+        "worst_intra": round(min((r["dd"] or 0) for r in years), 4) if years else None,
+        "worst_intra_year": (min((r["dd"] or 0, r["year"]) for r in years)[1] if years else None),
+        "note": "按年度收盘复利计算；年度最大回撤用年末净值，最深年内回撤取各年谷底",
+    }
+
+    out = {"years": years, "stocks": stocks, "summary": summary,
            "generated": pd.Timestamp.today().strftime("%Y-%m-%d")}
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
 
-    print(f"逐年记录 {len(years)} 年，涉及 {len(stocks)} 只股票")
+    print(f"逐年记录 {n} 年，涉及 {len(stocks)} 只股票")
+    print(f"  全周期 累计 {total*100:.0f}%  年化 {cagr*100:.1f}%  最大回撤 {mdd*100:.1f}%  正收益 {wins}/{n} 年")
     for r in years[-6:]:
         print(f"  {r['year']} {' '.join(p['ticker'] for p in r['holdings'])} "
               f"ret={r['ret']*100 if r['ret'] is not None else float('nan'):+.1f}% "

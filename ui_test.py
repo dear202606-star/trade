@@ -87,6 +87,37 @@ def main():
         check("要下的单" in txt, "下单区块存在", "下单区块缺失")
         pg.screenshot(path=os.path.join(OUT, "02_portfolio.png"), full_page=True)
 
+        # 总买入资金 → 一键分配
+        pg.goto(BASE + "portfolio.html", wait_until="networkidle")
+        pg.wait_for_timeout(800)
+        pg.evaluate("() => { localStorage.clear(); location.reload(); }")
+        pg.wait_for_timeout(2000)
+        plan = pg.locator("#plan")
+        check(plan.count() == 1, "总买入资金输入框存在", "总买入资金输入框缺失")
+        plan.fill("100000")
+        plan.dispatch_event("input")
+        pg.wait_for_timeout(500)
+        alloc = pg.get_by_text("按信号一键分配", exact=False).first
+        check(alloc.count() > 0, "有一键分配按钮", "缺少一键分配按钮")
+        alloc.click()
+        pg.wait_for_timeout(1500)
+        shares = pg.locator("input[data-f='shares']")
+        n = shares.count()
+        check(n == 3, "一键分配生成 3 条持仓", "一键分配生成 %d 条" % n)
+        vals = []
+        for i in range(n):
+            v = shares.nth(i).input_value()
+            vals.append(float(v or 0))
+        check(all(v > 0 for v in vals), "三条持仓股数均 > 0", "存在 0 股持仓：%s" % vals)
+        used = pg.locator("#tCash").inner_text()
+        used_num = float(used.replace("$", "").replace(",", "") or 0)
+        check(abs(used_num - 100000) / 100000 < 0.03,
+              "已投入成本≈总买入资金（%s）" % used, "已投入 %s 与 100000 偏差过大" % used)
+        pos = pg.locator("#tPos").inner_text()
+        check("%" in pos and abs(float(pos.replace("%", "")) - 100) < 3,
+              "已用资金比例≈100%%（%s）" % pos, "已用比例异常：%s" % pos)
+        pg.screenshot(path=os.path.join(OUT, "06_alloc.png"), full_page=True)
+
         # 校验止损线 = 最高价 × 0.7（读页面上的数值）
         vals = pg.evaluate("""() => {
           const r = {};

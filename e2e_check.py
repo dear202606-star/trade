@@ -129,8 +129,8 @@ def data(name):
 def main():
     # 1. 三个页面
     page("", ["今天该做什么", "策略净值", "下一步"])
-    page("portfolio.html", ["我的持仓", "要下的单", "止损线", "按信号一键填入"])
-    page("strategy.html", ["单位净值", "逐年记录", "个股贡献", "名词与纪律"])
+    page("portfolio.html", ["我的持仓", "总买入资金", "要下的单", "止损线", "按信号一键分配"])
+    page("strategy.html", ["单位净值", "全周期表现", "逐年记录", "个股贡献", "名词与纪律"])
 
     # 2. 数据
     sig = data("signal.json")
@@ -187,6 +187,15 @@ def main():
             bad("回撤为正（应 ≤0）：%s" % mdd)
 
     if sh:
+        sm = sh.get("summary") or {}
+        if sm.get("years") and sm.get("total") is not None:
+            ok("全周期 %s\u2013%s：累计 %.0f%% 年化 %.1f%% 回撤 %.1f%% 正收益 %s/%s" % (
+                sm["start"], sm["end"], sm["total"] * 100,
+                (sm["cagr"] or 0) * 100, sm["mdd"] * 100, sm["wins"], sm["years"]))
+            if not (0 < sm["total"] < 500):
+                bad("全周期累计收益异常：%s" % sm["total"])
+        else:
+            bad("strategy_history 缺 summary")
         ys = sh.get("years") or []
         if len(ys) >= 8:
             ok("逐年记录 %d 年" % len(ys))

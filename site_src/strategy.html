@@ -43,6 +43,18 @@
     </div>
   </div>
 
+  <h2 style="margin:44px 0 10px;font-size:19px;letter-spacing:-.02em">全周期表现 · <span id="sumRange">2010–2025</span></h2>
+  <div class="grid g4" id="summary">
+    <div class="card flat"><div class="label" style="margin-bottom:6px">累计收益</div>
+      <div class="num num-lg" id="sumTotal">—</div><div class="sub">按年度收盘复利</div></div>
+    <div class="card flat"><div class="label" style="margin-bottom:6px">年化收益</div>
+      <div class="num num-lg" id="sumCagr">—</div><div class="sub">复合年化</div></div>
+    <div class="card flat"><div class="label" style="margin-bottom:6px">最大回撤</div>
+      <div class="num num-lg down" id="sumMdd">—</div><div class="sub" id="sumMddSub">年末净值口径</div></div>
+    <div class="card flat"><div class="label" style="margin-bottom:6px">正收益年份</div>
+      <div class="num num-lg" id="sumWin">—</div><div class="sub" id="sumWinSub">—</div></div>
+  </div>
+
   <h2 style="margin:44px 0 10px;font-size:19px;letter-spacing:-.02em">逐年记录</h2>
   <div id="years"></div>
 
@@ -151,6 +163,27 @@ function renderStocks() {
 
 
 
+
+/* ---------- 全周期汇总 ---------- */
+function renderSummary(sh) {
+  const m = sh && sh.summary;
+  if (!m) return;
+  document.getElementById('sumRange').textContent = m.start + '\u2013' + m.end;
+  const t = document.getElementById('sumTotal');
+  t.textContent = DSH.pct(m.total, 0);
+  t.className = 'num num-lg ' + DSH.cls(m.total);
+  const g = document.getElementById('sumCagr');
+  g.textContent = m.cagr == null ? '\u2014' : DSH.pct(m.cagr, 1);
+  g.className = 'num num-lg ' + DSH.cls(m.cagr);
+  document.getElementById('sumMdd').textContent = DSH.pct(m.mdd, 1);
+  document.getElementById('sumMddSub').textContent =
+    '年末净值口径；最深年内 ' + DSH.pct(m.worst_intra, 1) + '（' + m.worst_intra_year + '）';
+  document.getElementById('sumWin').textContent = m.wins + ' / ' + m.years;
+  document.getElementById('sumWin').className = 'num num-lg ' + (m.losses === 0 ? 'up' : '');
+  document.getElementById('sumWinSub').textContent =
+    m.losses === 0 ? '没有任何亏损年份' : '亏损 ' + m.losses + ' 年';
+}
+
 (async function () {
   const eq = await DSH.json('equity', null);
   const sh = await DSH.json('strategy_history', null);
@@ -169,6 +202,7 @@ function renderStocks() {
   } else {
     $('chart').innerHTML = '<div class="tip warn">净值数据尚未生成</div>';
   }
+  safe(renderSummary, sh, '全周期汇总', 'summary');
   safe(renderYears, null, '逐年记录', 'years');
   safe(renderStocks, null, '个股贡献', 'stocks');
 

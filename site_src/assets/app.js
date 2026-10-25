@@ -13,6 +13,27 @@
   /* 单只移动止损：从持有期最高点回撤 30% 清仓（回测验证：16 年零亏损年） */
   DSH.STOP = 0.30;
 
+  /* 轻提示：右下角浮出，2.4 秒自动消失 */
+  DSH.toast = function (msg) {
+    if (!msg) return;
+    let el = document.getElementById("dshToast");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "dshToast";
+      el.style.cssText = "position:fixed;right:22px;bottom:22px;z-index:99;padding:12px 18px;" +
+        "border-radius:12px;background:rgba(28,27,33,.96);border:1px solid rgba(255,255,255,.1);" +
+        "color:#F5F3EE;font-size:13.5px;box-shadow:0 12px 40px rgba(0,0,0,.5);" +
+        "opacity:0;transform:translateY(8px);transition:all .22s ease;pointer-events:none;max-width:70vw";
+      document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    requestAnimationFrame(() => { el.style.opacity = "1"; el.style.transform = "translateY(0)"; });
+    clearTimeout(el._t);
+    el._t = setTimeout(() => {
+      el.style.opacity = "0"; el.style.transform = "translateY(8px)";
+    }, 2400);
+  };
+
   /* 更新每只票的持有期最高价并落盘 */
   DSH.updatePeaks = function (pf, quotes) {
     let changed = false;
@@ -142,11 +163,16 @@
     const dayPnl = rows.reduce((a, r) => a + (r.dayPnl || 0), 0);
     const dayValid = rows.length > 0 && rows.some((r) => !r.isNew);
     // 当日涨跌基数 = 昨日市值
+    // 总买入资金：用于一键分配与「已投入 / 剩余」显示；收益率始终按实际成本算
+    const plan = pf.plan || 0;
+    const deployed = plan > 0 ? cost / plan : 0;
+    const remain = plan > 0 ? Math.max(0, plan - cost) : 0;
     const prevMv = mv - dayPnl;
     return {
       rows, mv, cost,
       pnl: mv - cost,
       pnlPct: cost > 0 ? (mv - cost) / cost : 0,
+      plan, deployed, remain,
       dayPnl,
       dayPct: mv - dayPnl > 0 ? dayPnl / (mv - dayPnl) : 0,
       dayValid, session: sess,
@@ -155,12 +181,13 @@
   };
 
   /* ---------- 目标权重（占总资金） ---------- */
+  /* 目标占比：在「全部持仓」内部的权重（与页面上的占比同口径） */
   DSH.targets = function (sig) {
     const out = {};
     if (!sig) return out;
-    (sig.official || sig.picks || []).forEach((p) => {
-      out[p.ticker] = p.weight * sig.exposure * 0.30;
-    });
+    const list = sig.official || sig.picks || [];
+    const sum = list.reduce((a, p) => a + (p.weight || 0), 0) || 1;
+    list.forEach((p) => { out[p.ticker] = (p.weight || 0) / sum; });
     return out;
   };
 

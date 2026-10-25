@@ -28,23 +28,28 @@
         <div class="sub" id="tDayPct"></div>
       </div>
     </div>
-    <div class="grid g3" style="margin-top:24px;gap:12px">
+    <div class="grid g4" style="margin-top:24px;gap:12px">
       <div class="card flat"><div class="label" style="margin-bottom:6px">总市值</div><div class="num num-md" id="tMv">—</div></div>
-      <div class="card flat"><div class="label" style="margin-bottom:6px">总投入</div><div class="num num-md" id="tCash">—</div></div>
-      <div class="card flat"><div class="label" style="margin-bottom:6px">持有</div><div class="num num-md" id="tPos">—</div>
-        </div>
+      <div class="card flat"><div class="label" style="margin-bottom:6px">已投入（成本）</div><div class="num num-md" id="tCash">—</div></div>
+      <div class="card flat"><div class="label" style="margin-bottom:6px">收益率</div><div class="num num-md" id="tRet">—</div></div>
+      <div class="card flat"><div class="label" style="margin-bottom:6px">已用总买入资金</div><div class="num num-md" id="tPos">—</div>
+        <div class="bar"><i id="tPosBar" style="width:0%"></i></div></div>
     </div>
   </div>
 
   <!-- 持仓设置 -->
   <div class="card" style="margin-top:16px">
     <div class="row">
+      <div class="field" style="width:190px">
+        <label>总买入资金</label>
+        <input id="plan" type="number" min="0" step="1000" placeholder="例如 100000" class="num-in">
+      </div>
       <div class="field" style="width:140px">
         <label>币种</label>
         <select id="cur"><option value="USD">USD 美元</option><option value="CNY">CNY 人民币</option></select>
       </div>
       <div class="grow"></div>
-      <button class="btn primary" id="btnFromSignal">按信号一键填入</button>
+      <button class="btn primary" id="btnFromSignal">按信号一键分配</button>
       <button class="btn ghost" id="btnExport">导出</button>
       <button class="btn ghost" id="btnImport">导入</button>
     </div>
@@ -116,24 +121,34 @@ function render() {
 
   $('tMv').textContent = DSH.money(c.mv, cur);
   $('tCash').textContent = DSH.money(c.cost, cur);
-  $('tPos').textContent = c.rows.length + ' 只';
+  const tr = $('tRet');
+  if (PF.rows.length && c.cost > 0) {
+    tr.textContent = DSH.pct(c.pnlPct);
+    tr.className = 'num num-md ' + DSH.cls(c.pnl);
+  } else {
+    tr.textContent = '—'; tr.className = 'num num-md';
+  }
+  $('tPos').textContent = c.plan > 0 ? (c.deployed * 100).toFixed(0) + '%' : '—';
+  $('tPosBar').style.width = Math.min(100, c.deployed * 100) + '%';
+  $('tPosBar').className = c.deployed > 1.001 ? 'over' : '';
   
   
 
-  /* 资金说明：按实际持仓统计 */
+  /* 资金说明：总买入资金 → 已投入 / 剩余 */
   const capHint = $('capHint');
-  if (!PF.rows.length) {
-    capHint.innerHTML = '录入你实际买入的股票与股数，系统按<b>真实持仓</b>计算市值、盈亏与占比。仓位大小由你自己决定。';
+  if (!c.plan) {
+    capHint.innerHTML = '填<b>总买入资金</b>后点「按信号一键分配」，系统会按信号权重（30/30/40）算出每只该买多少股。' +
+      '<br><span style="color:var(--txt-3)">不填也能用：直接在下面录入你实际买入的股数即可。</span>';
   } else {
-    capHint.innerHTML = '持仓市值 <b>' + DSH.money(c.mv, cur) + '</b> ｜ 总投入 <b>' + DSH.money(c.cost, cur) +
-      '</b> ｜ 浮动盈亏 <b class="' + DSH.cls(c.pnl) + '">' + DSH.money(c.pnl, cur) + '</b>' +
-      '<br><span style="color:var(--txt-3)">占比按持仓市值计算；买多少、用多大仓位，由你自己决定。</span>';
+    capHint.innerHTML = '总买入资金 <b>' + DSH.money(c.plan, cur) + '</b> ｜ 已投入 <b>' + DSH.money(c.cost, cur) +
+      '</b> ｜ 剩余 <b>' + DSH.money(c.remain, cur) + '</b>' +
+      '<br><span style="color:var(--txt-3)">已投入 = 各持仓成本合计；剩余可继续按信号补仓。</span>';
   }
 
 
   if (!PF.rows.length) {
     $('list').innerHTML = '<div class="card" style="text-align:center;padding:38px 20px;color:var(--txt-3)">' +
-      '还没有持仓 · 用下面的输入框添加，或点「按信号一键填入」</div>';
+      '还没有持仓 · 用下面的输入框添加，或点「按信号一键分配」</div>';
     return;
   }
 
@@ -184,6 +199,12 @@ document.addEventListener('click', (e) => {
   if (d != null) { PF.rows.splice(+d, 1); DSH.save(PF); render(); }
 });
 
+$('plan').value = PF.plan || '';
+$('plan').addEventListener('input', (e) => {
+  PF.plan = parseFloat(e.target.value) || 0;
+  DSH.save(PF);
+  render();
+});
 $('cur').addEventListener('change', (e) => { PF.cur = e.target.value; DSH.save(PF); render(); });
 
 $('btnAdd').onclick = () => {
@@ -203,14 +224,22 @@ $('btnAdd').onclick = () => {
 $('btnFromSignal').onclick = () => {
   if (!SIG) return;
   const off = SIG.official || SIG.picks || [];
-  // 只填代码与现价，股数留给你按自己的投入决定
+  const plan = PF.plan || 0;
+  if (!plan) {
+    DSH.toast('请先填「总买入资金」，再一键分配');
+    const el = $('plan');
+    if (el) { el.focus(); el.select && el.select(); }
+    return;
+  }
+  const today = new Date().toISOString().slice(0, 10);
   PF.rows = off.map((p) => {
-    const price = ((Q.quotes || {})[p.ticker] || {}).p || 100;
-    return { ticker: p.ticker, shares: 0, cost: +price.toFixed(2),
-             added: new Date().toISOString().slice(0, 10) };
-  });
-  DSH.save(PF); render();
-  toast('已填入 ' + off.length + ' 只，请填上你实际买入的股数');
+    const price = ((Q.quotes || {})[p.ticker] || {}).p || 0;
+    const amt = plan * p.weight;                       // 按信号权重分配
+    const shares = price > 0 ? +(amt / price).toFixed(4) : 0;
+    return { ticker: p.ticker, shares, cost: +price.toFixed(2), added: today };
+  }).filter((r) => r.shares > 0);
+  DSH.save(PF); render(); renderOrders();
+  DSH.toast('已按 ' + DSH.money(plan, PF.cur || 'USD') + ' 分配到 ' + PF.rows.length + ' 只');
 };
 
 $('btnClear').onclick = () => {
