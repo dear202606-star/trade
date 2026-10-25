@@ -217,6 +217,15 @@ def main():
         if os.path.exists(s):
             shutil.copy2(s, os.path.join(DOCS, fn))
 
+    # 兜底：本次数据不完整时，用上次完整结果补位
+    for fn in ("strategy_history.json", "curve.json"):
+        dst = os.path.join(DATA, fn)
+        src = os.path.join(BASE, "output", fn)
+        if not os.path.exists(dst) and os.path.exists(src):
+            os.makedirs(DATA, exist_ok=True)
+            shutil.copy2(src, dst)
+            print("  沿用上次完整结果：" + fn)
+
     # 冻结的选股快照（供线上校验「分年持仓是否被改动」）
     pk = os.path.join(BASE, "output", "backtest_picks.json")
     if os.path.exists(pk):
