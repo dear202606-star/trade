@@ -17,6 +17,7 @@ on:
       - market_data.py
       - quotes.py
       - equity.py
+      - strategy_history.py
       - dashboard.py
       - site_build.py
       - report_live.py
@@ -63,6 +64,10 @@ jobs:
       - name: 计算策略净值
         continue-on-error: true
         run: python equity.py
+
+      - name: 生成逐年记录
+        continue-on-error: true
+        run: python strategy_history.py
 
       - name: 生成站点
         id: site

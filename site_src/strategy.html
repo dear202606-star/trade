@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>策略 · LEADER QUANT</title>
+<link rel="stylesheet" href="assets/app.css">
+<script src="assets/app.js"></script>
+</head><body>
+<script>DSH.boot();</script>
+<div class="wrap">
+
+  <div class="head">
+    <div class="eyebrow">Strategy</div>
+    <h1>策略表现</h1>
+    <p>收益与回撤同图；下面是逐年记录、持仓与调仓明细。</p>
+  </div>
+
+  <div class="grid g4" style="margin-top:26px">
+    <div class="card flat"><div class="label" style="margin-bottom:6px">策略收益</div>
+      <div class="num num-lg" id="sRet">—</div><div class="sub" id="sPeriod"></div></div>
+    <div class="card flat"><div class="label" style="margin-bottom:6px">标普 500</div>
+      <div class="num num-lg" id="bRet">—</div><div class="sub">同期基准</div></div>
+    <div class="card flat"><div class="label" style="margin-bottom:6px">超额</div>
+      <div class="num num-lg" id="exRet">—</div><div class="sub">策略 − 基准</div></div>
+    <div class="card flat"><div class="label" style="margin-bottom:6px">最大回撤</div>
+      <div class="num num-lg down" id="mdd">—</div><div class="sub">区间内最深跌幅</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;padding:20px 16px 8px">
+    <div class="row" style="padding:0 10px 12px">
+      <div class="label" style="margin:0">单位净值 + 回撤</div>
+      <div class="grow"></div>
+      <div class="row" style="gap:6px" id="ranges">
+        <button class="btn sm primary" data-r="all">全部</button>
+        <button class="btn sm ghost" data-r="1y">近 1 年</button>
+        <button class="btn sm ghost" data-r="3m">近 3 月</button>
+      </div>
+    </div>
+    <div id="chart"></div>
+    <div class="row" style="padding:8px 10px 0;gap:18px">
+      <span style="font-size:12px;color:var(--txt-2)"><i style="display:inline-block;width:16px;height:3px;background:#F2C46B;vertical-align:middle;border-radius:2px"></i> 策略净值</span>
+      <span style="font-size:12px;color:var(--txt-2)"><i style="display:inline-block;width:16px;height:3px;background:#6F7D92;vertical-align:middle;border-radius:2px"></i> 标普 500</span>
+      <span style="font-size:12px;color:var(--txt-2)"><i style="display:inline-block;width:16px;height:8px;background:rgba(255,107,114,.35);vertical-align:middle;border-radius:2px"></i> 回撤</span>
+    </div>
+  </div>
+
+  <h2 style="margin:44px 0 10px;font-size:19px;letter-spacing:-.02em">逐年记录</h2>
+  <div id="years"></div>
+
+  <h2 style="margin:44px 0 10px;font-size:19px;letter-spacing:-.02em">个股贡献</h2>
+  <div id="stocks"></div>
+
+  <h2 style="margin:44px 0 10px;font-size:19px;letter-spacing:-.02em">数据质量</h2>
+  <div id="quality"></div>
+
+    <h2 style="margin:44px 0 10px;font-size:19px;letter-spacing:-.02em">名词与纪律</h2>
+  <div class="card"><table>
+    <thead><tr><th style="width:150px">名词</th><th>含义</th></tr></thead>
+    <tbody>
+      <tr><td>账户总资金</td><td>交给这套策略管理的总金额（在「我的持仓」填）</td></tr>
+      <tr><td>策略上限</td><td>账户总资金 × 30%，其余留现金（回测显示满仓回撤 −60%）</td></tr>
+      <tr><td>仓位</td><td>持仓市值 ÷ 账户总资金</td></tr>
+      <tr><td>组合内权重</td><td>单只占「已买股票」的比例，前 3 名通常 30/30/40</td></tr>
+      <tr><td>占总资金</td><td>单只占「账户总资金」的比例 = 组合内权重 × 仓位</td></tr>
+      <tr><td>最大回撤</td><td>从历史最高点跌下来的最深幅度</td></tr>
+      <tr><td>换仓</td><td>每年 12 月最后一个交易日按新排名重建组合，其余月份不动</td></tr>
+    </tbody></table></div>
+
+  <div class="foot">
+    <a href="signals.html">信号看板 →</a> ｜ <a href="report.html">完整策略报告 →</a><br>
+    净值每日按收盘价计算；逐年记录无未来函数（用当年 1 月 1 日的成分股 + 上年 12 月排名）。
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let EQ = null, SH = null, RANGE = 'all';
+
+function slicePts(pts, r) {
+  if (r === '1y') return pts.slice(Math.max(0, pts.length - 250));
+  if (r === '3m') return pts.slice(Math.max(0, pts.length - 66));
+  return pts;
+}
+
+function drawChart() {
+  if (!EQ || !EQ.points || EQ.points.length < 2) return;
+  const pts = slicePts(EQ.points, RANGE);
+  const eq = pts.map(p => ({ d: p.d, y: p.s - 1 }));
+  const bm = pts.map(p => ({ d: p.d, y: p.b - 1 }));
+  let peak = 0;
+  const dd = pts.map(p => { peak = Math.max(peak, p.s); return { d: p.d, y: p.s / peak - 1 }; });
+  $('chart').innerHTML = DSH.combo(eq, dd, { bench: bm, h: 380 });
+
+  const f = pts[0], l = pts[pts.length - 1];
+  const sR = l.s / f.s - 1, bR = l.b / f.b - 1;
+  let p2 = 0, mdd = 0;
+  pts.forEach(p => { p2 = Math.max(p2, p.s); mdd = Math.min(mdd, p.s / p2 - 1); });
+  $('sRet').textContent = DSH.pct(sR); $('sRet').className = 'num num-lg ' + DSH.cls(sR);
+  $('bRet').textContent = DSH.pct(bR); $('bRet').className = 'num num-lg ' + DSH.cls(bR);
+  $('exRet').textContent = DSH.pct(sR - bR); $('exRet').className = 'num num-lg ' + DSH.cls(sR - bR);
+  $('mdd').textContent = DSH.pct(mdd, 1);
+  $('sPeriod').textContent = f.d.slice(0, 4) + '/' + f.d.slice(4, 6) + ' 起 · ' + pts.length + ' 个交易日';
+}
+
+document.querySelectorAll('#ranges button').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('#ranges button').forEach(x => { x.className = 'btn sm ghost'; });
+    b.className = 'btn sm primary';
+    RANGE = b.dataset.r;
+    drawChart();
+  };
+});
+
+function renderYears() {
+  if (!SH || !SH.years) { $('years').innerHTML = '<div class="tip warn">逐年数据尚未生成</div>'; return; }
+  const ys = SH.years.slice().reverse();
+  $('years').innerHTML = ys.map(r => {
+    const hold = r.holdings.map(p =>
+      '<span class="chip" style="margin-right:6px">' + DSH.esc(p.ticker) + ' <b style="color:var(--gold)">' +
+      (p.weight * 100).toFixed(0) + '%</b></span>').join('');
+    const ex = (r.ret != null && r.bench != null) ? r.ret - r.bench : null;
+    return '<div class="card" style="margin-bottom:10px;padding:18px 20px">' +
+      '<div class="row" style="align-items:flex-start">' +
+        '<div style="min-width:64px"><div class="num num-md">' + r.year + '</div>' +
+          '<div class="sub" style="margin-top:2px">' + (r.switched ? '换仓' : '沿用') + '</div></div>' +
+        '<div class="grow">' + hold + '</div>' +
+        '<div style="text-align:right;min-width:96px"><div class="num num-md ' + DSH.cls(r.ret) + '">' +
+          (r.ret == null ? '—' : DSH.pct(r.ret)) + '</div><div class="sub" style="margin-top:2px">策略</div></div>' +
+        '<div style="text-align:right;min-width:86px"><div class="num num-md ' + DSH.cls(ex) + '">' +
+          (ex == null ? '—' : DSH.pct(ex)) + '</div><div class="sub" style="margin-top:2px">超额</div></div>' +
+        '<div style="text-align:right;min-width:82px"><div class="num num-md down">' +
+          (r.dd == null ? '—' : DSH.pct(r.dd, 1)) + '</div><div class="sub" style="margin-top:2px">年内回撤</div></div>' +
+      '</div></div>';
+  }).join('');
+}
+
+function renderStocks() {
+  if (!SH || !SH.stocks) return;
+  const rows = SH.stocks.slice(0, 20).map(s =>
+    '<tr><td class="tk">' + DSH.esc(s.ticker) + '</td><td style="font-size:12.5px;color:var(--txt-3)">' +
+    DSH.esc((s.name || '').slice(0, 26)) + '</td>' +
+    '<td>' + s.years.join(', ') + '</td>' +
+    '<td class="num">' + s.n + '</td>' +
+    '<td class="num ' + DSH.cls(s.total_ret) + '">' + (s.total_ret == null ? '—' : DSH.pct(s.total_ret, 0)) + '</td></tr>').join('');
+  $('stocks').innerHTML = '<div class="card" style="padding:8px 14px"><table>' +
+    '<thead><tr><th>代码</th><th>名称</th><th>入选年份</th><th class="num">次数</th><th class="num">累计</th></tr></thead>' +
+    '<tbody>' + rows + '</tbody></table></div>';
+}
+
+(async function () {
+  const [eq, sh, q] = await Promise.all([
+    DSH.json('equity', null), DSH.json('strategy_history', null), DSH.json('quality', null)]);
+  EQ = eq; SH = sh;
+
+  if (eq) {
+    $('sPeriod').textContent = '自 ' + eq.base_date + ' 起';
+    drawChart();
+  } else {
+    $('chart').innerHTML = '<div class="tip warn">净值数据尚未生成</div>';
+  }
+  renderYears();
+  renderStocks();
+
+  if (q && q.total) {
+    const rate = (q.total - q.bad) / q.total;
+    const bad = (q.rows || []).filter(r => !r.ok);
+    $('quality').innerHTML = '<div class="tip ok" style="margin-bottom:12px">两源一致率 <b>' +
+      (rate * 100).toFixed(1) + '%</b>（' + (q.total - q.bad) + '/' + q.total +
+      '）。复权口径统一为「仅拆股」，不一致的标的直接隔离、不参与排名。</div>' +
+      (bad.length ? '<div class="card" style="padding:16px 20px"><div class="label" style="margin-bottom:8px">已隔离</div>' +
+        bad.map(r => '<span class="chip" style="margin:0 6px 6px 0">' + DSH.esc(r.ticker) + '</span>').join('') +
+        '<div class="sub" style="margin-top:8px">公司行为（分析上市、换股）导致两源编码不同，属正常偏差。</div></div>' : '');
+  }
+})();
+</script>
+</body></html>

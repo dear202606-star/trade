@@ -5,9 +5,7 @@
   const NAV = [
     ["index.html", "总览"],
     ["portfolio.html", "我的持仓"],
-    ["plan.html", "行动计划"],
-    ["nav.html", "净值"],
-    ["about.html", "说明"],
+    ["strategy.html", "策略表现"],
   ];
 
   const DSH = (g.DSH = {});
@@ -199,6 +197,51 @@
         d0.slice(4, 6) + "/" + d0.slice(6, 8) + "</text>";
     }
     svg += "</svg>";
+    return svg;
+  };
+
+  /* ---------- 收益 + 回撤 合一图 ---------- */
+  DSH.combo = function (eq, dd, opts) {
+    opts = opts || {};
+    const w = 900, h = opts.h || 380, L = 52, R = 14, T = 14;
+    const H1 = h * 0.68, GAP = 12, H2 = h - H1 - GAP - 26;
+    const eqs = eq.map(p => p.y);
+    let mn = Math.min.apply(null, eqs), mx = Math.max.apply(null, eqs);
+    const pad = (mx - mn) * 0.12 || 0.05;
+    mn -= pad; mx += pad;
+    const n = eq.length;
+    const X = i => L + (i / Math.max(1, n - 1)) * (w - L - R);
+    const Y1 = v => T + (1 - (v - mn) / (mx - mn || 1)) * H1;
+    const dmin = Math.min.apply(null, dd.map(p => p.y));
+    const Y2 = v => T + H1 + GAP + (1 - (v - dmin) / (0 - dmin || 1)) * H2;
+    let svg = '<svg viewBox="0 0 ' + w + ' ' + h + '" style="width:100%;height:auto;display:block">';
+    for (let k = 0; k <= 3; k++) {
+      const v = mn + (mx - mn) * k / 3, y = Y1(v).toFixed(1);
+      svg += '<line x1="' + L + '" y1="' + y + '" x2="' + (w - R) + '" y2="' + y + '" stroke="rgba(255,255,255,.05)"/>';
+      svg += '<text x="' + (L - 8) + '" y="' + (+y + 4) + '" fill="#6F7D92" font-size="10.5" text-anchor="end">' + (v * 100).toFixed(0) + '%</text>';
+    }
+    // 策略曲线
+    let d1 = '';
+    eq.forEach((p, i) => { d1 += (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y1(p.y).toFixed(1); });
+    svg += '<path d="' + d1 + '" fill="none" stroke="#F2C46B" stroke-width="2.2" stroke-linejoin="round"/>';
+    // 基准
+    if (opts.bench) {
+      let d2 = '';
+      opts.bench.forEach((p, i) => { d2 += (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y1(p.y).toFixed(1); });
+      svg += '<path d="' + d2 + '" fill="none" stroke="#6F7D92" stroke-width="1.4" stroke-dasharray="4 4"/>';
+    }
+    // 回撤区域
+    let d3 = '';
+    dd.forEach((p, i) => { d3 += (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y2(p.y).toFixed(1); });
+    d3 += 'L' + X(dd.length - 1).toFixed(1) + ' ' + Y2(0).toFixed(1) + 'L' + X(0).toFixed(1) + ' ' + Y2(0).toFixed(1) + 'Z';
+    svg += '<path d="' + d3 + '" fill="rgba(255,107,114,.16)" stroke="#FF6B72" stroke-width="1.2"/>';
+    svg += '<text x="' + L + '" y="' + (T + H1 + GAP - 3) + '" fill="#6F7D92" font-size="10.5">回撤 ' + (dmin * 100).toFixed(0) + '%</text>';
+    // X 轴
+    const step = Math.max(1, Math.floor(n / 6));
+    for (let i = 0; i < n; i += step) {
+      svg += '<text x="' + X(i).toFixed(1) + '" y="' + (h - 8) + '" fill="#6F7D92" font-size="10.5" text-anchor="middle">' + eq[i].d.slice(2, 4) + '/' + eq[i].d.slice(4, 6) + '</text>';
+    }
+    svg += '</svg>';
     return svg;
   };
 

@@ -77,6 +77,11 @@
     </div>
   </div>
 
+  <div style="margin-top:44px">
+    <div class="label" style="font-size:12px">要下的单</div>
+    <div class="grid" id="orders" style="gap:10px"></div>
+  </div>
+
   <div class="foot">行情来自新浪财经（延后约 15 分钟），每 30 分钟自动刷新 ｜ 盈亏不含手续费 ｜ 仅供研究，不构成投资建议</div>
 </div>
 
@@ -238,10 +243,62 @@ $('nTicker').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('nSha
 $('nShares').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('nCost').focus(); });
 $('nCost').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btnAdd').click(); });
 
+
+/* ---------- 要下的单 ---------- */
+function renderOrders() {
+  const el = orders;
+  if (!SIG) { el.innerHTML = ''; return; }
+  const quotes = (Q.quotes || {});
+  const off = SIG.official || SIG.picks || [];
+  const exp = SIG.exposure;
+  const cap = PF.capital || 0;
+  const cur = PF.cur || 'USD';
+  if (!cap || !PF.rows.length) {
+    el.innerHTML = '<div class="tip">填好上面两项后，这里会自动算出每笔要买/卖多少股。</div>';
+    return;
+  }
+  const sleeve = cap * 0.30 * exp;
+  const held = {};
+  PF.rows.forEach(r => { held[r.ticker] = (held[r.ticker] || 0) + r.shares; });
+  const items = [];
+  off.forEach(p => {
+    const price = (quotes[p.ticker] || {}).p || 0;
+    if (!price) return;
+    let tgt = (sleeve * p.weight) / price;
+    tgt = Math.min(tgt, (cap * 0.10) / price);
+    const have = held[p.ticker] || 0;
+    delete held[p.ticker];
+    items.push({ side: tgt - have, ticker: p.ticker, price, amt: Math.abs(tgt - have) * price });
+  });
+  Object.keys(held).forEach(t => {
+    if (held[t] <= 0) return;
+    const price = (quotes[t] || {}).p || 0;
+    items.push({ side: -held[t], ticker: t, price, amt: held[t] * price });
+  });
+  const real = items.filter(x => x.price && x.amt > Math.max(100, sleeve * 0.005));
+  if (!real.length) {
+    el.innerHTML = '<div class="tip ok">持仓已在目标权重附近，不需要下单。</div>';
+    return;
+  }
+  el.innerHTML = real.map(x => {
+    const buy = x.side > 0;
+    const qty = Math.abs(x.side);
+    return '<div class="action"><span class="tag ' + (buy ? 'buy' : 'sell') + '">' +
+      (buy ? '买入' : '卖出') + '</span>' +
+      '<div style="min-width:90px;font-weight:800;font-size:15px">' + DSH.esc(x.ticker) + '</div>' +
+      '<div class="grow" style="text-align:right"><div class="num" style="font-size:15px">' +
+        qty.toFixed(qty < 10 ? 2 : 0) + ' 股</div><div class="sub" style="margin-top:2px">@ ' + x.price.toFixed(2) + '</div></div>' +
+      '<div style="text-align:right;min-width:104px"><div class="num" style="font-size:15px;color:' +
+        (buy ? 'var(--green)' : 'var(--red)') + '">' + (buy ? '' : '−') + DSH.money(x.amt, cur) + '</div>' +
+        '<div class="sub" style="margin-top:2px">' + (buy ? '需要资金' : '回笼现金') + '</div></div></div>';
+  }).join('');
+}
+
 (async function () {
   SIG = await DSH.json('signal', null);
   Q = await DSH.json('quotes', { quotes: {}, fx: 7.1 });
   render();
+  renderOrders();
 })();
 </script>
 </body></html>

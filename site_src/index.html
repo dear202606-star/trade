@@ -40,7 +40,7 @@
           <div class="num num-lg" id="eqRet">—</div>
           <div class="sub" id="eqSub"></div>
         </div>
-        <div style="width:260px;max-width:45%"><div id="eqSpark"></div></div>
+        <div style="width:320px;max-width:46%"><div id="eqSpark"></div></div>
       </div>
     </a>
   </div>
@@ -164,7 +164,12 @@
     el.className = 'num num-lg ' + DSH.cls(r);
     document.getElementById('eqSub').innerHTML = '标普 500 同期 <span class="' + DSH.cls(br) + '">' +
       DSH.pct(br) + '</span> ｜ 超额 ' + DSH.pct(r - br) + ' ｜ ' + eq.points.length + ' 个交易日 ›';
-    document.getElementById('eqSpark').innerHTML = DSH.spark(eq.points.map(p => ({ y: p.s })), { w: 260, h: 58 });
+    let pk = 0;
+    const dds = eq.points.map(p => { pk = Math.max(pk, p.s); return { d: p.d, y: p.s / pk - 1 }; });
+    const tail = eq.points.slice(-120), tailDd = dds.slice(-120);
+    document.getElementById('eqSpark').innerHTML = DSH.combo(
+      tail.map(p => ({ d: p.d, y: p.s - 1 })), tailDd,
+      { bench: tail.map(p => ({ d: p.d, y: p.b - 1 })), h: 120 });
   }
 
   /* ---- 下一步 ---- */
