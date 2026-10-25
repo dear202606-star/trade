@@ -106,6 +106,34 @@ def copy_site():
     return n
 
 
+
+NAV_BAR = """<div style="position:sticky;top:0;z-index:50;background:#0b0f17f2;border-bottom:1px solid #232f44;">
+<div style="max-width:1180px;margin:0 auto;padding:0 22px;display:flex;align-items:center;gap:4px;height:56px;
+font-family:'Microsoft YaHei',system-ui,sans-serif;">
+<a href="index.html" style="font-weight:800;color:#e8eef8;text-decoration:none;margin-right:18px;font-size:15px;">LEADER<span style="color:#ffc857;">·</span>QUANT</a>
+<a href="index.html" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;text-decoration:none;font-size:14px;">总览</a>
+<a href="portfolio.html" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;text-decoration:none;font-size:14px;">我的持仓</a>
+<a href="plan.html" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;text-decoration:none;font-size:14px;">行动计划</a>
+<a href="signals.html" style="padding:6px 12px;border-radius:9px;background:#182233;color:#ffc857;text-decoration:none;font-size:14px;font-weight:700;">信号看板</a>
+<a href="analysis.html" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;text-decoration:none;font-size:14px;">数据质量</a>
+<a href="report.html" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;text-decoration:none;font-size:14px;">策略报告</a>
+</div></div>"""
+
+
+def inject_nav(path):
+    try:
+        with open(path, encoding="utf-8") as f:
+            html = f.read()
+        if "LEADER" in html.split("<body")[0]:
+            return
+        i = html.find("<body")
+        j = html.find(">", i) + 1
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(html[:j] + NAV_BAR + html[j:])
+    except Exception as e:
+        print("WARN: 导航注入失败", e)
+
+
 def main():
     hist = []
     if os.path.exists(HIST):
@@ -140,6 +168,8 @@ def main():
         f.write(build_report(hist))
 
     dashboard.build(hist, os.path.join(DOCS, "signals.html"))
+    inject_nav(os.path.join(DOCS, "signals.html"))
+    inject_nav(os.path.join(DOCS, "report.html"))
 
     for fn in ("策略模型研究与行动步骤.pdf", "策略模型研究与行动步骤.xlsx"):
         s = os.path.join(BASE, "output", fn)
