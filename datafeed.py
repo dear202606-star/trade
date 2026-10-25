@@ -136,3 +136,21 @@ def load_sector():
         return dict(zip(sp["Symbol"], sp["GICS Sector"])), dict(zip(sp["Symbol"], sp["Security"]))
     except Exception:
         return {}, {}
+
+
+def prefetch(tickers, workers=8):
+    """并行预热：CI 里没有本地缓存时，把 500 只票的抓取从串行 5 分钟压到 ~40 秒"""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    todo = [t for t in tickers if t not in _mem]
+    if not todo:
+        return 0
+    n = 0
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        futs = {ex.submit(load_bars, t): t for t in todo}
+        for fu in as_completed(futs):
+            try:
+                if fu.result():
+                    n += 1
+            except Exception:
+                pass
+    return n

@@ -189,6 +189,7 @@ def main():
     if not sector:
         print("WARN: 行业表不可用，按等权处理", file=sys.stderr)
 
+    datafeed.prefetch(sorted(m["ticker"].unique().tolist()) + ["SPY"], workers=8)
     spy = load_bars("SPY")
     years, prev_set = [], None
     for y in range(2010, 2026):

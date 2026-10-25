@@ -4,23 +4,24 @@ on:
   schedule:
     # 盘中：美股 13:30–21:00 UTC，每 30 分钟（= 北京 21:30–05:00）
     - cron: "*/30 13-21 * * 1-5"
-    # 收盘快照：22:30 UTC = 北京 06:30（拿到当日最终收盘价）
+    # 收盘快照：22:30 UTC = 北京 06:30（当日最终收盘价）
     - cron: "30 22 * * 1-5"
     # 兜底刷新：11:00 UTC = 北京 19:00（保证 20:00 前一定是最新）
     - cron: "0 11 * * 1-5"
-    # 周末补一次，避免周一开盘前数据过旧
+    # 周末补一次
     - cron: "0 2 * * 6"
   workflow_dispatch:
   push:
     branches: [main]
     paths:
       - quotes.py
-      - site_build.py
-      - site_src/**
-      - datafeed.py
-      - selftest.py
-      - strategy_history.py
       - equity.py
+      - strategy_history.py
+      - datafeed.py
+      - site_build.py
+      - selftest.py
+      - runner.py
+      - site_src/**
       - .github/workflows/quotes.yml
 
 permissions:
@@ -28,11 +29,10 @@ permissions:
   pages: write
   id-token: write
 
-
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
 
@@ -42,7 +42,8 @@ jobs:
           cache: pip
           cache-dependency-path: requirements.txt
 
-      - run: pip install -r requirements.txt
+      - name: 安装依赖
+        run: pip install -r requirements.txt
 
       - name: 抓取行情
         run: python runner.py quotes.py
@@ -55,20 +56,20 @@ jobs:
         continue-on-error: true
         run: python runner.py strategy_history.py
 
+      - name: 构建站点
+        run: python runner.py site_build.py
+
+      - name: 部署前自检
+        run: python runner.py selftest.py
+
       - name: 提交状态日志
         if: always()
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -f output/pipeline_status.json
-          git diff --staged --quiet || git commit -m "chore: 流水线状态 18:15"
+          git diff --staged --quiet || git commit -m "chore: 流水线状态 $(date -u +%H:%M)"
           git push || true
-
-      - name: 构建站点
-        run: python runner.py site_build.py
-
-      - name: 部署前自检（数据不全就不部署）
-        run: python runner.py selftest.py
 
       - name: 上传 Pages 产物
         uses: actions/upload-pages-artifact@v3
