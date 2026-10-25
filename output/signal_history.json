@@ -1,7 +1,7 @@
 [
   {
     "month": "2026-10",
-    "date": "2026-10-24",
+    "date": "2026-10-25",
     "official_month": "2025-12",
     "trend": "满仓",
     "exposure": 1.0,
@@ -19,10 +19,10 @@
       },
       {
         "rank": 2,
-        "ticker": "MU",
-        "name": "Micron Technology",
+        "ticker": "WDC",
+        "name": "Western Digital",
         "sector": "Information Technology",
-        "ret12": 2.3913,
+        "ret12": 2.8221,
         "weight": 0.3
       },
       {
@@ -134,7 +134,7 @@
     },
     "track_records": [
       {
-        "date": "2026-10-24",
+        "date": "2026-10-25",
         "month": "2026-10",
         "picks": [
           {
@@ -143,9 +143,9 @@
             "px": 756.17
           },
           {
-            "ticker": "MU",
+            "ticker": "WDC",
             "weight": 0.3,
-            "px": 877.55
+            "px": 343.67
           },
           {
             "ticker": "HOOD",
