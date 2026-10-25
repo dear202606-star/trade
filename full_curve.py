@@ -17,7 +17,9 @@ import pandas as pd
 
 import datafeed
 
-OUT = os.path.join("docs", "data", "curve.json")
+BASE = os.path.dirname(os.path.abspath(__file__))
+
+OUT = os.path.join(BASE, "docs", "data", "curve.json")
 FINAL_N = 3
 MIN_PRICE = 5.0
 SECTOR_CAP = 0.60
@@ -67,7 +69,7 @@ def main():
 
     # 复用冻结的选股快照，保证曲线与分年记录完全一致
     frozen = {}
-    _fp = os.path.join("output", "backtest_picks.json")
+    _fp = os.path.join(BASE, "output", "backtest_picks.json")
     if os.path.exists(_fp):
         try:
             frozen = {int(k): v for k, v in

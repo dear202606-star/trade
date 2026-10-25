@@ -99,7 +99,7 @@ def main():
     cv = load("curve.json")
     check(cv and len(cv.get("points") or []) >= 120,
           "全周期曲线 %d 个月" % len((cv or {}).get("points") or []),
-          "curve.json 缺失或过短")
+          "curve.json 缺失或过短（%s）" % os.path.join(DATA, "curve.json"))
 
     # C. 新鲜度
     if q and q.get("ts"):
