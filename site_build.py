@@ -184,7 +184,7 @@ def main():
             shutil.copy2(s, os.path.join(DOCS, fn))
 
     print(f"站点已构建：{n} 个静态文件 → {DOCS}")
-    print("  index / portfolio / plan / about / signals / report")
+    print("  index / portfolio / strategy / signals / report")
     print(f"  数据：signal.json history.json quality.json（{len(hist)} 期信号）")
 
 

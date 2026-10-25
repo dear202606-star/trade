@@ -18,6 +18,9 @@ on:
       - quotes.py
       - equity.py
       - strategy_history.py
+      - datafeed.py
+      - selftest.py
+      - verify_champions.py
       - dashboard.py
       - site_build.py
       - report_live.py
@@ -78,6 +81,9 @@ jobs:
         continue-on-error: true
         timeout-minutes: 8
         run: python survivorship.py --probe || echo "审计跳过"
+
+      - name: 部署前自检（数据不全就不部署）
+        run: python selftest.py
 
       - name: 上传 Pages 产物
         if: steps.pick.outcome == 'success'

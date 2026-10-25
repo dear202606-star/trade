@@ -218,6 +218,13 @@ def main():
 
     print(f"      成功 {len(data)-1} / 失败 {len(fail)}", flush=True)
     market_data.save_splits()
+    try:
+        import datafeed
+        sz = datafeed.save_panel(data)
+        print(f"      面板已导出 {sz/1048576:.1f} MB（供净值/逐年记录复用）", flush=True)
+    except Exception as e:
+        print(f"WARN: 面板导出失败 {e}", flush=True)
+
     print(f"      数据质量 {market_data.STATS}", flush=True)
     if market_data.QUARANTINE:
         print(f"      两源不一致已隔离 {len(market_data.QUARANTINE)} 只: "

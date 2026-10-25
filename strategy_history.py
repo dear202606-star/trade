@@ -17,6 +17,8 @@ import sys
 
 import pandas as pd
 
+import datafeed
+
 BASE = os.path.dirname(os.path.abspath(__file__))
 CACHE = os.path.join(BASE, "data", "sina2")
 MEMBERS = os.path.join(BASE, "data", "sp500_ticker_start_end.csv")
@@ -29,15 +31,8 @@ SECTOR_CAP = 0.60
 
 
 def load_bars(t):
-    p = os.path.join(CACHE, t + ".json")
-    if not os.path.exists(p):
-        return None
-    try:
-        d = json.load(open(p, encoding="utf-8"))
-        bars = d.get("bars") or []
-        return {b[0]: (b[1], b[2]) for b in bars} if bars else None
-    except Exception:
-        return None
+    import datafeed
+    return datafeed.load_bars(t)
 
 
 def ret_12m(bars, ym):
@@ -179,26 +174,9 @@ def main():
     m = pd.read_csv(MEMBERS)
     m["start_date"] = m["start_date"].astype(str)
     m["end_date"] = m["end_date"].fillna("2099-12-31").astype(str)
-    sector, name_map = {}, {}
-    try:
-        if os.path.exists(SP500):
-            sp = pd.read_csv(SP500)
-        else:
-            import requests
-            from io import StringIO
-            r = requests.get(
-                "https://raw.githubusercontent.com/fja05680/sp500/master/sp500.csv",
-                headers={"User-Agent": "Mozilla/5.0"}, timeout=25)
-            sp = pd.read_csv(StringIO(r.text))
-        sector = dict(zip(sp["Symbol"], sp["GICS Sector"]))
-        name_map = dict(zip(sp["Symbol"], sp["Security"]))
-    except Exception as e:
-        print("WARN: 行业表不可用，按等权处理：" + str(e)[:60], file=sys.stderr)
-        try:
-            u = pd.read_csv("data/universe_all.csv")
-            name_map = dict(zip(u["ticker"], u["secname"]))
-        except Exception:
-            pass
+    sector, name_map = datafeed.load_sector()
+    if not sector:
+        print("WARN: 行业表不可用，按等权处理", file=sys.stderr)
 
     spy = load_bars("SPY")
     years, prev_set = [], None

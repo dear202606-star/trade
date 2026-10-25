@@ -17,6 +17,10 @@ on:
       - quotes.py
       - site_build.py
       - site_src/**
+      - datafeed.py
+      - selftest.py
+      - strategy_history.py
+      - equity.py
       - .github/workflows/quotes.yml
 
 permissions:
@@ -47,8 +51,15 @@ jobs:
         continue-on-error: true
         run: python equity.py
 
+      - name: 生成逐年记录
+        continue-on-error: true
+        run: python strategy_history.py
+
       - name: 构建站点
         run: python site_build.py
+
+      - name: 部署前自检（数据不全就不部署）
+        run: python selftest.py
 
       - name: 上传 Pages 产物
         uses: actions/upload-pages-artifact@v3
