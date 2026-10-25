@@ -45,21 +45,30 @@ jobs:
       - run: pip install -r requirements.txt
 
       - name: 抓取行情
-        run: python quotes.py
+        run: python runner.py quotes.py
 
       - name: 计算策略净值
         continue-on-error: true
-        run: python equity.py
+        run: python runner.py equity.py
 
       - name: 生成逐年记录
         continue-on-error: true
-        run: python strategy_history.py
+        run: python runner.py strategy_history.py
+
+      - name: 提交状态日志
+        if: always()
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f output/pipeline_status.json
+          git diff --staged --quiet || git commit -m "chore: 流水线状态 18:15"
+          git push || true
 
       - name: 构建站点
-        run: python site_build.py
+        run: python runner.py site_build.py
 
       - name: 部署前自检（数据不全就不部署）
-        run: python selftest.py
+        run: python runner.py selftest.py
 
       - name: 上传 Pages 产物
         uses: actions/upload-pages-artifact@v3

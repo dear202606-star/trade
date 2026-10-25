@@ -58,32 +58,32 @@ jobs:
 
       - name: 运行选股与排名
         id: pick
-        run: python monthly_pick.py --workers 10
+        run: python runner.py monthly_pick.py --workers 10
 
       - name: 抓取行情快照
         continue-on-error: true
-        run: python quotes.py
+        run: python runner.py quotes.py
 
       - name: 计算策略净值
         continue-on-error: true
-        run: python equity.py
+        run: python runner.py equity.py
 
       - name: 生成逐年记录
         continue-on-error: true
-        run: python strategy_history.py
+        run: python runner.py strategy_history.py
 
       - name: 生成站点
         id: site
-        run: python site_build.py
+        run: python runner.py site_build.py
 
       - name: 生存者偏差审计（每周日跑一次，较慢）
         if: github.event_name == 'schedule' && github.event.schedule == '0 3 * * 0'
         continue-on-error: true
         timeout-minutes: 8
-        run: python survivorship.py --probe || echo "审计跳过"
+        run: python runner.py survivorship.py --probe || echo "审计跳过"
 
       - name: 部署前自检（数据不全就不部署）
-        run: python selftest.py
+        run: python runner.py selftest.py
 
       - name: 上传 Pages 产物
         if: steps.pick.outcome == 'success'
@@ -99,6 +99,7 @@ jobs:
           git add output/current_picks.csv output/current_picks_full.csv \
                   output/monthly output/signal_history.json output/dashboard.html \
                   output/track_record.json output/survivorship.json output/survivorship.md \
+                  output/pipeline_status.json \
                   "output/排名策略对比.html" "output/策略模型研究与行动步骤.html" output/splits.json
           if git diff --staged --quiet; then
             echo "本期无变更，跳过提交"
