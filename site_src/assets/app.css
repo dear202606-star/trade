@@ -12,8 +12,10 @@
   --txt-2:#A9B6C9;
   --txt-3:#6F7D92;
   --gold:#F2C46B;
-  --green:#3BD68A;
-  --red:#FF6B72;
+  --up:#FF6B72;      /* 涨=红 */
+  --down:#3BD68A;    /* 跌=绿 */
+  --green:#FF6B72;   /* 兼容旧名：语义改为「上涨」 */
+  --red:#3BD68A;     /* 兼容旧名：语义改为「下跌」 */
   --blue:#5B9DFF;
   --r-lg:20px; --r:14px; --r-sm:10px;
   --ease:cubic-bezier(.4,0,.2,1);
@@ -182,7 +184,7 @@ tr:last-child td{border-bottom:none}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;
   font-size:12.5px;font-weight:700}
 .pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
-.pill.on{background:rgba(59,214,138,.13);color:var(--green)}
+.pill.on{background:rgba(242,196,107,.13);color:var(--gold)}
 .pill.off{background:rgba(255,171,107,.13);color:#FFAB6B}
 .chip{display:inline-flex;align-items:center;padding:5px 11px;border-radius:8px;
   background:var(--surface-2);border:1px solid var(--line);font-size:12.5px;font-weight:600}

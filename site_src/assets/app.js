@@ -208,7 +208,7 @@
     });
     area = d + "L" + X(pts.length - 1).toFixed(1) + " " + (h - pad) + "L" + X(0).toFixed(1) + " " + (h - pad) + "Z";
     const up = ys[ys.length - 1] >= ys[0];
-    const col = opts.color || (up ? "#3BD68A" : "#FF6B72");
+    const col = opts.color || (up ? "#FF6B72" : "#3BD68A");   // 红涨绿跌
     const id = "g" + Math.random().toString(36).slice(2, 8);
     return '<svg viewBox="0 0 ' + w + " " + h + '" preserveAspectRatio="none" style="width:100%;height:' + h + 'px;display:block">' +
       '<defs><linearGradient id="' + id + '" x1="0" y1="0" x2="0" y2="1">' +
@@ -373,7 +373,7 @@
     let d3 = '';
     dd.forEach((p, i) => { d3 += (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y2(p.y).toFixed(1); });
     d3 += 'L' + X(dd.length - 1).toFixed(1) + ' ' + Y2(0).toFixed(1) + 'L' + X(0).toFixed(1) + ' ' + Y2(0).toFixed(1) + 'Z';
-    svg += '<path d="' + d3 + '" fill="rgba(255,107,114,.16)" stroke="#FF6B72" stroke-width="1.2"/>';
+    svg += '<path d="' + d3 + '" fill="rgba(59,214,138,.13)" stroke="#3BD68A" stroke-width="1.2"/>';
     svg += '<text x="' + L + '" y="' + (T + H1 + GAP - 3) + '" fill="#6F7D92" font-size="10.5">回撤 ' + (dmin * 100).toFixed(0) + '%</text>';
     // X 轴
     const step = Math.max(1, Math.floor(n / 6));
@@ -394,7 +394,7 @@
         if (opts.bench) {
           s += tipRow("#6F7D92", opts.bName || "标普 500", (opts.bench[i].y * 100).toFixed(1) + "%");
         }
-        if (dd[i]) s += tipRow("#FF6B72", "回撤", (dd[i].y * 100).toFixed(1) + "%");
+        if (dd[i]) s += tipRow("#3BD68A", "回撤", (dd[i].y * 100).toFixed(1) + "%");
         return s;
       },
     };
