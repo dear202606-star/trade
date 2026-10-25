@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LEADER QUANT · 总览</title>
+<link rel="stylesheet" href="assets/app.css">
+<script src="assets/app.js"></script>
+</head><body>
+<script>DSH.boot();</script>
+<div class="wrap">
+
+  <h1>美股排名动量 · 总览</h1>
+  <div class="sub">每年 12 月末买入过去 12 个月涨幅前 3 名，全年持有；标普 500 跌破 10 月均线时仓位减半。</div>
+
+  <!-- 策略信号 -->
+  <div class="hero" id="hero">
+    <div class="row" style="gap:34px">
+      <div><div class="k">最新信号</div><div class="v gold" id="sMonth">—</div></div>
+      <div><div class="k">大盘开关</div><div class="v" id="sTrend">—</div></div>
+      <div><div class="k">目标仓位</div><div class="v" id="sExp">—</div></div>
+      <div><div class="k">正式持仓</div><div class="v sm" id="sPicks">—</div></div>
+      <div class="spacer"></div>
+      <div style="text-align:right"><a href="plan.html" class="btn primary">看行动计划 →</a></div>
+    </div>
+    <div class="s" id="sAction" style="margin-top:12px">加载中…</div>
+  </div>
+
+  <!-- 关键指标 -->
+  <div class="grid g4" style="margin-top:16px">
+    <div class="card"><div class="k">策略年化（回测 17 年）</div><div class="v gold">29.4%</div><div class="s">前 3 名 + 趋势减仓</div></div>
+    <div class="card"><div class="k">最大回撤</div><div class="v red">−32.5%</div><div class="s">18 年里 17 年赚钱</div></div>
+    <div class="card"><div class="k">标普 500 同期</div><div class="v">12.7%</div><div class="s">每年多赚 16.7 个百分点</div></div>
+    <div class="card"><div class="k">数据源一致率</div><div class="v green" id="qRate">—</div><div class="s" id="qSub">两源交叉核对</div></div>
+  </div>
+
+  <!-- 我的组合 -->
+  <h2>我的组合</h2>
+  <div id="myBox">
+    <div class="card" id="emptyBox">
+      <div class="k">还没有录入持仓</div>
+      <div style="margin:8px 0 14px;color:var(--dim)">填入总资金和已买入的股票，这里就会实时显示每只票的市值、盈亏和整体情况。</div>
+      <a class="btn primary" href="portfolio.html">去录入持仓 →</a>
+    </div>
+    <div id="filledBox" class="hidden">
+      <div class="grid g4">
+        <div class="card"><div class="k">总市值</div><div class="v" id="mMv">—</div><div class="s" id="mCash"></div></div>
+        <div class="card"><div class="k">累计盈亏</div><div class="v" id="mPnl">—</div><div class="s" id="mPnlPct"></div></div>
+        <div class="card"><div class="k">今日盈亏</div><div class="v" id="mDay">—</div><div class="s" id="mDayPct"></div></div>
+        <div class="card"><div class="k">持仓数</div><div class="v" id="mCount">—</div><div class="s">点击查看明细</div></div>
+      </div>
+      <div style="margin-top:14px"><a class="btn" href="portfolio.html">查看持仓明细 →</a></div>
+    </div>
+  </div>
+
+  <!-- 本期持仓 -->
+  <h2>本期正式持仓</h2>
+  <div id="official"></div>
+
+  <div class="foot">数据：新浪财经日线 + 官方拆股表（两源交叉核对）｜ 行情每 30 分钟刷新 ｜ 仅供研究，不构成投资建议。</div>
+</div>
+
+<script>
+(async function(){
+  const sig = await DSH.json('signal', null);
+  const q = await DSH.json('quotes', {});
+  const qual = await DSH.json('quality', null);
+
+  if (sig) {
+    document.getElementById('sMonth').textContent = sig.month;
+    const on = sig.trend === '满仓';
+    document.getElementById('sTrend').innerHTML = '<span class="pill ' + (on?'on':'off') + '">' + DSH.esc(sig.trend) + '</span>';
+    document.getElementById('sExp').textContent = (sig.exposure*100).toFixed(0) + '%';
+    const off = sig.official || sig.picks || [];
+    document.getElementById('sPicks').innerHTML = off.map(p =>
+      '<span class="pill tag">' + DSH.esc(p.ticker) + ' ' + (p.weight*100).toFixed(0) + '%</span>').join(' ');
+    document.getElementById('sAction').textContent = sig.action || '';
+
+    const maxR = Math.max(...off.map(p=>p.ret12), .01);
+    document.getElementById('official').innerHTML =
+      '<table><thead><tr><th>#</th><th>代码</th><th>公司</th><th>行业</th>' +
+      '<th class="num">基准涨幅</th><th class="num">策略内权重</th><th class="num">占总资产</th><th style="width:120px">强度</th></tr></thead><tbody>' +
+      off.map(p=>{
+        const cur = q && q.quotes && q.quotes[p.ticker];
+        return '<tr><td>' + p.rank + '</td><td class="tk">' + DSH.esc(p.ticker) + '</td><td>' + DSH.esc(p.name) + '</td>' +
+          '<td>' + DSH.esc(p.sector) + '</td>' +
+          '<td class="num pos">' + DSH.pct(p.ret12,0) + '</td>' +
+          '<td class="num">' + (p.weight*100).toFixed(0) + '%</td>' +
+          '<td class="num"><b>' + (p.weight*sig.exposure*30).toFixed(1) + '%</b></td>' +
+          '<td><div class="spark"><i style="width:' + Math.max(6,p.ret12/maxR*100) + '%"></i></div></td></tr>';
+      }).join('') + '</tbody></table>' +
+      '<div class="note">正式持仓按 <b>' + DSH.esc(sig.official_month||'—') + '</b> 的排名锁定，本年度有效；每年 12 月最后一个交易日换仓。</div>';
+  }
+
+  if (qual && qual.total) {
+    const rate = (qual.total - qual.bad) / qual.total;
+    document.getElementById('qRate').textContent = (rate*100).toFixed(1) + '%';
+    document.getElementById('qRate').className = 'v ' + (rate >= .95 ? 'green' : 'red');
+    document.getElementById('qSub').textContent = '一致 ' + (qual.total-qual.bad) + '/' + qual.total + '，隔离 ' + qual.bad + ' 只';
+  } else {
+    document.getElementById('qRate').textContent = '—';
+  }
+
+  // 我的组合
+  const pf = DSH.load();
+  if (pf.rows.length) {
+    document.getElementById('emptyBox').classList.add('hidden');
+    document.getElementById('filledBox').classList.remove('hidden');
+    const c = DSH.compute(pf, q.quotes || {}, q.fx);
+    document.getElementById('mMv').textContent = DSH.money(c.mv, pf.cur);
+    document.getElementById('mCash').textContent = '现金 ' + DSH.money(c.cash, pf.cur) + ' ｜ 总资产 ' + DSH.money(c.total, pf.cur);
+    const p = document.getElementById('mPnl');
+    p.textContent = DSH.money(c.pnl, pf.cur);
+    p.className = 'v ' + DSH.cls(c.pnl);
+    document.getElementById('mPnlPct').textContent = DSH.pct(c.pnlPct);
+    const d = document.getElementById('mDay');
+    d.textContent = DSH.money(c.dayPnl, pf.cur);
+    d.className = 'v ' + DSH.cls(c.dayPnl);
+    document.getElementById('mDayPct').textContent = DSH.pct(c.dayPct);
+    document.getElementById('mCount').textContent = c.rows.length;
+  }
+})();
+</script>
+</body></html>

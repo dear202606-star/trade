@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LEADER QUANT · 数据质量</title>
+<link rel="stylesheet" href="assets/app.css">
+<script src="assets/app.js"></script>
+</head><body>
+<script>DSH.boot();</script>
+<div class="wrap">
+
+  <h1>数据质量与回测</h1>
+  <div class="sub">同一套规则，换数据源必须给同一答案。这里是每次核对的实测结果。</div>
+
+  <div class="grid g4">
+    <div class="card"><div class="k">两源一致率</div><div class="v green" id="rate">—</div><div class="s" id="rateSub">门槛 95%</div></div>
+    <div class="card"><div class="k">两源均可取</div><div class="v" id="total">—</div><div class="s">只</div></div>
+    <div class="card"><div class="k">已隔离</div><div class="v gold" id="bad">—</div><div class="s">不参与排名</div></div>
+    <div class="card"><div class="k">行情快照</div><div class="v sm" id="qts">—</div><div class="s" id="qcnt"></div></div>
+  </div>
+
+  <h2>怎么保证一致</h2>
+  <table>
+    <thead><tr><th style="width:190px">环节</th><th>做法</th></tr></thead>
+    <tbody>
+      <tr><td>复权口径</td><td>统一「仅拆股」。Yahoo 的 adjclose 含分红会抬高分红股收益，弃用</td></tr>
+      <tr><td>Yahoo close 语义</td><td>实测它已是前复权（KLAC 10:1 拆股后，拆股前月份显示 192 而非 1920），因此不再二次复权</td></tr>
+      <tr><td>新浪价格</td><td>原始价 × Yahoo 权威拆股表 = 后复权，与 Yahoo 只差一个常数，收益完全一致</td></tr>
+      <tr><td>符号格式</td><td>BRK.B ↔ BRK-B 自动转换</td></tr>
+      <tr><td>拆股表</td><td>入库共享（output/splits.json，502 只），本地与 CI 用同一张表</td></tr>
+      <tr><td>核对方法</td><td>比较最近 13 个月的月度收益序列，累计差 ≤1.5%、单月差 ≤2%</td></tr>
+      <tr><td>不达标处理</td><td>隔离该票不参与排名；一致率 &lt;95% 时 CI 直接失败并发 Issue 告警</td></tr>
+    </tbody>
+  </table>
+
+  <h2>隔离清单</h2>
+  <div id="badList"><div class="note">未发现隔离标的（或尚未核对）。</div></div>
+
+  <h2>回测结论（2009–2025，月度，0.2% 单边成本）</h2>
+  <table>
+    <thead><tr><th>模型</th><th class="num">年化</th><th class="num">最大回撤</th><th class="num">赚钱年数</th><th class="num">跑赢指数</th><th>评价</th></tr></thead>
+    <tbody>
+      <tr><td>只买第 1 名</td><td class="num">37.2%</td><td class="num neg">−60.7%</td><td class="num">14/18</td><td class="num">11/18</td><td>刺激但危险</td></tr>
+      <tr><td>前 1+2 名</td><td class="num">32.5%</td><td class="num neg">−55.9%</td><td class="num">16/18</td><td class="num">14/18</td><td>★★★★</td></tr>
+      <tr><td>前 3 名</td><td class="num">33.2%</td><td class="num neg">−44.6%</td><td class="num">17/18</td><td class="num">14/18</td><td>收益最高</td></tr>
+      <tr style="background:#16202e"><td><b>前 3 名 + 趋势减仓</b></td><td class="num pos"><b>29.4%</b></td><td class="num neg"><b>−32.5%</b></td><td class="num"><b>17/18</b></td><td class="num">13/18</td><td><b class="pos">首选</b></td></tr>
+      <tr><td>前 5 名</td><td class="num">22.8%</td><td class="num neg">−39.7%</td><td class="num">15/18</td><td class="num">13/18</td><td>★★★★</td></tr>
+      <tr><td>前 10 名</td><td class="num">20.0%</td><td class="num neg">−31.8%</td><td class="num">14/18</td><td class="num">11/18</td><td>太保守</td></tr>
+      <tr><td>标普 500</td><td class="num">12.7%</td><td class="num neg">−24.8%</td><td class="num">14/18</td><td class="num">0/18</td><td>基准</td></tr>
+    </tbody>
+  </table>
+
+  <h2>生存者偏差</h2>
+  <table>
+    <thead><tr><th>年份</th><th class="num">2008</th><th class="num">2010</th><th class="num">2012</th><th class="num">2015</th><th class="num">2021+</th></tr></thead>
+    <tbody><tr><td>行情覆盖率</td><td class="num">93.0%</td><td class="num">96.0%</td><td class="num">98.6%</td><td class="num">99.6%</td><td class="num">100%</td></tr></tbody>
+  </table>
+  <div class="note">累计仅缺 38 只，主要是雷曼、贝尔斯登、华盛顿互惠等 2008–2010 倒闭的金融股（当年的大输家），对「选出赢家」的影响小于 1 个百分点。</div>
+
+  <div class="foot">核对由 GitHub Actions 每月自动执行，结果写入 output/data_quality.md。</div>
+</div>
+
+<script>
+(async function(){
+  const q = await DSH.json('quality', null);
+  const qt = await DSH.json('quotes', {});
+  if (q && q.total) {
+    const rate = (q.total - q.bad) / q.total;
+    const el = document.getElementById('rate');
+    el.textContent = (rate*100).toFixed(1) + '%';
+    el.className = 'v ' + (rate >= .95 ? 'green' : 'red');
+    document.getElementById('rateSub').textContent = '门槛 95% ｜ 一致 ' + (q.total-q.bad) + '/' + q.total;
+    document.getElementById('total').textContent = q.total;
+    document.getElementById('bad').textContent = q.bad;
+    const rows = (q.rows || []).filter(r => !r.ok);
+    if (rows.length) {
+      document.getElementById('badList').innerHTML =
+        '<table><thead><tr><th>代码</th><th class="num">共同月份</th><th class="num">单月最大差</th><th class="num">12月累计差</th></tr></thead><tbody>' +
+        rows.map(r => '<tr><td class="tk">' + DSH.esc(r.ticker) + '</td><td class="num">' + r.common_months +
+          '</td><td class="num">' + (r.month_diff!=null ? (r.month_diff*100).toFixed(2)+'%' : '—') +
+          '</td><td class="num">' + (r.ret_diff!=null ? (r.ret_diff*100).toFixed(2)+'%' : '—') + '</td></tr>').join('') +
+        '</tbody></table><div class="note warn">这些标的是公司行为（分拆上市、换股）导致两源编码不同，已隔离不参与排名。</div>';
+    }
+  } else {
+    document.getElementById('rate').textContent = '—';
+  }
+  if (qt && qt.ts_local) {
+    document.getElementById('qts').textContent = qt.ts_local;
+    document.getElementById('qcnt').textContent = '覆盖 ' + qt.count + ' 只 ｜ 汇率 ' + (qt.fx||'—');
+  }
+})();
+</script>
+</body></html>

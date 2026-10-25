@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LEADER QUANT · 我的持仓</title>
+<link rel="stylesheet" href="assets/app.css">
+<script src="assets/app.js"></script>
+</head><body>
+<script>DSH.boot();</script>
+<div class="wrap">
+
+  <h1>我的持仓</h1>
+  <div class="sub">录入总资金与买入记录，自动按最新行情计算市值、盈亏、占比。数据只存在你自己的浏览器里，不上传任何服务器。</div>
+
+  <!-- 资金设置 -->
+  <div class="card">
+    <div class="row">
+      <div style="width:200px"><label>总投入资金</label><input class="num-in" id="capital" type="number" min="0" step="1000" placeholder="例如 300000"></div>
+      <div style="width:130px"><label>币种</label>
+        <select id="cur"><option value="USD">USD 美元</option><option value="CNY">CNY 人民币</option></select></div>
+      <div class="spacer"></div>
+      <div class="row" style="gap:8px">
+        <button class="btn" id="btnFromSignal">按策略持仓填入</button>
+        <button class="btn" id="btnAdd">+ 添加一行</button>
+        <button class="btn primary" id="btnSave">保存</button>
+        <button class="btn ghost" id="btnExport">导出</button>
+        <button class="btn ghost" id="btnImport">导入</button>
+        <button class="btn danger ghost" id="btnClear">清空</button>
+      </div>
+    </div>
+    <div class="hint" id="hint">提示：股数支持小数（如 0.5 股）；成本价留空则按现价填入。</div>
+  </div>
+
+  <!-- 总览 -->
+  <div class="grid g4" style="margin-top:16px">
+    <div class="card"><div class="k">总市值</div><div class="v" id="tMv">—</div><div class="s" id="tCash"></div></div>
+    <div class="card"><div class="k">累计盈亏</div><div class="v" id="tPnl">—</div><div class="s" id="tPnlPct"></div></div>
+    <div class="card"><div class="k">今日盈亏</div><div class="v" id="tDay">—</div><div class="s" id="tDayPct"></div></div>
+    <div class="card"><div class="k">仓位</div><div class="v" id="tPos">—</div><div class="s" id="tPosSub"></div></div>
+  </div>
+
+  <!-- 明细 -->
+  <h2>持仓明细</h2>
+  <div id="table"></div>
+  <div class="note" id="alertBox" style="display:none"></div>
+
+  <div class="foot">行情来自新浪财经（延后约 15 分钟），每 30 分钟自动刷新 ｜ 盈亏不含手续费与汇率损益 ｜ 仅供研究，不构成投资建议。</div>
+</div>
+
+<script>
+let PF = DSH.load();
+let Q = { quotes:{}, fx: 7.1 };
+let SIG = null;
+
+const $ = (id) => document.getElementById(id);
+
+function render() {
+  // 设置区
+  $('capital').value = PF.capital || '';
+  $('cur').value = PF.cur || 'USD';
+
+  if (!PF.rows.length) {
+    $('table').innerHTML = '<div class="card"><div class="k">暂无持仓</div>' +
+      '<div style="margin:8px 0 14px;color:var(--dim)">点「按策略持仓填入」可以一键生成当前策略的 3 只票，再改股数即可。</div></div>';
+    ['tMv','tPnl','tDay','tPos'].forEach(i => $(i).textContent = '—');
+    ['tCash','tPnlPct','tDayPct','tPosSub'].forEach(i => $(i).textContent = '');
+    return;
+  }
+
+  const c = DSH.compute(PF, Q.quotes, Q.fx);
+  const cur = PF.cur;
+
+  let html = '<table><thead><tr>' +
+    '<th style="width:44px">#</th><th style="width:110px">代码</th><th>名称</th>' +
+    '<th class="num" style="width:110px">股数</th><th class="num" style="width:120px">成本价</th>' +
+    '<th class="num" style="width:110px">现价</th><th class="num" style="width:100px">今日</th>' +
+    '<th class="num" style="width:120px">市值</th><th class="num" style="width:120px">盈亏</th>' +
+    '<th class="num" style="width:90px">盈亏%</th><th class="num" style="width:90px">占比</th>' +
+    '<th style="width:110px">目标</th><th style="width:40px"></th></tr></thead><tbody>';
+
+  c.rows.forEach((r, i) => {
+    const target = targetWeight(r.ticker);
+    const dev = target != null ? (r.weight - target) : null;
+    const devTxt = dev == null ? '—' :
+      '<span class="' + (Math.abs(dev) < 0.03 ? 'flat' : dev > 0 ? 'neg' : 'pos') + '">' +
+      (dev > 0 ? '超配 ' : '低配 ') + Math.abs(dev*100).toFixed(1) + 'pt</span>';
+    html += '<tr>' +
+      '<td>' + (i+1) + '</td>' +
+      '<td><input value="' + DSH.esc(r.ticker) + '" data-i="' + i + '" data-f="ticker" style="padding:5px 7px;font-weight:700;color:var(--gold);font-family:Consolas,monospace;text-transform:uppercase"></td>' +
+      '<td style="font-size:12.5px;color:var(--dim)">' + DSH.esc(r.name || '') + '</td>' +
+      '<td><input class="num-in" type="number" step="0.0001" value="' + r.shares + '" data-i="' + i + '" data-f="shares"></td>' +
+      '<td><input class="num-in" type="number" step="0.01" value="' + r.cost + '" data-i="' + i + '" data-f="cost"></td>' +
+      '<td class="num">' + (r.hasQuote ? r.price.toFixed(2) : '—') + '</td>' +
+      '<td class="num ' + DSH.cls(r.dayPct) + '">' + (r.hasQuote ? DSH.pct(r.dayPct,1) : '—') + '</td>' +
+      '<td class="num">' + DSH.money(r.mv, cur) + '</td>' +
+      '<td class="num ' + DSH.cls(r.pnl) + '"><b>' + DSH.money(r.pnl, cur) + '</b></td>' +
+      '<td class="num ' + DSH.cls(r.pnlPct) + '">' + DSH.pct(r.pnlPct) + '</td>' +
+      '<td class="num">' + (r.weight*100).toFixed(1) + '%</td>' +
+      '<td style="font-size:11.5px">' + (target==null?'<span class="flat">—</span>':(target*100).toFixed(0)+'% <br>' + devTxt) + '</td>' +
+      '<td><button class="btn sm danger ghost" data-del="' + i + '">×</button></td>' +
+      '</tr>';
+  });
+  html += '</tbody></table>';
+  $('table').innerHTML = html;
+
+  $('tMv').textContent = DSH.money(c.mv, cur);
+  $('tCash').textContent = '现金 ' + DSH.money(c.cash, cur) + ' ｜ 总资产 ' + DSH.money(c.total, cur);
+  const p = $('tPnl'); p.textContent = DSH.money(c.pnl, cur); p.className = 'v ' + DSH.cls(c.pnl);
+  $('tPnlPct').textContent = DSH.pct(c.pnlPct) + ' ｜ 成本 ' + DSH.money(c.cost, cur);
+  const d = $('tDay'); d.textContent = DSH.money(c.dayPnl, cur); d.className = 'v ' + DSH.cls(c.dayPnl);
+  $('tDayPct').textContent = DSH.pct(c.dayPct);
+  const pos = PF.capital ? c.mv / PF.capital : 0;
+  $('tPos').textContent = (pos*100).toFixed(1) + '%';
+  $('tPosSub').textContent = '市值 / 总投入';
+
+  // 风险提示
+  const alerts = [];
+  if (PF.capital && pos > 1.02) alerts.push('持仓市值已超过总投入，说明有浮盈或未记录追加资金。');
+  if (c.rows.some(r => r.weight > 0.5)) alerts.push('单只占比超过 50%，集中度过高。');
+  if (c.rows.some(r => !r.hasQuote)) alerts.push('部分代码取不到行情，请检查拼写（美股用 . 或 -，如 BRK.B）。');
+  const box = $('alertBox');
+  if (alerts.length) { box.style.display=''; box.className='note warn'; box.innerHTML = alerts.map(a=>'· '+a).join('<br>'); }
+  else box.style.display='none';
+}
+
+function targetWeight(ticker) {
+  if (!SIG) return null;
+  const off = SIG.official || SIG.picks || [];
+  const hit = off.find(p => p.ticker === ticker);
+  if (!hit) return 0;
+  return hit.weight * SIG.exposure * 0.30;   // 策略仓位上限 30%
+}
+
+/* ---------- 事件 ---------- */
+document.addEventListener('input', (e) => {
+  const t = e.target;
+  if (t.dataset && t.dataset.f) {
+    const i = +t.dataset.i, f = t.dataset.f;
+    if (f === 'ticker') PF.rows[i].ticker = t.value.toUpperCase().trim();
+    else PF.rows[i][f] = parseFloat(t.value) || 0;
+    DSH.save(PF);
+    if (f === 'ticker') render(); else renderTotalsOnly();
+  }
+});
+
+function renderTotalsOnly() {
+  const c = DSH.compute(PF, Q.quotes, Q.fx);
+  $('tMv').textContent = DSH.money(c.mv, PF.cur);
+  $('tCash').textContent = '现金 ' + DSH.money(c.cash, PF.cur) + ' ｜ 总资产 ' + DSH.money(c.total, PF.cur);
+  const p = $('tPnl'); p.textContent = DSH.money(c.pnl, PF.cur); p.className = 'v ' + DSH.cls(c.pnl);
+  $('tPnlPct').textContent = DSH.pct(c.pnlPct) + ' ｜ 成本 ' + DSH.money(c.cost, PF.cur);
+  const d = $('tDay'); d.textContent = DSH.money(c.dayPnl, PF.cur); d.className = 'v ' + DSH.cls(c.dayPnl);
+  $('tDayPct').textContent = DSH.pct(c.dayPct);
+}
+
+document.addEventListener('click', (e) => {
+  const del = e.target.dataset && e.target.dataset.del;
+  if (del != null) { PF.rows.splice(+del, 1); DSH.save(PF); render(); }
+});
+
+$('capital').addEventListener('input', (e) => { PF.capital = parseFloat(e.target.value) || 0; DSH.save(PF); render(); });
+$('cur').addEventListener('change', (e) => { PF.cur = e.target.value; DSH.save(PF); render(); });
+$('btnAdd').onclick = () => { PF.rows.push({ ticker:'', shares:0, cost:0 }); DSH.save(PF); render(); };
+$('btnSave').onclick = () => { DSH.save(PF); $('hint').textContent = '已保存 ' + new Date().toLocaleTimeString(); };
+
+$('btnFromSignal').onclick = async () => {
+  const sig = SIG;
+  if (!sig) return;
+  const off = sig.official || sig.picks || [];
+  const cap = PF.capital || 300000;
+  const sleeve = cap * 0.30 * sig.exposure;
+  PF.rows = off.map(p => {
+    const price = (Q.quotes[p.ticker] || {}).p || (p.ret12 ? 100 : 100);
+    const amt = sleeve * p.weight;
+    return { ticker: p.ticker, shares: +(amt / price).toFixed(4), cost: price };
+  });
+  DSH.save(PF); render();
+  $('hint').textContent = '已按总资金 30% 仓位生成，可自行调整股数';
+};
+
+$('btnClear').onclick = () => {
+  if (!confirm('清空所有持仓和资金设置？')) return;
+  PF = { capital:0, cur:'USD', rows:[] }; DSH.save(PF); render();
+};
+
+$('btnExport').onclick = () => {
+  const blob = new Blob([JSON.stringify(PF, null, 2)], { type:'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'portfolio-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+};
+
+$('btnImport').onclick = () => {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json';
+  inp.onchange = () => {
+    const f = inp.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => { try { const d = JSON.parse(r.result); if (d.rows) { PF = d; DSH.save(PF); render(); } } catch(err){ alert('文件格式不对'); } };
+    r.readAsText(f);
+  };
+  inp.click();
+};
+
+/* ---------- 启动 ---------- */
+(async function () {
+  SIG = await DSH.json('signal', null);
+  Q = await DSH.json('quotes', { quotes:{}, fx: 7.1 });
+  render();
+})();
+</script>
+</body></html>

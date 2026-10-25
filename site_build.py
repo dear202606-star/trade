@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
-"""site_build.py — 把《排名策略对比》更新为「带实时数据」的版本，并发布到 GitHub Pages
+"""site_build.py — 构建整站到 docs/
 
-核心：output/排名策略对比.html 既是源文件也是成品。
-      每次运行只替换其中被标记的两块区域（幂等，不会重复注入）：
-        <!--LIVE:BEGIN--> ... <!--LIVE:END-->     顶部实时信号卡
-        <!--PICKS:BEGIN--> ... <!--PICKS:END-->   第七节「本期该买什么」
+流程：
+  1. 复制 site_src/*（页面、样式、脚本）→ docs/
+  2. 写数据文件 docs/data/{signal,history,quality}.json
+  3. 用 排名策略对比.html + 实时信号 → docs/report.html（含动态区块）
+  4. 生成 docs/signals.html（信号看板）
 
-产物：
-  output/排名策略对比.html              （原地更新，入库）
-  output/策略模型研究与行动步骤.html     （同内容副本）
-  docs/index.html                       （Pages 首页）
-  docs/signals.html                     （信号看板）
+注意：output/排名策略对比.html 仍是「源 + 成品」合一，只有报告页用到它。
 """
 import json
 import os
@@ -21,10 +18,12 @@ import dashboard
 import report_live
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-SRC = os.path.join(BASE, "output", "排名策略对比.html")
-COPY = os.path.join(BASE, "output", "策略模型研究与行动步骤.html")
+SRC_REPORT = os.path.join(BASE, "output", "排名策略对比.html")
 HIST = os.path.join(BASE, "output", "signal_history.json")
+QUAL = os.path.join(BASE, "output", "data_quality.json")
+SRC_SITE = os.path.join(BASE, "site_src")
 DOCS = os.path.join(BASE, "docs")
+DATA = os.path.join(DOCS, "data")
 
 LIVE_CSS = """<style>
 #live-bar{max-width:1040px;margin:26px auto 0;padding:0 8px;font-family:'Microsoft YaHei',sans-serif}
@@ -37,7 +36,6 @@ LIVE_CSS = """<style>
 #live-bar .off{background:#3a2018;color:#ffab6b}
 #live-bar .tk{display:inline-block;background:#1b2434;color:#ffd98a;border-radius:6px;padding:2px 9px;margin-right:6px;font-family:Consolas,monospace;font-weight:700;font-size:14px}
 #live-bar a{color:#4da3ff;font-size:13px;text-decoration:none}
-#live-bar a:hover{text-decoration:underline}
 #live-bar .u{font-size:11.5px;color:#6f8199;margin-top:10px}
 </style>"""
 
@@ -47,7 +45,7 @@ LIVE_HTML = """<div id="live-bar"><div class="box">
   <div><div class="k">大盘开关</div><div class="v"><span class="pill" id="lb-trend">—</span></div></div>
   <div><div class="k">正式持仓（年度锁定）</div><div class="v" id="lb-picks">—</div></div>
   <div><div class="k">建议仓位</div><div class="v" id="lb-exp">—</div></div>
-  <div style="margin-left:auto"><a href="signals.html">查看信号看板与历史 →</a></div>
+  <div style="margin-left:auto"><a href="index.html">← 返回总览</a></div>
 </div>
 <div class="u" id="lb-note">由 GitHub Actions 自动更新</div>
 </div></div>"""
@@ -63,9 +61,9 @@ LIVE_JS = """<script>
   document.getElementById('lb-picks').innerHTML = (r.official||r.picks).map(function(p){
     return '<span class="tk">'+p.ticker+' '+(p.weight*100).toFixed(0)+'%</span>';
   }).join('');
-  document.getElementById('lb-exp').textContent = (r.exposure*100).toFixed(0)+'%';
+  document.getElementById('lb-exp').textContent = (r.exp*100).toFixed(0)+'%';
   document.getElementById('lb-note').textContent =
-    (r.action ? r.action+' ｜ ' : '') + '生成于 '+r.date+' ｜ 共 '+h.length+' 期信号 ｜ 仅供研究，不构成投资建议';
+    (r.action ? r.action+' ｜ ' : '') + '生成于 '+r.date+' ｜ 仅供研究，不构成投资建议';
 })();
 </script>"""
 
@@ -74,7 +72,6 @@ B_PICK, E_PICK = "<!--PICKS:BEGIN-->", "<!--PICKS:END-->"
 
 
 def _replace(html, begin, end, block, anchor="<body>"):
-    """有标记就替换，没有就在 <body> 后插入一次（幂等）"""
     if begin in html:
         return re.sub(re.escape(begin) + r".*?" + re.escape(end),
                       lambda m: block, html, count=1, flags=re.S)
@@ -83,19 +80,30 @@ def _replace(html, begin, end, block, anchor="<body>"):
     return block + html
 
 
-def render(hist):
-    with open(SRC, encoding="utf-8") as f:
+def build_report(hist):
+    with open(SRC_REPORT, encoding="utf-8") as f:
         html = f.read()
-
     live = (B_LIVE + "\n" + LIVE_CSS + "\n" + LIVE_HTML + "\n"
             + LIVE_JS.replace("__DATA__", json.dumps(hist, ensure_ascii=False)) + "\n" + E_LIVE)
-
     if B_PICK in html:
         picks = B_PICK + "\n" + report_live.render(hist[0] if hist else None) + "\n" + E_PICK
         html = _replace(html, B_PICK, E_PICK, picks)
-
     html = _replace(html, B_LIVE, E_LIVE, live)
     return html
+
+
+def copy_site():
+    if not os.path.isdir(SRC_SITE):
+        return 0
+    n = 0
+    for root, _dirs, files in os.walk(SRC_SITE):
+        rel = os.path.relpath(root, SRC_SITE)
+        dst = DOCS if rel == "." else os.path.join(DOCS, rel)
+        os.makedirs(dst, exist_ok=True)
+        for fn in files:
+            shutil.copy2(os.path.join(root, fn), os.path.join(dst, fn))
+            n += 1
+    return n
 
 
 def main():
@@ -104,13 +112,32 @@ def main():
         with open(HIST, encoding="utf-8") as f:
             hist = json.load(f)
 
-    html = render(hist)
-    for p in (SRC, COPY):
-        with open(p, "w", encoding="utf-8") as f:
-            f.write(html)
-    os.makedirs(DOCS, exist_ok=True)
-    with open(os.path.join(DOCS, "index.html"), "w", encoding="utf-8") as f:
-        f.write(html)
+    os.makedirs(DATA, exist_ok=True)
+    n = copy_site()
+
+    if hist:
+        with open(os.path.join(DATA, "signal.json"), "w", encoding="utf-8") as f:
+            json.dump(hist[0], f, ensure_ascii=False)
+        with open(os.path.join(DATA, "history.json"), "w", encoding="utf-8") as f:
+            json.dump(hist, f, ensure_ascii=False)
+
+    if os.path.exists(QUAL):
+        try:
+            with open(QUAL, encoding="utf-8") as f:
+                q = json.load(f)
+            slim = {"total": q.get("total"), "bad": q.get("bad"),
+                    "rows": [{"ticker": r.get("ticker"), "ok": r.get("ok"),
+                              "common_months": r.get("common_months"),
+                              "month_diff": r.get("month_diff"),
+                              "ret_diff": r.get("ret_diff")}
+                             for r in (q.get("rows") or [])]}
+            with open(os.path.join(DATA, "quality.json"), "w", encoding="utf-8") as f:
+                json.dump(slim, f, ensure_ascii=False)
+        except Exception as e:
+            print("WARN: quality.json 生成失败", e)
+
+    with open(os.path.join(DOCS, "report.html"), "w", encoding="utf-8") as f:
+        f.write(build_report(hist))
 
     dashboard.build(hist, os.path.join(DOCS, "signals.html"))
 
@@ -119,9 +146,9 @@ def main():
         if os.path.exists(s):
             shutil.copy2(s, os.path.join(DOCS, fn))
 
-    print(f"已更新: {SRC}  ({len(html)//1024} KB)")
-    print(f"副本  : {COPY}")
-    print(f"站点  : {DOCS}" + os.sep + f"index.html  |  signals.html  ({len(hist)} 期信号)")
+    print(f"站点已构建：{n} 个静态文件 → {DOCS}")
+    print("  index / portfolio / plan / signals / analysis / report")
+    print(f"  数据：signal.json history.json quality.json（{len(hist)} 期信号）")
 
 
 if __name__ == "__main__":

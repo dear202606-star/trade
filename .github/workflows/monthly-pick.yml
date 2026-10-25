@@ -28,7 +28,7 @@ permissions:
   issues: write
 
 concurrency:
-  group: monthly-pick
+  group: pages-deploy
   cancel-in-progress: false
 
 jobs:
@@ -53,6 +53,10 @@ jobs:
       - name: 运行月度选股
         id: pick
         run: python monthly_pick.py --workers 10
+
+      - name: 抓取行情快照
+        continue-on-error: true
+        run: python quotes.py
 
       - name: 生成站点
         id: site
