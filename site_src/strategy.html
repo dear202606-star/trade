@@ -170,9 +170,23 @@ function renderStocks() {
 
 
 /* ---------- 对冲研究 ---------- */
+function yrRate(name) {
+  const ys = window.__hy;
+  if (!ys || !ys.length) return '—';
+  let key = null;
+  if (name.indexOf('纯多头') === 0) key = 'long';
+  else if (name.indexOf('标普') === 0) key = 'spy';
+  else if (name.indexOf('1:1') === 0) key = 'ls';
+  else if (name.indexOf('β 对冲') === 0) key = 'lsb';
+  if (!key) return '—';
+  const pos = ys.filter((r) => (r[key] || 0) > 0).length;
+  return Math.round((pos / ys.length) * 100) + '%';
+}
+
 function renderHedge(h) {
   if (!h || !h.stats) { document.getElementById('hedgeVerdict').textContent = '对冲回测数据尚未生成'; return; }
   const st = h.stats;
+  window.__hy = h.years || [];
   const rows = [
     ['纯多头（现状）', st.long, '#F2C46B'],
     ['标普 500', st.bench, '#6F7D92'],
@@ -295,18 +309,29 @@ function renderSL(d) {
 (async function () {
   const [eq, sh, q] = await Promise.all([
     DSH.json('equity', null), DSH.json('strategy_history', null), DSH.json('quality', null)]);
-  const hg = await DSH.json('hedge', null);\n  const ab = await DSH.json('absolute', null);\n  const sl = await DSH.json('stoploss', null);
+  const hg = await DSH.json('hedge', null);
+  const ab = await DSH.json('absolute', null);
+  const sl = await DSH.json('stoploss', null);
   EQ = eq; SH = sh;
 
+  const safe = (fn, arg, name, anchorId) => {
+    try { fn(arg); } catch (e) {
+      const el = document.getElementById(anchorId);
+      if (el) el.innerHTML = '<div class="tip bad">' + name + ' 渲染失败：' + (e && e.message ? e.message : e) + '</div>';
+      console.error(name, e);
+    }
+  };
   if (eq) {
     $('sPeriod').textContent = '自 ' + eq.base_date + ' 起';
-    drawChart();
+    safe(drawChart, null, '净值图', 'chart');
   } else {
     $('chart').innerHTML = '<div class="tip warn">净值数据尚未生成</div>';
   }
-  renderYears();
-  renderHedge(hg);\n  renderAbs(ab);\n  renderSL(sl);
-  renderStocks();
+  safe(renderYears, null, '逐年记录', 'years');
+  safe(renderHedge, hg, '对冲研究', 'hedgeTable');
+  safe(renderAbs, ab, '绝对收益', 'absTable');
+  safe(renderSL, sl, '移动止损', 'slTable');
+  safe(renderStocks, null, '个股贡献', 'stocks');
 
   if (q && q.total) {
     const rate = (q.total - q.bad) / q.total;

@@ -205,7 +205,7 @@
       svg += '<line x1="' + L + '" y1="' + y + '" x2="' + (w - R) + '" y2="' + y +
         '" stroke="rgba(255,255,255,.06)" stroke-width="1"/>';
       svg += '<text x="' + (L - 9) + '" y="' + (+y + 4) + '" fill="#6F7D92" font-size="11" text-anchor="end">' +
-        (v * 100).toFixed(0) + "%</text>";
+        label(rawV) + "</text>";
     }
     series.forEach((s) => {
       let d = "";
