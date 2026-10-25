@@ -17,6 +17,7 @@ on:
       - quotes.py
       - equity.py
       - hedge_backtest.py
+      - absolute_backtest.py
       - strategy_history.py
       - datafeed.py
       - site_build.py
@@ -60,6 +61,10 @@ jobs:
       - name: 对冲回测
         continue-on-error: true
         run: python runner.py hedge_backtest.py
+
+      - name: 绝对收益回测
+        continue-on-error: true
+        run: python runner.py absolute_backtest.py
 
       - name: 构建站点
         run: python runner.py site_build.py

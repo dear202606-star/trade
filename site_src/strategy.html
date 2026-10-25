@@ -43,6 +43,13 @@
     </div>
   </div>
 
+  <h2 style="margin:44px 0 10px;font-size:19px;letter-spacing:-.02em">追求绝对收益：个股级风险过滤</h2>
+  <div class="card" style="padding:18px 20px">
+    <div id="absVerdict" class="tip" style="margin-bottom:16px;display:block;line-height:1.75">加载中…</div>
+    <div id="absTable"></div>
+    <div class="sub" style="margin-top:12px">信号全部用上月末数据；现金按年化 2% 计息；个股趋势＝该股跌破自身 10 月均线时该部分转现金。</div>
+  </div>
+
   <h2 style="margin:44px 0 10px;font-size:19px;letter-spacing:-.02em">对冲研究：做多组合 + 做空标普 500 值不值</h2>
   <div class="card" style="padding:18px 20px">
     <div id="hedgeVerdict" class="tip warn" style="margin-bottom:16px;display:block;line-height:1.75">加载中…</div>
@@ -206,10 +213,47 @@ function renderHedge(h) {
   ], { h: 240, log: true, fmt: (v) => v >= 10 ? Math.round(v) + 'x' : v.toFixed(1) + 'x' });
 }
 
+
+/* ---------- 绝对收益 ---------- */
+function renderAbs(a) {
+  const el = document.getElementById('absVerdict');
+  if (!a || !a.stats) { el.textContent = '绝对收益回测尚未生成'; return; }
+  const order = ['A', 'G', 'H', 'I'];
+  const rows = order.map(k => {
+    const s = a.stats[k];
+    const ny = (a.neg_years[k] || []).length;
+    const hi = k === 'H' ? ' style="background:rgba(242,196,107,.07)"' : '';
+    return '<tr' + hi + '><td>' + a.names[k] + (k === 'H' ? ' <span class="pill on" style="font-size:10px;padding:2px 7px">推荐</span>' : '') + '</td>' +
+      '<td class="num ' + DSH.cls(s.cagr) + '">' + DSH.pct(s.cagr, 1) + '</td>' +
+      '<td class="num">' + DSH.pct(s.vol, 1) + '</td>' +
+      '<td class="num"><b>' + s.sharpe.toFixed(2) + '</b></td>' +
+      '<td class="num down">' + DSH.pct(s.mdd, 1) + '</td>' +
+      '<td class="num">' + (s.r12_pos * 100).toFixed(0) + '%</td>' +
+      '<td class="num down">' + (s.r12_worst * 100).toFixed(1) + '%</td>' +
+      '<td class="num">' + ny + '</td></tr>';
+  }).join('');
+  document.getElementById('absTable').innerHTML =
+    '<table><thead><tr><th>方案</th><th class="num">年化</th><th class="num">波动</th>' +
+    '<th class="num">夏普</th><th class="num">最大回撤</th><th class="num">12月正收益率</th>' +
+    '<th class="num">最差12月</th><th class="num">亏损年数</th></tr></thead><tbody>' + rows + '</tbody></table>';
+
+  const b = a.stats.A, h = a.stats.H;
+  el.className = 'tip ok';
+  el.innerHTML =
+    '<b>结论：年度级“绝对正收益”做不到，但可以把最坏情况大幅改善。</b><br>' +
+    '推荐 <b>个股趋势 + 大盘减半</b>：夏普 ' + h.sharpe.toFixed(2) + ' 与基准持平（' + b.sharpe.toFixed(2) + '），' +
+    '但最大回撤从 ' + DSH.pct(b.mdd, 0) + ' 压到 ' + DSH.pct(h.mdd, 0) + '，' +
+    '最差 12 个月从 ' + DSH.pct(b.r12_worst, 0) + ' 改善到 ' + DSH.pct(h.r12_worst, 0) + '，' +
+    '代价是年化少 ' + DSH.pct(b.cagr - h.cagr, 0) + '。<br>' +
+    '滚动 12 个月仍有约 ' + ((1 - h.r12_pos) * 100).toFixed(0) + '% 的概率亏损——' +
+    '这是动量策略的固有属性（2011 年 NFLX 单只跌 60%），' +
+    '靠月度信号无法完全规避，除非上更高频的止损。';
+}
+
 (async function () {
   const [eq, sh, q] = await Promise.all([
     DSH.json('equity', null), DSH.json('strategy_history', null), DSH.json('quality', null)]);
-  const hg = await DSH.json('hedge', null);
+  const hg = await DSH.json('hedge', null);\n  const ab = await DSH.json('absolute', null);
   EQ = eq; SH = sh;
 
   if (eq) {
@@ -219,7 +263,7 @@ function renderHedge(h) {
     $('chart').innerHTML = '<div class="tip warn">净值数据尚未生成</div>';
   }
   renderYears();
-  renderHedge(hg);
+  renderHedge(hg);\n  renderAbs(ab);
   renderStocks();
 
   if (q && q.total) {
