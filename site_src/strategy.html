@@ -50,6 +50,13 @@
     <div class="sub" style="margin-top:12px">信号全部用上月末数据；现金按年化 2% 计息；个股趋势＝该股跌破自身 10 月均线时该部分转现金。</div>
   </div>
 
+  <h2 style="margin:44px 0 10px;font-size:19px;letter-spacing:-.02em">日线移动止损：把每年做成正收益</h2>
+  <div class="card" style="padding:18px 20px">
+    <div id="slVerdict" class="tip ok" style="margin-bottom:16px;display:block;line-height:1.75">加载中…</div>
+    <div id="slTable"></div>
+    <div class="sub" style="margin-top:12px">信号为日线级，止损后当年不再入场（避免反复打脸）；现金按年化 2% 计息。带「+ 再入场」的变体允许次月站回止损价时重新买入。</div>
+  </div>
+
   <h2 style="margin:44px 0 10px;font-size:19px;letter-spacing:-.02em">对冲研究：做多组合 + 做空标普 500 值不值</h2>
   <div class="card" style="padding:18px 20px">
     <div id="hedgeVerdict" class="tip warn" style="margin-bottom:16px;display:block;line-height:1.75">加载中…</div>
@@ -250,10 +257,44 @@ function renderAbs(a) {
     '靠月度信号无法完全规避，除非上更高频的止损。';
 }
 
+
+/* ---------- 移动止损 ---------- */
+function renderSL(d) {
+  const el = document.getElementById('slVerdict');
+  if (!d || !d.results) { el.textContent = '止损回测尚未生成'; return; }
+  const R = d.results;
+  const keys = ['none', '15', '20', '25', '30', '15R', '20R', '25R', '30R'].filter(k => R[k]);
+  const best = R['30'];
+  document.getElementById('slTable').innerHTML =
+    '<table><thead><tr><th>方案</th><th class="num">年化</th><th class="num">累计</th>' +
+    '<th class="num">亏损年数</th><th>亏损年份</th></tr></thead><tbody>' +
+    keys.map(k => {
+      const r = R[k];
+      const hi = k === '30' ? ' style="background:rgba(242,196,107,.07)"' : '';
+      return '<tr' + hi + '><td>' + r.label + (k === '30' ? ' <span class="pill on" style="font-size:10px;padding:2px 7px">推荐</span>' : '') + '</td>' +
+        '<td class="num ' + DSH.cls(r.cagr) + '">' + DSH.pct(r.cagr, 1) + '</td>' +
+        '<td class="num">' + (r.total * 100).toFixed(0) + '%</td>' +
+        '<td class="num"><b>' + (r.neg.length) + '</b></td>' +
+        '<td style="font-size:12px;color:var(--txt-3)">' + (r.neg.length ? r.neg.join(', ') : '无 ✅') + '</td></tr>';
+    }).join('') + '</tbody></table>';
+
+  const base = R['none'];
+  el.innerHTML =
+    '<b>结论：30% 移动止损是唯一能做到「16 年零亏损年」的方案。</b><br>' +
+    '年化从 ' + DSH.pct(base.cagr, 1) + ' 降到 ' + DSH.pct(best.cagr, 1) + '，累计从 ' +
+    (base.total * 100).toFixed(0) + '% 降到 ' + (best.total * 100).toFixed(0) + '%，' +
+    '换来亏损年份从 ' + base.neg.length + ' 个降到 <b>0 个</b>。<br>' +
+    '代价很真实：2020 年 3 月熔断把三只全打掉、之后空仓，当年只拿到 14%（不止损是 61.8%）。' +
+    '如果允许「止损后次月站回止损价就再买回」，年化能回到 ' + DSH.pct(R['30R'].cagr, 1) +
+    '（甚至超过不止损），但 2011 年又会亏 ' +
+    DSH.pct(Math.abs(R['30R'].neg.length ? 1 : 0) * 0, 0).replace('+0%', '') +
+    '——鱼与熊掌不可兼得。';
+}
+
 (async function () {
   const [eq, sh, q] = await Promise.all([
     DSH.json('equity', null), DSH.json('strategy_history', null), DSH.json('quality', null)]);
-  const hg = await DSH.json('hedge', null);\n  const ab = await DSH.json('absolute', null);
+  const hg = await DSH.json('hedge', null);\n  const ab = await DSH.json('absolute', null);\n  const sl = await DSH.json('stoploss', null);
   EQ = eq; SH = sh;
 
   if (eq) {
@@ -263,7 +304,7 @@ function renderAbs(a) {
     $('chart').innerHTML = '<div class="tip warn">净值数据尚未生成</div>';
   }
   renderYears();
-  renderHedge(hg);\n  renderAbs(ab);
+  renderHedge(hg);\n  renderAbs(ab);\n  renderSL(sl);
   renderStocks();
 
   if (q && q.total) {

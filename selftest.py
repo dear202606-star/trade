@@ -105,6 +105,10 @@ def main():
     check(ab and (ab.get("stats") or {}).get("H"),
           "绝对收益回测就绪", "absolute.json 缺失", hard=False)
 
+    sl = load("stoploss.json")
+    check(sl and (sl.get("results") or {}).get("none"),
+          "止损回测就绪", "stoploss.json 缺失", hard=False)
+
     # C. 新鲜度
     if q and q.get("ts"):
         try:

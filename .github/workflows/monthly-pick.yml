@@ -19,6 +19,7 @@ on:
       - equity.py
       - hedge_backtest.py
       - absolute_backtest.py
+      - stoploss_backtest.py
       - strategy_history.py
       - datafeed.py
       - selftest.py
