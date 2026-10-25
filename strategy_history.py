@@ -13,6 +13,7 @@
 """
 import json
 import os
+import shutil
 import sys
 
 import pandas as pd
@@ -24,6 +25,7 @@ CACHE = os.path.join(BASE, "data", "sina2")
 MEMBERS = os.path.join(BASE, "data", "sp500_ticker_start_end.csv")
 SP500 = os.path.join(BASE, "data", "sp500.csv")
 OUT = os.path.join(BASE, "docs", "data", "strategy_history.json")
+CURVE = os.path.join(BASE, "docs", "data", "curve.json")
 
 FINAL_N = 3
 MIN_PRICE = 5.0
@@ -327,6 +329,25 @@ def main():
         "note": "按年度收盘复利计算；年度最大回撤用年末净值，最深年内回撤取各年谷底",
     }
 
+    # ---- 健康检查：数据抓不全时不要覆盖已发布的完整结果 ----
+    GOOD_MONTHS = 180                      # 至少 15 年
+    n_nan = sum(1 for r in years if r["ret"] is None)
+    healthy = (len(MONTHS) >= GOOD_MONTHS and n_nan == 0)
+    SNAP_SH = os.path.join(BASE, "output", "strategy_history.json")
+    SNAP_CV = os.path.join(BASE, "output", "curve.json")
+
+    if not healthy:
+        print(f"WARN: 本次数据不完整（{len(MONTHS)} 个月，{n_nan} 个年份缺失），"
+              f"沿用上次完整结果", file=sys.stderr)
+        for src, dst in ((SNAP_SH, OUT), (SNAP_CV, CURVE)):
+            if os.path.exists(src):
+                os.makedirs(os.path.dirname(dst), exist_ok=True)
+                shutil.copy2(src, dst)
+                print(f"      已沿用 {os.path.basename(src)}")
+        if os.path.exists(OUT):
+            return 0
+        print("没有可沿用的历史结果，按本次输出", file=sys.stderr)
+
     out = {"years": years, "stocks": stocks, "summary": summary,
            "generated": pd.Timestamp.today().strftime("%Y-%m-%d")}
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
@@ -334,7 +355,6 @@ def main():
         json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
 
     # 全周期曲线（与分年同源，保证数字完全一致）
-    CURVE = os.path.join(BASE, "docs", "data", "curve.json")
     if MONTHS:
         bmap = {x["ym"]: x["b"] for x in SPYB}
         pts, s_acc, b_acc, pk2 = [], 1.0, 1.0, 1.0
@@ -376,6 +396,11 @@ def main():
             json.dump({"points": pts, "stats": cstats, "years": cyears,
                        "updated": pd.Timestamp.today().strftime("%Y-%m-%d")},
                       f, ensure_ascii=False, separators=(",", ":"))
+        for _src, _dst in ((OUT, SNAP_SH), (CURVE, SNAP_CV)):
+            try:
+                shutil.copy2(_src, _dst)
+            except Exception:
+                pass
         print(f"      全周期曲线 {len(pts)} 个月：累计 {cstats['total']*100:.0f}% "
               f"年化 {cstats['cagr']*100:.1f}% 回撤 {cstats['mdd']*100:.1f}%")
 
