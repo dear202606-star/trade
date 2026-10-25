@@ -1,0 +1,32 @@
+name: 线上 E2E 校验
+
+# 部署完成后，直接访问真实线上站点做端到端校验。
+# 任何一项不通过 → 工作流失败 → GitHub 会给你发失败通知。
+
+on:
+  workflow_run:
+    workflows: ["行情快照", "每日全量更新"]
+    types: [completed]
+  schedule:
+    - cron: "0 23 * * 1-5"     # 北京 07:00，收盘更新后复验一次
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: 安装依赖
+        run: pip install requests
+
+      - name: 校验线上站点
+        run: python e2e_check.py https://dear202606-star.github.io/trade/

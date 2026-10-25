@@ -11,7 +11,7 @@
   <div class="head">
     <div class="eyebrow">Leader Quant</div>
     <h1>今天该做什么</h1>
-    <p id="pageSub">加载中…</p>
+    <p id="pageSub"></p>
   </div>
 
   <div class="hero fade-in">
@@ -167,9 +167,7 @@
     let pk = 0;
     const dds = eq.points.map(p => { pk = Math.max(pk, p.s); return { d: p.d, y: p.s / pk - 1 }; });
     const tail = eq.points.slice(-120), tailDd = dds.slice(-120);
-    document.getElementById('eqSpark').innerHTML = DSH.combo(
-      tail.map(p => ({ d: p.d, y: p.s - 1 })), tailDd,
-      { bench: tail.map(p => ({ d: p.d, y: p.b - 1 })), h: 120 });
+    document.getElementById('eqSpark').innerHTML = DSH.spark(tail.map(p => ({ y: p.s })), { w: 320, h: 88 });
   }
 
   /* ---- 下一步 ---- */

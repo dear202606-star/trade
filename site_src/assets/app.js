@@ -117,7 +117,7 @@
       const stopLine = peak * (1 - DSH.STOP);
       return Object.assign({}, r, {
         name: q ? q.name : r.ticker,
-        price, mv, cost, pnl,
+        price, mv, cost, pnl, costPerShare: r.cost,
         pnlPct: cost > 0 ? pnl / cost : 0,
         dayPct: q ? q.chg : 0,
         dayPnl: q ? (q.p - q.pc) * r.shares : 0,
