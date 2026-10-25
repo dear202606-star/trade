@@ -16,9 +16,6 @@ on:
     paths:
       - quotes.py
       - equity.py
-      - hedge_backtest.py
-      - absolute_backtest.py
-      - stoploss_backtest.py
       - strategy_history.py
       - datafeed.py
       - site_build.py
@@ -58,18 +55,6 @@ jobs:
       - name: 生成逐年记录
         continue-on-error: true
         run: python runner.py strategy_history.py
-
-      - name: 对冲回测
-        continue-on-error: true
-        run: python runner.py hedge_backtest.py
-
-      - name: 绝对收益回测
-        continue-on-error: true
-        run: python runner.py absolute_backtest.py
-
-      - name: 移动止损回测
-        continue-on-error: true
-        run: python runner.py stoploss_backtest.py
 
       - name: 构建站点
         run: python runner.py site_build.py
