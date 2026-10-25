@@ -84,6 +84,8 @@ def main():
         txt = pg.content()
         has_rows = ("#demo" in pg.url) or rows >= 0
         check("止损线" in txt, "持仓卡片含「止损线」", "持仓卡片缺少「止损线」")
+        check("市值" in txt, "持仓卡片含「市值」", "持仓卡片缺少「市值」")
+        check("成本价留空" not in txt, "过程性说明已清理", "仍有过程性说明")
         check("要下的单" in txt, "下单区块存在", "下单区块缺失")
         pg.screenshot(path=os.path.join(OUT, "02_portfolio.png"), full_page=True)
 

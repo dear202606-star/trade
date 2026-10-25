@@ -11,7 +11,6 @@
   <div class="head">
     <div class="eyebrow">Portfolio</div>
     <h1>我的持仓</h1>
-    <p>填入买过的股票和股数，自动按最新行情算盈亏与占比。数据只存在你的浏览器里。</p>
   </div>
 
   <!-- 总览 -->
@@ -74,7 +73,6 @@
         <div class="grow"></div>
         <button class="btn ghost" id="btnClear" style="color:#FF9A9E">清空</button>
       </div>
-      <div class="sub" style="margin-top:10px">成本价留空则按现价填入。股数支持小数。</div>
     </div>
   </div>
 
@@ -134,15 +132,15 @@ function render() {
   
   
 
-  /* 资金说明：总买入资金 → 已投入 / 剩余 */
+  /* 资金说明：总买入资金 → 已投入 / 剩余（只留关键数字） */
   const capHint = $('capHint');
   if (!c.plan) {
-    capHint.innerHTML = '填<b>总买入资金</b>后点「按信号一键分配」，系统会按信号权重（30/30/40）算出每只该买多少股。' +
-      '<br><span style="color:var(--txt-3)">不填也能用：直接在下面录入你实际买入的股数即可。</span>';
+    capHint.style.display = 'none';
   } else {
-    capHint.innerHTML = '总买入资金 <b>' + DSH.money(c.plan, cur) + '</b> ｜ 已投入 <b>' + DSH.money(c.cost, cur) +
-      '</b> ｜ 剩余 <b>' + DSH.money(c.remain, cur) + '</b>' +
-      '<br><span style="color:var(--txt-3)">已投入 = 各持仓成本合计；剩余可继续按信号补仓。</span>';
+    capHint.style.display = '';
+    capHint.innerHTML = '总买入资金 <b>' + DSH.money(c.plan, cur) + '</b>' +
+      ' ｜ 已投入 <b>' + DSH.money(c.cost, cur) + '</b>' +
+      ' ｜ 剩余 <b>' + DSH.money(c.remain, cur) + '</b>';
   }
 
 
@@ -158,7 +156,7 @@ function render() {
     const dev = t != null ? r.weight - t : null;
     const devTxt = dev == null ? '' : (Math.abs(dev) < 0.005 ? '符合目标'
       : (dev > 0 ? '超配 ' : '低配 ') + Math.abs(dev * 100).toFixed(1) + 'pt');
-    return '<div class="holding" style="grid-template-columns:1.5fr .9fr .9fr .9fr 130px 34px">' +
+    return '<div class="holding" style="grid-template-columns:1.4fr .85fr .85fr .85fr .95fr 124px 34px">' +
       '<div><div class="tk">' + DSH.esc(r.ticker) + '</div><div class="nm">' + DSH.esc(r.name || '') + '</div>' +
         '<div class="bar" style="max-width:120px"><i class="' + (dev > 0.01 ? 'over' : '') +
         '" style="width:' + Math.min(100, r.weight * 330) + '%"></i></div></div>' +
@@ -171,9 +169,12 @@ function render() {
           '<div style="font-size:10.5px;margin-top:1px;color:' +
           (r.stopDist != null && r.stopDist <= 0 ? 'var(--red)' : r.stopDist != null && r.stopDist < 0.10 ? '#FFAB6B' : 'var(--txt-3)') + '">' +
           (r.stopDist == null ? '' : r.stopDist <= 0 ? '已触发' : '距 ' + (r.stopDist * 100).toFixed(0) + '%') + '</div></div></div>' +
-      '<div style="text-align:right"><div class="num" style="font-size:15px;color:' +
-        (r.pnl >= 0 ? 'var(--green)' : 'var(--red)') + '">' + DSH.money(r.pnl, cur) + '</div>' +
-        '<div class="sub" style="margin-top:2px;font-size:11.5px"><span class="' + DSH.cls(r.pnlPct) + '">' +
+      '<div style="text-align:right"><div class="label" style="margin:0 0 3px">市值</div>' +
+        '<div class="num" style="font-size:14px">' + DSH.money(r.mv, cur) + '</div>' +
+        '<div class="sub" style="margin-top:2px;font-size:11px">' + (r.weight * 100).toFixed(1) + '%</div></div>' +
+      '<div style="text-align:right"><div class="label" style="margin:0 0 3px">盈亏</div>' +
+        '<div class="num" style="font-size:14.5px;color:' + DSH.cls(r.pnl) + '">' + DSH.money(r.pnl, cur) + '</div>' +
+        '<div class="sub" style="margin-top:2px;font-size:11px"><span class="' + DSH.cls(r.pnlPct) + '">' +
         DSH.pct(r.pnlPct) + '</span> · ' + devTxt + '</div></div>' +
       '<button class="btn sm ghost" data-del="' + i + '" style="padding:6px 8px;color:#FF9A9E">×</button>' +
       '</div>';

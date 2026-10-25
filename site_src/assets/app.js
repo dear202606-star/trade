@@ -107,18 +107,37 @@
     const q = await DSH.json("quotes", {});
     const el = document.getElementById("navTick");
     if (!el) return;
-    if (!q || !q.ts_local) { el.textContent = "行情未就绪"; return; }
+    if (!q || (!q.ts && !q.ts_local)) { el.textContent = "行情未就绪"; return; }
     const spy = q.quotes && q.quotes.SPY;
     const c = spy ? (spy.chg >= 0 ? "up" : "dn") : "";
     const age = DSH.ageHours(q.ts);
     const stale = age == null ? false : age > 36;
     const ageTxt = age == null ? "" :
-      age < 1 ? "刚刚更新" :
+      age < 1 / 60 ? "刚刚更新" :
+      age < 1 ? Math.round(age * 60) + " 分钟前" :
       age < 24 ? Math.floor(age) + " 小时前" : Math.floor(age / 24) + " 天前";
+    // 时间按浏览器本地时区显示（服务端 ts 是 UTC）
+    let when = "";
+    if (q.ts) {
+      const d = new Date(q.ts);
+      if (!isNaN(d.getTime())) {
+        const p = (n) => String(n).padStart(2, "0");
+        when = d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) +
+          " " + p(d.getHours()) + ":" + p(d.getMinutes());
+      }
+    }
+    if (!when) when = q.ts_local || "";
     el.innerHTML =
       (spy ? "SPY <b>" + spy.p.toFixed(2) + "</b> <span class=\"" + c + "\">" + DSH.pct(spy.chg) + "</span><br>" : "") +
       '<span style="color:' + (stale ? "#FF6B72" : "#5A6779") + '">' +
-      (stale ? "⚠ 数据已 " + ageTxt : ageTxt) + " ｜ " + DSH.esc(q.ts_local) + "</span>";
+      (stale ? "⚠ 数据已 " + ageTxt : ageTxt) + " ｜ " + DSH.esc(when) + "</span>";
+  };
+  // 每分钟按真实经过时间刷新相对时间
+  DSH.tickTimer = function () {
+    if (DSH._tick) return;
+    DSH._tick = setInterval(function () {
+      try { DSH.paintTick(); } catch (e) {}
+    }, 60000);
   };
 
   /* 距上次更新的小时数 */
@@ -433,6 +452,7 @@
   DSH.boot = function () {
     DSH.nav();
     DSH.paintTick();
+      DSH.tickTimer();
     DSH.stamp();
   };
 })(window);
