@@ -36,6 +36,22 @@
     </div>
   </div>
 
+  <!-- 本月信号 -->
+  <div class="card" style="margin-top:16px;padding:20px 24px">
+    <div class="row" style="align-items:flex-start;gap:24px">
+      <div style="min-width:150px">
+        <div class="label" style="margin-bottom:6px">本月信号</div>
+        <div class="num num-md" id="sigMonth" style="color:var(--gold)">—</div>
+        <div class="row" style="gap:6px;margin-top:8px" id="sigMeta"></div>
+      </div>
+      <div class="grow" id="sigPicks" style="display:flex;gap:10px;flex-wrap:wrap"></div>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+        <button class="btn primary" id="btnFromSignal">按信号一键分配</button>
+        <a href="signals.html" style="font-size:12px;color:var(--txt-3);text-decoration:none">历史信号 →</a>
+      </div>
+    </div>
+  </div>
+
   <!-- 持仓设置 -->
   <div class="card" style="margin-top:16px">
     <div class="row">
@@ -48,7 +64,6 @@
         <select id="cur"><option value="USD">USD 美元</option><option value="CNY">CNY 人民币</option></select>
       </div>
       <div class="grow"></div>
-      <button class="btn primary" id="btnFromSignal">按信号一键分配</button>
       <button class="btn ghost" id="btnExport">导出</button>
       <button class="btn ghost" id="btnImport">导入</button>
     </div>
@@ -277,6 +292,32 @@ $('nShares').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('nCos
 $('nCost').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btnAdd').click(); });
 
 
+
+/* ---------- 本月信号 ---------- */
+function renderSignal() {
+  if (!SIG) return;
+  const off = SIG.official || SIG.picks || [];
+  const exp = SIG.exposure != null ? SIG.exposure : 1;
+  document.getElementById('sigMonth').textContent = SIG.month || '—';
+  document.getElementById('sigMeta').innerHTML =
+    '<span class="pill ' + (exp >= 0.99 ? 'on' : 'off') + '">' +
+      (SIG.trend || (exp >= 0.99 ? '满仓' : '半仓')) + '</span>' +
+    '<span class="pill off">目标 ' + Math.round(exp * 100) + '%</span>';
+  const q = Q.quotes || {};
+  document.getElementById('sigPicks').innerHTML = off.map((p, i) => {
+    const px = (q[p.ticker] || {}).p;
+    return '<div style="flex:1;min-width:150px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);' +
+      'border-radius:11px;padding:12px 14px">' +
+      '<div class="row" style="justify-content:space-between;align-items:baseline">' +
+        '<div class="tk" style="font-size:15px">' + DSH.esc(p.ticker) + '</div>' +
+        '<div style="font-size:11px;color:var(--gold)">' + Math.round((p.weight || 0) * 100) + '%</div></div>' +
+      '<div class="nm" style="margin-top:2px">' + DSH.esc((p.name || '').slice(0, 16)) + '</div>' +
+      '<div class="row" style="justify-content:space-between;margin-top:6px;font-size:11.5px">' +
+        '<span style="color:var(--txt-3)">' + (px ? px.toFixed(2) : '—') + '</span>' +
+        '<span class="' + DSH.cls(p.ret12) + '">' + DSH.pct(p.ret12, 0) + '</span></div></div>';
+  }).join('');
+}
+
 /* ---------- 要下的单 ---------- */
 function renderOrders() {
   const el = orders;
@@ -354,6 +395,7 @@ function renderOrders() {
   Q = await DSH.json('quotes', { quotes: {}, fx: 7.1 });
   if (window.__demo) { /* 演示数据不落盘 */ } else { }
   render();
+  renderSignal();
   renderOrders();
 })();
 </script>

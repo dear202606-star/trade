@@ -73,7 +73,8 @@ def main():
         pg.wait_for_timeout(1200)
         check(pg.locator("#capital").count() == 0,
               "已移除「账户总资金」输入框", "「账户总资金」输入框仍存在")
-        check("30%" not in pg.content(), "已移除 30% 仓位限制文案", "仍有 30% 仓位限制文案")
+        check(all(k not in pg.content() for k in ["策略上限", "用满 30%", "剩余现金"]),
+              "已移除旧仓位限制文案", "仍有旧仓位限制文案")
 
         # 用「按策略建仓」
         build = pg.get_by_text("按策略建仓", exact=False).first

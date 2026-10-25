@@ -83,6 +83,24 @@ def picks_from_frozen(y, tickers, sector):
                 r = rr
         picks.append({"ticker": t, "ret12": r if r is not None else 0.0,
                       "sector": sector.get(t, "Unknown")})
+    return assign_weights(picks)
+
+
+def assign_weights(picks):
+    """按行业上限分配权重（同行业 2 只时该行业合计 60%，否则等权）"""
+    if not picks:
+        return picks
+    secs = [p["sector"] for p in picks]
+    dup = [s for s, c in pd.Series(secs).value_counts().items() if c >= 2 and len(picks) > 2]
+    if dup:
+        cap, rest = SECTOR_CAP / 2, 1 - SECTOR_CAP
+        w = [cap if p["sector"] in dup else rest / max(1, len(picks) - 2) for p in picks]
+        tot = sum(w)
+        w = [x / tot for x in w]
+    else:
+        w = [1 / len(picks)] * len(picks)
+    for p, wi in zip(picks, w):
+        p["weight"] = round(wi, 4)
     return picks
 
 
@@ -114,18 +132,7 @@ def pick_for_year(y, members, sector):
 
     if not picks:
         return []
-    secs = [p["sector"] for p in picks]
-    dup = [s for s, c in pd.Series(secs).value_counts().items() if c >= 2 and len(picks) > 2]
-    if dup:
-        cap, rest = SECTOR_CAP / 2, 1 - SECTOR_CAP
-        w = [cap if p["sector"] in dup else rest / max(1, len(picks) - 2) for p in picks]
-        tot = sum(w)
-        w = [x / tot for x in w]
-    else:
-        w = [1 / len(picks)] * len(picks)
-    for p, wi in zip(picks, w):
-        p["weight"] = round(wi, 4)
-    return picks
+    return assign_weights(picks)
 
 
 def year_perf(y, picks):
