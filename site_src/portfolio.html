@@ -40,18 +40,19 @@
   <div class="card" style="margin-top:16px">
     <div class="row">
       <div class="field" style="width:210px">
-        <label>总投入资金</label>
-        <input id="capital" type="number" min="0" step="1000" placeholder="例如 300000" class="num-in">
+        <label>账户总资金</label>
+        <input id="capital" type="number" min="0" step="1000" placeholder="例如 100000" class="num-in">
       </div>
       <div class="field" style="width:140px">
         <label>币种</label>
         <select id="cur"><option value="USD">USD 美元</option><option value="CNY">CNY 人民币</option></select>
       </div>
       <div class="grow"></div>
-      <button class="btn" id="btnFromSignal">按策略持仓填入</button>
+      <button class="btn primary ghost" id="btnFromSignal">按策略建仓（用满 30%）</button>
       <button class="btn ghost" id="btnExport">导出</button>
       <button class="btn ghost" id="btnImport">导入</button>
     </div>
+    <div class="tip" id="capHint" style="margin-top:16px"></div>
   </div>
 
   <!-- 持仓列表 -->
@@ -109,9 +110,25 @@ function render() {
   $('tPosBar').style.width = Math.min(100, c.posPct * 200) + '%';
   $('tPosBar').className = c.posPct > 0.35 ? 'over' : '';
 
+  /* 资金说明：账户总资金 → 策略上限 30% → 已持仓 / 剩余现金 */
+  const cap = PF.capital || 0;
+  const capHint = $('capHint');
+  if (!cap) {
+    capHint.className = 'tip warn';
+    capHint.innerHTML = '先填<b>账户总资金</b>（这笔钱里最多 30% 用于本策略，剩下 70% 留作现金，是策略的抗回撤设计）。';
+  } else {
+    const limit = cap * 0.30 * ((SIG && SIG.exposure) || 1);
+    const used = c.cost;
+    capHint.className = 'tip';
+    capHint.innerHTML =
+      '账户总资金 <b>' + DSH.money(cap, cur) + '</b> → 策略上限 30% = <b>' + DSH.money(limit, cur) + '</b>' +
+      ' ｜ 已买入 <b>' + DSH.money(used, cur) + '</b> ｜ 剩余现金 <b>' + DSH.money(Math.max(0, cap - used), cur) + '</b>' +
+      '<br><span style="color:var(--txt-3)">为什么不是满仓：回测显示满仓最大回撤 −60%，用 30% 仓位把最坏情况压到 −10% 左右。</span>';
+  }
+
   if (!PF.rows.length) {
     $('list').innerHTML = '<div class="card" style="text-align:center;padding:38px 20px;color:var(--txt-3)">' +
-      '还没有持仓 · 用下面的输入框添加，或点「按策略持仓填入」</div>';
+      '还没有持仓 · 用下面的输入框添加，或点「按策略建仓（用满 30%）」</div>';
     return;
   }
 

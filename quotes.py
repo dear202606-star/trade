@@ -143,6 +143,8 @@ def main():
         "fx": fx,
         "count": len(quotes),
         "universe": len(tickers),
+        "coverage": round(len(quotes) / max(len(tickers), 1), 4),
+        "ok": len(quotes) >= 0.98 * max(len(tickers), 1),
         "stale": stale[:30],
         "quotes": quotes,
     }

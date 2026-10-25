@@ -55,6 +55,10 @@ jobs:
         continue-on-error: true
         run: python quotes.py
 
+      - name: 计算策略净值
+        continue-on-error: true
+        run: python equity.py
+
       - name: 生成站点
         id: site
         run: python site_build.py

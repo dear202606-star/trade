@@ -2,10 +2,14 @@ name: 行情快照
 
 on:
   schedule:
-    # 美股盘中（13:30–21:00 UTC）每 30 分钟，工作日
+    # 盘中：美股 13:30–21:00 UTC，每 30 分钟（= 北京 21:30–05:00）
     - cron: "*/30 13-21 * * 1-5"
-    # 北京时间早上补一次收盘价
-    - cron: "0 23 * * 1-5"
+    # 收盘快照：22:30 UTC = 北京 06:30（拿到当日最终收盘价）
+    - cron: "30 22 * * 1-5"
+    # 兜底刷新：11:00 UTC = 北京 19:00（保证 20:00 前一定是最新）
+    - cron: "0 11 * * 1-5"
+    # 周末补一次，避免周一开盘前数据过旧
+    - cron: "0 2 * * 6"
   workflow_dispatch:
   push:
     branches: [main]
@@ -38,6 +42,10 @@ jobs:
 
       - name: 抓取行情
         run: python quotes.py
+
+      - name: 计算策略净值
+        continue-on-error: true
+        run: python equity.py
 
       - name: 构建站点
         run: python site_build.py

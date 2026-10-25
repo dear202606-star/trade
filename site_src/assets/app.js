@@ -6,6 +6,7 @@
     ["index.html", "总览"],
     ["portfolio.html", "我的持仓"],
     ["plan.html", "行动计划"],
+    ["nav.html", "净值"],
     ["about.html", "说明"],
   ];
 
@@ -71,9 +72,23 @@
     if (!q || !q.ts_local) { el.textContent = "行情未就绪"; return; }
     const spy = q.quotes && q.quotes.SPY;
     const c = spy ? (spy.chg >= 0 ? "up" : "dn") : "";
+    const age = DSH.ageHours(q.ts);
+    const stale = age == null ? false : age > 36;
+    const ageTxt = age == null ? "" :
+      age < 1 ? "刚刚更新" :
+      age < 24 ? Math.floor(age) + " 小时前" : Math.floor(age / 24) + " 天前";
     el.innerHTML =
       (spy ? "SPY <b>" + spy.p.toFixed(2) + "</b> <span class=\"" + c + "\">" + DSH.pct(spy.chg) + "</span><br>" : "") +
-      '<span style="color:#5A6779">' + DSH.esc(q.ts_local) + " ｜ USD/CNY " + (q.fx ? q.fx.toFixed(3) : "—") + "</span>";
+      '<span style="color:' + (stale ? "#FF6B72" : "#5A6779") + '">' +
+      (stale ? "⚠ 数据已 " + ageTxt : ageTxt) + " ｜ " + DSH.esc(q.ts_local) + "</span>";
+  };
+
+  /* 距上次更新的小时数 */
+  DSH.ageHours = function (iso) {
+    if (!iso) return null;
+    const t = Date.parse(iso);
+    if (isNaN(t)) return null;
+    return Math.max(0, (Date.now() - t) / 3600000);
   };
 
   /* ---------- 组合计算 ---------- */
@@ -118,6 +133,73 @@
       out[p.ticker] = p.weight * sig.exposure * 0.30;
     });
     return out;
+  };
+
+  /* ---------- 图表：迷你走势 ---------- */
+  DSH.spark = function (pts, opts) {
+    opts = opts || {};
+    const w = opts.w || 260, h = opts.h || 56, pad = 3;
+    if (!pts || pts.length < 2) return '<div style="height:' + h + 'px"></div>';
+    const ys = pts.map((p) => p.y);
+    const min = Math.min.apply(null, ys), max = Math.max.apply(null, ys);
+    const span = max - min || 1;
+    const X = (i) => pad + (i / (pts.length - 1)) * (w - pad * 2);
+    const Y = (v) => h - pad - ((v - min) / span) * (h - pad * 2);
+    let d = "", area = "";
+    pts.forEach((p, i) => {
+      const x = X(i).toFixed(1), y = Y(p.y).toFixed(1);
+      d += (i ? "L" : "M") + x + " " + y;
+    });
+    area = d + "L" + X(pts.length - 1).toFixed(1) + " " + (h - pad) + "L" + X(0).toFixed(1) + " " + (h - pad) + "Z";
+    const up = ys[ys.length - 1] >= ys[0];
+    const col = opts.color || (up ? "#3BD68A" : "#FF6B72");
+    const id = "g" + Math.random().toString(36).slice(2, 8);
+    return '<svg viewBox="0 0 ' + w + " " + h + '" preserveAspectRatio="none" style="width:100%;height:' + h + 'px;display:block">' +
+      '<defs><linearGradient id="' + id + '" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0%" stop-color="' + col + '" stop-opacity=".28"/>' +
+      '<stop offset="100%" stop-color="' + col + '" stop-opacity="0"/></linearGradient></defs>' +
+      '<path d="' + area + '" fill="url(#' + id + ')"/>' +
+      '<path d="' + d + '" fill="none" stroke="' + col + '" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>' +
+      "</svg>";
+  };
+
+  /* ---------- 图表：带坐标的折线 ---------- */
+  DSH.lineChart = function (series, opts) {
+    opts = opts || {};
+    const w = 900, h = opts.h || 320, L = 54, R = 16, T = 16, B = 28;
+    const all = series.reduce((a, s) => a.concat(s.pts.map((p) => p.y)), []);
+    if (!all.length) return "";
+    let min = Math.min.apply(null, all), max = Math.max.apply(null, all);
+    const pad = (max - min) * 0.08 || 0.05;
+    min -= pad; max += pad;
+    const n = Math.max.apply(null, series.map((s) => s.pts.length));
+    const X = (i) => L + (i / Math.max(1, n - 1)) * (w - L - R);
+    const Y = (v) => T + (1 - (v - min) / (max - min || 1)) * (h - T - B);
+    let svg = '<svg viewBox="0 0 ' + w + " " + h + '" style="width:100%;height:auto;display:block">';
+    // 网格 + Y 轴
+    for (let k = 0; k <= 4; k++) {
+      const v = min + (max - min) * k / 4, y = Y(v).toFixed(1);
+      svg += '<line x1="' + L + '" y1="' + y + '" x2="' + (w - R) + '" y2="' + y +
+        '" stroke="rgba(255,255,255,.06)" stroke-width="1"/>';
+      svg += '<text x="' + (L - 9) + '" y="' + (+y + 4) + '" fill="#6F7D92" font-size="11" text-anchor="end">' +
+        (v * 100).toFixed(0) + "%</text>";
+    }
+    series.forEach((s) => {
+      let d = "";
+      s.pts.forEach((p, i) => { d += (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(p.y).toFixed(1); });
+      svg += '<path d="' + d + '" fill="none" stroke="' + s.color + '" stroke-width="' + (s.width || 2) +
+        '" stroke-linejoin="round" stroke-linecap="round"' + (s.dash ? ' stroke-dasharray="4 4"' : "") + "/>";
+    });
+    // X 轴标签
+    const pts = series[0].pts;
+    const step = Math.max(1, Math.floor(pts.length / 6));
+    for (let i = 0; i < pts.length; i += step) {
+      const d0 = pts[i].d;
+      svg += '<text x="' + X(i).toFixed(1) + '" y="' + (h - 8) + '" fill="#6F7D92" font-size="11" text-anchor="middle">' +
+        d0.slice(4, 6) + "/" + d0.slice(6, 8) + "</text>";
+    }
+    svg += "</svg>";
+    return svg;
   };
 
   function showErr(msg) {

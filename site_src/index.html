@@ -32,6 +32,20 @@
   </div>
 
   <div style="margin-top:48px">
+    <div class="label" style="font-size:12px">策略净值</div>
+    <a href="nav.html" class="card" style="display:block;color:inherit;padding:22px 26px">
+      <div class="row" style="align-items:flex-start">
+        <div class="grow">
+          <div class="label" style="margin-bottom:4px">自建仓日累计</div>
+          <div class="num num-lg" id="eqRet">—</div>
+          <div class="sub" id="eqSub"></div>
+        </div>
+        <div style="width:260px;max-width:45%"><div id="eqSpark"></div></div>
+      </div>
+    </a>
+  </div>
+
+  <div style="margin-top:48px">
     <div class="label" style="font-size:12px">下一步</div>
     <div class="grid" id="nextSteps" style="gap:10px"></div>
   </div>
@@ -138,6 +152,19 @@
       '</div>' +
       '<div class="grid" style="margin-top:14px;gap:10px">' + rowsHtml + '</div>' +
       '<div style="margin-top:16px"><a class="btn ghost sm" href="portfolio.html">编辑持仓</a></div>';
+  }
+
+  /* ---- 策略净值迷你图 ---- */
+  const eq = await DSH.json('equity', null);
+  if (eq && eq.points && eq.points.length > 1) {
+    const p0 = eq.points[0], pn = eq.points[eq.points.length - 1];
+    const r = pn.s / p0.s - 1, br = pn.b / p0.b - 1;
+    const el = document.getElementById('eqRet');
+    el.textContent = DSH.pct(r);
+    el.className = 'num num-lg ' + DSH.cls(r);
+    document.getElementById('eqSub').innerHTML = '标普 500 同期 <span class="' + DSH.cls(br) + '">' +
+      DSH.pct(br) + '</span> ｜ 超额 ' + DSH.pct(r - br) + ' ｜ ' + eq.points.length + ' 个交易日 ›';
+    document.getElementById('eqSpark').innerHTML = DSH.spark(eq.points.map(p => ({ y: p.s })), { w: 260, h: 58 });
   }
 
   /* ---- 下一步 ---- */

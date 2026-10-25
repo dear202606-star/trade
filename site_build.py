@@ -154,6 +154,8 @@ def main():
         with open(os.path.join(DATA, "history.json"), "w", encoding="utf-8") as f:
             json.dump(hist, f, ensure_ascii=False)
 
+    # 净值为 equity.py 直接写入 docs/data/，这里无需复制
+
     if os.path.exists(QUAL):
         try:
             with open(QUAL, encoding="utf-8") as f:

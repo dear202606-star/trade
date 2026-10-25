@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>净值 · LEADER QUANT</title>
+<link rel="stylesheet" href="assets/app.css">
+<script src="assets/app.js"></script>
+</head><body>
+<script>DSH.boot();</script>
+<div class="wrap">
+
+  <div class="head">
+    <div class="eyebrow">Equity Curve</div>
+    <h1>策略净值</h1>
+    <p id="sub">按正式持仓权重，从建仓日每日按收盘价计算；标普 500 为基准。</p>
+  </div>
+
+  <div class="grid g4" style="margin-top:26px">
+    <div class="card flat"><div class="label" style="margin-bottom:6px">策略收益</div>
+      <div class="num num-lg" id="sRet">—</div><div class="sub" id="sPeriod"></div></div>
+    <div class="card flat"><div class="label" style="margin-bottom:6px">标普 500</div>
+      <div class="num num-lg" id="bRet">—</div><div class="sub">同期基准</div></div>
+    <div class="card flat"><div class="label" style="margin-bottom:6px">超额</div>
+      <div class="num num-lg" id="exRet">—</div><div class="sub">策略 − 基准</div></div>
+    <div class="card flat"><div class="label" style="margin-bottom:6px">最大回撤</div>
+      <div class="num num-lg down" id="mdd">—</div><div class="sub">区间内最深跌幅</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;padding:22px 18px 10px">
+    <div class="row" style="padding:0 8px 14px">
+      <div class="label" style="margin:0">单位净值走势</div>
+      <div class="grow"></div>
+      <div class="row" style="gap:6px" id="ranges">
+        <button class="btn sm ghost on" data-r="all">全部</button>
+        <button class="btn sm ghost" data-r="3m">近 3 月</button>
+        <button class="btn sm ghost" data-r="1m">近 1 月</button>
+      </div>
+    </div>
+    <div id="chart"></div>
+    <div class="row" style="padding:10px 8px 0;gap:20px">
+      <span style="font-size:12px;color:var(--txt-2)"><i style="display:inline-block;width:18px;height:3px;background:#F2C46B;vertical-align:middle;border-radius:2px"></i> 策略组合</span>
+      <span style="font-size:12px;color:var(--txt-2)"><i style="display:inline-block;width:18px;height:3px;background:#6F7D92;vertical-align:middle;border-radius:2px"></i> 标普 500</span>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;padding:22px 18px 10px">
+    <div class="label" style="padding:0 8px 14px;margin:0">回撤（相对历史高点）</div>
+    <div id="ddChart"></div>
+  </div>
+
+  <div style="margin-top:34px">
+    <div class="label" style="font-size:12px">持仓构成</div>
+    <div class="grid g3" id="weights"></div>
+  </div>
+
+  <div class="foot" id="foot">加载中…</div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let EQ = null, RANGE = 'all';
+
+function slice(pts, r) {
+  if (r === 'all') return pts;
+  const n = r === '1m' ? 22 : 66;
+  return pts.slice(Math.max(0, pts.length - n));
+}
+
+function draw() {
+  if (!EQ || !EQ.points || EQ.points.length < 2) {
+    $('chart').innerHTML = '<div class="tip warn">净值数据不足，等第一次自动更新后生成。</div>';
+    return;
+  }
+  const pts = slice(EQ.points, RANGE);
+  const series = [
+    { pts: pts.map(p => ({ d: p.d, y: p.s - 1 })), color: '#F2C46B', width: 2.2 },
+    { pts: pts.map(p => ({ d: p.d, y: p.b - 1 })), color: '#6F7D92', width: 1.6, dash: true },
+  ];
+  $('chart').innerHTML = DSH.lineChart(series, { h: 320 });
+
+  // 回撤
+  let peak = 0;
+  const dd = pts.map(p => {
+    peak = Math.max(peak, p.s);
+    return { d: p.d, y: p.s / peak - 1 };
+  });
+  $('ddChart').innerHTML = DSH.lineChart([{ pts: dd, color: '#FF6B72', width: 1.5 }], { h: 150 });
+
+  // 区间统计
+  const first = pts[0], last = pts[pts.length - 1];
+  const sR = last.s / first.s - 1, bR = last.b / first.b - 1;
+  let pk = 0, mdd = 0;
+  pts.forEach(p => { pk = Math.max(pk, p.s); mdd = Math.min(mdd, p.s / pk - 1); });
+
+  $('sRet').textContent = DSH.pct(sR);
+  $('sRet').className = 'num num-lg ' + DSH.cls(sR);
+  $('bRet').textContent = DSH.pct(bR);
+  $('bRet').className = 'num num-lg ' + DSH.cls(bR);
+  $('exRet').textContent = DSH.pct(sR - bR);
+  $('exRet').className = 'num num-lg ' + DSH.cls(sR - bR);
+  $('mdd').textContent = DSH.pct(mdd, 1);
+  $('sPeriod').textContent = first.d.slice(0, 4) + '/' + first.d.slice(4, 6) + '/' + first.d.slice(6, 8) +
+    ' 起 · ' + pts.length + ' 个交易日';
+}
+
+document.querySelectorAll('#ranges button').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('#ranges button').forEach(x => x.classList.remove('primary'));
+    document.querySelectorAll('#ranges button').forEach(x => x.classList.add('ghost'));
+    b.classList.remove('ghost'); b.classList.add('primary');
+    RANGE = b.dataset.r;
+    draw();
+  };
+});
+
+(async function () {
+  EQ = await DSH.json('equity', null);
+  if (!EQ) {
+    $('sub').textContent = '净值数据尚未生成';
+    $('foot').textContent = '净值由 GitHub Actions 每个交易日自动计算。';
+    return;
+  }
+  $('sub').textContent = '按正式持仓权重，从 ' + EQ.base_date + ' 建仓，每日按收盘价计算；标普 500 为基准。';
+  $('foot').innerHTML = '更新时间：' + DSH.esc(EQ.updated) +
+    ' ｜ 建仓日：' + EQ.base_date + ' ｜ 仓位：' + (EQ.exposure * 100).toFixed(0) + '%' +
+    ' ｜ 数据：新浪财经美股日线（与回测同源）';
+
+  const w = EQ.weights || [];
+  $('weights').innerHTML = w.map(p =>
+    '<div class="card flat"><div class="row"><div class="grow"><div style="font-weight:800;font-size:16px;color:var(--gold)">' +
+    DSH.esc(p.ticker) + '</div><div class="sub">组合内权重</div></div>' +
+    '<div class="num num-md">' + (p.weight * 100).toFixed(0) + '%</div></div></div>').join('');
+
+  draw();
+})();
+</script>
+</body></html>
