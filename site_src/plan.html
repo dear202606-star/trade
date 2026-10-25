@@ -1,38 +1,44 @@
 <!DOCTYPE html>
 <html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LEADER QUANT · 行动计划</title>
+<title>行动计划 · LEADER QUANT</title>
 <link rel="stylesheet" href="assets/app.css">
 <script src="assets/app.js"></script>
 </head><body>
 <script>DSH.boot();</script>
 <div class="wrap">
 
-  <h1>行动计划</h1>
-  <div class="sub">根据最新信号和你的实际持仓，算出这个月要下的每一笔单：买哪只、几股、多少钱。</div>
-
-  <div class="hero" id="verdict">
-    <div class="k">本月结论</div>
-    <div class="v sm" id="vMain" style="line-height:1.5">加载中…</div>
-    <div class="s" id="vSub"></div>
+  <div class="head">
+    <div class="eyebrow">Action Plan</div>
+    <h1>要下的单</h1>
+    <p>按你的实际持仓算出每一笔：买哪只、几股、多少钱。</p>
   </div>
 
-  <div class="grid g3" style="margin-top:16px">
-    <div class="card"><div class="k">策略仓位上限</div><div class="v gold">30%</div><div class="s">占总投入，控制回撤</div></div>
-    <div class="card"><div class="k">本期目标仓位</div><div class="v" id="cExp">—</div><div class="s">大盘开关决定满仓/半仓</div></div>
-    <div class="card"><div class="k">单只上限</div><div class="v">10%</div><div class="s">占总投入，避免单票爆雷</div></div>
+  <div class="hero fade-in">
+    <div class="eyebrow" style="margin-bottom:12px">本月动作</div>
+    <h2 id="verdict">—</h2>
+    <p class="lead" id="verdictSub"></p>
   </div>
 
-  <h2>具体指令</h2>
-  <div id="orders"></div>
+  <div style="margin-top:34px">
+    <div class="label" style="font-size:12px">执行清单</div>
+    <div class="grid" id="orders" style="gap:10px"></div>
+  </div>
 
-  <h2>执行顺序</h2>
-  <div id="steps"></div>
+  <div style="margin-top:34px" id="stepsBox">
+    <div class="label" style="font-size:12px">操作顺序</div>
+    <div class="card" style="padding:20px 24px">
+      <ol style="margin:0;padding-left:20px;line-height:2.1;color:var(--txt-2);font-size:14px">
+        <li>先卖出不在名单里的持仓，回笼现金</li>
+        <li>再买入股数不足的标的，金额从大到小</li>
+        <li>同一天做完，别拖到第二天</li>
+        <li>成交后回「我的持仓」按实际成交价更新</li>
+        <li>本月之后不再操作，等下个月或 12 月末换仓</li>
+      </ol>
+    </div>
+  </div>
 
-  <h2>核对清单</h2>
-  <div id="checklist"></div>
-
-  <div class="foot">本页结论由规则自动生成，不构成投资建议。下单前请自行确认价格与可用资金。</div>
+  <div class="foot">结论由规则自动生成，不构成投资建议。下单前请自行确认价格与可用资金。</div>
 </div>
 
 <script>
@@ -40,145 +46,101 @@ const $ = (id) => document.getElementById(id);
 
 (async function () {
   const sig = await DSH.json('signal', null);
-  const q = await DSH.json('quotes', { quotes:{}, fx: 7.1 });
-  const pf = DSH.load();
+  const q = await DSH.json('quotes', { quotes: {}, fx: 7.1 });
   const quotes = q.quotes || {};
+  const pf = DSH.load();
 
-  if (!sig) {
-    $('vMain').textContent = '暂无信号数据，请等下一次自动更新';
-    return;
-  }
+  if (!sig) { $('verdict').textContent = '暂无信号数据'; return; }
 
   const off = sig.official || sig.picks || [];
   const exp = sig.exposure;
-  const month = sig.month || '';
-  const isDec = month.endsWith('-12');
-
-  $('cExp').textContent = (exp*100).toFixed(0) + '%';
-  $('cExp').className = 'v ' + (exp >= 1 ? 'green' : 'gold');
-
-  /* ---------- 判断该做什么 ---------- */
+  const isDec = (sig.month || '').endsWith('-12');
   const cap = pf.capital || 0;
-  const hasHoldings = pf.rows.length > 0;
-  let verdict, why = [];
+  const sleeve = cap * 0.30 * exp;
+  const cur = pf.cur || 'USD';
 
-  if (!cap) {
-    verdict = '先填总投入资金，才能算出具体股数';
-    why.push('打开「我的持仓」页，填入总投入金额。');
-  } else if (!hasHoldings) {
-    verdict = '还没建仓 → 本月按目标权重一次性买入 ' + off.length + ' 只';
-    why.push('策略仓位 = 总投入 × 30% × ' + (exp*100).toFixed(0) + '% = ' + DSH.money(cap*0.30*exp, pf.cur));
+  let verdict, lead;
+  if (!cap || !pf.rows.length) {
+    verdict = '先录入持仓';
+    lead = '打开「我的持仓」填入总资金和买入记录，这里会自动算出每笔的股数。';
   } else if (isDec) {
-    verdict = '⚠️ 本月是年度换仓窗口 → 12 月最后一个交易日按新名单换仓';
-    why.push('其余月份不动持仓，只有 12 月末这一次换仓。');
+    verdict = '12 月末换仓';
+    lead = '按最新前 3 名重建组合，卖出不在名单的持仓。';
   } else if (exp < 1) {
-    verdict = '大盘跌破 10 月均线 → 仓位降到 50%，卖掉一半';
-    why.push('SPY ' + sig.spy.toFixed(0) + ' < 10 月均线 ' + sig.ma.toFixed(0));
+    verdict = '仓位减半';
+    lead = 'SPY ' + sig.spy.toFixed(0) + ' 跌破 10 月均线 ' + sig.ma.toFixed(0) + '，把持仓减到 50%。';
   } else {
-    verdict = '不需要换仓 → 持有现有组合，本月无操作';
-    why.push('正式持仓按 ' + (sig.official_month||'上年 12 月') + ' 锁定，全年有效。');
+    verdict = '本月无需换仓';
+    lead = '持有 ' + off.map((p) => p.ticker).join(' / ') + ' 到 12 月末。下面是权重与目标的偏离。';
+  }
+  $('verdict').textContent = verdict;
+  $('verdictSub').textContent = lead;
+
+  if (!cap || !pf.rows.length) {
+    $('orders').innerHTML = '<div class="card" style="text-align:center;padding:40px 20px">' +
+      '<a class="btn primary" href="portfolio.html">去录入持仓 →</a></div>';
+    $('stepsBox').classList.add('hidden');
+    return;
   }
 
-  $('vMain').innerHTML = verdict;
-  $('vSub').innerHTML = why.join(' ') + ' ｜ 数据截至 ' + DSH.esc(sig.month) + '，行情 ' + DSH.esc(q.ts_local || '—');
-
-  /* ---------- 生成指令 ---------- */
-  const sleeve = cap * 0.30 * exp;              // 策略仓位金额
   const held = {};
-  pf.rows.forEach(r => { held[r.ticker] = (held[r.ticker] || 0) + r.shares; });
+  pf.rows.forEach((r) => { held[r.ticker] = (held[r.ticker] || 0) + r.shares; });
 
-  const orders = [];
-  off.forEach(p => {
+  const items = [];
+  off.forEach((p) => {
     const price = (quotes[p.ticker] || {}).p || 0;
     if (!price) return;
-    const targetAmt = sleeve * p.weight;
-    let targetSh = targetAmt / price;
-    // 单只不超过总投入 10%
-    const maxSh = (cap * 0.10) / price;
-    targetSh = Math.min(targetSh, maxSh);
-    const curSh = held[p.ticker] || 0;
-    const delta = targetSh - curSh;
-    orders.push({
-      ticker: p.ticker, name: p.name, price,
-      targetSh, curSh, delta,
-      targetAmt: targetSh * price, deltaAmt: delta * price,
-      weight: p.weight, sector: p.sector
-    });
+    let targetSh = (sleeve * p.weight) / price;
+    targetSh = Math.min(targetSh, (cap * 0.10) / price);
+    const have = held[p.ticker] || 0;
     delete held[p.ticker];
+    items.push({ side: targetSh - have, ticker: p.ticker, name: p.name,
+      price, have, targetSh, amt: Math.abs(targetSh - have) * price });
   });
-
-  // 不在目标里的持仓 → 清掉
-  const leftovers = Object.keys(held).filter(t => held[t] > 0).map(t => {
+  Object.keys(held).forEach((t) => {
+    if (held[t] <= 0) return;
     const price = (quotes[t] || {}).p || 0;
-    return { ticker: t, shares: held[t], price, amt: price * held[t] };
+    items.push({ side: -held[t], ticker: t, name: '不在本期名单', price,
+      have: held[t], targetSh: 0, amt: held[t] * price });
   });
 
-  let html = '<table><thead><tr><th>操作</th><th>代码</th><th>名称</th>' +
-    '<th class="num">现价</th><th class="num">当前股数</th><th class="num">目标股数</th>' +
-    '<th class="num">差额股数</th><th class="num">金额</th></tr></thead><tbody>';
+  const real = items.filter((x) => x.price && x.amt > Math.max(100, sleeve * 0.005));
+  const flat = items.filter((x) => real.indexOf(x) < 0);
 
-  const act = (d, price) => {
-    if (!price) return '<span class="flat">无行情</span>';
-    if (Math.abs(d * price) < 50) return '<span class="flat">持有</span>';
-    return d > 0 ? '<b class="pos">买入</b>' : '<b class="neg">卖出</b>';
+  const card = (x) => {
+    const buy = x.side > 0;
+    const qty = Math.abs(x.side);
+    return '<div class="action">' +
+      '<span class="tag ' + (buy ? 'buy' : 'sell') + '">' + (buy ? '买入' : '卖出') + '</span>' +
+      '<div style="min-width:92px"><div style="font-weight:800;font-size:15px">' + DSH.esc(x.ticker) + '</div>' +
+        '<div style="font-size:11.5px;color:var(--txt-3);margin-top:2px">' + DSH.esc(x.name || '') + '</div></div>' +
+      '<div class="grow" style="text-align:right"><div class="num" style="font-size:16px">' +
+        qty.toFixed(qty < 10 ? 2 : 0) + ' 股</div>' +
+        '<div class="sub" style="margin-top:2px">@ ' + x.price.toFixed(2) + '</div></div>' +
+      '<div style="text-align:right;min-width:110px"><div class="num" style="font-size:16px;color:' +
+        (buy ? 'var(--green)' : 'var(--red)') + '">' + (buy ? '' : '−') + DSH.money(x.amt, cur) + '</div>' +
+        '<div class="sub" style="margin-top:2px">' + (buy ? '需要资金' : '回笼现金') + '</div></div></div>';
   };
 
-  orders.forEach(o => {
-    html += '<tr><td>' + act(o.delta, o.price) + '</td>' +
-      '<td class="tk">' + DSH.esc(o.ticker) + '</td><td style="font-size:12.5px;color:var(--dim)">' + DSH.esc(o.name) + '</td>' +
-      '<td class="num">' + o.price.toFixed(2) + '</td>' +
-      '<td class="num">' + o.curSh.toFixed(2) + '</td>' +
-      '<td class="num">' + o.targetSh.toFixed(2) + '</td>' +
-      '<td class="num ' + DSH.cls(o.delta) + '"><b>' + (o.delta>0?'+':'') + o.delta.toFixed(2) + '</b></td>' +
-      '<td class="num">' + DSH.money(Math.abs(o.deltaAmt), pf.cur) + '</td></tr>';
-  });
-  leftovers.forEach(l => {
-    html += '<tr><td><b class="neg">清仓</b></td><td class="tk">' + DSH.esc(l.ticker) + '</td>' +
-      '<td style="font-size:12.5px;color:var(--dim)">不在本期名单</td>' +
-      '<td class="num">' + (l.price||0).toFixed(2) + '</td><td class="num">' + l.shares.toFixed(2) + '</td>' +
-      '<td class="num">0</td><td class="num neg"><b>-' + l.shares.toFixed(2) + '</b></td>' +
-      '<td class="num">' + DSH.money(l.amt, pf.cur) + '</td></tr>';
-  });
-  html += '</tbody></table>';
-
-  if (!cap) html = '<div class="note warn">先到「我的持仓」填入总投入资金，这里会自动算出每笔单的股数。</div>' + html;
-
-  const need = orders.reduce((a,o)=> a + Math.max(0, o.deltaAmt), 0);
-  const free = orders.reduce((a,o)=> a + Math.max(0, -o.deltaAmt), 0) + leftovers.reduce((a,l)=>a+l.amt,0);
-  html += '<div class="note">本次需要买入约 <b>' + DSH.money(need, pf.cur) + '</b>' +
-          (free > 0 ? '，卖出可回笼约 <b>' + DSH.money(free, pf.cur) + '</b>' : '') +
-          '。策略总仓位 ' + (sleeve>0 ? DSH.money(sleeve, pf.cur) : '—') +
-          '（总投入的 ' + (exp*30).toFixed(0) + '%）。</div>';
-  $('orders').innerHTML = html;
-
-  /* 有实际可执行差额时，修正结论措辞 */
-  const actionable = orders.filter(o => o.price && Math.abs(o.deltaAmt) > Math.max(200, sleeve * 0.01));
-  if (actionable.length && /无操作|不需要换仓/.test(verdict)) {
-    $('vMain').innerHTML = '不需要换仓，但持仓与目标权重有偏离 → 建议微调 ' + actionable.length + ' 只';
-    $('vSub').innerHTML = '这不是换仓，只是把超配/低配拉回目标（单只上限 10%、策略仓位 30%）。'
-      + ' ｜ 数据截至 ' + DSH.esc(sig.month);
+  let html = real.map(card).join('');
+  if (flat.length && real.length) {
+    html += '<div class="tip" style="margin-top:6px">另外 ' + flat.length + ' 只已在目标附近，无需调整：' +
+      flat.map((x) => DSH.esc(x.ticker)).join('、') + '</div>';
+  }
+  if (!real.length) {
+    html = '<div class="tip ok">持仓已在目标权重附近，本月不需要下单。</div>';
   }
 
-  /* ---------- 执行顺序 ---------- */
-  $('steps').innerHTML =
-    '<div class="card"><ol style="margin:0;padding-left:20px;line-height:2">' +
-    '<li>先<b>卖出</b>不在名单里的持仓，回笼现金（避免资金不足）。</li>' +
-    '<li>再<b>买入</b>目标股数不足的标的，按金额从大到小下单。</li>' +
-    '<li>同一天完成，不要拖到第二天（避免价格漂移）。</li>' +
-    '<li>成交后回到「我的持仓」，按实际成交价和股数更新。</li>' +
-    '<li>本月之后<b>不再操作</b>，等下个月信号或 12 月末换仓。</li>' +
-    '</ol></div>';
-
-  /* ---------- 核对清单 ---------- */
-  const checks = [
-    ['大盘开关', sig.trend + '（SPY ' + sig.spy.toFixed(0) + ' vs 均线 ' + sig.ma.toFixed(0) + '）'],
-    ['策略仓位', (exp*30).toFixed(0) + '% 的总投入'],
-    ['单只上限', '10%（已自动限制目标股数）'],
-    ['换仓时点', isDec ? '本月末需要换仓 ⚠️' : '不需要换仓，持有到 12 月末'],
-    ['止损', '不设个股止损，只看大盘开关'],
-  ];
-  $('checklist').innerHTML = '<table><thead><tr><th style="width:160px">项目</th><th>要求</th></tr></thead><tbody>' +
-    checks.map(([a,b]) => '<tr><td>' + a + '</td><td>' + DSH.esc(b) + '</td></tr>').join('') + '</tbody></table>';
+  const need = real.filter((x) => x.side > 0).reduce((a, x) => a + x.amt, 0);
+  const free = real.filter((x) => x.side < 0).reduce((a, x) => a + x.amt, 0);
+  if (real.length) {
+    html += '<div class="sub" style="margin-top:6px;font-size:13px">' +
+      (need ? '需要买入 ' + DSH.money(need, cur) : '') +
+      (need && free ? ' ｜ ' : '') +
+      (free ? '卖出回笼 ' + DSH.money(free, cur) : '') +
+      ' ｜ 策略总仓位 ' + DSH.money(sleeve, cur) + '（总资金的 ' + (exp * 30).toFixed(0) + '%）</div>';
+  }
+  $('orders').innerHTML = html;
 })();
 </script>
 </body></html>
