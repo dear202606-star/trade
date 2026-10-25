@@ -182,14 +182,15 @@ function renderHedge(h) {
   ];
   document.getElementById('hedgeTable').innerHTML =
     '<table><thead><tr><th>方案</th><th class="num">年化</th><th class="num">波动</th>' +
-    '<th class="num">夏普</th><th class="num">最大回撤</th><th class="num">胜率</th></tr></thead><tbody>' +
+    '<th class="num">夏普</th><th class="num">最大回撤</th><th class="num">月胜率</th><th class="num">年正收益率</th></tr></thead><tbody>' +
     rows.map(([n, s]) => '<tr><td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' +
       (rows.find(r => r[0] === n) || [])[2] + ';margin-right:8px"></span>' + n + '</td>' +
       '<td class="num ' + DSH.cls(s.cagr) + '">' + DSH.pct(s.cagr, 1) + '</td>' +
       '<td class="num">' + DSH.pct(s.vol, 1) + '</td>' +
       '<td class="num"><b>' + s.sharpe.toFixed(2) + '</b></td>' +
       '<td class="num down">' + DSH.pct(s.mdd, 1) + '</td>' +
-      '<td class="num">' + DSH.pct(s.win, 0) + '</td></tr>').join('') +
+      '<td class="num">' + DSH.pct(s.win, 0) + '</td>' +
+      '<td class="num"><b>' + yrRate(n) + '</b></td></tr>').join('') +
     '</tbody></table>';
 
   const v = '结论：<b>不要做空标普对冲。</b>组合波动 ' + DSH.pct(st.long.vol, 0) +
