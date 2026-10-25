@@ -133,6 +133,23 @@ def universe():
     return sorted(t for t in tk if t)
 
 
+def last_session(now_utc=None):
+    """美东时间最后一个已收盘的交易日（YYYY-MM-DD）
+
+    行情是「最新一笔」，收盘后到下一个开盘前，它反映的是上一交易日的涨跌。
+    界面必须写清楚是哪一天，否则用户会以为那是「今天」。
+    """
+    now_utc = now_utc or dt.datetime.now(dt.timezone.utc)
+    et = now_utc - dt.timedelta(hours=4)          # 夏令时 EDT=UTC-4（ approximations ）
+    d = et.date()
+    # 未到美东 16:00 收盘 → 用前一交易日
+    if et.hour < 16:
+        d -= dt.timedelta(days=1)
+    while d.weekday() >= 5:                        # 跳过周末
+        d -= dt.timedelta(days=1)
+    return d.isoformat()
+
+
 def main():
     tickers = universe()
     quotes, stale = fetch_quotes(tickers)
@@ -140,6 +157,7 @@ def main():
     payload = {
         "ts": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "ts_local": dt.datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "session": last_session(),
         "fx": fx,
         "count": len(quotes),
         "universe": len(tickers),

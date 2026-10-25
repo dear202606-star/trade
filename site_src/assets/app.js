@@ -49,7 +49,10 @@
       url = "data/" + name + ".json?t=" + Date.now();
       const r = await fetch(url, { cache: "no-store" });
       if (!r.ok) throw new Error("HTTP " + r.status);
-      cache[name] = await r.json();
+      const _d = await r.json();
+      // 行情：把「最近交易日」挂到报价表上，供各页面显示与判断新仓
+      if (name === 'quotes' && _d && _d.quotes) _d.quotes.__session = _d.session || '';
+      cache[name] = _d;
     } catch (e) {
       g.__dshErr = (g.__dshErr || []).concat(url + " -> " + e.message);
       cache[name] = fallback === undefined ? null : fallback;
@@ -128,18 +131,26 @@
     });
     const mv = rows.reduce((a, r) => a + r.mv, 0);
     const cost = rows.reduce((a, r) => a + r.cost, 0);
+    const sess = (quotes && quotes.__session) || '';
+    rows.forEach((r) => {
+      // 占比 = 该只市值 ÷ 全部持仓市值（不再用「总资金」当分母）
+      r.weight = mv > 0 ? r.mv / mv : (rows.length ? 1 / rows.length : 0);
+      // 在该交易日之后才买入的仓位，没有「当日涨跌」可言
+      r.isNew = !!(sess && r.added && String(r.added).slice(0, 10) > sess);
+      if (r.isNew) { r.dayPnl = 0; r.dayPct = 0; }
+    });
     const dayPnl = rows.reduce((a, r) => a + (r.dayPnl || 0), 0);
-    const cap = pf.capital || 0;
-    rows.forEach((r) => (r.weight = cap > 0 ? r.mv / cap : (mv > 0 ? r.mv / mv : 0)));
-    const cash = Math.max(0, cap - cost);
+    const dayValid = rows.length > 0 && rows.some((r) => !r.isNew);
+    // 当日涨跌基数 = 昨日市值
+    const prevMv = mv - dayPnl;
     return {
       rows, mv, cost,
       pnl: mv - cost,
       pnlPct: cost > 0 ? (mv - cost) / cost : 0,
       dayPnl,
       dayPct: mv - dayPnl > 0 ? dayPnl / (mv - dayPnl) : 0,
-      cash, total: mv + cash,
-      posPct: cap > 0 ? mv / cap : 0,
+      dayValid, session: sess,
+      total: mv,
     };
   };
 

@@ -39,6 +39,8 @@ def get(path, timeout=40):
     url = BASE + path + ("&" if "?" in path else "?") + "cb=" + CB
     try:
         r = requests.get(url, headers=H, timeout=timeout)
+        # 有些静态服务器不带 charset，必须自己按 UTF-8 解，否则中文全乱码
+        r.encoding = "utf-8"
         return r.status_code, r.text
     except Exception as e:
         return 0, str(e)
@@ -127,7 +129,7 @@ def data(name):
 def main():
     # 1. 三个页面
     page("", ["今天该做什么", "策略净值", "下一步"])
-    page("portfolio.html", ["账户总资金", "按策略建仓", "要下的单"])
+    page("portfolio.html", ["我的持仓", "要下的单", "止损线", "按信号一键填入"])
     page("strategy.html", ["单位净值", "逐年记录", "个股贡献", "名词与纪律"])
 
     # 2. 数据

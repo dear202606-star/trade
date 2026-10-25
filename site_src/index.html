@@ -70,9 +70,9 @@
   const isDec = (sig.month || '').endsWith('-12');
 
   let verdict, lead;
-  if (!pf.capital || !pf.rows.length) {
+  if (!pf.rows.length) {
     verdict = '先录入你的持仓，这里会给出今天的结论';
-    lead = '填入总资金和你买过的股票，系统自动算出盈亏、占比和下一步操作。';
+    lead = '填入你买过的股票和股数，系统自动算出盈亏、占比和下一步操作。';
   } else if (isDec) {
     verdict = '本年最后一个月 → 12 月末按新名单换仓';
     lead = '换仓日一年只有一次，其余月份只看大盘开关。';
@@ -134,20 +134,18 @@
               ' ｜ 成本 ' + DSH.money(c.cost, cur) + '</div>' +
           '</div>' +
           '<div style="text-align:right">' +
-            '<div class="label">今日</div>' +
-            '<div class="num num-lg ' + DSH.cls(c.dayPnl) + '">' + DSH.money(c.dayPnl, cur) + '</div>' +
+            '<div class="label">' + (q.session ? '最近交易日 ' + q.session.slice(5) : '今日') + '</div>' +
+            '<div class="num num-lg ' + (c.dayValid ? DSH.cls(c.dayPnl) : '') + '">' + (c.dayValid ? DSH.money(c.dayPnl, cur) : '—') + '</div>' +
             '<div class="sub"><span class="' + DSH.cls(c.dayPct) + '">' + DSH.pct(c.dayPct) + '</span></div>' +
           '</div>' +
         '</div>' +
         '<div class="grid g3" style="margin-top:26px;gap:12px">' +
-          '<div class="card flat"><div class="label" style="margin-bottom:6px">总市值</div>' +
+          '<div class="card flat"><div class="label" style="margin-bottom:6px">持仓市值</div>' +
             '<div class="num num-md">' + DSH.money(c.mv, cur) + '</div></div>' +
-          '<div class="card flat"><div class="label" style="margin-bottom:6px">现金</div>' +
-            '<div class="num num-md">' + DSH.money(c.cash, cur) + '</div></div>' +
-          '<div class="card flat"><div class="label" style="margin-bottom:6px">仓位（占总资金）</div>' +
-            '<div class="num num-md">' + (c.posPct * 100).toFixed(1) + '%</div>' +
-            '<div class="bar"><i class="' + (c.posPct > 0.35 ? 'over' : '') +
-            '" style="width:' + Math.min(100, c.posPct * 200) + '%"></i></div></div>' +
+          '<div class="card flat"><div class="label" style="margin-bottom:6px">总投入</div>' +
+            '<div class="num num-md">' + DSH.money(c.cost, cur) + '</div></div>' +
+          '<div class="card flat"><div class="label" style="margin-bottom:6px">持有</div>' +
+            '<div class="num num-md">' + c.rows.length + ' 只</div></div>' +
         '</div>' +
       '</div>' +
       '<div class="grid" style="margin-top:14px;gap:10px">' + rowsHtml + '</div>' +
@@ -163,7 +161,7 @@
     el.textContent = DSH.pct(r);
     el.className = 'num num-lg ' + DSH.cls(r);
     document.getElementById('eqSub').innerHTML = '标普 500 同期 <span class="' + DSH.cls(br) + '">' +
-      DSH.pct(br) + '</span> ｜ 超额 ' + DSH.pct(r - br) + ' ｜ ' + eq.points.length + ' 个交易日 ›';
+      DSH.pct(br) + '</span> ｜ 跑赢大盘 ' + DSH.pct(r - br) + ' ｜ ' + eq.points.length + ' 个交易日 ›';
     let pk = 0;
     const dds = eq.points.map(p => { pk = Math.max(pk, p.s); return { d: p.d, y: p.s / pk - 1 }; });
     const tail = eq.points.slice(-120), tailDd = dds.slice(-120);

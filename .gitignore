@@ -77,3 +77,6 @@ output/*-长图*.png
 
 # 本地调试截图
 output/_*.png
+
+# 界面测试截图（自动生成）
+output/ui_test/

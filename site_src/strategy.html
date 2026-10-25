@@ -19,8 +19,8 @@
       <div class="num num-lg" id="sRet">—</div><div class="sub" id="sPeriod"></div></div>
     <div class="card flat"><div class="label" style="margin-bottom:6px">标普 500</div>
       <div class="num num-lg" id="bRet">—</div><div class="sub">同期基准</div></div>
-    <div class="card flat"><div class="label" style="margin-bottom:6px">超额</div>
-      <div class="num num-lg" id="exRet">—</div><div class="sub">策略 − 基准</div></div>
+    <div class="card flat"><div class="label" style="margin-bottom:6px">跑赢大盘</div>
+      <div class="num num-lg" id="exRet">—</div><div class="sub">策略收益 − 标普收益</div></div>
     <div class="card flat"><div class="label" style="margin-bottom:6px">最大回撤</div>
       <div class="num num-lg down" id="mdd">—</div><div class="sub">区间内最深跌幅</div></div>
   </div>
@@ -49,18 +49,16 @@
   <h2 style="margin:44px 0 10px;font-size:19px;letter-spacing:-.02em">个股贡献</h2>
   <div id="stocks"></div>
 
-  <h2 style="margin:44px 0 10px;font-size:19px;letter-spacing:-.02em">数据质量</h2>
-  <div id="quality"></div>
-
     <h2 style="margin:44px 0 10px;font-size:19px;letter-spacing:-.02em">名词与纪律</h2>
   <div class="card"><table>
     <thead><tr><th style="width:150px">名词</th><th>含义</th></tr></thead>
     <tbody>
-      <tr><td>账户总资金</td><td>交给这套策略管理的总金额（在「我的持仓」填）</td></tr>
-      <tr><td>策略上限</td><td>账户总资金 × 30%，其余留现金（回测显示满仓回撤 −60%）</td></tr>
-      <tr><td>仓位</td><td>持仓市值 ÷ 账户总资金</td></tr>
+      <tr><td>总投入</td><td>你实际买入这些股票花掉的钱（成本合计），由持仓自动汇总</td></tr>
+      <tr><td>持仓市值</td><td>按最新价算出的当前价值 = 股数 × 现价</td></tr>
+      <tr><td>占比</td><td>单只市值 ÷ 全部持仓市值（不含现金）</td></tr>
       <tr><td>组合内权重</td><td>单只占「已买股票」的比例，前 3 名通常 30/30/40</td></tr>
-      <tr><td>占总资金</td><td>单只占「账户总资金」的比例 = 组合内权重 × 仓位</td></tr>
+      <tr><td>占总投入</td><td>单只成本 ÷ 总投入，用来看你实际把钱压在哪只上</td></tr>
+      <tr><td>跑赢大盘（超额）</td><td>策略赚的减去标普赚的。比如策略 +30%、标普 +10%，就是跑赢 20 个点。它衡量「选股有没有价值」，不是你实际赚了多少。</td></tr>
       <tr><td>最大回撤</td><td>从历史最高点跌下来的最深幅度</td></tr>
       <tr><td>换仓</td><td>每年 12 月最后一个交易日按新排名重建组合，其余月份不动</td></tr>
     </tbody></table></div>
@@ -126,7 +124,7 @@ function renderYears() {
         '<div style="text-align:right;min-width:96px"><div class="num num-md ' + DSH.cls(r.ret) + '">' +
           (r.ret == null ? '—' : DSH.pct(r.ret)) + '</div><div class="sub" style="margin-top:2px">策略</div></div>' +
         '<div style="text-align:right;min-width:86px"><div class="num num-md ' + DSH.cls(ex) + '">' +
-          (ex == null ? '—' : DSH.pct(ex)) + '</div><div class="sub" style="margin-top:2px">超额</div></div>' +
+          (ex == null ? '—' : DSH.pct(ex)) + '</div><div class="sub" style="margin-top:2px">跑赢</div></div>' +
         '<div style="text-align:right;min-width:82px"><div class="num num-md down">' +
           (r.dd == null ? '—' : DSH.pct(r.dd, 1)) + '</div><div class="sub" style="margin-top:2px">年内回撤</div></div>' +
       '</div></div>';
@@ -154,8 +152,8 @@ function renderStocks() {
 
 
 (async function () {
-  const [eq, sh, q] = await Promise.all([
-    DSH.json('equity', null), DSH.json('strategy_history', null), DSH.json('quality', null)]);
+  const eq = await DSH.json('equity', null);
+  const sh = await DSH.json('strategy_history', null);
   EQ = eq; SH = sh;
 
   const safe = (fn, arg, name, anchorId) => {
@@ -174,16 +172,6 @@ function renderStocks() {
   safe(renderYears, null, '逐年记录', 'years');
   safe(renderStocks, null, '个股贡献', 'stocks');
 
-  if (q && q.total) {
-    const rate = (q.total - q.bad) / q.total;
-    const bad = (q.rows || []).filter(r => !r.ok);
-    $('quality').innerHTML = '<div class="tip ok" style="margin-bottom:12px">两源一致率 <b>' +
-      (rate * 100).toFixed(1) + '%</b>（' + (q.total - q.bad) + '/' + q.total +
-      '）。复权口径统一为「仅拆股」，不一致的标的直接隔离、不参与排名。</div>' +
-      (bad.length ? '<div class="card" style="padding:16px 20px"><div class="label" style="margin-bottom:8px">已隔离</div>' +
-        bad.map(r => '<span class="chip" style="margin:0 6px 6px 0">' + DSH.esc(r.ticker) + '</span>').join('') +
-        '<div class="sub" style="margin-top:8px">公司行为（分析上市、换股）导致两源编码不同，属正常偏差。</div></div>' : '');
-  }
 })();
 </script>
 </body></html>

@@ -11,7 +11,7 @@
   <div class="head">
     <div class="eyebrow">Portfolio</div>
     <h1>我的持仓</h1>
-    <p>填入总资金和买过的股票，自动按最新行情算盈亏。数据只存在你的浏览器里。</p>
+    <p>填入买过的股票和股数，自动按最新行情算盈亏与占比。数据只存在你的浏览器里。</p>
   </div>
 
   <!-- 总览 -->
@@ -23,32 +23,28 @@
         <div class="sub" id="tPnlPct"></div>
       </div>
       <div style="text-align:right">
-        <div class="label">今日</div>
+        <div class="label" id="tDayLabel">今日</div>
         <div class="num num-lg" id="tDay">—</div>
         <div class="sub" id="tDayPct"></div>
       </div>
     </div>
     <div class="grid g3" style="margin-top:24px;gap:12px">
       <div class="card flat"><div class="label" style="margin-bottom:6px">总市值</div><div class="num num-md" id="tMv">—</div></div>
-      <div class="card flat"><div class="label" style="margin-bottom:6px">现金</div><div class="num num-md" id="tCash">—</div></div>
-      <div class="card flat"><div class="label" style="margin-bottom:6px">仓位（占总资金）</div><div class="num num-md" id="tPos">—</div>
-        <div class="bar"><i id="tPosBar" style="width:0%"></i></div></div>
+      <div class="card flat"><div class="label" style="margin-bottom:6px">总投入</div><div class="num num-md" id="tCash">—</div></div>
+      <div class="card flat"><div class="label" style="margin-bottom:6px">持有</div><div class="num num-md" id="tPos">—</div>
+        </div>
     </div>
   </div>
 
-  <!-- 资金设置 -->
+  <!-- 持仓设置 -->
   <div class="card" style="margin-top:16px">
     <div class="row">
-      <div class="field" style="width:210px">
-        <label>账户总资金</label>
-        <input id="capital" type="number" min="0" step="1000" placeholder="例如 100000" class="num-in">
-      </div>
       <div class="field" style="width:140px">
         <label>币种</label>
         <select id="cur"><option value="USD">USD 美元</option><option value="CNY">CNY 人民币</option></select>
       </div>
       <div class="grow"></div>
-      <button class="btn primary" id="btnFromSignal">按策略建仓（用满 30%）</button>
+      <button class="btn primary" id="btnFromSignal">按信号一键填入</button>
       <button class="btn ghost" id="btnExport">导出</button>
       <button class="btn ghost" id="btnImport">导入</button>
     </div>
@@ -92,7 +88,7 @@ let SIG = null;
 const $ = (id) => document.getElementById(id);
 
 function render() {
-  $('capital').value = PF.capital || '';
+  
   $('cur').value = PF.cur || 'USD';
 
   DSH.updatePeaks(PF, Q.quotes || {});
@@ -106,35 +102,38 @@ function render() {
     ? '<span class="' + DSH.cls(c.pnlPct) + '">' + DSH.pct(c.pnlPct) + '</span> ｜ 成本 ' + DSH.money(c.cost, cur)
     : '还没有持仓';
   const d = $('tDay');
-  d.textContent = PF.rows.length ? DSH.money(c.dayPnl, cur) : '—';
-  d.className = 'num num-lg ' + DSH.cls(c.dayPnl);
-  $('tDayPct').innerHTML = PF.rows.length ? '<span class="' + DSH.cls(c.dayPct) + '">' + DSH.pct(c.dayPct) + '</span>' : '';
+  if (c.session) $('tDayLabel').textContent = '最近交易日 ' + c.session.slice(5);
+  if (!PF.rows.length) {
+    d.textContent = '—'; d.className = 'num num-lg'; $('tDayPct').innerHTML = '';
+  } else if (!c.dayValid) {
+    d.textContent = '—'; d.className = 'num num-lg';
+    $('tDayPct').innerHTML = '<span style="color:var(--txt-3)">该交易日之后买入</span>';
+  } else {
+    d.textContent = DSH.money(c.dayPnl, cur);
+    d.className = 'num num-lg ' + DSH.cls(c.dayPnl);
+    $('tDayPct').innerHTML = '<span class="' + DSH.cls(c.dayPct) + '">' + DSH.pct(c.dayPct) + '</span>';
+  }
 
   $('tMv').textContent = DSH.money(c.mv, cur);
-  $('tCash').textContent = DSH.money(c.cash, cur);
-  $('tPos').textContent = (c.posPct * 100).toFixed(1) + '%';
-  $('tPosBar').style.width = Math.min(100, c.posPct * 200) + '%';
-  $('tPosBar').className = c.posPct > 0.35 ? 'over' : '';
+  $('tCash').textContent = DSH.money(c.cost, cur);
+  $('tPos').textContent = c.rows.length + ' 只';
+  
+  
 
-  /* 资金说明：账户总资金 → 策略上限 30% → 已持仓 / 剩余现金 */
-  const cap = PF.capital || 0;
+  /* 资金说明：按实际持仓统计 */
   const capHint = $('capHint');
-  if (!cap) {
-    capHint.className = 'tip warn';
-    capHint.innerHTML = '先填<b>账户总资金</b>（这笔钱里最多 30% 用于本策略，剩下 70% 留作现金，是策略的抗回撤设计）。';
+  if (!PF.rows.length) {
+    capHint.innerHTML = '录入你实际买入的股票与股数，系统按<b>真实持仓</b>计算市值、盈亏与占比。仓位大小由你自己决定。';
   } else {
-    const limit = cap * 0.30 * ((SIG && SIG.exposure) || 1);
-    const used = c.cost;
-    capHint.className = 'tip';
-    capHint.innerHTML =
-      '账户总资金 <b>' + DSH.money(cap, cur) + '</b> → 策略上限 30% = <b>' + DSH.money(limit, cur) + '</b>' +
-      ' ｜ 已买入 <b>' + DSH.money(used, cur) + '</b> ｜ 剩余现金 <b>' + DSH.money(Math.max(0, cap - used), cur) + '</b>' +
-      '<br><span style="color:var(--txt-3)">为什么不是满仓：回测显示满仓最大回撤 −60%，用 30% 仓位把最坏情况压到 −10% 左右。</span>';
+    capHint.innerHTML = '持仓市值 <b>' + DSH.money(c.mv, cur) + '</b> ｜ 总投入 <b>' + DSH.money(c.cost, cur) +
+      '</b> ｜ 浮动盈亏 <b class="' + DSH.cls(c.pnl) + '">' + DSH.money(c.pnl, cur) + '</b>' +
+      '<br><span style="color:var(--txt-3)">占比按持仓市值计算；买多少、用多大仓位，由你自己决定。</span>';
   }
+
 
   if (!PF.rows.length) {
     $('list').innerHTML = '<div class="card" style="text-align:center;padding:38px 20px;color:var(--txt-3)">' +
-      '还没有持仓 · 用下面的输入框添加，或点「按策略建仓（用满 30%）」</div>';
+      '还没有持仓 · 用下面的输入框添加，或点「按信号一键填入」</div>';
     return;
   }
 
@@ -185,7 +184,6 @@ document.addEventListener('click', (e) => {
   if (d != null) { PF.rows.splice(+d, 1); DSH.save(PF); render(); }
 });
 
-$('capital').addEventListener('input', (e) => { PF.capital = parseFloat(e.target.value) || 0; DSH.save(PF); render(); });
 $('cur').addEventListener('change', (e) => { PF.cur = e.target.value; DSH.save(PF); render(); });
 
 $('btnAdd').onclick = () => {
@@ -195,7 +193,7 @@ $('btnAdd').onclick = () => {
   const q = (Q.quotes || {})[tk];
   let cost = parseFloat($('nCost').value);
   if (!cost || isNaN(cost)) cost = q ? q.p : 0;
-  PF.rows.push({ ticker: tk, shares: sh, cost });
+  PF.rows.push({ ticker: tk, shares: sh, cost, added: new Date().toISOString().slice(0, 10) });
   DSH.save(PF);
   $('nTicker').value = ''; $('nShares').value = ''; $('nCost').value = '';
   $('nTicker').focus();
@@ -205,18 +203,18 @@ $('btnAdd').onclick = () => {
 $('btnFromSignal').onclick = () => {
   if (!SIG) return;
   const off = SIG.official || SIG.picks || [];
-  const cap = PF.capital || 300000;
-  const sleeve = cap * 0.30 * SIG.exposure;
+  // 只填代码与现价，股数留给你按自己的投入决定
   PF.rows = off.map((p) => {
     const price = ((Q.quotes || {})[p.ticker] || {}).p || 100;
-    return { ticker: p.ticker, shares: +(sleeve * p.weight / price).toFixed(4), cost: +price.toFixed(2) };
+    return { ticker: p.ticker, shares: 0, cost: +price.toFixed(2),
+             added: new Date().toISOString().slice(0, 10) };
   });
-  if (!PF.capital) PF.capital = cap;
   DSH.save(PF); render();
+  toast('已填入 ' + off.length + ' 只，请填上你实际买入的股数');
 };
 
 $('btnClear').onclick = () => {
-  if (!confirm('清空所有持仓和资金设置？')) return;
+  if (!confirm('清空所有持仓记录？')) return;
   PF = { capital: 0, cur: 'USD', rows: [] };
   DSH.save(PF); render();
 };
@@ -255,22 +253,21 @@ function renderOrders() {
   if (!SIG) { el.innerHTML = ''; return; }
   const quotes = (Q.quotes || {});
   const off = SIG.official || SIG.picks || [];
-  const exp = SIG.exposure;
-  const cap = PF.capital || 0;
   const cur = PF.cur || 'USD';
-  if (!cap || !PF.rows.length) {
-    el.innerHTML = '<div class="tip">填好上面两项后，这里会自动算出每笔要买/卖多少股。</div>';
+  const c0 = DSH.compute(PF, quotes, Q.fx);
+  // 以「当前持仓市值」为盘子做再平衡，不再假设一个总资金
+  const book = c0.mv > 0 ? c0.mv : 0;
+  if (!PF.rows.length || book <= 0) {
+    el.innerHTML = '<div class="tip">录入你实际买入的股数和成本后，这里会给出「补齐到目标比例」的买卖股数。</div>';
     return;
   }
-  const sleeve = cap * 0.30 * exp;
   const held = {};
   PF.rows.forEach(r => { held[r.ticker] = (held[r.ticker] || 0) + r.shares; });
   const items = [];
   off.forEach(p => {
     const price = (quotes[p.ticker] || {}).p || 0;
     if (!price) return;
-    let tgt = (sleeve * p.weight) / price;
-    tgt = Math.min(tgt, (cap * 0.10) / price);
+    const tgt = (book * p.weight) / price;
     const have = held[p.ticker] || 0;
     delete held[p.ticker];
     items.push({ side: tgt - have, ticker: p.ticker, price, amt: Math.abs(tgt - have) * price });
@@ -281,7 +278,6 @@ function renderOrders() {
     items.push({ side: -held[t], ticker: t, price, amt: held[t] * price });
   });
   // 已触发移动止损的持仓 → 强制清仓（优先于权重调整）
-  const c0 = DSH.compute(PF, quotes, Q.fx);
   c0.rows.forEach(r => {
     if (r.stopDist != null && r.stopDist <= 0 && r.hasQuote) {
       const i = items.findIndex(x => x.ticker === r.ticker);
@@ -290,7 +286,7 @@ function renderOrders() {
       else { items.push({ side: -r.shares, ticker: r.ticker, price: r.price, amt, forced: true }); }
     }
   });
-  const real = items.filter(x => x.price && x.amt > Math.max(100, sleeve * 0.005));
+  const real = items.filter(x => x.price && x.amt > Math.max(100, book * 0.005));
   if (!real.length) {
     el.innerHTML = '<div class="tip ok">持仓已在目标权重附近，不需要下单。</div>';
     return;
@@ -316,11 +312,12 @@ function renderOrders() {
   if (location.hash === '#demo' && !PF.rows.length) {
     const q = await DSH.json('quotes', {});
     const off = (SIG && (SIG.official || SIG.picks)) || [];
-    const cap = 100000;
-    PF = { capital: cap, cur: 'USD', rows: off.map(p => {
+    const book = 100000;                      // 演示：假设已投入 10 万
+    PF = { cur: 'USD', rows: off.map(p => {
       const px = ((q.quotes || {})[p.ticker] || {}).p || 100;
-      const amt = cap * 0.30 * (SIG.exposure || 1) * p.weight;
-      return { ticker: p.ticker, shares: +(amt / px).toFixed(4), cost: +(px * 0.92).toFixed(2), peak: +(px * 1.08).toFixed(2) };
+      const amt = book * p.weight;
+      return { ticker: p.ticker, shares: +(amt / px).toFixed(4), cost: +(px * 0.92).toFixed(2),
+               peak: +(px * 1.08).toFixed(2), added: '2026-09-01' };
     }) };
     window.__demo = true;
   }
