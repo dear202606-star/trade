@@ -176,11 +176,13 @@ def _write_error(msg):
 
 
 def main():
-    if not os.path.exists(MEMBERS):
-        print("缺 成分股时点表", file=sys.stderr)
+    m = datafeed.load_members()
+    if m is None:
+        msg = "无法获取标普500 时点成分表（static/ 与网络均不可用）"
+        print(msg, file=sys.stderr)
+        _write_error(msg)
         return 1
 
-    m = pd.read_csv(MEMBERS)
     m["start_date"] = m["start_date"].astype(str)
     m["end_date"] = m["end_date"].fillna("2099-12-31").astype(str)
     sector, name_map = datafeed.load_sector()
