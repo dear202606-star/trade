@@ -120,7 +120,7 @@ font-family:'Microsoft YaHei',system-ui,sans-serif;">
 </div></div>"""
 
 
-def inject_nav(path):
+def inject_nav(path, active=""):
     try:
         with open(path, encoding="utf-8") as f:
             html = f.read()
@@ -129,7 +129,12 @@ def inject_nav(path):
         i = html.find("<body")
         j = html.find(">", i) + 1
         with open(path, "w", encoding="utf-8") as f:
-            f.write(html[:j] + NAV_BAR + html[j:])
+            nav = NAV_BAR
+            if active:
+                nav = nav.replace('background:#182233;color:#ffc857;text-decoration:none;font-size:14px;font-weight:700;','color:#8fa2bd;font-weight:400;text-decoration:none;font-size:14px;padding:6px 12px;border-radius:9px;')
+                nav = nav.replace('href="%s" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;' % active,
+                                  'href="%s" style="padding:6px 12px;border-radius:9px;background:#182233;color:#ffc857;font-weight:700;' % active)
+            f.write(html[:j] + nav + html[j:])
     except Exception as e:
         print("WARN: 导航注入失败", e)
 
@@ -168,8 +173,8 @@ def main():
         f.write(build_report(hist))
 
     dashboard.build(hist, os.path.join(DOCS, "signals.html"))
-    inject_nav(os.path.join(DOCS, "signals.html"))
-    inject_nav(os.path.join(DOCS, "report.html"))
+    inject_nav(os.path.join(DOCS, "signals.html"), "signals.html")
+    inject_nav(os.path.join(DOCS, "report.html"), "report.html")
 
     for fn in ("策略模型研究与行动步骤.pdf", "策略模型研究与行动步骤.xlsx"):
         s = os.path.join(BASE, "output", fn)
