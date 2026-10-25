@@ -20,7 +20,7 @@ import requests
 BASE = os.path.dirname(os.path.abspath(__file__))
 CACHE = os.path.join(BASE, "data", "sina2")
 PANEL = os.path.join(BASE, "output", ".panel.json")
-MEMBERS = os.path.join(BASE, "data", "sp500_ticker_start_end.csv")
+MEMBERS = os.path.join(BASE, "static", "sp500_members.csv")
 SP500 = os.path.join(BASE, "data", "sp500.csv")
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/128.0 Safari/537.36")
@@ -61,7 +61,9 @@ def load_bars(ticker):
     bars = None
 
     p = os.path.join(CACHE, ticker + ".json")
-    if os.path.exists(p):
+    if os.environ.get("DSH_NO_CACHE"):
+        p = ""
+    if p and os.path.exists(p):
         try:
             d = json.load(open(p, encoding="utf-8"))
             b = d.get("bars") or []
@@ -99,9 +101,13 @@ def save_panel(panel_dict):
 
 def load_members():
     """标普 500 时点成分表：本地优先，CI 从 GitHub 取"""
-    if os.path.exists(MEMBERS):
-        import pandas as pd
-        return pd.read_csv(MEMBERS)
+    import pandas as pd
+    for p in (MEMBERS, os.path.join(BASE, "data", "sp500_ticker_start_end.csv")):
+        if os.path.exists(p):
+            try:
+                return pd.read_csv(p)
+            except Exception:
+                pass
     import pandas as pd
     for url in ("https://raw.githubusercontent.com/fja05680/sp500/master/"
                 "sp500_ticker_start_end.csv",

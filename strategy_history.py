@@ -166,6 +166,15 @@ def year_perf(y, picks):
     return round(ret, 4), round(mdd, 4), True
 
 
+def _write_error(msg):
+    try:
+        os.makedirs(os.path.dirname(OUT), exist_ok=True)
+        with open(OUT, "w", encoding="utf-8") as f:
+            json.dump({"years": [], "stocks": [], "error": msg}, f, ensure_ascii=False)
+    except Exception:
+        pass
+
+
 def main():
     if not os.path.exists(MEMBERS):
         print("缺 成分股时点表", file=sys.stderr)
