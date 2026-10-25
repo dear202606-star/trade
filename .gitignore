@@ -74,3 +74,6 @@ _archive/
 
 # 长图（本地导出，不入库）
 output/*-长图*.png
+
+# 本地调试截图
+output/_*.png
