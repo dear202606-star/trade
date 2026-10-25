@@ -43,6 +43,14 @@
     </div>
   </div>
 
+  <h2 style="margin:44px 0 10px;font-size:19px;letter-spacing:-.02em">对冲研究：做多组合 + 做空标普 500 值不值</h2>
+  <div class="card" style="padding:18px 20px">
+    <div id="hedgeVerdict" class="tip warn" style="margin-bottom:16px">加载中…</div>
+    <div id="hedgeTable"></div>
+    <div id="hedgeChart" style="margin-top:16px"></div>
+    <div class="sub" style="margin-top:12px">对冲成本按年化 1.6% 计（SPY 分红 1.3% + 借券 0.3%）；区间与净值页一致。</div>
+  </div>
+
   <h2 style="margin:44px 0 10px;font-size:19px;letter-spacing:-.02em">逐年记录</h2>
   <div id="years"></div>
 
@@ -146,9 +154,62 @@ function renderStocks() {
     '<tbody>' + rows + '</tbody></table></div>';
 }
 
+
+/* ---------- 对冲研究 ---------- */
+function renderHedge(h) {
+  if (!h || !h.stats) { document.getElementById('hedgeVerdict').textContent = '对冲回测数据尚未生成'; return; }
+  const st = h.stats;
+  const rows = [
+    ['纯多头（现状）', st.long, '#F2C46B'],
+    ['标普 500', st.bench, '#6F7D92'],
+    ['1:1 对冲', st.ls, '#5B9DFF'],
+    ['β 对冲（' + (st.beta_used || 1.48) + 'x）', st.lsb, '#A78BFA'],
+    ['波动率目标 20%', st.vt, '#3BD68A'],
+  ];
+  document.getElementById('hedgeTable').innerHTML =
+    '<table><thead><tr><th>方案</th><th class="num">年化</th><th class="num">波动</th>' +
+    '<th class="num">夏普</th><th class="num">最大回撤</th><th class="num">胜率</th></tr></thead><tbody>' +
+    rows.map(([n, s]) => '<tr><td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' +
+      (rows.find(r => r[0] === n) || [])[2] + ';margin-right:8px"></span>' + n + '</td>' +
+      '<td class="num ' + DSH.cls(s.cagr) + '">' + DSH.pct(s.cagr, 1) + '</td>' +
+      '<td class="num">' + DSH.pct(s.vol, 1) + '</td>' +
+      '<td class="num"><b>' + s.sharpe.toFixed(2) + '</b></td>' +
+      '<td class="num down">' + DSH.pct(s.mdd, 1) + '</td>' +
+      '<td class="num">' + DSH.pct(s.win, 0) + '</td></tr>').join('') +
+    '</tbody></table>';
+
+  const v = '结论：<b>不要做空标普对冲。</b>组合波动 ' + DSH.pct(st.long.vol, 0) +
+    ' 里只有 ' + DSH.pct(st.beta * st.bench.vol, 0) + ' 来自大盘，其余 ' +
+    DSH.pct(st.long.vol - st.beta * st.bench.vol, 0) + ' 是个股特异性风险，SPY 对冲不掉。' +
+    '1:1 对冲夏普从 ' + st.long.sharpe.toFixed(2) + ' 掉到 ' + st.ls.sharpe.toFixed(2) +
+    '，β 对冲更差（' + st.lsb.sharpe.toFixed(2) + '）。<br>正确做法是<b>波动率目标</b>：同样夏普 ' +
+    st.vt.sharpe.toFixed(2) + '，回撤从 ' + DSH.pct(st.long.mdd, 0) + ' 压到 ' + DSH.pct(st.vt.mdd, 0) + '。';
+  const el = document.getElementById('hedgeVerdict');
+  el.className = 'tip ok';
+  el.innerHTML = v;
+
+  // 曲线对比
+  const pts = h.monthly;
+  let e1 = 1, e2 = 1, e3 = 1, e4 = 1;
+  const s1 = [], s2 = [], s3 = [], s4 = [];
+  pts.forEach((p, i) => {
+    e1 *= 1 + p.p; e2 *= 1 + p.s; e3 *= 1 + p.l; e4 *= 1 + p.h;
+    if (i % 3 === 0) {
+      const d = p.ym.replace('-', '');
+      s1.push({ d, y: e1 }); s2.push({ d, y: e2 }); s3.push({ d, y: e3 }); s4.push({ d, y: e4 });
+    }
+  });
+  document.getElementById('hedgeChart').innerHTML = DSH.lineChart([
+    { pts: s1, color: '#F2C46B', width: 2.2 },
+    { pts: s2, color: '#6F7D92', width: 1.4, dash: true },
+    { pts: s3, color: '#5B9DFF', width: 1.5 },
+  ], { h: 240 });
+}
+
 (async function () {
   const [eq, sh, q] = await Promise.all([
     DSH.json('equity', null), DSH.json('strategy_history', null), DSH.json('quality', null)]);
+  const hg = await DSH.json('hedge', null);
   EQ = eq; SH = sh;
 
   if (eq) {
@@ -158,6 +219,7 @@ function renderStocks() {
     $('chart').innerHTML = '<div class="tip warn">净值数据尚未生成</div>';
   }
   renderYears();
+  renderHedge(hg);
   renderStocks();
 
   if (q && q.total) {

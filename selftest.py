@@ -74,6 +74,33 @@ def main():
           f"质量核对 {qual.get('total') if qual else 0} 只",
           "quality.json 缺失或样本不足", hard=False)
 
+    # B2. 成分股合规（只允许标普 500 成分股）
+    try:
+        import pandas as pd
+        mm = pd.read_csv("static/sp500_members.csv")
+        mm["start_date"] = mm["start_date"].astype(str)
+        mm["end_date"] = mm["end_date"].fillna("2099-12-31").astype(str)
+        bad_hold = []
+        for r in (sh or {}).get("years", []):
+            d = "%d-12-31" % (r["year"] - 1)
+            for p in r.get("holdings", []):
+                hit = mm[(mm.ticker == p["ticker"]) & (mm.start_date <= d) & (mm.end_date >= d)]
+                if not len(hit):
+                    bad_hold.append("%d:%s" % (r["year"], p["ticker"]))
+        for p in (sig or {}).get("official", []):
+            hit = mm[(mm.ticker == p["ticker"]) & (mm.start_date <= "2026-12-31") & (mm.end_date >= "2026-01-01")]
+            if not len(hit):
+                bad_hold.append("当前:%s" % p["ticker"])
+        check(not bad_hold, "全部持仓均为标普500 成分股",
+              "存在非成分股持仓：" + ", ".join(bad_hold[:8]))
+    except Exception as e:
+        warns.append("成分股校验失败：%s" % e)
+
+    # B3. 对冲回测
+    hg = load("hedge.json")
+    check(hg and (hg.get("stats") or {}).get("long"),
+          "对冲回测就绪", "hedge.json 缺失", hard=False)
+
     # C. 新鲜度
     if q and q.get("ts"):
         try:

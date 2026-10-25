@@ -245,12 +245,38 @@ def main():
         print("ERROR: 排名结果为空", file=sys.stderr)
         sys.exit(1)
 
-    # ---- 正式持仓：以「上一年 12 月」为基准锁定 ----
+    # ---- 正式持仓：以「上一年 12 月」为基准，一次锁定、全年不再变 ----
     official_month = f"{int(latest[:4]) - 1}-12"
-    q_off, _ = ranking_at(data, months, sp, official_month)
-    if q_off is None:                       # 数据不足时退回当月
-        q_off, official_month = q_now, latest
-    official = select_holdings(q_off)
+
+    # 已锁定过就沿用，绝不重算（否则数据微小修订会让持仓漂移）
+    locked = None
+    try:
+        if os.path.exists("output/signal_history.json"):
+            _h = json.load(open("output/signal_history.json", encoding="utf-8"))
+            for _r in _h:
+                if _r.get("official_month") == official_month and _r.get("official"):
+                    locked = _r["official"]
+                    break
+    except Exception:
+        locked = None
+
+    if locked:
+        class _P(dict):
+            def __getitem__(self, k):
+                return dict.__getitem__(self, k)
+        official = []
+        for p in locked:
+            row = {"ticker": p["ticker"], "name": p.get("name", p["ticker"]),
+                   "sector": p.get("sector", ""), "rank": p.get("rank", 0),
+                   "ret12": p.get("ret12", 0.0)}
+            official.append((row, p.get("weight", 1 / len(locked))))
+        print(f"      正式持仓已锁定（{official_month}），沿用不重算", flush=True)
+    else:
+        q_off, _ = ranking_at(data, months, sp, official_month)
+        if q_off is None:                   # 数据不足时退回当月
+            q_off, official_month = q_now, latest
+        official = select_holdings(q_off)
+
     preview = select_holdings(q_now)
 
     # ---- 趋势开关 ----
