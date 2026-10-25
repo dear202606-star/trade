@@ -20,9 +20,6 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  group: pages-deploy
-  cancel-in-progress: false
 
 jobs:
   refresh:
@@ -51,6 +48,9 @@ jobs:
           path: docs
 
   deploy:
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: false
     needs: refresh
     runs-on: ubuntu-latest
     environment:

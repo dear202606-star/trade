@@ -27,9 +27,6 @@ permissions:
   id-token: write
   issues: write
 
-concurrency:
-  group: pages-deploy
-  cancel-in-progress: false
 
 jobs:
   pick:
@@ -110,6 +107,9 @@ jobs:
           fi
 
   deploy:
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: false
     needs: pick
     runs-on: ubuntu-latest
     environment:
