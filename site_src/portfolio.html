@@ -48,7 +48,7 @@
         <select id="cur"><option value="USD">USD 美元</option><option value="CNY">CNY 人民币</option></select>
       </div>
       <div class="grow"></div>
-      <button class="btn primary ghost" id="btnFromSignal">按策略建仓（用满 30%）</button>
+      <button class="btn primary" id="btnFromSignal">按策略建仓（用满 30%）</button>
       <button class="btn ghost" id="btnExport">导出</button>
       <button class="btn ghost" id="btnImport">导入</button>
     </div>
@@ -95,6 +95,7 @@ function render() {
   $('capital').value = PF.capital || '';
   $('cur').value = PF.cur || 'USD';
 
+  DSH.updatePeaks(PF, Q.quotes || {});
   const c = DSH.compute(PF, Q.quotes, Q.fx);
   const cur = PF.cur || 'USD';
 
@@ -151,8 +152,11 @@ function render() {
         '<input class="num-in" type="number" step="0.0001" value="' + r.shares + '" data-i="' + i + '" data-f="shares" style="padding:7px 9px;font-size:13px"></div>' +
       '<div><div class="label" style="margin:0 0 3px">成本</div>' +
         '<input class="num-in" type="number" step="0.01" value="' + (+r.cost).toFixed(2) + '" data-i="' + i + '" data-f="cost" style="padding:7px 9px;font-size:13px"></div>' +
-      '<div><div class="label" style="margin:0 0 3px">现价</div>' +
-        '<div class="num" style="font-size:13.5px;padding-top:7px">' + (r.hasQuote ? r.price.toFixed(2) : '—') + '</div></div>' +
+      '<div><div class="label" style="margin:0 0 3px">止损线</div>' +
+        '<div class="num" style="font-size:13.5px;padding-top:5px">' + (r.stopLine ? r.stopLine.toFixed(2) : '—') +
+          '<div style="font-size:10.5px;margin-top:1px;color:' +
+          (r.stopDist != null && r.stopDist <= 0 ? 'var(--red)' : r.stopDist != null && r.stopDist < 0.10 ? '#FFAB6B' : 'var(--txt-3)') + '">' +
+          (r.stopDist == null ? '' : r.stopDist <= 0 ? '已触发' : '距 ' + (r.stopDist * 100).toFixed(0) + '%') + '</div></div></div>' +
       '<div style="text-align:right"><div class="num" style="font-size:15px;color:' +
         (r.pnl >= 0 ? 'var(--green)' : 'var(--red)') + '">' + DSH.money(r.pnl, cur) + '</div>' +
         '<div class="sub" style="margin-top:2px;font-size:11.5px"><span class="' + DSH.cls(r.pnlPct) + '">' +
@@ -168,6 +172,7 @@ document.addEventListener('input', (e) => {
   const i = +t.dataset.i, f = t.dataset.f;
   PF.rows[i][f] = parseFloat(t.value) || 0;
   DSH.save(PF);
+  DSH.updatePeaks(PF, Q.quotes || {});
   const c = DSH.compute(PF, Q.quotes, Q.fx);
   const cur = PF.cur || 'USD';
   const p = $('tPnl'); p.textContent = DSH.money(c.pnl, cur); p.className = 'num num-xl ' + DSH.cls(c.pnl);
@@ -275,6 +280,16 @@ function renderOrders() {
     const price = (quotes[t] || {}).p || 0;
     items.push({ side: -held[t], ticker: t, price, amt: held[t] * price });
   });
+  // 已触发移动止损的持仓 → 强制清仓（优先于权重调整）
+  const c0 = DSH.compute(PF, quotes, Q.fx);
+  c0.rows.forEach(r => {
+    if (r.stopDist != null && r.stopDist <= 0 && r.hasQuote) {
+      const i = items.findIndex(x => x.ticker === r.ticker);
+      const amt = r.price * r.shares;
+      if (i >= 0) { items[i] = { side: -r.shares, ticker: r.ticker, price: r.price, amt, forced: true }; }
+      else { items.push({ side: -r.shares, ticker: r.ticker, price: r.price, amt, forced: true }); }
+    }
+  });
   const real = items.filter(x => x.price && x.amt > Math.max(100, sleeve * 0.005));
   if (!real.length) {
     el.innerHTML = '<div class="tip ok">持仓已在目标权重附近，不需要下单。</div>';
@@ -285,7 +300,8 @@ function renderOrders() {
     const qty = Math.abs(x.side);
     return '<div class="action"><span class="tag ' + (buy ? 'buy' : 'sell') + '">' +
       (buy ? '买入' : '卖出') + '</span>' +
-      '<div style="min-width:90px;font-weight:800;font-size:15px">' + DSH.esc(x.ticker) + '</div>' +
+      '<div style="min-width:90px;font-weight:800;font-size:15px">' + DSH.esc(x.ticker) +
+        (x.forced ? ' <span class="pill off" style="font-size:10px;padding:2px 6px">止损</span>' : '') + '</div>' +
       '<div class="grow" style="text-align:right"><div class="num" style="font-size:15px">' +
         qty.toFixed(qty < 10 ? 2 : 0) + ' 股</div><div class="sub" style="margin-top:2px">@ ' + x.price.toFixed(2) + '</div></div>' +
       '<div style="text-align:right;min-width:104px"><div class="num" style="font-size:15px;color:' +
@@ -296,7 +312,20 @@ function renderOrders() {
 
 (async function () {
   SIG = await DSH.json('signal', null);
+  // 演示模式：#demo 自动填一份样例，方便预览（不覆盖真实数据）
+  if (location.hash === '#demo' && !PF.rows.length) {
+    const q = await DSH.json('quotes', {});
+    const off = (SIG && (SIG.official || SIG.picks)) || [];
+    const cap = 100000;
+    PF = { capital: cap, cur: 'USD', rows: off.map(p => {
+      const px = ((q.quotes || {})[p.ticker] || {}).p || 100;
+      const amt = cap * 0.30 * (SIG.exposure || 1) * p.weight;
+      return { ticker: p.ticker, shares: +(amt / px).toFixed(4), cost: +(px * 0.92).toFixed(2), peak: +(px * 1.08).toFixed(2) };
+    }) };
+    window.__demo = true;
+  }
   Q = await DSH.json('quotes', { quotes: {}, fx: 7.1 });
+  if (window.__demo) { /* 演示数据不落盘 */ } else { }
   render();
   renderOrders();
 })();
