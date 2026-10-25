@@ -27,6 +27,42 @@ UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
 PAT = re.compile(r"\(\s*(\[.*\])\s*\)", re.S)
 
 _mem = {}
+_SPLITS = None
+
+
+def _splits():
+    """载入入库的权威拆股表，保证本地与 CI 用同一张表"""
+    global _SPLITS
+    if _SPLITS is None:
+        _SPLITS = {}
+        for p in (os.path.join(BASE, "output", "splits.json"),):
+            if os.path.exists(p):
+                try:
+                    _SPLITS = json.load(open(p, encoding="utf-8"))
+                except Exception:
+                    _SPLITS = {}
+    return _SPLITS
+
+
+def _reapply(ticker, bars):
+    """用权威拆股表重算复权价：adj = raw × 拆股累计比例"""
+    sp = _splits().get(ticker)
+    if not sp or not bars:
+        return bars
+    out = {}
+    for ym, (adj, raw) in bars.items():
+        try:
+            import pandas as pd
+            me = pd.Timestamp(ym + "-01") + pd.offsets.MonthEnd(0)
+            ts = int(me.timestamp()) + 86399
+            f = 1.0
+            for sd, ratio in sp:
+                if int(sd) <= ts:
+                    f *= float(ratio)
+            out[ym] = (raw * f, raw)
+        except Exception:
+            out[ym] = (adj, raw)
+    return out
 _panel = None
 
 
@@ -79,6 +115,8 @@ def load_bars(ticker):
 
     if bars is None:
         bars = fetch_sina_bars(ticker)
+    if bars:
+        bars = _reapply(ticker, bars)
 
     _mem[ticker] = bars
     return bars
