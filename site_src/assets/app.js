@@ -168,15 +168,20 @@
     const all = series.reduce((a, s) => a.concat(s.pts.map((p) => p.y)), []);
     if (!all.length) return "";
     let min = Math.min.apply(null, all), max = Math.max.apply(null, all);
+    const logScale = !!opts.log && min > 0;
+    if (logScale) { min = Math.log(min); max = Math.log(max); }
     const pad = (max - min) * 0.08 || 0.05;
     min -= pad; max += pad;
+    const label = opts.fmt || ((v) => (logScale ? Math.exp(v) : v) * 100 + "%");
+    if (opts.fmt) { /* 自定义格式时不做百分比换算 */ }
     const n = Math.max.apply(null, series.map((s) => s.pts.length));
     const X = (i) => L + (i / Math.max(1, n - 1)) * (w - L - R);
-    const Y = (v) => T + (1 - (v - min) / (max - min || 1)) * (h - T - B);
+    const Y = (v) => T + (1 - ((logScale ? Math.log(v) : v) - min) / (max - min || 1)) * (h - T - B);
     let svg = '<svg viewBox="0 0 ' + w + " " + h + '" style="width:100%;height:auto;display:block">';
     // 网格 + Y 轴
     for (let k = 0; k <= 4; k++) {
-      const v = min + (max - min) * k / 4, y = Y(v).toFixed(1);
+      const rawV = logScale ? Math.exp(min + (max - min) * k / 4) : (min + (max - min) * k / 4);
+      const y = (T + (1 - ((logScale ? Math.log(rawV) : rawV) - min) / (max - min || 1)) * (h - T - B)).toFixed(1);
       svg += '<line x1="' + L + '" y1="' + y + '" x2="' + (w - R) + '" y2="' + y +
         '" stroke="rgba(255,255,255,.06)" stroke-width="1"/>';
       svg += '<text x="' + (L - 9) + '" y="' + (+y + 4) + '" fill="#6F7D92" font-size="11" text-anchor="end">' +
