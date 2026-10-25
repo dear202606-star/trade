@@ -263,25 +263,101 @@
     return svg;
   };
 
+  /* ---------- 图表十字线（滑动读数） ---------- */
+  let __chId = 0;
+  DSH._charts = {};
+
+  function chartWrap(svg, meta) {
+    const id = "ch" + (++__chId);
+    meta.id = id;
+    DSH._charts[id] = meta;
+    return '<div class="ch-wrap" id="' + id + '" style="position:relative">' + svg + "</div>";
+  }
+
+  DSH.attachCharts = function (root) {
+    Object.keys(DSH._charts).forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el || el._ready) return;
+      el._ready = true;
+      const meta = DSH._charts[id];
+      const line = document.createElement("div");
+      line.style.cssText = "position:absolute;top:0;bottom:0;width:1px;background:rgba(242,196,107,.5);" +
+        "display:none;pointer-events:none;z-index:4";
+      const dot = document.createElement("div");
+      dot.style.cssText = "position:absolute;width:8px;height:8px;border-radius:50%;background:#F2C46B;" +
+        "box-shadow:0 0 0 3px rgba(242,196,107,.22);display:none;pointer-events:none;z-index:4;transform:translate(-50%,-50%)";
+      const tip = document.createElement("div");
+      tip.style.cssText = "position:absolute;pointer-events:none;display:none;z-index:6;padding:9px 11px;" +
+        "border-radius:9px;background:rgba(20,19,24,.97);border:1px solid rgba(255,255,255,.13);" +
+        "font-size:11.5px;line-height:1.6;white-space:nowrap;box-shadow:0 10px 28px rgba(0,0,0,.55);color:#EDEAE4";
+      el.appendChild(line); el.appendChild(dot); el.appendChild(tip);
+
+      const move = (ev) => {
+        const r = el.getBoundingClientRect();
+        if (!r.width) return;
+        const x = ev.clientX - r.left;
+        const frac = (x / r.width - meta.l) / (1 - meta.l - meta.r);
+        let i = Math.round(frac * (meta.n - 1));
+        i = Math.max(0, Math.min(meta.n - 1, i));
+        const px = (meta.l + (i / Math.max(1, meta.n - 1)) * (1 - meta.l - meta.r)) * r.width;
+        const py = meta.y ? meta.y(i, r.height) : null;
+
+        line.style.display = "block"; line.style.left = px.toFixed(1) + "px";
+        if (py != null && meta.dot !== false) {
+          dot.style.display = "block";
+          dot.style.left = px.toFixed(1) + "px"; dot.style.top = py.toFixed(1) + "px";
+        }
+        tip.style.display = "block";
+        tip.innerHTML = meta.tip(i);
+        const tw = tip.offsetWidth || 150;
+        tip.style.left = Math.min(Math.max(4, px + 14), Math.max(4, r.width - tw - 4)) + "px";
+        tip.style.top = "12px";
+      };
+      el.addEventListener("mousemove", move);
+      el.addEventListener("mouseleave", () => {
+        line.style.display = "none"; dot.style.display = "none"; tip.style.display = "none";
+      });
+      el.addEventListener("touchmove", (e) => { if (e.touches[0]) move(e.touches[0]); }, { passive: true });
+    });
+  };
+
+  /* 图例行：色块 + 名称 + 数值 */
+  function tipRow(color, name, val) {
+    return '<div style="display:flex;gap:8px;align-items:center;justify-content:space-between">' +
+      '<span style="color:#A5A2B0"><i style="display:inline-block;width:7px;height:7px;border-radius:50%;' +
+      "background:" + color + ';margin-right:6px;vertical-align:middle"></i>' + name + "</span>" +
+      '<b style="margin-left:14px;font-variant-numeric:tabular-nums">' + val + "</b></div>";
+  }
+  DSH._tipRow = tipRow;
+
   /* ---------- 收益 + 回撤 合一图 ---------- */
   DSH.combo = function (eq, dd, opts) {
     opts = opts || {};
     const w = 900, h = opts.h || 380, L = 52, R = 14, T = 14;
     const H1 = h * 0.68, GAP = 12, H2 = h - H1 - GAP - 26;
     const eqs = eq.map(p => p.y);
-    let mn = Math.min.apply(null, eqs), mx = Math.max.apply(null, eqs);
-    const pad = (mx - mn) * 0.12 || 0.05;
+    // 净值跨度大时用对数轴，否则前几年会被压成一条线
+    const useLog = opts.log !== false && (Math.max.apply(null, eqs) - Math.min.apply(null, eqs)) > 2;
+    const tf = (v) => (useLog ? Math.log(Math.max(1e-6, 1 + v)) : v);
+    let mn = Math.min.apply(null, eqs.map(tf)), mx = Math.max.apply(null, eqs.map(tf));
+    const pad = (mx - mn) * 0.10 || 0.05;
     mn -= pad; mx += pad;
     const n = eq.length;
     const X = i => L + (i / Math.max(1, n - 1)) * (w - L - R);
-    const Y1 = v => T + (1 - (v - mn) / (mx - mn || 1)) * H1;
+    const Y1 = v => T + (1 - (tf(v) - mn) / (mx - mn || 1)) * H1;
     const dmin = Math.min.apply(null, dd.map(p => p.y));
     const Y2 = v => T + H1 + GAP + (1 - (v - dmin) / (0 - dmin || 1)) * H2;
     let svg = '<svg viewBox="0 0 ' + w + ' ' + h + '" style="width:100%;height:auto;display:block">';
-    for (let k = 0; k <= 3; k++) {
-      const v = mn + (mx - mn) * k / 3, y = Y1(v).toFixed(1);
+    // 纵轴单位统一：跨度过大时全用「x 倍」，否则全用「%」
+    const useX = (Math.max.apply(null, eqs) >= 9);
+    for (let k = 0; k <= 4; k++) {
+      const tv = mn + (mx - mn) * k / 4;
+      const v = useLog ? (Math.exp(tv) - 1) : tv;
+      const y = Y1(v).toFixed(1);
       svg += '<line x1="' + L + '" y1="' + y + '" x2="' + (w - R) + '" y2="' + y + '" stroke="rgba(255,255,255,.05)"/>';
-      svg += '<text x="' + (L - 8) + '" y="' + (+y + 4) + '" fill="#6F7D92" font-size="10.5" text-anchor="end">' + (v * 100).toFixed(0) + '%</text>';
+      const txt = useX ? (1 + v).toFixed(1).replace(/\.0$/, '') + 'x' : (v * 100).toFixed(0) + '%';
+      svg += '<text x="' + (L - 8) + '" y="' + (+y + 4) + '" fill="#6F7D92" font-size="10.5" text-anchor="end">' +
+        txt + '</text>';
     }
     // 策略曲线
     let d1 = '';
@@ -305,7 +381,24 @@
       svg += '<text x="' + X(i).toFixed(1) + '" y="' + (h - 8) + '" fill="#6F7D92" font-size="10.5" text-anchor="middle">' + eq[i].d.slice(2, 4) + '/' + eq[i].d.slice(4, 6) + '</text>';
     }
     svg += '</svg>';
-    return svg;
+
+    // 十字线读数：日期 + 策略 / 基准 / 回撤
+    const meta = {
+      n: n, l: L / w, r: R / w, dot: false,
+      y: (i, hh) => (Y1(eqs[i]) / h) * hh,
+      tip: (i) => {
+        const p = eq[i];
+        let s = '<div style="color:#8E8B99;margin-bottom:5px;font-size:10.5px;letter-spacing:.04em">' +
+          (p.d.length === 6 ? p.d.slice(0, 4) + "-" + p.d.slice(4, 6) : p.d) + "</div>";
+        s += tipRow("#F2C46B", opts.sName || "策略", (eqs[i] * 100).toFixed(1) + "%");
+        if (opts.bench) {
+          s += tipRow("#6F7D92", opts.bName || "标普 500", (opts.bench[i].y * 100).toFixed(1) + "%");
+        }
+        if (dd[i]) s += tipRow("#FF6B72", "回撤", (dd[i].y * 100).toFixed(1) + "%");
+        return s;
+      },
+    };
+    return chartWrap(svg, meta);
   };
 
   function showErr(msg) {

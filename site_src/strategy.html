@@ -11,134 +11,232 @@
   <div class="head">
     <div class="eyebrow">Strategy</div>
     <h1>策略表现</h1>
-    <p>收益与回撤同图；下面是逐年记录、持仓与调仓明细。</p>
+    <p>上面是当前持仓的运行表现，下面是回测的全周期与分年记录。</p>
   </div>
 
-  <div class="grid g4" style="margin-top:26px">
+  <!-- ========== 一、当前运行 ========== -->
+  <div class="row" style="margin:30px 0 10px;align-items:baseline;gap:10px">
+    <h2 style="margin:0;font-size:19px;letter-spacing:-.02em">当前持仓表现</h2>
+    <span class="sub" id="runPeriod">—</span>
+  </div>
+
+  <div class="grid g4">
     <div class="card flat"><div class="label" style="margin-bottom:6px">策略收益</div>
-      <div class="num num-lg" id="sRet">—</div><div class="sub" id="sPeriod"></div></div>
-    <div class="card flat"><div class="label" style="margin-bottom:6px">标普 500</div>
-      <div class="num num-lg" id="bRet">—</div><div class="sub">同期基准</div></div>
-    <div class="card flat"><div class="label" style="margin-bottom:6px">跑赢大盘</div>
-      <div class="num num-lg" id="exRet">—</div><div class="sub">策略收益 − 标普收益</div></div>
+      <div class="num num-lg" id="rRet">—</div><div class="sub">自建仓日累计</div></div>
+    <div class="card flat"><div class="label" style="margin-bottom:6px">标普 500 同期</div>
+      <div class="num num-lg" id="rBench">—</div><div class="sub">同期基准</div></div>
+    <div class="card flat"><div class="label" style="margin-bottom:6px">跑赢标普 500</div>
+      <div class="num num-lg" id="rEx">—</div><div class="sub">策略收益 − 标普收益</div></div>
     <div class="card flat"><div class="label" style="margin-bottom:6px">最大回撤</div>
-      <div class="num num-lg down" id="mdd">—</div><div class="sub">区间内最深跌幅</div></div>
+      <div class="num num-lg down" id="rMdd">—</div><div class="sub">区间内最深跌幅</div></div>
   </div>
 
   <div class="card" style="margin-top:16px;padding:20px 16px 8px">
     <div class="row" style="padding:0 10px 12px">
-      <div class="label" style="margin:0">单位净值 + 回撤</div>
+      <div class="label" style="margin:0">累计收益 + 回撤</div>
       <div class="grow"></div>
-      <div class="row" style="gap:6px" id="ranges">
+      <div class="row" style="gap:6px" id="rRanges">
         <button class="btn sm primary" data-r="all">全部</button>
         <button class="btn sm ghost" data-r="1y">近 1 年</button>
         <button class="btn sm ghost" data-r="3m">近 3 月</button>
       </div>
     </div>
-    <div id="chart"></div>
+    <div id="runChart"></div>
     <div class="row" style="padding:8px 10px 0;gap:18px">
-      <span style="font-size:12px;color:var(--txt-2)"><i style="display:inline-block;width:16px;height:3px;background:#F2C46B;vertical-align:middle;border-radius:2px"></i> 策略净值</span>
+      <span style="font-size:12px;color:var(--txt-2)"><i style="display:inline-block;width:16px;height:3px;background:#F2C46B;vertical-align:middle;border-radius:2px"></i> 策略</span>
       <span style="font-size:12px;color:var(--txt-2)"><i style="display:inline-block;width:16px;height:3px;background:#6F7D92;vertical-align:middle;border-radius:2px"></i> 标普 500</span>
       <span style="font-size:12px;color:var(--txt-2)"><i style="display:inline-block;width:16px;height:8px;background:rgba(255,107,114,.35);vertical-align:middle;border-radius:2px"></i> 回撤</span>
+      <span style="font-size:11.5px;color:var(--txt-3)">鼠标移到图上可看每日数值</span>
     </div>
   </div>
 
-  <h2 style="margin:44px 0 10px;font-size:19px;letter-spacing:-.02em">全周期表现 · <span id="sumRange">2010–2025</span></h2>
-  <div class="grid g4" id="summary">
-    <div class="card flat"><div class="label" style="margin-bottom:6px">累计收益</div>
-      <div class="num num-lg" id="sumTotal">—</div><div class="sub">按年度收盘复利</div></div>
-    <div class="card flat"><div class="label" style="margin-bottom:6px">年化收益</div>
-      <div class="num num-lg" id="sumCagr">—</div><div class="sub">复合年化</div></div>
-    <div class="card flat"><div class="label" style="margin-bottom:6px">最大回撤</div>
-      <div class="num num-lg down" id="sumMdd">—</div><div class="sub" id="sumMddSub">年末净值口径</div></div>
-    <div class="card flat"><div class="label" style="margin-bottom:6px">正收益年份</div>
-      <div class="num num-lg" id="sumWin">—</div><div class="sub" id="sumWinSub">—</div></div>
+  <!-- ========== 二、回测 ========== -->
+  <div class="row" style="margin:48px 0 10px;align-items:baseline;gap:10px">
+    <h2 style="margin:0;font-size:19px;letter-spacing:-.02em">回测：全周期</h2>
+    <span class="sub" id="btPeriod">—</span>
   </div>
 
-  <h2 style="margin:44px 0 10px;font-size:19px;letter-spacing:-.02em">逐年记录</h2>
+  <div class="grid g4">
+    <div class="card flat"><div class="label" style="margin-bottom:6px">累计收益</div>
+      <div class="num num-lg" id="bTotal">—</div><div class="sub">按月复利</div></div>
+    <div class="card flat"><div class="label" style="margin-bottom:6px">年化收益</div>
+      <div class="num num-lg" id="bCagr">—</div><div class="sub">复合年化</div></div>
+    <div class="card flat"><div class="label" style="margin-bottom:6px">标普 500 同期</div>
+      <div class="num num-lg" id="bBench">—</div><div class="sub" id="bBenchSub">—</div></div>
+    <div class="card flat"><div class="label" style="margin-bottom:6px">最大回撤</div>
+      <div class="num num-lg down" id="bMdd">—</div><div class="sub">区间内最深跌幅</div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;padding:20px 16px 8px">
+    <div class="row" style="padding:0 10px 12px">
+      <div class="label" style="margin:0">累计收益增长 + 回撤</div>
+      <div class="grow"></div>
+      <div class="row" style="gap:6px" id="bRanges">
+        <button class="btn sm primary" data-r="all">全部</button>
+        <button class="btn sm ghost" data-r="5y">近 5 年</button>
+        <button class="btn sm ghost" data-r="1y">近 1 年</button>
+      </div>
+    </div>
+    <div id="btChart"></div>
+    <div class="row" style="padding:8px 10px 0;gap:18px">
+      <span style="font-size:12px;color:var(--txt-2)"><i style="display:inline-block;width:16px;height:3px;background:#F2C46B;vertical-align:middle;border-radius:2px"></i> 策略</span>
+      <span style="font-size:12px;color:var(--txt-2)"><i style="display:inline-block;width:16px;height:3px;background:#6F7D92;vertical-align:middle;border-radius:2px"></i> 标普 500</span>
+      <span style="font-size:12px;color:var(--txt-2)"><i style="display:inline-block;width:16px;height:8px;background:rgba(255,107,114,.35);vertical-align:middle;border-radius:2px"></i> 回撤</span>
+      <span style="font-size:11.5px;color:var(--txt-3)">跨度过大时纵轴为对数刻度；鼠标可看每月数值</span>
+    </div>
+  </div>
+
+  <h2 style="margin:40px 0 10px;font-size:19px;letter-spacing:-.02em">回测：分年记录</h2>
+  <div id="yearTotal" style="margin-bottom:10px"></div>
   <div id="years"></div>
 
   <h2 style="margin:44px 0 10px;font-size:19px;letter-spacing:-.02em">个股贡献</h2>
   <div id="stocks"></div>
 
-    <h2 style="margin:44px 0 10px;font-size:19px;letter-spacing:-.02em">名词与纪律</h2>
-  <div class="card"><table>
-    <thead><tr><th style="width:150px">名词</th><th>含义</th></tr></thead>
-    <tbody>
-      <tr><td>总投入</td><td>你实际买入这些股票花掉的钱（成本合计），由持仓自动汇总</td></tr>
-      <tr><td>持仓市值</td><td>按最新价算出的当前价值 = 股数 × 现价</td></tr>
-      <tr><td>占比</td><td>单只市值 ÷ 全部持仓市值（不含现金）</td></tr>
-      <tr><td>组合内权重</td><td>单只占「已买股票」的比例，前 3 名通常 30/30/40</td></tr>
-      <tr><td>占总投入</td><td>单只成本 ÷ 总投入，用来看你实际把钱压在哪只上</td></tr>
-      <tr><td>跑赢大盘（超额）</td><td>策略赚的减去标普赚的。比如策略 +30%、标普 +10%，就是跑赢 20 个点。它衡量「选股有没有价值」，不是你实际赚了多少。</td></tr>
-      <tr><td>最大回撤</td><td>从历史最高点跌下来的最深幅度</td></tr>
-      <tr><td>换仓</td><td>每年 12 月最后一个交易日按新排名重建组合，其余月份不动</td></tr>
-    </tbody></table></div>
-
   <div class="foot">
     <a href="signals.html">信号看板 →</a> ｜ <a href="report.html">完整策略报告 →</a><br>
-    净值每日按收盘价计算；逐年记录无未来函数（用当年 1 月 1 日的成分股 + 上年 12 月排名）。
+    分年记录无未来函数：用当年 1 月 1 日的成分股 + 上年 12 月末的排名。
   </div>
 </div>
 
 <script>
 const $ = (id) => document.getElementById(id);
-let EQ = null, SH = null, RANGE = 'all';
+let CV = null, SH = null, EQ = null;
+let RUN_R = 'all', BT_R = 'all';
 
-function slicePts(pts, r) {
-  if (r === '1y') return pts.slice(Math.max(0, pts.length - 250));
-  if (r === '3m') return pts.slice(Math.max(0, pts.length - 66));
-  return pts;
+function bindRanges(id, cb) {
+  document.querySelectorAll('#' + id + ' button').forEach(b => {
+    b.onclick = () => {
+      document.querySelectorAll('#' + id + ' button').forEach(x => { x.className = 'btn sm ghost'; });
+      b.className = 'btn sm primary';
+      cb(b.dataset.r);
+    };
+  });
 }
+bindRanges('rRanges', r => { RUN_R = r; drawRun(); });
+bindRanges('bRanges', r => { BT_R = r; drawBt(); });
 
-function drawChart() {
+/* ---------- 一、当前运行 ---------- */
+function drawRun() {
   if (!EQ || !EQ.points || EQ.points.length < 2) return;
-  const pts = slicePts(EQ.points, RANGE);
+  let pts = EQ.points;
+  if (RUN_R === '1y') pts = pts.slice(Math.max(0, pts.length - 250));
+  if (RUN_R === '3m') pts = pts.slice(Math.max(0, pts.length - 66));
   const eq = pts.map(p => ({ d: p.d, y: p.s - 1 }));
   const bm = pts.map(p => ({ d: p.d, y: p.b - 1 }));
   let peak = 0;
   const dd = pts.map(p => { peak = Math.max(peak, p.s); return { d: p.d, y: p.s / peak - 1 }; });
-  $('chart').innerHTML = DSH.combo(eq, dd, { bench: bm, h: 380 });
+  $('runChart').innerHTML = DSH.combo(eq, dd, { bench: bm, h: 360, sName: '策略', bName: '标普 500' });
+  DSH.attachCharts();
 
   const f = pts[0], l = pts[pts.length - 1];
-  const sR = l.s / f.s - 1, bR = l.b / f.b - 1;
   let p2 = 0, mdd = 0;
   pts.forEach(p => { p2 = Math.max(p2, p.s); mdd = Math.min(mdd, p.s / p2 - 1); });
-  $('sRet').textContent = DSH.pct(sR); $('sRet').className = 'num num-lg ' + DSH.cls(sR);
-  $('bRet').textContent = DSH.pct(bR); $('bRet').className = 'num num-lg ' + DSH.cls(bR);
-  $('exRet').textContent = DSH.pct(sR - bR); $('exRet').className = 'num num-lg ' + DSH.cls(sR - bR);
-  $('mdd').textContent = DSH.pct(mdd, 1);
-  $('sPeriod').textContent = f.d.slice(0, 4) + '/' + f.d.slice(4, 6) + ' 起 · ' + pts.length + ' 个交易日';
+  const sR = l.s / f.s - 1, bR = l.b / f.b - 1;
+  $('rRet').textContent = DSH.pct(sR); $('rRet').className = 'num num-lg ' + DSH.cls(sR);
+  $('rBench').textContent = DSH.pct(bR); $('rBench').className = 'num num-lg ' + DSH.cls(bR);
+  $('rEx').textContent = DSH.pct(sR - bR); $('rEx').className = 'num num-lg ' + DSH.cls(sR - bR);
+  $('rMdd').textContent = DSH.pct(mdd, 1);
+  $('runPeriod').textContent = f.d.slice(0, 4) + '/' + f.d.slice(4, 6) + ' 起 · ' + pts.length + ' 个交易日';
 }
 
-document.querySelectorAll('#ranges button').forEach(b => {
-  b.onclick = () => {
-    document.querySelectorAll('#ranges button').forEach(x => { x.className = 'btn sm ghost'; });
-    b.className = 'btn sm primary';
-    RANGE = b.dataset.r;
-    drawChart();
-  };
-});
+/* ---------- 二、回测 ---------- */
+function drawBt() {
+  if (!CV || !CV.points || CV.points.length < 2) return;
+  let pts = CV.points;
+  if (BT_R === '1y') pts = pts.slice(Math.max(0, pts.length - 12));
+  if (BT_R === '5y') pts = pts.slice(Math.max(0, pts.length - 60));
+  const eq = pts.map(p => ({ d: p.d.replace('-', ''), y: p.s - 1 }));
+  const bm = pts.map(p => ({ d: p.d.replace('-', ''), y: p.b - 1 }));
+  const dd = pts.map(p => ({ d: p.d.replace('-', ''), y: p.dd }));
+  $('btChart').innerHTML = DSH.combo(eq, dd, { bench: bm, h: 400, sName: '策略', bName: '标普 500' });
+  DSH.attachCharts();
+
+  const f = pts[0], l = pts[pts.length - 1];
+  let peak = 0, mdd = 0;
+  pts.forEach(p => { peak = Math.max(peak, p.s); mdd = Math.min(mdd, p.s / peak - 1); });
+  const sR = l.s / f.s - 1, bR = l.b / f.b - 1;
+  const yrs = pts.length / 12;
+  const cg = yrs > 0.9 ? Math.pow(l.s / f.s, 1 / yrs) - 1 : null;
+
+  $('bTotal').textContent = sR >= 9 ? ('+' + (1 + sR).toFixed(1) + ' 倍') : DSH.pct(sR);
+  $('bTotal').className = 'num num-lg ' + DSH.cls(sR);
+  $('bCagr').textContent = cg == null ? '—' : DSH.pct(cg);
+  $('bCagr').className = 'num num-lg ' + DSH.cls(cg);
+  $('bBench').textContent = DSH.pct(bR); $('bBench').className = 'num num-lg ' + DSH.cls(bR);
+  $('bBenchSub').textContent = yrs > 0.9 ? ('年化 ' + DSH.pct(Math.pow(l.b / f.b, 1 / yrs) - 1)) : '同期基准';
+  $('bMdd').textContent = DSH.pct(mdd, 1);
+  $('btPeriod').textContent = f.d + ' 起 · ' + pts.length + ' 个月';
+}
+
+function renderYearTotal() {
+  // 汇总直接由「分年行」的同源数据算出，保证与下表逐行相加一致
+  let rows = (CV && CV.years) || [];
+  rows = rows.filter(r => r.year <= (SH && SH.summary ? SH.summary.end : 9999));
+  let m = null;
+  if (rows.length) {
+    let eq = 1, peak = 1, mdd = 0, wi = 0, worst = 0;
+    rows.forEach(r => {
+      eq *= 1 + r.ret;
+      peak = Math.max(peak, eq);
+      mdd = Math.min(mdd, eq / peak - 1);
+      if (r.ret > 0) wi++;
+      worst = Math.min(worst, r.dd || 0);
+    });
+    const n = rows.length;
+    m = {
+      start: rows[0].year, end: rows[n - 1].year, years: n,
+      total: eq - 1, cagr: Math.pow(eq, 1 / n) - 1, mdd, worst_intra: worst,
+      wins: wi, losses: n - wi,
+    };
+  } else if (SH && SH.summary) {
+    m = SH.summary;
+  }
+  if (!m) { $('yearTotal').innerHTML = ''; return; }
+  $('yearTotal').innerHTML =
+    '<div class="card" style="padding:16px 20px;border-color:rgba(242,196,107,.22);background:rgba(242,196,107,.04)">' +
+      '<div class="row" style="gap:28px;flex-wrap:wrap">' +
+        '<div><div class="sub" style="margin-bottom:3px">' + m.start + '–' + m.end + ' 累计</div>' +
+          '<div class="num num-md ' + DSH.cls(m.total) + '">' + DSH.pct(m.total, 0) + '</div></div>' +
+        '<div><div class="sub" style="margin-bottom:3px">年化</div>' +
+          '<div class="num num-md ' + DSH.cls(m.cagr) + '">' + DSH.pct(m.cagr, 1) + '</div></div>' +
+        '<div><div class="sub" style="margin-bottom:3px">年末口径回撤</div>' +
+          '<div class="num num-md down">' + DSH.pct(m.mdd, 1) + '</div></div>' +
+        '<div><div class="sub" style="margin-bottom:3px">最深年内回撤</div>' +
+          '<div class="num num-md down">' + DSH.pct(m.worst_intra || 0, 1) + '</div></div>' +
+        '<div><div class="sub" style="margin-bottom:3px">正收益年份</div>' +
+          '<div class="num num-md ' + (m.losses === 0 ? 'up' : '') + '">' + m.wins + ' / ' + m.years + '</div></div>' +
+        '<div class="grow"></div>' +
+        '<div class="sub" style="align-self:flex-end">自然年口径</div>' +
+      '</div></div>';
+}
 
 function renderYears() {
   if (!SH || !SH.years) { $('years').innerHTML = '<div class="tip warn">逐年数据尚未生成</div>'; return; }
+  // 收益取回测曲线（与上图同源），持仓与调仓取逐年记录
+  const byYear = {};
+  (CV && CV.years || []).forEach(r => { byYear[r.year] = r; });
   const ys = SH.years.slice().reverse();
   $('years').innerHTML = ys.map(r => {
+    const c = byYear[r.year] || {};
+    const ret = c.ret != null ? c.ret : r.ret;
+    const bench = c.bench != null ? c.bench : r.bench;
+    const dd = c.dd != null ? c.dd : r.dd;
     const hold = r.holdings.map(p =>
       '<span class="chip" style="margin-right:6px">' + DSH.esc(p.ticker) + ' <b style="color:var(--gold)">' +
       (p.weight * 100).toFixed(0) + '%</b></span>').join('');
-    const ex = (r.ret != null && r.bench != null) ? r.ret - r.bench : null;
+    const ex = (ret != null && bench != null) ? ret - bench : null;
     return '<div class="card" style="margin-bottom:10px;padding:18px 20px">' +
       '<div class="row" style="align-items:flex-start">' +
         '<div style="min-width:64px"><div class="num num-md">' + r.year + '</div>' +
           '<div class="sub" style="margin-top:2px">' + (r.switched ? '换仓' : '沿用') + '</div></div>' +
         '<div class="grow">' + hold + '</div>' +
-        '<div style="text-align:right;min-width:96px"><div class="num num-md ' + DSH.cls(r.ret) + '">' +
-          (r.ret == null ? '—' : DSH.pct(r.ret)) + '</div><div class="sub" style="margin-top:2px">策略</div></div>' +
-        '<div style="text-align:right;min-width:86px"><div class="num num-md ' + DSH.cls(ex) + '">' +
-          (ex == null ? '—' : DSH.pct(ex)) + '</div><div class="sub" style="margin-top:2px">跑赢</div></div>' +
+        '<div style="text-align:right;min-width:96px"><div class="num num-md ' + DSH.cls(ret) + '">' +
+          (ret == null ? '—' : DSH.pct(ret)) + '</div><div class="sub" style="margin-top:2px">策略</div></div>' +
+        '<div style="text-align:right;min-width:104px"><div class="num num-md ' + DSH.cls(ex) + '">' +
+          (ex == null ? '—' : DSH.pct(ex)) + '</div><div class="sub" style="margin-top:2px">跑赢标普 500</div></div>' +
         '<div style="text-align:right;min-width:82px"><div class="num num-md down">' +
-          (r.dd == null ? '—' : DSH.pct(r.dd, 1)) + '</div><div class="sub" style="margin-top:2px">年内回撤</div></div>' +
+          (dd == null ? '—' : DSH.pct(dd, 1)) + '</div><div class="sub" style="margin-top:2px">年内回撤</div></div>' +
       '</div></div>';
   }).join('');
 }
@@ -156,56 +254,27 @@ function renderStocks() {
     '<tbody>' + rows + '</tbody></table></div>';
 }
 
-
-
-
-
-
-
-
-
-/* ---------- 全周期汇总 ---------- */
-function renderSummary(sh) {
-  const m = sh && sh.summary;
-  if (!m) return;
-  document.getElementById('sumRange').textContent = m.start + '\u2013' + m.end;
-  const t = document.getElementById('sumTotal');
-  t.textContent = DSH.pct(m.total, 0);
-  t.className = 'num num-lg ' + DSH.cls(m.total);
-  const g = document.getElementById('sumCagr');
-  g.textContent = m.cagr == null ? '\u2014' : DSH.pct(m.cagr, 1);
-  g.className = 'num num-lg ' + DSH.cls(m.cagr);
-  document.getElementById('sumMdd').textContent = DSH.pct(m.mdd, 1);
-  document.getElementById('sumMddSub').textContent =
-    '年末净值口径；最深年内 ' + DSH.pct(m.worst_intra, 1) + '（' + m.worst_intra_year + '）';
-  document.getElementById('sumWin').textContent = m.wins + ' / ' + m.years;
-  document.getElementById('sumWin').className = 'num num-lg ' + (m.losses === 0 ? 'up' : '');
-  document.getElementById('sumWinSub').textContent =
-    m.losses === 0 ? '没有任何亏损年份' : '亏损 ' + m.losses + ' 年';
-}
-
 (async function () {
-  const eq = await DSH.json('equity', null);
-  const sh = await DSH.json('strategy_history', null);
-  EQ = eq; SH = sh;
-
-  const safe = (fn, arg, name, anchorId) => {
-    try { fn(arg); } catch (e) {
+  const safe = (fn, name, anchorId) => {
+    try { fn(); } catch (e) {
       const el = document.getElementById(anchorId);
       if (el) el.innerHTML = '<div class="tip bad">' + name + ' 渲染失败：' + (e && e.message ? e.message : e) + '</div>';
       console.error(name, e);
     }
   };
-  if (eq) {
-    $('sPeriod').textContent = '自 ' + eq.base_date + ' 起';
-    safe(drawChart, null, '净值图', 'chart');
-  } else {
-    $('chart').innerHTML = '<div class="tip warn">净值数据尚未生成</div>';
-  }
-  safe(renderSummary, sh, '全周期汇总', 'summary');
-  safe(renderYears, null, '逐年记录', 'years');
-  safe(renderStocks, null, '个股贡献', 'stocks');
+  [EQ, CV, SH] = await Promise.all([
+    DSH.json('equity', null), DSH.json('curve', null), DSH.json('strategy_history', null),
+  ]);
 
+  if (EQ && EQ.points && EQ.points.length > 2) safe(drawRun, '当前持仓图', 'runChart');
+  else $('runChart').innerHTML = '<div class="tip warn">净值数据尚未生成</div>';
+
+  if (CV && CV.points && CV.points.length > 2) safe(drawBt, '回测图', 'btChart');
+  else $('btChart').innerHTML = '<div class="tip warn">全周期曲线尚未生成</div>';
+
+  safe(renderYearTotal, '分年汇总', 'yearTotal');
+  safe(renderYears, '分年记录', 'years');
+  safe(renderStocks, '个股贡献', 'stocks');
 })();
 </script>
 </body></html>

@@ -130,7 +130,15 @@ def main():
     # 1. 三个页面
     page("", ["今天该做什么", "策略净值", "下一步"])
     page("portfolio.html", ["我的持仓", "总买入资金", "要下的单", "止损线", "按信号一键分配"])
-    page("strategy.html", ["单位净值", "全周期表现", "逐年记录", "个股贡献", "名词与纪律"])
+    page("strategy.html", ["累计收益增长", "逐年记录", "个股贡献", "跑赢标普 500"])
+
+    # 1b. 旧链接不能 404（历史书签）
+    for old, want in [("plan.html", "portfolio"), ("about.html", "strategy"), ("nav.html", "strategy")]:
+        code, txt = get(old)
+        if code == 200:
+            ok("旧链接 %s 可访问（跳转 %s）" % (old, want))
+        else:
+            bad("旧链接 %s 返回 %s" % (old, code))
 
     # 2. 数据
     sig = data("signal.json")

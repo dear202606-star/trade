@@ -153,20 +153,23 @@ def main():
         pg.goto(BASE + "strategy.html", wait_until="networkidle", timeout=60000)
         pg.wait_for_timeout(1800)
         c = pg.content()
-        for k in ["策略收益", "标普 500", "最大回撤", "逐年记录", "个股贡献", "名词与纪律"]:
+        for k in ["累计收益", "年化收益", "标普 500 同期", "最大回撤", "逐年记录", "个股贡献"]:
             check(k in c, "策略页含「%s」" % k, "策略页缺少「%s」" % k)
         check("对冲研究" not in c, "对冲研究已移除", "对冲研究仍存在")
         check("数据质量" not in c, "数据质量已移除", "数据质量仍存在")
-        check(pg.locator("#chart svg").count() > 0, "收益回撤图已渲染", "收益回撤图未渲染")
+        check("名词与纪律" not in c, "名词与纪律已移除", "名词与纪律仍存在")
+        check("跑赢标普 500" in c, "逐年记录写明跑赢对象", "跑赢对象未说明")
+        check(pg.locator("#runChart svg").count() > 0, "当前持仓图已渲染", "当前持仓图未渲染")
+        check(pg.locator("#btChart svg").count() > 0, "回测曲线已渲染", "回测曲线未渲染")
         check(pg.locator("#years .card").count() >= 10, "逐年记录卡片 ≥10 年", "逐年记录卡片过少")
 
         # 区间切换
-        for label in ["近 1 年", "近 3 月", "全部"]:
+        for label in ["近 1 年", "近 3 月", "全部", "近 5 年"]:
             b = pg.get_by_text(label, exact=True).first
             if b.count():
                 b.click()
                 pg.wait_for_timeout(700)
-        check(pg.locator("#chart svg").count() > 0, "区间切换后图表仍正常", "区间切换后图表消失")
+        check(pg.locator("#btChart svg").count() > 0, "区间切换后图表仍正常", "区间切换后图表消失")
         pg.screenshot(path=os.path.join(OUT, "04_strategy.png"), full_page=True)
 
         # ---------- E 一致性 ----------
@@ -187,6 +190,24 @@ def main():
         check("尚未生成" in t2 or "正常" in t2 or "逐年记录" in t2,
               "数据缺失时页面不白屏", "数据缺失时页面白屏")
         pg2.screenshot(path=os.path.join(OUT, "05_degrade.png"), full_page=True)
+
+        # ---------- G 十字线 ----------
+        pg.goto(BASE + "strategy.html", wait_until="networkidle")
+        pg.wait_for_timeout(1800)
+        wrap = pg.locator(".ch-wrap").first
+        if wrap.count():
+            box = wrap.bounding_box()
+            pg.mouse.move(box["x"] + box["width"] * 0.55, box["y"] + box["height"] * 0.35)
+            pg.wait_for_timeout(600)
+            shown = pg.evaluate(
+                "() => { const w = document.querySelector('.ch-wrap');"
+                " if (!w) return false;"
+                " return Array.from(w.querySelectorAll('div')).some("
+                "  d => d.style.display === 'block' && /%|倍/.test(d.textContent)); }")
+            check(shown, "十字线悬浮显示数值", "十字线未显示数值")
+            pg.screenshot(path=os.path.join(OUT, "07_crosshair.png"))
+        else:
+            bad("图表容器 .ch-wrap 缺失")
 
         js_err = [e for e in errors
                   if "favicon" not in e.lower()

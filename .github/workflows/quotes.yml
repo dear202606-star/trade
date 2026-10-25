@@ -17,6 +17,7 @@ on:
       - quotes.py
       - equity.py
       - strategy_history.py
+      - full_curve.py
       - datafeed.py
       - site_build.py
       - selftest.py
@@ -55,6 +56,10 @@ jobs:
       - name: 生成逐年记录
         continue-on-error: true
         run: python runner.py strategy_history.py
+
+      - name: 全周期曲线
+        continue-on-error: true
+        run: python runner.py full_curve.py
 
       - name: 构建站点
         run: python runner.py site_build.py
