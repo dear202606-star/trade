@@ -48,6 +48,23 @@
     </table>
   </div>
 
+  <h2 style="margin:40px 0 8px;font-size:19px;letter-spacing:-.02em">名词解释</h2>
+  <div class="card">
+    <table>
+      <thead><tr><th style="width:170px">名词</th><th>含义</th></tr></thead>
+      <tbody>
+        <tr><td>账户总资金</td><td>你打算交给这套策略管理的总金额（在「我的持仓」里填）</td></tr>
+        <tr><td>策略上限</td><td>账户总资金 × 30%，本策略最多动用这么多，其余留现金</td></tr>
+        <tr><td>持仓市值</td><td>已买入股票的当前市值 = 股数 × 现价</td></tr>
+        <tr><td>仓位</td><td>持仓市值 ÷ 账户总资金，回测里满仓是 100%（即用满 30% 上限）</td></tr>
+        <tr><td>组合内权重</td><td>单只股票占「已买股票」的比例，前 3 名通常 30/30/40</td></tr>
+        <tr><td>占总资金</td><td>单只股票占「账户总资金」的比例 = 组合内权重 × 仓位</td></tr>
+        <tr><td>净值</td><td>以建仓日为 1.0，按每日收盘价计算的组合价值，用于对比标普 500</td></tr>
+        <tr><td>大盘开关</td><td>标普 500 是否跌破 10 月均线；跌破则仓位减半</td></tr>
+      </tbody>
+    </table>
+  </div>
+
   <h2 style="margin:40px 0 8px;font-size:19px;letter-spacing:-.02em">数据质量</h2>
   <div class="tip ok" style="margin-bottom:14px">
     同一套规则，换数据源必须给同一答案。复权口径统一为「仅拆股」，两源两两核对，

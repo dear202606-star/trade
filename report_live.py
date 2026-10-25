@@ -38,7 +38,7 @@ def render(rec):
 <table>
 <thead><tr><th class="num" style="width:50px">#</th><th style="width:80px">代码</th><th>公司</th>
 <th style="width:150px">行业</th><th class="num" style="width:100px">基准涨幅</th>
-<th class="num" style="width:100px">策略内权重</th><th class="num" style="width:100px">占总资产</th></tr></thead>
+<th class="num" style="width:100px">组合内权重</th><th class="num" style="width:100px">占总资金</th></tr></thead>
 <tbody>{''.join(rows)}</tbody></table>
 <div class="note"><b>本月动作：</b>{action}</div>
 <div class="note">正式持仓按 <b>{rec.get('official_month', '')}</b> 的排名锁定，本年度有效；每年 12 月最后一个交易日再按当年排名换仓。下表是当月排名，仅供观察，不据此换仓。</div>

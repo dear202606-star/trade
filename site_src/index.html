@@ -144,7 +144,7 @@
             '<div class="num num-md">' + DSH.money(c.mv, cur) + '</div></div>' +
           '<div class="card flat"><div class="label" style="margin-bottom:6px">现金</div>' +
             '<div class="num num-md">' + DSH.money(c.cash, cur) + '</div></div>' +
-          '<div class="card flat"><div class="label" style="margin-bottom:6px">仓位</div>' +
+          '<div class="card flat"><div class="label" style="margin-bottom:6px">仓位（占总资金）</div>' +
             '<div class="num num-md">' + (c.posPct * 100).toFixed(1) + '%</div>' +
             '<div class="bar"><i class="' + (c.posPct > 0.35 ? 'over' : '') +
             '" style="width:' + Math.min(100, c.posPct * 200) + '%"></i></div></div>' +

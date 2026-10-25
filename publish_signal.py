@@ -52,6 +52,16 @@ def main():
     if not hist:
         return
     r = hist[0]
+    # GATE：同一个月只通知一次，避免每日运行刷屏
+    gate = "output/last_notified.json"
+    try:
+        last = json.load(open(gate, encoding="utf-8"))
+    except Exception:
+        last = {}
+    if last.get("month") == r.get("month"):
+        print(f"本月（{r.get('month')}）已通知过，跳过")
+        return
+
     official = r.get("official") or r.get("picks") or []
     page = f"https://{OWNER}.github.io/{REPO.split('/')[-1]}/"
 
@@ -108,6 +118,11 @@ def main():
         print(f"已在 Issue #{num} 追加评论（会触发通知）")
 
     os.remove("_signal_body.md")
+    try:
+        with open(gate, "w", encoding="utf-8") as f:
+            json.dump({"month": r.get("month"), "at": r.get("date")}, f, ensure_ascii=False)
+    except Exception:
+        pass
 
 
 if __name__ == "__main__":

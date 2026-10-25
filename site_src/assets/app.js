@@ -211,8 +211,29 @@
   window.addEventListener('error', function (e) { showErr(e.message + ' @ ' + (e.filename||'').split('/').pop() + ':' + e.lineno); });
   window.addEventListener('unhandledrejection', function (e) { showErr('Promise: ' + (e.reason && e.reason.message || e.reason)); });
 
+  /* ---------- 页脚数据时间戳 ---------- */
+  DSH.stamp = async function () {
+    const el = document.querySelector(".foot");
+    if (!el) return;
+    const [q, eq] = await Promise.all([DSH.json("quotes", {}), DSH.json("equity", {})]);
+    const parts = [];
+    if (q && q.ts_local) {
+      const age = DSH.ageHours(q.ts);
+      const stale = age != null && age > 36;
+      parts.push("行情更新 <b style=\"color:" + (stale ? "var(--red)" : "var(--txt-2)") + "\">" +
+        DSH.esc(q.ts_local) + "</b>（" + (age == null ? "—" : age < 1 ? "刚刚" : Math.floor(age) + " 小时前") + "）");
+    }
+    if (eq && eq.updated) parts.push("净值更新 <b style=\"color:var(--txt-2)\">" + DSH.esc(eq.updated) + "</b>");
+    if (!parts.length) return;
+    const line = document.createElement("div");
+    line.style.cssText = "margin-bottom:10px;color:#55637A;font-size:11.5px";
+    line.innerHTML = parts.join(" ｜ ") + " ｜ 每日自动更新（北京时间 20:00 前）";
+    el.insertBefore(line, el.firstChild);
+  };
+
   DSH.boot = function () {
     DSH.nav();
     DSH.paintTick();
+    DSH.stamp();
   };
 })(window);

@@ -2,8 +2,10 @@ name: 数据质量核对
 
 on:
   schedule:
-    # 每月 1 日 02:00 UTC（选股后一小时）
-    - cron: "0 2 1 * *"
+    # 每日 22:40 UTC = 北京 06:40（全量更新之后）
+    - cron: "40 22 * * *"
+    # 兜底：11:40 UTC = 北京 19:40
+    - cron: "40 11 * * *"
   workflow_dispatch:
   push:
     paths:

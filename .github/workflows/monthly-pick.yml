@@ -1,17 +1,22 @@
-name: 月度选股
+name: 每日全量更新
 
 on:
   schedule:
-    # 每月 1 日 01:00 UTC = 北京时间 09:00
-    - cron: "0 1 1 * *"
+    # 收盘后全量：22:00 UTC = 北京 06:00（拿到当日收盘价）
+    - cron: "0 22 * * *"
+    # 兜底：11:00 UTC = 北京 19:00（保证 20:00 前数据是最新的）
+    - cron: "0 11 * * *"
+    # 每周日 03:00 UTC = 北京 11:00：生存者偏差审计
+    - cron: "0 3 * * 0"
   workflow_dispatch:
-  # 修改选股脚本或本工作流时自动跑一次，便于验证
-  # （github-actions[bot] 用 GITHUB_TOKEN 提交不会触发，因此不会循环）
+  # 修改任何管道脚本时自动跑一次（bot 用 GITHUB_TOKEN 提交不会触发，不会循环）
   push:
     branches: [main]
     paths:
       - monthly_pick.py
       - market_data.py
+      - quotes.py
+      - equity.py
       - dashboard.py
       - site_build.py
       - report_live.py
@@ -47,7 +52,7 @@ jobs:
       - name: 安装依赖
         run: pip install -r requirements.txt
 
-      - name: 运行月度选股
+      - name: 运行选股与排名
         id: pick
         run: python monthly_pick.py --workers 10
 
@@ -63,8 +68,8 @@ jobs:
         id: site
         run: python site_build.py
 
-      - name: 生存者偏差审计（仅月度定时运行，较慢）
-        if: github.event_name == 'schedule'
+      - name: 生存者偏差审计（每周日跑一次，较慢）
+        if: github.event_name == 'schedule' && github.event.schedule == '0 3 * * 0'
         continue-on-error: true
         timeout-minutes: 8
         run: python survivorship.py --probe || echo "审计跳过"
@@ -87,7 +92,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "本期无变更，跳过提交"
           else
-            git commit -m "chore: 月度选股更新 $(date -u +%Y-%m)"
+            git commit -m "chore: 每日数据更新 $(date -u +%Y-%m)"
             git push
           fi
 
