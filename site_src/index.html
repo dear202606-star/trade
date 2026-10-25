@@ -14,35 +14,38 @@
     <p id="pageSub"></p>
   </div>
 
-  <div class="hero fade-in">
-    <div class="eyebrow" style="margin-bottom:12px">本月结论</div>
-    <h2 id="verdict">—</h2>
-    <p class="lead" id="verdictSub"></p>
-    <div class="hero-row">
-      <div class="hero-item"><div class="label">最新信号</div><div class="num num-md" id="hMonth" style="color:var(--gold)">—</div></div>
-      <div class="hero-item"><div class="label">大盘开关</div><div id="hTrend">—</div></div>
-      <div class="hero-item"><div class="label">目标仓位</div><div class="num num-md" id="hExp">—</div></div>
-      <div class="hero-item hero-cta"><a class="btn primary" href="plan.html">看具体操作 →</a></div>
+  <div class="hero fade-in" style="position:relative">
+    <div class="row" style="align-items:flex-start;gap:28px">
+      <div class="grow" style="min-width:0">
+        <div class="eyebrow" style="margin-bottom:12px">本月结论</div>
+        <h2 id="verdict">—</h2>
+        <p class="lead" id="verdictSub"></p>
+        <div class="hero-row">
+          <div class="hero-item"><div class="label">最新信号</div><div class="num num-md" id="hMonth" style="color:var(--gold)">—</div></div>
+          <div class="hero-item"><div class="label">大盘开关</div><div id="hTrend">—</div></div>
+          <div class="hero-item"><div class="label">目标仓位</div><div class="num num-md" id="hExp">—</div></div>
+          <div class="hero-item hero-cta"><a class="btn primary" id="ctaBtn" href="signals.html">看具体操作 →</a></div>
+        </div>
+      </div>
+
+      <!-- 策略净值：进门第一眼的成绩单 -->
+      <a href="strategy.html" style="display:block;color:inherit;width:330px;flex:0 0 330px;
+         background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;
+         padding:18px 20px;text-decoration:none">
+        <div class="row" style="justify-content:space-between;align-items:baseline">
+          <div class="label" style="margin:0">策略净值</div>
+          <span style="font-size:11px;color:var(--txt-3)" id="eqPeriod">—</span>
+        </div>
+        <div class="num num-lg" id="eqRet" style="margin-top:6px">—</div>
+        <div class="sub" id="eqSub" style="margin-top:2px"></div>
+        <div id="eqSpark" style="margin-top:10px"></div>
+      </a>
     </div>
   </div>
 
   <div style="margin-top:48px">
     <div class="label" style="font-size:12px">我的组合</div>
     <div id="pfBody"></div>
-  </div>
-
-  <div style="margin-top:48px">
-    <div class="label" style="font-size:12px">策略净值</div>
-    <a href="nav.html" class="card" style="display:block;color:inherit;padding:22px 26px">
-      <div class="row" style="align-items:flex-start">
-        <div class="grow">
-          <div class="label" style="margin-bottom:4px">自建仓日累计</div>
-          <div class="num num-lg" id="eqRet">—</div>
-          <div class="sub" id="eqSub"></div>
-        </div>
-        <div style="width:320px;max-width:46%"><div id="eqSpark"></div></div>
-      </div>
-    </a>
   </div>
 
   <div style="margin-top:48px">
@@ -160,8 +163,12 @@
     const el = document.getElementById('eqRet');
     el.textContent = DSH.pct(r);
     el.className = 'num num-lg ' + DSH.cls(r);
-    document.getElementById('eqSub').innerHTML = '标普 500 同期 <span class="' + DSH.cls(br) + '">' +
-      DSH.pct(br) + '</span> ｜ 跑赢标普 500 ' + DSH.pct(r - br) + ' ｜ ' + eq.points.length + ' 个交易日 ›';
+    document.getElementById('eqSub').innerHTML = '同期标普 <span class="' + DSH.cls(br) + '">' + DSH.pct(br) +
+      '</span> ｜ 跑赢标普 500 <span class="' + DSH.cls(r - br) + '">' + DSH.pct(r - br) + '</span>';
+    const bd = String(eq.base_date || '');
+    const bdt = bd.length === 8 ? bd.slice(0, 4) + '/' + bd.slice(4, 6) + '/' + bd.slice(6, 8) : bd;
+    document.getElementById('eqPeriod').textContent = bdt + ' 起 · ' + eq.points.length + ' 日';
+    document.getElementById('ctaBtn').setAttribute('href', 'signals.html');
     let pk = 0;
     const dds = eq.points.map(p => { pk = Math.max(pk, p.s); return { d: p.d, y: p.s / pk - 1 }; });
     const tail = eq.points.slice(-120), tailDd = dds.slice(-120);

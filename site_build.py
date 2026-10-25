@@ -113,9 +113,8 @@ font-family:'Microsoft YaHei',system-ui,sans-serif;">
 <a href="index.html" style="font-weight:800;color:#e8eef8;text-decoration:none;margin-right:18px;font-size:15px;">LEADER<span style="color:#ffc857;">·</span>QUANT</a>
 <a href="index.html" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;text-decoration:none;font-size:14px;">总览</a>
 <a href="portfolio.html" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;text-decoration:none;font-size:14px;">我的持仓</a>
-<a href="plan.html" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;text-decoration:none;font-size:14px;">行动计划</a>
+<a href="strategy.html" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;text-decoration:none;font-size:14px;">策略表现</a>
 <a href="signals.html" style="padding:6px 12px;border-radius:9px;background:#182233;color:#ffc857;text-decoration:none;font-size:14px;font-weight:700;">信号看板</a>
-<a href="analysis.html" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;text-decoration:none;font-size:14px;">数据质量</a>
 <a href="report.html" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;text-decoration:none;font-size:14px;">策略报告</a>
 </div></div>"""
 

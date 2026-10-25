@@ -15,7 +15,7 @@
 | [我的持仓](https://dear202606-star.github.io/trade/portfolio.html) | 录入总资金与买入记录 → 实时市值/盈亏/占比/目标偏离 |
 | [行动计划](https://dear202606-star.github.io/trade/plan.html) | 按你的实际持仓算出要下的每一笔单：买哪只、几股、多少钱 |
 | [信号看板](https://dear202606-star.github.io/trade/signals.html) | 历史信号、开关状态、月度记录 |
-| [数据质量](https://dear202606-star.github.io/trade/analysis.html) | 两源交叉核对结果、隔离清单、回测结论 |
+| [策略表现](https://dear202606-star.github.io/trade/strategy.html) | 全周期收益/回撤、分年记录、个股贡献 |
 | [策略报告](https://dear202606-star.github.io/trade/report.html) | 完整回测报告（含实时信号卡） |
 
 ## 🏗 架构

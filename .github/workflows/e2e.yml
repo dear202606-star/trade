@@ -28,5 +28,8 @@ jobs:
       - name: 安装依赖
         run: pip install requests
 
+      - name: 全站链接巡检
+        run: python link_check.py https://dear202606-star.github.io/trade/
+
       - name: 校验线上站点
         run: python e2e_check.py https://dear202606-star.github.io/trade/
