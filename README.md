@@ -1,23 +1,49 @@
-# 美股排名动量策略研究
+# 美股排名动量策略 · 量化网站
 
 [![月度选股](https://github.com/dear202606-star/trade/actions/workflows/monthly-pick.yml/badge.svg)](https://github.com/dear202606-star/trade/actions/workflows/monthly-pick.yml)
+[![行情快照](https://github.com/dear202606-star/trade/actions/workflows/quotes.yml/badge.svg)](https://github.com/dear202606-star/trade/actions/workflows/quotes.yml)
 
-对「买入上一年涨幅前 N 名」的横截面动量策略做系统回测，比较 11 种持有模型，并给出可执行的建仓方案。
+对「买入上一年涨幅前 N 名」的横截面动量策略做系统回测，比较 11 种持有模型，并落地成一个可录入持仓、实时看盈亏、自动给下单指令的网站。
 
-## 🌐 在线看板
+## 🌐 网站
 
-| 页面 | 网址 |
+**https://dear202606-star.github.io/trade/**
+
+| 页面 | 作用 |
 |---|---|
-| 策略模型研究与行动步骤 | https://dear202606-star.github.io/trade/ |
-| 实时信号看板 | https://dear202606-star.github.io/trade/signals.html |
+| [总览](https://dear202606-star.github.io/trade/) | 本期信号、你的组合概况、数据质量 |
+| [我的持仓](https://dear202606-star.github.io/trade/portfolio.html) | 录入总资金与买入记录 → 实时市值/盈亏/占比/目标偏离 |
+| [行动计划](https://dear202606-star.github.io/trade/plan.html) | 按你的实际持仓算出要下的每一笔单：买哪只、几股、多少钱 |
+| [信号看板](https://dear202606-star.github.io/trade/signals.html) | 历史信号、开关状态、月度记录 |
+| [数据质量](https://dear202606-star.github.io/trade/analysis.html) | 两源交叉核对结果、隔离清单、回测结论 |
+| [策略报告](https://dear202606-star.github.io/trade/report.html) | 完整回测报告（含实时信号卡） |
 
-两个页面由 GitHub Actions 每月自动重建，打开即是最新数据。
+## 🏗 架构
+
+```
+GitHub Actions（定时）
+  ├── monthly_pick.py   月度选股 → signal_history.json
+  ├── quotes.py         行情快照 → docs/data/quotes.json（508/510 只）
+  ├── site_build.py     构建站点 → docs/
+  └── deploy-pages      发布到 GitHub Pages
+        ↓
+   静态站（无后端、无数据库、零费用）
+        ↓
+   浏览器：localStorage 存持仓，fetch 同源 JSON 取行情
+```
+
+**为什么这么设计**：
+
+- **不要后端**：持仓是私密数据，存浏览器本地最安全，也省掉服务器成本
+- **不要数据库**：本站数据量小（一份 JSON 42 KB），GitHub Pages 直接当 CDN
+- **不要行情 API key**：免费行情源普遍不开 CORS，浏览器直连会被拦，所以放服务端批量抓、发布成同源 JSON
+- **行情刷新**：美股盘中每 30 分钟一次（`quotes.yml`），延后约 15 分钟
 
 ## 🔔 自动通知
 
-每月运行后会自动在 [Issues](https://github.com/dear202606-star/trade/issues) 的「📊 月度信号看板」下追加一条评论，内容包括当期持仓、建议权重、大盘开关、与上期的变化。
+每月运行后会自动在 [Issues](https://github.com/dear202606-star/trade/issues) 的「📊 月度信号看板」下追加一条评论，内容包括当期持仓、建议权重、大盘开关、数据质量与上期变化。
 
-GitHub 会对 Issue 参与人发送**邮件通知**（必要时在手机 App 打开推送）。想改通知方式：右上角 Watch → Custom → 勾选 Issues。
+GitHub 会对 Issue 参与人发送**邮件通知**（手机 App 可开推送）。想改通知方式：右上角 Watch → Custom → 勾选 Issues。
 
 > **每月自动选股已上线**：查看最新名单 → [`output/monthly/latest.md`](output/monthly/latest.md)
 
