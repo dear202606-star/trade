@@ -197,11 +197,11 @@ def main():
     if sh:
         sm = sh.get("summary") or {}
         if sm.get("years") and sm.get("total") is not None:
-            ok("全周期 %s\u2013%s：累计 %.0f%% 年化 %.1f%% 回撤 %.1f%% 正收益 %s/%s" % (
+            ok("分年记录 %s\u2013%s：累计 %.0f%% 年化 %.1f%% 回撤 %.1f%% 正收益 %s/%s" % (
                 sm["start"], sm["end"], sm["total"] * 100,
                 (sm["cagr"] or 0) * 100, sm["mdd"] * 100, sm["wins"], sm["years"]))
             if not (0 < sm["total"] < 500):
-                bad("全周期累计收益异常：%s" % sm["total"])
+                bad("分年累计收益异常：%s" % sm["total"])
         else:
             bad("strategy_history 缺 summary")
         ys = sh.get("years") or []
@@ -214,6 +214,42 @@ def main():
                 bad("%d 年收益异常：%.0f%%" % (r["year"], r["ret"] * 100))
             if len(r.get("holdings") or []) != 3:
                 bad("%d 年持仓数异常" % r["year"])
+
+    # ---- 数字自洽校验：曲线末值必须等于逐年复利之积 ----
+    cv = data("curve.json")
+    if cv and cv.get("points") and cv.get("years"):
+        pts = cv["points"]
+        prod = 1.0
+        for r in cv["years"]:
+            prod *= 1 + r.get("ret", 0)
+        end = pts[-1].get("s", 0)
+        if end > 0 and abs(prod / end - 1) < 0.01:
+            ok("曲线与分年自洽：末值 %.2f 倍 = 逐年复利 %.2f 倍" % (end, prod))
+        else:
+            bad("曲线与分年不一致：末值 %.3f vs 逐年复利 %.3f" % (end, prod))
+
+        # 回撤必须落在 0 与 -1 之间
+        dds = [p.get("dd", 0) for p in pts]
+        if min(dds) >= -1 and max(dds) <= 0.0001:
+            ok("回撤序列合法（最深 %.1f%%）" % (min(dds) * 100))
+        else:
+            bad("回撤序列异常：min=%s max=%s" % (min(dds), max(dds)))
+
+        # 分年收益离谱值
+        for r in cv["years"]:
+            if abs(r.get("ret", 0)) > 5:
+                bad("%s 年收益异常：%.0f%%" % (r.get("year"), r["ret"] * 100))
+
+    # 分年表与曲线必须用同一批持仓
+    if sh and cv:
+        picks = (data("backtest_picks.json") or {}).get("years") or {}
+        if picks:
+            ok("选股快照已冻结（%d 年）" % len(picks))
+            for r in (sh.get("years") or []):
+                frozen = picks.get(str(r["year"]))
+                now = [p["ticker"] for p in r["holdings"]]
+                if frozen and list(frozen) != now:
+                    bad("%d 年持仓与冻结快照不一致：%s vs %s" % (r["year"], now, frozen))
 
     print("=== 线上 E2E 校验 · %s ===" % BASE)
     for m in oks:

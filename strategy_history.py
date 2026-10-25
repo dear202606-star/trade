@@ -70,6 +70,22 @@ def ret_12m(bars, ym):
     return r, True
 
 
+def picks_from_frozen(y, tickers, sector):
+    """用冻结的代码列表重建 picks（仍按当时数据算 12 个月涨幅用于展示）"""
+    rank_ym = f"{y-1}-12"
+    picks = []
+    for t in tickers:
+        bars = load_bars(t)
+        r = None
+        if bars and rank_ym in bars:
+            rr, ok = ret_12m(bars, rank_ym)
+            if ok:
+                r = rr
+        picks.append({"ticker": t, "ret12": r if r is not None else 0.0,
+                      "sector": sector.get(t, "Unknown")})
+    return picks
+
+
 def pick_for_year(y, members, sector):
     cand = []
     rank_ym = f"{y-1}-12"
@@ -191,11 +207,29 @@ def main():
 
     datafeed.prefetch(sorted(m["ticker"].unique().tolist()) + ["SPY"], workers=8)
     spy = load_bars("SPY")
+
+    # 冻结选股：同样的规则 + 同样的数据源，回测结果必须稳定可复现。
+    # 已冻结的年份直接沿用，不再重算；确需重算时加 --refresh。
+    frozen, frozen_years = {}, {}
+    fps = os.path.join(BASE, "output", "backtest_picks.json")
+    refresh = "--refresh" in sys.argv
+    if os.path.exists(fps) and not refresh:
+        try:
+            fd = json.load(open(fps, encoding="utf-8"))
+            frozen = {int(k): v for k, v in (fd.get("years") or {}).items()}
+            frozen_years = fd.get("generated_years") or {}
+            print(f"      选股已冻结（{len(frozen)} 年，{fd.get('generated','')}）", flush=True)
+        except Exception:
+            frozen = {}
+
     years, prev_set = [], None
     for y in range(2010, 2026):
         d = f"{y}-01-01"
         members = set(m[(m.start_date <= d) & (m.end_date >= d)]["ticker"])
-        picks = pick_for_year(y, members, sector)
+        if y in frozen:
+            picks = picks_from_frozen(y, frozen[y], sector)
+        else:
+            picks = pick_for_year(y, members, sector)
         if not picks:
             continue
         ret, dd, ok = year_perf(y, picks)
@@ -266,6 +300,15 @@ def main():
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
+
+    # 写入选股快照（回测的唯一事实来源，供全周期曲线复用）
+    if not frozen:
+        snap = {"generated": pd.Timestamp.today().strftime("%Y-%m-%d"),
+                "note": "冻结的逐年持仓，回测与曲线均以此为准；重算用 --refresh",
+                "years": {str(r["year"]): [p["ticker"] for p in r["holdings"]] for r in years}}
+        with open(fps, "w", encoding="utf-8") as f:
+            json.dump(snap, f, ensure_ascii=False, indent=1)
+        print(f"      已冻结选股快照 → {fps}")
 
     print(f"逐年记录 {n} 年，涉及 {len(stocks)} 只股票")
     print(f"  全周期 累计 {total*100:.0f}%  年化 {cagr*100:.1f}%  最大回撤 {mdd*100:.1f}%  正收益 {wins}/{n} 年")

@@ -106,6 +106,42 @@ def copy_site():
     return n
 
 
+def asset_version():
+    """用 css/js 内容哈希做版本号，避免部署后浏览器还在用旧配色/旧脚本"""
+    import hashlib
+    h = hashlib.md5()
+    for f in ("assets/app.css", "assets/app.js"):
+        p = os.path.join(SRC_SITE, f)
+        if os.path.exists(p):
+            with open(p, "rb") as fh:
+                h.update(fh.read())
+    return h.hexdigest()[:8]
+
+
+def bust_cache():
+    """给所有页面的 css/js 引用加上 ?v=哈希"""
+    v = asset_version()
+    n = 0
+    for fn in os.listdir(DOCS):
+        if not fn.endswith(".html"):
+            continue
+        p = os.path.join(DOCS, fn)
+        try:
+            with open(p, encoding="utf-8") as f:
+                html = f.read()
+        except Exception:
+            continue
+        new = html
+        for a in ("assets/app.css", "assets/app.js"):
+            new = re.sub(re.escape(a) + r"(\?v=[0-9a-f]+)?", a + "?v=" + v, new)
+        if new != html:
+            with open(p, "w", encoding="utf-8") as f:
+                f.write(new)
+            n += 1
+    print(f"  静态资源版本：{v}（{n} 个页面已更新引用）")
+    return v
+
+
 
 NAV_BAR = """<div style="position:sticky;top:0;z-index:50;background:#0b0f17f2;border-bottom:1px solid #232f44;">
 <div style="max-width:1180px;margin:0 auto;padding:0 22px;display:flex;align-items:center;gap:4px;height:56px;
@@ -181,6 +217,13 @@ def main():
         s = os.path.join(BASE, "output", fn)
         if os.path.exists(s):
             shutil.copy2(s, os.path.join(DOCS, fn))
+
+    # 冻结的选股快照（供线上校验「分年持仓是否被改动」）
+    pk = os.path.join(BASE, "output", "backtest_picks.json")
+    if os.path.exists(pk):
+        shutil.copy2(pk, os.path.join(DATA, "backtest_picks.json"))
+
+    bust_cache()
 
     print(f"站点已构建：{n} 个静态文件 → {DOCS}")
     print("  index / portfolio / strategy / signals / report")

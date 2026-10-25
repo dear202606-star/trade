@@ -58,7 +58,7 @@
 
   <div class="grid g4">
     <div class="card flat"><div class="label" style="margin-bottom:6px">累计收益</div>
-      <div class="num num-lg" id="bTotal">—</div><div class="sub">按月复利</div></div>
+      <div class="num num-lg" id="bTotal">—</div><div class="sub" id="bTotalSub">按月复利</div></div>
     <div class="card flat"><div class="label" style="margin-bottom:6px">年化收益</div>
       <div class="num num-lg" id="bCagr">—</div><div class="sub">复合年化</div></div>
     <div class="card flat"><div class="label" style="margin-bottom:6px">标普 500 同期</div>
@@ -166,6 +166,7 @@ function drawBt() {
   $('bBench').textContent = DSH.pct(bR); $('bBench').className = 'num num-lg ' + DSH.cls(bR);
   $('bBenchSub').textContent = yrs > 0.9 ? ('年化 ' + DSH.pct(Math.pow(l.b / f.b, 1 / yrs) - 1)) : '同期基准';
   $('bMdd').textContent = DSH.pct(mdd, 1);
+  $('bTotalSub').textContent = '按月复利 · ' + f.d + ' ～ ' + pts[pts.length - 1].d;
   $('btPeriod').textContent = f.d + ' 起 · ' + pts.length + ' 个月';
 }
 
@@ -196,7 +197,7 @@ function renderYearTotal() {
   $('yearTotal').innerHTML =
     '<div class="card" style="padding:16px 20px;border-color:rgba(242,196,107,.22);background:rgba(242,196,107,.04)">' +
       '<div class="row" style="gap:28px;flex-wrap:wrap">' +
-        '<div><div class="sub" style="margin-bottom:3px">' + m.start + '–' + m.end + ' 累计</div>' +
+        '<div><div class="sub" style="margin-bottom:3px">' + m.start + '–' + m.end + ' 累计（自然年）</div>' +
           '<div class="num num-md ' + DSH.cls(m.total) + '">' + DSH.pct(m.total, 0) + '</div></div>' +
         '<div><div class="sub" style="margin-bottom:3px">年化</div>' +
           '<div class="num num-md ' + DSH.cls(m.cagr) + '">' + DSH.pct(m.cagr, 1) + '</div></div>' +

@@ -65,6 +65,16 @@ def main():
         print("缺 SPY", file=sys.stderr)
         return 1
 
+    # 复用冻结的选股快照，保证曲线与分年记录完全一致
+    frozen = {}
+    _fp = os.path.join("output", "backtest_picks.json")
+    if os.path.exists(_fp):
+        try:
+            frozen = {int(k): v for k, v in
+                      (json.load(open(_fp, encoding="utf-8")).get("years") or {}).items()}
+        except Exception:
+            frozen = {}
+
     rows = []
     for y in range(2010, 2027):
         rank_ym = f"{y - 1}-12"
@@ -80,15 +90,18 @@ def main():
                 cand.append((t, r))
         cand.sort(key=lambda x: -x[1])
 
-        picks, sec = [], {}
-        for t, r in cand:
-            if len(picks) >= FINAL_N:
-                break
-            s = sector.get(t, "Unknown")
-            if sec.get(s, 0) >= 2:
-                continue
-            picks.append((t, r, s))
-            sec[s] = sec.get(s, 0) + 1
+        if y in frozen:
+            picks = [(t, 0.0, sector.get(t, "Unknown")) for t in frozen[y]]
+        else:
+            picks, sec = [], {}
+            for t, r in cand:
+                if len(picks) >= FINAL_N:
+                    break
+                sc = sector.get(t, "Unknown")
+                if sec.get(sc, 0) >= 2:
+                    continue
+                picks.append((t, r, sc))
+                sec[sc] = sec.get(sc, 0) + 1
         if len(picks) < FINAL_N:
             continue
 
