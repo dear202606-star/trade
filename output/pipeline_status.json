@@ -1,54 +1,6 @@
 {
  "runs": [
   {
-   "ts": "2026-10-25T12:19:34Z",
-   "step": "selftest.py",
-   "rc": 0,
-   "dur": 0.4,
-   "ok": true,
-   "tail": "=== 部署前自检 ===\n  ✅ 页面 index.html\n  ✅ 页面 portfolio.html\n  ✅ 页面 strategy.html\n  ✅ 信号有正式持仓\n  ✅ 行情 508/510 只（100%）\n  ✅ 净值 205 个交易日\n  ✅ 逐年记录 16 年\n  ✅ 质量核对 496 只\n  ✅ 全部持仓均为标普500 成分股\n  ✅ 行情 0.0 小时前更新\n  ✅ 净值末值 1.550175\n  ✅ 最大回撤 -34.8%\n通过 12 · 警告 0 · 失败 0"
-  },
-  {
-   "ts": "2026-10-25T12:25:51Z",
-   "step": "quotes.py",
-   "rc": 0,
-   "dur": 8.9,
-   "ok": true,
-   "tail": "行情 508 / 510，汇率 6.6702，缺失 2"
-  },
-  {
-   "ts": "2026-10-25T12:25:58Z",
-   "step": "equity.py",
-   "rc": 0,
-   "dur": 6.8,
-   "ok": true,
-   "tail": "净值 205 个交易日（20251231 起）｜策略 +55.02% ｜标普 +11.45% ｜ 最大回撤 -34.8%"
-  },
-  {
-   "ts": "2026-10-25T12:28:10Z",
-   "step": "strategy_history.py",
-   "rc": 0,
-   "dur": 132.2,
-   "ok": true,
-   "tail": "逐年记录 16 年，涉及 40 只股票\n  2020 AMD LRCX TGT ret=+63.5% dd=-16.6%\n  2021 TSLA ETSY NVDA ret=+66.0% dd=-12.1%\n  2022 DVN MRNA FTNT ret=-7.2% dd=-18.7%\n  2023 OXY MPC FSLR ret=+12.7% dd=-13.1%\n  2024 NVDA META RCL ret=+104.9% dd=-5.4%\n  2025 PLTR VST NVDA ret=+59.0% dd=-15.3%"
-  },
-  {
-   "ts": "2026-10-25T12:28:11Z",
-   "step": "site_build.py",
-   "rc": 0,
-   "dur": 0.0,
-   "ok": true,
-   "tail": "站点已构建：5 个静态文件 → /home/runner/work/trade/trade/docs\n  index / portfolio / strategy / signals / report\n  数据：signal.json history.json quality.json（1 期信号）"
-  },
-  {
-   "ts": "2026-10-25T12:28:11Z",
-   "step": "selftest.py",
-   "rc": 0,
-   "dur": 0.4,
-   "ok": true,
-   "tail": "=== 部署前自检 ===\n  ✅ 页面 index.html\n  ✅ 页面 portfolio.html\n  ✅ 页面 strategy.html\n  ✅ 信号有正式持仓\n  ✅ 行情 508/510 只（100%）\n  ✅ 净值 205 个交易日\n  ✅ 逐年记录 16 年\n  ✅ 质量核对 496 只\n  ✅ 全部持仓均为标普500 成分股\n  ✅ 行情 0.0 小时前更新\n  ✅ 净值末值 1.550175\n  ✅ 最大回撤 -34.8%\n通过 12 · 警告 0 · 失败 0"
-  },
-  {
    "ts": "2026-10-25T13:13:02Z",
    "step": "quotes.py",
    "rc": 0,
@@ -319,7 +271,55 @@
    "dur": 0.3,
    "ok": false,
    "tail": "=== 部署前自检 ===\n  ✅ 页面 index.html\n  ✅ 页面 portfolio.html\n  ✅ 页面 strategy.html\n  ✅ 信号有正式持仓\n  ✅ 行情 508/510 只（100%）\n  ✅ 净值 205 个交易日\n  ✅ 质量核对 496 只\n  ✅ 全部持仓均为标普500 成分股\n  ✅ 行情 0.1 小时前更新\n  ✅ 净值末值 1.550175\n  ✅ 最大回撤 -34.8%\n  ❌ strategy_history.json 逐年记录不足\n  ❌ curve.json 缺失或过短\n通过 11 · 警告 0 · 失败 2\n[stderr]\n自检未通过，终止部署。"
+  },
+  {
+   "ts": "2026-10-25T14:38:41Z",
+   "step": "quotes.py",
+   "rc": 0,
+   "dur": 9.1,
+   "ok": true,
+   "tail": "行情 508 / 510，汇率 6.6702，缺失 2"
+  },
+  {
+   "ts": "2026-10-25T14:38:47Z",
+   "step": "equity.py",
+   "rc": 0,
+   "dur": 6.4,
+   "ok": true,
+   "tail": "净值 205 个交易日（20251231 起）｜策略 +55.02% ｜标普 +11.45% ｜ 最大回撤 -34.8%"
+  },
+  {
+   "ts": "2026-10-25T14:40:57Z",
+   "step": "strategy_history.py",
+   "rc": 1,
+   "dur": 129.7,
+   "ok": false,
+   "tail": "选股已冻结（16 年，2026-10-25）\n[stderr]\nTraceback (most recent call last):\n  File \"/home/runner/work/trade/trade/strategy_history.py\", line 323, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File \"/home/runner/work/trade/trade/strategy_history.py\", line 235, in main\n    ret, dd, ok = year_perf(y, picks)\n                  ^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/trade/trade/strategy_history.py\", line 164, in year_perf\n    v += p[\"weight\"] * (px / base)\n         ~^^^^^^^^^^\nKeyError: 'weight'"
+  },
+  {
+   "ts": "2026-10-25T14:42:39Z",
+   "step": "full_curve.py",
+   "rc": 0,
+   "dur": 102.1,
+   "ok": true,
+   "tail": "预取 1209 只…\n\n全周期 2011-01 ~ 2026-10（118 个月）\n  策略 累计 3149%  年化 42.5%  回撤 -38.8%  波动 38.1%  夏普 1.12\n  标普 累计 280%  年化 14.5%\n已写入 docs/data/curve.json"
+  },
+  {
+   "ts": "2026-10-25T14:42:39Z",
+   "step": "site_build.py",
+   "rc": 0,
+   "dur": 0.1,
+   "ok": true,
+   "tail": "静态资源版本：fb6b6de0（7 个页面已更新引用）\n站点已构建：9 个静态文件 → /home/runner/work/trade/trade/docs\n  index / portfolio / strategy / signals / report\n  数据：signal.json history.json quality.json（1 期信号）"
+  },
+  {
+   "ts": "2026-10-25T14:42:40Z",
+   "step": "selftest.py",
+   "rc": 1,
+   "dur": 0.3,
+   "ok": false,
+   "tail": "=== 部署前自检 ===\n  ✅ 页面 index.html\n  ✅ 页面 portfolio.html\n  ✅ 页面 strategy.html\n  ✅ 信号有正式持仓\n  ✅ 行情 508/510 只（100%）\n  ✅ 净值 205 个交易日\n  ✅ 质量核对 496 只\n  ✅ 全部持仓均为标普500 成分股\n  ✅ 行情 0.1 小时前更新\n  ✅ 净值末值 1.550175\n  ✅ 最大回撤 -34.8%\n  ❌ strategy_history.json 逐年记录不足\n  ❌ curve.json 缺失或过短\n通过 11 · 警告 0 · 失败 2\n[stderr]\n自检未通过，终止部署。"
   }
  ],
- "updated": "2026-10-25T14:32:09Z"
+ "updated": "2026-10-25T14:42:40Z"
 }
