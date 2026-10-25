@@ -1,46 +1,6 @@
 {
  "runs": [
   {
-   "ts": "2026-10-25T11:45:41Z",
-   "step": "selftest.py",
-   "rc": 0,
-   "dur": 0.4,
-   "ok": true,
-   "tail": "=== 部署前自检 ===\n  ✅ 页面 index.html\n  ✅ 页面 portfolio.html\n  ✅ 页面 strategy.html\n  ✅ 信号有正式持仓\n  ✅ 行情 508/510 只（100%）\n  ✅ 净值 205 个交易日\n  ✅ 逐年记录 16 年\n  ✅ 质量核对 496 只\n  ✅ 全部持仓均为标普500 成分股\n  ✅ 对冲回测就绪\n  ✅ 绝对收益回测就绪\n  ✅ 止损回测就绪\n  ✅ 行情 0.1 小时前更新\n  ✅ 净值末值 1.550175\n  ✅ 最大回撤 -34.8%\n通过 15 · 警告 0 · 失败 0"
-  },
-  {
-   "ts": "2026-10-25T11:51:46Z",
-   "step": "quotes.py",
-   "rc": 0,
-   "dur": 8.6,
-   "ok": true,
-   "tail": "行情 508 / 510，汇率 6.6702，缺失 2"
-  },
-  {
-   "ts": "2026-10-25T11:51:52Z",
-   "step": "equity.py",
-   "rc": 0,
-   "dur": 6.6,
-   "ok": true,
-   "tail": "净值 205 个交易日（20251231 起）｜策略 +55.02% ｜标普 +11.45% ｜ 最大回撤 -34.8%"
-  },
-  {
-   "ts": "2026-10-25T11:53:56Z",
-   "step": "strategy_history.py",
-   "rc": 0,
-   "dur": 123.5,
-   "ok": true,
-   "tail": "逐年记录 16 年，涉及 40 只股票\n  2020 AMD LRCX TGT ret=+63.5% dd=-16.6%\n  2021 TSLA ETSY NVDA ret=+66.0% dd=-12.1%\n  2022 DVN MRNA FTNT ret=-7.2% dd=-18.7%\n  2023 OXY MPC FSLR ret=+12.7% dd=-13.1%\n  2024 NVDA META RCL ret=+104.9% dd=-5.4%\n  2025 PLTR VST NVDA ret=+59.0% dd=-15.3%"
-  },
-  {
-   "ts": "2026-10-25T11:55:35Z",
-   "step": "hedge_backtest.py",
-   "rc": 0,
-   "dur": 98.8,
-   "ok": true,
-   "tail": "预取 1209 只…\n\n区间 2010-01 ~ 2026-10 共 202 个月\n                 年化       波动      夏普      最大回撤      胜率\n纯多头           35.6%    34.4%    1.06    -38.8%   62.9%\n标普500         12.1%    14.4%    0.87    -24.8%   65.3%\n半对冲           28.1%    30.2%    0.97    -32.5%   60.4%\n1:1对冲         20.4%    27.3%    0.82    -29.5%   57.9%\nβ对冲           11.9%    26.2%    0.56    -39.9%   54.9%\n波动率目标         21.1%    20.0%    1.06    -23.9%   62.9%\n\n纯多头 beta=1.542 alpha=17.1%/年 相关性=0.647\n对冲后 beta=0.542（应接近 0）\n已写入 docs/data/hedge.json"
-  },
-  {
    "ts": "2026-10-25T11:57:15Z",
    "step": "absolute_backtest.py",
    "rc": 0,
@@ -319,7 +279,47 @@
    "dur": 0.4,
    "ok": true,
    "tail": "=== 部署前自检 ===\n  ✅ 页面 index.html\n  ✅ 页面 portfolio.html\n  ✅ 页面 strategy.html\n  ✅ 信号有正式持仓\n  ✅ 行情 508/510 只（100%）\n  ✅ 净值 205 个交易日\n  ✅ 逐年记录 16 年\n  ✅ 质量核对 496 只\n  ✅ 全部持仓均为标普500 成分股\n  ✅ 行情 0.0 小时前更新\n  ✅ 净值末值 1.550175\n  ✅ 最大回撤 -34.8%\n通过 12 · 警告 0 · 失败 0"
+  },
+  {
+   "ts": "2026-10-25T13:38:26Z",
+   "step": "quotes.py",
+   "rc": 0,
+   "dur": 8.6,
+   "ok": true,
+   "tail": "行情 508 / 510，汇率 6.6702，缺失 2"
+  },
+  {
+   "ts": "2026-10-25T13:38:32Z",
+   "step": "equity.py",
+   "rc": 0,
+   "dur": 5.8,
+   "ok": true,
+   "tail": "净值 205 个交易日（20251231 起）｜策略 +55.02% ｜标普 +11.45% ｜ 最大回撤 -34.8%"
+  },
+  {
+   "ts": "2026-10-25T13:40:27Z",
+   "step": "strategy_history.py",
+   "rc": 0,
+   "dur": 115.1,
+   "ok": true,
+   "tail": "逐年记录 16 年，涉及 40 只股票\n  全周期 累计 7932%  年化 31.5%  最大回撤 -26.4%  正收益 14/16 年\n  2020 AMD LRCX TGT ret=+63.5% dd=-16.6%\n  2021 TSLA ETSY NVDA ret=+66.0% dd=-12.1%\n  2022 DVN MRNA FTNT ret=-7.2% dd=-18.7%\n  2023 OXY MPC FSLR ret=+12.7% dd=-13.1%\n  2024 NVDA META RCL ret=+104.9% dd=-5.4%\n  2025 PLTR VST NVDA ret=+59.0% dd=-15.3%"
+  },
+  {
+   "ts": "2026-10-25T13:40:27Z",
+   "step": "site_build.py",
+   "rc": 0,
+   "dur": 0.0,
+   "ok": true,
+   "tail": "站点已构建：5 个静态文件 → /home/runner/work/trade/trade/docs\n  index / portfolio / strategy / signals / report\n  数据：signal.json history.json quality.json（1 期信号）"
+  },
+  {
+   "ts": "2026-10-25T13:40:27Z",
+   "step": "selftest.py",
+   "rc": 0,
+   "dur": 0.4,
+   "ok": true,
+   "tail": "=== 部署前自检 ===\n  ✅ 页面 index.html\n  ✅ 页面 portfolio.html\n  ✅ 页面 strategy.html\n  ✅ 信号有正式持仓\n  ✅ 行情 508/510 只（100%）\n  ✅ 净值 205 个交易日\n  ✅ 逐年记录 16 年\n  ✅ 质量核对 496 只\n  ✅ 全部持仓均为标普500 成分股\n  ✅ 行情 0.0 小时前更新\n  ✅ 净值末值 1.550175\n  ✅ 最大回撤 -34.8%\n通过 12 · 警告 0 · 失败 0"
   }
  ],
- "updated": "2026-10-25T13:15:29Z"
+ "updated": "2026-10-25T13:40:27Z"
 }
