@@ -18,7 +18,6 @@ on:
       - quotes.py
       - equity.py
       - strategy_history.py
-      - full_curve.py
       - datafeed.py
       - selftest.py
       - verify_champions.py

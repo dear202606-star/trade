@@ -86,6 +86,16 @@ def picks_from_frozen(y, tickers, sector):
     return assign_weights(picks)
 
 
+MONTHS = []
+SPYB = []
+
+
+def ym_add(ym, k):
+    i = int(ym[:4]) * 12 + int(ym[5:7]) + k
+    yy, mm = divmod(i - 1, 12)
+    return f"{yy:04d}-{mm+1:02d}"
+
+
 def assign_weights(picks):
     """按行业上限分配权重（同行业 2 只时该行业合计 60%，否则等权）"""
     if not picks:
@@ -148,7 +158,7 @@ def year_perf(y, picks):
         p["_bars"] = bars
 
     if not ok:
-        return None, None, None
+        return None, None, None, None
 
     vals = []
     for m in seq:
@@ -170,7 +180,7 @@ def year_perf(y, picks):
                 break
             v += p["weight"] * (px / base)
         if v is None:
-            return None, None, None
+            return None, None, None, None
         vals.append(v)
 
     ret = vals[-1] - 1
@@ -179,6 +189,12 @@ def year_perf(y, picks):
         peak = max(peak, v)
         mdd = min(mdd, v / peak - 1)
 
+    # 月度收益序列（曲线与分年共用同一份计算）
+    months, prev_v = [], 1.0
+    for i, v in enumerate(vals):
+        months.append({"ym": seq[i], "p": round(v / prev_v - 1, 6)})
+        prev_v = v
+
     # 每只股票在 Y 年的收益
     for p in picks:
         bars = p.pop("_bars", None)
@@ -186,7 +202,7 @@ def year_perf(y, picks):
             p["ret_year"] = round(bars[f"{y}-12"][0] / bars[prev_ym][0] - 1, 4)
         else:
             p["ret_year"] = None
-    return round(ret, 4), round(mdd, 4), True
+    return round(ret, 4), round(mdd, 4), True, months
 
 
 def _write_error(msg):
@@ -229,6 +245,8 @@ def main():
         except Exception:
             frozen = {}
 
+    MONTHS.clear()
+    SPYB.clear()
     years, prev_set = [], None
     for y in range(2010, 2026):
         d = f"{y}-01-01"
@@ -239,7 +257,7 @@ def main():
             picks = pick_for_year(y, members, sector)
         if not picks:
             continue
-        ret, dd, ok = year_perf(y, picks)
+        ret, dd, ok, months = year_perf(y, picks)
         bench = None
         if spy and f"{y-1}-12" in spy and f"{y}-12" in spy:
             bench = round(spy[f"{y}-12"][0] / spy[f"{y-1}-12"][0] - 1, 4)
@@ -252,6 +270,13 @@ def main():
         years.append({"year": y, "holdings": picks, "ret": ret, "dd": dd,
                       "bench": bench, "switched": switched,
                       "n_members": len(members)})
+        if months:
+            MONTHS.extend(months)
+            for mo in months:
+                ym = mo["ym"]
+                pv = ym_add(ym, -1)
+                if spy and ym in spy and pv in spy and spy[pv][0] > 0:
+                    SPYB.append({"ym": ym, "b": round(spy[ym][0] / spy[pv][0] - 1, 6)})
 
     # 分股票统计
     stat = {}
@@ -307,6 +332,52 @@ def main():
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
+
+    # 全周期曲线（与分年同源，保证数字完全一致）
+    CURVE = os.path.join(BASE, "docs", "data", "curve.json")
+    if MONTHS:
+        bmap = {x["ym"]: x["b"] for x in SPYB}
+        pts, s_acc, b_acc, pk2 = [], 1.0, 1.0, 1.0
+        for mo in MONTHS:
+            s_acc *= 1 + mo["p"]
+            b_acc *= 1 + bmap.get(mo["ym"], 0.0)
+            pk2 = max(pk2, s_acc)
+            pts.append({"d": mo["ym"], "s": round(s_acc, 4), "b": round(b_acc, 4),
+                        "dd": round(s_acc / pk2 - 1, 4)})
+        yrs = len(pts) / 12
+        vol = (pd.Series([x["p"] for x in MONTHS]).std() * (12 ** 0.5)) if len(pts) > 2 else 0
+        cstats = {
+            "total": round(s_acc - 1, 4),
+            "cagr": round(s_acc ** (1 / yrs) - 1, 4) if yrs > 0 else 0,
+            "mdd": round(min(p["dd"] for p in pts), 4),
+            "vol": round(float(vol), 4),
+            "sharpe": round(float(pd.Series([x["p"] for x in MONTHS]).mean() * 12 / vol), 3) if vol else None,
+            "bench_total": round(b_acc - 1, 4),
+            "bench_cagr": round(b_acc ** (1 / yrs) - 1, 4) if yrs > 0 else 0,
+            "months": len(pts), "start": pts[0]["d"], "end": pts[-1]["d"],
+            "win": round(float(sum(1 for x in MONTHS if x["p"] > 0) / len(MONTHS)), 4),
+        }
+        cyears = []
+        for r in years:
+            mm = [x["p"] for x in MONTHS if x["ym"].startswith(str(r["year"]))]
+            bb = [bmap.get(x["ym"], 0.0) for x in MONTHS if x["ym"].startswith(str(r["year"]))]
+            if not mm:
+                continue
+            path, ipeak, ydd = 1.0, 1.0, 0.0
+            for x in mm:
+                path *= 1 + x
+                ipeak = max(ipeak, path)
+                ydd = min(ydd, path / ipeak - 1)
+            cyears.append({"year": r["year"],
+                           "ret": round(float(path - 1), 4),
+                           "bench": round(float(pd.Series(bb).add(1).prod() - 1), 4),
+                           "dd": round(ydd, 4)})
+        with open(CURVE, "w", encoding="utf-8") as f:
+            json.dump({"points": pts, "stats": cstats, "years": cyears,
+                       "updated": pd.Timestamp.today().strftime("%Y-%m-%d")},
+                      f, ensure_ascii=False, separators=(",", ":"))
+        print(f"      全周期曲线 {len(pts)} 个月：累计 {cstats['total']*100:.0f}% "
+              f"年化 {cstats['cagr']*100:.1f}% 回撤 {cstats['mdd']*100:.1f}%")
 
     # 写入选股快照（回测的唯一事实来源，供全周期曲线复用）
     if not frozen:
