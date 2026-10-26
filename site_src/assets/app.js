@@ -487,10 +487,15 @@
       document.body.insertBefore(bar, document.body.firstChild);
     }
 
-    const line = document.createElement("div");
-    line.style.cssText = "margin-bottom:10px;color:#7A8699;font-size:12.5px";
+    // 复用同一个节点，避免每次刷新都多插一行
+    let line = document.getElementById("dataStamp");
+    if (!line) {
+      line = document.createElement("div");
+      line.id = "dataStamp";
+      line.style.cssText = "margin-bottom:10px;color:#7A8699;font-size:12.5px";
+      el.insertBefore(line, el.firstChild);
+    }
     line.innerHTML = parts.join(" ｜ ");
-    el.insertBefore(line, el.firstChild);
   };
 
   DSH.boot = function () {

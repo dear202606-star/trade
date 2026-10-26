@@ -51,7 +51,6 @@
       </div>
       <div class="grow" id="sigPicks" style="display:flex;gap:10px;flex-wrap:wrap"></div>
     </div>
-    <div id="sigNote" class="sub" style="margin-top:14px"></div>
   </div>
 
   <!-- 投入与分配 -->
@@ -95,7 +94,7 @@
     <div class="grid" id="orders" style="gap:10px"></div>
   </div>
 
-  <div class="foot">行情为美股收盘价 ｜ 盈亏不含手续费 ｜ 仅供研究，不构成投资建议</div>
+  <div class="foot">盈亏不含手续费 ｜ 仅供研究，不构成投资建议</div>
 </div>
 <script>
 // 从总览点「我要下单」直接滚到清单
@@ -331,14 +330,6 @@ function renderSignal() {
     '<span class="pill ' + (exp >= 0.99 ? 'on' : 'off') + '">' +
       (SIG.trend || (exp >= 0.99 ? '满仓' : '半仓')) + '</span>' +
     '<span class="pill off">目标 ' + Math.round(exp * 100) + '%</span>';
-  // 当月排名与年度持仓是两回事，必须说清楚，避免买错
-  const b0 = (SIG.bench || []).slice(0, 3).map(function (x) { return x.ticker; }).join(' / ');
-  const note = document.getElementById('sigNote');
-  if (note) {
-    note.innerHTML = (b0 ? ('当月排名（' + (SIG.ranking_month || SIG.month) + '，仅供参考、本次不买入）：<b>' + b0 + '</b>' +
-      ' ｜ ') : '') +
-      '下次换仓：<b>' + (SIG.rebalance_hint || '12 月末') + '</b>';
-  }
   const q = Q.quotes || {};
   document.getElementById('sigPicks').innerHTML = off.map((p, i) => {
     const px = (q[p.ticker] || {}).p;
