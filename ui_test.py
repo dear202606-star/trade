@@ -63,7 +63,7 @@ def main():
 
         # 点「下一步 → 去录入」
         before = pg.url
-        btn = pg.get_by_text("去录入", exact=False).first
+        btn = pg.get_by_text("录入", exact=True).first
         if btn.count():
             btn.click()
             pg.wait_for_timeout(1200)
@@ -102,13 +102,13 @@ def main():
         plan.fill("100000")
         plan.dispatch_event("input")
         pg.wait_for_timeout(500)
-        alloc = pg.get_by_text("按信号一键分配", exact=False).first
-        check(alloc.count() > 0, "有一键分配按钮", "缺少一键分配按钮")
+        alloc = pg.get_by_text("分配", exact=True).first
+        check(alloc.count() > 0, "有分配按钮", "缺少分配按钮")
         alloc.click()
         pg.wait_for_timeout(1500)
         shares = pg.locator("input[data-f='shares']")
         n = shares.count()
-        check(n == 3, "一键分配生成 3 条持仓", "一键分配生成 %d 条" % n)
+        check(n == 3, "分配生成 3 条持仓", "分配生成 %d 条" % n)
         vals = []
         for i in range(n):
             v = shares.nth(i).input_value()

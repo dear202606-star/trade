@@ -24,7 +24,7 @@
           <div class="hero-item"><div class="label">最新信号</div><div class="num num-md" id="hMonth" style="color:var(--gold)">—</div></div>
           <div class="hero-item"><div class="label">大盘开关</div><div id="hTrend">—</div></div>
           <div class="hero-item"><div class="label">目标仓位</div><div class="num num-md" id="hExp">—</div></div>
-          <div class="hero-item hero-cta"><a class="btn primary" id="ctaBtn" href="portfolio.html#orders">我要下单 →</a></div>
+          <div class="hero-item hero-cta"><a class="btn primary" id="ctaBtn" href="portfolio.html#orders">下单</a></div>
         </div>
       </div>
 
@@ -101,7 +101,7 @@
     box.innerHTML =
       '<div class="card" style="text-align:center;padding:52px 24px">' +
       '<div style="font-size:15px;color:var(--txt-2);margin-bottom:22px">还没有持仓记录</div>' +
-      '<a class="btn primary" href="portfolio.html">录入持仓（约 1 分钟）</a>' +
+      '<a class="btn primary" href="portfolio.html">录入</a>' +
       '<div class="sub" style="margin-top:18px">数据只保存在你自己的浏览器里，不上传服务器</div></div>';
   } else {
     const c = DSH.compute(pf, quotes, q.fx);
@@ -151,7 +151,7 @@
         '</div>' +
       '</div>' +
       '<div class="grid" style="margin-top:14px;gap:10px">' + rowsHtml + '</div>' +
-      '<div style="margin-top:16px"><a class="btn ghost sm" href="portfolio.html">编辑持仓</a></div>';
+      '<div style="margin-top:16px"><a class="btn ghost sm" href="portfolio.html">编辑</a></div>';
   }
 
   /* ---- 策略净值迷你图 ---- */
@@ -177,7 +177,7 @@
   /* ---- 下一步 ---- */
   const steps = [];
   if (!pf.rows.length) {
-    steps.push({ tag: 'hold', title: '录入持仓', desc: '填入总资金与买入记录', href: 'portfolio.html', cta: '去录入' });
+    steps.push({ tag: 'hold', title: '录入持仓', desc: '填入总资金与买入记录', href: 'portfolio.html', cta: '录入' });
   } else {
     const c = DSH.compute(pf, quotes, q.fx);
     const actionable = off.filter((p) => {
@@ -186,9 +186,9 @@
       const curW = r ? r.weight : 0;
       return Math.abs(curW - tw) > 0.01;
     });
-    if (isDec) steps.push({ tag: 'sell', title: '12 月末换仓', desc: '按最新前 3 名重建组合', href: 'plan.html', cta: '看清单' });
-    if (exp < 1) steps.push({ tag: 'sell', title: '仓位减半', desc: '大盘跌破 10 月均线', href: 'plan.html', cta: '看清单' });
-    if (actionable.length) steps.push({ tag: 'buy', title: '微调 ' + actionable.length + ' 只', desc: '把超配/低配拉回目标权重', href: 'plan.html', cta: '看清单' });
+    if (isDec) steps.push({ tag: 'sell', title: '12 月末换仓', desc: '按最新前 3 名重建组合', href: 'plan.html', cta: '查看' });
+    if (exp < 1) steps.push({ tag: 'sell', title: '仓位减半', desc: '大盘跌破 10 月均线', href: 'plan.html', cta: '查看' });
+    if (actionable.length) steps.push({ tag: 'buy', title: '微调 ' + actionable.length + ' 只', desc: '把超配/低配拉回目标权重', href: 'plan.html', cta: '查看' });
     if (!steps.length) steps.push({ tag: 'hold', title: '本月无需操作', desc: '持有到 12 月末换仓', href: 'plan.html', cta: '查看' });
   }
   document.getElementById('nextSteps').innerHTML = steps.map((s) =>
@@ -196,7 +196,7 @@
     (s.tag === 'buy' ? '买入' : s.tag === 'sell' ? '卖出' : '持有') + '</span>' +
     '<div class="grow"><div style="font-weight:650;font-size:14.5px">' + DSH.esc(s.title) + '</div>' +
     '<div class="sub" style="margin-top:3px">' + DSH.esc(s.desc) + '</div></div>' +
-    '<a class="btn sm ghost" href="' + s.href + '">' + s.cta + ' →</a></div>'
+    '<a class="btn sm ghost" href="' + s.href + '">' + s.cta + '</a></div>'
   ).join('');
 
   // 页面打开期间每 5 分钟拉一次最新数据并重绘

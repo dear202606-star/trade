@@ -56,7 +56,7 @@
         <label>计划投入</label>
         <input id="plan" type="number" min="0" step="1000" placeholder="例如 100000" class="num-in">
       </div>
-      <button class="btn primary" id="btnFromSignal">按信号一键分配</button>
+      <button class="btn primary" id="btnFromSignal">分配</button>
       <div class="grow"></div>
       <button class="btn ghost" id="btnExport">导出</button>
       <button class="btn ghost" id="btnImport">导入</button>
@@ -78,7 +78,7 @@
           <input id="nShares" type="number" step="0.0001" placeholder="35.7" class="num-in"></div>
         <div class="field" style="width:140px"><label>成本价</label>
           <input id="nCost" type="number" step="0.01" placeholder="756.17" class="num-in"></div>
-        <button class="btn primary" id="btnAdd">+ 添加</button>
+        <button class="btn primary" id="btnAdd">添加</button>
         <div class="grow"></div>
         <button class="btn ghost" id="btnClear" style="color:#FF9A9E">清空</button>
       </div>
@@ -163,7 +163,7 @@ function render() {
 
   if (!PF.rows.length) {
     $('list').innerHTML = '<div class="card" style="text-align:center;padding:38px 20px;color:var(--txt-3)">' +
-      '还没有持仓 · 用下面的输入框添加，或点「按信号一键分配」</div>';
+      '还没有持仓 · 用下面的输入框添加，或点「分配」</div>';
     return;
   }
 
@@ -249,7 +249,7 @@ $('btnFromSignal').onclick = () => {
   const off = SIG.official || SIG.picks || [];
   const plan = PF.plan || 0;
   if (!plan) {
-    DSH.toast('请先填「总买入资金」，再一键分配');
+    DSH.toast('请先填「总买入资金」，再分配');
     const el = $('plan');
     if (el) { el.focus(); el.select && el.select(); }
     return;

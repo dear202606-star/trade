@@ -22,13 +22,13 @@
 
   <div class="grid g4">
     <div class="card flat"><div class="label" style="margin-bottom:6px">策略收益</div>
-      <div class="num num-lg" id="rRet">—</div><div class="sub">自建仓日累计</div></div>
+      <div class="num num-lg" id="rRet">—</div></div>
     <div class="card flat"><div class="label" style="margin-bottom:6px">标普 500 同期</div>
-      <div class="num num-lg" id="rBench">—</div><div class="sub">同期基准</div></div>
+      <div class="num num-lg" id="rBench">—</div></div>
     <div class="card flat"><div class="label" style="margin-bottom:6px">跑赢标普 500</div>
-      <div class="num num-lg" id="rEx">—</div><div class="sub">策略收益 − 标普收益</div></div>
+      <div class="num num-lg" id="rEx">—</div></div>
     <div class="card flat"><div class="label" style="margin-bottom:6px">最大回撤</div>
-      <div class="num num-lg down" id="rMdd">—</div><div class="sub">区间内最深跌幅</div></div>
+      <div class="num num-lg down" id="rMdd">—</div></div>
   </div>
 
   <div class="card" style="margin-top:16px;padding:20px 16px 8px">
@@ -37,8 +37,8 @@
       <div class="grow"></div>
       <div class="row" style="gap:6px" id="rRanges">
         <button class="btn sm primary" data-r="all">全部</button>
-        <button class="btn sm ghost" data-r="1y">近 1 年</button>
-        <button class="btn sm ghost" data-r="3m">近 3 月</button>
+        <button class="btn sm ghost" data-r="1y">一年</button>
+        <button class="btn sm ghost" data-r="3m">三月</button>
       </div>
     </div>
     <div id="runChart"></div>
@@ -58,13 +58,13 @@
 
   <div class="grid g4">
     <div class="card flat"><div class="label" style="margin-bottom:6px">累计收益</div>
-      <div class="num num-lg" id="bTotal">—</div><div class="sub" id="bTotalSub">按月复利</div></div>
+      <div class="num num-lg" id="bTotal">—</div></div>
     <div class="card flat"><div class="label" style="margin-bottom:6px">年化收益</div>
-      <div class="num num-lg" id="bCagr">—</div><div class="sub">复合年化</div></div>
+      <div class="num num-lg" id="bCagr">—</div></div>
     <div class="card flat"><div class="label" style="margin-bottom:6px">标普 500 同期</div>
-      <div class="num num-lg" id="bBench">—</div><div class="sub" id="bBenchSub">—</div></div>
+      <div class="num num-lg" id="bBench">—</div></div>
     <div class="card flat"><div class="label" style="margin-bottom:6px">最大回撤</div>
-      <div class="num num-lg down" id="bMdd">—</div><div class="sub">区间内最深跌幅</div></div>
+      <div class="num num-lg down" id="bMdd">—</div></div>
   </div>
 
   <div class="card" style="margin-top:16px;padding:20px 16px 8px">
@@ -73,8 +73,8 @@
       <div class="grow"></div>
       <div class="row" style="gap:6px" id="bRanges">
         <button class="btn sm primary" data-r="all">全部</button>
-        <button class="btn sm ghost" data-r="5y">近 5 年</button>
-        <button class="btn sm ghost" data-r="1y">近 1 年</button>
+        <button class="btn sm ghost" data-r="5y">五年</button>
+        <button class="btn sm ghost" data-r="1y">一年</button>
       </div>
     </div>
     <div id="btChart"></div>
@@ -168,9 +168,7 @@ function drawBt() {
   $('bCagr').textContent = cg == null ? '—' : DSH.pct(cg);
   $('bCagr').className = 'num num-lg ' + DSH.cls(cg);
   $('bBench').textContent = DSH.pct(bR); $('bBench').className = 'num num-lg ' + DSH.cls(bR);
-  $('bBenchSub').textContent = yrs > 0.9 ? ('年化 ' + DSH.pct(Math.pow(l.b / f.b, 1 / yrs) - 1)) : '同期基准';
   $('bMdd').textContent = DSH.pct(mdd, 1);
-  $('bTotalSub').textContent = '按月复利 · ' + f.d + ' ～ ' + pts[pts.length - 1].d;
   $('btPeriod').textContent = f.d + ' 起 · ' + pts.length + ' 个月';
 }
 
