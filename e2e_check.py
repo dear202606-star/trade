@@ -133,7 +133,8 @@ def main():
     page("strategy.html", ["累计收益增长", "逐年记录", "个股贡献", "跑赢标普 500"])
 
     # 1b. 旧链接不能 404（历史书签）
-    for old, want in [("plan.html", "portfolio"), ("about.html", "strategy"), ("nav.html", "strategy")]:
+    for old, want in [("plan.html", "portfolio"), ("about.html", "strategy"),
+                      ("nav.html", "strategy"), ("report.html", "strategy")]:
         code, txt = get(old)
         if code == 200:
             ok("旧链接 %s 可访问（跳转 %s）" % (old, want))

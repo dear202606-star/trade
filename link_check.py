@@ -16,8 +16,8 @@ BASE = (sys.argv[1] if len(sys.argv) > 1 else
 H = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)", "Cache-Control": "no-store"}
 CB = "?cb=" + str(int(time.time()))
 
-PAGES = ["", "portfolio.html", "strategy.html", "signals.html", "report.html",
-         "plan.html", "about.html", "nav.html", "report-old.html"]
+PAGES = ["", "portfolio.html", "strategy.html", "signals.html",
+         "plan.html", "about.html", "nav.html", "report.html"]
 
 LINK_RE = re.compile(r'(?:href|src)\s*=\s*["\']([^"\'#?]+)[^"\']*["\']', re.I)
 

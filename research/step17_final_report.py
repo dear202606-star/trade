@@ -422,7 +422,7 @@ ol{{padding-left:22px}}
 <div class="foot">数据来源：新浪财经（价格）、NASDAQ Trader（股票清单）、fja05680/sp500（时点成分）。统计方法：6 个月分块 bootstrap、市场模型 OLS、Deflated Sharpe Ratio。本报告仅供研究，不构成投资建议。</div>
 </div></body></html>"""
 
-    p = os.path.join(OUT, "排名策略对比.html")
+    p = os.path.join(OUT, "策略模型研究与行动步骤.html")
     open(p, "w", encoding="utf-8").write(html)
     print("report:", p, len(html))
 

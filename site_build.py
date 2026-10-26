@@ -4,7 +4,7 @@
 流程：
   1. 复制 site_src/*（页面、样式、脚本）→ docs/
   2. 写数据文件 docs/data/{signal,history,curve}.json
-  3. 用 排名策略对比.html + 实时信号 → docs/report.html（含动态区块）
+  3. 生成 docs/signals.html（信号历史）
   4. 生成 docs/signals.html（信号看板）
 
 注意：output/排名策略对比.html 仍是「源 + 成品」合一，只有报告页用到它。
@@ -150,7 +150,6 @@ font-family:'Microsoft YaHei',system-ui,sans-serif;">
 <a href="index.html" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;text-decoration:none;font-size:14px;">总览</a>
 <a href="portfolio.html" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;text-decoration:none;font-size:14px;">我的持仓</a>
 <a href="strategy.html" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;text-decoration:none;font-size:14px;">策略表现</a>
-<a href="report.html" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;text-decoration:none;font-size:14px;">策略报告</a>
 </div></div>"""
 
 
@@ -191,12 +190,9 @@ def main():
     # 净值为 equity.py 直接写入 docs/data/，这里无需复制
     # 数据质量明细（output/data_quality.json）仅供内部核查，不再发布到站点
 
-    with open(os.path.join(DOCS, "report.html"), "w", encoding="utf-8") as f:
-        f.write(build_report(hist))
-
+    # 策略报告页已下线（内容与「策略表现」重复）；report.html 由 site_src 提供跳转页
     dashboard.build(hist, os.path.join(DOCS, "signals.html"))
     inject_nav(os.path.join(DOCS, "signals.html"), "signals.html")
-    inject_nav(os.path.join(DOCS, "report.html"), "report.html")
 
     for fn in ("策略模型研究与行动步骤.pdf", "策略模型研究与行动步骤.xlsx"):
         s = os.path.join(BASE, "output", fn)
@@ -220,7 +216,7 @@ def main():
     bust_cache()
 
     print(f"站点已构建：{n} 个静态文件 → {DOCS}")
-    print("  index / portfolio / strategy / signals / report")
+    print("  index / portfolio / strategy / signals")
     print(f"  数据：signal.json history.json curve.json（{len(hist)} 期信号）")
 
 
