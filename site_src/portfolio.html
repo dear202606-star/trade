@@ -262,22 +262,29 @@ $('btnFromSignal').onclick = () => {
   // 已有持仓会被改写，必须先确认，且尽量保留原来的成本价
   const existed = {};
   PF.rows.forEach((r) => { existed[r.ticker] = r; });
-  if (PF.rows.length &&
-      !confirm('将按信号重建 3 只持仓，你现有的 ' + PF.rows.length + ' 条记录会被替换。\n' +
-               '已持有的标的会保留原成本价。确定继续？')) {
+  const exp = (SIG && SIG.exposure != null) ? SIG.exposure : 1;
+  const msg = exp < 1
+    ? '⚠ 大盘跌破 10 月均线，本次只投入计划的 ' + Math.round(exp * 100) + '%（其余留现金）。\n' +
+      '将按此比例重建 3 只持仓，你现有 ' + PF.rows.length + ' 条记录会被替换，已持有的标的保留原成本价。\n确定继续？'
+    : '将按信号重建 3 只持仓，你现有的 ' + PF.rows.length + ' 条记录会被替换。\n' +
+      '已持有的标的会保留原成本价。确定继续？';
+  if (PF.rows.length && !confirm(msg)) {
     return;
   }
   const today = new Date().toISOString().slice(0, 10);
+  const deploy = plan * exp;          // 半仓时只投入一半，其余留现金
   PF.rows = off.map((p) => {
     const price = ((Q.quotes || {})[p.ticker] || {}).p || 0;
-    const amt = plan * p.weight;
+    const amt = deploy * p.weight;
     const shares = price > 0 ? +(amt / price).toFixed(4) : 0;
     const old = existed[p.ticker];
     const cost = old && old.cost > 0 ? old.cost : +price.toFixed(2);   // 保留真实成本
     return { ticker: p.ticker, shares, cost, added: old && old.added ? old.added : today };
   }).filter((r) => r.shares > 0);
   DSH.save(PF); render(); renderOrders();
-  DSH.toast('已按 ' + DSH.money(plan, PF.cur || 'USD') + ' 分配到 ' + PF.rows.length + ' 只');
+  DSH.toast('已投入 ' + DSH.money(deploy, PF.cur || 'USD') +
+    (exp < 1 ? '（半仓，留存现金 ' + DSH.money(plan - deploy, PF.cur || 'USD') + '）' : '') +
+    ' 到 ' + PF.rows.length + ' 只');
 };
 
 $('btnClear').onclick = () => {
@@ -343,6 +350,24 @@ function renderSignal() {
         '<span style="color:var(--txt-3)">' + (px ? px.toFixed(2) : '—') + '</span>' +
         '<span class="' + DSH.cls(p.ret12) + '">' + DSH.pct(p.ret12, 0) + '</span></div></div>';
   }).join('');
+
+  // 半仓时给出醒目提示（这是「恰当的时候展示」）
+  const warnId = 'sigHalfWarn';
+  let warn = document.getElementById(warnId);
+  if (exp < 1) {
+    if (!warn) {
+      warn = document.createElement('div');
+      warn.id = warnId;
+      warn.className = 'tip warn';
+      warn.style.cssText = 'margin-top:14px;border-color:rgba(255,171,107,.35);background:rgba(255,171,107,.08)';
+      document.getElementById('sigPicks').parentNode.parentNode.appendChild(warn);
+    }
+    warn.innerHTML = '⚠ 大盘走弱：标普 500 <b>' + (SIG.spy || '—') + '</b> / 10 月均线 <b>' +
+      (SIG.ma || '—') + '</b>，按规则本次只投入计划资金的 <b>' + Math.round(exp * 100) +
+      '%</b>，其余留作现金。';
+  } else if (warn) {
+    warn.remove();
+  }
 }
 
 /* ---------- 要下的单（只在真的有换仓需求时出现） ---------- */

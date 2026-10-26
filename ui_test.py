@@ -222,6 +222,38 @@ def main():
               "数据缺失时页面不白屏", "数据缺失时页面白屏")
         pg2.screenshot(path=os.path.join(OUT, "05_degrade.png"), full_page=True)
 
+        # ---------- H 半仓规则落地 ----------
+        pg2b = ctx.new_page()
+
+        def _halve(route):
+            import json as _j
+            resp = route.fetch()
+            data = _j.loads(resp.text())
+            data['exposure'] = 0.5
+            data['trend'] = '半仓'
+            route.fulfill(status=200, body=_j.dumps(data, ensure_ascii=False),
+                          headers={'Content-Type': 'application/json'})
+        pg2b.route('**/data/signal.json*', _halve)
+        pg2b.goto(BASE + 'portfolio.html', wait_until='networkidle')
+        pg2b.evaluate('localStorage.clear()')
+        pg2b.reload(wait_until='networkidle')
+        pg2b.wait_for_timeout(1500)
+        pg2b.fill('#plan', '50000')
+        pg2b.dispatch_event('#plan', 'input')
+        pg2b.wait_for_timeout(400)
+        pg2b.once('dialog', lambda d: d.accept())
+        pg2b.get_by_text('分配', exact=True).first.click()
+        pg2b.wait_for_timeout(1500)
+        cost_txt = pg2b.locator('#tCash').inner_text()
+        cost_v = float(cost_txt.replace('$', '').replace(',', '') or 0)
+        check(abs(cost_v - 25000) / 25000 < 0.05,
+              '半仓规则落地：计划 5 万只投 %s' % cost_txt,
+              '半仓未生效：已投入 %s（应≈25000）' % cost_txt)
+        warn = pg2b.evaluate('() => !!document.getElementById("sigHalfWarn")')
+        check(warn, '半仓有醒目提示', '半仓缺少提示')
+        pg2b.screenshot(path=os.path.join(OUT, '08_half.png'), full_page=True)
+        pg2b.close()
+
         # ---------- G 十字线 ----------
         pg.goto(BASE + "strategy.html", wait_until="networkidle")
         pg.wait_for_timeout(1800)
