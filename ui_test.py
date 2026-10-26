@@ -56,7 +56,8 @@ def main():
         pg.wait_for_timeout(1500)
         check("今天该做什么" in pg.content(), "首页标题正常", "首页标题缺失")
         nav = pg.locator("nav a, .nav a, header a").all_inner_texts()
-        check(any("我的持仓" in t for t in nav), "导航含「我的持仓」", "导航缺少「我的持仓」")
+        check(any("持仓" in t for t in nav) and any("策略" in t for t in nav),
+              "导航为 总览/持仓/策略", "导航项异常")
         check(pg.locator("#eqSpark svg").count() > 0, "首页净值迷你图已渲染", "首页迷你图未渲染")
         pg.screenshot(path=os.path.join(OUT, "01_index.png"), full_page=True)
 
@@ -84,8 +85,9 @@ def main():
         rows = pg.locator(".card").filter(has_text="股数").count()
         txt = pg.content()
         has_rows = ("#demo" in pg.url) or rows >= 0
-        check("止损线" in txt, "持仓卡片含「止损线」", "持仓卡片缺少「止损线」")
+        check("止损线" not in txt, "止损口径已统一（无个股止损）", "仍存在与回测不符的止损线")
         check("市值" in txt, "持仓卡片含「市值」", "持仓卡片缺少「市值」")
+        check("CNY" not in txt, "已移除假换算的 CNY 选项", "CNY 选项仍在")
         check("成本价留空" not in txt, "过程性说明已清理", "仍有过程性说明")
         check("要下的单" in txt, "下单区块存在", "下单区块缺失")
         pg.screenshot(path=os.path.join(OUT, "02_portfolio.png"), full_page=True)

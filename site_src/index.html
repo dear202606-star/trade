@@ -24,16 +24,16 @@
           <div class="hero-item"><div class="label">最新信号</div><div class="num num-md" id="hMonth" style="color:var(--gold)">—</div></div>
           <div class="hero-item"><div class="label">大盘开关</div><div id="hTrend">—</div></div>
           <div class="hero-item"><div class="label">目标仓位</div><div class="num num-md" id="hExp">—</div></div>
-          <div class="hero-item hero-cta"><a class="btn primary" id="ctaBtn" href="signals.html">看具体操作 →</a></div>
+          <div class="hero-item hero-cta"><a class="btn primary" id="ctaBtn" href="portfolio.html#orders">我要下单 →</a></div>
         </div>
       </div>
 
       <!-- 策略净值：进门第一眼的成绩单 -->
-      <a href="strategy.html" style="display:block;color:inherit;width:330px;flex:0 0 330px;
+      <a href="strategy.html" class="eq-card" style="display:block;color:inherit;
          background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;
          padding:18px 20px;text-decoration:none">
         <div class="row" style="justify-content:space-between;align-items:baseline">
-          <div class="label" style="margin:0">策略净值</div>
+          <div class="label" style="margin:0">策略累计收益</div>
           <span style="font-size:11px;color:var(--txt-3)" id="eqPeriod">—</span>
         </div>
         <div class="num num-lg" id="eqRet" style="margin-top:6px">—</div>
@@ -167,7 +167,7 @@
     const bd = String(eq.base_date || '');
     const bdt = bd.length === 8 ? bd.slice(0, 4) + '/' + bd.slice(4, 6) + '/' + bd.slice(6, 8) : bd;
     document.getElementById('eqPeriod').textContent = bdt + ' 起 · ' + eq.points.length + ' 日';
-    document.getElementById('ctaBtn').setAttribute('href', 'signals.html');
+    document.getElementById('ctaBtn').setAttribute('href', 'portfolio.html#orders');
     let pk = 0;
     const dds = eq.points.map(p => { pk = Math.max(pk, p.s); return { d: p.d, y: p.s / pk - 1 }; });
     const tail = eq.points.slice(-120), tailDd = dds.slice(-120);

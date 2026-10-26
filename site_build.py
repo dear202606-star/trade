@@ -148,8 +148,8 @@ NAV_BAR = """<div style="position:sticky;top:0;z-index:50;background:#0b0f17f2;b
 font-family:'Microsoft YaHei',system-ui,sans-serif;">
 <a href="index.html" style="font-weight:800;color:#e8eef8;text-decoration:none;margin-right:18px;font-size:15px;">LEADER<span style="color:#ffc857;">·</span>QUANT</a>
 <a href="index.html" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;text-decoration:none;font-size:14px;">总览</a>
-<a href="portfolio.html" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;text-decoration:none;font-size:14px;">我的持仓</a>
-<a href="strategy.html" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;text-decoration:none;font-size:14px;">策略表现</a>
+<a href="portfolio.html" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;text-decoration:none;font-size:14px;">持仓</a>
+<a href="strategy.html" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;text-decoration:none;font-size:14px;">策略</a>
 </div></div>"""
 
 

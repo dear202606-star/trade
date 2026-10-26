@@ -17,7 +17,7 @@
   <div class="card fade-in" style="padding:28px 30px">
     <div class="row" style="align-items:flex-start">
       <div class="grow">
-        <div class="label">累计盈亏</div>
+        <div class="label">浮动盈亏</div>
         <div class="num num-xl" id="tPnl">—</div>
         <div class="sub" id="tPnlPct"></div>
       </div>
@@ -29,9 +29,9 @@
     </div>
     <div class="grid g4" style="margin-top:24px;gap:12px">
       <div class="card flat"><div class="label" style="margin-bottom:6px">总市值</div><div class="num num-md" id="tMv">—</div></div>
-      <div class="card flat"><div class="label" style="margin-bottom:6px">已投入（成本）</div><div class="num num-md" id="tCash">—</div></div>
+      <div class="card flat"><div class="label" style="margin-bottom:6px">持仓成本</div><div class="num num-md" id="tCash">—</div></div>
       <div class="card flat"><div class="label" style="margin-bottom:6px">收益率</div><div class="num num-md" id="tRet">—</div></div>
-      <div class="card flat"><div class="label" style="margin-bottom:6px">已用总买入资金</div><div class="num num-md" id="tPos">—</div>
+      <div class="card flat"><div class="label" style="margin-bottom:6px">仓位（已投入÷计划）</div><div class="num num-md" id="tPos">—</div>
         <div class="bar"><i id="tPosBar" style="width:0%"></i></div></div>
     </div>
   </div>
@@ -56,12 +56,12 @@
   <div class="card" style="margin-top:16px">
     <div class="row">
       <div class="field" style="width:190px">
-        <label>总买入资金</label>
+        <label>计划投入</label>
         <input id="plan" type="number" min="0" step="1000" placeholder="例如 100000" class="num-in">
       </div>
       <div class="field" style="width:140px">
         <label>币种</label>
-        <select id="cur"><option value="USD">USD 美元</option><option value="CNY">CNY 人民币</option></select>
+        <select id="cur"><option value="USD">USD 美元</option></select>
       </div>
       <div class="grow"></div>
       <button class="btn ghost" id="btnExport">导出</button>
@@ -96,8 +96,17 @@
     <div class="grid" id="orders" style="gap:10px"></div>
   </div>
 
-  <div class="foot">行情来自新浪财经（延后约 15 分钟），每 30 分钟自动刷新 ｜ 盈亏不含手续费 ｜ 仅供研究，不构成投资建议</div>
+  <div class="foot">行情为美股收盘价（延迟约 15 分钟）｜ 盈亏不含手续费 ｜ 仅供研究，不构成投资建议</div>
 </div>
+<script>
+// 从总览点「我要下单」直接滚到清单
+if (location.hash === '#orders') {
+  setTimeout(function () {
+    var el = document.getElementById('orders');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 600);
+}
+</script>
 
 <script>
 let PF = DSH.load();
@@ -171,7 +180,7 @@ function render() {
     const dev = t != null ? r.weight - t : null;
     const devTxt = dev == null ? '' : (Math.abs(dev) < 0.005 ? '符合目标'
       : (dev > 0 ? '超配 ' : '低配 ') + Math.abs(dev * 100).toFixed(1) + 'pt');
-    return '<div class="holding" style="grid-template-columns:1.4fr .85fr .85fr .85fr .95fr 124px 34px">' +
+    return '<div class="holding hold-row">' +
       '<div><div class="tk">' + DSH.esc(r.ticker) + '</div><div class="nm">' + DSH.esc(r.name || '') + '</div>' +
         '<div class="bar" style="max-width:120px"><i class="' + (dev > 0.01 ? 'over' : '') +
         '" style="width:' + Math.min(100, r.weight * 330) + '%"></i></div></div>' +
@@ -179,11 +188,9 @@ function render() {
         '<input class="num-in" type="number" step="0.0001" value="' + r.shares + '" data-i="' + i + '" data-f="shares" style="padding:7px 9px;font-size:13px"></div>' +
       '<div><div class="label" style="margin:0 0 3px">成本</div>' +
         '<input class="num-in" type="number" step="0.01" value="' + (+(r.costPerShare || r.cost)).toFixed(2) + '" data-i="' + i + '" data-f="cost" style="padding:7px 9px;font-size:13px"></div>' +
-      '<div><div class="label" style="margin:0 0 3px">止损线</div>' +
-        '<div class="num" style="font-size:13.5px;padding-top:5px">' + (r.stopLine ? r.stopLine.toFixed(2) : '—') +
-          '<div style="font-size:10.5px;margin-top:1px;color:' +
-          (r.stopDist != null && r.stopDist <= 0 ? 'var(--red)' : r.stopDist != null && r.stopDist < 0.10 ? '#FFAB6B' : 'var(--txt-3)') + '">' +
-          (r.stopDist == null ? '' : r.stopDist <= 0 ? '已触发' : '距 ' + (r.stopDist * 100).toFixed(0) + '%') + '</div></div></div>' +
+      '<div style="text-align:right"><div class="label" style="margin:0 0 3px">现价</div>' +
+        '<div class="num" style="font-size:14px">' + (r.hasQuote ? r.price.toFixed(2) : '—') + '</div>' +
+        '<div class="sub" style="margin-top:2px;font-size:11px">' + (r.hasQuote ? DSH.pct(r.dayPct, 2) : '') + '</div></div>' +
       '<div style="text-align:right"><div class="label" style="margin:0 0 3px">市值</div>' +
         '<div class="num" style="font-size:14px">' + DSH.money(r.mv, cur) + '</div>' +
         '<div class="sub" style="margin-top:2px;font-size:11px">' + (r.weight * 100).toFixed(1) + '%</div></div>' +
@@ -226,10 +233,18 @@ $('cur').addEventListener('change', (e) => { PF.cur = e.target.value; DSH.save(P
 $('btnAdd').onclick = () => {
   const tk = ($('nTicker').value || '').trim().toUpperCase();
   if (!tk) { $('nTicker').focus(); return; }
-  const sh = parseFloat($('nShares').value) || 0;
   const q = (Q.quotes || {})[tk];
+  // 代码校验：不在标普 500 名单里就不允许录入，避免静默生成 0 市值行
+  if (!q || !q.p) {
+    DSH.toast('「' + tk + '」没有行情数据，请检查代码是否正确');
+    $('nTicker').focus();
+    return;
+  }
+  const sh = parseFloat($('nShares').value) || 0;
+  if (sh <= 0) { DSH.toast('股数必须大于 0'); $('nShares').focus(); return; }
   let cost = parseFloat($('nCost').value);
-  if (!cost || isNaN(cost)) cost = q ? q.p : 0;
+  // 成本价必须有效：留空用现价，填 0 或负数视为无效
+  if (!isFinite(cost) || cost <= 0) cost = q.p;
   PF.rows.push({ ticker: tk, shares: sh, cost, added: new Date().toISOString().slice(0, 10) });
   DSH.save(PF);
   $('nTicker').value = ''; $('nShares').value = ''; $('nCost').value = '';
@@ -247,12 +262,22 @@ $('btnFromSignal').onclick = () => {
     if (el) { el.focus(); el.select && el.select(); }
     return;
   }
+  // 已有持仓会被改写，必须先确认，且尽量保留原来的成本价
+  const existed = {};
+  PF.rows.forEach((r) => { existed[r.ticker] = r; });
+  if (PF.rows.length &&
+      !confirm('将按信号重建 3 只持仓，你现有的 ' + PF.rows.length + ' 条记录会被替换。\n' +
+               '已持有的标的会保留原成本价。确定继续？')) {
+    return;
+  }
   const today = new Date().toISOString().slice(0, 10);
   PF.rows = off.map((p) => {
     const price = ((Q.quotes || {})[p.ticker] || {}).p || 0;
-    const amt = plan * p.weight;                       // 按信号权重分配
+    const amt = plan * p.weight;
     const shares = price > 0 ? +(amt / price).toFixed(4) : 0;
-    return { ticker: p.ticker, shares, cost: +price.toFixed(2), added: today };
+    const old = existed[p.ticker];
+    const cost = old && old.cost > 0 ? old.cost : +price.toFixed(2);   // 保留真实成本
+    return { ticker: p.ticker, shares, cost, added: old && old.added ? old.added : today };
   }).filter((r) => r.shares > 0);
   DSH.save(PF); render(); renderOrders();
   DSH.toast('已按 ' + DSH.money(plan, PF.cur || 'USD') + ' 分配到 ' + PF.rows.length + ' 只');
@@ -348,15 +373,6 @@ function renderOrders() {
     const price = (quotes[t] || {}).p || 0;
     items.push({ side: -held[t], ticker: t, price, amt: held[t] * price });
   });
-  // 已触发移动止损的持仓 → 强制清仓（优先于权重调整）
-  c0.rows.forEach(r => {
-    if (r.stopDist != null && r.stopDist <= 0 && r.hasQuote) {
-      const i = items.findIndex(x => x.ticker === r.ticker);
-      const amt = r.price * r.shares;
-      if (i >= 0) { items[i] = { side: -r.shares, ticker: r.ticker, price: r.price, amt, forced: true }; }
-      else { items.push({ side: -r.shares, ticker: r.ticker, price: r.price, amt, forced: true }); }
-    }
-  });
   const real = items.filter(x => x.price && x.amt > Math.max(100, book * 0.005));
   if (!real.length) {
     el.innerHTML = '<div class="tip ok">持仓已在目标权重附近，不需要下单。</div>';
@@ -368,7 +384,7 @@ function renderOrders() {
     return '<div class="action"><span class="tag ' + (buy ? 'buy' : 'sell') + '">' +
       (buy ? '买入' : '卖出') + '</span>' +
       '<div style="min-width:90px;font-weight:800;font-size:15px">' + DSH.esc(x.ticker) +
-        (x.forced ? ' <span class="pill off" style="font-size:10px;padding:2px 6px">止损</span>' : '') + '</div>' +
+        '</div>' +
       '<div class="grow" style="text-align:right"><div class="num" style="font-size:15px">' +
         qty.toFixed(qty < 10 ? 2 : 0) + ' 股</div><div class="sub" style="margin-top:2px">@ ' + x.price.toFixed(2) + '</div></div>' +
       '<div style="text-align:right;min-width:104px"><div class="num" style="font-size:15px;color:' +

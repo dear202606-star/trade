@@ -108,7 +108,7 @@ def main():
             check(age <= 48, f"行情 {age:.1f} 小时前更新",
                   f"行情已过期 {age:.0f} 小时", hard=False)
 
-    # D. 合理性
+    # D. 合理性（不变量硬校验：任何一条不过都不允许部署）
     if eq and eq.get("points"):
         last = eq["points"][-1]
         check(-5 < last.get("s", 0) < 20, f"净值末值 {last.get('s')}",
@@ -117,9 +117,69 @@ def main():
         check(mdd <= 0.001, f"最大回撤 {mdd*100:.1f}%", f"回撤应为负值：{mdd}")
 
     if sh and sh.get("years"):
+        import math
+        bad_ret, bad_w, bad_n, bad_sec = [], [], [], []
         for r in sh["years"]:
-            if r.get("ret") is not None and abs(r["ret"]) > 5:
-                fails.append(f"{r['year']} 年收益异常：{r['ret']*100:.0f}%")
+            y = r.get("year")
+            # 1) 收益与回撤必须是有限数（NaN 会让 abs(x)>5 判假而蒙混过关）
+            rt, ddv = r.get("ret"), r.get("dd")
+            if rt is None or ddv is None or not math.isfinite(rt) or not math.isfinite(ddv):
+                bad_ret.append(y)
+            elif abs(rt) > 5:
+                bad_ret.append(y)
+            hold = r.get("holdings") or []
+            # 2) 每年必须恰好 3 只
+            if len(hold) != 3:
+                bad_n.append("%s:%d只" % (y, len(hold)))
+            # 3) 权重合计必须为 1
+            wsum = sum((p.get("weight") or 0) for p in hold)
+            if abs(wsum - 1) > 0.005:
+                bad_w.append("%s:%.3f" % (y, wsum))
+            # 4) 行业上限：同行业 ≤2 只，且该行业合计 ≤60%
+            bys = {}
+            for p in hold:
+                s = p.get("sector") or "Unknown"
+                bys.setdefault(s, [0, 0.0])
+                bys[s][0] += 1
+                bys[s][1] += (p.get("weight") or 0)
+            for s, (cnt, w) in bys.items():
+                if cnt > 2 or w > 0.61:
+                    bad_sec.append("%s:%s(%d只/%.0f%%)" % (y, s, cnt, w * 100))
+
+        check(not bad_ret, "逐年收益均为有限且合理", "收益缺失/异常年份：" + ",".join(map(str, bad_ret[:6])))
+        check(not bad_n, "每年恰好 3 只持仓", "持仓数异常：" + ",".join(bad_n[:6]))
+        check(not bad_w, "各年权重合计 = 1", "权重合计异常：" + ",".join(bad_w[:6]))
+        check(not bad_sec, "行业上限（≤2 只 / ≤60%）", "行业超限：" + ",".join(bad_sec[:6]))
+
+        # 5) 历史不可变：已发布年份的收益不得被改动
+        try:
+            bp = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                              "output", "history_baseline.json")
+            cur = {str(r["year"]): round(r["ret"], 4) for r in sh["years"]}
+            if os.path.exists(bp):
+                base = json.load(open(bp, encoding="utf-8")).get("years") or {}
+                drift = [f"{y}({base[y]:+.3f}→{cur[y]:+.3f})"
+                         for y in base if y in cur and abs(cur[y] - base[y]) > 0.005]
+                check(not drift, "历史收益未被改写", "历史收益被改动：" + ",".join(drift[:5]))
+            else:
+                warns.append("缺少历史基线（首次运行会建立）")
+        except Exception as e:
+            warns.append("历史基线校验失败：%s" % e)
+
+        # 6) 曲线末值必须等于逐年复利
+        cv = load("curve.json")
+        if cv and cv.get("points") and cv.get("years"):
+            prod = 1.0
+            for r in cv["years"]:
+                prod *= 1 + (r.get("ret") or 0)
+            end = cv["points"][-1].get("s", 0)
+            check(end > 0 and abs(prod / end - 1) < 0.01,
+                  "曲线末值 = 逐年复利（%.2f 倍）" % end,
+                  "曲线与分年不一致：%.2f vs %.2f" % (end, prod))
+
+        # 7) 降级标记：沿用旧数据时必须让页面看得到
+        if sh.get("degraded"):
+            warns.append("本次沿用 %s 的结果（数据抓取不完整）" % sh.get("asof", "上次"))
 
     # 报告
     print("=== 部署前自检 ===")

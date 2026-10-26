@@ -4,8 +4,8 @@
 
   const NAV = [
     ["index.html", "总览"],
-    ["portfolio.html", "我的持仓"],
-    ["strategy.html", "策略表现"],
+    ["portfolio.html", "持仓"],
+    ["strategy.html", "策略"],
   ];
 
   const DSH = (g.DSH = {});
@@ -429,23 +429,50 @@
   window.addEventListener('error', function (e) { showErr(e.message + ' @ ' + (e.filename||'').split('/').pop() + ':' + e.lineno); });
   window.addEventListener('unhandledrejection', function (e) { showErr('Promise: ' + (e.reason && e.reason.message || e.reason)); });
 
-  /* ---------- 页脚数据时间戳 ---------- */
+  /* ---------- 页脚数据状态条（全站唯一的「数据可信」说明） ---------- */
   DSH.stamp = async function () {
     const el = document.querySelector(".foot");
     if (!el) return;
     const [q, eq] = await Promise.all([DSH.json("quotes", {}), DSH.json("equity", {})]);
     const parts = [];
-    if (q && q.ts_local) {
-      const age = DSH.ageHours(q.ts);
-      const stale = age != null && age > 36;
-      parts.push("行情更新 <b style=\"color:" + (stale ? "var(--red)" : "var(--txt-2)") + "\">" +
-        DSH.esc(q.ts_local) + "</b>（" + (age == null ? "—" : age < 1 ? "刚刚" : Math.floor(age) + " 小时前") + "）");
+
+    // 三个时间必须分清：行情属于哪个交易日 / 什么时候抓的 / 净值算到哪天
+    if (q && q.session) {
+      parts.push("行情 <b style=\"color:var(--txt-2)\">" + DSH.esc(q.session) + " 收盘</b>");
     }
-    if (eq && eq.updated) parts.push("净值更新 <b style=\"color:var(--txt-2)\">" + DSH.esc(eq.updated) + "</b>");
+    if (q && q.ts) {
+      const d = new Date(q.ts);
+      if (!isNaN(d.getTime())) {
+        const p = (n) => String(n).padStart(2, "0");
+        parts.push("采集于 <b style=\"color:var(--txt-2)\">" +
+          p(d.getMonth() + 1) + "-" + p(d.getDate()) + " " + p(d.getHours()) + ":" + p(d.getMinutes()) + "</b>");
+      }
+      const age = DSH.ageHours(q.ts);
+      if (age != null && age > 36) {
+        parts.push("<b style=\"color:#FFAB6B\">⚠ 行情已 " + Math.floor(age / 24) + " 天未更新</b>");
+      }
+    }
+    if (eq && eq.updated) {
+      parts.push("净值截至 <b style=\"color:var(--txt-2)\">" + DSH.esc(eq.updated) + "</b>");
+    }
+    parts.push("两源已核对");
     if (!parts.length) return;
+
+    // 行情过旧时，顶部通栏提醒（不能只缩在页脚）
+    const age = q ? DSH.ageHours(q.ts) : null;
+    if (age != null && age > 36 && !document.getElementById("staleBar")) {
+      const bar = document.createElement("div");
+      bar.id = "staleBar";
+      bar.style.cssText = "position:sticky;top:0;z-index:60;background:#7A4A12;color:#FFE7C2;" +
+        "font-size:13px;padding:9px 16px;text-align:center;letter-spacing:.01em";
+      bar.textContent = "⚠ 行情已 " + Math.floor(age / 24) + " 天未更新，最新数据为 " +
+        (q.session || "上次交易日") + " 收盘，请勿据此下单";
+      document.body.insertBefore(bar, document.body.firstChild);
+    }
+
     const line = document.createElement("div");
-    line.style.cssText = "margin-bottom:10px;color:#55637A;font-size:11.5px";
-    line.innerHTML = parts.join(" ｜ ") + " ｜ 每日自动更新（北京时间 20:00 前）";
+    line.style.cssText = "margin-bottom:10px;color:#7A8699;font-size:12.5px";
+    line.innerHTML = parts.join(" ｜ ");
     el.insertBefore(line, el.firstChild);
   };
 

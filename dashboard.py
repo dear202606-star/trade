@@ -12,7 +12,7 @@ def build(history, path="output/dashboard.html"):
 <title>美股排名动量 · 信号看板</title>
 <style>
 :root{{--bg:#0d1117;--card:#161d2c;--line:#2a3346;--txt:#e6ecf5;--dim:#93a4bd;--gold:#ffc857;
---green:#2ecc71;--red:#ff5a5f;--blue:#4da3ff}}
+--up:#ff5a5f;--down:#2ecc71;--green:#ff5a5f;--red:#2ecc71;--blue:#4da3ff}}
 *{{box-sizing:border-box}}
 body{{margin:0;background:var(--bg);color:var(--txt);font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;
 line-height:1.7;font-size:15px}}
@@ -129,7 +129,7 @@ function renderNow(rec){{
     <table><thead><tr><th>#</th><th>代码</th><th>公司</th><th>行业</th>
     <th class="num">基准涨幅</th><th class="num">策略内权重</th><th class="num">占总资产</th></tr></thead><tbody>
     ${{off.map(p=>`<tr><td>${{p.rank}}</td><td class="tk">${{esc(p.ticker)}}</td><td>${{esc(p.name)}}</td>
-      <td>${{esc(p.sector)}}</td><td class="num" style="color:var(--green)">${{fmt(p.ret12,0)}}</td>
+      <td>${{esc(p.sector)}}</td><td class="num" style="color:var(--up)">${{fmt(p.ret12,0)}}</td>
       <td class="num">${{(p.weight*100).toFixed(0)}}%</td>
       <td class="num"><b>${{(p.weight*rec.exposure*0.30*100).toFixed(1)}}%</b></td></tr>`).join('')}}
     </tbody></table>`;
@@ -200,7 +200,7 @@ function renderTrack(rec){{
     ${{rows.map(r=>{{
       const pos = (r.picks||[]).map(p=>esc(p.ticker)).join(' / ');
       const ex = (r.ret!=null && r.spy_ret!=null) ? r.ret - r.spy_ret : null;
-      const col = v => v==null ? '#6f8199' : (v>=0 ? '#2ecc71' : '#ff5a5f');
+      const col = v => v==null ? '#6f8199' : (v>=0 ? '#ff5a5f' : '#2ecc71');
       return `<tr><td>${{esc(r.month)}}</td><td class="tk">${{pos}}</td>
         <td class="num">${{(r.exposure*100).toFixed(0)}}%</td>
         <td class="num" style="color:${{col(r.ret)}}">${{r.ret==null?'待结算':pct(r.ret)}}</td>

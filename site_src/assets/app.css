@@ -190,3 +190,29 @@ tr:last-child td{border-bottom:none}
   background:var(--surface-2);border:1px solid var(--line);font-size:12.5px;font-weight:600}
 .fade-in{animation:fade .4s ease-out}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+
+/* ---------- 移动端 ---------- */
+@media (max-width:560px){
+  .wrap{padding:0 14px}
+  .grid.g4{grid-template-columns:repeat(2,1fr)!important}
+  .grid.g3{grid-template-columns:1fr!important}
+  .holding{grid-template-columns:1fr 1fr!important;row-gap:10px}
+  .holding > div:first-child{grid-column:1 / -1}
+  .num-xl{font-size:34px}
+  .num-lg{font-size:22px}
+  .hero-row{flex-wrap:wrap}
+}
+
+.hold-row{grid-template-columns:1.4fr .85fr .85fr .85fr .95fr 124px 34px}
+@media (max-width:560px){ .hold-row{grid-template-columns:1fr 1fr!important} }
+
+.eq-card{width:330px;flex:0 0 330px}
+@media (max-width:560px){
+  .hero{padding:22px 18px}
+  .hero .row{flex-direction:column!important;gap:18px!important}
+  .eq-card{width:100%!important;flex:1 1 auto!important}
+  .nav{height:auto!important;flex-wrap:wrap;padding:8px 0}
+  .nav a{font-size:13px!important;padding:5px 9px!important}
+  .nav .tick{display:none}
+}
