@@ -135,11 +135,12 @@
             '<div class="sub"><span class="' + DSH.cls(c.pnlPct) + '">' + DSH.pct(c.pnlPct) + '</span>' +
               ' ｜ 成本 ' + DSH.money(c.cost, cur) + '</div>' +
           '</div>' +
+          (c.dayValid && c.dayPnl !== 0 ?
           '<div style="text-align:right">' +
             '<div class="label">' + (q.session ? '最近交易日 ' + q.session.slice(5) : '今日') + '</div>' +
-            '<div class="num num-lg ' + (c.dayValid ? DSH.cls(c.dayPnl) : '') + '">' + (c.dayValid ? DSH.money(c.dayPnl, cur) : '—') + '</div>' +
+            '<div class="num num-lg ' + DSH.cls(c.dayPnl) + '">' + DSH.money(c.dayPnl, cur) + '</div>' +
             '<div class="sub"><span class="' + DSH.cls(c.dayPct) + '">' + DSH.pct(c.dayPct) + '</span></div>' +
-          '</div>' +
+          '</div>' : '') +
         '</div>' +
         '<div class="grid g3" style="margin-top:26px;gap:12px">' +
           '<div class="card flat"><div class="label" style="margin-bottom:6px">持仓市值</div>' +
