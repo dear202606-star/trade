@@ -96,7 +96,7 @@
     <div class="grid" id="orders" style="gap:10px"></div>
   </div>
 
-  <div class="foot">行情为美股收盘价（延迟约 15 分钟）｜ 盈亏不含手续费 ｜ 仅供研究，不构成投资建议</div>
+  <div class="foot">行情为美股收盘价 ｜ 盈亏不含手续费 ｜ 仅供研究，不构成投资建议</div>
 </div>
 <script>
 // 从总览点「我要下单」直接滚到清单
@@ -410,6 +410,8 @@ function renderOrders() {
   }
   Q = await DSH.json('quotes', { quotes: {}, fx: 7.1 });
   if (window.__demo) { /* 演示数据不落盘 */ } else { }
+  DSH.onRefresh(async () => { Q = await DSH.json("quotes", { quotes: {}, fx: 7.1 }); render(); renderSignal(); renderOrders(); });
+  DSH.autoRefresh(5);
   render();
   renderSignal();
   renderOrders();

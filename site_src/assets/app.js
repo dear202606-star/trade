@@ -132,6 +132,23 @@
       '<span style="color:' + (stale ? "#FF6B72" : "#5A6779") + '">' +
       (stale ? "⚠ 数据已 " + ageTxt : ageTxt) + " ｜ " + DSH.esc(when) + "</span>";
   };
+  /* ---------- 页面打开期间的自动刷新 ----------
+     数据由 GitHub Actions 定期生成；页面这边每 5 分钟重新拉一次，
+     有新数据就重绘，没有就只更新时间，避免用户看到过期数字。 */
+  DSH._refreshers = [];
+  DSH.onRefresh = function (fn) { if (typeof fn === 'function') DSH._refreshers.push(fn); };
+  DSH.autoRefresh = function (minutes) {
+    const ms = (minutes || 5) * 60000;
+    setInterval(async function () {
+      try {
+        for (const k of Object.keys(cache)) delete cache[k];
+        await DSH.paintTick();
+        if (DSH.stamp) await DSH.stamp();
+        for (const fn of DSH._refreshers) { try { await fn(); } catch (e) {} }
+      } catch (e) {}
+    }, ms);
+  };
+
   // 每分钟按真实经过时间刷新相对时间
   DSH.tickTimer = function () {
     if (DSH._tick) return;
