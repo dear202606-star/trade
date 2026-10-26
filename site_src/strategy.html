@@ -87,7 +87,6 @@
   </div>
 
   <h2 style="margin:40px 0 10px;font-size:19px;letter-spacing:-.02em">回测：分年记录</h2>
-  <div id="yearTotal" style="margin-bottom:10px"></div>
   <div id="years"></div>
 
   <h2 style="margin:44px 0 10px;font-size:19px;letter-spacing:-.02em">个股贡献</h2>
@@ -143,9 +142,14 @@ function drawRun() {
 /* ---------- 二、回测 ---------- */
 function drawBt() {
   if (!CV || !CV.points || CV.points.length < 2) return;
-  let pts = CV.points;
-  if (BT_R === '1y') pts = pts.slice(Math.max(0, pts.length - 12));
-  if (BT_R === '5y') pts = pts.slice(Math.max(0, pts.length - 60));
+  const all = CV.points;
+  let i0 = 0;
+  if (BT_R === '1y') i0 = Math.max(0, all.length - 12);
+  if (BT_R === '5y') i0 = Math.max(0, all.length - 60);
+  const pts = all.slice(i0);
+  // 区间起点必须取「切片前一个月的净值」，否则会漏掉区间首月的涨跌
+  const b0 = i0 > 0 ? all[i0 - 1].s : 1;
+  const bB = i0 > 0 ? all[i0 - 1].b : 1;
   const eq = pts.map(p => ({ d: p.d.replace('-', ''), y: p.s - 1 }));
   const bm = pts.map(p => ({ d: p.d.replace('-', ''), y: p.b - 1 }));
   const dd = pts.map(p => ({ d: p.d.replace('-', ''), y: p.dd }));
@@ -153,11 +157,11 @@ function drawBt() {
   DSH.attachCharts();
 
   const f = pts[0], l = pts[pts.length - 1];
-  let peak = 0, mdd = 0;
+  let peak = b0, mdd = 0;
   pts.forEach(p => { peak = Math.max(peak, p.s); mdd = Math.min(mdd, p.s / peak - 1); });
-  const sR = l.s / f.s - 1, bR = l.b / f.b - 1;
+  const sR = l.s / b0 - 1, bR = l.b / bB - 1;
   const yrs = pts.length / 12;
-  const cg = yrs > 0.9 ? Math.pow(l.s / f.s, 1 / yrs) - 1 : null;
+  const cg = yrs > 0.9 ? Math.pow(l.s / b0, 1 / yrs) - 1 : null;
 
   $('bTotal').textContent = sR >= 9 ? ('+' + (1 + sR).toFixed(1) + ' 倍') : DSH.pct(sR);
   $('bTotal').className = 'num num-lg ' + DSH.cls(sR);
@@ -168,48 +172,6 @@ function drawBt() {
   $('bMdd').textContent = DSH.pct(mdd, 1);
   $('bTotalSub').textContent = '按月复利 · ' + f.d + ' ～ ' + pts[pts.length - 1].d;
   $('btPeriod').textContent = f.d + ' 起 · ' + pts.length + ' 个月';
-}
-
-function renderYearTotal() {
-  // 汇总直接由「分年行」的同源数据算出，保证与下表逐行相加一致
-  let rows = (CV && CV.years) || [];
-  rows = rows.filter(r => r.year <= (SH && SH.summary ? SH.summary.end : 9999));
-  let m = null;
-  if (rows.length) {
-    let eq = 1, peak = 1, mdd = 0, wi = 0, worst = 0;
-    rows.forEach(r => {
-      eq *= 1 + r.ret;
-      peak = Math.max(peak, eq);
-      mdd = Math.min(mdd, eq / peak - 1);
-      if (r.ret > 0) wi++;
-      worst = Math.min(worst, r.dd || 0);
-    });
-    const n = rows.length;
-    m = {
-      start: rows[0].year, end: rows[n - 1].year, years: n,
-      total: eq - 1, cagr: Math.pow(eq, 1 / n) - 1, mdd, worst_intra: worst,
-      wins: wi, losses: n - wi,
-    };
-  } else if (SH && SH.summary) {
-    m = SH.summary;
-  }
-  if (!m) { $('yearTotal').innerHTML = ''; return; }
-  $('yearTotal').innerHTML =
-    '<div class="card" style="padding:16px 20px;border-color:rgba(242,196,107,.22);background:rgba(242,196,107,.04)">' +
-      '<div class="row" style="gap:28px;flex-wrap:wrap">' +
-        '<div><div class="sub" style="margin-bottom:3px">' + m.start + '–' + m.end + ' 累计（自然年）</div>' +
-          '<div class="num num-md ' + DSH.cls(m.total) + '">' + DSH.pct(m.total, 0) + '</div></div>' +
-        '<div><div class="sub" style="margin-bottom:3px">年化</div>' +
-          '<div class="num num-md ' + DSH.cls(m.cagr) + '">' + DSH.pct(m.cagr, 1) + '</div></div>' +
-        '<div><div class="sub" style="margin-bottom:3px">年末口径回撤</div>' +
-          '<div class="num num-md down">' + DSH.pct(m.mdd, 1) + '</div></div>' +
-        '<div><div class="sub" style="margin-bottom:3px">最深年内回撤</div>' +
-          '<div class="num num-md down">' + DSH.pct(m.worst_intra || 0, 1) + '</div></div>' +
-        '<div><div class="sub" style="margin-bottom:3px">正收益年份</div>' +
-          '<div class="num num-md ' + (m.losses === 0 ? 'up' : '') + '">' + m.wins + ' / ' + m.years + '</div></div>' +
-        '<div class="grow"></div>' +
-        '<div class="sub" style="align-self:flex-end">自然年口径</div>' +
-      '</div></div>';
 }
 
 function renderYears() {
@@ -273,7 +235,6 @@ function renderStocks() {
   if (CV && CV.points && CV.points.length > 2) safe(drawBt, '回测图', 'btChart');
   else $('btChart').innerHTML = '<div class="tip warn">全周期曲线尚未生成</div>';
 
-  safe(renderYearTotal, '分年汇总', 'yearTotal');
   safe(renderYears, '分年记录', 'years');
   safe(renderStocks, '个股贡献', 'stocks');
 })();

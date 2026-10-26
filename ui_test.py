@@ -166,6 +166,28 @@ def main():
         check(pg.locator("#btChart svg").count() > 0, "回测曲线已渲染", "回测曲线未渲染")
         check(pg.locator("#years .card").count() >= 10, "逐年记录卡片 ≥10 年", "逐年记录卡片过少")
 
+        # 卡片数字必须与数据源一致（防止起点算错导致虚高）
+        cv = pg.evaluate("() => DSH.json('curve', null)")
+        if cv and cv.get("stats"):
+            st = cv["stats"]
+            shown = pg.locator("#bTotal").inner_text().strip()
+            if "倍" in shown:
+                got = float(shown.replace("+", "").replace("倍", "").strip())
+                want = round(1 + st["total"], 1)
+                check(abs(got - want) <= 0.15,
+                      "累计收益与数据一致（%s）" % shown, "累计收益不一致：页面 %s vs 数据 %.1f 倍" % (shown, want))
+            else:
+                check(False, "", "累计收益未按倍数显示：%s" % shown)
+            cagr_txt = pg.locator("#bCagr").inner_text().strip().replace("%", "").replace("+", "")
+            try:
+                got_c = float(cagr_txt)
+                want_c = round(st["cagr"] * 100, 2)
+                check(abs(got_c - want_c) <= 0.15,
+                      "年化与数据一致（%s）" % pg.locator("#bCagr").inner_text().strip(),
+                      "年化不一致：页面 %.2f vs 数据 %.2f" % (got_c, want_c))
+            except Exception:
+                check(False, "", "年化数字无法解析")
+
         # 区间切换
         for label in ["近 1 年", "近 3 月", "全部", "近 5 年"]:
             b = pg.get_by_text(label, exact=True).first
