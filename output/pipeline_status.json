@@ -1,46 +1,6 @@
 {
  "runs": [
   {
-   "ts": "2026-10-25T14:28:34Z",
-   "step": "quotes.py",
-   "rc": 0,
-   "dur": 8.8,
-   "ok": true,
-   "tail": "行情 508 / 510，汇率 6.6702，缺失 2"
-  },
-  {
-   "ts": "2026-10-25T14:28:39Z",
-   "step": "equity.py",
-   "rc": 0,
-   "dur": 4.5,
-   "ok": true,
-   "tail": "净值 205 个交易日（20251231 起）｜策略 +55.02% ｜标普 +11.45% ｜ 最大回撤 -34.8%"
-  },
-  {
-   "ts": "2026-10-25T14:30:36Z",
-   "step": "strategy_history.py",
-   "rc": 1,
-   "dur": 117.2,
-   "ok": false,
-   "tail": "选股已冻结（16 年，2026-10-25）\n[stderr]\nTraceback (most recent call last):\n  File \"/home/runner/work/trade/trade/strategy_history.py\", line 323, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File \"/home/runner/work/trade/trade/strategy_history.py\", line 235, in main\n    ret, dd, ok = year_perf(y, picks)\n                  ^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/trade/trade/strategy_history.py\", line 164, in year_perf\n    v += p[\"weight\"] * (px / base)\n         ~^^^^^^^^^^\nKeyError: 'weight'"
-  },
-  {
-   "ts": "2026-10-25T14:32:09Z",
-   "step": "full_curve.py",
-   "rc": 0,
-   "dur": 92.6,
-   "ok": true,
-   "tail": "预取 1209 只…\n\n全周期 2011-01 ~ 2026-10（118 个月）\n  策略 累计 3149%  年化 42.5%  回撤 -38.8%  波动 38.1%  夏普 1.12\n  标普 累计 280%  年化 14.5%\n已写入 docs/data/curve.json"
-  },
-  {
-   "ts": "2026-10-25T14:32:09Z",
-   "step": "site_build.py",
-   "rc": 0,
-   "dur": 0.1,
-   "ok": true,
-   "tail": "静态资源版本：7366383e（7 个页面已更新引用）\n站点已构建：9 个静态文件 → /home/runner/work/trade/trade/docs\n  index / portfolio / strategy / signals / report\n  数据：signal.json history.json quality.json（1 期信号）"
-  },
-  {
    "ts": "2026-10-25T14:32:09Z",
    "step": "selftest.py",
    "rc": 1,
@@ -319,7 +279,47 @@
    "dur": 0.3,
    "ok": true,
    "tail": "=== 部署前自检 ===\n  ✅ 页面 index.html\n  ✅ 页面 portfolio.html\n  ✅ 页面 strategy.html\n  ✅ 信号有正式持仓\n  ✅ 行情 508/510 只（100%）\n  ✅ 净值 205 个交易日\n  ✅ 逐年记录 16 年\n  ✅ 质量核对 496 只\n  ✅ 全部持仓均为标普500 成分股\n  ✅ 全周期曲线 192 个月\n  ✅ 行情 0.0 小时前更新\n  ✅ 净值末值 1.550175\n  ✅ 最大回撤 -34.8%\n通过 13 · 警告 0 · 失败 0"
+  },
+  {
+   "ts": "2026-10-26T13:07:25Z",
+   "step": "quotes.py",
+   "rc": 0,
+   "dur": 9.1,
+   "ok": true,
+   "tail": "行情 508 / 510，汇率 6.668，缺失 2"
+  },
+  {
+   "ts": "2026-10-26T13:07:33Z",
+   "step": "equity.py",
+   "rc": 0,
+   "dur": 8.1,
+   "ok": true,
+   "tail": "净值 205 个交易日（20251231 起）｜策略 +55.02% ｜标普 +11.45% ｜ 最大回撤 -34.8%"
+  },
+  {
+   "ts": "2026-10-26T13:09:40Z",
+   "step": "strategy_history.py",
+   "rc": 0,
+   "dur": 126.5,
+   "ok": true,
+   "tail": "选股已冻结（16 年，2026-10-25）\n      已沿用 strategy_history.json\n      已沿用 curve.json\n[stderr]\nWARN: 本次数据不完整（108 个月，7 个年份缺失），沿用上次完整结果"
+  },
+  {
+   "ts": "2026-10-26T13:09:40Z",
+   "step": "site_build.py",
+   "rc": 0,
+   "dur": 0.1,
+   "ok": true,
+   "tail": "静态资源版本：fb6b6de0（7 个页面已更新引用）\n站点已构建：9 个静态文件 → /home/runner/work/trade/trade/docs\n  index / portfolio / strategy / signals / report\n  数据：signal.json history.json quality.json（1 期信号）"
+  },
+  {
+   "ts": "2026-10-26T13:09:40Z",
+   "step": "selftest.py",
+   "rc": 0,
+   "dur": 0.4,
+   "ok": true,
+   "tail": "=== 部署前自检 ===\n  ✅ 页面 index.html\n  ✅ 页面 portfolio.html\n  ✅ 页面 strategy.html\n  ✅ 信号有正式持仓\n  ✅ 行情 508/510 只（100%）\n  ✅ 净值 205 个交易日\n  ✅ 逐年记录 16 年\n  ✅ 质量核对 496 只\n  ✅ 全部持仓均为标普500 成分股\n  ✅ 全周期曲线 192 个月\n  ✅ 行情 0.0 小时前更新\n  ✅ 净值末值 1.550175\n  ✅ 最大回撤 -34.8%\n通过 13 · 警告 0 · 失败 0"
   }
  ],
- "updated": "2026-10-26T00:17:51Z"
+ "updated": "2026-10-26T13:09:40Z"
 }
