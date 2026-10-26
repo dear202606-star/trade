@@ -330,7 +330,8 @@ function renderSignal() {
   const oy = SIG.official_year;
   document.getElementById('sigTitle').textContent = oy ? (oy + ' 年度持仓') : '本年持仓';
   document.getElementById('sigValid').textContent = (SIG.valid_from && SIG.valid_to)
-    ? (SIG.valid_from.slice(5).replace('-', '/') + ' ~ ' + SIG.valid_to.slice(5).replace('-', '/') + ' 有效')
+    ? (SIG.valid_from.slice(5).replace('-', '/') + ' ~ ' + SIG.valid_to.slice(5).replace('-', '/') + ' 有效' +
+       (SIG.official_month ? ' · 按 ' + SIG.official_month + ' 排名选出' : ''))
     : '';
   document.getElementById('sigMonth').textContent = SIG.month || '—';
   document.getElementById('sigMeta').innerHTML =
@@ -348,7 +349,10 @@ function renderSignal() {
       '<div class="nm" style="margin-top:2px">' + DSH.esc((p.name || '').slice(0, 16)) + '</div>' +
       '<div class="row" style="justify-content:space-between;margin-top:6px;font-size:11.5px">' +
         '<span style="color:var(--txt-3)">' + (px ? px.toFixed(2) : '—') + '</span>' +
-        '<span class="' + DSH.cls(p.ret12) + '">' + DSH.pct(p.ret12, 0) + '</span></div></div>';
+        '<span style="color:var(--txt-3);font-size:11px" title="' +
+          DSH.esc((SIG.official_month || '') + ' 排名时，过去 12 个月的涨幅——它因此入选，不是现在的收益') +
+          '">入选 </span><span class="' + DSH.cls(p.ret12) + '" style="font-size:11.5px">' +
+          DSH.pct(p.ret12, 0) + '</span></div></div>';
   }).join('');
 
   // 半仓时给出醒目提示（这是「恰当的时候展示」）
