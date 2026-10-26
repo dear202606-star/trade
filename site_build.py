@@ -3,7 +3,7 @@
 
 流程：
   1. 复制 site_src/*（页面、样式、脚本）→ docs/
-  2. 写数据文件 docs/data/{signal,history,quality}.json
+  2. 写数据文件 docs/data/{signal,history,curve}.json
   3. 用 排名策略对比.html + 实时信号 → docs/report.html（含动态区块）
   4. 生成 docs/signals.html（信号看板）
 
@@ -189,21 +189,7 @@ def main():
             json.dump(hist, f, ensure_ascii=False)
 
     # 净值为 equity.py 直接写入 docs/data/，这里无需复制
-
-    if os.path.exists(QUAL):
-        try:
-            with open(QUAL, encoding="utf-8") as f:
-                q = json.load(f)
-            slim = {"total": q.get("total"), "bad": q.get("bad"),
-                    "rows": [{"ticker": r.get("ticker"), "ok": r.get("ok"),
-                              "common_months": r.get("common_months"),
-                              "month_diff": r.get("month_diff"),
-                              "ret_diff": r.get("ret_diff")}
-                             for r in (q.get("rows") or [])]}
-            with open(os.path.join(DATA, "quality.json"), "w", encoding="utf-8") as f:
-                json.dump(slim, f, ensure_ascii=False)
-        except Exception as e:
-            print("WARN: quality.json 生成失败", e)
+    # 数据质量明细（output/data_quality.json）仅供内部核查，不再发布到站点
 
     with open(os.path.join(DOCS, "report.html"), "w", encoding="utf-8") as f:
         f.write(build_report(hist))
@@ -235,7 +221,7 @@ def main():
 
     print(f"站点已构建：{n} 个静态文件 → {DOCS}")
     print("  index / portfolio / strategy / signals / report")
-    print(f"  数据：signal.json history.json quality.json（{len(hist)} 期信号）")
+    print(f"  数据：signal.json history.json curve.json（{len(hist)} 期信号）")
 
 
 if __name__ == "__main__":

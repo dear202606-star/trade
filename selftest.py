@@ -69,10 +69,6 @@ def main():
           f"逐年记录 {len(sh.get('years') or []) if sh else 0} 年",
           "strategy_history.json 逐年记录不足")
 
-    qual = load("quality.json")
-    check(qual and qual.get("total", 0) > 100,
-          f"质量核对 {qual.get('total') if qual else 0} 只",
-          "quality.json 缺失或样本不足", hard=False)
 
     # B2. 成分股合规（只允许标普 500 成分股）
     try:
