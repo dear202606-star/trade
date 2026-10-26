@@ -1,54 +1,6 @@
 {
  "runs": [
   {
-   "ts": "2026-10-25T14:12:22Z",
-   "step": "quotes.py",
-   "rc": 0,
-   "dur": 9.7,
-   "ok": true,
-   "tail": "行情 508 / 510，汇率 6.6702，缺失 2"
-  },
-  {
-   "ts": "2026-10-25T14:12:54Z",
-   "step": "equity.py",
-   "rc": 0,
-   "dur": 32.0,
-   "ok": true,
-   "tail": "净值 205 个交易日（20251231 起）｜策略 +55.02% ｜标普 +11.45% ｜ 最大回撤 -34.8%"
-  },
-  {
-   "ts": "2026-10-25T14:15:22Z",
-   "step": "strategy_history.py",
-   "rc": 0,
-   "dur": 147.7,
-   "ok": true,
-   "tail": "逐年记录 16 年，涉及 40 只股票\n  全周期 累计 7932%  年化 31.5%  最大回撤 -26.4%  正收益 14/16 年\n  2020 AMD LRCX TGT ret=+63.5% dd=-16.6%\n  2021 TSLA ETSY NVDA ret=+66.0% dd=-12.1%\n  2022 DVN MRNA FTNT ret=-7.2% dd=-18.7%\n  2023 OXY MPC FSLR ret=+12.7% dd=-13.1%\n  2024 NVDA META RCL ret=+104.9% dd=-5.4%\n  2025 PLTR VST NVDA ret=+59.0% dd=-15.3%"
-  },
-  {
-   "ts": "2026-10-25T14:17:05Z",
-   "step": "full_curve.py",
-   "rc": 0,
-   "dur": 103.0,
-   "ok": true,
-   "tail": "预取 1209 只…\n\n全周期 2010-01 ~ 2026-10（202 个月）\n  策略 累计 16694%  年化 35.6%  回撤 -38.8%  波动 34.4%  夏普 1.06\n  标普 累计 582%  年化 12.1%\n已写入 docs/data/curve.json"
-  },
-  {
-   "ts": "2026-10-25T14:17:05Z",
-   "step": "site_build.py",
-   "rc": 0,
-   "dur": 0.0,
-   "ok": true,
-   "tail": "站点已构建：9 个静态文件 → /home/runner/work/trade/trade/docs\n  index / portfolio / strategy / signals / report\n  数据：signal.json history.json quality.json（1 期信号）"
-  },
-  {
-   "ts": "2026-10-25T14:17:05Z",
-   "step": "selftest.py",
-   "rc": 0,
-   "dur": 0.4,
-   "ok": true,
-   "tail": "=== 部署前自检 ===\n  ✅ 页面 index.html\n  ✅ 页面 portfolio.html\n  ✅ 页面 strategy.html\n  ✅ 信号有正式持仓\n  ✅ 行情 508/510 只（100%）\n  ✅ 净值 205 个交易日\n  ✅ 逐年记录 16 年\n  ✅ 质量核对 496 只\n  ✅ 全部持仓均为标普500 成分股\n  ✅ 全周期曲线 202 个月\n  ✅ 行情 0.1 小时前更新\n  ✅ 净值末值 1.550175\n  ✅ 最大回撤 -34.8%\n通过 13 · 警告 0 · 失败 0"
-  },
-  {
    "ts": "2026-10-25T14:28:34Z",
    "step": "quotes.py",
    "rc": 0,
@@ -319,7 +271,55 @@
    "dur": 0.4,
    "ok": true,
    "tail": "=== 部署前自检 ===\n  ✅ 页面 index.html\n  ✅ 页面 portfolio.html\n  ✅ 页面 strategy.html\n  ✅ 信号有正式持仓\n  ✅ 行情 508/510 只（100%）\n  ✅ 净值 205 个交易日\n  ✅ 逐年记录 16 年\n  ✅ 质量核对 496 只\n  ✅ 全部持仓均为标普500 成分股\n  ✅ 全周期曲线 192 个月\n  ✅ 行情 0.0 小时前更新\n  ✅ 净值末值 1.550175\n  ✅ 最大回撤 -34.8%\n通过 13 · 警告 0 · 失败 0"
+  },
+  {
+   "ts": "2026-10-26T00:16:06Z",
+   "step": "monthly_pick.py",
+   "rc": 0,
+   "dur": 731.0,
+   "ok": true,
+   "tail": "145s\n      200/504  用时 288s\n      300/504  用时 433s\n      400/504  用时 583s\n      500/504  用时 723s\n      成功 498 / 失败 5\n      面板已导出 3.6 MB（供净值/逐年记录复用）\n      数据质量 {'sina': 496, 'yahoo': 3, 'both': 497, 'quarantine': 3, 'fail': 2}\n      两源不一致已隔离 3 只: ECHO, FISV, Q\n[3/5] 计算动量排名（当月 + 上一年 12 月）...\n      正式持仓已锁定（2025-12），沿用不重算\n      当月排名池 498 只；正式持仓基准 2025-12\n[4/5] 生成报告 ...\n# 月度信号 · 2026-10\n\n> 生成时间 2026-10-26 ｜ 数据截至 2026-10 ｜ 排名池 498 只\n> 运行环境 GitHub Actions ｜ 代码版本 4ba7256\n\n## 本月动作\n\n**本月不换仓：持有 2026 年度组合（基准 2025-12）；大盘在 10 月均线上方（760 ≥ 729），维持满仓**\n\n## 大盘开关\n\n- SPY 最新收盘：**759.97** ｜ 10 月均线：**728.69**\n- 状态：**满仓** → 目标仓位 100%\n\n## 正式持仓（2025-12 锁定，本年度有效）\n\n| # | 代码 | 公司 | 行业 | 基准涨幅 | 策略内权重 | 占总资产 |\n|---|---|---|---|---|---|---|\n| 1 | **LITE** | Lumentum | Information Technology | +339% | 30% | 9.0% |\n| 2 | **WDC** | Western Digital | Information Technology | +282% | 30% | 9.0% |\n| 3 | **HOOD** | Robinhood Markets | Financials | +204% | 40% | 12.0% |\n\n## 若现在重排（参考，不据此换仓）\n\n| # | 代码 | 行业 | 12月涨幅 |\n|---|---|---|---|\n      跟踪: {\"start\": \"2026-10\", \"months\": 0, \"strategy\": 0.0, \"spy\": 0.0, \"expected\": 0.02171, \"excess_vs_spy\": 0.0, \"gap_vs_backtest\": -0.02171}\n[5/5] 更新看板 ...\n      看板: output/dashboard.html"
+  },
+  {
+   "ts": "2026-10-26T00:16:14Z",
+   "step": "quotes.py",
+   "rc": 0,
+   "dur": 8.0,
+   "ok": true,
+   "tail": "行情 508 / 510，汇率 6.6702，缺失 2"
+  },
+  {
+   "ts": "2026-10-26T00:16:18Z",
+   "step": "equity.py",
+   "rc": 0,
+   "dur": 4.5,
+   "ok": true,
+   "tail": "净值 205 个交易日（20251231 起）｜策略 +55.02% ｜标普 +11.45% ｜ 最大回撤 -34.8%"
+  },
+  {
+   "ts": "2026-10-26T00:17:50Z",
+   "step": "strategy_history.py",
+   "rc": 0,
+   "dur": 91.8,
+   "ok": true,
+   "tail": "选股已冻结（16 年，2026-10-25）\n      已沿用 strategy_history.json\n      已沿用 curve.json\n[stderr]\nWARN: 本次数据不完整（108 个月，7 个年份缺失），沿用上次完整结果"
+  },
+  {
+   "ts": "2026-10-26T00:17:50Z",
+   "step": "site_build.py",
+   "rc": 0,
+   "dur": 0.0,
+   "ok": true,
+   "tail": "静态资源版本：fb6b6de0（7 个页面已更新引用）\n站点已构建：9 个静态文件 → /home/runner/work/trade/trade/docs\n  index / portfolio / strategy / signals / report\n  数据：signal.json history.json quality.json（1 期信号）"
+  },
+  {
+   "ts": "2026-10-26T00:17:51Z",
+   "step": "selftest.py",
+   "rc": 0,
+   "dur": 0.3,
+   "ok": true,
+   "tail": "=== 部署前自检 ===\n  ✅ 页面 index.html\n  ✅ 页面 portfolio.html\n  ✅ 页面 strategy.html\n  ✅ 信号有正式持仓\n  ✅ 行情 508/510 只（100%）\n  ✅ 净值 205 个交易日\n  ✅ 逐年记录 16 年\n  ✅ 质量核对 496 只\n  ✅ 全部持仓均为标普500 成分股\n  ✅ 全周期曲线 192 个月\n  ✅ 行情 0.0 小时前更新\n  ✅ 净值末值 1.550175\n  ✅ 最大回撤 -34.8%\n通过 13 · 警告 0 · 失败 0"
   }
  ],
- "updated": "2026-10-25T15:18:47Z"
+ "updated": "2026-10-26T00:17:51Z"
 }
