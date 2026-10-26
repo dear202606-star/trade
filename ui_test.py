@@ -118,6 +118,10 @@ def main():
         used_num = float(used.replace("$", "").replace(",", "") or 0)
         check(abs(used_num - 100000) / 100000 < 0.03,
               "已投入成本≈总买入资金（%s）" % used, "已投入 %s 与 100000 偏差过大" % used)
+        orders_txt = pg.locator("#orders").inner_text()
+        check(("无需操作" in orders_txt) or ("股" in orders_txt),
+              "下单建议已生成（%s）" % ("一致无操作" if "无需操作" in orders_txt else "有买卖"),
+              "下单建议区异常：" + orders_txt[:60])
         pos = pg.locator("#tPos").inner_text()
         check("%" in pos and abs(float(pos.replace("%", "")) - 100) < 3,
               "已用资金比例≈100%%（%s）" % pos, "已用比例异常：%s" % pos)

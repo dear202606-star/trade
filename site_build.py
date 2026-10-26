@@ -172,6 +172,21 @@ def inject_nav(path, active=""):
         print("WARN: 导航注入失败", e)
 
 
+def with_validity(rec):
+    """给信号补上「有效期」字段：正式持仓按年度锁定，当月排名只作参考"""
+    if not isinstance(rec, dict):
+        return rec
+    om = str(rec.get("official_month") or rec.get("month") or "")
+    if len(om) >= 4 and om[:4].isdigit():
+        y = int(om[:4]) + 1
+        rec.setdefault("official_year", y)
+        rec.setdefault("valid_from", "%d-01-01" % y)
+        rec.setdefault("valid_to", "%d-12-31" % y)
+        rec.setdefault("rebalance_hint", "%d-12 最后一个交易日" % y)
+    rec.setdefault("ranking_month", rec.get("month"))
+    return rec
+
+
 def main():
     hist = []
     if os.path.exists(HIST):
@@ -183,9 +198,9 @@ def main():
 
     if hist:
         with open(os.path.join(DATA, "signal.json"), "w", encoding="utf-8") as f:
-            json.dump(hist[0], f, ensure_ascii=False)
+            json.dump(with_validity(hist[0]), f, ensure_ascii=False)
         with open(os.path.join(DATA, "history.json"), "w", encoding="utf-8") as f:
-            json.dump(hist, f, ensure_ascii=False)
+            json.dump([with_validity(r) for r in hist], f, ensure_ascii=False)
 
     # 净值为 equity.py 直接写入 docs/data/，这里无需复制
     # 数据质量明细（output/data_quality.json）仅供内部核查，不再发布到站点

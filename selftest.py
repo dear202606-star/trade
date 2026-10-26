@@ -50,6 +50,14 @@ def main():
     sig = load("signal.json")
     check(sig and sig.get("official"), "信号有正式持仓", "signal.json 缺 official")
 
+    # 信号必须带有效期（年度持仓 / 当月排名要能区分）
+    if sig:
+        oy = sig.get("official_year")
+        vf, vt = sig.get("valid_from"), sig.get("valid_to")
+        check(bool(oy) and bool(vf) and bool(vt) and vf < vt,
+              "持仓有效期 %s ~ %s（%s 年度）" % (vf, vt, oy),
+              "信号缺少有效期字段")
+
     q = load("quotes.json")
     cnt = (q or {}).get("count", 0)
     uni = (q or {}).get("universe") or 0

@@ -355,8 +355,16 @@ def main():
                  "sector": p["sector"], "ret12": round(float(p["ret12"]), 4),
                  "weight": round(float(wi), 4)} for i_, (p, wi) in enumerate(picks, 1)]
 
+    # 有效期：正式持仓锁定于 official_month，次年全年有效；
+    # 当月排名每月更新，只作参考。
+    official_year = int(official_month[:4]) + 1
     rec = {
         "month": latest, "date": today, "official_month": official_month,
+        "official_year": official_year,
+        "valid_from": f"{official_year}-01-01",
+        "valid_to": f"{official_year}-12-31",
+        "ranking_month": latest,
+        "rebalance_hint": f"{official_year}-12 最后一个交易日",
         "trend": "满仓" if trend_on else "半仓", "exposure": round(float(exposure), 3),
         "spy": round(float(spy_px), 2), "ma": round(float(ma10), 2),
         "action": action,

@@ -56,6 +56,14 @@
     <span class="sub" id="btPeriod">—</span>
   </div>
 
+  <div class="card" style="padding:14px 18px;margin-bottom:14px" id="ruleBox">
+    <div class="sub" style="line-height:1.9">
+      <b style="color:var(--txt)">规则</b>：每年 12 月末取过去 12 个月涨幅前 3 名，等权持有全年（同行业最多 2 只、该行业合计 ≤60%）。
+      标普 500 跌破 10 月均线时整体仓位减半。
+      <span id="ruleNow" style="color:var(--txt-3)"></span>
+    </div>
+  </div>
+
   <div class="grid g4">
     <div class="card flat"><div class="label" style="margin-bottom:6px">累计收益</div>
       <div class="num num-lg" id="bTotal">—</div></div>
@@ -226,6 +234,17 @@ function renderStocks() {
   [EQ, CV, SH] = await Promise.all([
     DSH.json('equity', null), DSH.json('curve', null), DSH.json('strategy_history', null),
   ]);
+
+  // 均线开关的当前状态（让「规则」能对上今天的实际仓位）
+  try {
+    const sg = await DSH.json('signal', null);
+    const el = document.getElementById('ruleNow');
+    if (el && sg && sg.spy && sg.ma) {
+      el.innerHTML = ' ｜ 当前：标普 ' + sg.spy + (sg.spy >= sg.ma ? ' ≥ ' : ' < ') +
+        '10 月均线 ' + sg.ma + ' → <b style="color:var(--gold)">' +
+        (sg.trend || (sg.exposure >= 0.99 ? '满仓' : '半仓')) + '</b>';
+    }
+  } catch (e) {}
 
   if (EQ && EQ.points && EQ.points.length > 2) safe(drawRun, '当前持仓图', 'runChart');
   else $('runChart').innerHTML = '<div class="tip warn">净值数据尚未生成</div>';

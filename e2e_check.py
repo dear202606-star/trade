@@ -159,6 +159,11 @@ def main():
         else:
             bad("权重合计异常：%.3f" % w)
 
+    if sig and sig.get("official_year"):
+        ok("持仓有效期 %s ~ %s（%s 年度）" % (sig.get("valid_from"), sig.get("valid_to"), sig.get("official_year")))
+        if not (sig.get("valid_from") and sig.get("valid_to")):
+            bad("信号缺少有效期字段")
+
     if q:
         cnt, uni = q.get("count", 0), q.get("universe", 0)
         if uni and cnt / uni >= 0.8:
