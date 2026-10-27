@@ -105,11 +105,13 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add output/current_picks.csv output/current_picks_full.csv \
-                  output/monthly output/signal_history.json output/dashboard.html \
-                  output/track_record.json output/survivorship.json output/survivorship.md \
-                  output/pipeline_status.json \
-                  "output/排名策略对比.html" "output/策略模型研究与行动步骤.html" output/splits.json
+          # 只提交实际存在的产物；某个文件被清理后不能让 git add 报错(exit 128)拖垮整个任务
+          for f in output/signal_history.json output/track_record.json \
+                   output/survivorship.json output/survivorship.md \
+                   output/pipeline_status.json output/splits.json \
+                   output/dashboard.html; do
+            if [ -f "$f" ]; then git add -f "$f"; fi
+          done
           if git diff --staged --quiet; then
             echo "本期无变更，跳过提交"
           else
