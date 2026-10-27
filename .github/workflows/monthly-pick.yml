@@ -40,7 +40,7 @@ permissions:
 jobs:
   pick:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 40
 
     steps:
       - name: 检出仓库
