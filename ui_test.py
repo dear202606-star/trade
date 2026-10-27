@@ -177,13 +177,11 @@ def main():
         if cv and cv.get("stats"):
             st = cv["stats"]
             shown = pg.locator("#bTotal").inner_text().strip()
-            if "倍" in shown:
-                got = float(shown.replace("+", "").replace("倍", "").strip())
-                want = round(1 + st["total"], 1)
-                check(abs(got - want) <= 0.15,
-                      "累计收益与数据一致（%s）" % shown, "累计收益不一致：页面 %s vs 数据 %.1f 倍" % (shown, want))
-            else:
-                check(False, "", "累计收益未按倍数显示：%s" % shown)
+            got_c = float(shown.replace("+", "").replace("%", "").replace(",", ""))
+            want_c = round(st["total"] * 100, 1)
+            check(abs(got_c - want_c) <= 1.0,
+                  "累计收益与数据一致（%s）" % shown,
+                  "累计收益不一致：页面 %s vs 数据 %.1f%%" % (shown, want_c))
             cagr_txt = pg.locator("#bCagr").inner_text().strip().replace("%", "").replace("+", "")
             try:
                 got_c = float(cagr_txt)

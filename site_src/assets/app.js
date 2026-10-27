@@ -58,7 +58,7 @@
     return (v < 0 ? "-" : "") + sym + s;
   };
   DSH.pct = (v, d) => (v == null || isNaN(v) ? "—" : (v >= 0 ? "+" : "") + (v * 100).toFixed(d == null ? 2 : d) + "%");
-  DSH.cls = (v) => (v == null || isNaN(v) || Math.abs(v) < 1e-9 ? "zero" : v > 0 ? "up" : "down");
+  DSH.cls = (v) => (v == null || isNaN(v) ? "zero" : v >= 0 ? "up" : "down");
   DSH.esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
   /* ---------- 数据 ---------- */
@@ -357,11 +357,13 @@
     });
   };
 
-  /* 累计收益的统一写法：小额用百分比，大额用「倍」，全站一致 */
+  /* 累计收益统一用百分比（不用「倍」，避免净值倍数与收益率混淆），大额加千分位 */
   DSH.ret = function (v) {
     if (v == null || isNaN(v)) return '—';
-    if (v >= 9) return (1 + v).toFixed(1) + ' 倍';
-    return (v >= 0 ? '+' : '') + (v * 100).toFixed(1) + '%';
+    const p = v * 100;
+    const abs = Math.abs(p);
+    const num = abs >= 1000 ? abs.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',') : abs.toFixed(1);
+    return (p >= 0 ? '+' : '-') + num + '%';
   };
 
   /* 图例行：色块 + 名称 + 数值 */

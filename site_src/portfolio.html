@@ -192,7 +192,7 @@ function render() {
         '<div class="num" style="font-size:14px">' + DSH.money(r.mv, cur) + '</div>' +
         '<div class="sub" style="margin-top:2px;font-size:11px">' + (r.weight * 100).toFixed(1) + '%</div></div>' +
       '<div style="text-align:right"><div class="label" style="margin:0 0 3px">盈亏</div>' +
-        '<div class="num" style="font-size:14.5px;color:' + DSH.cls(r.pnl) + '">' + DSH.money(r.pnl, cur) + '</div>' +
+        '<div class="num ' + DSH.cls(r.pnl) + '" style="font-size:14.5px">' + DSH.money(r.pnl, cur) + '</div>' +
         '<div class="sub" style="margin-top:2px;font-size:11px"><span class="' + DSH.cls(r.pnlPct) + '">' +
         DSH.pct(r.pnlPct) + '</span> · ' + devTxt + '</div></div>' +
       '<button class="btn sm ghost" data-del="' + i + '" style="padding:6px 8px;color:#FF9A9E">×</button>' +
