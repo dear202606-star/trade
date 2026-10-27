@@ -201,7 +201,23 @@ def main():
         except Exception as e:
             warns.append("历史锁定校验失败：%s" % e)
 
-        # 8) 降级标记：沿用旧数据时必须让页面看得到
+        # 8) 成分表与选股池
+        try:
+            import pandas as _pd, time as _t
+            mp = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                              "static", "sp500_members.csv")
+            if os.path.exists(mp):
+                age = (_t.time() - os.path.getmtime(mp)) / 86400.0
+                check(age <= 30, "成分表快照 %.0f 天内（%.0f 天）" % (30, age),
+                      "成分表快照已 %.0f 天未刷新" % age)
+            mt = _pd.read_csv(mp)
+            mt["end_date"] = mt["end_date"].fillna("2099-12-31")
+            cur = mt[mt["end_date"] >= "2026-10-27"]
+            check(len(cur) >= 480, "当前成分 %d 只" % len(cur), "当前成分不足 480 只")
+        except Exception as e:
+            warns.append("成分表校验失败：%s" % e)
+
+        # 9) 降级标记：沿用旧数据时必须让页面看得到
         if sh.get("degraded"):
             warns.append("本次沿用 %s 的结果（数据抓取不完整）" % sh.get("asof", "上次"))
 

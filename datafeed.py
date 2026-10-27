@@ -137,12 +137,35 @@ def save_panel(panel_dict):
         return 0
 
 
-def load_members():
-    """标普 500 时点成分表：本地优先，CI 从 GitHub 取"""
+def load_members(max_age_days=7):
+    """标普 500 时点成分表：本地有过期机制，超过 max_age_days 就从网络刷新并回写
+
+    成分股每年约 20-25 次调整（每月 1-2 次），所以快照不能永久冻结。
+    """
     import pandas as pd
     for p in (MEMBERS, os.path.join(BASE, "data", "sp500_ticker_start_end.csv")):
         if os.path.exists(p):
             try:
+                age = (time.time() - os.path.getmtime(p)) / 86400.0
+                if age <= max_age_days:
+                    return pd.read_csv(p)
+                # 过期：尝试刷新，成功则覆盖本地快照（下次提交即生效）
+                for url in ("https://raw.githubusercontent.com/fja05680/sp500/master/"
+                            "sp500_ticker_start_end.csv",):
+                    try:
+                        r = requests.get(url, headers={"User-Agent": UA}, timeout=30)
+                        if r.status_code == 200:
+                            df = pd.read_csv(StringIO(r.text))
+                            if "ticker" in df.columns and "start_date" in df.columns:
+                                try:
+                                    df.to_csv(p, index=False)
+                                except Exception:
+                                    pass
+                                print("      成分表已刷新（本地快照 %.1f 天，刷新后回写）" % age)
+                                return df
+                    except Exception:
+                        continue
+                print("      成分表快照已 %.1f 天，但刷新失败，沿用本地" % age, file=sys.stderr)
                 return pd.read_csv(p)
             except Exception:
                 pass
