@@ -216,7 +216,73 @@ def _write_error(msg):
         pass
 
 
+def locked_ok():
+    """历史是否已锁定且自洽：锁定 = 不再重算、不再拉历史数据
+
+    校验通过才锁定；任何一项不过就返回 False（走重算+人工确认流程）。
+    校验内容：
+      1. output/strategy_history.json 与 output/curve.json 都存在
+      2. 逐年收益全部是有限数
+      3. 曲线末值 == 逐年复利之积（1% 容差）
+      4. 与 output/history_baseline.json 记录的历史收益一致（0.5pp 容差）
+    """
+    try:
+        sh_p = os.path.join(BASE, "output", "strategy_history.json")
+        cv_p = os.path.join(BASE, "output", "curve.json")
+        if not (os.path.exists(sh_p) and os.path.exists(cv_p)):
+            return False, "缺少已锁定的历史文件"
+        sh = json.load(open(sh_p, encoding="utf-8"))
+        cv = json.load(open(cv_p, encoding="utf-8"))
+        ys = sh.get("years") or []
+        if len(ys) < 8:
+            return False, "历史年份不足"
+        for r in ys:
+            v = r.get("ret")
+            if v is None or not isinstance(v, (int, float)) or v != v:
+                return False, "存在无效年份收益"
+        prod = 1.0
+        for r in cv.get("years") or []:
+            prod *= 1 + (r.get("ret") or 0)
+        end = (cv.get("points") or [{}])[-1].get("s", 0)
+        if not end or abs(prod / end - 1) > 0.01:
+            return False, "曲线与分年不一致"
+        bp = os.path.join(BASE, "output", "history_baseline.json")
+        if os.path.exists(bp):
+            base = json.load(open(bp, encoding="utf-8")).get("years") or {}
+            drift = [y for y in base if y in {str(x["year"]): x for x in ys}
+                     and abs(base[y] - {str(x["year"]): x for x in ys}[y]["ret"]) > 0.005]
+            if drift:
+                return False, "历史收益被改动：%s" % ",".join(drift[:5])
+        return True, "校验通过"
+    except Exception as e:
+        return False, "校验异常：%s" % e
+
+
+def publish_locked():
+    """把已锁定的历史直接发布到 docs/data，不做任何重算"""
+    for fn in ("strategy_history.json", "curve.json"):
+        src = os.path.join(BASE, "output", fn)
+        dst = os.path.join(BASE, "docs", "data", fn)
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        shutil.copy2(src, dst)
+
+
 def main():
+    refresh = "--refresh" in sys.argv
+
+    # 历史已锁定 → 直接发布，秒级完成，不再拉取任何历史数据
+    if not refresh:
+        ok, why = locked_ok()
+        if ok:
+            publish_locked()
+            sh = json.load(open(os.path.join(BASE, "output", "strategy_history.json"),
+                                encoding="utf-8"))
+            m = sh.get("summary") or {}
+            print(f"历史已锁定（{m.get('start')}–{m.get('end')}，"
+                  f"累计 {m.get('total', 0) * 100:.0f}%，{why}）→ 直接发布，不重算")
+            return 0
+        print(f"历史未锁定（{why}），执行一次完整重算…", file=sys.stderr)
+
     m = datafeed.load_members()
     if m is None:
         msg = "无法获取标普500 时点成分表（static/ 与网络均不可用）"

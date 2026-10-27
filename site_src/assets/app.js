@@ -357,6 +357,13 @@
     });
   };
 
+  /* 累计收益的统一写法：小额用百分比，大额用「倍」，全站一致 */
+  DSH.ret = function (v) {
+    if (v == null || isNaN(v)) return '—';
+    if (v >= 9) return (1 + v).toFixed(1) + ' 倍';
+    return (v >= 0 ? '+' : '') + (v * 100).toFixed(1) + '%';
+  };
+
   /* 图例行：色块 + 名称 + 数值 */
   function tipRow(color, name, val) {
     return '<div style="display:flex;gap:8px;align-items:center;justify-content:space-between">' +
@@ -426,9 +433,9 @@
         const p = eq[i];
         let s = '<div style="color:#8E8B99;margin-bottom:5px;font-size:10.5px;letter-spacing:.04em">' +
           (p.d.length === 6 ? p.d.slice(0, 4) + "-" + p.d.slice(4, 6) : p.d) + "</div>";
-        s += tipRow("#F2C46B", opts.sName || "策略", (eqs[i] * 100).toFixed(1) + "%");
+        s += tipRow("#F2C46B", opts.sName || "策略", DSH.ret(eqs[i]));
         if (opts.bench) {
-          s += tipRow("#6F7D92", opts.bName || "标普 500", (opts.bench[i].y * 100).toFixed(1) + "%");
+          s += tipRow("#6F7D92", opts.bName || "标普 500", DSH.ret(opts.bench[i].y));
         }
         if (dd[i]) s += tipRow("#3BD68A", "回撤", (dd[i].y * 100).toFixed(1) + "%");
         return s;

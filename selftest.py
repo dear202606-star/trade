@@ -185,7 +185,23 @@ def main():
                   "曲线末值 = 逐年复利（%.2f 倍）" % end,
                   "曲线与分年不一致：%.2f vs %.2f" % (end, prod))
 
-        # 7) 降级标记：沿用旧数据时必须让页面看得到
+        # 7) 历史锁定一致：docs 发布的历史必须与 output 里锁定的完全一致
+        try:
+            BASE = os.path.dirname(os.path.abspath(__file__))
+            locked = os.path.join(BASE, "output", "strategy_history.json")
+            if os.path.exists(locked):
+                lk = json.load(open(locked, encoding="utf-8"))
+                same = all(
+                    any(x["year"] == r["year"] and abs(x["ret"] - r["ret"]) < 1e-6
+                        for x in lk.get("years", []))
+                    for r in sh["years"] if r.get("ret") is not None
+                )
+                check(same, "历史锁定一致（%d 年未改动）" % len(lk.get("years", [])),
+                      "发布的历史与锁定版本不一致")
+        except Exception as e:
+            warns.append("历史锁定校验失败：%s" % e)
+
+        # 8) 降级标记：沿用旧数据时必须让页面看得到
         if sh.get("degraded"):
             warns.append("本次沿用 %s 的结果（数据抓取不完整）" % sh.get("asof", "上次"))
 

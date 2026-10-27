@@ -195,6 +195,52 @@ def main():
         tickers = tickers[: args.limit]
     print(f"      {len(tickers)} 只", flush=True)
 
+    # ---- 增量模式：同一自然月内排名不会变 ----
+    # 只刷新 SPY 收盘价判定均线开关，其余沿用上一条记录。
+    # 500 只股票重拉两遍约 15 分钟 → 这里约 20 秒。强制重排用 --rerank。
+    this_month = dt.date.today().strftime("%Y-%m")
+    hist_prev = []
+    _hp = os.path.join("output", "signal_history.json")
+    if os.path.exists(_hp):
+        try:
+            hist_prev = json.load(open(_hp, encoding="utf-8"))
+        except Exception:
+            hist_prev = []
+    if (hist_prev and hist_prev[0].get("month") == this_month
+            and hist_prev[0].get("picks") and hist_prev[0].get("official")
+            and "--rerank" not in sys.argv):
+        print("[增量] 本月排名已存在，只刷新均线开关…", flush=True)
+        spy_bars = fetch_history("SPY")
+        if spy_bars and len(spy_bars) >= 14:
+            spy_df = month_end_series(spy_bars)
+            ma10 = spy_df["raw"].iloc[-10:].mean()
+            spy_px = spy_df["raw"].iloc[-1]
+            trend_on = bool(spy_px >= ma10)
+            exposure = 1.0 if trend_on else 0.5
+            rec = dict(hist_prev[0])
+            rec.update({
+                "date": today,
+                "trend": "满仓" if trend_on else "半仓",
+                "exposure": round(float(exposure), 3),
+                "spy": round(float(spy_px), 2),
+                "ma": round(float(ma10), 2),
+                "action": "本月不换仓：持有 %s 年度组合（基准 %s）；大盘%s 10 月均线（%s %s %s），%s" % (
+                    rec.get("official_year", ""), rec.get("official_month", ""),
+                    "在" if trend_on else "跌破", "≥" if trend_on else "<",
+                    "{:,.0f}".format(spy_px), "{:,.0f}".format(ma10),
+                    "维持满仓" if trend_on else "整体仓位降至 50%"),
+                "incremental": True,
+            })
+            with open(_hp, "w", encoding="utf-8") as f:
+                json.dump([rec] + hist_prev[1:], f, ensure_ascii=False)
+            os.makedirs(os.path.join("docs", "data"), exist_ok=True)
+            with open(os.path.join("docs", "data", "signal.json"), "w", encoding="utf-8") as f:
+                json.dump(rec, f, ensure_ascii=False)
+            print("      标普 {:,.2f} / 10 月均线 {:,.2f} → {}".format(spy_px, ma10, rec["trend"]),
+                  flush=True)
+            return 0
+        print("      SPY 获取失败，回退到全量重排", flush=True)
+
     print("[2/5] 拉取行情（新浪主源 + Yahoo 交叉核对）...", flush=True)
     yahoo_ok = market_data.probe_yahoo()
     market_data.reset_stats()
