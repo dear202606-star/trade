@@ -18,6 +18,7 @@
   <div class="row" style="margin:30px 0 10px;align-items:baseline;gap:10px">
     <h2 style="margin:0;font-size:19px;letter-spacing:-.02em">当前持仓表现</h2>
     <span class="sub" id="runPeriod">—</span>
+    <span class="sub" id="livePct" style="margin-left:auto"></span>
   </div>
 
   <div class="grid g4">
@@ -235,6 +236,26 @@ function renderStocks() {
     DSH.json('equity', null), DSH.json('curve', null), DSH.json('strategy_history', null),
   ]);
 
+
+  // 盘中实时读数：用最新报价的日内涨跌，按持仓权重合成（收盘后自动等于 0）
+  try {
+    const [sg, qt] = await Promise.all([DSH.json('signal', null), DSH.json('quotes', {})]);
+    const off = (sg && (sg.official || sg.picks)) || [];
+    const qs = (qt && qt.quotes) || {};
+    let w = 0, chg = 0, n = 0;
+    off.forEach(function (p) {
+      const q = qs[p.ticker];
+      if (q && isFinite(q.chg) && p.weight) { chg += p.weight * q.chg; w += p.weight; n++; }
+    });
+    const el = document.getElementById('livePct');
+    if (el && n && w > 0) {
+      const v = chg / w;
+      el.innerHTML = '盘中 <b class="' + DSH.cls(v) + '">' + DSH.pct(v, 2) + '</b>' +
+        '<span style="color:var(--txt-3)"> · 截至 ' + (qt.ts_local || '') + '</span>';
+    } else if (el) {
+      el.textContent = '';
+    }
+  } catch (e) {}
 
   if (EQ && EQ.points && EQ.points.length > 2) safe(drawRun, '当前持仓图', 'runChart');
   else $('runChart').innerHTML = '<div class="tip warn">净值数据尚未生成</div>';

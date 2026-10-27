@@ -168,6 +168,8 @@ def main():
         check("数据质量" not in c, "数据质量已移除", "数据质量仍存在")
         check("名词与纪律" not in c, "名词与纪律已移除", "名词与纪律仍存在")
         check("跑赢标普 500" in c, "逐年记录写明跑赢对象", "跑赢对象未说明")
+        live = pg.locator("#livePct").inner_text()
+        check("盘中" in live, "盘中实时读数：%s" % live.strip(), "缺少盘中实时读数")
         check(pg.locator("#runChart svg").count() > 0, "当前持仓图已渲染", "当前持仓图未渲染")
         check(pg.locator("#btChart svg").count() > 0, "回测曲线已渲染", "回测曲线未渲染")
         check(pg.locator("#years .card").count() >= 10, "逐年记录卡片 ≥10 年", "逐年记录卡片过少")
