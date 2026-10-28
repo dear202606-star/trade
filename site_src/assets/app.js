@@ -474,7 +474,7 @@
           p(d.getMonth() + 1) + "-" + p(d.getDate()) + " " + p(d.getHours()) + ":" + p(d.getMinutes()) + "</b>");
       }
       const age = DSH.ageHours(q.ts);
-      if (age != null && age > 36) {
+      if (age != null && age > 26) {
         parts.push("<b style=\"color:#FFAB6B\">⚠ 行情已 " + Math.floor(age / 24) + " 天未更新</b>");
       }
     }
@@ -486,7 +486,7 @@
 
     // 行情过旧时，顶部通栏提醒（不能只缩在页脚）
     const age = q ? DSH.ageHours(q.ts) : null;
-    if (age != null && age > 36 && !document.getElementById("staleBar")) {
+    if (age != null && age > 26 && !document.getElementById("staleBar")) {
       const bar = document.createElement("div");
       bar.id = "staleBar";
       bar.style.cssText = "position:sticky;top:0;z-index:60;background:#7A4A12;color:#FFE7C2;" +
