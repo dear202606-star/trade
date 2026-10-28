@@ -81,26 +81,34 @@
     return cache[name];
   };
 
-  /* ---------- 本地存储 ---------- */
-  const KEY = "dsh.portfolio.v1";
+  /* ---------- 存储：云端为准，本地只留同步码 ----------
+     持仓不写 localStorage（避免"本地一份、云端一份"的不一致）；
+     浏览器只在 sessionStorage 里留一份本次会话的缓存，关掉标签页即清空，
+     每次打开都以云端数据为准。 */
+  const CODE_KEY = "dsh.sync.code";
+  const CACHE_KEY = "dsh.portfolio.cache";
+
+  function emptyPf() { return { capital: 0, cur: "USD", rows: [] }; }
+
   DSH.load = function () {
     try {
-      const d = JSON.parse(localStorage.getItem(KEY) || "null");
+      const d = JSON.parse(sessionStorage.getItem(CACHE_KEY) || "null");
       if (d && Array.isArray(d.rows)) return d;
     } catch (e) {}
-    return { capital: 0, cur: "USD", rows: [] };
+    return emptyPf();
   };
+
   DSH.save = function (d) {
-    localStorage.setItem(KEY, JSON.stringify(d));
+    try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(d)); } catch (e) {}
     if (DSH.cloud && DSH.cloud.auto) DSH.cloud.queue(d);
   };
 
-  /* ---------- 云同步（Supabase + 客户端 AES-GCM 加密） ----------
-     安全模型：同步码 = 密钥；服务端只存密文，行 id 是同步码的哈希。
-     即使数据库被枚举，拿到的也只是密文。 */
+  /* ---------- 云同步（Supabase + 客户端 AES-GCM + 哈希校验） ----------
+     安全：同步码即密钥，服务端只见密文，行 id 是同步码哈希。
+     准确：明文里带 data 的 SHA-256，读出来先校验哈希，不一致就拒绝使用；
+           写入后立刻回读比对，确认"存进去的 == 想存的"。 */
   DSH.cloud = (function () {
-    const CODE_KEY = "dsh.sync.code";
-    let cfg = null, timer = null, pushed = 0;
+    let cfg = null, timer = null, last = 0, state = "idle";
 
     const buf2b64 = (buf) => btoa(String.fromCharCode.apply(null, new Uint8Array(buf)));
     const b642buf = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
@@ -109,6 +117,9 @@
 
     async function digest(txt) {
       return new Uint8Array(await crypto.subtle.digest("SHA-256", enc(txt)));
+    }
+    async function hexOf(txt) {
+      return Array.from(await digest(txt)).map((b) => b.toString(16).padStart(2, "0")).join("");
     }
     async function keyFor(code) {
       const k = await digest("dsh-key|" + code);
@@ -125,18 +136,41 @@
         "Content-Type": "application/json",
       };
     }
+    async function seal(code, data) {
+      const body = JSON.stringify(data);
+      const hash = await hexOf(code + "|" + body);
+      const blob = JSON.stringify({ v: 2, ts: Date.now(), hash: hash, data: data });
+      const k = await keyFor(code);
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, k, enc(blob));
+      return "v2." + buf2b64(iv) + "." + buf2b64(ct);
+    }
+    async function open(code, payload) {
+      const parts = String(payload || "").split(".");
+      if (parts.length !== 3) throw new Error("数据格式异常");
+      const k = await keyFor(code);
+      const pt = JSON.parse(dec(await crypto.subtle.decrypt(
+        { name: "AES-GCM", iv: b642buf(parts[1]) }, k, b642buf(parts[2]))));
+      // v1（旧格式）没有哈希，仍然接受
+      if (!pt || pt.data === undefined) return { data: pt, verified: false };
+      const hash = await hexOf(code + "|" + JSON.stringify(pt.data));
+      return { data: pt.data, verified: hash === pt.hash, ts: pt.ts };
+    }
 
     const api = {
       auto: false,
+      get state() { return state; },
+      get lastSync() { return last; },
       get code() { return localStorage.getItem(CODE_KEY) || ""; },
-      set code(v) { v ? localStorage.setItem(CODE_KEY, v) : localStorage.removeItem(CODE_KEY); },
+      set code(v) {
+        if (v) localStorage.setItem(CODE_KEY, v); else localStorage.removeItem(CODE_KEY);
+        api.auto = !!v;
+      },
       get bound() { return !!api.code; },
 
       async init() {
         if (cfg) return true;
-        try {
-          cfg = await DSH.json("cloud", null);
-        } catch (e) { cfg = null; }
+        try { cfg = await DSH.json("cloud", null); } catch (e) { cfg = null; }
         if (!cfg || !cfg.url || !cfg.key) return false;
         api.auto = api.bound;
         return true;
@@ -150,23 +184,30 @@
         return s.slice(0, 4) + "-" + s.slice(4, 8) + "-" + s.slice(8, 12);
       },
 
+      // 上传 + 立刻回读校验
       async push(data, code) {
         if (!(await api.init())) throw new Error("云同步未配置");
         const c = (code || api.code || "").trim().toUpperCase();
         if (!c) throw new Error("还没有同步码");
-        const k = await keyFor(c);
-        const iv = crypto.getRandomValues(new Uint8Array(12));
-        const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, k, enc(JSON.stringify(data)));
-        const payload = "v1." + buf2b64(iv) + "." + buf2b64(ct);
-        const id = await idFor(c);
-        const r = await fetch(cfg.url + "/rest/v1/holdings?on_conflict=id", {
-          method: "POST",
-          headers: Object.assign(headers(), { Prefer: "resolution=merge-duplicates,return=minimal" }),
-          body: JSON.stringify({ id, payload }),
-        });
-        if (!r.ok) throw new Error("上传失败 " + r.status);
-        pushed = Date.now();
-        return true;
+        state = "saving";
+        try {
+          const payload = await seal(c, data);
+          const id = await idFor(c);
+          const r = await fetch(cfg.url + "/rest/v1/holdings?on_conflict=id", {
+            method: "POST",
+            headers: Object.assign(headers(), { Prefer: "resolution=merge-duplicates,return=minimal" }),
+            body: JSON.stringify({ id: id, payload: payload }),
+          });
+          if (!r.ok) throw new Error("上传失败 " + r.status);
+          // 回读校验：确认云端存的就是刚才那份
+          const back = await api.pull(c);
+          if (!back || !back.verified) { state = "error"; throw new Error("写入校验未通过"); }
+          state = "ok"; last = Date.now();
+          return true;
+        } catch (e) {
+          state = "error";
+          throw e;
+        }
       },
 
       async pull(code) {
@@ -178,23 +219,20 @@
         if (!r.ok) throw new Error("拉取失败 " + r.status);
         const arr = await r.json();
         if (!arr.length) return null;
-        const parts = String(arr[0].payload).split(".");
-        if (parts.length !== 3) return null;
-        const k = await keyFor(c);
-        const pt = await crypto.subtle.decrypt(
-          { name: "AES-GCM", iv: b642buf(parts[1]) }, k, b642buf(parts[2]));
-        return JSON.parse(dec(pt));
+        const got = await open(c, arr[0].payload);
+        if (!got.verified) { state = "error"; throw new Error("云端数据校验失败（可能已损坏）"); }
+        state = "ok"; last = Date.now();
+        return got;
       },
 
-      // 改动后 3 秒自动上传（合并高频输入）
+      // 改动后 400ms 自动上传（边输边存也不会漏）
       queue(data) {
         if (timer) clearTimeout(timer);
         timer = setTimeout(() => {
           timer = null;
           api.push(data).catch(() => {});
-        }, 3000);
+        }, 400);
       },
-      get lastPush() { return pushed; },
     };
     return api;
   })();

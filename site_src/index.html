@@ -64,8 +64,18 @@
   const sig = await DSH.json('signal', null);
   const q = await DSH.json('quotes', {});
   const quotes = q.quotes || {};
-  const pf = DSH.load();
+  let pf = DSH.load();
   const targets = DSH.targets(sig);
+
+  // 已绑定云端 → 以云端为准（本地仅是本次会话缓存）
+  try {
+    if (await DSH.cloud.init()) {
+      if (DSH.cloud.bound) {
+        const r = await DSH.cloud.pull();
+        if (r && r.data && Array.isArray(r.data.rows)) { pf = r.data; DSH.save(pf); }
+      }
+    }
+  } catch (e) { /* 云端不可用时用会话缓存渲染，不阻塞页面 */ }
 
   if (!sig) { document.getElementById('pageSub').textContent = '暂无信号数据'; return; }
 

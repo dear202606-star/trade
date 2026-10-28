@@ -73,9 +73,10 @@
     <div id="cloudBox" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.07)">
       <div class="row" style="gap:8px;flex-wrap:wrap">
         <input id="cloudCode" class="num-in" placeholder="同步码，例如 ABCD-EFGH-JKLM"
-               style="flex:1;min-width:220px;max-width:300px;letter-spacing:.06em;text-transform:uppercase">
+               style="flex:1;min-width:200px;max-width:280px;letter-spacing:.06em;text-transform:uppercase">
+        <button class="btn primary" id="cloudNew">新建</button>
         <button class="btn" id="cloudBind">绑定</button>
-        <button class="btn" id="cloudUpload">上传</button>
+        <button class="btn ghost" id="cloudUpload">上传</button>
         <button class="btn ghost" id="cloudDownload">拉取</button>
         <button class="btn ghost" id="cloudOff">解绑</button>
       </div>
@@ -498,15 +499,27 @@ function renderOrders() {
     if (!ok) { say('云同步未配置（缺少 cloud.json）', 'warn'); return; }
     if (DSH.cloud.bound) {
       codeIn.value = DSH.cloud.code;
-      say('已绑定同步码，持仓改动会自动上传。', 'ok');
+      say('已绑定同步码。持仓改动会在 0.4 秒内上传并回读校验。', 'ok');
     } else {
-      say('点「绑定」输入已有同步码，或直接生成一个新的：');
-      const c = DSH.cloud.genCode();
-      DSH.cloud.code = c;
-      DSH.cloud.auto = true;
-      showCode(c);
-      try { await DSH.cloud.push(PF); say('已生成并上传。可继续用：<b>' + c + '</b>', 'ok'); } catch (e) { say('上传失败：' + e.message, 'warn'); }
+      say('还没有云端档案：点「新建」创建，或输入已有同步码后点「绑定」。');
     }
+  };
+
+  // 新建云端档案：生成同步码并上传当前内容
+  $('cloudNew').onclick = async () => {
+    const ok = await DSH.cloud.init();
+    if (!ok) { say('云同步未配置', 'warn'); return; }
+    if (DSH.cloud.bound && !confirm('已有同步码，确定要新建一个吗？（旧档案保留）')) return;
+    const c = DSH.cloud.genCode();
+    DSH.cloud.code = c;
+    DSH.cloud.auto = true;
+    codeIn.value = c;
+    say('正在创建并校验…');
+    try {
+      await DSH.cloud.push(PF);
+      say('已创建云端档案，校验通过。<br>同步码：<b style="color:var(--gold);letter-spacing:.08em">' + c +
+          '</b>（抄下来，换设备输入它即可取回）');
+    } catch (e) { say('创建失败：' + e.message, 'warn'); }
   };
 
   $('cloudBind').onclick = async () => {
@@ -514,52 +527,65 @@ function renderOrders() {
     if (!c) { codeIn.focus(); return; }
     DSH.cloud.code = c;
     DSH.cloud.auto = true;
-    say('正在拉取…');
+    say('正在从云端拉取并校验…');
     try {
-      const d = await DSH.cloud.pull(c);
-      if (!d || !Array.isArray(d.rows)) {
-        say('这个同步码下还没有数据。可点「上传」把当前持仓存上去。', 'warn');
+      const r = await DSH.cloud.pull(c);
+      if (!r) {
+        say('这个同步码下还没有数据。点「上传」把当前内容存上去。', 'warn');
         return;
       }
-      if (PF.rows.length && !confirm('将用云端数据覆盖本地 ' + PF.rows.length + ' 条记录，确定？')) return;
-      PF = d; DSH.save(PF); render(); renderOrders();
-      say('已绑定并取回 ' + d.rows.length + ' 条持仓。', 'ok');
+      if (PF.rows.length && !confirm('将用云端数据覆盖本页 ' + PF.rows.length + ' 条记录，确定？')) return;
+      PF = r.data; DSH.save(PF); render(); renderOrders();
+      say('已绑定，取回 ' + r.data.rows.length + ' 条持仓（哈希校验通过）。', 'ok');
     } catch (e) { say('拉取失败：' + e.message, 'warn'); }
   };
 
   $('cloudUpload').onclick = async () => {
-    try { await DSH.cloud.push(PF); say('已上传（' + (PF.rows || []).length + ' 条）。', 'ok'); }
-    catch (e) { say('上传失败：' + e.message, 'warn'); }
+    try {
+      await DSH.cloud.push(PF);
+      say('已上传并回读校验通过（' + (PF.rows || []).length + ' 条）。', 'ok');
+    } catch (e) { say('上传失败：' + e.message, 'warn'); }
   };
 
   $('cloudDownload').onclick = async () => {
     try {
-      const d = await DSH.cloud.pull();
-      if (!d || !Array.isArray(d.rows)) { say('云端暂无数据。', 'warn'); return; }
-      if (PF.rows.length && !confirm('将覆盖本地 ' + PF.rows.length + ' 条记录，确定？')) return;
-      PF = d; DSH.save(PF); render(); renderOrders();
-      say('已拉取 ' + d.rows.length + ' 条持仓。', 'ok');
+      const r = await DSH.cloud.pull();
+      if (!r) { say('云端暂无数据。', 'warn'); return; }
+      if (PF.rows.length && !confirm('将覆盖本页 ' + PF.rows.length + ' 条记录，确定？')) return;
+      PF = r.data; DSH.save(PF); render(); renderOrders();
+      say('已拉取 ' + r.data.rows.length + ' 条（哈希校验通过）。', 'ok');
     } catch (e) { say('拉取失败：' + e.message, 'warn'); }
   };
 
   $('cloudOff').onclick = () => {
-    if (!confirm('解绑后本机不再自动同步（云端数据保留）。确定？')) return;
+    if (!confirm('解绑后本机不再与云端同步（云端数据保留）。确定？')) return;
     DSH.cloud.auto = false; DSH.cloud.code = '';
     codeIn.value = ''; say('已解绑。', 'ok');
   };
 
-  // 启动：已绑定且本地为空 → 自动拉回
+  // 启动：已绑定 → 无条件以云端为准（本地只作本次会话缓存）
   (async () => {
     const ok = await DSH.cloud.init();
-    if (!ok || !DSH.cloud.bound) return;
-    if (!PF.rows.length) {
-      try {
-        const d = await DSH.cloud.pull();
-        if (d && Array.isArray(d.rows) && d.rows.length) {
-          PF = d; DSH.save(PF); render(); renderOrders();
-          say('已从云端恢复 ' + d.rows.length + ' 条持仓。', 'ok');
-        }
-      } catch (e) {}
+    if (!ok) return;
+    if (!DSH.cloud.bound) {
+      // 首次使用：提示建立云端档案
+      box.style.display = '';
+      say('尚未绑定同步码。点「绑定」输入已有码，或在下面生成一个新的——' +
+          '之后所有持仓都以云端为准，换设备输入同一串码即可。');
+      return;
+    }
+    codeIn.value = DSH.cloud.code;
+    try {
+      const r = await DSH.cloud.pull();
+      if (r && r.data && Array.isArray(r.data.rows)) {
+        const changed = JSON.stringify(r.data.rows) !== JSON.stringify(PF.rows);
+        PF = r.data; DSH.save(PF); render(); renderOrders();
+        if (changed) say('已从云端同步 ' + r.data.rows.length + ' 条持仓（校验通过）。', 'ok');
+      } else if (!PF.rows.length) {
+        say('云端档案是空的，录入持仓后会自动上传。');
+      }
+    } catch (e) {
+      say('云端读取失败：' + (e && (e.message || e.name) || '数据损坏或被篡改') + '（当前显示的是本次会话缓存）', 'warn');
     }
   })();
 })();

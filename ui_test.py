@@ -95,7 +95,7 @@ def main():
         # 总买入资金 → 一键分配
         pg.goto(BASE + "portfolio.html", wait_until="networkidle")
         pg.wait_for_timeout(800)
-        pg.evaluate("() => { localStorage.clear(); location.reload(); }")
+        pg.evaluate("() => { localStorage.clear(); sessionStorage.clear(); location.reload(); }")
         pg.wait_for_timeout(2000)
         plan = pg.locator("#plan")
         check(plan.count() == 1, "总买入资金输入框存在", "总买入资金输入框缺失")
@@ -235,7 +235,7 @@ def main():
                           headers={'Content-Type': 'application/json'})
         pg2b.route('**/data/signal.json*', _halve)
         pg2b.goto(BASE + 'portfolio.html', wait_until='networkidle')
-        pg2b.evaluate('localStorage.clear()')
+        pg2b.evaluate('localStorage.clear(); sessionStorage.clear()')
         pg2b.reload(wait_until='networkidle')
         pg2b.wait_for_timeout(1500)
         pg2b.fill('#plan', '50000')
