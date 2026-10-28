@@ -65,3 +65,16 @@ GitHub 自带的 schedule 保留作为备用（每 2 小时 × 2 组错峰），
 - **收到失败邮件**：先看 https://www.githubstatus.com/ 是否平台故障；若长期失败，
   检查 Token 是否过期/被撤销
 - **不需要了**：删掉 cron-job.org 任务 + 在 GitHub 撤销 Token，两步即可完全退出
+
+---
+
+## 附：Token 已经创建好
+
+- 名称：cron-dispatch
+- 有效期：到 2027-01-26（到期前 GitHub 会邮件提醒）
+- 权限：仅 dear202606-star/trade 仓库的 **Actions: Read and write**
+- 已验证：调用 workflow_dispatch 返回 **204**（成功触发了一次真实运行）
+- 密文存放：output/_pat_token.txt（已在 .gitignore 中，不会提交）
+
+**你只需要做：注册 cron-job.org → 新建任务（参数见上文）→ 把 output/_pat_token.txt
+里的整串内容填到 Authorization 头，前面加 Bearer （注意有一个空格）。**

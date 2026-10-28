@@ -80,3 +80,8 @@ output/_*.png
 
 # 鐣岄潰娴嬭瘯鎴浘锛堣嚜鍔ㄧ敓鎴愶級
 output/ui_test/
+
+# 本地密钥与临时产物（绝不入库）
+output/_pat_token.txt
+output/_*.png
+scripts_create_pat*.py
