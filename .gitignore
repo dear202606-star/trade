@@ -88,3 +88,8 @@ scripts_create_pat*.py
 output/_supabase.json
 output/_supabase_dbpass.txt
 output/_test_sync_code.txt
+
+!output/supabase_cron.sql
+output/_supabase_cron_filled.sql
+output/_supabase_cron.sql
+output/_test_dispatch.sql
