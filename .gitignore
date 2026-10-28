@@ -85,3 +85,6 @@ output/ui_test/
 output/_pat_token.txt
 output/_*.png
 scripts_create_pat*.py
+output/_supabase.json
+output/_supabase_dbpass.txt
+output/_test_sync_code.txt

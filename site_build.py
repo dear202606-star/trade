@@ -196,6 +196,16 @@ def main():
     os.makedirs(DATA, exist_ok=True)
     n = copy_site()
 
+    # 云同步配置：publishable key 本就是公开的，数据靠「同步码 + 客户端加密」保护
+    cfgp = os.path.join(BASE, "output", "_supabase.json")
+    if os.path.exists(cfgp):
+        try:
+            cfg = json.load(open(cfgp, encoding="utf-8"))
+            with open(os.path.join(DATA, "cloud.json"), "w", encoding="utf-8") as f:
+                json.dump({"url": cfg["url"], "key": cfg["publishable_key"]}, f, ensure_ascii=False)
+        except Exception as e:
+            print("WARN: 云同步配置写入失败", e)
+
     if hist:
         with open(os.path.join(DATA, "signal.json"), "w", encoding="utf-8") as f:
             json.dump(with_validity(hist[0]), f, ensure_ascii=False)

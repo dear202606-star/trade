@@ -62,10 +62,24 @@
       </div>
       <button class="btn primary" id="btnFromSignal">分配</button>
       <div class="grow"></div>
+      <button class="btn ghost" id="btnCloud">同步</button>
       <button class="btn ghost" id="btnExport">导出</button>
       <button class="btn ghost" id="btnImport">导入</button>
     </div>
     <div class="tip" id="capHint" style="margin-top:16px"></div>
+
+    <!-- 云同步面板 -->
+    <div id="cloudBox" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.07)">
+      <div class="row" style="gap:8px;flex-wrap:wrap">
+        <input id="cloudCode" class="num-in" placeholder="同步码，例如 ABCD-EFGH-JKLM"
+               style="flex:1;min-width:220px;max-width:300px;letter-spacing:.06em;text-transform:uppercase">
+        <button class="btn" id="cloudBind">绑定</button>
+        <button class="btn" id="cloudUpload">上传</button>
+        <button class="btn ghost" id="cloudDownload">拉取</button>
+        <button class="btn ghost" id="cloudOff">解绑</button>
+      </div>
+      <div class="tip" id="cloudHint" style="margin-top:12px"></div>
+    </div>
   </div>
 
   <!-- 持仓列表 -->
@@ -458,6 +472,95 @@ function renderOrders() {
   render();
   renderSignal();
   renderOrders();
+})();
+
+/* ---------- 云同步 ---------- */
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const box = $('cloudBox'), hint = $('cloudHint'), codeIn = $('cloudCode');
+
+  function say(msg, cls) {
+    hint.className = 'tip' + (cls ? ' ' + cls : '');
+    hint.innerHTML = msg;
+  }
+  function showCode(c) {
+    codeIn.value = c;
+    say('同步码：<b style="color:var(--gold);letter-spacing:.08em">' + c +
+        '</b><br>抄下来。换设备时输入这串码就能取回持仓；丢了无法找回（服务端只存密文）。');
+  }
+
+  $('btnCloud').onclick = async () => {
+    const open = box.style.display === 'none';
+    box.style.display = open ? '' : 'none';
+    if (!open) return;
+    const ok = await DSH.cloud.init();
+    if (!ok) { say('云同步未配置（缺少 cloud.json）', 'warn'); return; }
+    if (DSH.cloud.bound) {
+      codeIn.value = DSH.cloud.code;
+      say('已绑定同步码，持仓改动会自动上传。', 'ok');
+    } else {
+      say('点「绑定」输入已有同步码，或直接生成一个新的：');
+      const c = DSH.cloud.genCode();
+      DSH.cloud.code = c;
+      DSH.cloud.auto = true;
+      showCode(c);
+      try { await DSH.cloud.push(PF); say('已生成并上传。可继续用：<b>' + c + '</b>', 'ok'); } catch (e) { say('上传失败：' + e.message, 'warn'); }
+    }
+  };
+
+  $('cloudBind').onclick = async () => {
+    const c = (codeIn.value || '').trim().toUpperCase();
+    if (!c) { codeIn.focus(); return; }
+    DSH.cloud.code = c;
+    DSH.cloud.auto = true;
+    say('正在拉取…');
+    try {
+      const d = await DSH.cloud.pull(c);
+      if (!d || !Array.isArray(d.rows)) {
+        say('这个同步码下还没有数据。可点「上传」把当前持仓存上去。', 'warn');
+        return;
+      }
+      if (PF.rows.length && !confirm('将用云端数据覆盖本地 ' + PF.rows.length + ' 条记录，确定？')) return;
+      PF = d; DSH.save(PF); render(); renderOrders();
+      say('已绑定并取回 ' + d.rows.length + ' 条持仓。', 'ok');
+    } catch (e) { say('拉取失败：' + e.message, 'warn'); }
+  };
+
+  $('cloudUpload').onclick = async () => {
+    try { await DSH.cloud.push(PF); say('已上传（' + (PF.rows || []).length + ' 条）。', 'ok'); }
+    catch (e) { say('上传失败：' + e.message, 'warn'); }
+  };
+
+  $('cloudDownload').onclick = async () => {
+    try {
+      const d = await DSH.cloud.pull();
+      if (!d || !Array.isArray(d.rows)) { say('云端暂无数据。', 'warn'); return; }
+      if (PF.rows.length && !confirm('将覆盖本地 ' + PF.rows.length + ' 条记录，确定？')) return;
+      PF = d; DSH.save(PF); render(); renderOrders();
+      say('已拉取 ' + d.rows.length + ' 条持仓。', 'ok');
+    } catch (e) { say('拉取失败：' + e.message, 'warn'); }
+  };
+
+  $('cloudOff').onclick = () => {
+    if (!confirm('解绑后本机不再自动同步（云端数据保留）。确定？')) return;
+    DSH.cloud.auto = false; DSH.cloud.code = '';
+    codeIn.value = ''; say('已解绑。', 'ok');
+  };
+
+  // 启动：已绑定且本地为空 → 自动拉回
+  (async () => {
+    const ok = await DSH.cloud.init();
+    if (!ok || !DSH.cloud.bound) return;
+    if (!PF.rows.length) {
+      try {
+        const d = await DSH.cloud.pull();
+        if (d && Array.isArray(d.rows) && d.rows.length) {
+          PF = d; DSH.save(PF); render(); renderOrders();
+          say('已从云端恢复 ' + d.rows.length + ' 条持仓。', 'ok');
+        }
+      } catch (e) {}
+    }
+  })();
 })();
 </script>
 </body></html>

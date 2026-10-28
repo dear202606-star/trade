@@ -90,7 +90,114 @@
     } catch (e) {}
     return { capital: 0, cur: "USD", rows: [] };
   };
-  DSH.save = function (d) { localStorage.setItem(KEY, JSON.stringify(d)); };
+  DSH.save = function (d) {
+    localStorage.setItem(KEY, JSON.stringify(d));
+    if (DSH.cloud && DSH.cloud.auto) DSH.cloud.queue(d);
+  };
+
+  /* ---------- 云同步（Supabase + 客户端 AES-GCM 加密） ----------
+     安全模型：同步码 = 密钥；服务端只存密文，行 id 是同步码的哈希。
+     即使数据库被枚举，拿到的也只是密文。 */
+  DSH.cloud = (function () {
+    const CODE_KEY = "dsh.sync.code";
+    let cfg = null, timer = null, pushed = 0;
+
+    const buf2b64 = (buf) => btoa(String.fromCharCode.apply(null, new Uint8Array(buf)));
+    const b642buf = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+    const enc = (s) => new TextEncoder().encode(s);
+    const dec = (b) => new TextDecoder().decode(b);
+
+    async function digest(txt) {
+      return new Uint8Array(await crypto.subtle.digest("SHA-256", enc(txt)));
+    }
+    async function keyFor(code) {
+      const k = await digest("dsh-key|" + code);
+      return crypto.subtle.importKey("raw", k, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
+    }
+    async function idFor(code) {
+      const h = await digest("dsh-id|" + code);
+      return Array.from(h).slice(0, 16).map((b) => b.toString(16).padStart(2, "0")).join("");
+    }
+    function headers() {
+      return {
+        apikey: cfg.key,
+        Authorization: "Bearer " + cfg.key,
+        "Content-Type": "application/json",
+      };
+    }
+
+    const api = {
+      auto: false,
+      get code() { return localStorage.getItem(CODE_KEY) || ""; },
+      set code(v) { v ? localStorage.setItem(CODE_KEY, v) : localStorage.removeItem(CODE_KEY); },
+      get bound() { return !!api.code; },
+
+      async init() {
+        if (cfg) return true;
+        try {
+          cfg = await DSH.json("cloud", null);
+        } catch (e) { cfg = null; }
+        if (!cfg || !cfg.url || !cfg.key) return false;
+        api.auto = api.bound;
+        return true;
+      },
+
+      genCode() {
+        const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        const r = crypto.getRandomValues(new Uint8Array(12));
+        let s = "";
+        for (let i = 0; i < 12; i++) s += A[r[i] % A.length];
+        return s.slice(0, 4) + "-" + s.slice(4, 8) + "-" + s.slice(8, 12);
+      },
+
+      async push(data, code) {
+        if (!(await api.init())) throw new Error("云同步未配置");
+        const c = (code || api.code || "").trim().toUpperCase();
+        if (!c) throw new Error("还没有同步码");
+        const k = await keyFor(c);
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, k, enc(JSON.stringify(data)));
+        const payload = "v1." + buf2b64(iv) + "." + buf2b64(ct);
+        const id = await idFor(c);
+        const r = await fetch(cfg.url + "/rest/v1/holdings?on_conflict=id", {
+          method: "POST",
+          headers: Object.assign(headers(), { Prefer: "resolution=merge-duplicates,return=minimal" }),
+          body: JSON.stringify({ id, payload }),
+        });
+        if (!r.ok) throw new Error("上传失败 " + r.status);
+        pushed = Date.now();
+        return true;
+      },
+
+      async pull(code) {
+        if (!(await api.init())) throw new Error("云同步未配置");
+        const c = (code || api.code || "").trim().toUpperCase();
+        if (!c) throw new Error("还没有同步码");
+        const id = await idFor(c);
+        const r = await fetch(cfg.url + "/rest/v1/holdings?id=eq." + id + "&select=payload", { headers: headers() });
+        if (!r.ok) throw new Error("拉取失败 " + r.status);
+        const arr = await r.json();
+        if (!arr.length) return null;
+        const parts = String(arr[0].payload).split(".");
+        if (parts.length !== 3) return null;
+        const k = await keyFor(c);
+        const pt = await crypto.subtle.decrypt(
+          { name: "AES-GCM", iv: b642buf(parts[1]) }, k, b642buf(parts[2]));
+        return JSON.parse(dec(pt));
+      },
+
+      // 改动后 3 秒自动上传（合并高频输入）
+      queue(data) {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => {
+          timer = null;
+          api.push(data).catch(() => {});
+        }, 3000);
+      },
+      get lastPush() { return pushed; },
+    };
+    return api;
+  })();
 
   /* ---------- 导航 ---------- */
   DSH.nav = function () {
