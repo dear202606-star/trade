@@ -103,7 +103,7 @@
       '<div class="card" style="text-align:center;padding:52px 24px">' +
       '<div style="font-size:15px;color:var(--txt-2);margin-bottom:22px">还没有持仓记录</div>' +
       '<a class="btn primary" href="portfolio.html">录入</a>' +
-      '<div class="sub" style="margin-top:18px">数据只保存在你自己的浏览器里，不上传服务器</div></div>';
+      '<div class="sub" style="margin-top:18px">默认只存在本机浏览器；需要跨设备可在持仓页开启「同步」，云端仅存加密密文</div></div>';
   } else {
     const c = DSH.compute(pf, quotes, q.fx);
     const cur = pf.cur || 'USD';
@@ -151,9 +151,24 @@
           '<div class="card flat"><div class="label" style="margin-bottom:6px">持有</div>' +
             '<div class="num num-md">' + c.rows.length + ' 只</div></div>' +
         '</div>' +
+        '<div class="sub" id="pfStamp" style="margin-top:16px;font-size:11.5px;color:var(--txt-3)"></div>' +
       '</div>' +
       '<div class="grid" style="margin-top:14px;gap:10px">' + rowsHtml + '</div>' +
       '<div style="margin-top:16px"><a class="btn ghost sm" href="portfolio.html">编辑</a></div>';
+
+    // 数据时间：让用户一眼知道这些数字是哪天的
+    const stamp = document.getElementById('pfStamp');
+    if (stamp) {
+      let when = '';
+      if (q.ts) {
+        const d = new Date(q.ts);
+        const p = (n) => String(n).padStart(2, '0');
+        when = (d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+      }
+      stamp.innerHTML = (q.session ? '行情 <b style="color:var(--txt-2)">' + DSH.esc(q.session) + '</b> 收盘' : '') +
+        (when ? ' ｜ 更新于 <b style="color:var(--txt-2)">' + when + '</b>' : '') +
+        ((DSH.ageHours && DSH.ageHours(q.ts) > 26) ? ' ｜ <span style="color:#FFAB6B">⚠ 数据偏旧</span>' : '');
+    }
   }
 
   /* ---- 策略净值迷你图 ---- */
