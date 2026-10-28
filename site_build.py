@@ -197,12 +197,19 @@ def main():
     n = copy_site()
 
     # 云同步配置：publishable key 本就是公开的，数据靠「同步码 + 客户端加密」保护
-    cfgp = os.path.join(BASE, "output", "_supabase.json")
+    # 优先用随源码入库的公开配置（publishable key 可公开），其次本地私密副本
+    cfgp = os.path.join(BASE, "site_src", "cloud.json")
+    if not os.path.exists(cfgp):
+        cfgp = os.path.join(BASE, "output", "_supabase.json")
     if os.path.exists(cfgp):
         try:
             cfg = json.load(open(cfgp, encoding="utf-8"))
-            with open(os.path.join(DATA, "cloud.json"), "w", encoding="utf-8") as f:
-                json.dump({"url": cfg["url"], "key": cfg["publishable_key"]}, f, ensure_ascii=False)
+            key = cfg.get("key") or cfg.get("publishable_key")
+            if cfg.get("url") and key:
+                with open(os.path.join(DATA, "cloud.json"), "w", encoding="utf-8") as f:
+                    json.dump({"url": cfg["url"], "key": key}, f, ensure_ascii=False)
+            else:
+                print("WARN: cloud.json 缺少 url 或 key")
         except Exception as e:
             print("WARN: 云同步配置写入失败", e)
 
