@@ -9,6 +9,7 @@ def build(history, path="output/dashboard.html"):
     html = f"""<!DOCTYPE html>
 <html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <title>美股排名动量 · 信号看板</title>
 <style>
 :root{{--bg:#0d1117;--card:#161d2c;--line:#2a3346;--txt:#e6ecf5;--dim:#93a4bd;--gold:#ffc857;
