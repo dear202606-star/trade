@@ -492,10 +492,13 @@ function renderOrders() {
   }
 
   $('btnCloud').onclick = async () => {
-    const open = box.style.display === 'none';
-    box.style.display = open ? '' : 'none';
-    if (!open) return;
-    const ok = await DSH.cloud.init();
+    const ok = await DSH.cloud.init().catch(() => false);
+    // 未绑定时始终展开面板（首次使用不该被误关掉）；已绑定时可开可关
+    if (ok && DSH.cloud.bound && box.style.display !== 'none') {
+      box.style.display = 'none';
+      return;
+    }
+    box.style.display = '';
     if (!ok) { say('云同步未配置（缺少 cloud.json）', 'warn'); return; }
     if (DSH.cloud.bound) {
       codeIn.value = DSH.cloud.code;

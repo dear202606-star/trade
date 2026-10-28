@@ -100,7 +100,8 @@ def main():
         # ---------- 云同步（真实写库 → 换设备恢复） ----------
         print("\n[云同步]")
         before = len(supabase_rows())
-        pg.click("#btnCloud"); pg.wait_for_timeout(1200)
+        if not pg.locator("#cloudBox").is_visible():
+            pg.click("#btnCloud"); pg.wait_for_timeout(1200)
         pg.click("#cloudNew"); pg.wait_for_timeout(4000)
         code = pg.input_value("#cloudCode")
         ck(bool(re.fullmatch(r"[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}", code or "")), "生成同步码 %s" % code)
@@ -110,7 +111,8 @@ def main():
         pg2 = ctx.new_page()
         pg2.goto(BASE + "portfolio.html", wait_until="networkidle")
         pg2.evaluate("localStorage.clear()"); pg2.reload(wait_until="networkidle"); pg2.wait_for_timeout(1500)
-        pg2.click("#btnCloud"); pg2.wait_for_timeout(1500)
+        if not pg2.locator("#cloudBox").is_visible():
+            pg2.click("#btnCloud"); pg2.wait_for_timeout(1500)
         pg2.fill("#cloudCode", code); pg2.click("#cloudBind"); pg2.wait_for_timeout(5000)
         r2 = pg2.evaluate("() => DSH.load().rows||[]")
         ck(len(r2) == 3, "另一浏览器凭码恢复 %d 条" % len(r2), str([x["ticker"] for x in r2]))
