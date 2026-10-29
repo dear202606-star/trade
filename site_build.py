@@ -222,8 +222,7 @@ def main():
     # 净值为 equity.py 直接写入 docs/data/，这里无需复制
     # 数据质量明细（output/data_quality.json）仅供内部核查，不再发布到站点
 
-    # 策略报告页已下线（内容与「策略表现」重复）；report.html 由 site_src 提供跳转页
-    dashboard.build(hist, os.path.join(DOCS, "signals.html"))
+        dashboard.build(hist, os.path.join(DOCS, "signals.html"))
     inject_nav(os.path.join(DOCS, "signals.html"), "signals.html")
 
     for fn in ("策略模型研究与行动步骤.pdf", "策略模型研究与行动步骤.xlsx"):
