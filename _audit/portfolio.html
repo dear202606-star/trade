@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>策略账户 · LEADER QUANT</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="assets/app.css?v=0a2445df">
+<script src="assets/app.js?v=0a2445df"></script>
+</head><body>
+<script>DSH.boot();</script>
+<div class="wrap">
+
+  <div class="head">
+    <div class="eyebrow">Account</div>
+    <h1>策略账户</h1>
+    <div class="sub" id="acctSub">按策略执行的示范账户，所有人看到的一致</div>
+  </div>
+
+  <!-- 账户总览 -->
+  <div class="card fade-in" style="padding:28px 30px">
+    <div class="row" style="align-items:center;gap:10px;margin-bottom:18px">
+      <div class="label" style="margin:0">本金</div>
+      <div class="row" style="gap:6px" id="amtSwitch">
+        <button class="btn sm ghost" data-amt="10000">1 万</button>
+        <button class="btn sm primary" data-amt="100000">10 万</button>
+        <button class="btn sm ghost" data-amt="1000000">100 万</button>
+      </div>
+      <div class="grow"></div>
+      <div class="sub" id="acctStamp"></div>
+    </div>
+
+    <div class="row" style="align-items:flex-start">
+      <div class="grow">
+        <div class="label">累计盈亏</div>
+        <div class="num num-xl" id="tPnl">—</div>
+        <div class="sub" id="tPnlPct"></div>
+      </div>
+      <div style="text-align:right" id="tDayBox">
+        <div class="label" id="tDayLabel">最近交易日</div>
+        <div class="num num-lg" id="tDay">—</div>
+        <div class="sub" id="tDayPct"></div>
+      </div>
+    </div>
+
+    <div class="grid g4" style="margin-top:24px;gap:12px">
+      <div class="card flat"><div class="label" style="margin-bottom:6px">总市值</div><div class="num num-md" id="tMv">—</div></div>
+      <div class="card flat"><div class="label" style="margin-bottom:6px">建仓成本</div><div class="num num-md" id="tCost">—</div></div>
+      <div class="card flat"><div class="label" style="margin-bottom:6px">收益率</div><div class="num num-md" id="tRet">—</div></div>
+      <div class="card flat"><div class="label" style="margin-bottom:6px">仓位</div><div class="num num-md" id="tExp">—</div></div>
+    </div>
+    <div id="qaBox" class="tip warn" style="display:none;margin-top:14px"></div>
+  </div>
+
+  <!-- 年度持仓 -->
+  <div class="card" style="margin-top:16px;padding:20px 24px">
+    <div class="row" style="align-items:center;margin-bottom:16px;gap:10px">
+      <div class="label" style="margin:0;font-size:15px;color:var(--txt)" id="sigTitle">本年持仓</div>
+      <span class="pill on" id="sigValid" style="font-size:11.5px"></span>
+      <div class="grow"></div>
+      <a href="signals.html" class="lnk">历史信号 →</a>
+    </div>
+    <div class="row" style="align-items:flex-start;gap:18px">
+      <div style="min-width:120px">
+        <div class="row" style="gap:6px" id="sigMeta"></div>
+        <div class="sub" id="sigDates" style="margin-top:8px;font-size:11.5px;line-height:1.7"></div>
+      </div>
+      <div class="grow" id="sigPicks" style="display:flex;gap:10px;flex-wrap:wrap"></div>
+    </div>
+  </div>
+
+  <!-- 持仓明细 -->
+  <div style="margin-top:30px">
+    <div class="row" style="align-items:baseline;margin-bottom:10px">
+      <div class="label" style="font-size:12px;margin:0">持仓明细</div>
+      <div class="grow"></div>
+      <div class="sub" id="posHint" style="font-size:11.5px"></div>
+    </div>
+    <div class="card" style="padding:6px 0" id="list"></div>
+  </div>
+
+  <div class="foot">
+    <div id="dataStamp"></div>
+    理论账户：按建仓日收盘价买入、不计手续费与滑点 ｜ 仅供研究，不构成投资建议
+  </div>
+</div>
+
+<script>
+(async function () {
+  const $ = (id) => document.getElementById(id);
+  const AMTS = [10000, 100000, 1000000];
+  let amt = +(localStorage.getItem('dsh.amt') || 100000);
+  if (AMTS.indexOf(amt) < 0) amt = 100000;
+
+  let EQ = null, SIG = null, Q = { quotes: {} };
+
+  function money(v, d) {
+    if (v == null || isNaN(v)) return '—';
+    const a = Math.abs(v);
+    const s = a >= 1e4 ? Math.round(a).toLocaleString('en-US') : a.toLocaleString('en-US', { maximumFractionDigits: d == null ? 2 : d });
+    return (v < 0 ? '-' : '') + '$' + s;
+  }
+
+  // 由 equity.position 生成理论账户（本金 × 权重 ÷ 建仓价 = 股数）
+  function build() {
+    const pos = (EQ && EQ.position) || [];
+    const exp = EQ && EQ.exposure != null ? EQ.exposure : 1;
+    const quotes = (Q && Q.quotes) || {};
+    const rows = pos.map((p) => {
+      const budget = amt * (p.weight || 0) * exp;
+      const entry = p.entry, last = p.last;
+      const shares = entry > 0 ? budget / entry : null;
+      const mv = shares != null && last > 0 ? shares * last : null;
+      const q = quotes[p.ticker];
+      const qPrice = q && q.p > 0 ? q.p : null;
+      // 统一用净值文件的收盘价（与「策略表现」同源），行情只用于「当日涨跌」，
+      // 避免两个数据源不同步导致收益率对不上
+      const price = last > 0 ? last : qPrice;
+      const mvNow = shares != null && price > 0 ? shares * price : null;
+      return {
+        ticker: p.ticker, weight: p.weight, entry, shares, price,
+        mv: mvNow, cost: budget,
+        pnl: mvNow != null ? mvNow - budget : null,
+        pnlPct: mvNow != null && budget > 0 ? (mvNow - budget) / budget : null,
+        dayPct: q && q.chg != null ? q.chg : null,
+        name: (q && q.name) || p.ticker,
+        hasQuote: price > 0,
+      };
+    });
+    const cash = amt * (1 - exp);
+    const mv = rows.reduce((a, r) => a + (r.mv || 0), 0) + cash;
+    const pnl = mv - amt;
+    rows.forEach((r) => { r.w = mv > 0 ? (r.mv || 0) / mv : 0; });
+    const dayPnl = rows.reduce((a, r) => a + (r.dayPct != null && r.mv != null ? r.mv * (r.dayPct / (1 + r.dayPct)) : 0), 0);
+    return {
+      rows, amt, cash, mv, cost: amt * exp, pnl,
+      pnlPct: amt > 0 ? pnl / amt : null,
+      dayPnl, exp,
+      dayPct: mv - dayPnl > 0 ? dayPnl / (mv - dayPnl) : null,
+      missing: rows.filter((r) => !r.hasQuote).length,
+    };
+  }
+
+  function audit(c) {
+    const fails = [];
+    if (c.rows.some((r) => r.mv == null && r.hasQuote)) fails.push('部分持仓市值缺失');
+    const sum = c.rows.reduce((a, r) => a + (r.mv || 0), 0) + c.cash;
+    if (Math.abs(sum - c.mv) > Math.max(1, c.mv * 1e-6)) fails.push('市值合计不一致');
+    if (c.cost > 0 && Math.abs(c.pnl - (c.mv - c.cost - c.cash)) > Math.max(1, Math.abs(c.pnl) * 1e-6)) {
+      fails.push('盈亏合计不一致');
+    }
+    c.rows.forEach((r) => {
+      if (r.entry != null && !(r.entry > 0)) fails.push(r.ticker + ' 建仓价无效');
+      if (r.dayPct != null && (r.dayPct > 1.5 || r.dayPct < -1.5)) fails.push(r.ticker + ' 当日涨跌异常');
+    });
+    return { ok: !fails.length, fails };
+  }
+
+  function render() {
+    if (!EQ) return;
+    const c = build();
+
+    $('tPnl').textContent = money(c.pnl);
+    $('tPnl').className = 'num num-xl ' + DSH.cls(c.pnl);
+    $('tPnlPct').innerHTML = '<span class="' + DSH.cls(c.pnlPct) + '">' + DSH.pct(c.pnlPct) +
+      '</span> ｜ 本金 ' + money(c.amt, 0);
+
+    const td = DSH.today(SIG, Q);
+    if (!td) {
+      $('tDayBox').style.display = 'none';
+    } else {
+      $('tDayBox').style.display = '';
+      $('tDayLabel').innerHTML = td.label +
+        (td.live && td.asOf ? '<span style="font-weight:400;color:var(--txt-3)"> · 截至 ' + td.asOf + '</span>' : '');
+      const dayAmt = td.pct * c.mv / (1 + td.pct);
+      $('tDay').textContent = money(dayAmt);
+      $('tDay').className = 'num num-lg ' + DSH.cls(td.pct);
+      $('tDayPct').innerHTML = '<span class="' + DSH.cls(td.pct) +
+        '" style="font-size:15px;font-weight:700">' + DSH.pct(td.pct) + '</span>';
+    }
+
+    $('tMv').textContent = money(c.mv);
+    $('tCost').textContent = money(c.cost);
+    $('tRet').textContent = DSH.pct(c.pnlPct);
+    $('tRet').className = 'num num-md ' + DSH.cls(c.pnlPct);
+    $('tExp').textContent = Math.round(c.exp * 100) + '%' + (c.exp < 1 ? '（半仓）' : '');
+
+    const qa = $('qaBox'), a = audit(c);
+    if (!a.ok) {
+      qa.style.display = '';
+      qa.innerHTML = '⚠ 数据校验未通过：' + DSH.esc(a.fails.join('；'));
+    } else if (c.missing > 0) {
+      qa.style.display = '';
+      qa.innerHTML = '⚠ ' + c.missing + ' 只暂时没有行情，已按最近收盘价计算';
+    } else {
+      qa.style.display = 'none';
+    }
+
+    // 顶部更新状态（手机不用滚到底就知道数据新旧）
+    const st = document.getElementById('acctStamp');
+    if (st) {
+      const t = (Q && Q.ts) ? new Date(Q.ts) : null;
+      const p2 = (n) => String(n).padStart(2, '0');
+      const when = t ? ((t.getMonth() + 1) + '-' + p2(t.getDate()) + ' ' + p2(t.getHours()) + ':' + p2(t.getMinutes())) : '';
+      const stale = DSH.ageHours && DSH.ageHours(Q && Q.ts) > 26;
+      st.innerHTML = (when ? '更新于 ' + when + '（北京）' : '') +
+        (stale ? ' <span style="color:#FFAB6B">⚠ 数据偏旧</span>' : '');
+    }
+
+    // 明细表
+    $('posHint').textContent = '建仓日 ' + (EQ.base_date || '').slice(0, 4) + '-' +
+      (EQ.base_date || '').slice(4, 6) + '-' + (EQ.base_date || '').slice(6, 8) + ' 收盘价买入';
+    const head = '<div class="pr-row pr-head">' +
+      '<div>代码</div><div class="ta-r">权重</div><div class="ta-r">建仓价</div>' +
+      '<div class="ta-r">现价</div><div class="ta-r">涨跌</div>' +
+      '<div class="ta-r">市值</div><div class="ta-r">盈亏</div><div class="ta-r">贡献</div></div>';
+    const body = c.rows.map((r) => {
+      const contrib = c.pnl !== 0 && r.pnl != null ? r.pnl / Math.abs(c.amt) : null;
+      return '<div class="pr-row">' +
+        '<div><div class="tk">' + DSH.esc(r.ticker) + '</div>' +
+          '<div class="nm pr-m">建仓 ' + (r.entry != null ? r.entry.toFixed(2) : '—') + ' · 现价 ' + (r.price != null ? r.price.toFixed(2) : '—') + '</div>' +
+          '<div class="nm">' + DSH.esc((r.name || '').slice(0, 18)) + '</div></div>' +
+        '<div class="ta-r num">' + Math.round(r.weight * 100) + '%</div>' +
+        '<div class="ta-r num">' + (r.entry != null ? r.entry.toFixed(2) : '—') + '</div>' +
+        '<div class="ta-r num">' + (r.price != null ? r.price.toFixed(2) : '—') + '</div>' +
+        '<div class="ta-r num ' + DSH.cls(r.pnlPct) + '">' + DSH.pct(r.pnlPct) + '</div>' +
+        '<div class="ta-r num">' + money(r.mv) + '</div>' +
+        '<div class="ta-r num ' + DSH.cls(r.pnl) + '">' + money(r.pnl) + '</div>' +
+        '<div class="ta-r num ' + DSH.cls(r.pnl) + '">' + DSH.pct(contrib) + '</div></div>';
+    }).join('');
+    const cashRow = c.cash > 0
+      ? '<div class="pr-row" style="opacity:.75"><div><div class="tk">现金</div>' +
+        '<div class="nm">半仓未投入</div></div><div class="ta-r num">—</div><div class="ta-r num">—</div>' +
+        '<div class="ta-r num">—</div><div class="ta-r num">—</div><div class="ta-r num">' + money(c.cash) +
+        '</div><div class="ta-r num">—</div><div class="ta-r num">—</div></div>'
+      : '';
+    $('list').innerHTML = head + body + cashRow;
+
+    // 顶部说明
+    $('acctSub').innerHTML = '按策略执行的示范账户 ｜ 每股按建仓日收盘价买入，与「策略表现」同一口径';
+
+    // 数据时间
+    const t = (Q && Q.ts) ? new Date(Q.ts) : null;
+    const pad = (n) => String(n).padStart(2, '0');
+    $('dataStamp').innerHTML = (Q && Q.session
+      ? '行情 <b style="color:var(--txt-2)">' + DSH.esc(Q.session) + '</b> 收盘'
+      : '') +
+      (t ? ' ｜ 抓取于(北京) <b style="color:var(--txt-2)">' + (t.getMonth() + 1) + '-' + pad(t.getDate()) +
+        ' ' + pad(t.getHours()) + ':' + pad(t.getMinutes()) + '</b>' : '') +
+      (EQ && EQ.updated ? ' ｜ 净值更新(北京) <b style="color:var(--txt-2)">' + DSH.esc(EQ.updated) + '</b>' : '');
+
+    window.__audit = () => audit(build());
+  }
+
+  function renderSignal() {
+    if (!SIG) return;
+    const off = SIG.official || SIG.picks || [];
+    const exp = SIG.exposure != null ? SIG.exposure : 1;
+    const oy = SIG.official_year;
+    $('sigTitle').textContent = oy ? (oy + ' 年度持仓') : '本年持仓';
+    // 有效期做成醒目的 pill，而不是一行小字
+    $('sigValid').textContent = SIG.valid_to ? ('全年有效 · 至 ' + SIG.valid_to.slice(5).replace('-', '/')) : '全年有效';
+    $('sigMeta').innerHTML =
+      '<span class="pill ' + (exp >= 0.99 ? 'on' : 'off') + '">' +
+        (SIG.trend || (exp >= 0.99 ? '满仓' : '半仓')) + '</span>' +
+      '<span class="pill off">目标 ' + Math.round(exp * 100) + '%</span>';
+    const bd = String((EQ && EQ.base_date) || '');
+    const bdTxt = bd.length === 8 ? (bd.slice(0, 4) + '-' + bd.slice(4, 6) + '-' + bd.slice(6, 8)) : '';
+    $('sigDates').innerHTML =
+      (bdTxt ? '建仓 ' + bdTxt + '<br>' : '') +
+      (SIG.rebalance_hint ? '换仓 ' + SIG.rebalance_hint : '');
+    const q = (Q && Q.quotes) || {};
+    $('sigPicks').innerHTML = off.map((p) => {
+      const qq = q[p.ticker] || {};
+      return '<div style="flex:1;min-width:150px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);' +
+        'border-radius:11px;padding:12px 14px">' +
+        '<div class="row" style="justify-content:space-between;align-items:baseline">' +
+          '<div class="tk" style="font-size:15px">' + DSH.esc(p.ticker) + '</div>' +
+          '<div style="font-size:11px;color:var(--gold)">' + Math.round((p.weight || 0) * 100) + '%</div></div>' +
+        '<div class="nm" style="margin-top:2px">' + DSH.esc((p.name || '').slice(0, 16)) + '</div>' +
+        '<div class="row" style="justify-content:space-between;margin-top:6px;font-size:11.5px">' +
+          '<span style="color:var(--txt-3)">' + (qq.p ? qq.p.toFixed(2) : '—') + '</span>' +
+          '<span class="' + DSH.cls(p.ret12) + '" style="font-size:11.5px" title="' +
+            DSH.esc((SIG.official_month || '') + ' 排名时过去 12 个月涨幅，不是现在的收益') +
+          '">入选 ' + DSH.pct(p.ret12, 0) + '</span></div></div>';
+    }).join('');
+  }
+
+  // 本金切换
+  $('amtSwitch').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-amt]');
+    if (!b) return;
+    amt = +b.dataset.amt;
+    localStorage.setItem('dsh.amt', String(amt));
+    [...$('amtSwitch').children].forEach((x) => {
+      const on = +x.dataset.amt === amt;
+      x.className = 'btn sm ' + (on ? 'primary' : 'ghost');
+    });
+    render();
+  });
+
+  [...$('amtSwitch').children].forEach((x) => {
+    const on = +x.dataset.amt === amt;
+    x.className = 'btn sm ' + (on ? 'primary' : 'ghost');
+  });
+
+  // 数据加载
+  SIG = await DSH.json('signal', null);
+  Q = await DSH.json('quotes', { quotes: {} });
+  EQ = await DSH.json('equity', null);
+  if (!EQ || !EQ.position || !EQ.position.length) {
+    $('list').innerHTML = '<div class="tip warn" style="margin:16px">净值数据尚未生成</div>';
+  }
+  render();
+  renderSignal();
+
+  DSH.onRefresh(async () => {
+    Q = await DSH.json('quotes', { quotes: {} });
+    EQ = await DSH.json('equity', null);
+    render();
+    renderSignal();
+  });
+  DSH.autoRefresh(5);
+})();
+</script>
+</body></html>

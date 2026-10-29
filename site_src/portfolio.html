@@ -79,7 +79,7 @@
 
   <div class="foot">
     <div id="dataStamp"></div>
-    理论账户：按建仓日收盘价买入、不计手续费与滑点 ｜ 仅供研究，不构成投资建议
+    按建仓日收盘价买入，不计手续费 ｜ 仅供研究，不构成投资建议
   </div>
 </div>
 
@@ -244,7 +244,7 @@
     $('list').innerHTML = head + body + cashRow;
 
     // 顶部说明
-    document.getElementById('acctSub').textContent = (y ? (y + ' 年度持仓 · ') : '') + '按建仓日收盘价买入，与「策略表现」同一口径';
+    document.getElementById('acctSub').textContent = (y ? (y + ' 年度持仓') : '');
 
     // 数据时间
     const t = (Q && Q.ts) ? new Date(Q.ts) : null;
