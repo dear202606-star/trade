@@ -1,221 +1,97 @@
 # -*- coding: utf-8 -*-
-"""dashboard.py — 把信号历史渲染成自包含的可交互 HTML（离线可用，无 CDN 依赖）"""
+"""signals.html —— 历史信号（一张表，不重复首页与账户页的信息）
+
+只回答一个问题：每年 12 月末按规则选出了谁、当年结果如何。
+当年持仓、当日操作、净值曲线都在「总览 / 当期策略表现 / 策略表现」里，这里不重复。
+"""
 import json
+import os
+
+NAV = [
+    ("index.html", "总览"),
+    ("portfolio.html", "持仓"),
+    ("strategy.html", "策略"),
+    ("signals.html", "信号"),
+]
+CSS = """
+:root{--bg:#080A0F;--txt:#EDF1F7;--txt2:#A9B6C9;--txt3:#6F7D92;--gold:#F2C46B;--up:#FF6B72;--down:#3BD68A;--line:rgba(255,255,255,.07)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);
+font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+.nav{display:flex;gap:6px;align-items:center;padding:14px 0 26px}
+.logo{font-weight:800;letter-spacing:-.02em;margin-right:18px}
+.logo i{color:var(--gold);font-style:normal}
+.nav a{padding:8px 14px;border-radius:9px;color:var(--txt2);text-decoration:none;font-size:14px;min-height:44px;display:inline-flex;align-items:center}
+.nav a.on{background:rgba(242,196,107,.13);color:var(--gold)}
+h1{font-size:30px;margin:6px 0 6px;letter-spacing:-.02em}
+.sub{color:var(--txt3);font-size:12.5px;margin-bottom:20px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;color:var(--txt3);font-weight:500;font-size:12px;padding:10px 8px;border-bottom:1px solid var(--line)}
+td{padding:12px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.up{color:var(--up)}.down{color:var(--down)}
+.tk{font-weight:700}
+.w{color:var(--txt3);font-size:11.5px}
+.foot{margin-top:28px;color:var(--txt3);font-size:12px}
+@media (max-width:560px){h1{font-size:24px}td,th{padding:9px 5px;font-size:13px}}
+"""
 
 
-def build(history, path="output/dashboard.html"):
-    data = json.dumps(history, ensure_ascii=False)
+def _fmt(v, d=2, pct=True):
+    if v is None:
+        return "—"
+    return ("%+." + str(d) + "f%%") % (v * 100) if pct else ("%." + str(d) + "f") % v
 
-    html = f"""<!DOCTYPE html>
-<html lang="zh-CN"><head><meta charset="utf-8">
+
+def build(hist, out_path):
+    base = os.path.dirname(os.path.abspath(__file__))
+    docs = os.path.join(base, "docs", "data")
+    sh = {}
+    sig = {}
+    try:
+        sh = json.load(open(os.path.join(docs, "strategy_history.json"), encoding="utf-8"))
+    except Exception:
+        pass
+    try:
+        sig = json.load(open(os.path.join(docs, "signal.json"), encoding="utf-8"))
+    except Exception:
+        pass
+
+    rows = []
+    for r in (sh.get("years") or []):
+        holds = " · ".join(
+            '<span class="tk">%s</span> <span class="w">%.0f%%</span>' % (p["ticker"], p["weight"] * 100)
+            for p in r.get("holdings") or [])
+        cls = "up" if (r.get("ret") or 0) >= 0 else "down"
+        rows.append(
+            "<tr><td>%d</td><td>%s</td><td class='num %s'>%s</td><td class='num'>%s</td></tr>"
+            % (r["year"], holds, cls, _fmt(r.get("ret"), 1), _fmt(r.get("dd"), 1)))
+
+    cur = ""
+    if sig:
+        off = sig.get("official") or []
+        if off:
+            cur = ("<div class='sub' style='margin-top:22px'>%s 年度持仓：%s</div>"
+                   % (sig.get("official_year", ""),
+                      " · ".join("%s %.0f%%" % (p["ticker"], p["weight"] * 100) for p in off)))
+
+    nav = "".join('<a href="%s"%s>%s</a>' % (h, ' class="on"' if h == "signals.html" else "", t)
+                  for h, t in NAV)
+
+    html = """<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<title>美股排名动量 · 信号看板</title>
-<style>
-:root{{--bg:#0d1117;--card:#161d2c;--line:#2a3346;--txt:#e6ecf5;--dim:#93a4bd;--gold:#ffc857;
---up:#ff5a5f;--down:#2ecc71;--green:#ff5a5f;--red:#2ecc71;--blue:#4da3ff}}
-*{{box-sizing:border-box}}
-body{{margin:0;background:var(--bg);color:var(--txt);font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;
-line-height:1.7;font-size:15px}}
-.wrap{{max-width:1080px;margin:0 auto;padding:40px 24px 90px}}
-h1{{font-size:26px;margin:0 0 4px;letter-spacing:-.4px}}
-.sub{{color:var(--dim);font-size:13px;margin-bottom:22px}}
-.tabs{{display:flex;gap:8px;margin:20px 0 22px;border-bottom:1px solid var(--line)}}
-.tab{{padding:9px 16px;cursor:pointer;color:var(--dim);font-size:14px;border-bottom:2px solid transparent;user-select:none}}
-.tab.on{{color:var(--gold);border-bottom-color:var(--gold)}}
-.panel{{display:none}} .panel.on{{display:block}}
-.hero{{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:6px 0 18px}}
-.card{{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px}}
-.card .v{{font-size:24px;font-weight:800;color:var(--gold);letter-spacing:-.6px}}
-.card .l{{font-size:12px;color:var(--dim);margin-top:2px}}
-.card .s{{font-size:11.5px;color:#6f8199;margin-top:6px}}
-.pill{{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12.5px;font-weight:700}}
-.on-pill{{background:#12351f;color:#5fe08a}} .off-pill{{background:#3a2018;color:#ffab6b}}
-table{{width:100%;border-collapse:collapse;font-size:13.5px;margin:10px 0}}
-th{{background:#1b2434;color:#aab9cf;font-weight:600;text-align:left;padding:9px 8px;
-border-bottom:1px solid var(--line);font-size:12.5px}}
-td{{padding:9px 8px;border-bottom:1px solid #1e2637}}
-tr:hover td{{background:#182033}}
-.num{{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}}
-.tk{{font-weight:700;color:var(--gold);font-family:Consolas,monospace}}
-.bar{{height:6px;border-radius:3px;background:var(--blue);min-width:2px}}
-.note{{background:#141b28;border-left:3px solid var(--blue);border-radius:8px;padding:12px 16px;
-font-size:13.5px;color:#c3cfe0;margin:14px 0}}
-.act{{border-left-color:var(--gold);background:#1a1a12;color:#ffe6a8}}
-.sel{{background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:8px;
-padding:7px 10px;font-size:13.5px;font-family:inherit}}
-.hist-row{{display:flex;gap:14px;align-items:center;padding:11px 0;border-bottom:1px solid #1e2637}}
-.hist-m{{color:var(--dim);font-family:Consolas,monospace;width:74px}}
-.tag{{font-size:11px;padding:1px 7px;border-radius:4px;background:#1b2434;color:#9fb2cb}}
-.foot{{color:#6f8199;font-size:11.5px;margin-top:36px;border-top:1px solid var(--line);padding-top:14px}}
-h3{{font-size:15px;color:var(--gold);margin:24px 0 6px}}
-</style></head><body><div class="wrap">
+<title>历史信号 · LEADER QUANT</title><style>%s</style></head><body><div class="wrap">
+<div class="nav"><div class="logo">LEADER<i>·</i>QUANT</div>%s</div>
+<h1>历史信号</h1>
+<div class="sub">每年 12 月末按过去 12 个月涨幅取前 3 名，次年全年持有</div>
+<table><thead><tr><th>年度</th><th>持仓（权重）</th><th class="num">当年收益</th><th class="num">年内回撤</th></tr></thead>
+<tbody>%s</tbody></table>
+%s
+<div class="foot">仅供研究，不构成投资建议</div>
+</div></body></html>""" % (CSS, nav, "".join(rows), cur)
 
-<h1>美股排名动量 · 信号看板</h1>
-<div class="sub">策略：每年 12 月末按过去 12 个月涨幅取前 3 名等权，全年持有；标普 500 跌破 10 月均线时仓位减半</div>
-
-<div class="tabs">
-  <div class="tab on" data-p="now">本期信号</div>
-  <div class="tab" data-p="track">实盘跟踪</div>
-  <div class="tab" data-p="hist">历史记录</div>
-  <div class="tab" data-p="how">策略说明</div>
-</div>
-
-<div class="panel on" id="now">
-  <div id="action"></div>
-  <div class="hero" id="hero"></div>
-  <div id="official"></div>
-  <div id="picks"></div>
-</div>
-
-<div class="panel" id="track">
-  <div id="trackSummary"></div>
-  <div id="trackTable"></div>
-  <div class="note">从首期信号开始记账：每期按正式持仓的权重 × 仓位计算组合收益，与标普 500、回测预期（年化 29.4%）对照。<b>不足 12 期时，偏差主要反映运气，不足以判断策略失效。</b></div>
-</div>
-
-<div class="panel" id="hist">
-  <div style="margin:12px 0">
-    <label style="color:var(--dim);font-size:13px">选择月份：</label>
-    <select class="sel" id="monthSel"></select>
-  </div>
-  <div id="histDetail"></div>
-  <h3>全部记录</h3>
-  <div id="histList"></div>
-</div>
-
-<div class="panel" id="how">
-  <div class="note"><b>选股</b>：股票池为当前标普 500 成分股；剔除股价 &lt; 5 美元、过去 12 个月日均成交额 &lt; 2000 万美元的标的；按过去 12 个自然月涨幅排序。</div>
-  <div class="note"><b>持仓</b>：前 3 名；同一 GICS 行业最多 2 只，若出现 2 只同行业，该行业权重上限 60%，剩余给第三只。</div>
-  <div class="note"><b>换仓</b>：<b>每年 12 月最后一个交易日</b>按当时排名换仓，之后全年不变。其余月份只检查大盘开关，不动持仓——这是回测验证过的关键纪律（改成月度再平衡会让年化掉约 8 个百分点）。</div>
-  <div class="note"><b>开关</b>：标普 500 上月收盘低于 10 个月均线时，整体仓位降至 50%；否则满仓。</div>
-  <div class="note"><b>仓位</b>：策略总仓位 ≤ 股票资产的 30%（上表"占总资产"已按此折算），单只 ≤ 总资产 10%，不设个股止损。</div>
-  <div class="note" style="border-left-color:var(--red)"><b>风险</b>：生存者偏差已量化——覆盖 2008 年 93%、2012 年 98.6%、2021 年后 100%，累计仅缺 38 只（雷曼、贝尔斯登、华盛顿互惠等 2008–2010 倒闭金融股），对"选出赢家"的影响集中在 2009–2010 反弹年。行业集中度高，单赛道崩塌会同步回撤。本页面仅供研究，不构成投资建议。</div>
-</div>
-
-<div class="foot">数据来源：新浪财经日线 · 标普500 成分。页面由 GitHub Actions 每月自动生成。</div>
-</div>
-
-<script>
-const DATA = {data};
-const fmt = (x,d=1)=> (x*100>=0?'+':'') + (x*100).toFixed(d) + '%';
-const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}}[c]));
-
-document.querySelectorAll('.tab').forEach(t=>{{
-  t.onclick=()=>{{
-    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
-    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('on'));
-    t.classList.add('on'); document.getElementById(t.dataset.p).classList.add('on');
-  }};
-}});
-
-function renderNow(rec){{
-  if(!rec){{document.getElementById('now').innerHTML='<div class="note">暂无数据</div>';return;}}
-  const on = rec.trend === '满仓';
-  const off = rec.official || rec.picks || [];
-
-  document.getElementById('action').innerHTML =
-    '<div class="note act"><b>本月动作：</b>' + esc(rec.action || '—') + '</div>';
-
-  document.getElementById('hero').innerHTML = `
-    <div class="card"><div class="v">${{esc(rec.month)}}</div><div class="l">最新信号月份</div>
-      <div class="s">生成于 ${{esc(rec.date)}}</div></div>
-    <div class="card"><div class="v"><span class="pill ${{on?'on-pill':'off-pill'}}">${{esc(rec.trend)}}</span></div>
-      <div class="l">大盘开关</div><div class="s">目标仓位 ${{(rec.exposure*100).toFixed(0)}}%</div></div>
-    <div class="card"><div class="v">${{rec.spy.toFixed(0)}}</div><div class="l">SPY / 10月均线 ${{rec.ma.toFixed(0)}}</div>
-      <div class="s">${{on?'在均线上方':'跌破均线'}}</div></div>`;
-
-  document.getElementById('official').innerHTML = `
-    <h3>正式持仓（${{esc(rec.official_month||'—')}} 锁定，本年度有效）</h3>
-    <table><thead><tr><th>#</th><th>代码</th><th>公司</th><th>行业</th>
-    <th class="num">基准涨幅</th><th class="num">策略内权重</th><th class="num">占总资产</th></tr></thead><tbody>
-    ${{off.map(p=>`<tr><td>${{p.rank}}</td><td class="tk">${{esc(p.ticker)}}</td><td>${{esc(p.name)}}</td>
-      <td>${{esc(p.sector)}}</td><td class="num" style="color:var(--up)">${{fmt(p.ret12,0)}}</td>
-      <td class="num">${{(p.weight*100).toFixed(0)}}%</td>
-      <td class="num"><b>${{(p.weight*rec.exposure*0.30*100).toFixed(1)}}%</b></td></tr>`).join('')}}
-    </tbody></table>`;
-
-  const bench = (rec.bench||[]).slice(0,7);
-  document.getElementById('picks').innerHTML = bench.length ? `
-    <h3>当月排名（若在此换仓会选谁 · 仅供参考）</h3>
-    <table><thead><tr><th>#</th><th>代码</th><th>行业</th><th class="num">12月涨幅</th></tr></thead><tbody>
-    ${{bench.map(p=>`<tr><td>${{p.rank}}</td><td class="tk">${{esc(p.ticker)}}</td>
-      <td>${{esc(p.sector)}}</td><td class="num">${{fmt(p.ret12,0)}}</td></tr>`).join('')}}
-    </tbody></table>` : '';
-}}
-
-function renderHist(rec){{
-  if(!rec) return;
-  const on = rec.trend==='满仓';
-  const off = rec.official || rec.picks || [];
-  document.getElementById('histDetail').innerHTML = `
-    <div class="hero" style="grid-template-columns:repeat(3,1fr)">
-      <div class="card"><div class="v">${{esc(rec.month)}}</div><div class="l">月份</div></div>
-      <div class="card"><div class="v"><span class="pill ${{on?'on-pill':'off-pill'}}">${{esc(rec.trend)}}</span></div>
-        <div class="l">大盘开关</div><div class="s">仓位 ${{(rec.exposure*100).toFixed(0)}}%</div></div>
-      <div class="card"><div class="v">${{off.map(p=>esc(p.ticker)).join(' / ')}}</div><div class="l">正式持仓</div></div>
-    </div>
-    <div class="note act"><b>动作：</b>${{esc(rec.action||'—')}}</div>`;
-}}
-
-function initHist(){{
-  const sel = document.getElementById('monthSel');
-  sel.innerHTML = DATA.map((r,i)=>`<option value="${{i}}">${{esc(r.month)}}（${{esc(r.trend)}}）</option>`).join('');
-  sel.onchange = ()=> renderHist(DATA[+sel.value]);
-  document.getElementById('histList').innerHTML = DATA.map(r=>{{
-    const on = r.trend==='满仓';
-    const off = r.official || r.picks || [];
-    return `<div class="hist-row">
-      <div class="hist-m">${{esc(r.month)}}</div>
-      <span class="pill ${{on?'on-pill':'off-pill'}}" style="font-size:11px;padding:1px 8px">${{esc(r.trend)}}</span>
-      <div style="flex:1">${{off.map(p=>`<span class="tag">${{esc(p.ticker)}} ${{(p.weight*100).toFixed(0)}}%</span>`).join(' ')}}</div>
-      <div style="color:var(--dim);font-size:12px">${{esc(r.date)}}</div>
-    </div>`;
-  }}).join('');
-  if(DATA.length) renderHist(DATA[0]);
-}}
-
-function renderTrack(rec){{
-  const t = rec.track || {{}};
-  const el = document.getElementById('trackSummary');
-  const pct = v => (v==null ? '—' : ((v*100>=0?'+':'') + (v*100).toFixed(1) + '%'));
-  const rows = (rec.track_records || []).slice().reverse();
-  if(!t.months){{
-    el.innerHTML = '<div class="note">尚未产生已结算月份。首期信号已记录，下个月运行后开始计算收益。</div>';
-  }} else {{
-    el.innerHTML = `
-      <div class="hero" style="grid-template-columns:repeat(4,1fr)">
-        <div class="card"><div class="v">${{pct(t.strategy)}}</div><div class="l">策略累计（${{t.months}} 期）</div>
-          <div class="s">起始 ${{esc(t.start)}}</div></div>
-        <div class="card"><div class="v">${{pct(t.spy)}}</div><div class="l">标普500 同期</div>
-          <div class="s">超额 ${{pct(t.excess_vs_spy)}}</div></div>
-        <div class="card"><div class="v">${{pct(t.expected)}}</div><div class="l">回测预期</div>
-          <div class="s">按 29.4% 年化折算</div></div>
-        <div class="card"><div class="v">${{pct(t.gap_vs_backtest)}}</div><div class="l">与回测的偏差</div>
-          <div class="s">正=跑赢回测</div></div>
-      </div>`;
-  }}
-  document.getElementById('trackTable').innerHTML = `
-    <table><thead><tr><th>期次</th><th>正式持仓</th><th class="num">仓位</th>
-    <th class="num">策略收益</th><th class="num">标普500</th><th class="num">超额</th></tr></thead><tbody>
-    ${{rows.map(r=>{{
-      const pos = (r.picks||[]).map(p=>esc(p.ticker)).join(' / ');
-      const ex = (r.ret!=null && r.spy_ret!=null) ? r.ret - r.spy_ret : null;
-      const col = v => v==null ? '#6f8199' : (v>=0 ? '#ff5a5f' : '#2ecc71');
-      return `<tr><td>${{esc(r.month)}}</td><td class="tk">${{pos}}</td>
-        <td class="num">${{(r.exposure*100).toFixed(0)}}%</td>
-        <td class="num" style="color:${{col(r.ret)}}">${{r.ret==null?'待结算':pct(r.ret)}}</td>
-        <td class="num">${{r.spy_ret==null?'—':pct(r.spy_ret)}}</td>
-        <td class="num" style="color:${{col(ex)}}">${{ex==null?'—':pct(ex)}}</td></tr>`;
-    }}).join('')}}
-    </tbody></table>`;
-}}
-
-renderNow(DATA[0]);
-renderTrack(DATA[0]);
-initHist();
-</script>
-</body></html>"""
-    with open(path, "w", encoding="utf-8") as f:
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    with open(out_path, "w", encoding="utf-8") as f:
         f.write(html)
-    return path
+    return out_path

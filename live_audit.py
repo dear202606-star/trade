@@ -44,8 +44,9 @@ def main():
         hero = pg.locator("#verdict").inner_text() if pg.locator("#verdict").count() else ""
         ck(len(hero) >= 2, "今日结论有内容（%s）" % hero, "结论为空")
         ck("看账户" in body, "首屏有主行动按钮")
-        rows_n = pg.locator("#pfBody .holding").count()
-        ck(rows_n >= 3, "持仓明细 %d 只" % rows_n)
+        line = pg.locator("#holdingLine").inner_text() if pg.locator("#holdingLine").count() else ""
+        ck(all(t in line for t in ["WDC", "MU", "HOOD"]),
+           "持仓摘要：%s" % line.strip()[:40], "持仓摘要缺失：%s" % line)
         # CTA 真的能跳
         cta = pg.locator("#heroCta")
         if cta.count():

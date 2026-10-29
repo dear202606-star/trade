@@ -194,7 +194,16 @@ def load_sector():
             r = requests.get("https://raw.githubusercontent.com/fja05680/sp500/master/sp500.csv",
                              headers={"User-Agent": UA}, timeout=30)
             sp = pd.read_csv(StringIO(r.text))
-        return dict(zip(sp["Symbol"], sp["GICS Sector"])), dict(zip(sp["Symbol"], sp["Security"]))
+        sec = dict(zip(sp["Symbol"], sp["GICS Sector"]))
+        # 补上已退市/被并购的历史成分股行业（否则行业约束对其失效）
+        try:
+            ov = json.load(open(os.path.join(BASE, "static", "sector_overrides.json"), encoding="utf-8"))
+            for k, v in ov.items():
+                if not k.startswith("_"):
+                    sec.setdefault(k, v)
+        except Exception:
+            pass
+        return sec, dict(zip(sp["Symbol"], sp["Security"]))
     except Exception:
         return {}, {}
 

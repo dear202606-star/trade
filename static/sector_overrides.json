@@ -1,0 +1,13 @@
+{
+ "_note": "已退市/被并购的历史成分股 GICS 行业（公开事实），用于回测行业约束",
+ "XL": "Financials",
+ "THC": "Health Care",
+ "WHR": "Consumer Discretionary",
+ "EA": "Communication Services",
+ "ATVI": "Communication Services",
+ "MRO": "Energy",
+ "HES": "Energy",
+ "ETSY": "Consumer Discretionary",
+ "ABMD": "Health Care",
+ "COG": "Energy"
+}

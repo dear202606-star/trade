@@ -119,10 +119,8 @@ def main():
             s_val += p["weight"] * (px / bp)
         if not ok:
             continue
-        # 口径说明：历史段一律满仓；敞口只作用于「最新一日之后」。
-        # （此前用当前敞口回填全部历史，导致开关翻转时历史收益被改写）
-        if d == days[-1]:
-            s_val = s_val * exposure + (1 - exposure)
+        # 净值口径 = 满仓持有（与回测一致）。敞口只作「建议仓位」展示，
+        # 不参与净值计算，避免开关翻转时历史收益被改写。
         bd, bp = base_px["SPY"]
         bpx = data["SPY"].get(d)
         if bpx is None:
