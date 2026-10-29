@@ -138,8 +138,9 @@
     var years = (SH && SH.years) || [];
     $("yearRows").innerHTML = years.slice().reverse().map(function (r) {
       var holds = (r.holdings || []).map(function (h) {
-        return '<b>' + DSH.esc(h.ticker) + '</b> ' + Math.round((h.weight || 0) * 100) + '%';
-      }).join(" · ");
+        return '<span class="chip"><b>' + DSH.esc(h.ticker) + '</b><i>' +
+          Math.round((h.weight || 0) * 100) + '%</i></span>';
+      }).join('');
       return '<div class="yr-row">' +
         '<div>' + r.year + '</div>' +
         '<div class="h">' + holds + '</div>' +
