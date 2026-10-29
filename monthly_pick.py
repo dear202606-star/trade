@@ -187,7 +187,7 @@ def main():
     ap.add_argument("--workers", type=int, default=8)
     args = ap.parse_args()
 
-    today = dt.date.today().isoformat()
+    today = (dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=8)).date().isoformat()
     print("[1/5] 获取标普500 成分股 ...", flush=True)
     sp = fetch_sp500()
     tickers = sp.ticker.tolist()
@@ -198,7 +198,7 @@ def main():
     # ---- 增量模式：同一自然月内排名不会变 ----
     # 只刷新 SPY 收盘价判定均线开关，其余沿用上一条记录。
     # 500 只股票重拉两遍约 15 分钟 → 这里约 20 秒。强制重排用 --rerank。
-    this_month = dt.date.today().strftime("%Y-%m")
+    this_month = (dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=8)).strftime("%Y-%m")
     hist_prev = []
     _hp = os.path.join("output", "signal_history.json")
     if os.path.exists(_hp):

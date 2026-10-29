@@ -229,9 +229,9 @@
     $('dataStamp').innerHTML = (Q && Q.session
       ? '行情 <b style="color:var(--txt-2)">' + DSH.esc(Q.session) + '</b> 收盘'
       : '') +
-      (t ? ' ｜ 抓取于 <b style="color:var(--txt-2)">' + (t.getMonth() + 1) + '-' + pad(t.getDate()) +
+      (t ? ' ｜ 抓取于(北京) <b style="color:var(--txt-2)">' + (t.getMonth() + 1) + '-' + pad(t.getDate()) +
         ' ' + pad(t.getHours()) + ':' + pad(t.getMinutes()) + '</b>' : '') +
-      (EQ && EQ.updated ? ' ｜ 净值更新 <b style="color:var(--txt-2)">' + DSH.esc(EQ.updated) + '</b>' : '');
+      (EQ && EQ.updated ? ' ｜ 净值更新(北京) <b style="color:var(--txt-2)">' + DSH.esc(EQ.updated) + '</b>' : '');
 
     window.__audit = () => audit(build());
   }

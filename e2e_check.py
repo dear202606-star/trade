@@ -16,6 +16,7 @@ import shutil
 import subprocess
 import sys
 import time
+import calendar
 
 import requests
 
@@ -128,8 +129,8 @@ def data(name):
 
 def main():
     # 1. 三个页面
-    page("", ["今天该做什么", "策略净值", "下一步"])
-    page("portfolio.html", ["我的持仓", "计划投入", "要下的单", "分配"])
+    page("", ["今天该做什么", "策略累计收益", "下一步"])
+    page("portfolio.html", ["策略账户", "建仓价", "累计盈亏", "持仓明细"])
     page("strategy.html", ["累计收益增长", "逐年记录", "个股贡献", "跑赢标普 500"])
 
     # 1b. 旧链接不能 404（历史书签）
@@ -173,9 +174,10 @@ def main():
         ts = q.get("ts")
         if ts:
             try:
-                age = (time.time() - time.mktime(time.strptime(ts, "%Y-%m-%dT%H:%M:%SZ"))
-                       + time.localtime().tm_gmtoff) / 3600
-                if age <= 48:
+                # ts 是 UTC（带 Z），必须按 UTC 解析；此前用 mktime 当成本地时间
+                # 又多加了时区偏移，导致「更新于」虚高 8 小时
+                age = (time.time() - calendar.timegm(time.strptime(ts, "%Y-%m-%dT%H:%M:%SZ"))) / 3600
+                if age <= 26:
                     ok("行情 %.1f 小时前更新" % age)
                 else:
                     bad("行情已过期 %.0f 小时" % age)

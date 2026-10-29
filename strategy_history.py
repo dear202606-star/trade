@@ -415,7 +415,7 @@ def main():
         print("没有可沿用的历史结果，按本次输出", file=sys.stderr)
 
     out = {"years": years, "stocks": stocks, "summary": summary,
-           "generated": pd.Timestamp.today().strftime("%Y-%m-%d")}
+           "generated": (pd.Timestamp.utcnow() + pd.Timedelta(hours=8)).strftime("%Y-%m-%d")}
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
@@ -460,7 +460,7 @@ def main():
                            "dd": round(ydd, 4)})
         with open(CURVE, "w", encoding="utf-8") as f:
             json.dump({"points": pts, "stats": cstats, "years": cyears,
-                       "updated": pd.Timestamp.today().strftime("%Y-%m-%d")},
+                       "updated": (pd.Timestamp.utcnow() + pd.Timedelta(hours=8)).strftime("%Y-%m-%d")},
                       f, ensure_ascii=False, separators=(",", ":"))
         for _src, _dst in ((OUT, SNAP_SH), (CURVE, SNAP_CV)):
             try:
@@ -472,7 +472,7 @@ def main():
 
     # 写入选股快照（回测的唯一事实来源，供全周期曲线复用）
     if not frozen:
-        snap = {"generated": pd.Timestamp.today().strftime("%Y-%m-%d"),
+        snap = {"generated": (pd.Timestamp.utcnow() + pd.Timedelta(hours=8)).strftime("%Y-%m-%d"),
                 "note": "冻结的逐年持仓，回测与曲线均以此为准；重算用 --refresh",
                 "years": {str(r["year"]): [p["ticker"] for p in r["holdings"]] for r in years}}
         with open(fps, "w", encoding="utf-8") as f:

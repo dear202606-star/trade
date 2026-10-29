@@ -69,7 +69,7 @@ def main():
             print("Yahoo 探测失败:", e, file=sys.stderr)
 
     out = {
-        "generated": pd.Timestamp.today().strftime("%Y-%m-%d"),
+        "generated": (pd.Timestamp.utcnow() + pd.Timedelta(hours=8)).strftime("%Y-%m-%d"),
         "by_year": [{k: (v if k != "missing_list" else v) for k, v in r.items()} for r in rows],
         "missing_unique": len(allmiss),
         "recovered": len(recovered),

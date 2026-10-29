@@ -9,6 +9,7 @@
   {base_date, updated, weights:[{ticker,weight}], points:[{d,s,b}], stats:{...}}
 """
 import json
+from datetime import datetime, timedelta, timezone
 import os
 import re
 import sys
@@ -142,7 +143,8 @@ def main():
 
     out = {
         "base_date": base_day,
-        "updated": time.strftime("%Y-%m-%d %H:%M"),
+        "updated": (datetime.now(timezone.utc) + timedelta(hours=8)).strftime("%Y-%m-%d %H:%M"),
+        "updated_tz": "Asia/Shanghai",
         "exposure": exposure,
         "weights": [{"ticker": p["ticker"], "weight": p["weight"]} for p in official],
         "benchmark": "SPY",

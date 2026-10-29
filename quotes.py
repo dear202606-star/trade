@@ -156,7 +156,7 @@ def main():
     fx = fetch_fx()
     payload = {
         "ts": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "ts_local": dt.datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "ts_local": (dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=8)).strftime("%Y-%m-%d %H:%M"),
         "session": last_session(),
         "fx": fx,
         "count": len(quotes),

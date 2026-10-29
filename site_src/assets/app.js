@@ -689,7 +689,7 @@
       const d = new Date(q.ts);
       if (!isNaN(d.getTime())) {
         const p = (n) => String(n).padStart(2, "0");
-        parts.push("采集于 <b style=\"color:var(--txt-2)\">" +
+        parts.push("采集于(北京) <b style=\"color:var(--txt-2)\">" +
           p(d.getMonth() + 1) + "-" + p(d.getDate()) + " " + p(d.getHours()) + ":" + p(d.getMinutes()) + "</b>");
       }
       const age = DSH.ageHours(q.ts);
@@ -698,7 +698,7 @@
       }
     }
     if (eq && eq.updated) {
-      parts.push("净值截至 <b style=\"color:var(--txt-2)\">" + DSH.esc(eq.updated) + "</b>");
+      parts.push("净值截至(北京) <b style=\"color:var(--txt-2)\">" + DSH.esc(eq.updated) + "</b>");
     }
     parts.push("两源已核对");
     if (!parts.length) return;

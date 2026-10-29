@@ -183,7 +183,7 @@
         when = (d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
       }
       stamp.innerHTML = (q.session ? '行情 <b style="color:var(--txt-2)">' + DSH.esc(q.session) + '</b> 收盘' : '') +
-        (when ? ' ｜ 更新于 <b style="color:var(--txt-2)">' + when + '</b>' : '') +
+        (when ? ' ｜ 更新于(北京) <b style="color:var(--txt-2)">' + when + '</b>' : '') +
         (EQ0.base_date ? ' ｜ 建仓 ' + EQ0.base_date.slice(0, 4) + '-' + EQ0.base_date.slice(4, 6) + '-' + EQ0.base_date.slice(6, 8) : '') +
         ((DSH.ageHours && DSH.ageHours(q.ts) > 26) ? ' ｜ <span style="color:#FFAB6B">⚠ 数据偏旧</span>' : '');
     }
