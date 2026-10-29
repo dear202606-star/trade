@@ -3,23 +3,23 @@
   "equity": 1.0,
   "records": [
     {
-      "date": "2026-10-27",
+      "date": "2026-10-29",
       "month": "2026-10",
       "picks": [
         {
-          "ticker": "LITE",
-          "weight": 0.3,
-          "px": 818.1
-        },
-        {
           "ticker": "WDC",
           "weight": 0.3,
-          "px": 356.13
+          "px": 396.42
+        },
+        {
+          "ticker": "MU",
+          "weight": 0.3,
+          "px": 983.23
         },
         {
           "ticker": "HOOD",
           "weight": 0.4,
-          "px": 92.84
+          "px": 91.43
         }
       ],
       "exposure": 1.0,

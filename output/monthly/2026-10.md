@@ -1,39 +1,39 @@
 # 月度信号 · 2026-10
 
-> 生成时间 2026-10-26 ｜ 数据截至 2026-10 ｜ 排名池 498 只
-> 运行环境 GitHub Actions ｜ 代码版本 4ba7256
+> 生成时间 2026-10-29 ｜ 数据截至 2026-10 ｜ 排名池 495 只
+> 运行环境 本地 ｜ 代码版本 local
 
 ## 本月动作
 
-**本月不换仓：持有 2026 年度组合（基准 2025-12）；大盘在 10 月均线上方（760 ≥ 729），维持满仓**
+**本月不换仓：持有 2026 年度组合（基准 2025-12）；大盘在 10 月均线上方（772 ≥ 730），维持满仓**
 
 ## 大盘开关
 
-- SPY 最新收盘：**759.97** ｜ 10 月均线：**728.69**
+- SPY 最新收盘：**772.31** ｜ 10 月均线：**729.92**
 - 状态：**满仓** → 目标仓位 100%
 
 ## 正式持仓（2025-12 锁定，本年度有效）
 
 | # | 代码 | 公司 | 行业 | 基准涨幅 | 策略内权重 | 占总资产 |
 |---|---|---|---|---|---|---|
-| 1 | **LITE** | Lumentum | Information Technology | +339% | 30% | 9.0% |
-| 2 | **WDC** | Western Digital | Information Technology | +282% | 30% | 9.0% |
+| 1 | **WDC** | Western Digital | Information Technology | +285% | 30% | 9.0% |
+| 2 | **MU** | Micron Technology | Information Technology | +239% | 30% | 9.0% |
 | 3 | **HOOD** | Robinhood Markets | Financials | +204% | 40% | 12.0% |
 
 ## 若现在重排（参考，不据此换仓）
 
 | # | 代码 | 行业 | 12月涨幅 |
 |---|---|---|---|
-| 1 | MRNA | Health Care | +637% |
-| 2 | SNDK | Information Technology | +521% |
-| 3 | MU | Information Technology | +292% |
-| 4 | LITE | Information Technology | +275% |
-| 5 | DELL | Information Technology | +182% |
-| 6 | VLO | Energy | +147% |
-| 7 | STX | Information Technology | +146% |
-| 8 | MRVL | Information Technology | +144% |
-| 9 | MPC | Energy | +135% |
-| 10 | HPE | Information Technology | +132% |
+| 1 | MRNA | Health Care | +689% |
+| 2 | SNDK | Information Technology | +605% |
+| 3 | LITE | Information Technology | +353% |
+| 4 | MU | Information Technology | +339% |
+| 5 | DELL | Information Technology | +205% |
+| 6 | STX | Information Technology | +173% |
+| 7 | MRVL | Information Technology | +168% |
+| 8 | WDC | Information Technology | +164% |
+| 9 | HPE | Information Technology | +147% |
+| 10 | INTC | Information Technology | +139% |
 
 ## 纪律
 

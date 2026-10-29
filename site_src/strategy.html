@@ -17,25 +17,25 @@
 
   <!-- ========== 一、当前运行 ========== -->
   <div class="row" style="margin:30px 0 10px;align-items:baseline;gap:10px">
-    <h2 style="margin:0;font-size:19px;letter-spacing:-.02em">当前持仓表现</h2>
+    <h2 style="margin:0;font-size:19px;letter-spacing:-.02em" id="curYearTitle">当期表现</h2>
     <span class="sub" id="runPeriod">—</span>
     <span class="sub" id="livePct" style="margin-left:auto"></span>
   </div>
 
   <div class="grid g4">
-    <div class="card flat"><div class="label" style="margin-bottom:6px">策略收益</div>
+    <div class="card flat"><div class="label" style="margin-bottom:6px"<span id="curYearRetLabel">当期策略收益</span></div>
       <div class="num num-lg" id="rRet">—</div></div>
     <div class="card flat"><div class="label" style="margin-bottom:6px">标普 500 同期</div>
       <div class="num num-lg" id="rBench">—</div></div>
     <div class="card flat"><div class="label" style="margin-bottom:6px">跑赢标普 500</div>
       <div class="num num-lg" id="rEx">—</div></div>
-    <div class="card flat"><div class="label" style="margin-bottom:6px">最大回撤</div>
+    <div class="card flat"><div class="label" style="margin-bottom:6px">年内最大回撤</div>
       <div class="num num-lg down" id="rMdd">—</div></div>
   </div>
 
   <div class="card" style="margin-top:16px;padding:20px 16px 8px">
     <div class="row" style="padding:0 10px 12px">
-      <div class="label" style="margin:0">累计收益 + 回撤</div>
+      <div class="label" style="margin:0">当期净值与回撤</div>
       <div class="grow"></div>
       <div class="row" style="gap:6px" id="rRanges">
         <button class="btn sm primary" data-r="all">全部</button>
@@ -67,19 +67,19 @@
   </div>
 
   <div class="grid g4">
-    <div class="card flat"><div class="label" style="margin-bottom:6px">累计收益</div>
+    <div class="card flat"><div class="label" style="margin-bottom:6px">全周期累计收益</div>
       <div class="num num-lg" id="bTotal">—</div></div>
-    <div class="card flat"><div class="label" style="margin-bottom:6px">年化收益</div>
+    <div class="card flat"><div class="label" style="margin-bottom:6px">全周期年化</div>
       <div class="num num-lg" id="bCagr">—</div></div>
     <div class="card flat"><div class="label" style="margin-bottom:6px">标普 500 同期</div>
       <div class="num num-lg" id="bBench">—</div></div>
-    <div class="card flat"><div class="label" style="margin-bottom:6px">最大回撤</div>
+    <div class="card flat"><div class="label" style="margin-bottom:6px">全周期最大回撤</div>
       <div class="num num-lg down" id="bMdd">—</div></div>
   </div>
 
   <div class="card" style="margin-top:16px;padding:20px 16px 8px">
     <div class="row" style="padding:0 10px 12px">
-      <div class="label" style="margin:0">累计收益增长 + 回撤</div>
+      <div class="label" style="margin:0">全周期净值与回撤</div>
       <div class="grow"></div>
       <div class="row" style="gap:6px" id="bRanges">
         <button class="btn sm primary" data-r="all">全部</button>
@@ -256,6 +256,15 @@ function renderStocks() {
     } else if (el) {
       el.textContent = '';
     }
+  } catch (e) {}
+
+  // 标题带上当前年度，明确这是「中期」口径
+  try {
+    const _y = (EQ && EQ.base_date) ? (+String(EQ.base_date).slice(0, 4) + 1) : null;
+    const _t = document.getElementById('curYearTitle');
+    if (_t && _y) _t.textContent = _y + ' 年当期表现';
+    const _l = document.getElementById('curYearRetLabel');
+    if (_l && _y) _l.textContent = _y + ' 年策略收益';
   } catch (e) {}
 
   if (EQ && EQ.points && EQ.points.length > 2) safe(drawRun, '当前持仓图', 'runChart');

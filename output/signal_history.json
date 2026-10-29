@@ -1,1 +1,168 @@
-[{"month": "2026-10", "date": "2026-10-29", "official_month": "2025-12", "official_year": 2026, "valid_from": "2026-01-01", "valid_to": "2026-12-31", "ranking_month": "2026-10", "rebalance_hint": "2026-12 最后一个交易日", "trend": "满仓", "exposure": 1.0, "spy": 772.31, "ma": 729.92, "action": "本月不换仓：持有 2026 年度组合（基准 2025-12）；大盘在 10 月均线（≥ 772 730），维持满仓", "official": [{"rank": 1, "ticker": "LITE", "name": "Lumentum", "sector": "Information Technology", "ret12": 3.3906, "weight": 0.3}, {"rank": 2, "ticker": "WDC", "name": "Western Digital", "sector": "Information Technology", "ret12": 2.8221, "weight": 0.3}, {"rank": 3, "ticker": "HOOD", "name": "Robinhood Markets", "sector": "Financials", "ret12": 2.0354, "weight": 0.4}], "picks": [{"rank": 1, "ticker": "MRNA", "name": "Moderna", "sector": "Health Care", "ret12": 6.3214, "weight": 0.4}, {"rank": 2, "ticker": "SNDK", "name": "Sandisk", "sector": "Information Technology", "ret12": 5.299, "weight": 0.3}, {"rank": 3, "ticker": "LITE", "name": "Lumentum", "sector": "Information Technology", "ret12": 3.0588, "weight": 0.3}], "bench": [{"rank": 1, "ticker": "MRNA", "sector": "Health Care", "ret12": 6.3214}, {"rank": 2, "ticker": "SNDK", "sector": "Information Technology", "ret12": 5.299}, {"rank": 3, "ticker": "LITE", "sector": "Information Technology", "ret12": 3.0588}, {"rank": 4, "ticker": "MU", "sector": "Information Technology", "ret12": 3.0385}, {"rank": 5, "ticker": "DELL", "sector": "Information Technology", "ret12": 1.8831}, {"rank": 6, "ticker": "STX", "sector": "Information Technology", "ret12": 1.5176}, {"rank": 7, "ticker": "VLO", "sector": "Energy", "ret12": 1.5169}, {"rank": 8, "ticker": "MRVL", "sector": "Information Technology", "ret12": 1.4939}, {"rank": 9, "ticker": "MPC", "sector": "Energy", "ret12": 1.4147}, {"rank": 10, "ticker": "HPE", "sector": "Information Technology", "ret12": 1.4046}], "change": "无变化", "track": {"start": "2026-10", "months": 0, "strategy": 0.0, "spy": 0.0, "expected": 0.02171, "excess_vs_spy": 0.0, "gap_vs_backtest": -0.02171}, "track_records": [{"date": "2026-10-27", "month": "2026-10", "picks": [{"ticker": "LITE", "weight": 0.3, "px": 818.1}, {"ticker": "WDC", "weight": 0.3, "px": 356.13}, {"ticker": "HOOD", "weight": 0.4, "px": 92.84}], "exposure": 1.0, "spy_px": 759.97, "ret": null, "spy_ret": null}], "incremental": true}]
+[
+  {
+    "month": "2026-10",
+    "date": "2026-10-29",
+    "official_month": "2025-12",
+    "official_year": 2026,
+    "valid_from": "2026-01-01",
+    "valid_to": "2026-12-31",
+    "ranking_month": "2026-10",
+    "rebalance_hint": "2026-12 最后一个交易日",
+    "trend": "满仓",
+    "exposure": 1.0,
+    "spy": 772.31,
+    "ma": 729.92,
+    "action": "本月不换仓：持有 2026 年度组合（基准 2025-12）；大盘在 10 月均线上方（772 ≥ 730），维持满仓",
+    "official": [
+      {
+        "rank": 1,
+        "ticker": "WDC",
+        "name": "Western Digital",
+        "sector": "Information Technology",
+        "ret12": 2.8455,
+        "weight": 0.3
+      },
+      {
+        "rank": 2,
+        "ticker": "MU",
+        "name": "Micron Technology",
+        "sector": "Information Technology",
+        "ret12": 2.3913,
+        "weight": 0.3
+      },
+      {
+        "rank": 3,
+        "ticker": "HOOD",
+        "name": "Robinhood Markets",
+        "sector": "Financials",
+        "ret12": 2.0354,
+        "weight": 0.4
+      }
+    ],
+    "picks": [
+      {
+        "rank": 1,
+        "ticker": "MRNA",
+        "name": "Moderna",
+        "sector": "Health Care",
+        "ret12": 6.8851,
+        "weight": 0.4
+      },
+      {
+        "rank": 2,
+        "ticker": "SNDK",
+        "name": "Sandisk",
+        "sector": "Information Technology",
+        "ret12": 6.0475,
+        "weight": 0.3
+      },
+      {
+        "rank": 3,
+        "ticker": "LITE",
+        "name": "Lumentum",
+        "sector": "Information Technology",
+        "ret12": 3.5344,
+        "weight": 0.3
+      }
+    ],
+    "bench": [
+      {
+        "rank": 1,
+        "ticker": "MRNA",
+        "sector": "Health Care",
+        "ret12": 6.8851
+      },
+      {
+        "rank": 2,
+        "ticker": "SNDK",
+        "sector": "Information Technology",
+        "ret12": 6.0475
+      },
+      {
+        "rank": 3,
+        "ticker": "LITE",
+        "sector": "Information Technology",
+        "ret12": 3.5344
+      },
+      {
+        "rank": 4,
+        "ticker": "MU",
+        "sector": "Information Technology",
+        "ret12": 3.3939
+      },
+      {
+        "rank": 5,
+        "ticker": "DELL",
+        "sector": "Information Technology",
+        "ret12": 2.0479
+      },
+      {
+        "rank": 6,
+        "ticker": "STX",
+        "sector": "Information Technology",
+        "ret12": 1.7277
+      },
+      {
+        "rank": 7,
+        "ticker": "MRVL",
+        "sector": "Information Technology",
+        "ret12": 1.6846
+      },
+      {
+        "rank": 8,
+        "ticker": "WDC",
+        "sector": "Information Technology",
+        "ret12": 1.6391
+      },
+      {
+        "rank": 9,
+        "ticker": "HPE",
+        "sector": "Information Technology",
+        "ret12": 1.4705
+      },
+      {
+        "rank": 10,
+        "ticker": "INTC",
+        "sector": "Information Technology",
+        "ret12": 1.3888
+      }
+    ],
+    "change": "无变化",
+    "track": {
+      "start": "2026-10",
+      "months": 0,
+      "strategy": 0.0,
+      "spy": 0.0,
+      "expected": 0.02171,
+      "excess_vs_spy": 0.0,
+      "gap_vs_backtest": -0.02171
+    },
+    "track_records": [
+      {
+        "date": "2026-10-29",
+        "month": "2026-10",
+        "picks": [
+          {
+            "ticker": "WDC",
+            "weight": 0.3,
+            "px": 396.42
+          },
+          {
+            "ticker": "MU",
+            "weight": 0.3,
+            "px": 983.23
+          },
+          {
+            "ticker": "HOOD",
+            "weight": 0.4,
+            "px": 91.43
+          }
+        ],
+        "exposure": 1.0,
+        "spy_px": 759.97,
+        "ret": null,
+        "spy_ret": null
+      }
+    ]
+  }
+]

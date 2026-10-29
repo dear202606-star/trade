@@ -57,7 +57,7 @@ def main():
         pg.goto(BASE + "portfolio.html", wait_until="networkidle")
         pg.wait_for_timeout(2500)
         body = pg.inner_text("body")
-        ck("策略账户" in body, "页面为「策略账户」")
+        ck("当期策略表现" in body or "年当期策略表现" in body, "页面为「当期策略表现」")
         ck(all(k not in body for k in ["计划投入", "一键分配", "添加", "同步码", "成本价"]),
            "无个人录入控件")
         nrow = pg.locator(".pr-row").count()

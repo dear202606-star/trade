@@ -72,6 +72,41 @@ def main():
           f"净值 {len(eq.get('points') or []) if eq else 0} 个交易日",
           "equity.json 净值样本不足")
 
+    # ---- 当年持仓锁定后不得漂移 ----
+    try:
+        _lp = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output", "official_locks.json")
+        if os.path.exists(_lp):
+            _locks = json.load(open(_lp, encoding="utf-8"))
+            _om = (sig or {}).get("official_month")
+            if _om in _locks:
+                _cur = [{"ticker": p["ticker"], "weight": p["weight"]} for p in (sig.get("official") or [])]
+                _want = _locks[_om]["holdings"]
+                check(_cur == _want,
+                      "%s 持仓与锁定一致（%s）" % (_om, "、".join(x["ticker"] for x in _want)),
+                      "持仓发生漂移：当前 %s / 锁定 %s" % (
+                          [x["ticker"] for x in _cur], [x["ticker"] for x in _want]))
+    except Exception as e:
+        warns.append("持仓锁定校验失败：%s" % e)
+
+    # ---- 防未来函数：正式持仓必须是「排名日」的标普 500 成分股 ----
+    try:
+        import calendar
+        import datafeed as _df
+        _m = _df.load_members()
+        _m["start_date"] = _m["start_date"].astype(str)
+        _m["end_date"] = _m["end_date"].fillna("2099-12-31").astype(str)
+        om = (sig or {}).get("official_month") or ""
+        if om:
+            y, mm = int(om[:4]), int(om[5:7])
+            day = "%04d-%02d-%02d" % (y, mm, calendar.monthrange(y, mm)[1])
+            live = set(_m[(_m.start_date <= day) & (_m.end_date >= day)]["ticker"])
+            ghosts = [p["ticker"] for p in (sig.get("official") or []) if p["ticker"] not in live]
+            check(not ghosts,
+                  "正式持仓均为 %s 成分股" % om,
+                  "以下持仓在 %s 时还不是成分股（未来函数）：%s" % (om, ",".join(ghosts)))
+    except Exception as e:
+        warns.append("成分股时点校验失败：%s" % e)
+
     # ---- 理论账户：加权建仓收益必须等于净值曲线 ----
     try:
         e = load("equity.json") or {}

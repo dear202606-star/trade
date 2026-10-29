@@ -28,6 +28,25 @@ FINAL_N = 3
 SECTOR_WEIGHT_CAP = 0.60
 
 
+_MEMBERS = None
+
+
+def members_at(ym):
+    """返回 yyyy-mm 月末属于标普 500 的股票集合（时点成分，防未来函数）"""
+    global _MEMBERS
+    if _MEMBERS is None:
+        import datafeed
+        m = datafeed.load_members()
+        m["start_date"] = m["start_date"].astype(str)
+        m["end_date"] = m["end_date"].fillna("2099-12-31").astype(str)
+        _MEMBERS = m
+    import calendar
+    y, mm = int(ym[:4]), int(ym[5:7])
+    day = "%04d-%02d-%02d" % (y, mm, calendar.monthrange(y, mm)[1])
+    m = _MEMBERS
+    return set(m[(m["start_date"] <= day) & (m["end_date"] >= day)]["ticker"].unique().tolist())
+
+
 def nice_ratio(k, tol=0.04):
     best = min(NICE, key=lambda z: abs(z - k))
     return best if abs(best - k) / k <= tol else None
@@ -130,8 +149,11 @@ def ranking_at(data, months, sp, m):
         return None, 0
     base = months[i - 12]
     rows = []
+    live = members_at(m)          # 当时属于标普 500 的股票
     for tk, df in data.items():
         if tk == "SPY":
+            continue
+        if tk not in live:        # 排名日还没纳入的股票不能入选
             continue
         if base not in df.index or m not in df.index:
             continue
@@ -185,12 +207,21 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--workers", type=int, default=8)
+    ap.add_argument("--rerank", action="store_true")
     args = ap.parse_args()
 
     today = (dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=8)).date().isoformat()
     print("[1/5] 获取标普500 成分股 ...", flush=True)
     sp = fetch_sp500()
     tickers = sp.ticker.tolist()
+    # 补上排名时需要的历史时点成员（当前名单可能新增/剔除过）
+    try:
+        _prev_y = dt.datetime.now(dt.timezone.utc).year - 1
+        for _ym in ("%d-12" % _prev_y, "%d-01" % _prev_y):
+            tickers += [t for t in members_at(_ym) if t not in tickers]
+    except Exception as _e:
+        print("      WARN 时点成分表不可用：%s" % _e, flush=True)
+    tickers = list(dict.fromkeys(tickers))
     if args.limit:
         tickers = tickers[: args.limit]
     print(f"      {len(tickers)} 只", flush=True)
@@ -256,6 +287,16 @@ def main():
             except Exception:
                 r, _src = None, None
             if r and len(r) >= 14:
+                # 与回测同一套除权来源：market_data 拿原始序列，再用 splits.json 统一复权
+                try:
+                    import datafeed as _df
+                    _bars = {x[0]: (x[1], x[2]) for x in r}
+                    _fixed = _df._reapply(t, _bars)
+                    if _fixed:
+                        _vol = {x[0]: (x[3] if len(x) > 3 else 0) for x in r}
+                        r = [[ym, v[0], v[1], _vol.get(ym, 0)] for ym, v in _fixed.items()]
+                except Exception:
+                    pass
                 data[t] = month_end_series(r)
             else:
                 fail.append(t)

@@ -33,7 +33,7 @@
          background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;
          padding:18px 20px;text-decoration:none">
         <div class="row" style="justify-content:space-between;align-items:baseline">
-          <div class="label" style="margin:0">策略累计收益</div>
+          <div class="label" style="margin:0">当期策略收益</div>
           <span style="font-size:11px;color:var(--txt-3)" id="eqPeriod">—</span>
         </div>
         <div class="num num-lg" id="eqRet" style="margin-top:6px">—</div>
@@ -154,7 +154,7 @@
             '<div class="num num-md">' + DSH.money(mvAll) + '</div></div>' +
           '<div class="card flat"><div class="label" style="margin-bottom:6px">本金</div>' +
             '<div class="num num-md">' + DSH.money(amt) + '</div></div>' +
-          '<div class="card flat"><div class="label" style="margin-bottom:6px">累计盈亏</div>' +
+          '<div class="card flat"><div class="label" style="margin-bottom:6px">当期累计盈亏</div>' +
             '<div class="num num-md ' + DSH.cls(pnlAll) + '">' + DSH.money(pnlAll) + '</div></div>' +
           '<div class="card flat"><div class="label" style="margin-bottom:6px">持有</div>' +
             '<div class="num num-md">' + parts.length + ' 只</div></div>' +

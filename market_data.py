@@ -49,10 +49,27 @@ def load_splits():
 
 
 def save_splits():
+    """合并写入：保留人工维护的除权记录，避免被自动检测结果覆盖
+
+    splits.json 是权威公司行为表（含分拆/换股等自动检测不到的），
+    这里只追加本次检测到的新条目，绝不整体覆盖。
+    """
     try:
         os.makedirs(os.path.dirname(SPLITS_FILE), exist_ok=True)
+        cur = {}
+        if os.path.exists(SPLITS_FILE):
+            try:
+                cur = json.load(open(SPLITS_FILE, encoding="utf-8")) or {}
+            except Exception:
+                cur = {}
+        for t, lst in (_SPLIT_CACHE or {}).items():
+            have = cur.setdefault(t, [])
+            for item in lst:
+                if not any(abs(item[0] - x[0]) < 86400 for x in have):
+                    have.append(item)
+            have.sort()
         with open(SPLITS_FILE, "w", encoding="utf-8") as f:
-            json.dump(_SPLIT_CACHE, f, ensure_ascii=False, separators=(",", ":"))
+            json.dump(cur, f, ensure_ascii=False, separators=(",", ":"))
     except Exception:
         pass
 

@@ -73,7 +73,7 @@ def main():
         pg.goto(BASE + "portfolio.html", wait_until="networkidle", timeout=60000)
         pg.wait_for_timeout(2000)
         txt = pg.content()
-        check("策略账户" in txt, "页面为「策略账户」", "页面标题不符")
+        check("当期策略表现" in txt, "页面为「当期策略表现」", "页面标题不符")
         check(all(k not in txt for k in ["计划投入", "一键分配", "添加持仓", "成本价", "同步码"]),
               "个人录入相关控件已移除", "仍有个人录入控件")
         nrow = pg.locator(".pr-row").count()
@@ -108,7 +108,7 @@ def main():
         pg.goto(BASE + "strategy.html", wait_until="networkidle", timeout=60000)
         pg.wait_for_timeout(1800)
         c = pg.content()
-        for k in ["累计收益", "年化收益", "标普 500 同期", "最大回撤", "逐年记录", "个股贡献"]:
+        for k in ["全周期累计收益", "全周期年化", "标普 500 同期", "全周期最大回撤", "逐年记录", "个股贡献"]:
             check(k in c, "策略页含「%s」" % k, "策略页缺少「%s」" % k)
         check("对冲研究" not in c, "对冲研究已移除", "对冲研究仍存在")
         check("数据质量" not in c, "数据质量已移除", "数据质量仍存在")
