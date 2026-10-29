@@ -83,6 +83,30 @@ def main():
           f"净值 {len(eq.get('points') or []) if eq else 0} 个交易日",
           "equity.json 净值样本不足")
 
+    # ---- 权重形态：每年必须是「等权」或「同行业 30/30 + 40」----
+    try:
+        _sh = load("strategy_history.json") or {}
+        _bad_w = []
+        for _r in (_sh.get("years") or []):
+            _hs = _r.get("holdings") or []
+            if len(_hs) != 3:
+                _bad_w.append("%s 持仓数 %d" % (_r.get("year"), len(_hs)))
+                continue
+            _w = sorted(round(x.get("weight", 0), 4) for x in _hs)
+            _eq = all(abs(x - 1 / 3) < 0.01 for x in _w)
+            _cap = abs(_w[0] - 0.3) < 0.01 and abs(_w[1] - 0.3) < 0.01 and abs(_w[2] - 0.4) < 0.01
+            if not (_eq or _cap):
+                _bad_w.append("%s 权重 %s" % (_r.get("year"), _w))
+            if _cap:
+                _secs = [x.get("sector") for x in _hs]
+                _dup = [k for k in set(_secs) if _secs.count(k) >= 2]
+                if not _dup:
+                    _bad_w.append("%s 30/30/40 但无同行业" % _r.get("year"))
+        check(not _bad_w, "权重形态合规（等权 / 同行业 30-30-40）",
+              "异常年份：%s" % _bad_w[:3])
+    except Exception as e:
+        warns.append("权重形态校验失败：%s" % e)
+
     # ---- 跨年链路：任意年份都必须能自动切换 ----
     try:
         import simulate_rollover as _sim
