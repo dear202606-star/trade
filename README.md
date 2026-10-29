@@ -36,7 +36,6 @@
 |---|---|
 | ① 今天该做什么 | 结论、今日涨跌、大盘开关 |
 | ② 当期策略累计表现 | 2026 年收益、本金切换、市值/盈亏/成本/仓位 |
-| ③ 持仓明细 | 代码、权重、建仓价、现价、涨跌、市值、盈亏 |
 | ③′ 明年可能持仓 | 年初至今涨幅前 3（实时预览，年末才最终确定） |
 | ④ 总体策略至今表现 | 2010–2025 累计、年化、最大回撤、胜率、双曲线 |
 | ⑤ 历史与回测 | 逐年持仓、收益、回撤 |
@@ -78,7 +77,7 @@ python simulate_rollover.py # 跨年仿真：任意日期推导全链路
 |---|---|
 | 数据源 | 新浪（主）+ Yahoo（交叉核对，不可达时降级并记录） |
 | 公司与行业 | `output/splits.json`（合并写入，不被覆盖）、`static/sector_overrides.json`（退市票行业） |
-| 自检 | 29 项硬校验：无 NaN、3 只持仓、权重和 1、行业 ≤60%、曲线=逐年复利、持仓锁定一致、持仓为排名日成分股、账户=净值 |
+| 自检 | 48 项硬校验：无 NaN、3 只持仓、权重和 1、行业 ≤60%、曲线=逐年复利、持仓锁定一致、持仓为排名日成分股、账户=净值 |
 | 前端 | 页面内不变量校验（市值=Σ股数×价、盈亏=市值−成本），失败即页面提示 |
 | 测试 | `ui_test.py`(34) / `e2e_check.py`(20) / `consistency_check.py`(14) / `live_audit.py`(20) |
 
@@ -100,7 +99,7 @@ python simulate_rollover.py # 跨年仿真：任意日期推导全链路
 ```
 ├─ 数据管线      quotes.py  monthly_pick.py  equity.py  strategy_history.py
 ├─ 数据层        market_data.py（双源+复权）  datafeed.py（缓存/成分/行业）
-├─ 站点构建      site_build.py  dashboard.py（历史信号页）
+├─ 站点构建      site_build.py  dashboard.py（保留，页面已并入单页）
 ├─ 校验          selftest.py（硬门禁）  quality_gate.py  crosscheck.py
 ├─ 测试          ui_test.py  e2e_check.py  consistency_check.py  live_audit.py  link_check.py
 ├─ 静态资源      site_src/（html/css/js）  static/（成分表、行业覆盖）

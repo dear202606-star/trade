@@ -158,7 +158,7 @@
   font-size:11.5px;color:var(--txt-3)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend .dot{width:8px;height:8px;border-radius:2px;display:inline-block}
-.legend .dot.gold{background:#F2C46B}
+.legend .dot.red{background:#FF6B72}
 .legend .dot.grey{background:#6F7D92}
 
 /* 卡片标题统一 */

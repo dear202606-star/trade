@@ -542,12 +542,21 @@
     // X 轴标签
     const pts = series[0].pts;
     const step = Math.max(1, Math.floor(pts.length / 6));
-    for (let i = step > 1 ? step : 1; i < pts.length; i += step) {
+    const xOnly = !!opts.xOnly;
+    // 只在有标签的点打刻度（如每年 1 月），并控制密度避免重叠
+    let idxs = [];
+    for (let i = 0; i < pts.length; i++) {
+      if (!xOnly || pts[i].label) idxs.push(i);
+    }
+    if (!xOnly) idxs = idxs.filter((i) => i >= step);
+    const stride = Math.max(1, Math.ceil(idxs.length / 6));
+    idxs.forEach((i, k) => {
+      if (k % stride) return;
       const d0 = pts[i].d;
       const lab = pts[i].label || (d0.slice(4, 6) + "/" + d0.slice(6, 8));
       svg += '<text x="' + X(i).toFixed(1) + '" y="' + (h - 8) + '" fill="#6F7D92" font-size="' + FS + '" text-anchor="middle">' +
         lab + "</text>";
-    }
+    });
     svg += "</svg>";
     return svg;
   };

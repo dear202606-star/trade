@@ -78,9 +78,9 @@
     var q = (Q && Q.quotes) || {};
     var bdTxt = (EQ && EQ.base_date)
       ? EQ.base_date.slice(0, 4) + "-" + EQ.base_date.slice(4, 6) + "-" + EQ.base_date.slice(6, 8) : "—";
-    $("posTitle").textContent = (y ? y + " 年持仓" : "持仓");
+    $("posTitle").textContent = "当前持仓明细";
     var pm = $("posMeta");
-    if (pm) pm.textContent = bdTxt && y ? ((y - 1) + "-12 选出 · 建仓 " + bdTxt) : "";
+    if (pm) pm.textContent = (y ? y + " 年 · " : "") + (y ? (y - 1) + "-12 选出 · " : "") + (bdTxt ? "建仓 " + bdTxt : "");
     $("posRows").innerHTML = c.rows.map(function (r) {
       var qq = q[r.ticker] || {};
       var eraw = (r.entry_raw != null) ? r.entry_raw : r.entry;
@@ -97,8 +97,8 @@
         '<div class="r">' + Math.round(r.weight * 100) + '%</div>' +
         '<div class="r">' + eraw.toFixed(2) + '</div>' +
         '<div class="r">' + liveRaw.toFixed(2) + '</div>' +
-        '<div class="r ' + cls(liveAdj - r.entry) + '">' + pct2(liveAdj / r.entry - 1) + '</div>' +
         '<div class="r">' + yuan(mvAdj) + '</div>' +
+        '<div class="r ' + cls(liveAdj - r.entry) + '">' + pct2(liveAdj / r.entry - 1) + '</div>' +
         '<div class="r ' + cls(pnlAdj) + '">' + yuan(pnlAdj) + '</div>' +
         '</div>';
     }).join("");
@@ -139,11 +139,11 @@
     return t || "20200101";
   }
 
-  /* 月频标签：26/01 */
-  function ymLab(d) {
+  /* 年度刻度：只在每年 1 月打点，显示 4 位年份 */
+  function yearLab(d) {
     var t = String(d || "").replace(/[^0-9]/g, "");
     if (t.length < 6) return "";
-    return t.slice(2, 4) + "/" + t.slice(4, 6);
+    return t.slice(4, 6) === "01" ? t.slice(0, 4) : "";
   }
 
   function drawAllChart() {
@@ -151,9 +151,9 @@
     if (!box || !CV || !CV.points || CV.points.length < 4) return;
     try {
       box.innerHTML = DSH.lineChart([
-        { name: "策略", color: "#F2C46B", pts: CV.points.map(function (p) { return { d: ymd(p.d), y: p.s, label: ymLab(p.d) }; }) },
-        { name: "标普500", color: "#6F7D92", pts: CV.points.map(function (p) { return { d: ymd(p.d), y: p.b, label: ymLab(p.d) }; }) }
-      ], { h: 210, w: 420, fs: 14, l: 46, b: 34, sw: 2.4, log: true,
+        { name: "策略", color: "#FF6B72", pts: CV.points.map(function (p) { return { d: ymd(p.d), y: p.s, label: yearLab(p.d) }; }) },
+        { name: "标普500", color: "#6F7D92", pts: CV.points.map(function (p) { return { d: ymd(p.d), y: p.b, label: yearLab(p.d) }; }) }
+      ], { h: 210, w: 420, fs: 14, l: 46, b: 34, sw: 2.4, log: true, xOnly: true,
         fmt: function (v) { return v >= 10 ? Math.round(v) + "×" : v.toFixed(1) + "×"; } });
     } catch (e) { box.innerHTML = ""; }
   }
