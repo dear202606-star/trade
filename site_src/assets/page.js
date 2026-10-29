@@ -47,6 +47,7 @@
       var c = shares * p.entry, v = shares * p.last;
       mv += v; cost += c;
       rows.push({ ticker: p.ticker, weight: p.weight, entry: p.entry, last: p.last,
+        entry_raw: p.entry_raw, last_raw: p.last_raw,
         shares: shares, mv: v, cost: c });
     });
     var cash = amt * (1 - exposure);
@@ -74,21 +75,27 @@
     $("tExp").textContent = Math.round(c.exposure * 100) + "%";
 
     var q = (Q && Q.quotes) || {};
-    $("posNote").textContent = "建仓 " + (EQ && EQ.base_date
-      ? EQ.base_date.slice(0, 4) + "-" + EQ.base_date.slice(4, 6) + "-" + EQ.base_date.slice(6, 8) : "—");
+    var bdTxt = (EQ && EQ.base_date)
+      ? EQ.base_date.slice(0, 4) + "-" + EQ.base_date.slice(4, 6) + "-" + EQ.base_date.slice(6, 8) : "—";
+    $("posNote").textContent = (y ? (y - 1) + "-12 选出 · " + y + " 全年持有 · " : "") + "建仓 " + bdTxt;
     $("posRows").innerHTML = c.rows.map(function (r) {
       var qq = q[r.ticker] || {};
-      var live = (isFinite(qq.p) && qq.p > 0) ? qq.p : r.last;
-      var pnl = r.shares * live - r.cost;
+      var eraw = (r.entry_raw != null) ? r.entry_raw : r.entry;
+      var lraw = (r.last_raw != null) ? r.last_raw : r.last;
+      // 实时价（原始口径）→ 换算成复权价用于市值/盈亏，拆股也连续
+      var liveRaw = (isFinite(qq.p) && qq.p > 0) ? qq.p : lraw;
+      var liveAdj = (eraw && r.entry) ? (liveRaw / eraw) * r.entry : r.last;
+      var mvAdj = r.shares * liveAdj;
+      var pnlAdj = mvAdj - r.cost;
       return '<div class="pr-row">' +
         '<div><div class="tk">' + DSH.esc(r.ticker) + '</div>' +
-          '<div class="nm">建仓 ' + r.entry.toFixed(2) + ' · 现价 ' + live.toFixed(2) + '</div></div>' +
+          '<div class="nm">建仓 ' + eraw.toFixed(2) + ' · 现价 ' + liveRaw.toFixed(2) + '</div></div>' +
         '<div class="r">' + Math.round(r.weight * 100) + '%</div>' +
-        '<div class="r">' + r.entry.toFixed(2) + '</div>' +
-        '<div class="r">' + live.toFixed(2) + '</div>' +
-        '<div class="r ' + cls(live - r.entry) + '">' + pct2(live / r.entry - 1) + '</div>' +
-        '<div class="r">' + yuan(r.shares * live) + '</div>' +
-        '<div class="r ' + cls(pnl) + '">' + yuan(pnl) + '</div>' +
+        '<div class="r">' + eraw.toFixed(2) + '</div>' +
+        '<div class="r">' + liveRaw.toFixed(2) + '</div>' +
+        '<div class="r ' + cls(liveAdj - r.entry) + '">' + pct2(liveAdj / r.entry - 1) + '</div>' +
+        '<div class="r">' + yuan(mvAdj) + '</div>' +
+        '<div class="r ' + cls(pnlAdj) + '">' + yuan(pnlAdj) + '</div>' +
         '</div>';
     }).join("");
   }

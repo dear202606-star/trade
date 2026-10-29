@@ -84,10 +84,12 @@ def main():
 
     tickers = [p["ticker"] for p in official] + ["SPY"]
     data = {}
+    raw_data = {}
     for t in tickers:
         d = daily_closes(t)
         if d:
-            # I3：收益序列用复权价（拆股不至于画出断崖）；展示仍用原始价
+            raw_data[t] = d
+            # I3：收益序列用复权价（拆股不至于画出断崖）；展示仍用原始成交价
             try:
                 import datafeed as _df
                 data[t] = _df.adjust_daily(t, d)
@@ -187,18 +189,33 @@ def main():
     last_day = pts[-1]["d"]
     for p in official:
         t = p["ticker"]
-        bd, bp = base_px.get(t, (None, None))
-        px = data[t].get(last_day)
-        if px is None:
-            cand = [k for k in sorted(data[t]) if k <= last_day]
-            px = data[t][cand[-1]] if cand else None
+        raw = raw_data.get(t) or data[t]
+        adj = data[t]
+        # 复权价：用于股数与市值（拆股后仍连续）
+        cadj = [k for k in sorted(adj) if k <= base_day]
+        bd = cadj[-1] if cadj else None
+        bp_adj = adj[bd] if bd else None
+        px_adj = adj.get(last_day)
+        if px_adj is None:
+            c2 = [k for k in sorted(adj) if k <= last_day]
+            px_adj = adj[c2[-1]] if c2 else None
+        # 原始价：用于展示（用户实际成交/看到的价格）
+        craw = [k for k in sorted(raw) if k <= base_day]
+        bp_raw = raw[craw[-1]] if craw else None
+        px_raw = raw.get(last_day)
+        if px_raw is None:
+            c3 = [k for k in sorted(raw) if k <= last_day]
+            px_raw = raw[c3[-1]] if c3 else None
         out["position"].append({
             "ticker": t,
             "weight": p["weight"],
             "entry_date": bd,
-            "entry": round(bp, 4) if bp else None,
+            "entry": round(bp_adj, 4) if bp_adj else None,
+            "entry_raw": round(bp_raw, 4) if bp_raw else None,
+            "last_raw": round(px_raw, 4) if px_raw else None,
+            "entry": round(bp_adj, 4) if bp_adj else None,
             "last_date": last_day,
-            "last": round(px, 4) if px else None,
+            "last": round(px_adj, 4) if px_adj else None,
         })
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
