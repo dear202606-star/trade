@@ -217,6 +217,13 @@ def main():
     if hist:
         with open(os.path.join(DATA, "signal.json"), "w", encoding="utf-8") as f:
             json.dump(with_validity(hist[0]), f, ensure_ascii=False)
+    # 中文名映射（行情源缺中文名时使用）
+    try:
+        import shutil as _sh
+        _sh.copy(os.path.join(BASE, "static", "name_zh.json"),
+                 os.path.join(DATA, "name_zh.json"))
+    except Exception as _e:
+        print("WARN 中文名映射复制失败：%s" % _e)
     # ---- 健康状况（供页面显示红条，避免"停更却无人知"）----
     try:
         hq = json.load(open(os.path.join(DOCS, "data", "quotes.json"), encoding="utf-8"))

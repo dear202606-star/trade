@@ -131,3 +131,6 @@
 .yr-row{font-size:14px}
 .chip{font-size:12.5px;padding:4px 9px}
 .chip i{font-size:11.5px}
+
+/* 代码旁的中文名 */
+.nm-inline{font-size:11.5px;font-weight:500;color:var(--txt-3);margin-left:6px;letter-spacing:0}

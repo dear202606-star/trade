@@ -1,7 +1,7 @@
 /* 单页渲染：一次加载，全部可见，无 Tab、无隐藏内容 */
 (function () {
   var $ = function (id) { return document.getElementById(id); };
-  var EQ = null, SIG = null, Q = null, CV = null, SH = null, PV = null;
+  var EQ = null, SIG = null, Q = null, CV = null, SH = null, PV = null, ZH = {};
   var amt = +(localStorage.getItem("dsh.amt") || 100000);
 
   function yuan(v) {
@@ -35,8 +35,7 @@
     }
 
     $("switchTxt").textContent = trend;
-    $("switchSub").textContent = "SPY " + (SIG && SIG.spy ? SIG.spy.toFixed(0) : "—") +
-      " / " + (SIG && SIG.ma ? SIG.ma.toFixed(0) : "—");
+    $("switchSub").textContent = "SPY " + spyNow() + " / 均线 " + (SIG && SIG.ma ? SIG.ma.toFixed(0) : "—");
   }
 
   /* ---------- ② 当期账户 ---------- */
@@ -91,7 +90,8 @@
       var mvAdj = r.shares * liveAdj;
       var pnlAdj = mvAdj - r.cost;
       return '<div class="pr-row">' +
-        '<div><div class="tk">' + DSH.esc(r.ticker) + '</div>' +
+        '<div><div class="tk">' + DSH.esc(r.ticker) +
+          '<span class="nm-inline"> ' + DSH.esc(zhName(r.ticker, "")) + '</span></div>' +
           '<div class="nm">建仓 ' + eraw.toFixed(2) + '</div>' +
           '<div class="nm">现价 ' + liveRaw.toFixed(2) + '</div></div>' +
         '<div class="r">' + Math.round(r.weight * 100) + '%</div>' +
@@ -111,6 +111,25 @@
       box.innerHTML = DSH.spark(EQ.points.map(function (p) { return { y: p.s }; }),
         { h: 118, color: "#F2C46B" });
     } catch (e) { box.innerHTML = ""; }
+  }
+
+  /* 全站统一 SPY 价格：优先实时行情，其次用信号里的收盘价 */
+  function spyNow() {
+    var q = (Q && Q.quotes && Q.quotes.SPY) || null;
+    if (q && isFinite(q.p) && q.p > 0) return q.p.toFixed(0);
+    if (SIG && isFinite(SIG.spy)) return Number(SIG.spy).toFixed(0);
+    return "—";
+  }
+
+  /* 中文名优先（行情源带中文），否则回退英文 */
+  function zhName(ticker, fallback) {
+    var q = (Q && Q.quotes && Q.quotes[ticker]) || null;
+    var nm = q && q.name ? String(q.name).trim() : "";
+    if (/[\u4e00-\u9fff]/.test(nm)) return nm;             // 行情源自带中文
+    if (ZH && ZH[ticker]) return ZH[ticker];                // 本地中文映射
+    var fb = fallback ? String(fallback).trim() : "";
+    if (fb && fb.toUpperCase() !== String(ticker).toUpperCase()) return fb;
+    return nm && nm.toUpperCase() !== String(ticker).toUpperCase() ? nm : "";
   }
 
   /* 统一日期为 YYYYMMDD（月频数据补 01） */
@@ -163,7 +182,7 @@
       return '<div class="pv-row">' +
         '<div class="pv-rank">' + (r.rank || "") + '</div>' +
         '<div class="pv-main"><div class="tk">' + DSH.esc(r.ticker) + '</div>' +
-          '<div class="nm">' + DSH.esc(r.name || "") + '</div></div>' +
+          '<div class="nm">' + DSH.esc(zhName(r.ticker, r.name)) + '</div></div>' +
         '<div class="pv-sec">' + DSH.esc(sec) + '</div>' +
         '<div class="pv-val ' + cls(r.ytd) + '">' + pct2(r.ytd, 1) + '</div>' +
         '</div>';
@@ -235,9 +254,9 @@
       var arr = await Promise.all([
         DSH.json("equity", null), DSH.json("signal", null), DSH.json("quotes", {}),
         DSH.json("curve", null), DSH.json("strategy_history", null),
-        DSH.json("preview", null)
+        DSH.json("preview", null), DSH.json("name_zh", {})
       ]);
-      EQ = arr[0]; SIG = arr[1]; Q = arr[2]; CV = arr[3]; SH = arr[4]; PV = arr[5];
+      EQ = arr[0]; SIG = arr[1]; Q = arr[2]; CV = arr[3]; SH = arr[4]; PV = arr[5]; ZH = arr[6] || {};
     } catch (e) {}
 
     renderTick();

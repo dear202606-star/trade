@@ -130,7 +130,7 @@ def data(name):
 
 def main():
     # 1. 单页结构
-    page("", ["今天该做什么", "策略收益", "逐年记录", "可能持仓"])
+    page("", ["今天该做什么", "策略收益", "回测效果", "可能持仓", "静待花开"])
 
     # 2. 数据
     sig = data("signal.json")
@@ -204,9 +204,9 @@ def main():
             bad("strategy_history 缺 summary")
         ys = sh.get("years") or []
         if len(ys) >= 8:
-            ok("逐年记录 %d 年" % len(ys))
+            ok("回测效果 %d 年" % len(ys))
         else:
-            bad("逐年记录不足：%d 年" % len(ys))
+            bad("回测效果不足：%d 年" % len(ys))
         for r in ys:
             if r.get("ret") is not None and abs(r["ret"]) > 5:
                 bad("%d 年收益异常：%.0f%%" % (r["year"], r["ret"] * 100))
