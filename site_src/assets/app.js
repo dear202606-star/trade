@@ -510,7 +510,7 @@
   /* ---------- 图表：带坐标的折线 ---------- */
   DSH.lineChart = function (series, opts) {
     opts = opts || {};
-    const w = opts.w || 900, h = opts.h || 320, FS = opts.fs || 11, L = opts.l || 54, R = 16, T = 16, B = 28;
+    const w = opts.w || 900, h = opts.h || 320, FS = opts.fs || 11, L = opts.l || 54, R = opts.r || 16, T = opts.t || 16, B = opts.b || 28, SW = opts.sw || 2;
     const all = series.reduce((a, s) => a.concat(s.pts.map((p) => p.y)), []);
     if (!all.length) return "";
     let min = Math.min.apply(null, all), max = Math.max.apply(null, all);
@@ -523,7 +523,7 @@
     const n = Math.max.apply(null, series.map((s) => s.pts.length));
     const X = (i) => L + (i / Math.max(1, n - 1)) * (w - L - R);
     const Y = (v) => T + (1 - ((logScale ? Math.log(v) : v) - min) / (max - min || 1)) * (h - T - B);
-    let svg = '<svg viewBox="0 0 ' + w + " " + h + '" style="width:100%;height:auto;display:block">';
+    let svg = '<svg viewBox="0 0 ' + w + " " + h + '" shape-rendering="geometricPrecision" style="width:100%;height:auto;display:block">';
     // 网格 + Y 轴
     for (let k = 0; k <= 4; k++) {
       const rawV = logScale ? Math.exp(min + (max - min) * k / 4) : (min + (max - min) * k / 4);
@@ -542,7 +542,7 @@
     // X 轴标签
     const pts = series[0].pts;
     const step = Math.max(1, Math.floor(pts.length / 6));
-    for (let i = 0; i < pts.length; i += step) {
+    for (let i = step > 1 ? step : 1; i < pts.length; i += step) {
       const d0 = pts[i].d;
       const lab = pts[i].label || (d0.slice(4, 6) + "/" + d0.slice(6, 8));
       svg += '<text x="' + X(i).toFixed(1) + '" y="' + (h - 8) + '" fill="#6F7D92" font-size="' + FS + '" text-anchor="middle">' +

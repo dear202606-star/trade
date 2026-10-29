@@ -145,3 +145,18 @@
   .logo .en{font-size:14.5px}
   .logo .zh{font-size:11.5px;letter-spacing:.12em;padding-left:8px}
 }
+
+/* 今日 / 大盘开关：等高等宽、字号统一、说明不换行 */
+.now-grid{align-items:stretch}
+.cell{display:flex;flex-direction:column;justify-content:flex-start;min-height:112px}
+.cell .num{font-size:27px;line-height:1.12}
+.cell .sub{font-size:12px;white-space:nowrap;color:var(--txt-2);margin-top:10px}
+.cell .label{margin-bottom:10px}
+
+/* 图例 */
+.legend{display:flex;gap:18px;justify-content:flex-end;margin-top:12px;
+  font-size:11.5px;color:var(--txt-3)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend .dot{width:8px;height:8px;border-radius:2px;display:inline-block}
+.legend .dot.gold{background:#F2C46B}
+.legend .dot.grey{background:#6F7D92}

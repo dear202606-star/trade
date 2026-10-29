@@ -35,7 +35,8 @@
     }
 
     $("switchTxt").textContent = trend;
-    $("switchSub").textContent = "SPY " + spyNow() + " / 均线 " + (SIG && SIG.ma ? SIG.ma.toFixed(0) : "—");
+    $("switchSub").textContent = "SPY " + spyNow() + " / " +
+      (SIG && SIG.ma ? SIG.ma.toFixed(0) : "—");
   }
 
   /* ---------- ② 当期账户 ---------- */
@@ -90,8 +91,7 @@
       var mvAdj = r.shares * liveAdj;
       var pnlAdj = mvAdj - r.cost;
       return '<div class="pr-row">' +
-        '<div><div class="tk">' + DSH.esc(r.ticker) +
-          '<span class="nm-inline"> ' + DSH.esc(zhName(r.ticker, "")) + '</span></div>' +
+        '<div><div class="tk">' + DSH.esc(r.ticker) + '</div>' +
           '<div class="nm">建仓 ' + eraw.toFixed(2) + '</div>' +
           '<div class="nm">现价 ' + liveRaw.toFixed(2) + '</div></div>' +
         '<div class="r">' + Math.round(r.weight * 100) + '%</div>' +
@@ -153,7 +153,8 @@
       box.innerHTML = DSH.lineChart([
         { name: "策略", color: "#F2C46B", pts: CV.points.map(function (p) { return { d: ymd(p.d), y: p.s, label: ymLab(p.d) }; }) },
         { name: "标普500", color: "#6F7D92", pts: CV.points.map(function (p) { return { d: ymd(p.d), y: p.b, label: ymLab(p.d) }; }) }
-      ], { h: 230, log: true, w: 460, fs: 20, fmt: function (v) { return v >= 10 ? Math.round(v) + "×" : v.toFixed(1) + "×"; } });
+      ], { h: 210, w: 420, fs: 14, l: 46, b: 34, sw: 2.4, log: true,
+        fmt: function (v) { return v >= 10 ? Math.round(v) + "×" : v.toFixed(1) + "×"; } });
     } catch (e) { box.innerHTML = ""; }
   }
 
@@ -182,7 +183,7 @@
       return '<div class="pv-row">' +
         '<div class="pv-rank">' + (r.rank || "") + '</div>' +
         '<div class="pv-main"><div class="tk">' + DSH.esc(r.ticker) + '</div>' +
-          '<div class="nm">' + DSH.esc(zhName(r.ticker, r.name)) + '</div></div>' +
+          '</div>' +
         '<div class="pv-sec">' + DSH.esc(sec) + '</div>' +
         '<div class="pv-val ' + cls(r.ytd) + '">' + pct2(r.ytd, 1) + '</div>' +
         '</div>';
