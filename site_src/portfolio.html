@@ -52,16 +52,16 @@
 
   <!-- 年度持仓 -->
   <div class="card" style="margin-top:16px;padding:20px 24px">
-    <div class="row" style="align-items:baseline;margin-bottom:14px">
-      <div class="label" style="margin:0" id="sigTitle">本年持仓</div>
-      <span class="sub" id="sigValid" style="margin-left:10px"></span>
+    <div class="row" style="align-items:center;margin-bottom:16px;gap:10px">
+      <div class="label" style="margin:0;font-size:15px;color:var(--txt)" id="sigTitle">本年持仓</div>
+      <span class="pill on" id="sigValid" style="font-size:11.5px"></span>
       <div class="grow"></div>
       <a href="signals.html" style="font-size:12px;color:var(--txt-3);text-decoration:none">历史信号 →</a>
     </div>
     <div class="row" style="align-items:flex-start;gap:18px">
-      <div style="min-width:130px">
-        <div class="num num-md" id="sigMonth" style="color:var(--gold)">—</div>
-        <div class="row" style="gap:6px;margin-top:8px" id="sigMeta"></div>
+      <div style="min-width:120px">
+        <div class="row" style="gap:6px" id="sigMeta"></div>
+        <div class="sub" id="sigDates" style="margin-top:8px;font-size:11.5px;line-height:1.7"></div>
       </div>
       <div class="grow" id="sigPicks" style="display:flex;gap:10px;flex-wrap:wrap"></div>
     </div>
@@ -163,16 +163,18 @@
     $('tPnlPct').innerHTML = '<span class="' + DSH.cls(c.pnlPct) + '">' + DSH.pct(c.pnlPct) +
       '</span> ｜ 本金 ' + money(c.amt, 0);
 
-    if (c.dayPct == null) {
+    const td = DSH.today(SIG, Q);
+    if (!td) {
       $('tDayBox').style.display = 'none';
     } else {
       $('tDayBox').style.display = '';
-      $('tDayLabel').textContent = '最近交易日 ' + (EQ.base_date || '').slice(4) ? '' : '';
-      const sess = (Q && Q.session) || '';
-      if (sess) $('tDayLabel').textContent = '最近交易日 ' + sess.slice(5);
-      $('tDay').textContent = money(c.dayPnl);
-      $('tDay').className = 'num num-lg ' + DSH.cls(c.dayPnl);
-      $('tDayPct').innerHTML = '<span class="' + DSH.cls(c.dayPct) + '">' + DSH.pct(c.dayPct) + '</span>';
+      $('tDayLabel').innerHTML = td.label +
+        (td.live && td.asOf ? '<span style="font-weight:400;color:var(--txt-3)"> · 截至 ' + td.asOf + '</span>' : '');
+      const dayAmt = td.pct * c.mv / (1 + td.pct);
+      $('tDay').textContent = money(dayAmt);
+      $('tDay').className = 'num num-lg ' + DSH.cls(td.pct);
+      $('tDayPct').innerHTML = '<span class="' + DSH.cls(td.pct) +
+        '" style="font-size:15px;font-weight:700">' + DSH.pct(td.pct) + '</span>';
     }
 
     $('tMv').textContent = money(c.mv);
@@ -214,6 +216,7 @@
       const contrib = c.pnl !== 0 && r.pnl != null ? r.pnl / Math.abs(c.amt) : null;
       return '<div class="pr-row">' +
         '<div><div class="tk">' + DSH.esc(r.ticker) + '</div>' +
+          '<div class="nm pr-m">建仓 ' + (r.entry != null ? r.entry.toFixed(2) : '—') + ' · 现价 ' + (r.price != null ? r.price.toFixed(2) : '—') + '</div>' +
           '<div class="nm">' + DSH.esc((r.name || '').slice(0, 18)) + '</div></div>' +
         '<div class="ta-r num">' + Math.round(r.weight * 100) + '%</div>' +
         '<div class="ta-r num">' + (r.entry != null ? r.entry.toFixed(2) : '—') + '</div>' +
@@ -253,15 +256,17 @@
     const exp = SIG.exposure != null ? SIG.exposure : 1;
     const oy = SIG.official_year;
     $('sigTitle').textContent = oy ? (oy + ' 年度持仓') : '本年持仓';
-    $('sigValid').textContent = (SIG.valid_from && SIG.valid_to)
-      ? (SIG.valid_from.slice(5).replace('-', '/') + ' ~ ' + SIG.valid_to.slice(5).replace('-', '/') + ' 有效' +
-         (SIG.official_month ? ' · 按 ' + SIG.official_month + ' 排名选出' : ''))
-      : '';
-    $('sigMonth').textContent = SIG.month || '—';
+    // 有效期做成醒目的 pill，而不是一行小字
+    $('sigValid').textContent = SIG.valid_to ? ('全年有效 · 至 ' + SIG.valid_to.slice(5).replace('-', '/')) : '全年有效';
     $('sigMeta').innerHTML =
       '<span class="pill ' + (exp >= 0.99 ? 'on' : 'off') + '">' +
         (SIG.trend || (exp >= 0.99 ? '满仓' : '半仓')) + '</span>' +
       '<span class="pill off">目标 ' + Math.round(exp * 100) + '%</span>';
+    const bd = String((EQ && EQ.base_date) || '');
+    const bdTxt = bd.length === 8 ? (bd.slice(0, 4) + '-' + bd.slice(4, 6) + '-' + bd.slice(6, 8)) : '';
+    $('sigDates').innerHTML =
+      (bdTxt ? '建仓 ' + bdTxt + '<br>' : '') +
+      (SIG.rebalance_hint ? '换仓 ' + SIG.rebalance_hint : '');
     const q = (Q && Q.quotes) || {};
     $('sigPicks').innerHTML = off.map((p) => {
       const qq = q[p.ticker] || {};

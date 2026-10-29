@@ -38,6 +38,7 @@
         </div>
         <div class="num num-lg" id="eqRet" style="margin-top:6px">—</div>
         <div class="sub" id="eqSub" style="margin-top:2px"></div>
+        <div id="eqToday" style="margin-top:8px"></div>
         <div id="eqSpark" style="margin-top:10px"></div>
       </a>
     </div>
@@ -157,13 +158,21 @@
             '<div class="num num-xl ' + DSH.cls(pnlAll) + '">' + DSH.money(pnlAll) + '</div>' +
             '<div class="sub"><span class="' + DSH.cls(pctAll) + '">' + DSH.pct(pctAll) + '</span></div>' +
           '</div>' +
-          '<div style="text-align:right">' +
-            '<div class="label">建仓日</div>' +
-            '<div class="num num-md" style="color:var(--gold)">' + (EQ0.base_date ? (EQ0.base_date.slice(0,4)+'-'+EQ0.base_date.slice(4,6)+'-'+EQ0.base_date.slice(6,8)) : '—') + '</div>' +
-            '<div class="sub" style="margin-top:2px">按当日收盘价买入</div>' +
-          '</div>' +
+          (function () {
+            const td = DSH.today(sig, q);
+            if (!td) return '';
+            const bg = td.pct >= 0 ? 'rgba(255,90,95,.12)' : 'rgba(46,204,113,.12)';
+            return '<div style="text-align:right">' +
+              '<div class="label">' + td.label + (td.live && td.asOf ? ' · ' + td.asOf : '') + '</div>' +
+              '<div class="num num-lg ' + DSH.cls(td.pct) + '" style="background:' + bg +
+                ';border-radius:10px;padding:2px 10px;display:inline-block">' + DSH.pct(td.pct) + '</div>' +
+              '</div>';
+          })() +
         '</div>' +
-        '<div class="grid g3" style="margin-top:26px;gap:12px">' +
+        '<div class="sub" style="margin-top:12px;font-size:12px;color:var(--txt-3)">建仓 ' +
+          (EQ0.base_date ? (EQ0.base_date.slice(0,4)+'-'+EQ0.base_date.slice(4,6)+'-'+EQ0.base_date.slice(6,8)) : '—') +
+          ' · 按当日收盘价买入</div>' +
+        '<div class="grid g3" style="margin-top:18px;gap:12px">' +
           '<div class="card flat"><div class="label" style="margin-bottom:6px">总市值</div>' +
             '<div class="num num-md">' + DSH.money(mvAll) + '</div></div>' +
           '<div class="card flat"><div class="label" style="margin-bottom:6px">本金</div>' +
@@ -205,6 +214,23 @@
     const bd = String(eq.base_date || '');
     const bdt = bd.length === 8 ? bd.slice(0, 4) + '/' + bd.slice(4, 6) + '/' + bd.slice(6, 8) : bd;
     document.getElementById('eqPeriod').textContent = bdt + ' 起 · ' + eq.points.length + ' 日';
+    // 当前涨跌幅 + 金额（与账户页同一个 DSH.today 口径）
+    const tdEq = DSH.today(sig, q);
+    const eqT = document.getElementById('eqToday');
+    if (eqT) {
+      if (tdEq) {
+        let amtNow = +(localStorage.getItem('dsh.amt') || 100000);
+        const dayAmt = amtNow * tdEq.pct;
+        const bg2 = tdEq.pct >= 0 ? 'rgba(255,90,95,.14)' : 'rgba(46,204,113,.14)';
+        eqT.innerHTML = '<span style="display:inline-block;background:' + bg2 +
+          ';border-radius:8px;padding:3px 9px;font-size:12.5px">' + tdEq.label + ' ' +
+          '<b class="' + DSH.cls(tdEq.pct) + '">' + DSH.pct(tdEq.pct) + '</b>' +
+          '<span style="color:var(--txt-3)"> · ' + DSH.money(dayAmt) + '</span></span>';
+      } else {
+        eqT.innerHTML = '';
+      }
+    }
+
     document.getElementById('ctaBtn').setAttribute('href', 'portfolio.html');
     let pk = 0;
     const dds = eq.points.map(p => { pk = Math.max(pk, p.s); return { d: p.d, y: p.s / pk - 1 }; });

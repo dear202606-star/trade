@@ -435,6 +435,28 @@
     return { ok: fails.length === 0, fails, warns };
   };
 
+  /* ---------- 当日涨跌（三页共用的唯一口径） ----------
+     按正式持仓权重合成最新报价的日内涨跌；行情够新显示「盘中」，否则「收盘」。 */
+  DSH.today = function (signal, quotes) {
+    const off = (signal && (signal.official || signal.picks)) || [];
+    const qs = (quotes && quotes.quotes) || {};
+    let w = 0, chg = 0, n = 0;
+    off.forEach(function (p) {
+      const q = qs[p.ticker];
+      if (q && isFinite(q.chg) && p.weight) { chg += p.weight * q.chg; w += p.weight; n++; }
+    });
+    if (!n || w <= 0) return null;
+    const age = DSH.ageHours(quotes && quotes.ts);
+    const live = age != null && age <= 0.75;
+    return {
+      pct: chg / w,
+      session: (quotes && quotes.session) || "",
+      asOf: (quotes && quotes.ts_local) || "",
+      live: live,
+      label: live ? "盘中" : "收盘",
+    };
+  };
+
   /* 目标权重（占总资金） */
   /* 目标占比：在「全部持仓」内部的权重（与页面上的占比同口径） */
   DSH.targets = function (sig) {
