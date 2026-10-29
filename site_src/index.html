@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#080A0F">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<title>LEADER QUANT · 美股动量策略</title>
+<title>长坡厚雪 · 年度动量</title>
 <link rel="stylesheet" href="assets/app.css">
 <link rel="stylesheet" href="assets/page.css">
 </head>
@@ -13,7 +13,7 @@
 
 <header class="top">
   <div class="top-in">
-    <div class="logo">LEADER<i>·</i>QUANT</div>
+    <div class="logo">长坡厚雪<i>·</i><span class="sub-logo">年度动量</span></div>
     <div class="tick">
       <span id="tickPx">—</span>
       <span id="tickChg" class="sub"></span>
@@ -75,7 +75,6 @@
       <div class="label" style="margin:0;white-space:nowrap">持仓明细</div>
       <div class="sub" id="posNote"></div>
     </div>
-    <div class="meta" id="posMeta"></div>
     <div class="pr">
       <div class="pr-head">
         <div>代码</div><div class="r">权重</div><div class="r">建仓价</div>
@@ -83,6 +82,7 @@
       </div>
       <div id="posRows"></div>
     </div>
+    <div class="card-foot right" id="posMeta"></div>
   </section>
 
 
@@ -91,8 +91,8 @@
     <div class="row-split">
       <div class="label" style="margin:0" id="nextYearTitle">明年可能持仓</div>
     </div>
-    <div class="sub" style="margin:-2px 0 10px" id="previewNote"></div>
     <div id="previewRows" class="pv-list"></div>
+    <div class="card-foot right" id="previewNote"></div>
   </section>
 
   <!-- ⑤ 总体策略至今表现 -->
@@ -114,8 +114,7 @@
   <!-- ⑥ 历史与回测 -->
   <section class="card flat">
     <div class="row-split">
-      <div class="label" style="margin:0">逐年记录</div>
-      <div class="sub">上一年的 12 月末选出 · 当年全年持有</div>
+      <div class="label" style="margin:0">年度持仓</div>
     </div>
     <div class="yr">
       <div class="yr-head">
@@ -123,6 +122,7 @@
       </div>
       <div id="yearRows"></div>
     </div>
+    <div class="card-foot right">上一年 12 月末选出 · 当年持有 ｜ 右列：收益 / 回撤</div>
   </section>
 
 </main>

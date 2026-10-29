@@ -510,7 +510,7 @@
   /* ---------- 图表：带坐标的折线 ---------- */
   DSH.lineChart = function (series, opts) {
     opts = opts || {};
-    const w = 900, h = opts.h || 320, L = 54, R = 16, T = 16, B = 28;
+    const w = opts.w || 900, h = opts.h || 320, FS = opts.fs || 11, L = opts.l || 54, R = 16, T = 16, B = 28;
     const all = series.reduce((a, s) => a.concat(s.pts.map((p) => p.y)), []);
     if (!all.length) return "";
     let min = Math.min.apply(null, all), max = Math.max.apply(null, all);
@@ -530,7 +530,7 @@
       const y = (T + (1 - ((logScale ? Math.log(rawV) : rawV) - min) / (max - min || 1)) * (h - T - B)).toFixed(1);
       svg += '<line x1="' + L + '" y1="' + y + '" x2="' + (w - R) + '" y2="' + y +
         '" stroke="rgba(255,255,255,.06)" stroke-width="1"/>';
-      svg += '<text x="' + (L - 9) + '" y="' + (+y + 4) + '" fill="#6F7D92" font-size="11" text-anchor="end">' +
+      svg += '<text x="' + (L - 9) + '" y="' + (+y + 4) + '" fill="#6F7D92" font-size="' + FS + '" text-anchor="end">' +
         label(rawV) + "</text>";
     }
     series.forEach((s) => {
@@ -544,8 +544,9 @@
     const step = Math.max(1, Math.floor(pts.length / 6));
     for (let i = 0; i < pts.length; i += step) {
       const d0 = pts[i].d;
-      svg += '<text x="' + X(i).toFixed(1) + '" y="' + (h - 8) + '" fill="#6F7D92" font-size="11" text-anchor="middle">' +
-        d0.slice(4, 6) + "/" + d0.slice(6, 8) + "</text>";
+      const lab = pts[i].label || (d0.slice(4, 6) + "/" + d0.slice(6, 8));
+      svg += '<text x="' + X(i).toFixed(1) + '" y="' + (h - 8) + '" fill="#6F7D92" font-size="' + FS + '" text-anchor="middle">' +
+        lab + "</text>";
     }
     svg += "</svg>";
     return svg;

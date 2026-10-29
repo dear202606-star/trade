@@ -4,7 +4,8 @@
 .top-in{display:flex;align-items:center;justify-content:space-between;gap:12px;
   max-width:760px;margin:0 auto;padding:14px 18px}
 .logo{font-weight:800;font-size:15.5px;letter-spacing:-.02em;color:var(--txt)}
-.logo i{color:var(--gold);font-style:normal}
+.logo i{color:var(--gold);font-style:normal;margin:0 1px}
+.sub-logo{font-size:11px;font-weight:500;color:var(--txt-3);letter-spacing:.06em;margin-left:5px}
 .tick{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--txt-2);
   font-variant-numeric:tabular-nums}
 .tick .dot{color:var(--txt-3)}
@@ -109,8 +110,9 @@
 }
 
 /* 卡片底部次要信息 */
-.card-foot{margin-top:14px;padding-top:10px;border-top:1px solid rgba(255,255,255,.05);
-  font-size:11px;color:var(--txt-3);letter-spacing:.01em;white-space:nowrap}
+.card-foot{margin-top:14px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);
+  font-size:11.5px;color:var(--txt-3);letter-spacing:.01em;white-space:nowrap}
+.card-foot.right{text-align:right}
 /* 顶部行情涨跌：红涨绿跌 */
 .tick .chg{font-variant-numeric:tabular-nums;font-weight:600}
 .tick .chg.up{color:var(--up)}
@@ -121,3 +123,11 @@
 /* 红涨绿跌：.sub 也要遵循（否则灰色覆盖） */
 .sub.up, .num.up{color:var(--up)}
 .sub.down, .num.down{color:var(--down)}
+
+/* 可读性：标签与表格头提亮放大 */
+.label{font-size:12px;letter-spacing:.02em;color:var(--txt-2)}
+.pr-head,.yr-head{font-size:12px;color:var(--txt-3)}
+.pr-row{font-size:14px}
+.yr-row{font-size:14px}
+.chip{font-size:12.5px;padding:4px 9px}
+.chip i{font-size:11.5px}

@@ -80,7 +80,7 @@
       ? EQ.base_date.slice(0, 4) + "-" + EQ.base_date.slice(4, 6) + "-" + EQ.base_date.slice(6, 8) : "—";
     $("posNote").textContent = "建仓 " + bdTxt;
     var pm = $("posMeta");
-    if (pm) pm.textContent = y ? ((y - 1) + "-12 选出") : "";
+    if (pm) pm.textContent = bdTxt && y ? ((y - 1) + "-12 选出 · 建仓 " + bdTxt) : "";
     $("posRows").innerHTML = c.rows.map(function (r) {
       var qq = q[r.ticker] || {};
       var eraw = (r.entry_raw != null) ? r.entry_raw : r.entry;
@@ -113,14 +113,28 @@
     } catch (e) { box.innerHTML = ""; }
   }
 
+  /* 统一日期为 YYYYMMDD（月频数据补 01） */
+  function ymd(d) {
+    var t = String(d || "").replace(/[^0-9]/g, "");
+    if (t.length === 6) t += "01";
+    return t || "20200101";
+  }
+
+  /* 月频标签：26/01 */
+  function ymLab(d) {
+    var t = String(d || "").replace(/[^0-9]/g, "");
+    if (t.length < 6) return "";
+    return t.slice(2, 4) + "/" + t.slice(4, 6);
+  }
+
   function drawAllChart() {
     var box = $("allChart");
     if (!box || !CV || !CV.points || CV.points.length < 4) return;
     try {
       box.innerHTML = DSH.lineChart([
-        { name: "策略", color: "#F2C46B", pts: CV.points.map(function (p) { return { d: p.d, y: p.s }; }) },
-        { name: "标普500", color: "#6F7D92", pts: CV.points.map(function (p) { return { d: p.d, y: p.b }; }) }
-      ], { h: 230, log: true });
+        { name: "策略", color: "#F2C46B", pts: CV.points.map(function (p) { return { d: ymd(p.d), y: p.s, label: ymLab(p.d) }; }) },
+        { name: "标普500", color: "#6F7D92", pts: CV.points.map(function (p) { return { d: ymd(p.d), y: p.b, label: ymLab(p.d) }; }) }
+      ], { h: 230, log: true, w: 460, fs: 20, fmt: function (v) { return v >= 10 ? Math.round(v) + "×" : v.toFixed(1) + "×"; } });
     } catch (e) { box.innerHTML = ""; }
   }
 
@@ -130,7 +144,7 @@
     if (!box || !PV) return;
     var y = PV.hold_year || "";
     $("nextYearTitle").textContent = y ? (y + " 年可能持仓") : "明年可能持仓";
-    $("previewNote").textContent = PV.final ? "已定稿" : "年初至今涨幅";
+    $("previewNote").textContent = PV.final ? "已定稿 · 与正式持仓一致" : "年初至今涨幅 · 年末定稿";
     var SEC = {
       "Information Technology": "信息技术",
       "Communication Services": "通信服务",
