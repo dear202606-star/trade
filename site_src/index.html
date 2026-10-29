@@ -19,8 +19,9 @@
     <div class="row" style="align-items:flex-start;gap:28px">
       <div class="grow" style="min-width:0">
         <div class="eyebrow" style="margin-bottom:12px">本月结论</div>
-        <h2 id="verdict">—</h2>
+        <h2 id="verdict" style="font-size:34px;line-height:1.18">—</h2>
         <div class="sub" id="verdictSub" style="margin:6px 0 0;font-size:13px"></div>
+        <div id="threeLayer" style="margin-top:12px;font-size:12.5px;color:var(--txt-3);line-height:1.9"></div>
         <div class="hero-row">
           <div class="hero-item"><div class="label">大盘开关</div><div id="hTrend">—</div></div>
           <div class="hero-item"><div class="label">目标仓位</div><div class="num num-md" id="hExp">—</div></div>
@@ -101,6 +102,28 @@
   document.getElementById('hTrend').innerHTML =
     '<span class="pill ' + (exp >= 1 ? 'on' : 'off') + '">' + DSH.esc(sig.trend) + '</span>';
   document.getElementById('hExp').textContent = (exp * 100).toFixed(0) + '%';
+
+  // 三层时间视野：当下(今日) / 中期(年内) / 远期(全周期)
+  (function () {
+    const el = document.getElementById("threeLayer");
+    if (!el) return;
+    const t = DSH.today(sig, q, await DSH.json("equity", null));
+    const cv = await DSH.json("curve", null);
+    const parts = [];
+    if (t && t.pct != null) {
+      parts.push("今日 <b class=\"" + DSH.cls(t.pct) + "\">" + DSH.pct(t.pct) + "</b>（" + DSH.money(t.amount) + "）");
+    }
+    const eq0 = await DSH.json("equity", null);
+    if (eq0 && eq0.stats) {
+      const y = eq0.base_date ? (+String(eq0.base_date).slice(0, 4) + 1) : "";
+      parts.push(y + " 年内 <b class=\"" + DSH.cls(eq0.stats.strategy) + "\">" + DSH.pct(eq0.stats.strategy) + "</b>");
+    }
+    if (cv && cv.points && cv.points.length) {
+      const tot = cv.points[cv.points.length - 1].s - 1;
+      parts.push("全周期 <b class=\"" + DSH.cls(tot) + "\">" + DSH.pct(tot, 0) + "</b>（2010–2025）");
+    }
+    el.innerHTML = parts.join(" ｜ ");
+  })();
 
   /* ---- 策略账户（理论账户，所有人一致） ---- */
   const cur = 'USD';
@@ -192,7 +215,7 @@
     const bdt = bd.length === 8 ? bd.slice(0, 4) + '/' + bd.slice(4, 6) + '/' + bd.slice(6, 8) : bd;
     document.getElementById('eqPeriod').textContent = bdt + ' 起 · ' + eq.points.length + ' 日';
     // 当前涨跌幅 + 金额（与账户页同一个 DSH.today 口径）
-    const tdEq = DSH.today(sig, q);
+    const tdEq = DSH.today(sig, q, EQ0);
     const eqT = document.getElementById('eqToday');
     if (eqT) {
       if (tdEq) {

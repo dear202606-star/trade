@@ -177,7 +177,7 @@
       $('tDayBox').style.display = 'none';
     } else {
       $('tDayBox').style.display = '';
-      $('tDayLabel').innerHTML = td.label +
+      $('tDayLabel').innerHTML = td.label + (td.live ? "（盘中，未计入累计）" : "") +
         (td.live && td.asOf ? '<span style="font-weight:400;color:var(--txt-3)"> · 截至 ' + td.asOf + '</span>' : '');
       const dayAmt = td.pct * c.mv / (1 + td.pct);
       $('tDay').textContent = money(dayAmt);

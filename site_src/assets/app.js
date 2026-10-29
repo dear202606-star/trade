@@ -437,19 +437,30 @@
 
   /* ---------- 当日涨跌（三页共用的唯一口径） ----------
      按正式持仓权重合成最新报价的日内涨跌；行情够新显示「盘中」，否则「收盘」。 */
-  DSH.today = function (signal, quotes) {
-    const off = (signal && (signal.official || signal.picks)) || [];
+  DSH.today = function (signal, quotes, equity) {
+    // 口径：day = Σ 股数×(最新价−昨收)，基数 = 当前市值（不是目标权重）
     const qs = (quotes && quotes.quotes) || {};
-    let w = 0, chg = 0, n = 0;
-    off.forEach(function (p) {
+    const pos = (equity && equity.position) || [];
+    const amt = +(localStorage.getItem("dsh.amt") || 100000);
+    const exp = (equity && equity.exposure != null) ? equity.exposure : 1;
+    let day = 0, mv = 0, covered = 0;
+    pos.forEach(function (p) {
       const q = qs[p.ticker];
-      if (q && isFinite(q.chg) && p.weight) { chg += p.weight * q.chg; w += p.weight; n++; }
+      const base = p.entry > 0 ? (amt * p.weight * exp) / p.entry : 0;   // 股数
+      const price = (q && q.p > 0) ? q.p : p.last;                       // 优先实时价
+      const prev = (q && q.pc > 0) ? q.pc : null;
+      if (!base || !price) return;
+      mv += base * price;
+      if (prev) { day += base * (price - prev); covered++; }
     });
-    if (!n || w <= 0) return null;
+    const cash = amt * (1 - exp);
+    const totalMv = mv + cash;
+    if (!covered || !totalMv) return null;
     const age = DSH.ageHours(quotes && quotes.ts);
     const live = age != null && age <= 0.75;
     return {
-      pct: chg / w,
+      amount: day,
+      pct: totalMv - day > 0 ? day / (totalMv - day) : null,
       session: (quotes && quotes.session) || "",
       asOf: (quotes && quotes.ts_local) || "",
       live: live,

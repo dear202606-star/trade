@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>策略账户 · LEADER QUANT</title>
+<title>当期策略表现 · LEADER QUANT</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="assets/app.css?v=0a2445df">
 <script src="assets/app.js?v=0a2445df"></script>
@@ -11,8 +11,8 @@
 
   <div class="head">
     <div class="eyebrow">Account</div>
-    <h1>策略账户</h1>
-    <div class="sub" id="acctSub">按策略执行的示范账户，所有人看到的一致</div>
+    <h1 id="pageTitle">当期策略表现</h1>
+    <div class="sub" id="acctSub"></div>
   </div>
 
   <!-- 账户总览 -->
@@ -30,7 +30,7 @@
 
     <div class="row" style="align-items:flex-start">
       <div class="grow">
-        <div class="label">累计盈亏</div>
+        <div class="label">当期累计盈亏</div>
         <div class="num num-xl" id="tPnl">—</div>
         <div class="sub" id="tPnlPct"></div>
       </div>
@@ -154,8 +154,17 @@
     return { ok: !fails.length, fails };
   }
 
+  function yearOf() {
+    const oy = SIG && SIG.official_year;
+    if (oy) return oy;
+    const bd = String((EQ && EQ.base_date) || '');
+    return bd.length >= 4 ? (+bd.slice(0, 4) + 1) : null;
+  }
+
   function render() {
     if (!EQ) return;
+    const y = yearOf();
+    document.getElementById('pageTitle').textContent = y ? (y + ' 年当期策略表现') : '当期策略表现';
     const c = build();
 
     $('tPnl').textContent = money(c.pnl);
@@ -235,7 +244,7 @@
     $('list').innerHTML = head + body + cashRow;
 
     // 顶部说明
-    $('acctSub').innerHTML = '按策略执行的示范账户 ｜ 每股按建仓日收盘价买入，与「策略表现」同一口径';
+    document.getElementById('acctSub').textContent = (y ? (y + ' 年度持仓 · ') : '') + '按建仓日收盘价买入，与「策略表现」同一口径';
 
     // 数据时间
     const t = (Q && Q.ts) ? new Date(Q.ts) : null;

@@ -61,7 +61,7 @@
   <div class="card" style="padding:14px 18px;margin-bottom:14px" id="ruleBox">
     <div class="sub" style="line-height:1.9">
       <b style="color:var(--txt)">规则</b>：每年 12 月末取过去 12 个月涨幅前 3 名，等权持有全年（同行业最多 2 只、该行业合计 ≤60%）。
-      标普 500 跌破 10 月均线时整体仓位减半。
+      标普 500 跌破 10 月均线时实盘仓位减半<span style="color:var(--txt-3)">（回测按满仓口径计算，未叠加该开关）</span>。
       
     </div>
   </div>
@@ -179,6 +179,7 @@ function drawBt() {
   $('bCagr').className = 'num num-lg ' + DSH.cls(cg);
   $('bBench').textContent = DSH.ret(bR); $('bBench').className = 'num num-lg ' + DSH.cls(bR);
   $('bMdd').textContent = DSH.pct(mdd, 1);
+  $('bMdd').className = 'num num-lg down';
   $('btPeriod').textContent = f.d + ' 起 · ' + pts.length + ' 个月';
 }
 
