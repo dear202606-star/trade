@@ -107,3 +107,17 @@
   .pv-val{grid-column:3;grid-row:1}
   .pv-sec{grid-column:2/4;grid-row:2;text-align:left}
 }
+
+/* 卡片底部次要信息 */
+.card-foot{margin-top:14px;padding-top:10px;border-top:1px solid rgba(255,255,255,.05);
+  font-size:11px;color:var(--txt-3);letter-spacing:.01em;white-space:nowrap}
+/* 顶部行情涨跌：红涨绿跌 */
+.tick .chg{font-variant-numeric:tabular-nums;font-weight:600}
+.tick .chg.up{color:var(--up)}
+.tick .chg.down{color:var(--down)}
+/* 关键数字不换行 */
+.num,.cell .num{white-space:nowrap}
+
+/* 红涨绿跌：.sub 也要遵循（否则灰色覆盖） */
+.sub.up, .num.up{color:var(--up)}
+.sub.down, .num.down{color:var(--down)}

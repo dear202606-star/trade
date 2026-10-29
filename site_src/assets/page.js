@@ -29,12 +29,15 @@
     if (t) {
       $("todayPct").textContent = pct2(t.pct);
       $("todayPct").className = "num num-lg " + cls(t.pct);
-      $("todayAmt").textContent = yuan(t.amount) + (t.live ? " · 截至 " + t.asOf : " · 收盘");
+      $("todayAmt").textContent = yuan(t.amount);
+      $("todayAmt").className = "sub " + cls(t.amount);
+      $("todayLabel").textContent = "今日 · " + (t.live ? "盘中" : "收盘");
+      $("todayFoot").textContent = (t.asOf || "").slice(5) + "（北京）";
     }
 
     $("switchTxt").textContent = trend;
     $("switchSub").textContent = "SPY " + (SIG && SIG.spy ? SIG.spy.toFixed(0) : "—") +
-      " / 均线 " + (SIG && SIG.ma ? SIG.ma.toFixed(0) : "—");
+      " / " + (SIG && SIG.ma ? SIG.ma.toFixed(0) : "—");
   }
 
   /* ---------- ② 当期账户 ---------- */
@@ -67,7 +70,7 @@
       (c.pnlPct != null && bench != null
         ? " ｜ 跑赢 <span class='" + cls(c.pnlPct - bench) + "'>" + pct2(c.pnlPct - bench) + "</span>" : "");
 
-    $("yearStamp").textContent = EQ && EQ.updated ? "净值 " + EQ.updated.slice(5, 16) + "（北京）" : "";
+    $("yearStamp").textContent = EQ && EQ.updated ? EQ.updated.slice(5, 16) : "";
     $("tMv").textContent = yuan(c.mv);
     $("tPnl").textContent = yuan(c.pnl);
     $("tPnl").className = "num num-md " + cls(c.pnl);
@@ -164,8 +167,8 @@
     $("bTotal").className = "num num-xl " + cls(s.total);
     $("bCagr").textContent = pct2(s.cagr, 1);
     $("bMdd").textContent = "-" + (Math.abs(s.worst_intra || 0) * 100).toFixed(1) + "%";
+    $("bMdd").className = "num num-md down";
     $("bWin").textContent = s.wins + "/" + s.years;
-    if (rg) rg.textContent = (s.start && s.end) ? (s.start + "–" + s.end + " · " + s.years + " 年") : "";
     var rg = $("allRange");
     if (rg) {
       rg.textContent = (s.start && s.end)
@@ -212,7 +215,7 @@
     if (!q) return;
     $("tickPx").textContent = "SPY " + q.p.toFixed(2);
     $("tickChg").textContent = pct2(q.chg);
-    $("tickChg").className = "sub " + cls(q.chg);
+    $("tickChg").className = "chg " + cls(q.chg);
     $("tickTs").textContent = (Q.ts_local || "").slice(5);
   }
 
