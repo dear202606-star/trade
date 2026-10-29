@@ -192,6 +192,17 @@
       qa.style.display = 'none';
     }
 
+    // 顶部更新状态（手机不用滚到底就知道数据新旧）
+    const st = document.getElementById('acctStamp');
+    if (st) {
+      const t = (Q && Q.ts) ? new Date(Q.ts) : null;
+      const p2 = (n) => String(n).padStart(2, '0');
+      const when = t ? ((t.getMonth() + 1) + '-' + p2(t.getDate()) + ' ' + p2(t.getHours()) + ':' + p2(t.getMinutes())) : '';
+      const stale = DSH.ageHours && DSH.ageHours(Q && Q.ts) > 26;
+      st.innerHTML = (when ? '更新于 ' + when + '（北京）' : '') +
+        (stale ? ' <span style="color:#FFAB6B">⚠ 数据偏旧</span>' : '');
+    }
+
     // 明细表
     $('posHint').textContent = '建仓日 ' + (EQ.base_date || '').slice(0, 4) + '-' +
       (EQ.base_date || '').slice(4, 6) + '-' + (EQ.base_date || '').slice(6, 8) + ' 收盘价买入';
