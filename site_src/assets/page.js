@@ -1,7 +1,7 @@
 /* 单页渲染：一次加载，全部可见，无 Tab、无隐藏内容 */
 (function () {
   var $ = function (id) { return document.getElementById(id); };
-  var EQ = null, SIG = null, Q = null, CV = null, SH = null;
+  var EQ = null, SIG = null, Q = null, CV = null, SH = null, PV = null;
   var amt = +(localStorage.getItem("dsh.amt") || 100000);
 
   function yuan(v) {
@@ -120,7 +120,40 @@
     } catch (e) { box.innerHTML = ""; }
   }
 
-  /* ---------- ④ 全周期 ---------- */
+  /* ---------- 明年预览 ---------- */
+  function renderPreview() {
+    var box = $("previewRows");
+    if (!box || !PV) return;
+    var y = PV.hold_year || "";
+    $("nextYearTitle").textContent = y ? (y + " 年可能持仓") : "明年可能持仓";
+    $("previewStamp").textContent = PV.as_of ? "截至 " + PV.as_of.slice(5) : "";
+    $("previewNote").textContent = (PV.official_month || "") + " 排名预览 · 年初至今涨幅 · 同行业最多 2 只";
+    var SEC = {
+      "Information Technology": "信息技术",
+      "Communication Services": "通信服务",
+      "Consumer Discretionary": "可选消费",
+      "Consumer Staples": "必需消费",
+      "Health Care": "医疗保健",
+      "Financials": "金融",
+      "Industrials": "工业",
+      "Energy": "能源",
+      "Utilities": "公用事业",
+      "Materials": "原材料",
+      "Real Estate": "房地产"
+    };
+    box.innerHTML = (PV.top || []).map(function (r) {
+      var sec = SEC[r.sector] || r.sector || "";
+      return '<div class="pv-row">' +
+        '<div class="pv-rank">' + (r.rank || "") + '</div>' +
+        '<div class="pv-main"><div class="tk">' + DSH.esc(r.ticker) + '</div>' +
+          '<div class="nm">' + DSH.esc(r.name || "") + '</div></div>' +
+        '<div class="pv-sec">' + DSH.esc(sec) + '</div>' +
+        '<div class="pv-val ' + cls(r.ytd) + '">' + pct2(r.ytd, 1) + '</div>' +
+        '</div>';
+    }).join("");
+  }
+
+  /* ---------- ⑤ 全周期 ---------- */
   function renderAll() {
     if (!SH || !SH.summary) return;
     var s = SH.summary;
@@ -179,14 +212,17 @@
     try {
       var arr = await Promise.all([
         DSH.json("equity", null), DSH.json("signal", null), DSH.json("quotes", {}),
-        DSH.json("curve", null), DSH.json("strategy_history", null)
+        DSH.json("curve", null), DSH.json("strategy_history", null),
+        DSH.json("preview", null)
       ]);
-      EQ = arr[0]; SIG = arr[1]; Q = arr[2]; CV = arr[3]; SH = arr[4];
+      EQ = arr[0]; SIG = arr[1]; Q = arr[2]; CV = arr[3]; SH = arr[4]; PV = arr[5];
     } catch (e) {}
 
     renderTick();
     renderNow();
     renderYear();
+    renderPreview();
+    renderPreview();
     renderAll();
     renderYears();
     drawYearSpark();

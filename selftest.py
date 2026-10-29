@@ -74,6 +74,24 @@ def main():
           f"净值 {len(eq.get('points') or []) if eq else 0} 个交易日",
           "equity.json 净值样本不足")
 
+    # ---- 明年预览（年初至今前 3）----
+    try:
+        _pv = load("preview.json")
+        _top = (_pv or {}).get("top") or []
+        check(len(_top) == 3, "preview.json 有 3 只候选", "候选数 %d" % len(_top))
+        if _top:
+            _w = sum(x.get("weight") or 0 for x in _top)
+            check(abs(_w - 1) < 1e-6, "预览权重合计 = 1", "实际 %.4f" % _w)
+            _bad = [x["ticker"] for x in _top
+                    if not x.get("sector") or x["sector"] == "Unknown"]
+            check(not _bad, "预览行业均已分类", "缺行业：%s" % _bad)
+            _inf = [x["ticker"] for x in _top if not isinstance(x.get("ytd"), (int, float))]
+            check(not _inf, "预览涨幅为有限数", "异常：%s" % _inf)
+            _om = _pv.get("official_month") or ""
+            check(_om.endswith("-12"), "预览基准月为 12 月（%s）" % _om, "基准月 %s" % _om)
+    except Exception as e:
+        warns.append("预览校验失败：%s" % e)
+
     # ---- 年度结转：排名基准月必须符合规则，且锁与持仓一致 ----
     try:
         import monthly_pick as _mp

@@ -69,6 +69,8 @@ jobs:
       - name: 计算策略净值
         continue-on-error: true
         run: python runner.py equity.py
+      - name: 生成明年预览
+        run: python runner.py preview.py
 
       - name: 生成逐年记录
         continue-on-error: true
