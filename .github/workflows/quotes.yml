@@ -1,5 +1,9 @@
 name: 行情快照
 
+concurrency:
+  group: trade-pipeline
+  cancel-in-progress: false
+
 on:
   schedule:
     # GitHub 定时任务经常延迟/漏触发（实测延迟 3-4.5 小时、平台故障时停摆半天），
@@ -73,7 +77,13 @@ jobs:
           if [ -f output/signal_history.json ]; then git add -f output/signal_history.json; fi
           if [ -f output/splits.json ]; then git add -f output/splits.json; fi
           git diff --staged --quiet || git commit -m "chore: 流水线状态 $(date -u +%H:%M)"
-          git push || true
+          for i in 1 2 3; do
+            if git push; then break; fi
+            echo "push 失败，第 $i 次重试…"
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME:-main}" || true
+            sleep 5
+          done
+          git push || { echo "::error::无法推送，状态可能丢失"; exit 1; }
 
       - name: 上传 Pages 产物
         uses: actions/upload-pages-artifact@v3

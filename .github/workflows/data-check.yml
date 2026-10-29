@@ -1,5 +1,9 @@
 name: 数据质量核对
 
+concurrency:
+  group: trade-pipeline
+  cancel-in-progress: false
+
 on:
   schedule:
     # 每日 22:40 UTC = 北京 06:40（全量更新之后）

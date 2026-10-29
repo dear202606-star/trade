@@ -72,6 +72,32 @@ def main():
           f"净值 {len(eq.get('points') or []) if eq else 0} 个交易日",
           "equity.json 净值样本不足")
 
+    # ---- 健康状态与新鲜度（B3：停更必须可见）----
+    try:
+        _hp = os.path.join(os.path.dirname(os.path.abspath(__file__)), "docs", "data", "health.json")
+        if os.path.exists(_hp):
+            _h = json.load(open(_hp, encoding="utf-8"))
+            check(_h.get("status") in ("ok", "degraded"),
+                  "health.json 存在且状态合法（%s）" % _h.get("status"),
+                  "health.json 状态非法：%s" % _h.get("status"))
+            _age = _h.get("quotes_age_hours")
+            check(_age is None or _age < 72,
+                  "行情年龄 %.1f 小时（<72）" % (_age or 0),
+                  "行情已 %.1f 小时未更新" % (_age or 0))
+        else:
+            warns.append("缺 health.json（健康状态不可见）")
+        _ep = os.path.join(os.path.dirname(os.path.abspath(__file__)), "docs", "data", "equity.json")
+        _e = json.load(open(_ep, encoding="utf-8"))
+        check(_e.get("last_session") and _e["points"][-1]["d"] == _e["last_session"],
+              "净值末点 = 已收盘日（%s）" % _e.get("last_session"),
+              "净值末点 %s ≠ 已收盘日 %s" % (_e["points"][-1]["d"], _e.get("last_session")))
+        _sp = os.path.join(os.path.dirname(os.path.abspath(__file__)), "docs", "data", "signal.json")
+        _raw = open(_sp, encoding="utf-8").read()
+        check("NaN" not in _raw and "Infinity" not in _raw,
+              "signal.json 不含 NaN/Infinity", "signal.json 含非法数值")
+    except Exception as e:
+        fails.append("健康/新鲜度校验异常：%s" % e)
+
     # ---- 当年持仓锁定后不得漂移 ----
     try:
         _lp = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output", "official_locks.json")

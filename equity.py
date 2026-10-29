@@ -23,6 +23,22 @@ PAT = re.compile(r"\(\s*(\[.*\])\s*\)", re.S)
 OUT = os.path.join("docs", "data", "equity.json")
 
 
+def settled_cutoff():
+    """返回最后一个「已收盘」交易日的 YYYYMMDD（美东时间 16:10 后算当日已收盘）"""
+    try:
+        from zoneinfo import ZoneInfo
+        now_et = datetime.now(ZoneInfo("America/New_York"))
+    except Exception:
+        now_et = datetime.now(timezone.utc) - timedelta(hours=4)
+    d = now_et.date()
+    if (now_et.hour, now_et.minute) < (16, 10):
+        d = d - timedelta(days=1)
+    # 跳过周末
+    while d.weekday() >= 5:
+        d = d - timedelta(days=1)
+    return d.strftime("%Y%m%d")
+
+
 def daily_closes(ticker):
     """返回 {yyyymmdd: close}，未复权，仅用于同口径比例计算"""
     sym = ticker.replace(".", "$")
@@ -80,7 +96,8 @@ def main():
         return 1
 
     # 交易日序列（以 SPY 为准）
-    days = sorted(k for k in data["SPY"] if k >= base_ym + "01")
+    cutoff = settled_cutoff()
+    days = sorted(k for k in data["SPY"] if base_ym + "01" <= k <= cutoff)
     # 找建仓日：base_ym 内最后一个交易日
     base_days = [d for d in sorted(data["SPY"]) if d[:6] == base_ym]
     if not base_days:
@@ -142,6 +159,7 @@ def main():
     bret = last["b"] - 1
 
     out = {
+        "last_session": days[-1] if days else None,
         "base_date": base_day,
         "updated": (datetime.now(timezone.utc) + timedelta(hours=8)).strftime("%Y-%m-%d %H:%M"),
         "updated_tz": "Asia/Shanghai",

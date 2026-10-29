@@ -766,3 +766,22 @@
     DSH.stamp();
   };
 })(window);
+
+  /* ---------- 数据健康状态（异常时顶部红条，避免停更无人知） ---------- */
+  (function () {
+    if (location.pathname.indexOf("report.html") >= 0) return;
+    fetch("data/health.json?t=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (h) {
+        if (!h || h.status === "ok") return;
+        var bar = document.createElement("div");
+        bar.id = "healthBanner";
+        bar.style.cssText = "position:sticky;top:0;z-index:99;background:rgba(255,90,95,.16);" +
+          "border-bottom:1px solid rgba(255,90,95,.4);color:#FFB3B6;font-size:12.5px;" +
+          "padding:8px 16px;text-align:center";
+        bar.textContent = "⚠ 数据异常：" + (h.issues || []).join("；") +
+          (h.quotes_ts ? "（行情 " + h.quotes_ts + " UTC）" : "");
+        document.body.insertBefore(bar, document.body.firstChild);
+      })
+      .catch(function () {});
+  })();

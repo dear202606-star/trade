@@ -13,6 +13,7 @@ import json
 import os
 import re
 import shutil
+from datetime import datetime as dt, timezone
 
 import dashboard
 import report_live
@@ -216,6 +217,45 @@ def main():
     if hist:
         with open(os.path.join(DATA, "signal.json"), "w", encoding="utf-8") as f:
             json.dump(with_validity(hist[0]), f, ensure_ascii=False)
+    # ---- 健康状况（供页面显示红条，避免"停更却无人知"）----
+    try:
+        hq = json.load(open(os.path.join(DOCS, "data", "quotes.json"), encoding="utf-8"))
+        he = json.load(open(os.path.join(DOCS, "data", "equity.json"), encoding="utf-8"))
+        hs = json.load(open(os.path.join(DOCS, "data", "signal.json"), encoding="utf-8"))
+        now = dt.now(timezone.utc)
+        issues = []
+        if not hq.get("ok", False):
+            issues.append("行情覆盖率不足 %.0f%%" % (hq.get("coverage", 0) * 100))
+        age_h = None
+        try:
+            ts = dt.strptime(hq["ts"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+            age_h = round((now - ts).total_seconds() / 3600, 1)
+            if age_h > 26:
+                issues.append("行情 %.0f 小时未更新" % age_h)
+        except Exception:
+            issues.append("行情时间戳异常")
+        if he.get("last_session") and he.get("points") and he["points"][-1]["d"] != he["last_session"]:
+            issues.append("净值末点与已收盘日不一致")
+        if not hs.get("official"):
+            issues.append("缺少年度持仓")
+        health = {
+            "status": "ok" if not issues else "degraded",
+            "issues": issues,
+            "quotes_ts": hq.get("ts"),
+            "quotes_age_hours": age_h,
+            "session": hq.get("session"),
+            "coverage": hq.get("coverage"),
+            "last_session": he.get("last_session"),
+            "equity_updated": he.get("updated"),
+            "signal_month": hs.get("month"),
+            "checked_at": dt.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        }
+        with open(os.path.join(DOCS, "data", "health.json"), "w", encoding="utf-8") as f:
+            json.dump(health, f, ensure_ascii=False)
+        print("   健康状态：%s%s" % (health["status"], ("｜" + "；".join(issues)) if issues else ""))
+    except Exception as e:
+        print("WARN 健康状态生成失败：%s" % e)
+
         with open(os.path.join(DATA, "history.json"), "w", encoding="utf-8") as f:
             json.dump([with_validity(r) for r in hist], f, ensure_ascii=False)
 
