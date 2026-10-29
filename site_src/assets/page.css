@@ -160,3 +160,7 @@
 .legend .dot{width:8px;height:8px;border-radius:2px;display:inline-block}
 .legend .dot.gold{background:#F2C46B}
 .legend .dot.grey{background:#6F7D92}
+
+/* 卡片标题统一 */
+.card-title{font-size:15px;font-weight:600;color:var(--txt);margin:0;letter-spacing:-.01em}
+.row-split .card-title{line-height:1.3}

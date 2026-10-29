@@ -78,7 +78,7 @@
     var q = (Q && Q.quotes) || {};
     var bdTxt = (EQ && EQ.base_date)
       ? EQ.base_date.slice(0, 4) + "-" + EQ.base_date.slice(4, 6) + "-" + EQ.base_date.slice(6, 8) : "—";
-    $("posNote").textContent = "建仓 " + bdTxt;
+    $("posTitle").textContent = (y ? y + " 年持仓" : "持仓");
     var pm = $("posMeta");
     if (pm) pm.textContent = bdTxt && y ? ((y - 1) + "-12 选出 · 建仓 " + bdTxt) : "";
     $("posRows").innerHTML = c.rows.map(function (r) {
