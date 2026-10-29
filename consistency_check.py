@@ -78,8 +78,10 @@ def main():
         m = re.search(r"同期标普\s*([+\-]?[\d.]+)%", vs)
         ck(bool(m) and abs(float(m.group(1)) - bench) <= 0.05,
            "同期标普 = 数据源（%.2f%%）" % bench, vs[:40])
+        foot = pg.inner_text("#todayFoot")
         stamp = pg.inner_text("#yearStamp")
-        ck("（北京）" in stamp, "更新时间标注时区（%s）" % stamp.strip(), "缺时区")
+        ck("（北京）" in foot, "时间标注时区（%s）" % foot.strip(), "缺时区")
+        ck(bool(stamp.strip()), "当期卡片显示时间（%s）" % stamp.strip(), "缺时间")
 
         print("\n[今日]")
         t = pg.inner_text("#todayPct")
@@ -101,8 +103,8 @@ def main():
         ck(tv is not None and abs(tv - exp) < 1.5,
            "今日涨跌与行情方向一致（页面 %+.2f / 加权 %+.2f）" % (tv or 0, exp),
            "页面 %s" % t)
-        amt_txt = pg.inner_text("#todayAmt")
-        ck("截至" in amt_txt or "收盘" in amt_txt, "今日注明盘中/收盘（%s）" % amt_txt.strip()[:24])
+        lbl = pg.inner_text("#todayLabel")
+        ck("盘中" in lbl or "收盘" in lbl, "今日注明盘中/收盘（%s）" % lbl.strip())
 
         print("\n[全周期]")
         bt = num(pg.inner_text("#bTotal"))
