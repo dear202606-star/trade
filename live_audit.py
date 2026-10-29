@@ -87,6 +87,22 @@ def main():
             cost = pg.locator("#tCash").inner_text()
             ck("25" not in cost or True, "成本已写入（%s）" % cost)
 
+        aud = pg.evaluate("() => window.__audit ? window.__audit() : {ok:true,fails:[]}")
+        ck(aud.get("ok"), "线上数据自检通过", ";".join(aud.get("fails", [])[:3]))
+
+        # 缺行情时不得伪造 0% 盈亏
+        pf_now = pg.evaluate("() => DSH.load()")
+        pg.route("**/data/quotes.json*", lambda r: r.fulfill(status=200,
+                 body=json.dumps(dict(json.loads(r.fetch().text()), quotes={})),
+                 headers={"Content-Type": "application/json"}))
+        pg.reload(wait_until="networkidle"); pg.wait_for_timeout(2500)
+        mv_txt = pg.locator("#tMv").inner_text()
+        ret_txt = pg.locator("#tRet").inner_text()
+        warn_on = pg.locator("#qaBox").is_visible()
+        ck(mv_txt.strip() in ("$", "—", "") or "缺行情" in pg.inner_text("#qaBox"),
+           "缺行情时不再伪造市值（%s）" % mv_txt.strip(), "缺行情仍显示 %s" % mv_txt)
+        pg.unroute("**/data/quotes.json*")
+
         # ---------- 导出 ----------
         print("\n[导出]")
         try:

@@ -35,6 +35,7 @@
       <div class="card flat"><div class="label" style="margin-bottom:6px">仓位（已投入÷计划）</div><div class="num num-md" id="tPos">—</div>
         <div class="bar"><i id="tPosBar" style="width:0%"></i></div></div>
     </div>
+    <div id="qaBox" class="tip warn" style="display:none;margin-top:14px"></div>
   </div>
 
   <!-- 年度持仓 + 当月排名 -->
@@ -157,15 +158,39 @@ function render() {
   $('tMv').textContent = DSH.money(c.mv, cur);
   $('tCash').textContent = DSH.money(c.cost, cur);
   const tr = $('tRet');
-  if (PF.rows.length && c.cost > 0) {
+  if (PF.rows.length && c.costPriced > 0) {
     tr.textContent = DSH.pct(c.pnlPct);
     tr.className = 'num num-md ' + DSH.cls(c.pnl);
   } else {
     tr.textContent = '—'; tr.className = 'num num-md';
   }
+  // 调试/测试钩子：页面自检结果（不显示给用户）
+  window.__audit = function () {
+    const cc = DSH.compute(PF, Q.quotes || {}, Q.fx);
+    return DSH.audit(PF, Q.quotes || {}, cc);
+  };
   $('tPos').textContent = c.plan > 0 ? (c.deployed * 100).toFixed(0) + '%' : '—';
   $('tPosBar').style.width = Math.min(100, c.deployed * 100) + '%';
   $('tPosBar').className = c.deployed > 1.001 ? 'over' : '';
+
+  // 数据质量：缺行情的持仓不计入市值/盈亏，并明确告诉用户
+  const qa = $('qaBox');
+  if (qa) {
+    const aud = DSH.audit(PF, Q.quotes || {}, c);
+    if (!aud.ok) {
+      qa.style.display = '';
+      qa.className = 'tip warn';
+      qa.innerHTML = '⚠ 数据校验未通过：' + DSH.esc(aud.fails.join('；')) +
+        '<br><span style="font-size:11.5px;color:var(--txt-3)">页面数字可能有误，请刷新或稍后再试</span>';
+    } else if (c.missingCount > 0) {
+      qa.style.display = '';
+      qa.className = 'tip warn';
+      qa.innerHTML = '⚠ ' + c.missingCount + ' 只缺行情（' + DSH.esc(c.missingTickers.join('、')) +
+        '），未计入市值与盈亏';
+    } else {
+      qa.style.display = 'none';
+    }
+  }
   
   
 

@@ -118,6 +118,8 @@ def main():
         used_num = float(used.replace("$", "").replace(",", "") or 0)
         check(abs(used_num - 100000) / 100000 < 0.03,
               "已投入成本≈总买入资金（%s）" % used, "已投入 %s 与 100000 偏差过大" % used)
+        aud = pg.evaluate("() => window.__audit ? window.__audit() : {ok:true,fails:[]}")
+        check(aud.get("ok"), "页面数据自检通过", "自检失败：" + ";".join(aud.get("fails", [])[:3]))
         orders_txt = pg.locator("#orders").inner_text()
         check(("无需操作" in orders_txt) or ("股" in orders_txt),
               "下单建议已生成（%s）" % ("一致无操作" if "无需操作" in orders_txt else "有买卖"),

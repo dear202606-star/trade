@@ -314,54 +314,114 @@
   DSH.compute = function (pf, quotes, fx) {
     const rows = pf.rows.map((r) => {
       const q = quotes && quotes[r.ticker];
-      const price = q ? q.p : (r.cost || 0);
-      const mv = price * r.shares;
+      const hasQuote = !!(q && isFinite(q.p) && q.p > 0);
+      // 没有行情时绝不拿成本价冒充现价（否则盈亏会伪装成 0%）
+      const price = hasQuote ? q.p : null;
+      const mv = hasQuote ? price * r.shares : null;
       const cost = r.cost * r.shares;
-      const pnl = mv - cost;
-      const peak = Math.max(r.peak || 0, price, r.cost || 0);
+      const pnl = hasQuote ? mv - cost : null;
+      const peak = Math.max(r.peak || 0, hasQuote ? price : 0, r.cost || 0);
       const stopLine = peak * (1 - DSH.STOP);
       return Object.assign({}, r, {
         name: q ? q.name : r.ticker,
         price, mv, cost, pnl, costPerShare: r.cost,
-        pnlPct: cost > 0 ? pnl / cost : 0,
-        dayPct: q ? q.chg : 0,
-        dayPnl: q ? (q.p - q.pc) * r.shares : 0,
-        hasQuote: !!q,
+        pnlPct: hasQuote && cost > 0 ? pnl / cost : null,
+        dayPct: hasQuote ? q.chg : null,
+        dayPnl: hasQuote ? (q.p - q.pc) * r.shares : null,
+        hasQuote,
         peak, stopLine,
-        stopDist: stopLine > 0 ? price / stopLine - 1 : null,
+        stopDist: stopLine > 0 && hasQuote ? price / stopLine - 1 : null,
       });
     });
-    const mv = rows.reduce((a, r) => a + r.mv, 0);
+    const priced = rows.filter((r) => r.hasQuote);
+    const missing = rows.filter((r) => !r.hasQuote);
+    const mv = priced.reduce((a, r) => a + r.mv, 0);
     const cost = rows.reduce((a, r) => a + r.cost, 0);
+    const costPriced = priced.reduce((a, r) => a + r.cost, 0);
     const sess = (quotes && quotes.__session) || '';
     rows.forEach((r) => {
-      // 占比 = 该只市值 ÷ 全部持仓市值（不再用「总资金」当分母）
-      r.weight = mv > 0 ? r.mv / mv : (rows.length ? 1 / rows.length : 0);
+      // 占比 = 该只市值 ÷ 全部持仓市值（只算有行情的）
+      r.weight = mv > 0 && r.hasQuote ? r.mv / mv : 0;
       // 在该交易日之后才买入的仓位，没有「当日涨跌」可言
       r.isNew = !!(sess && r.added && String(r.added).slice(0, 10) > sess);
       if (r.isNew) { r.dayPnl = 0; r.dayPct = 0; }
     });
-    const dayPnl = rows.reduce((a, r) => a + (r.dayPnl || 0), 0);
-    const dayValid = rows.length > 0 && rows.some((r) => !r.isNew);
-    // 当日涨跌基数 = 昨日市值
-    // 总买入资金：用于一键分配与「已投入 / 剩余」显示；收益率始终按实际成本算
+    const dayPnl = priced.reduce((a, r) => a + (r.dayPnl || 0), 0);
+    const dayValid = priced.some((r) => !r.isNew);
     const plan = pf.plan || 0;
     const deployed = plan > 0 ? cost / plan : 0;
     const remain = plan > 0 ? Math.max(0, plan - cost) : 0;
-    const prevMv = mv - dayPnl;
+    // 盈亏只用「有行情的部分」计算，口径写在页面上
+    const pnl = priced.reduce((a, r) => a + r.pnl, 0);
     return {
-      rows, mv, cost,
-      pnl: mv - cost,
-      pnlPct: cost > 0 ? (mv - cost) / cost : 0,
+      rows, mv, cost, costPriced,
+      pnl,
+      pnlPct: costPriced > 0 ? pnl / costPriced : null,
       plan, deployed, remain,
       dayPnl,
-      dayPct: mv - dayPnl > 0 ? dayPnl / (mv - dayPnl) : 0,
+      dayPct: mv - dayPnl > 0 ? dayPnl / (mv - dayPnl) : null,
       dayValid, session: sess,
+      pricedCount: priced.length,
+      missingCount: missing.length,
+      missingTickers: missing.map((r) => r.ticker),
       total: mv,
     };
   };
 
-  /* ---------- 目标权重（占总资金） ---------- */
+  /* ---------- 数据质量自检（前端不变量） ----------
+     每次渲染后跑一遍，任何一条不成立说明界面数字不可信。
+     返回 {ok, fails:[说明], warns:[说明]} */
+  DSH.audit = function (pf, quotes, c) {
+    const fails = [], warns = [];
+    const near = (a, b, tol) => Math.abs(a - b) <= (tol == null ? 0.01 : tol);
+    const rows = (c && c.rows) || [];
+    const fin = (v) => v == null || (typeof v === "number" && isFinite(v));
+
+    if (!Array.isArray(pf.rows)) fails.push("持仓数据结构异常");
+
+    // 1) 每行必须有正的价格，否则不能参与市值与盈亏
+    rows.forEach((r) => {
+      if (!r.hasQuote) { warns.push(r.ticker + " 缺行情，未计入市值"); return; }
+      if (!(r.price > 0)) fails.push(r.ticker + " 价格无效：" + r.price);
+      if (!(r.shares > 0)) fails.push(r.ticker + " 股数无效：" + r.shares);
+      if (!fin(r.mv) || !fin(r.pnl)) fails.push(r.ticker + " 市值/盈亏非数值");
+    });
+
+    // 2) 市值 = Σ 股数×价格
+    const mvSum = rows.filter((r) => r.hasQuote).reduce((a, r) => a + r.shares * r.price, 0);
+    if (!near(mvSum, c.mv, Math.max(0.02, c.mv * 1e-6))) {
+      fails.push("市值合计不一致：" + mvSum.toFixed(2) + " ≠ " + (c.mv || 0).toFixed(2));
+    }
+
+    // 3) 盈亏 = 市值 − 有行情部分的成本
+    if (rows.some((r) => r.hasQuote)) {
+      const pnlCalc = rows.filter((r) => r.hasQuote).reduce((a, r) => a + (r.mv - r.cost), 0);
+      if (!near(pnlCalc, c.pnl, Math.max(0.02, Math.abs(c.pnl || 0) * 1e-6))) {
+        fails.push("盈亏合计不一致");
+      }
+      // 4) 收益率 = 盈亏 ÷ 成本
+      if (c.costPriced > 0 && !near(c.pnlPct, c.pnl / c.costPriced, 1e-9)) {
+        fails.push("收益率与盈亏/成本不一致");
+      }
+    }
+
+    // 5) 权重之和 ≈ 1（有行情时）
+    if (rows.some((r) => r.hasQuote)) {
+      const w = rows.filter((r) => r.hasQuote).reduce((a, r) => a + r.weight, 0);
+      if (!near(w, 1, 0.005)) fails.push("权重合计 " + w.toFixed(3) + " ≠ 1");
+    }
+
+    // 6) 当日涨跌不能超过合理范围（防串数据）
+    rows.forEach((r) => {
+      if (r.hasQuote && (r.dayPct > 1.5 || r.dayPct < -1.5)) {
+        fails.push(r.ticker + " 当日涨跌幅异常：" + (r.dayPct * 100).toFixed(1) + "%");
+      }
+    });
+
+    return { ok: fails.length === 0, fails, warns };
+  };
+
+  /* 目标权重（占总资金） */
   /* 目标占比：在「全部持仓」内部的权重（与页面上的占比同口径） */
   DSH.targets = function (sig) {
     const out = {};

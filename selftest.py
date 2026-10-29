@@ -72,6 +72,27 @@ def main():
           f"净值 {len(eq.get('points') or []) if eq else 0} 个交易日",
           "equity.json 净值样本不足")
 
+    # ---- 全链路一致性：行情 ↔ 持仓 ↔ 净值 ----
+    qq = (q or {}).get("quotes") or {}
+    sess = (q or {}).get("session") or ""
+    off = (sig or {}).get("official") or (sig or {}).get("picks") or []
+    miss = [p.get("ticker") for p in off
+            if not (qq.get(p.get("ticker")) or {}).get("p")]
+    check(not miss,
+          "正式持仓 %d 只均有行情" % len(off),
+          "以下持仓缺行情，页面会显示不全：" + ",".join(map(str, miss)))
+
+    bad_px = [t for t, v in qq.items()
+              if not isinstance((v or {}).get("p"), (int, float)) or (v or {}).get("p", 0) <= 0]
+    check(not bad_px, "全部行情价格为正数",
+          "存在非法价格：" + ",".join(bad_px[:5]))
+
+    if eq and sess:
+        last_d = ((eq.get("points") or [{}])[-1] or {}).get("d") or ""
+        check(last_d <= sess.replace("-", ""),
+              "净值末点 %s ≤ 行情交易日 %s" % (last_d, sess),
+              "净值日期(%s)晚于行情交易日(%s)，口径不一致" % (last_d, sess))
+
     sh = load("strategy_history.json")
     check(sh and len(sh.get("years") or []) >= 8,
           f"逐年记录 {len(sh.get('years') or []) if sh else 0} 年",
