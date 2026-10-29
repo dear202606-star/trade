@@ -70,6 +70,7 @@ jobs:
 
       - name: 提交状态日志
         if: always()
+        continue-on-error: true
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -79,13 +80,14 @@ jobs:
           if [ -f output/signal_history.json ]; then git add -f output/signal_history.json; fi
           if [ -f output/splits.json ]; then git add -f output/splits.json; fi
           git diff --staged --quiet || git commit -m "chore: 流水线状态 $(date -u +%H:%M)"
+          # 站点发布走 Pages 产物，不依赖这次提交；推送失败只告警，不阻断部署
           for i in 1 2 3; do
-            if git push; then break; fi
+            if git push; then exit 0; fi
             echo "push 失败，第 $i 次重试…"
             git pull --rebase --autostash origin "${GITHUB_REF_NAME:-main}" || true
             sleep 5
           done
-          git push || { echo "::error::无法推送，状态可能丢失"; exit 1; }
+          echo "::warning::状态日志未能推送（不影响站点发布）"
 
       - name: 上传 Pages 产物
         uses: actions/upload-pages-artifact@v3
