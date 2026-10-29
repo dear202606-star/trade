@@ -453,7 +453,7 @@
       session: (quotes && quotes.session) || "",
       asOf: (quotes && quotes.ts_local) || "",
       live: live,
-      label: live ? "盘中" : "收盘",
+      label: "今日",
     };
   };
 

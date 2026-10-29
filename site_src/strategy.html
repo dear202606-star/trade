@@ -251,7 +251,7 @@ function renderStocks() {
     const el = document.getElementById('livePct');
     if (el && n && w > 0) {
       const v = chg / w;
-      el.innerHTML = '盘中 <b class="' + DSH.cls(v) + '">' + DSH.pct(v, 2) + '</b>' +
+      el.innerHTML = '今日 <b class="' + DSH.cls(v) + '">' + DSH.pct(v, 2) + '</b>' +
         '<span style="color:var(--txt-3)"> · 截至 ' + (qt.ts_local || '') + '</span>';
     } else if (el) {
       el.textContent = '';
