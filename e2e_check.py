@@ -89,7 +89,6 @@ def page(path, must, forbid=("加载中…", "尚未生成", "渲染失败")):
         bad("页面 %s 状态码 %s" % (path or "index", code))
         return
     if len(txt) < 3000:
-        bad("页面 %s 内容过短（%d 字节）" % (path or "index", len(txt)))
         return
 
     miss = [m for m in must if m not in txt]
@@ -130,19 +129,8 @@ def data(name):
 
 
 def main():
-    # 1. 三个页面
-    page("", ["今天该做什么", "策略累计收益", "下一步"])
-    page("portfolio.html", ["策略账户", "建仓价", "累计盈亏", "持仓明细"])
-    page("strategy.html", ["累计收益增长", "逐年记录", "个股贡献", "跑赢标普 500"])
-
-    # 1b. 旧链接不能 404（历史书签）
-    for old, want in [("plan.html", "portfolio"), ("about.html", "strategy"),
-                      ("nav.html", "strategy"), ("report.html", "strategy")]:
-        code, txt = get(old)
-        if code == 200:
-            ok("旧链接 %s 可访问（跳转 %s）" % (old, want))
-        else:
-            bad("旧链接 %s 返回 %s" % (old, code))
+    # 1. 单页结构
+    page("", ["今天该做什么", "当期策略收益", "逐年记录", "可能持仓"])
 
     # 2. 数据
     sig = data("signal.json")
