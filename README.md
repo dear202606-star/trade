@@ -66,7 +66,8 @@ python monthly_pick.py      # 信号（同月自动走增量）
 python equity.py            # 当期净值
 python strategy_history.py  # 历史（已锁定则 1 秒返回）
 python site_build.py        # 构建 docs/
-python selftest.py          # 部署前自检（29 项硬校验）
+python selftest.py          # 部署前自检（48 项硬校验）
+python simulate_rollover.py # 跨年仿真：任意日期推导全链路
 ```
 
 预览站点：`cd docs && python -m http.server 8768`

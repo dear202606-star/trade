@@ -83,6 +83,24 @@ def main():
           f"净值 {len(eq.get('points') or []) if eq else 0} 个交易日",
           "equity.json 净值样本不足")
 
+    # ---- 跨年链路：任意年份都必须能自动切换 ----
+    try:
+        import simulate_rollover as _sim
+        _days = ["2026-10-30", "2027-01-02", "2027-12-31", "2028-01-02", "2031-01-02"]
+        _rows = [_sim.simulate(d) for d in _days]
+        _bad = []
+        for _r in _rows:
+            if int(_r["官方基准月"][:4]) + 1 != _r["持有年度"]:
+                _bad.append(_r["日期"] + ":持有年度")
+            if _r["净值建仓月"] != _r["官方基准月"]:
+                _bad.append(_r["日期"] + ":建仓月")
+            if _r["日期"].endswith("-01-02") and _r["历史归档年份"] != int(_r["日期"][:4]) - 1:
+                _bad.append(_r["日期"] + ":归档年份")
+        check(not _bad, "跨年链路自洽（%d 个日期）" % len(_days),
+              "不自洽：%s" % _bad[:3])
+    except Exception as e:
+        warns.append("跨年仿真失败：%s" % e)
+
     # ---- 明年预览（年初至今前 3）----
     try:
         _pv = load("preview.json")
