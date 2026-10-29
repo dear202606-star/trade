@@ -88,6 +88,15 @@ def main():
             _inf = [x["ticker"] for x in _top if not isinstance(x.get("ytd"), (int, float))]
             check(not _inf, "预览涨幅为有限数", "异常：%s" % _inf)
             _om = _pv.get("official_month") or ""
+            _sig_om = (sig or {}).get("official_month") or ""
+            if _om == _sig_om:
+                check(_pv.get("final") is True,
+                      "预览已定稿（%s）" % _om,
+                      "官方月已等于基准月，但预览未标记定稿")
+            else:
+                check(_pv.get("final") is not True,
+                      "预览仍在预测期（官方 %s）" % _sig_om,
+                      "官方月 %s 与预览基准 %s 不同，却标记为已定稿" % (_sig_om, _om))
             check(_om.endswith("-12"), "预览基准月为 12 月（%s）" % _om, "基准月 %s" % _om)
     except Exception as e:
         warns.append("预览校验失败：%s" % e)

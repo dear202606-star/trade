@@ -36,6 +36,27 @@ def split_factor_after(ticker, base_ym):
     return f
 
 
+def resolve_final(sig, official_month, picks):
+    """年末定稿判定：官方排名月 == 预览基准月 → 直接用官方结果。"""
+    try:
+        if sig.get("official_month") == official_month and sig.get("official"):
+            out = []
+            for i, p in enumerate(sig["official"]):
+                out.append({
+                    "ticker": p["ticker"],
+                    "name": p.get("name", p["ticker"]),
+                    "sector": p.get("sector", ""),
+                    "price": None,
+                    "ytd": round(float(p.get("ret12") or 0), 4),
+                    "weight": round(float(p.get("weight") or 0), 4),
+                    "rank": i + 1,
+                })
+            return out, True
+    except Exception:
+        pass
+    return picks, False
+
+
 def main():
     q = json.load(open(os.path.join("docs", "data", "quotes.json"), encoding="utf-8"))
     quotes = q.get("quotes") or {}
@@ -43,6 +64,7 @@ def main():
     m["start_date"] = m["start_date"].astype(str)
     m["end_date"] = m["end_date"].fillna("2099-12-31").astype(str)
     today = (dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=8)).strftime("%Y-%m-%d")
+    official_month = "%d-12" % (int(BASE_YM[:4]) + 1)   # 次年持有的官方排名月
     live = set(m[(m.start_date <= today) & (m.end_date >= today)]["ticker"])
     sector, name_map = datafeed.load_sector()
 
@@ -116,7 +138,15 @@ def main():
         p["ytd"] = round(p["ytd"], 4)
         p["rank"] = picks.index(p) + 1
 
+    # ---- 年末定稿：官方排名月一旦等于预览基准月，直接采用已锁定的官方结果 ----
+    try:
+        _sig = json.load(open(os.path.join("docs", "data", "signal.json"), encoding="utf-8"))
+    except Exception:
+        _sig = {}
+    picks, final = resolve_final(_sig, official_month, picks)
+
     out = {
+        "final": final,
         "as_of": q.get("ts_local") or "",
         "as_of_ts": q.get("ts"),
         "session": q.get("session"),

@@ -77,7 +77,9 @@
     var q = (Q && Q.quotes) || {};
     var bdTxt = (EQ && EQ.base_date)
       ? EQ.base_date.slice(0, 4) + "-" + EQ.base_date.slice(4, 6) + "-" + EQ.base_date.slice(6, 8) : "—";
-    $("posNote").textContent = (y ? (y - 1) + "-12 选出 · " + y + " 全年持有 · " : "") + "建仓 " + bdTxt;
+    $("posNote").textContent = "建仓 " + bdTxt;
+    var pm = $("posMeta");
+    if (pm) pm.textContent = y ? ((y - 1) + "-12 选出 · " + y + " 全年持有") : "";
     $("posRows").innerHTML = c.rows.map(function (r) {
       var qq = q[r.ticker] || {};
       var eraw = (r.entry_raw != null) ? r.entry_raw : r.entry;
@@ -89,7 +91,8 @@
       var pnlAdj = mvAdj - r.cost;
       return '<div class="pr-row">' +
         '<div><div class="tk">' + DSH.esc(r.ticker) + '</div>' +
-          '<div class="nm">建仓 ' + eraw.toFixed(2) + ' · 现价 ' + liveRaw.toFixed(2) + '</div></div>' +
+          '<div class="nm">建仓 ' + eraw.toFixed(2) + '</div>' +
+          '<div class="nm">现价 ' + liveRaw.toFixed(2) + '</div></div>' +
         '<div class="r">' + Math.round(r.weight * 100) + '%</div>' +
         '<div class="r">' + eraw.toFixed(2) + '</div>' +
         '<div class="r">' + liveRaw.toFixed(2) + '</div>' +
@@ -127,7 +130,9 @@
     var y = PV.hold_year || "";
     $("nextYearTitle").textContent = y ? (y + " 年可能持仓") : "明年可能持仓";
     $("previewStamp").textContent = PV.as_of ? "截至 " + PV.as_of.slice(5) : "";
-    $("previewNote").textContent = (PV.official_month || "") + " 排名预览 · 年初至今涨幅 · 同行业最多 2 只";
+    $("previewNote").textContent = PV.final
+      ? "已定稿 · 与正式持仓一致"
+      : ((PV.official_month || "") + " 排名预览 · 年初至今涨幅 · 同行业最多 2 只");
     var SEC = {
       "Information Technology": "信息技术",
       "Communication Services": "通信服务",
