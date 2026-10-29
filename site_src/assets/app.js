@@ -136,6 +136,20 @@
         "Content-Type": "application/json",
       };
     }
+    // 网络不稳（尤其移动网络）时自动重试，避免一次抖动就报 Failed to fetch
+    async function req(url, opts, tries) {
+      const n = tries || 3;
+      let lastErr;
+      for (let i = 0; i < n; i++) {
+        try {
+          return await fetch(url, opts);
+        } catch (e) {
+          lastErr = e;
+          if (i < n - 1) await new Promise((r) => setTimeout(r, 300 * Math.pow(3, i)));
+        }
+      }
+      throw new Error("网络连接失败（已重试 " + n + " 次），请稍后再试");
+    }
     async function seal(code, data) {
       const body = JSON.stringify(data);
       const hash = await hexOf(code + "|" + body);
@@ -193,7 +207,7 @@
         try {
           const payload = await seal(c, data);
           const id = await idFor(c);
-          const r = await fetch(cfg.url + "/rest/v1/holdings?on_conflict=id", {
+          const r = await req(cfg.url + "/rest/v1/holdings?on_conflict=id", {
             method: "POST",
             headers: Object.assign(headers(), { Prefer: "resolution=merge-duplicates,return=minimal" }),
             body: JSON.stringify({ id: id, payload: payload }),
@@ -215,7 +229,7 @@
         const c = (code || api.code || "").trim().toUpperCase();
         if (!c) throw new Error("还没有同步码");
         const id = await idFor(c);
-        const r = await fetch(cfg.url + "/rest/v1/holdings?id=eq." + id + "&select=payload", { headers: headers() });
+        const r = await req(cfg.url + "/rest/v1/holdings?id=eq." + id + "&select=payload", { headers: headers() });
         if (!r.ok) throw new Error("拉取失败 " + r.status);
         const arr = await r.json();
         if (!arr.length) return null;
