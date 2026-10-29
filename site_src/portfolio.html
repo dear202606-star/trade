@@ -325,7 +325,7 @@ $('btnFromSignal').onclick = () => {
   DSH.save(PF); render(); renderOrders();
   DSH.toast('已投入 ' + DSH.money(deploy, PF.cur || 'USD') +
     (exp < 1 ? '（半仓，留存现金 ' + DSH.money(plan - deploy, PF.cur || 'USD') + '）' : '') +
-    ' 到 ' + PF.rows.length + ' 只');
+    ' 到 ' + PF.rows.length + ' 只。成本价=当时的现价，成交后可改成真实价格');
 };
 
 $('btnClear').onclick = () => {
