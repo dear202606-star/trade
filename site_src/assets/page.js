@@ -167,6 +167,12 @@
     $("bCagr").textContent = pct2(s.cagr, 1);
     $("bMdd").textContent = "-" + (Math.abs(s.worst_intra || 0) * 100).toFixed(1) + "%";
     $("bWin").textContent = s.wins + "/" + s.years;
+    if (rg) rg.textContent = (s.start && s.end) ? (s.start + "–" + s.end + " · " + s.years + " 年") : "";
+    var rg = $("allRange");
+    if (rg) {
+      rg.textContent = (s.start && s.end)
+        ? (s.start + "–" + s.end + " · " + s.years + " 年") : "";
+    }
     var bench = (SH.years || []).reduce(function (a, r) { return a * (1 + (r.bench || 0)); }, 1) - 1;
     $("bBench").textContent = pct2(bench, 0);
   }

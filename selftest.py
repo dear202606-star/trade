@@ -11,6 +11,7 @@
 """
 import json
 import os
+import re
 import sys
 import time
 
@@ -44,6 +45,14 @@ def main():
     p = os.path.join(DOCS, "index.html")
     check(os.path.exists(p) and os.path.getsize(p) > 2000,
           "页面 index.html", "页面缺失或过小：index.html")
+    _html = open(p, encoding="utf-8").read()
+    _hard = re.findall(r"20\d\d\s*[–\-]\s*20\d\d", _html)
+    check(not _hard, "页面无写死年份区间（动态推导）",
+          "发现写死：%s" % _hard[:3])
+    _hard2 = re.findall(r"20\d\d\s*年", _html)
+    check(not _hard2, "页面无写死年份标题（动态推导）",
+          "发现写死：%s" % _hard2[:3])
+
     for sec in ("todayPct", "yearRet", "bTotal", "yearRows", "posRows"):
         check(sec in open(p, encoding="utf-8").read(),
               f"单页含区块 {sec}", f"index.html 缺区块 {sec}")
