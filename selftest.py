@@ -72,6 +72,25 @@ def main():
           f"净值 {len(eq.get('points') or []) if eq else 0} 个交易日",
           "equity.json 净值样本不足")
 
+    # ---- 理论账户：加权建仓收益必须等于净值曲线 ----
+    try:
+        e = load("equity.json") or {}
+        pos = e.get("position") or []
+        if pos:
+            exp_ = e.get("exposure", 1.0)
+            w = sum(p["weight"] * (p["last"] / p["entry"]) for p in pos
+                    if p.get("entry") and p.get("last"))
+            calc = w * exp_ + (1 - exp_) - 1
+            want = (e.get("stats") or {}).get("strategy", 0)
+            check(abs(calc - want) < 1e-4,
+                  "理论账户与净值一致（%+.2f%%）" % (calc * 100),
+                  "账户口径与净值不符：%+.4f%% vs %+.4f%%" % (calc * 100, want * 100))
+            bad_pos = [p["ticker"] for p in pos if not (p.get("entry") or 0) > 0 or not (p.get("last") or 0) > 0]
+            check(not bad_pos, "全部持仓有建仓价与现价",
+                  "缺少建仓价/现价：" + ",".join(bad_pos))
+    except Exception as e2:
+        warns.append("理论账户校验失败：%s" % e2)
+
     # ---- 全链路一致性：行情 ↔ 持仓 ↔ 净值 ----
     qq = (q or {}).get("quotes") or {}
     sess = (q or {}).get("session") or ""

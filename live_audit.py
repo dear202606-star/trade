@@ -51,88 +51,54 @@ def main():
             href = cta.get_attribute("href")
             ck("portfolio" in (href or ""), "下单按钮指向持仓页", "href=%s" % href)
 
-        # ---------- 持仓：真实增删改 ----------
-        print("\n[持仓]")
+        # ---------- 策略账户 ----------
+        print("\n[策略账户]")
         pg.goto(BASE + "portfolio.html", wait_until="networkidle")
-        pg.evaluate("localStorage.clear()")
-        pg.reload(wait_until="networkidle"); pg.wait_for_timeout(1800)
-        n0 = pg.evaluate("() => (DSH.load().rows||[]).length")
-        pg.fill("#nTicker", "LITE"); pg.fill("#nShares", "40"); pg.fill("#nCost", "700")
-        pg.click("#btnAdd"); pg.wait_for_timeout(1200)
-        rows = pg.evaluate("() => DSH.load().rows||[]")
-        ck(len(rows) == n0 + 1 and rows[0]["ticker"] == "LITE", "新增持仓真实写入", str(rows[:1]))
-        # 持久化（刷新后还在）
-        pg.reload(wait_until="networkidle"); pg.wait_for_timeout(1500)
-        ck(pg.evaluate("() => (DSH.load().rows||[]).length") == 1, "刷新后持仓仍在（持久化）")
-        # 市值/盈亏是真的算出来的
-        mv = pg.locator("#tMv").inner_text()
-        ck(bool(re.search(r"\d", mv)) and mv.strip() not in ("$0", "—"), "总市值已计算", "值=%s" % mv)
-        # 错误代码必须被拒绝
-        pg.fill("#nTicker", "ZZZZ"); pg.fill("#nShares", "1"); pg.click("#btnAdd"); pg.wait_for_timeout(1000)
-        ck(pg.evaluate("() => (DSH.load().rows||[]).length") == 1, "错误代码被拒绝，不会静默入库")
-        # 删除
-        pg.locator("[data-del]").first.click(); pg.wait_for_timeout(900)
-        ck(pg.evaluate("() => (DSH.load().rows||[]).length") == 0, "删除持仓真实生效")
+        pg.wait_for_timeout(2500)
+        body = pg.inner_text("body")
+        ck("策略账户" in body, "页面为「策略账户」")
+        ck(all(k not in body for k in ["计划投入", "一键分配", "添加", "同步码", "成本价"]),
+           "无个人录入控件")
+        nrow = pg.locator(".pr-row").count()
+        ck(nrow == 4, "明细 3 只 + 表头（%d）" % nrow)
 
-        # ---------- 一键分配 ----------
-        print("\n[一键分配]")
-        pg.fill("#plan", "50000"); pg.dispatch_event("#plan", "input"); pg.wait_for_timeout(400)
-        pg.once("dialog", lambda d: d.accept())
-        pg.get_by_text("分配", exact=True).first.click(); pg.wait_for_timeout(1800)
-        rows = pg.evaluate("() => DSH.load().rows||[]")
-        ck(len(rows) == 3, "分配到 3 只", "实际 %d" % len(rows))
-        if rows:
-            tick = sorted(r["ticker"] for r in rows)
-            ck(tick == sorted(["LITE", "WDC", "HOOD"]), "分配的是当年信号股", str(tick))
-            cost = pg.locator("#tCash").inner_text()
-            ck("25" not in cost or True, "成本已写入（%s）" % cost)
+        eq = pg.evaluate("() => fetch('data/equity.json?t='+Date.now()).then(r=>r.json())")
+        ret_txt = pg.locator("#tRet").inner_text()
+        got = float(ret_txt.replace("%", "").replace("+", ""))
+        want = eq["stats"]["strategy"] * 100
+        ck(abs(got - round(want, 2)) <= 0.05,
+           "账户收益率 = 净值曲线（%s）" % ret_txt,
+           "不一致：页面 %s / 净值 %+.2f%%" % (ret_txt, want))
 
         aud = pg.evaluate("() => window.__audit ? window.__audit() : {ok:true,fails:[]}")
-        ck(aud.get("ok"), "线上数据自检通过", ";".join(aud.get("fails", [])[:3]))
+        ck(aud.get("ok"), "账户自检通过", ";".join(aud.get("fails", [])[:2]))
 
-        # 缺行情时不得伪造 0% 盈亏
-        pf_now = pg.evaluate("() => DSH.load()")
+        mv100 = pg.locator("#tMv").inner_text()
+        pg.locator('[data-amt="10000"]').click(); pg.wait_for_timeout(900)
+        mv10 = pg.locator("#tMv").inner_text()
+        f = lambda t: float(t.replace("$", "").replace(",", "") or 0)
+        ck(abs(f(mv10) * 10 - f(mv100)) / max(1, f(mv100)) < 0.02,
+           "本金 100万→10万 线性缩放（%s → %s）" % (mv100, mv10))
+        ret10 = pg.locator("#tRet").inner_text()
+        ck(ret10 == ret_txt, "切换本金不改变收益率")
+        pg.locator('[data-amt="100000"]').click(); pg.wait_for_timeout(600)
+
+        # 两个价格来源都缺时，必须显示「—」而不是编一个数字
+        def _strip_last(route):
+            d = json.loads(route.fetch().text())
+            if d.get("position"):
+                d["position"][0]["last"] = None
+            route.fulfill(status=200, body=json.dumps(d), headers={"Content-Type": "application/json"})
+        pg.route("**/data/equity.json*", _strip_last)
         pg.route("**/data/quotes.json*", lambda r: r.fulfill(status=200,
-                 body=json.dumps(dict(json.loads(r.fetch().text()), quotes={})),
+                 body=json.dumps({"quotes": {}, "session": "", "ts": ""}),
                  headers={"Content-Type": "application/json"}))
-        pg.reload(wait_until="networkidle"); pg.wait_for_timeout(2500)
-        mv_txt = pg.locator("#tMv").inner_text()
-        ret_txt = pg.locator("#tRet").inner_text()
-        warn_on = pg.locator("#qaBox").is_visible()
-        ck(mv_txt.strip() in ("$", "—", "") or "缺行情" in pg.inner_text("#qaBox"),
-           "缺行情时不再伪造市值（%s）" % mv_txt.strip(), "缺行情仍显示 %s" % mv_txt)
+        pg.reload(wait_until="networkidle"); pg.wait_for_timeout(2200)
+        row = pg.locator(".pr-row").nth(1).inner_text()
+        ck("—" in row, "缺价格显示「—」（该行：%s）" % row.replace(chr(10), " ")[:50],
+           "缺价格仍显示数值：%s" % row.replace(chr(10), " ")[:60])
+        pg.unroute("**/data/equity.json*")
         pg.unroute("**/data/quotes.json*")
-
-        # ---------- 导出 ----------
-        print("\n[导出]")
-        try:
-            with pg.expect_download(timeout=8000) as di:
-                pg.click("#btnExport")
-            d = di.value
-            ck(d.suggested_filename.endswith(".json"), "导出真的下载了文件", d.suggested_filename)
-        except Exception as e:
-            ck(False, "导出下载", str(e)[:60])
-
-        # ---------- 云同步（真实写库 → 换设备恢复） ----------
-        print("\n[云同步]")
-        before = len(supabase_rows())
-        if not pg.locator("#cloudBox").is_visible():
-            pg.click("#btnCloud"); pg.wait_for_timeout(1200)
-        pg.click("#cloudNew"); pg.wait_for_timeout(4000)
-        code = pg.input_value("#cloudCode")
-        ck(bool(re.fullmatch(r"[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}", code or "")), "生成同步码 %s" % code)
-        after = len(supabase_rows())
-        ck(after == before + 1, "云端真的多了一行", "%d→%d" % (before, after))
-        # 换「设备」
-        pg2 = ctx.new_page()
-        pg2.goto(BASE + "portfolio.html", wait_until="networkidle")
-        pg2.evaluate("localStorage.clear()"); pg2.reload(wait_until="networkidle"); pg2.wait_for_timeout(1500)
-        if not pg2.locator("#cloudBox").is_visible():
-            pg2.click("#btnCloud"); pg2.wait_for_timeout(1500)
-        pg2.fill("#cloudCode", code); pg2.click("#cloudBind"); pg2.wait_for_timeout(5000)
-        r2 = pg2.evaluate("() => DSH.load().rows||[]")
-        ck(len(r2) == 3, "另一浏览器凭码恢复 %d 条" % len(r2), str([x["ticker"] for x in r2]))
-        pg2.close()
 
         # ---------- 策略页 ----------
         print("\n[策略]")

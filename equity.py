@@ -147,6 +147,9 @@ def main():
         "weights": [{"ticker": p["ticker"], "weight": p["weight"]} for p in official],
         "benchmark": "SPY",
         "points": pts,
+        # 理论账户：建仓价 = 基准日收盘价，现价 = 最新交易日收盘价
+        # 页面按「本金 × 权重 ÷ 建仓价」换算股数，与净值曲线同一口径
+        "position": [],
         "stats": {
             "strategy": round(ret, 6),
             "benchmark": round(bret, 6),
@@ -155,6 +158,23 @@ def main():
             "days": len(pts),
         },
     }
+
+    last_day = pts[-1]["d"]
+    for p in official:
+        t = p["ticker"]
+        bd, bp = base_px.get(t, (None, None))
+        px = data[t].get(last_day)
+        if px is None:
+            cand = [k for k in sorted(data[t]) if k <= last_day]
+            px = data[t][cand[-1]] if cand else None
+        out["position"].append({
+            "ticker": t,
+            "weight": p["weight"],
+            "entry_date": bd,
+            "entry": round(bp, 4) if bp else None,
+            "last_date": last_day,
+            "last": round(px, 4) if px else None,
+        })
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, separators=(",", ":"))

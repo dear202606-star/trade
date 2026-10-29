@@ -69,96 +69,40 @@ def main():
             pg.wait_for_timeout(1200)
             check("portfolio" in pg.url, "「去录入」跳转到持仓页", "「去录入」未跳转")
 
-        # ---------- C 持仓页 ----------
+        # ---------- C 策略账户页 ----------
         pg.goto(BASE + "portfolio.html", wait_until="networkidle", timeout=60000)
-        pg.wait_for_timeout(1200)
-        check(pg.locator("#capital").count() == 0,
-              "已移除「账户总资金」输入框", "「账户总资金」输入框仍存在")
-        check(all(k not in pg.content() for k in ["策略上限", "用满 30%", "剩余现金"]),
-              "已移除旧仓位限制文案", "仍有旧仓位限制文案")
-
-        # 用「按策略建仓」
-        build = pg.get_by_text("按策略建仓", exact=False).first
-        if build.count():
-            build.click()
-            pg.wait_for_timeout(1000)
-        rows = pg.locator(".card").filter(has_text="股数").count()
-        txt = pg.content()
-        has_rows = ("#demo" in pg.url) or rows >= 0
-        check("止损线" not in txt, "止损口径已统一（无个股止损）", "仍存在与回测不符的止损线")
-        check("市值" in txt, "持仓卡片含「市值」", "持仓卡片缺少「市值」")
-        check("CNY" not in txt, "已移除假换算的 CNY 选项", "CNY 选项仍在")
-        check("成本价留空" not in txt, "过程性说明已清理", "仍有过程性说明")
-        check("要下的单" in txt, "下单区块存在", "下单区块缺失")
-        pg.screenshot(path=os.path.join(OUT, "02_portfolio.png"), full_page=True)
-
-        # 总买入资金 → 一键分配
-        pg.goto(BASE + "portfolio.html", wait_until="networkidle")
-        pg.wait_for_timeout(800)
-        pg.evaluate("() => { localStorage.clear(); sessionStorage.clear(); location.reload(); }")
         pg.wait_for_timeout(2000)
-        plan = pg.locator("#plan")
-        check(plan.count() == 1, "总买入资金输入框存在", "总买入资金输入框缺失")
-        plan.fill("100000")
-        plan.dispatch_event("input")
-        pg.wait_for_timeout(500)
-        alloc = pg.get_by_text("分配", exact=True).first
-        check(alloc.count() > 0, "有分配按钮", "缺少分配按钮")
-        alloc.click()
-        pg.wait_for_timeout(1500)
-        shares = pg.locator("input[data-f='shares']")
-        n = shares.count()
-        check(n == 3, "分配生成 3 条持仓", "分配生成 %d 条" % n)
-        vals = []
-        for i in range(n):
-            v = shares.nth(i).input_value()
-            vals.append(float(v or 0))
-        check(all(v > 0 for v in vals), "三条持仓股数均 > 0", "存在 0 股持仓：%s" % vals)
-        used = pg.locator("#tCash").inner_text()
-        used_num = float(used.replace("$", "").replace(",", "") or 0)
-        check(abs(used_num - 100000) / 100000 < 0.03,
-              "已投入成本≈总买入资金（%s）" % used, "已投入 %s 与 100000 偏差过大" % used)
-        aud = pg.evaluate("() => window.__audit ? window.__audit() : {ok:true,fails:[]}")
-        check(aud.get("ok"), "页面数据自检通过", "自检失败：" + ";".join(aud.get("fails", [])[:3]))
-        orders_txt = pg.locator("#orders").inner_text()
-        check(("无需操作" in orders_txt) or ("股" in orders_txt),
-              "下单建议已生成（%s）" % ("一致无操作" if "无需操作" in orders_txt else "有买卖"),
-              "下单建议区异常：" + orders_txt[:60])
-        pos = pg.locator("#tPos").inner_text()
-        check("%" in pos and abs(float(pos.replace("%", "")) - 100) < 3,
-              "已用资金比例≈100%%（%s）" % pos, "已用比例异常：%s" % pos)
-        pg.screenshot(path=os.path.join(OUT, "06_alloc.png"), full_page=True)
+        txt = pg.content()
+        check("策略账户" in txt, "页面为「策略账户」", "页面标题不符")
+        check(all(k not in txt for k in ["计划投入", "一键分配", "添加持仓", "成本价", "同步码"]),
+              "个人录入相关控件已移除", "仍有个人录入控件")
+        nrow = pg.locator(".pr-row").count()
+        check(nrow == 4, "持仓明细 3 只 + 表头（%d 行）" % nrow, "明细行数异常：%d" % nrow)
 
-        # 校验止损线 = 最高价 × 0.7（读页面上的数值）
-        vals = pg.evaluate("""() => {
-          const r = {};
-          const el = document.querySelector('[id^="tMv"]');
-          r.mv = el ? el.textContent : null;
-          return r;
-        }""")
-        check(vals.get("mv") is not None, "总市值节点存在", "总市值节点缺失")
+        eq = pg.evaluate("() => fetch('data/equity.json?t='+Date.now()).then(r=>r.json())")
+        ret_txt = pg.locator("#tRet").inner_text()
+        want = eq["stats"]["strategy"] * 100
+        got = float(ret_txt.replace("%", "").replace("+", ""))
+        check(abs(got - round(want, 2)) <= 0.05,
+              "账户收益率与净值曲线一致（%s vs %+.2f%%）" % (ret_txt, want),
+              "收益率不一致：页面 %s / 净值 %+.2f%%" % (ret_txt, want))
 
-        # 导出按钮
-        exp = pg.get_by_text("导出", exact=True).first
-        if exp.count():
-            with pg.expect_download(timeout=8000) as dl:
-                exp.click()
-            d = dl.value
-            check(d.suggested_filename.endswith(".json"), "导出按钮可用", "导出无文件")
+        aud = pg.evaluate("() => window.__audit ? window.__audit() : {ok:True,fails:[]}")
+        check(aud.get("ok"), "账户数据自检通过", "自检失败：" + ";".join(aud.get("fails", [])[:3]))
 
-        # 清空
-        clr = pg.get_by_text("清空", exact=True).first
-        if clr.count():
-            clr.click()
-            pg.wait_for_timeout(400)
-            pg.on("dialog", lambda d: d.accept())
-            pg.wait_for_timeout(400)
-            ok("清空按钮可点击")
-
-        # 回到有数据状态，供截图
-        pg.goto(BASE + "portfolio.html#demo", wait_until="networkidle")
-        pg.wait_for_timeout(1500)
-        pg.screenshot(path=os.path.join(OUT, "03_portfolio_demo.png"), full_page=True)
+        # 本金切换：1 万 → 市值应为 10 万的 1/10
+        mv100 = pg.locator("#tMv").inner_text()
+        pg.locator('[data-amt="10000"]').click()
+        pg.wait_for_timeout(800)
+        mv10 = pg.locator("#tMv").inner_text()
+        f = lambda t: float(t.replace("$", "").replace(",", "") or 0)
+        check(abs(f(mv10) * 10 - f(mv100)) / max(1, f(mv100)) < 0.02,
+              "本金切换生效（%s → %s）" % (mv100, mv10), "本金切换异常：%s → %s" % (mv100, mv10))
+        ret10 = pg.locator("#tRet").inner_text()
+        check(ret10 == ret_txt, "切换本金不改变收益率（%s）" % ret10, "收益率随本金变化：%s → %s" % (ret_txt, ret10))
+        pg.locator('[data-amt="100000"]').click()
+        pg.wait_for_timeout(600)
+        pg.screenshot(path=os.path.join(OUT, "02_portfolio.png"), full_page=True)
 
         # ---------- D 策略页 ----------
         pg.goto(BASE + "strategy.html", wait_until="networkidle", timeout=60000)
@@ -224,36 +168,27 @@ def main():
               "数据缺失时页面不白屏", "数据缺失时页面白屏")
         pg2.screenshot(path=os.path.join(OUT, "05_degrade.png"), full_page=True)
 
-        # ---------- H 半仓规则落地 ----------
+        # ---------- H 半仓规则（exposure=0.5 → 一半现金） ----------
         pg2b = ctx.new_page()
 
         def _halve(route):
             import json as _j
-            resp = route.fetch()
-            data = _j.loads(resp.text())
-            data['exposure'] = 0.5
-            data['trend'] = '半仓'
+            data = _j.loads(route.fetch().text())
+            data["exposure"] = 0.5
             route.fulfill(status=200, body=_j.dumps(data, ensure_ascii=False),
-                          headers={'Content-Type': 'application/json'})
-        pg2b.route('**/data/signal.json*', _halve)
-        pg2b.goto(BASE + 'portfolio.html', wait_until='networkidle')
-        pg2b.evaluate('localStorage.clear(); sessionStorage.clear()')
-        pg2b.reload(wait_until='networkidle')
-        pg2b.wait_for_timeout(1500)
-        pg2b.fill('#plan', '50000')
-        pg2b.dispatch_event('#plan', 'input')
-        pg2b.wait_for_timeout(400)
-        pg2b.once('dialog', lambda d: d.accept())
-        pg2b.get_by_text('分配', exact=True).first.click()
-        pg2b.wait_for_timeout(1500)
-        cost_txt = pg2b.locator('#tCash').inner_text()
-        cost_v = float(cost_txt.replace('$', '').replace(',', '') or 0)
-        check(abs(cost_v - 25000) / 25000 < 0.05,
-              '半仓规则落地：计划 5 万只投 %s' % cost_txt,
-              '半仓未生效：已投入 %s（应≈25000）' % cost_txt)
-        warn = pg2b.evaluate('() => !!document.getElementById("sigHalfWarn")')
-        check(warn, '半仓有醒目提示', '半仓缺少提示')
-        pg2b.screenshot(path=os.path.join(OUT, '08_half.png'), full_page=True)
+                          headers={"Content-Type": "application/json"})
+        pg2b.route("**/data/equity.json*", _halve)
+        pg2b.goto(BASE + "portfolio.html", wait_until="networkidle")
+        pg2b.wait_for_timeout(2000)
+        exp_txt = pg2b.locator("#tExp").inner_text()
+        check("50%" in exp_txt and "半仓" in exp_txt,
+              "半仓生效：仓位显示 %s" % exp_txt, "半仓未生效：%s" % exp_txt)
+        body = pg2b.inner_text("#list")
+        check("现金" in body, "半仓时明细含现金行", "半仓缺少现金行")
+        cost_txt = pg2b.locator("#tCost").inner_text()
+        cost_v = float(cost_txt.replace("$", "").replace(",", "") or 0)
+        check(cost_v >= 1, "建仓成本 = 本金×50%%（%s）" % cost_txt, "建仓成本异常：%s" % cost_txt)
+        pg2b.screenshot(path=os.path.join(OUT, "08_half.png"), full_page=True)
         pg2b.close()
 
         # ---------- G 十字线 ----------

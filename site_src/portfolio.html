@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>我的持仓 · LEADER QUANT</title>
+<title>策略账户 · LEADER QUANT</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="assets/app.css">
 <script src="assets/app.js"></script>
@@ -10,35 +10,47 @@
 <div class="wrap">
 
   <div class="head">
-    <div class="eyebrow">Portfolio</div>
-    <h1>我的持仓</h1>
+    <div class="eyebrow">Account</div>
+    <h1>策略账户</h1>
+    <div class="sub" id="acctSub">按策略执行的示范账户，所有人看到的一致</div>
   </div>
 
-  <!-- 总览 -->
+  <!-- 账户总览 -->
   <div class="card fade-in" style="padding:28px 30px">
+    <div class="row" style="align-items:center;gap:10px;margin-bottom:18px">
+      <div class="label" style="margin:0">本金</div>
+      <div class="row" style="gap:6px" id="amtSwitch">
+        <button class="btn sm ghost" data-amt="10000">1 万</button>
+        <button class="btn sm primary" data-amt="100000">10 万</button>
+        <button class="btn sm ghost" data-amt="1000000">100 万</button>
+      </div>
+      <div class="grow"></div>
+      <div class="sub" id="acctStamp"></div>
+    </div>
+
     <div class="row" style="align-items:flex-start">
       <div class="grow">
-        <div class="label">浮动盈亏</div>
+        <div class="label">累计盈亏</div>
         <div class="num num-xl" id="tPnl">—</div>
         <div class="sub" id="tPnlPct"></div>
       </div>
       <div style="text-align:right" id="tDayBox">
-        <div class="label" id="tDayLabel">今日</div>
+        <div class="label" id="tDayLabel">最近交易日</div>
         <div class="num num-lg" id="tDay">—</div>
         <div class="sub" id="tDayPct"></div>
       </div>
     </div>
+
     <div class="grid g4" style="margin-top:24px;gap:12px">
       <div class="card flat"><div class="label" style="margin-bottom:6px">总市值</div><div class="num num-md" id="tMv">—</div></div>
-      <div class="card flat"><div class="label" style="margin-bottom:6px">持仓成本</div><div class="num num-md" id="tCash">—</div></div>
+      <div class="card flat"><div class="label" style="margin-bottom:6px">建仓成本</div><div class="num num-md" id="tCost">—</div></div>
       <div class="card flat"><div class="label" style="margin-bottom:6px">收益率</div><div class="num num-md" id="tRet">—</div></div>
-      <div class="card flat"><div class="label" style="margin-bottom:6px">仓位（已投入÷计划）</div><div class="num num-md" id="tPos">—</div>
-        <div class="bar"><i id="tPosBar" style="width:0%"></i></div></div>
+      <div class="card flat"><div class="label" style="margin-bottom:6px">仓位</div><div class="num num-md" id="tExp">—</div></div>
     </div>
     <div id="qaBox" class="tip warn" style="display:none;margin-top:14px"></div>
   </div>
 
-  <!-- 年度持仓 + 当月排名 -->
+  <!-- 年度持仓 -->
   <div class="card" style="margin-top:16px;padding:20px 24px">
     <div class="row" style="align-items:baseline;margin-bottom:14px">
       <div class="label" style="margin:0" id="sigTitle">本年持仓</div>
@@ -55,567 +67,242 @@
     </div>
   </div>
 
-  <!-- 投入与分配 -->
-  <div class="card" style="margin-top:16px">
-    <div class="row">
-      <div class="field" style="width:190px">
-        <label>计划投入</label>
-        <input id="plan" type="number" min="0" step="1000" placeholder="例如 100000" class="num-in">
-      </div>
-      <button class="btn primary" id="btnFromSignal">分配</button>
+  <!-- 持仓明细 -->
+  <div style="margin-top:30px">
+    <div class="row" style="align-items:baseline;margin-bottom:10px">
+      <div class="label" style="font-size:12px;margin:0">持仓明细</div>
       <div class="grow"></div>
-      <button class="btn ghost" id="btnCloud">同步</button>
-      <button class="btn ghost" id="btnExport">导出</button>
-      <button class="btn ghost" id="btnImport">导入</button>
+      <div class="sub" id="posHint" style="font-size:11.5px"></div>
     </div>
-    <div class="tip" id="capHint" style="margin-top:16px"></div>
-
-    <!-- 云同步面板 -->
-    <div id="cloudBox" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.07)">
-      <div class="row" style="gap:8px;flex-wrap:wrap">
-        <input id="cloudCode" class="num-in" placeholder="同步码，例如 ABCD-EFGH-JKLM"
-               style="flex:1;min-width:200px;max-width:280px;letter-spacing:.06em;text-transform:uppercase">
-        <button class="btn primary" id="cloudNew">新建</button>
-        <button class="btn" id="cloudBind">绑定</button>
-        <button class="btn ghost" id="cloudUpload">上传</button>
-        <button class="btn ghost" id="cloudDownload">拉取</button>
-        <button class="btn ghost" id="cloudOff">解绑</button>
-      </div>
-      <div class="tip" id="cloudHint" style="margin-top:12px"></div>
-    </div>
+    <div class="card" style="padding:6px 0" id="list"></div>
   </div>
 
-  <!-- 持仓列表 -->
-  <div style="margin-top:34px">
-    <div class="label" style="font-size:12px">持仓明细</div>
-    <div class="grid" id="list" style="gap:10px"></div>
-
-    <!-- 添加 -->
-    <div class="card" style="margin-top:14px;padding:18px 20px">
-      <div class="row">
-        <div class="field" style="width:150px"><label>代码</label>
-          <input id="nTicker" placeholder="LITE" style="text-transform:uppercase;font-weight:700"></div>
-        <div class="field" style="width:130px"><label>股数</label>
-          <input id="nShares" type="number" step="0.0001" placeholder="35.7" class="num-in"></div>
-        <div class="field" style="width:140px"><label>成本价</label>
-          <input id="nCost" type="number" step="0.01" placeholder="756.17" class="num-in"></div>
-        <button class="btn primary" id="btnAdd">添加</button>
-        <div class="grow"></div>
-        <button class="btn ghost" id="btnClear" style="color:#FF9A9E">清空</button>
-      </div>
-    </div>
+  <div class="foot">
+    <div id="dataStamp"></div>
+    理论账户：按建仓日收盘价买入、不计手续费与滑点 ｜ 仅供研究，不构成投资建议
   </div>
-
-  <div style="margin-top:44px">
-    <div class="label" style="font-size:12px">要下的单</div>
-    <div class="grid" id="orders" style="gap:10px"></div>
-  </div>
-
-  <div class="foot">盈亏不含手续费 ｜ 仅供研究，不构成投资建议</div>
 </div>
-<script>
-// 从总览点「我要下单」直接滚到清单
-if (location.hash === '#orders') {
-  setTimeout(function () {
-    var el = document.getElementById('orders');
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, 600);
-}
-</script>
 
 <script>
-let PF = DSH.load();
-let Q = { quotes: {}, fx: 7.1 };
-let SIG = null;
-const $ = (id) => document.getElementById(id);
+(async function () {
+  const $ = (id) => document.getElementById(id);
+  const AMTS = [10000, 100000, 1000000];
+  let amt = +(localStorage.getItem('dsh.amt') || 100000);
+  if (AMTS.indexOf(amt) < 0) amt = 100000;
 
-function render() {
-  
+  let EQ = null, SIG = null, Q = { quotes: {} };
 
-  DSH.updatePeaks(PF, Q.quotes || {});
-  const c = DSH.compute(PF, Q.quotes, Q.fx);
-  const cur = PF.cur || 'USD';
-
-  const p = $('tPnl');
-  p.textContent = PF.rows.length ? DSH.money(c.pnl, cur) : '—';
-  p.className = 'num num-xl ' + DSH.cls(c.pnl);
-  $('tPnlPct').innerHTML = PF.rows.length
-    ? '<span class="' + DSH.cls(c.pnlPct) + '">' + DSH.pct(c.pnlPct) + '</span> ｜ 成本 ' + DSH.money(c.cost, cur)
-    : '还没有持仓';
-  const d = $('tDay');
-  const dayBox = $('tDayBox');
-  // 没有可比的「当日涨跌」时，整块隐藏，不留无意义的「— / +0.00%」
-  if (!PF.rows.length || !c.dayValid) {
-    dayBox.style.display = 'none';
-  } else {
-    dayBox.style.display = '';
-    if (c.session) $('tDayLabel').textContent = '最近交易日 ' + c.session.slice(5);
-    d.textContent = DSH.money(c.dayPnl, cur);
-    d.className = 'num num-lg ' + DSH.cls(c.dayPnl);
-    $('tDayPct').innerHTML = '<span class="' + DSH.cls(c.dayPct) + '">' + DSH.pct(c.dayPct) + '</span>';
+  function money(v, d) {
+    if (v == null || isNaN(v)) return '—';
+    const a = Math.abs(v);
+    const s = a >= 1e4 ? Math.round(a).toLocaleString('en-US') : a.toLocaleString('en-US', { maximumFractionDigits: d == null ? 2 : d });
+    return (v < 0 ? '-' : '') + '$' + s;
   }
 
-  $('tMv').textContent = DSH.money(c.mv, cur);
-  $('tCash').textContent = DSH.money(c.cost, cur);
-  const tr = $('tRet');
-  if (PF.rows.length && c.costPriced > 0) {
-    tr.textContent = DSH.pct(c.pnlPct);
-    tr.className = 'num num-md ' + DSH.cls(c.pnl);
-  } else {
-    tr.textContent = '—'; tr.className = 'num num-md';
+  // 由 equity.position 生成理论账户（本金 × 权重 ÷ 建仓价 = 股数）
+  function build() {
+    const pos = (EQ && EQ.position) || [];
+    const exp = EQ && EQ.exposure != null ? EQ.exposure : 1;
+    const quotes = (Q && Q.quotes) || {};
+    const rows = pos.map((p) => {
+      const budget = amt * (p.weight || 0) * exp;
+      const entry = p.entry, last = p.last;
+      const shares = entry > 0 ? budget / entry : null;
+      const mv = shares != null && last > 0 ? shares * last : null;
+      const q = quotes[p.ticker];
+      const qPrice = q && q.p > 0 ? q.p : null;
+      // 统一用净值文件的收盘价（与「策略表现」同源），行情只用于「当日涨跌」，
+      // 避免两个数据源不同步导致收益率对不上
+      const price = last > 0 ? last : qPrice;
+      const mvNow = shares != null && price > 0 ? shares * price : null;
+      return {
+        ticker: p.ticker, weight: p.weight, entry, shares, price,
+        mv: mvNow, cost: budget,
+        pnl: mvNow != null ? mvNow - budget : null,
+        pnlPct: mvNow != null && budget > 0 ? (mvNow - budget) / budget : null,
+        dayPct: q && q.chg != null ? q.chg : null,
+        name: (q && q.name) || p.ticker,
+        hasQuote: price > 0,
+      };
+    });
+    const cash = amt * (1 - exp);
+    const mv = rows.reduce((a, r) => a + (r.mv || 0), 0) + cash;
+    const pnl = mv - amt;
+    rows.forEach((r) => { r.w = mv > 0 ? (r.mv || 0) / mv : 0; });
+    const dayPnl = rows.reduce((a, r) => a + (r.dayPct != null && r.mv != null ? r.mv * (r.dayPct / (1 + r.dayPct)) : 0), 0);
+    return {
+      rows, amt, cash, mv, cost: amt * exp, pnl,
+      pnlPct: amt > 0 ? pnl / amt : null,
+      dayPnl, exp,
+      dayPct: mv - dayPnl > 0 ? dayPnl / (mv - dayPnl) : null,
+      missing: rows.filter((r) => !r.hasQuote).length,
+    };
   }
-  // 调试/测试钩子：页面自检结果（不显示给用户）
-  window.__audit = function () {
-    const cc = DSH.compute(PF, Q.quotes || {}, Q.fx);
-    return DSH.audit(PF, Q.quotes || {}, cc);
-  };
-  $('tPos').textContent = c.plan > 0 ? (c.deployed * 100).toFixed(0) + '%' : '—';
-  $('tPosBar').style.width = Math.min(100, c.deployed * 100) + '%';
-  $('tPosBar').className = c.deployed > 1.001 ? 'over' : '';
 
-  // 数据质量：缺行情的持仓不计入市值/盈亏，并明确告诉用户
-  const qa = $('qaBox');
-  if (qa) {
-    const aud = DSH.audit(PF, Q.quotes || {}, c);
-    if (!aud.ok) {
+  function audit(c) {
+    const fails = [];
+    if (c.rows.some((r) => r.mv == null && r.hasQuote)) fails.push('部分持仓市值缺失');
+    const sum = c.rows.reduce((a, r) => a + (r.mv || 0), 0) + c.cash;
+    if (Math.abs(sum - c.mv) > Math.max(1, c.mv * 1e-6)) fails.push('市值合计不一致');
+    if (c.cost > 0 && Math.abs(c.pnl - (c.mv - c.cost - c.cash)) > Math.max(1, Math.abs(c.pnl) * 1e-6)) {
+      fails.push('盈亏合计不一致');
+    }
+    c.rows.forEach((r) => {
+      if (r.entry != null && !(r.entry > 0)) fails.push(r.ticker + ' 建仓价无效');
+      if (r.dayPct != null && (r.dayPct > 1.5 || r.dayPct < -1.5)) fails.push(r.ticker + ' 当日涨跌异常');
+    });
+    return { ok: !fails.length, fails };
+  }
+
+  function render() {
+    if (!EQ) return;
+    const c = build();
+
+    $('tPnl').textContent = money(c.pnl);
+    $('tPnl').className = 'num num-xl ' + DSH.cls(c.pnl);
+    $('tPnlPct').innerHTML = '<span class="' + DSH.cls(c.pnlPct) + '">' + DSH.pct(c.pnlPct) +
+      '</span> ｜ 本金 ' + money(c.amt, 0);
+
+    if (c.dayPct == null) {
+      $('tDayBox').style.display = 'none';
+    } else {
+      $('tDayBox').style.display = '';
+      $('tDayLabel').textContent = '最近交易日 ' + (EQ.base_date || '').slice(4) ? '' : '';
+      const sess = (Q && Q.session) || '';
+      if (sess) $('tDayLabel').textContent = '最近交易日 ' + sess.slice(5);
+      $('tDay').textContent = money(c.dayPnl);
+      $('tDay').className = 'num num-lg ' + DSH.cls(c.dayPnl);
+      $('tDayPct').innerHTML = '<span class="' + DSH.cls(c.dayPct) + '">' + DSH.pct(c.dayPct) + '</span>';
+    }
+
+    $('tMv').textContent = money(c.mv);
+    $('tCost').textContent = money(c.cost);
+    $('tRet').textContent = DSH.pct(c.pnlPct);
+    $('tRet').className = 'num num-md ' + DSH.cls(c.pnlPct);
+    $('tExp').textContent = Math.round(c.exp * 100) + '%' + (c.exp < 1 ? '（半仓）' : '');
+
+    const qa = $('qaBox'), a = audit(c);
+    if (!a.ok) {
       qa.style.display = '';
-      qa.className = 'tip warn';
-      qa.innerHTML = '⚠ 数据校验未通过：' + DSH.esc(aud.fails.join('；')) +
-        '<br><span style="font-size:11.5px;color:var(--txt-3)">页面数字可能有误，请刷新或稍后再试</span>';
-    } else if (c.missingCount > 0) {
+      qa.innerHTML = '⚠ 数据校验未通过：' + DSH.esc(a.fails.join('；'));
+    } else if (c.missing > 0) {
       qa.style.display = '';
-      qa.className = 'tip warn';
-      qa.innerHTML = '⚠ ' + c.missingCount + ' 只缺行情（' + DSH.esc(c.missingTickers.join('、')) +
-        '），未计入市值与盈亏';
+      qa.innerHTML = '⚠ ' + c.missing + ' 只暂时没有行情，已按最近收盘价计算';
     } else {
       qa.style.display = 'none';
     }
-  }
-  
-  
 
-  /* 资金说明：总买入资金 → 已投入 / 剩余（只留关键数字） */
-  const capHint = $('capHint');
-  if (!c.plan) {
-    capHint.style.display = 'none';
-  } else {
-    capHint.style.display = '';
-    capHint.innerHTML = '总买入资金 <b>' + DSH.money(c.plan, cur) + '</b>' +
-      ' ｜ 已投入 <b>' + DSH.money(c.cost, cur) + '</b>' +
-      ' ｜ 剩余 <b>' + DSH.money(c.remain, cur) + '</b>';
-  }
+    // 明细表
+    $('posHint').textContent = '建仓日 ' + (EQ.base_date || '').slice(0, 4) + '-' +
+      (EQ.base_date || '').slice(4, 6) + '-' + (EQ.base_date || '').slice(6, 8) + ' 收盘价买入';
+    const head = '<div class="pr-row pr-head">' +
+      '<div>代码</div><div class="ta-r">权重</div><div class="ta-r">建仓价</div>' +
+      '<div class="ta-r">现价</div><div class="ta-r">涨跌</div>' +
+      '<div class="ta-r">市值</div><div class="ta-r">盈亏</div><div class="ta-r">贡献</div></div>';
+    const body = c.rows.map((r) => {
+      const contrib = c.pnl !== 0 && r.pnl != null ? r.pnl / Math.abs(c.amt) : null;
+      return '<div class="pr-row">' +
+        '<div><div class="tk">' + DSH.esc(r.ticker) + '</div>' +
+          '<div class="nm">' + DSH.esc((r.name || '').slice(0, 18)) + '</div></div>' +
+        '<div class="ta-r num">' + Math.round(r.weight * 100) + '%</div>' +
+        '<div class="ta-r num">' + (r.entry != null ? r.entry.toFixed(2) : '—') + '</div>' +
+        '<div class="ta-r num">' + (r.price != null ? r.price.toFixed(2) : '—') + '</div>' +
+        '<div class="ta-r num ' + DSH.cls(r.pnlPct) + '">' + DSH.pct(r.pnlPct) + '</div>' +
+        '<div class="ta-r num">' + money(r.mv) + '</div>' +
+        '<div class="ta-r num ' + DSH.cls(r.pnl) + '">' + money(r.pnl) + '</div>' +
+        '<div class="ta-r num ' + DSH.cls(r.pnl) + '">' + DSH.pct(contrib) + '</div></div>';
+    }).join('');
+    const cashRow = c.cash > 0
+      ? '<div class="pr-row" style="opacity:.75"><div><div class="tk">现金</div>' +
+        '<div class="nm">半仓未投入</div></div><div class="ta-r num">—</div><div class="ta-r num">—</div>' +
+        '<div class="ta-r num">—</div><div class="ta-r num">—</div><div class="ta-r num">' + money(c.cash) +
+        '</div><div class="ta-r num">—</div><div class="ta-r num">—</div></div>'
+      : '';
+    $('list').innerHTML = head + body + cashRow;
 
+    // 顶部说明
+    $('acctSub').innerHTML = '按策略执行的示范账户 ｜ 每股按建仓日收盘价买入，与「策略表现」同一口径';
 
-  if (!PF.rows.length) {
-    $('list').innerHTML = '<div class="card" style="text-align:center;padding:38px 20px;color:var(--txt-3)">' +
-      '还没有持仓 · 用下面的输入框添加，或点「分配」</div>';
-    return;
-  }
+    // 数据时间
+    const t = (Q && Q.ts) ? new Date(Q.ts) : null;
+    const pad = (n) => String(n).padStart(2, '0');
+    $('dataStamp').innerHTML = (Q && Q.session
+      ? '行情 <b style="color:var(--txt-2)">' + DSH.esc(Q.session) + '</b> 收盘'
+      : '') +
+      (t ? ' ｜ 抓取于 <b style="color:var(--txt-2)">' + (t.getMonth() + 1) + '-' + pad(t.getDate()) +
+        ' ' + pad(t.getHours()) + ':' + pad(t.getMinutes()) + '</b>' : '') +
+      (EQ && EQ.updated ? ' ｜ 净值更新 <b style="color:var(--txt-2)">' + DSH.esc(EQ.updated) + '</b>' : '');
 
-  const tg = DSH.targets(SIG);
-  $('list').innerHTML = c.rows.map((r, i) => {
-    const t = tg[r.ticker];
-    const dev = t != null ? r.weight - t : null;
-    const devTxt = dev == null ? '' : (Math.abs(dev) < 0.005 ? '符合目标'
-      : (dev > 0 ? '超配 ' : '低配 ') + Math.abs(dev * 100).toFixed(1) + 'pt');
-    return '<div class="holding hold-row">' +
-      '<div><div class="tk">' + DSH.esc(r.ticker) + '</div><div class="nm">' + DSH.esc(r.name || '') + '</div>' +
-        '<div class="bar" style="max-width:120px"><i class="' + (dev > 0.01 ? 'over' : '') +
-        '" style="width:' + Math.min(100, r.weight * 330) + '%"></i></div></div>' +
-      '<div><div class="label" style="margin:0 0 3px">股数</div>' +
-        '<input class="num-in" type="number" step="0.0001" value="' + r.shares + '" data-i="' + i + '" data-f="shares" style="padding:7px 9px;font-size:13px"></div>' +
-      '<div><div class="label" style="margin:0 0 3px">成本</div>' +
-        '<input class="num-in" type="number" step="0.01" value="' + (+(r.costPerShare || r.cost)).toFixed(2) + '" data-i="' + i + '" data-f="cost" style="padding:7px 9px;font-size:13px"></div>' +
-      '<div style="text-align:right"><div class="label" style="margin:0 0 3px">现价</div>' +
-        '<div class="num" style="font-size:14px">' + (r.hasQuote ? r.price.toFixed(2) : '—') + '</div>' +
-        '<div class="sub" style="margin-top:2px;font-size:11px">' + (r.hasQuote ? DSH.pct(r.dayPct, 2) : '') + '</div></div>' +
-      '<div style="text-align:right"><div class="label" style="margin:0 0 3px">市值</div>' +
-        '<div class="num" style="font-size:14px">' + DSH.money(r.mv, cur) + '</div>' +
-        '<div class="sub" style="margin-top:2px;font-size:11px">' + (r.weight * 100).toFixed(1) + '%</div></div>' +
-      '<div style="text-align:right"><div class="label" style="margin:0 0 3px">盈亏</div>' +
-        '<div class="num ' + DSH.cls(r.pnl) + '" style="font-size:14.5px">' + DSH.money(r.pnl, cur) + '</div>' +
-        '<div class="sub" style="margin-top:2px;font-size:11px"><span class="' + DSH.cls(r.pnlPct) + '">' +
-        DSH.pct(r.pnlPct) + '</span> · ' + devTxt + '</div></div>' +
-      '<button class="btn sm ghost" data-del="' + i + '" style="padding:6px 8px;color:#FF9A9E">×</button>' +
-      '</div>';
-  }).join('');
-}
-
-document.addEventListener('input', (e) => {
-  const t = e.target;
-  if (!t.dataset || !t.dataset.f) return;
-  const i = +t.dataset.i, f = t.dataset.f;
-  PF.rows[i][f] = parseFloat(t.value) || 0;
-  DSH.save(PF);
-  DSH.updatePeaks(PF, Q.quotes || {});
-  const c = DSH.compute(PF, Q.quotes, Q.fx);
-  const cur = PF.cur || 'USD';
-  const p = $('tPnl'); p.textContent = DSH.money(c.pnl, cur); p.className = 'num num-xl ' + DSH.cls(c.pnl);
-  $('tPnlPct').innerHTML = '<span class="' + DSH.cls(c.pnlPct) + '">' + DSH.pct(c.pnlPct) + '</span> ｜ 成本 ' + DSH.money(c.cost, cur);
-  $('tMv').textContent = DSH.money(c.mv, cur);
-});
-
-document.addEventListener('click', (e) => {
-  const d = e.target.dataset && e.target.dataset.del;
-  if (d != null) { PF.rows.splice(+d, 1); DSH.save(PF); render(); renderOrders(); }
-});
-
-$('plan').value = PF.plan || '';
-$('plan').addEventListener('input', (e) => {
-  PF.plan = parseFloat(e.target.value) || 0;
-  DSH.save(PF);
-  render();
-});
-
-$('btnAdd').onclick = () => {
-  const tk = ($('nTicker').value || '').trim().toUpperCase();
-  if (!tk) { $('nTicker').focus(); return; }
-  const q = (Q.quotes || {})[tk];
-  // 代码校验：不在标普 500 名单里就不允许录入，避免静默生成 0 市值行
-  if (!q || !q.p) {
-    DSH.toast('「' + tk + '」没有行情数据，请检查代码是否正确');
-    $('nTicker').focus();
-    return;
-  }
-  const sh = parseFloat($('nShares').value) || 0;
-  if (sh <= 0) { DSH.toast('股数必须大于 0'); $('nShares').focus(); return; }
-  let cost = parseFloat($('nCost').value);
-  // 成本价必须有效：留空用现价，填 0 或负数视为无效
-  if (!isFinite(cost) || cost <= 0) cost = q.p;
-  PF.rows.push({ ticker: tk, shares: sh, cost, added: new Date().toISOString().slice(0, 10) });
-  DSH.save(PF);
-  $('nTicker').value = ''; $('nShares').value = ''; $('nCost').value = '';
-  $('nTicker').focus();
-  render();
-  renderOrders();
-};
-
-$('btnFromSignal').onclick = () => {
-  if (!SIG) return;
-  const off = SIG.official || SIG.picks || [];
-  const plan = PF.plan || 0;
-  if (!plan) {
-    DSH.toast('请先填「总买入资金」，再分配');
-    const el = $('plan');
-    if (el) { el.focus(); el.select && el.select(); }
-    return;
-  }
-  // 已有持仓会被改写，必须先确认，且尽量保留原来的成本价
-  const existed = {};
-  PF.rows.forEach((r) => { existed[r.ticker] = r; });
-  const exp = (SIG && SIG.exposure != null) ? SIG.exposure : 1;
-  const msg = exp < 1
-    ? '⚠ 大盘跌破 10 月均线，本次只投入计划的 ' + Math.round(exp * 100) + '%（其余留现金）。\n' +
-      '将按此比例重建 3 只持仓，你现有 ' + PF.rows.length + ' 条记录会被替换，已持有的标的保留原成本价。\n确定继续？'
-    : '将按信号重建 3 只持仓，你现有的 ' + PF.rows.length + ' 条记录会被替换。\n' +
-      '已持有的标的会保留原成本价。确定继续？';
-  if (PF.rows.length && !confirm(msg)) {
-    return;
-  }
-  const today = new Date().toISOString().slice(0, 10);
-  const deploy = plan * exp;          // 半仓时只投入一半，其余留现金
-  PF.rows = off.map((p) => {
-    const price = ((Q.quotes || {})[p.ticker] || {}).p || 0;
-    const amt = deploy * p.weight;
-    const shares = price > 0 ? +(amt / price).toFixed(4) : 0;
-    const old = existed[p.ticker];
-    const cost = old && old.cost > 0 ? old.cost : +price.toFixed(2);   // 保留真实成本
-    return { ticker: p.ticker, shares, cost, added: old && old.added ? old.added : today };
-  }).filter((r) => r.shares > 0);
-  DSH.save(PF); render(); renderOrders();
-  DSH.toast('已投入 ' + DSH.money(deploy, PF.cur || 'USD') +
-    (exp < 1 ? '（半仓，留存现金 ' + DSH.money(plan - deploy, PF.cur || 'USD') + '）' : '') +
-    ' 到 ' + PF.rows.length + ' 只。成本价=当时的现价，成交后可改成真实价格');
-};
-
-$('btnClear').onclick = () => {
-  if (!confirm('清空所有持仓记录？')) return;
-  PF = { capital: 0, cur: 'USD', rows: [] };
-  DSH.save(PF); render();
-};
-
-$('btnExport').onclick = () => {
-  const blob = new Blob([JSON.stringify(PF, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'portfolio-' + new Date().toISOString().slice(0, 10) + '.json';
-  a.click();
-};
-
-$('btnImport').onclick = () => {
-  const inp = document.createElement('input');
-  inp.type = 'file'; inp.accept = '.json';
-  inp.onchange = () => {
-    const f = inp.files[0]; if (!f) return;
-    const r = new FileReader();
-    r.onload = () => {
-      try { const d = JSON.parse(r.result); if (d.rows) { PF = d; DSH.save(PF); render(); } }
-      catch (err) { alert('文件格式不对'); }
-    };
-    r.readAsText(f);
-  };
-  inp.click();
-};
-
-$('nTicker').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('nShares').focus(); });
-$('nShares').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('nCost').focus(); });
-$('nCost').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btnAdd').click(); });
-
-
-
-/* ---------- 本月信号 ---------- */
-function renderSignal() {
-  if (!SIG) return;
-  const off = SIG.official || SIG.picks || [];
-  const exp = SIG.exposure != null ? SIG.exposure : 1;
-  const oy = SIG.official_year;
-  document.getElementById('sigTitle').textContent = oy ? (oy + ' 年度持仓') : '本年持仓';
-  document.getElementById('sigValid').textContent = (SIG.valid_from && SIG.valid_to)
-    ? (SIG.valid_from.slice(5).replace('-', '/') + ' ~ ' + SIG.valid_to.slice(5).replace('-', '/') + ' 有效' +
-       (SIG.official_month ? ' · 按 ' + SIG.official_month + ' 排名选出' : ''))
-    : '';
-  document.getElementById('sigMonth').textContent = SIG.month || '—';
-  document.getElementById('sigMeta').innerHTML =
-    '<span class="pill ' + (exp >= 0.99 ? 'on' : 'off') + '">' +
-      (SIG.trend || (exp >= 0.99 ? '满仓' : '半仓')) + '</span>' +
-    '<span class="pill off">目标 ' + Math.round(exp * 100) + '%</span>';
-  const q = Q.quotes || {};
-  document.getElementById('sigPicks').innerHTML = off.map((p, i) => {
-    const px = (q[p.ticker] || {}).p;
-    return '<div style="flex:1;min-width:150px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);' +
-      'border-radius:11px;padding:12px 14px">' +
-      '<div class="row" style="justify-content:space-between;align-items:baseline">' +
-        '<div class="tk" style="font-size:15px">' + DSH.esc(p.ticker) + '</div>' +
-        '<div style="font-size:11px;color:var(--gold)">' + Math.round((p.weight || 0) * 100) + '%</div></div>' +
-      '<div class="nm" style="margin-top:2px">' + DSH.esc((p.name || '').slice(0, 16)) + '</div>' +
-      '<div class="row" style="justify-content:space-between;margin-top:6px;font-size:11.5px">' +
-        '<span style="color:var(--txt-3)">' + (px ? px.toFixed(2) : '—') + '</span>' +
-        '<span style="color:var(--txt-3);font-size:11px" title="' +
-          DSH.esc((SIG.official_month || '') + ' 排名时，过去 12 个月的涨幅——它因此入选，不是现在的收益') +
-          '">入选 </span><span class="' + DSH.cls(p.ret12) + '" style="font-size:11.5px">' +
-          DSH.pct(p.ret12, 0) + '</span></div></div>';
-  }).join('');
-
-  // 半仓时给出醒目提示（这是「恰当的时候展示」）
-  const warnId = 'sigHalfWarn';
-  let warn = document.getElementById(warnId);
-  if (exp < 1) {
-    if (!warn) {
-      warn = document.createElement('div');
-      warn.id = warnId;
-      warn.className = 'tip warn';
-      warn.style.cssText = 'margin-top:14px;border-color:rgba(255,171,107,.35);background:rgba(255,171,107,.08)';
-      document.getElementById('sigPicks').parentNode.parentNode.appendChild(warn);
-    }
-    warn.innerHTML = '⚠ 大盘走弱：标普 500 <b>' + (SIG.spy || '—') + '</b> / 10 月均线 <b>' +
-      (SIG.ma || '—') + '</b>，按规则本次只投入计划资金的 <b>' + Math.round(exp * 100) +
-      '%</b>，其余留作现金。';
-  } else if (warn) {
-    warn.remove();
-  }
-}
-
-/* ---------- 要下的单（只在真的有换仓需求时出现） ---------- */
-function renderOrders() {
-  const el = orders;
-  if (!SIG) { el.innerHTML = ''; return; }
-  const quotes = (Q.quotes || {});
-  const off = SIG.official || SIG.picks || [];
-  const cur = PF.cur || 'USD';
-  const c0 = DSH.compute(PF, quotes, Q.fx);
-  const book = c0.mv > 0 ? c0.mv : 0;
-  if (!PF.rows.length || book <= 0) {
-    el.innerHTML = '<div class="tip">按信号分配建仓后，这里会显示需要买卖的股数。</div>';
-    return;
+    window.__audit = () => audit(build());
   }
 
-  const held = {};
-  PF.rows.forEach(r => { held[r.ticker] = (held[r.ticker] || 0) + r.shares; });
-  const items = [];
-  off.forEach(p => {
-    const price = (quotes[p.ticker] || {}).p || 0;
-    if (!price) return;
-    const tgt = (book * p.weight) / price;
-    const have = held[p.ticker] || 0;
-    delete held[p.ticker];
-    items.push({ side: tgt - have, ticker: p.ticker, price, amt: Math.abs(tgt - have) * price });
-  });
-  // 不在信号里的持仓 → 清掉
-  Object.keys(held).forEach(t => {
-    if (held[t] <= 0) return;
-    const price = (quotes[t] || {}).p || 0;
-    items.push({ side: -held[t], ticker: t, price, amt: held[t] * price, offList: true });
+  function renderSignal() {
+    if (!SIG) return;
+    const off = SIG.official || SIG.picks || [];
+    const exp = SIG.exposure != null ? SIG.exposure : 1;
+    const oy = SIG.official_year;
+    $('sigTitle').textContent = oy ? (oy + ' 年度持仓') : '本年持仓';
+    $('sigValid').textContent = (SIG.valid_from && SIG.valid_to)
+      ? (SIG.valid_from.slice(5).replace('-', '/') + ' ~ ' + SIG.valid_to.slice(5).replace('-', '/') + ' 有效' +
+         (SIG.official_month ? ' · 按 ' + SIG.official_month + ' 排名选出' : ''))
+      : '';
+    $('sigMonth').textContent = SIG.month || '—';
+    $('sigMeta').innerHTML =
+      '<span class="pill ' + (exp >= 0.99 ? 'on' : 'off') + '">' +
+        (SIG.trend || (exp >= 0.99 ? '满仓' : '半仓')) + '</span>' +
+      '<span class="pill off">目标 ' + Math.round(exp * 100) + '%</span>';
+    const q = (Q && Q.quotes) || {};
+    $('sigPicks').innerHTML = off.map((p) => {
+      const qq = q[p.ticker] || {};
+      return '<div style="flex:1;min-width:150px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);' +
+        'border-radius:11px;padding:12px 14px">' +
+        '<div class="row" style="justify-content:space-between;align-items:baseline">' +
+          '<div class="tk" style="font-size:15px">' + DSH.esc(p.ticker) + '</div>' +
+          '<div style="font-size:11px;color:var(--gold)">' + Math.round((p.weight || 0) * 100) + '%</div></div>' +
+        '<div class="nm" style="margin-top:2px">' + DSH.esc((p.name || '').slice(0, 16)) + '</div>' +
+        '<div class="row" style="justify-content:space-between;margin-top:6px;font-size:11.5px">' +
+          '<span style="color:var(--txt-3)">' + (qq.p ? qq.p.toFixed(2) : '—') + '</span>' +
+          '<span class="' + DSH.cls(p.ret12) + '" style="font-size:11.5px" title="' +
+            DSH.esc((SIG.official_month || '') + ' 排名时过去 12 个月涨幅，不是现在的收益') +
+          '">入选 ' + DSH.pct(p.ret12, 0) + '</span></div></div>';
+    }).join('');
+  }
+
+  // 本金切换
+  $('amtSwitch').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-amt]');
+    if (!b) return;
+    amt = +b.dataset.amt;
+    localStorage.setItem('dsh.amt', String(amt));
+    [...$('amtSwitch').children].forEach((x) => {
+      const on = +x.dataset.amt === amt;
+      x.className = 'btn sm ' + (on ? 'primary' : 'ghost');
+    });
+    render();
   });
 
-  // 只有「买卖金额占组合 5% 以上」或「整只进出」才算真的需要下单，
-  // 否则说明只是价格波动带来的微调，列出来只会让人困惑。
-  const MOVE = Math.max(800, book * 0.05);
-  const real = items
-    .filter(x => x.price && (x.offList || x.amt >= MOVE))
-    .map(x => {
-      // 股数取整：券商多数不支持碎股，买入向下取整、卖出四舍五入
-      const raw = Math.abs(x.side);
-      const q = x.side > 0 ? Math.floor(raw) : Math.round(raw);
-      return Object.assign({}, x, { qty: q, amt: q * x.price });
-    })
-    .filter(x => x.qty > 0);
+  [...$('amtSwitch').children].forEach((x) => {
+    const on = +x.dataset.amt === amt;
+    x.className = 'btn sm ' + (on ? 'primary' : 'ghost');
+  });
 
-  if (!real.length) {
-    el.innerHTML = '<div class="tip ok">已与信号一致，本期无需操作。</div>';
-    return;
-  }
-  el.innerHTML = real.map(x => {
-    const buy = x.side > 0;
-    return '<div class="action"><span class="tag ' + (buy ? 'buy' : 'sell') + '">' +
-      (buy ? '买入' : '卖出') + '</span>' +
-      '<div style="min-width:90px;font-weight:800;font-size:15px">' + DSH.esc(x.ticker) + '</div>' +
-      '<div class="grow" style="text-align:right"><div class="num" style="font-size:15px">' +
-        x.qty + ' 股</div><div class="sub" style="margin-top:2px">@ ' + x.price.toFixed(2) + '</div></div>' +
-      '<div style="text-align:right;min-width:104px"><div class="num" style="font-size:15px;color:' +
-        (buy ? 'var(--up)' : 'var(--down)') + '">' + (buy ? '' : '−') + DSH.money(x.amt, cur) + '</div>' +
-        '<div class="sub" style="margin-top:2px">' + (buy ? '需要资金' : '回笼现金') + '</div></div></div>';
-  }).join('');
-}
-
-(async function () {
+  // 数据加载
   SIG = await DSH.json('signal', null);
-  // 演示模式：#demo 自动填一份样例，方便预览（不覆盖真实数据）
-  if (location.hash === '#demo' && !PF.rows.length) {
-    const q = await DSH.json('quotes', {});
-    const off = (SIG && (SIG.official || SIG.picks)) || [];
-    const book = 100000;                      // 演示：假设已投入 10 万
-    PF = { cur: 'USD', rows: off.map(p => {
-      const px = ((q.quotes || {})[p.ticker] || {}).p || 100;
-      const amt = book * p.weight;
-      return { ticker: p.ticker, shares: +(amt / px).toFixed(4), cost: +(px * 0.92).toFixed(2),
-               peak: +(px * 1.08).toFixed(2), added: '2026-09-01' };
-    }) };
-    window.__demo = true;
+  Q = await DSH.json('quotes', { quotes: {} });
+  EQ = await DSH.json('equity', null);
+  if (!EQ || !EQ.position || !EQ.position.length) {
+    $('list').innerHTML = '<div class="tip warn" style="margin:16px">净值数据尚未生成</div>';
   }
-  Q = await DSH.json('quotes', { quotes: {}, fx: 7.1 });
-  if (window.__demo) { /* 演示数据不落盘 */ } else { }
-  DSH.onRefresh(async () => { Q = await DSH.json("quotes", { quotes: {}, fx: 7.1 }); render(); renderSignal(); renderOrders(); });
-  DSH.autoRefresh(5);
   render();
   renderSignal();
-  renderOrders();
-})();
 
-/* ---------- 云同步 ---------- */
-(function () {
-  const $ = (id) => document.getElementById(id);
-  const box = $('cloudBox'), hint = $('cloudHint'), codeIn = $('cloudCode');
-
-  function say(msg, cls) {
-    hint.className = 'tip' + (cls ? ' ' + cls : '');
-    hint.innerHTML = msg;
-  }
-  function showCode(c) {
-    codeIn.value = c;
-    say('同步码：<b style="color:var(--gold);letter-spacing:.08em">' + c +
-        '</b><br>抄下来。换设备时输入这串码就能取回持仓；丢了无法找回（服务端只存密文）。');
-  }
-
-  $('btnCloud').onclick = async () => {
-    const ok = await DSH.cloud.init().catch(() => false);
-    // 未绑定时始终展开面板（首次使用不该被误关掉）；已绑定时可开可关
-    if (ok && DSH.cloud.bound && box.style.display !== 'none') {
-      box.style.display = 'none';
-      return;
-    }
-    box.style.display = '';
-    if (!ok) { say('云同步未配置（缺少 cloud.json）', 'warn'); return; }
-    if (DSH.cloud.bound) {
-      codeIn.value = DSH.cloud.code;
-      say('已绑定同步码。持仓改动会在 0.4 秒内上传并回读校验。', 'ok');
-    } else {
-      say('还没有云端档案：点「新建」创建，或输入已有同步码后点「绑定」。');
-    }
-  };
-
-  // 新建云端档案：生成同步码并上传当前内容
-  $('cloudNew').onclick = async () => {
-    const ok = await DSH.cloud.init();
-    if (!ok) { say('云同步未配置', 'warn'); return; }
-    if (DSH.cloud.bound && !confirm('已有同步码，确定要新建一个吗？（旧档案保留）')) return;
-    const c = DSH.cloud.genCode();
-    DSH.cloud.code = c;
-    DSH.cloud.auto = true;
-    codeIn.value = c;
-    say('正在创建并校验…');
-    try {
-      await DSH.cloud.push(PF);
-      say('已创建云端档案，校验通过。<br>同步码：<b style="color:var(--gold);letter-spacing:.08em">' + c +
-          '</b>（抄下来，换设备输入它即可取回）');
-    } catch (e) { say('创建失败：' + e.message, 'warn'); }
-  };
-
-  $('cloudBind').onclick = async () => {
-    const c = (codeIn.value || '').trim().toUpperCase();
-    if (!c) { codeIn.focus(); return; }
-    DSH.cloud.code = c;
-    DSH.cloud.auto = true;
-    say('正在从云端拉取并校验…');
-    try {
-      const r = await DSH.cloud.pull(c);
-      if (!r) {
-        say('这个同步码下还没有数据。点「上传」把当前内容存上去。', 'warn');
-        return;
-      }
-      if (PF.rows.length && !confirm('将用云端数据覆盖本页 ' + PF.rows.length + ' 条记录，确定？')) return;
-      PF = r.data; DSH.save(PF); render(); renderOrders();
-      say('已绑定，取回 ' + r.data.rows.length + ' 条持仓（哈希校验通过）。', 'ok');
-    } catch (e) { say('拉取失败：' + e.message, 'warn'); }
-  };
-
-  $('cloudUpload').onclick = async () => {
-    try {
-      await DSH.cloud.push(PF);
-      say('已上传并回读校验通过（' + (PF.rows || []).length + ' 条）。', 'ok');
-    } catch (e) { say('上传失败：' + e.message, 'warn'); }
-  };
-
-  $('cloudDownload').onclick = async () => {
-    try {
-      const r = await DSH.cloud.pull();
-      if (!r) { say('云端暂无数据。', 'warn'); return; }
-      if (PF.rows.length && !confirm('将覆盖本页 ' + PF.rows.length + ' 条记录，确定？')) return;
-      PF = r.data; DSH.save(PF); render(); renderOrders();
-      say('已拉取 ' + r.data.rows.length + ' 条（哈希校验通过）。', 'ok');
-    } catch (e) { say('拉取失败：' + e.message, 'warn'); }
-  };
-
-  $('cloudOff').onclick = () => {
-    if (!confirm('解绑后本机不再与云端同步（云端数据保留）。确定？')) return;
-    DSH.cloud.auto = false; DSH.cloud.code = '';
-    codeIn.value = ''; say('已解绑。', 'ok');
-  };
-
-  // 启动：已绑定 → 无条件以云端为准（本地只作本次会话缓存）
-  (async () => {
-    const ok = await DSH.cloud.init();
-    if (!ok) return;
-    if (!DSH.cloud.bound) {
-      // 首次使用：提示建立云端档案
-      box.style.display = '';
-      say('尚未绑定同步码。点「绑定」输入已有码，或在下面生成一个新的——' +
-          '之后所有持仓都以云端为准，换设备输入同一串码即可。');
-      return;
-    }
-    codeIn.value = DSH.cloud.code;
-    try {
-      const r = await DSH.cloud.pull();
-      if (r && r.data && Array.isArray(r.data.rows)) {
-        const changed = JSON.stringify(r.data.rows) !== JSON.stringify(PF.rows);
-        PF = r.data; DSH.save(PF); render(); renderOrders();
-        if (changed) say('已从云端同步 ' + r.data.rows.length + ' 条持仓（校验通过）。', 'ok');
-      } else if (!PF.rows.length) {
-        say('云端档案是空的，录入持仓后会自动上传。');
-      }
-    } catch (e) {
-      say('云端读取失败：' + (e && (e.message || e.name) || '数据损坏或被篡改') + '（当前显示的是本次会话缓存）', 'warn');
-    }
-  })();
+  DSH.onRefresh(async () => {
+    Q = await DSH.json('quotes', { quotes: {} });
+    EQ = await DSH.json('equity', null);
+    render();
+    renderSignal();
+  });
+  DSH.autoRefresh(5);
 })();
 </script>
 </body></html>
