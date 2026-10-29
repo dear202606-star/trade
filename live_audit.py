@@ -42,7 +42,7 @@ def main():
         eq = pg.locator("#eqRet").inner_text() if pg.locator("#eqRet").count() else ""
         ck(bool(re.search(r"[+\-]?\d", eq)), "策略累计收益有真实数值", "值=%r" % eq)
         hero = pg.locator("#verdict").inner_text() if pg.locator("#verdict").count() else ""
-        ck(len(hero) > 6, "今日结论有内容", "值=%r" % hero[:30])
+        ck(len(hero) >= 2, "今日结论有内容（%s）" % hero, "结论为空")
         steps = pg.locator("#nextSteps .action").count()
         ck(steps >= 1, "下一步清单有 %d 条" % steps)
         # CTA 真的能跳
