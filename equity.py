@@ -87,7 +87,12 @@ def main():
     for t in tickers:
         d = daily_closes(t)
         if d:
-            data[t] = d
+            # I3：收益序列用复权价（拆股不至于画出断崖）；展示仍用原始价
+            try:
+                import datafeed as _df
+                data[t] = _df.adjust_daily(t, d)
+            except Exception:
+                data[t] = d
     missing = [t for t in tickers if t not in data]
     if missing:
         print(f"WARN: 缺日线 {missing}", file=sys.stderr)

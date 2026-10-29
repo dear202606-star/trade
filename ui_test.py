@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# DEPRECATED: 站点已改为单页结构，本脚本针对旧的多页结构，暂停使用。
+# 现行校验：selftest.py（数据）+ consistency_check.py（页面口径）
 """ui_test.py — 用真实浏览器（Playwright + 本机 Chrome）逐项操作界面做全面测试
 
 覆盖：

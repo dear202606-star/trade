@@ -1,0 +1,75 @@
+/* ===== 单页纵向卡片流（无 Tab、无隐藏内容） ===== */
+.top{position:sticky;top:0;z-index:50;background:rgba(8,10,15,.92);
+  backdrop-filter:saturate(150%) blur(14px);border-bottom:1px solid rgba(255,255,255,.07)}
+.top-in{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  max-width:760px;margin:0 auto;padding:14px 18px}
+.logo{font-weight:800;font-size:15.5px;letter-spacing:-.02em;color:var(--txt)}
+.logo i{color:var(--gold);font-style:normal}
+.tick{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--txt-2);
+  font-variant-numeric:tabular-nums}
+.tick .dot{color:var(--txt-3)}
+
+.wrap{max-width:760px;margin:0 auto;padding:16px 18px 8px}
+.wrap > .card{margin-bottom:14px}
+
+/* ① 今日 */
+.hero{padding:26px 24px}
+.hero .verdict{font-size:38px;line-height:1.14;margin:6px 0 4px;letter-spacing:-.03em}
+.now-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+.cell{padding:14px 16px;border-radius:12px;background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.07)}
+
+/* ② 当期 */
+.amt-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0 14px}
+.pills{display:flex;gap:6px}
+.pill-btn{padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.1);
+  background:transparent;color:var(--txt-2);font-size:13px;cursor:pointer;min-height:38px}
+.pill-btn.on{background:var(--gold);border-color:var(--gold);color:#1a1206;font-weight:700}
+.spark-box{margin-top:14px}
+.chart-box{margin-top:16px}
+.grid.g4.mini{gap:10px}
+.grid.g4.mini .card.flat{padding:14px 16px;border-radius:12px}
+
+/* ③ 明细表 */
+.pr{margin-top:4px}
+.pr-head,.pr-row{display:grid;grid-template-columns:1.5fr .7fr .9fr .9fr .9fr 1fr 1fr;
+  gap:8px;align-items:center}
+.pr-head{padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07);
+  font-size:11.5px;color:var(--txt-3)}
+.pr-row{padding:14px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13.5px}
+.pr-row:last-child{border-bottom:0}
+.pr .r{text-align:right;font-variant-numeric:tabular-nums}
+.pr .tk{font-weight:700}
+.pr .nm{font-size:11px;color:var(--txt-3);margin-top:2px}
+
+/* ⑤ 年度表 */
+.yr{margin-top:4px}
+.yr-head,.yr-row{display:grid;grid-template-columns:64px 1fr 84px 68px;gap:8px;align-items:center}
+.yr-head{padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07);
+  font-size:11.5px;color:var(--txt-3)}
+.yr-row{padding:13px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13.5px}
+.yr-row:last-child{border-bottom:0}
+.yr .r{text-align:right;font-variant-numeric:tabular-nums}
+.yr .h{font-size:12px;color:var(--txt-2);line-height:1.6}
+.yr .h b{color:var(--txt);font-weight:600}
+
+.row-split{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.foot{max-width:760px;margin:0 auto;padding:20px 18px 40px;color:var(--txt-3);
+  font-size:11.5px;line-height:1.9;text-align:center}
+
+@media (max-width:560px){
+  .wrap{padding:12px 13px 6px}
+  .top-in{padding:12px 13px}
+  .hero{padding:22px 18px}
+  .hero .verdict{font-size:31px}
+  .grid.g4.mini{grid-template-columns:repeat(2,1fr)!important}
+  .pr-head,.pr-row{grid-template-columns:1.6fr .9fr 1fr 1fr;gap:6px}
+  .pr-head > div:nth-child(2),
+  .pr-head > div:nth-child(3),
+  .pr-head > div:nth-child(4),
+  .pr-row > div:nth-child(2),
+  .pr-row > div:nth-child(3),
+  .pr-row > div:nth-child(4){display:none}
+  .yr-head,.yr-row{grid-template-columns:50px 1fr 74px 60px;gap:6px}
+  .foot{padding:16px 13px 32px}
+}

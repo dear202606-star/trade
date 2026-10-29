@@ -90,6 +90,34 @@ def fetch_sina_bars(ticker):
     return None
 
 
+def adjust_daily(ticker, bars):
+    """把日线 {yyyymmdd: close} 用 splits.json 复权。
+
+    约定与 _reapply 一致：拆股日（含）之后的价格乘以比例，
+    使跨拆股的价格序列保持连续。返回 {yyyymmdd: adj_close}。
+    """
+    sp = _splits().get(ticker)
+    if not sp or not bars:
+        return bars
+    import datetime as _dt
+    marks = []
+    for ts, ratio in sp:
+        try:
+            marks.append((_dt.datetime.utcfromtimestamp(int(ts)).strftime("%Y%m%d"), float(ratio)))
+        except Exception:
+            continue
+    if not marks:
+        return bars
+    out = {}
+    for d, px in bars.items():
+        f = 1.0
+        for md, ratio in marks:
+            if md <= d:
+                f *= ratio
+        out[d] = px * f
+    return out
+
+
 def load_bars(ticker):
     """统一入口：本地缓存 → 运行面板 → 实时抓取"""
     if ticker in _mem:

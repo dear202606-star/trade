@@ -40,11 +40,13 @@ def load(name):
 
 
 def main():
-    # A. 页面
-    for f in ("index.html", "portfolio.html", "strategy.html"):
-        p = os.path.join(DOCS, f)
-        check(os.path.exists(p) and os.path.getsize(p) > 2000,
-              f"页面 {f}", f"页面缺失或过小：{f}")
+    # A. 页面（单页结构：只有 index.html 含内容，其余为跳转壳）
+    p = os.path.join(DOCS, "index.html")
+    check(os.path.exists(p) and os.path.getsize(p) > 2000,
+          "页面 index.html", "页面缺失或过小：index.html")
+    for sec in ("todayPct", "yearRet", "bTotal", "yearRows", "posRows"):
+        check(sec in open(p, encoding="utf-8").read(),
+              f"单页含区块 {sec}", f"index.html 缺区块 {sec}")
 
     # B. 数据
     sig = load("signal.json")

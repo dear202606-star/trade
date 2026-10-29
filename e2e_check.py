@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# DEPRECATED: 站点已改为单页结构，本脚本针对旧的多页结构，暂停使用。
+# 现行校验：selftest.py（数据）+ consistency_check.py（页面口径）
 """e2e_check.py — 上线后对「真实线上站点」做端到端校验
 
 不信任构建产物，只检查用户真正打开的那个 URL：
