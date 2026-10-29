@@ -15,7 +15,8 @@ import os
 
 import datafeed
 
-BASE_YM = "2025-12"          # 建仓基准：上年 12 月末
+_NOW = dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=8)
+BASE_YM = "%d-12" % (_NOW.year - 1)   # 建仓基准：上一年 12 月末（自动跨年）
 MIN_PRICE = 5.0
 TOPN = 3
 OUT = os.path.join("docs", "data", "preview.json")
@@ -44,6 +45,12 @@ def main():
     today = (dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=8)).strftime("%Y-%m-%d")
     live = set(m[(m.start_date <= today) & (m.end_date >= today)]["ticker"])
     sector, name_map = datafeed.load_sector()
+
+    # 并行预热：CI 没有本地缓存时，500 只串行抓取会超时
+    try:
+        datafeed.prefetch(sorted(live), workers=10)
+    except Exception as _e:
+        print("预热失败（继续）：%s" % _e)
 
     rows = []
     bad = []
@@ -118,8 +125,8 @@ def main():
         "ranked": len(rows),
         "excluded": sorted(bad)[:20],
         "excluded_n": len(bad),
-        "hold_year": int(today[:4]) + 1,
-        "official_month": f"{today[:4]}-12",
+        "hold_year": int(BASE_YM[:4]) + 2,
+        "official_month": "%d-12" % (int(BASE_YM[:4]) + 1),
         "top": picks,
         "near": [{"ticker": r["ticker"], "sector": r["sector"], "ytd": round(r["ytd"], 4)}
                  for r in rows[:12] if r["ticker"] not in {p["ticker"] for p in picks}][:5],
