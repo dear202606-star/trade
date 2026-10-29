@@ -32,7 +32,6 @@
       $("todayAmt").textContent = yuan(t.amount);
       $("todayAmt").className = "sub " + cls(t.amount);
       $("todayLabel").textContent = "今日 · " + (t.live ? "盘中" : "收盘");
-      $("todayFoot").textContent = (t.asOf || "").slice(5) + "（北京）";
     }
 
     $("switchTxt").textContent = trend;
@@ -70,7 +69,6 @@
       (c.pnlPct != null && bench != null
         ? " ｜ 跑赢 <span class='" + cls(c.pnlPct - bench) + "'>" + pct2(c.pnlPct - bench) + "</span>" : "");
 
-    $("yearStamp").textContent = EQ && EQ.updated ? EQ.updated.slice(5, 16) : "";
     $("tMv").textContent = yuan(c.mv);
     $("tPnl").textContent = yuan(c.pnl);
     $("tPnl").className = "num num-md " + cls(c.pnl);
@@ -132,7 +130,6 @@
     if (!box || !PV) return;
     var y = PV.hold_year || "";
     $("nextYearTitle").textContent = y ? (y + " 年可能持仓") : "明年可能持仓";
-    $("previewStamp").textContent = PV.as_of ? PV.as_of.slice(5) : "";
     $("previewNote").textContent = PV.final ? "已定稿" : "年初至今涨幅";
     var SEC = {
       "Information Technology": "信息技术",
@@ -216,7 +213,6 @@
     $("tickPx").textContent = "SPY " + q.p.toFixed(2);
     $("tickChg").textContent = pct2(q.chg);
     $("tickChg").className = "chg " + cls(q.chg);
-    $("tickTs").textContent = (Q.ts_local || "").slice(5);
   }
 
   async function boot() {
@@ -240,7 +236,8 @@
     drawYearSpark();
     drawAllChart();
 
-    if (EQ && EQ.updated) $("footStamp").textContent = "净值 " + EQ.updated + "（北京）";
+    var when = (Q && Q.ts_local) || (EQ && EQ.updated) || "";
+    if (when) $("footStamp").textContent = "数据更新 " + when.slice(5, 16) + "（北京）";
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

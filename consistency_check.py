@@ -78,10 +78,12 @@ def main():
         m = re.search(r"同期标普\s*([+\-]?[\d.]+)%", vs)
         ck(bool(m) and abs(float(m.group(1)) - bench) <= 0.05,
            "同期标普 = 数据源（%.2f%%）" % bench, vs[:40])
-        foot = pg.inner_text("#todayFoot")
-        stamp = pg.inner_text("#yearStamp")
-        ck("（北京）" in foot, "时间标注时区（%s）" % foot.strip(), "缺时区")
-        ck(bool(stamp.strip()), "当期卡片显示时间（%s）" % stamp.strip(), "缺时间")
+        foot = pg.inner_text("#footStamp")
+        ck("（北京）" in foot, "页脚标注时区（%s）" % foot.strip(), "缺时区")
+        body = pg.inner_text("body")
+        _ts = re.findall(r"\d{2}-\d{2}\s+\d{2}:\d{2}", body)
+        ck(len(_ts) <= 1, "全页仅一个时间戳（%s）" % (_ts or "无"),
+           "出现多个时间戳：%s" % _ts)
 
         print("\n[今日]")
         t = pg.inner_text("#todayPct")
