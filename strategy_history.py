@@ -11,6 +11,11 @@
   {years:[{year, holdings:[{ticker,name,sector,weight,ret12_at_pick,ret_year}],
            ret, dd, bench, switched}], stocks:[{ticker, years, total_ret, appear}]}
 """
+import datetime as _dt
+
+# 最后一个「已结束」的年份：进入新一年后，上一年才算完整
+_today = _dt.datetime.now(_dt.timezone.utc) + _dt.timedelta(hours=8)
+END_YEAR = _today.year - 1 if _today.month >= 1 else _today.year
 import json
 import os
 import shutil
@@ -267,13 +272,25 @@ def publish_locked():
         shutil.copy2(src, dst)
 
 
+def missing_new_year():
+    """返回尚未归档的已结束年份（年度结转用），没有则返回 None"""
+    try:
+        sh = json.load(open(os.path.join(BASE, "output", "strategy_history.json"),
+                            encoding="utf-8"))
+        have = {r.get("year") for r in (sh.get("years") or [])}
+    except Exception:
+        return END_YEAR
+    return None if END_YEAR in have else END_YEAR
+
+
 def main():
     refresh = "--refresh" in sys.argv
 
     # 历史已锁定 → 直接发布，秒级完成，不再拉取任何历史数据
     if not refresh:
         ok, why = locked_ok()
-        if ok:
+        new_year = missing_new_year()
+        if ok and new_year is None:
             publish_locked()
             sh = json.load(open(os.path.join(BASE, "output", "strategy_history.json"),
                                 encoding="utf-8"))
@@ -281,7 +298,12 @@ def main():
             print(f"历史已锁定（{m.get('start')}–{m.get('end')}，"
                   f"累计 {m.get('total', 0) * 100:.0f}%，{why}）→ 直接发布，不重算")
             return 0
-        print(f"历史未锁定（{why}），执行一次完整重算…", file=sys.stderr)
+        if ok and new_year is not None:
+            print(f"年度结转：{new_year} 已结束但未归档，执行一次重算以补入该年…",
+                  file=sys.stderr)
+            refresh = True
+        else:
+            print(f"历史未锁定（{why}），执行一次完整重算…", file=sys.stderr)
 
     m = datafeed.load_members()
     if m is None:
@@ -316,7 +338,7 @@ def main():
     MONTHS.clear()
     SPYB.clear()
     years, prev_set = [], None
-    for y in range(2010, 2026):
+    for y in range(2010, END_YEAR + 1):
         d = f"{y}-01-01"
         members = set(m[(m.start_date <= d) & (m.end_date >= d)]["ticker"])
         if y in frozen:

@@ -31,6 +31,13 @@ SECTOR_WEIGHT_CAP = 0.60
 _MEMBERS = None
 
 
+def official_month_for(latest):
+    """年度持仓的排名基准月：latest 是 12 月则用它（次年持有），否则用上一年 12 月。"""
+    if latest.endswith("-12"):
+        return latest
+    return "%d-12" % (int(latest[:4]) - 1)
+
+
 def members_at(ym):
     """返回 yyyy-mm 月末属于标普 500 的股票集合（时点成分，防未来函数）"""
     global _MEMBERS
@@ -333,7 +340,7 @@ def main():
         sys.exit(1)
 
     # ---- 正式持仓：以「上一年 12 月」为基准，一次锁定、全年不再变 ----
-    official_month = f"{int(latest[:4]) - 1}-12"
+    official_month = official_month_for(latest)
 
     # 已锁定过就沿用，绝不重算（否则数据微小修订会让持仓漂移）
     locked = None

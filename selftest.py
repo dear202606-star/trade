@@ -74,6 +74,30 @@ def main():
           f"净值 {len(eq.get('points') or []) if eq else 0} 个交易日",
           "equity.json 净值样本不足")
 
+    # ---- 年度结转：排名基准月必须符合规则，且锁与持仓一致 ----
+    try:
+        import monthly_pick as _mp
+        _sig = sig or {}
+        _om = _sig.get("official_month") or ""
+        _oy = _sig.get("official_year")
+        _rank = _sig.get("ranking_month") or _om
+        _want = _mp.official_month_for(_rank if _rank.endswith("-12") else _om)
+        check(_om == _want,
+              "年度结转规则一致（%s）" % _om,
+              "排名基准月应为 %s，实际 %s" % (_want, _om))
+        check(_oy == int(_om[:4]) + 1,
+              "持有年度 = 基准年 + 1（%s）" % _oy,
+              "official_year 应为 %s，实际 %s" % (int(_om[:4]) + 1, _oy))
+        _vf = _sig.get("valid_from") or ""
+        _vt = _sig.get("valid_to") or ""
+        import datetime as _dtm
+        _td = (_dtm.datetime.now(_dtm.timezone.utc) + _dtm.timedelta(hours=8)).strftime("%Y-%m-%d")
+        check(bool(_vf and _vt) and _vf <= _td <= _vt,
+              "当前日期在生效区间内（%s~%s）" % (_vf, _vt),
+              "当前 %s 不在 %s~%s" % (_td, _vf, _vt))
+    except Exception as e:
+        warns.append("年度结转校验失败：%s" % e)
+
     # ---- 健康状态与新鲜度（B3：停更必须可见）----
     try:
         _hp = os.path.join(os.path.dirname(os.path.abspath(__file__)), "docs", "data", "health.json")
