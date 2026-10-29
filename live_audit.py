@@ -43,8 +43,9 @@ def main():
         ck(bool(re.search(r"[+\-]?\d", eq)), "策略累计收益有真实数值", "值=%r" % eq)
         hero = pg.locator("#verdict").inner_text() if pg.locator("#verdict").count() else ""
         ck(len(hero) >= 2, "今日结论有内容（%s）" % hero, "结论为空")
-        steps = pg.locator("#nextSteps .action").count()
-        ck(steps >= 1, "下一步清单有 %d 条" % steps)
+        ck("看账户" in body, "首屏有主行动按钮")
+        rows_n = pg.locator("#pfBody .holding").count()
+        ck(rows_n >= 3, "持仓明细 %d 只" % rows_n)
         # CTA 真的能跳
         cta = pg.locator("#heroCta")
         if cta.count():

@@ -49,10 +49,6 @@
     <div id="pfBody"></div>
   </div>
 
-  <div style="margin-top:48px">
-    <div class="label" style="font-size:12px">下一步</div>
-    <div class="grid" id="nextSteps" style="gap:10px"></div>
-  </div>
 
   <div class="foot">
     美股收盘后更新 ｜ 仅供研究，不构成投资建议
@@ -126,7 +122,7 @@
       const qq = qmap[p.ticker] || {};
       return {
         ticker: p.ticker, name: qq.name || p.ticker, weight: p.weight,
-        price: p.last, mv: mv, cost: budget,
+        price: p.last, entry: p.entry, mv: mv, cost: budget,
         pnl: mv != null ? mv - budget : null,
         pnlPct: mv != null && budget > 0 ? (mv - budget) / budget : null,
         hasQuote: p.last > 0,
@@ -139,51 +135,33 @@
 
     const rowsHtml = parts.map((r) =>
       '<div class="holding">' +
-        '<div><div class="tk">' + DSH.esc(r.ticker) + '</div><div class="nm">' + DSH.esc(r.name) + '</div></div>' +
+        '<div><div class="tk">' + DSH.esc(r.ticker) + '</div>' +
+          '<div class="nm">' + DSH.esc(r.name) + '</div>' +
+          '<div class="nm" style="color:var(--txt-3)">现价 ' + (r.hasQuote ? r.price.toFixed(2) : '—') +
+            ' · 建仓 ' + (r.entry != null ? r.entry.toFixed(2) : '—') + '</div></div>' +
         '<div><div class="label" style="margin:0 0 3px">市值</div>' +
           '<div class="num num-md">' + DSH.money(r.mv) + '</div></div>' +
-        '<div class="hide-sm"><div class="label" style="margin:0 0 3px">现价</div>' +
-          '<div class="num num-md">' + (r.hasQuote ? r.price.toFixed(2) : '—') + '</div></div>' +
-        '<div style="text-align:right">' +
+        '<div style="text-align:right"><div class="label" style="margin:0 0 3px">盈亏</div>' +
           '<div class="num num-md ' + DSH.cls(r.pnl) + '">' + DSH.money(r.pnl) + '</div>' +
           '<div class="sub" style="margin-top:3px"><span class="' + DSH.cls(r.pnlPct) + '">' +
             DSH.pct(r.pnlPct) + '</span></div></div>' +
         '</div>').join('');
 
     box.innerHTML =
-      '<div class="card" style="padding:30px 32px">' +
-        '<div class="row" style="align-items:flex-start">' +
-          '<div class="grow">' +
-            '<div class="label">累计盈亏</div>' +
-            '<div class="num num-xl ' + DSH.cls(pnlAll) + '">' + DSH.money(pnlAll) + '</div>' +
-            '<div class="sub"><span class="' + DSH.cls(pctAll) + '">' + DSH.pct(pctAll) + '</span></div>' +
-          '</div>' +
-          (function () {
-            const td = DSH.today(sig, q);
-            if (!td) return '';
-            const bg = td.pct >= 0 ? 'rgba(255,90,95,.12)' : 'rgba(46,204,113,.12)';
-            return '<div style="text-align:right">' +
-              '<div class="label">' + td.label + (td.live && td.asOf ? ' · ' + td.asOf : '') + '</div>' +
-              '<div class="num num-lg ' + DSH.cls(td.pct) + '" style="background:' + bg +
-                ';border-radius:10px;padding:2px 10px;display:inline-block">' + DSH.pct(td.pct) + '</div>' +
-              '</div>';
-          })() +
-        '</div>' +
-        '<div class="sub" style="margin-top:12px;font-size:12px;color:var(--txt-3)">建仓 ' +
-          (EQ0.base_date ? (EQ0.base_date.slice(0,4)+'-'+EQ0.base_date.slice(4,6)+'-'+EQ0.base_date.slice(6,8)) : '—') +
-          ' · 按当日收盘价买入</div>' +
-        '<div class="grid g3" style="margin-top:18px;gap:12px">' +
+      '<div class="card" style="padding:26px 30px">' +
+        '<div class="grid g4" style="gap:12px">' +
           '<div class="card flat"><div class="label" style="margin-bottom:6px">总市值</div>' +
             '<div class="num num-md">' + DSH.money(mvAll) + '</div></div>' +
           '<div class="card flat"><div class="label" style="margin-bottom:6px">本金</div>' +
             '<div class="num num-md">' + DSH.money(amt) + '</div></div>' +
+          '<div class="card flat"><div class="label" style="margin-bottom:6px">累计盈亏</div>' +
+            '<div class="num num-md ' + DSH.cls(pnlAll) + '">' + DSH.money(pnlAll) + '</div></div>' +
           '<div class="card flat"><div class="label" style="margin-bottom:6px">持有</div>' +
             '<div class="num num-md">' + parts.length + ' 只</div></div>' +
         '</div>' +
-        '<div class="sub" id="pfStamp" style="margin-top:16px;font-size:11.5px;color:var(--txt-3)"></div>' +
+        '<div class="sub" id="pfStamp" style="margin-top:14px;font-size:11.5px;color:var(--txt-3)"></div>' +
       '</div>' +
-      '<div class="grid" style="margin-top:14px;gap:10px">' + rowsHtml + '</div>' +
-      '<div style="margin-top:16px"><a class="btn ghost sm" href="portfolio.html">看账户明细</a></div>';
+      '<div class="grid" style="margin-top:14px;gap:10px">' + rowsHtml + '</div>';
 
     // 数据时间：让用户一眼知道这些数字是哪天的
     const stamp = document.getElementById('pfStamp');
@@ -194,9 +172,8 @@
         const p = (n) => String(n).padStart(2, '0');
         when = (d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
       }
-      stamp.innerHTML = (q.session ? '行情 <b style="color:var(--txt-2)">' + DSH.esc(q.session) + '</b> 收盘' : '') +
-        (when ? ' ｜ 更新于(北京) <b style="color:var(--txt-2)">' + when + '</b>' : '') +
-
+      stamp.innerHTML = (EQ0.base_date ? '建仓 ' + EQ0.base_date.slice(0,4) + '-' + EQ0.base_date.slice(4,6) + '-' + EQ0.base_date.slice(6,8) + ' ｜ ' : '') +
+        (when ? '净值 ' + when + '（北京）' : '') +
         ((DSH.ageHours && DSH.ageHours(q.ts) > 26) ? ' ｜ <span style="color:#FFAB6B">⚠ 数据偏旧</span>' : '');
     }
   }
@@ -239,22 +216,6 @@
   }
 
   /* ---- 下一步 ---- */
-  const steps = [];
-  if (isDec) {
-    steps.push({ tag: 'sell', title: '本月末换仓', desc: '按新名单重买 3 只', href: 'portfolio.html', cta: '看账户' });
-  } else if (exp < 1) {
-    steps.push({ tag: 'sell', title: '仓位减半', desc: '标普跌破 10 月均线', href: 'portfolio.html', cta: '看账户' });
-  } else {
-    steps.push({ tag: 'hold', title: '本月无需操作', desc: '持有到 12 月末换仓', href: 'portfolio.html', cta: '看账户' });
-  }
-  document.getElementById('nextSteps').innerHTML = steps.map((s) =>
-    '<div class="action"><span class="tag ' + s.tag + '">' +
-    (s.tag === 'buy' ? '买入' : s.tag === 'sell' ? '卖出' : '持有') + '</span>' +
-    '<div class="grow"><div style="font-weight:650;font-size:14.5px">' + DSH.esc(s.title) + '</div>' +
-    '<div class="sub" style="margin-top:3px">' + DSH.esc(s.desc) + '</div></div>' +
-    '<a class="btn sm ghost" href="' + s.href + '">' + s.cta + '</a></div>'
-  ).join('');
-
   // 页面打开期间每 5 分钟拉一次最新数据并重绘
   DSH.autoRefresh(5);
 })();

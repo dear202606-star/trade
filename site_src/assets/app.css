@@ -196,7 +196,8 @@ tr:last-child td{border-bottom:none}
 @media (max-width:560px){
   .wrap{padding:0 14px}
   .grid.g4{grid-template-columns:repeat(2,1fr)!important}
-  .grid.g3{grid-template-columns:1fr!important}
+  .grid.g3{grid-template-columns:repeat(2,1fr)!important}
+  .nav a,.nav a.n{min-height:44px;display:inline-flex;align-items:center}
   .holding{grid-template-columns:1fr 1fr!important;row-gap:10px}
   .holding > div:first-child{grid-column:1 / -1}
   .num-xl{font-size:34px}
@@ -241,3 +242,7 @@ tr:last-child td{border-bottom:none}
   .pr-head > div:nth-child(8){display:none}
   .pr-m{display:block;font-size:11px;color:var(--txt-3);margin-top:2px}
 }
+
+/* 小号文字链接：扩大可点击区域 */
+.lnk{display:inline-flex;align-items:center;min-height:36px;padding:0 4px;font-size:12px;color:var(--txt-3);text-decoration:none}
+.lnk:hover{color:var(--txt-2)}
