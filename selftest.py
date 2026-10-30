@@ -40,6 +40,16 @@ def load(name):
         return None
 
 
+def _nextday(ymd):
+    """yyyymmdd + 1 天（用于允许净值日历比行情快照领先一天）"""
+    try:
+        import datetime as _d
+        d = _d.datetime.strptime(ymd, "%Y%m%d").date() + _d.timedelta(days=1)
+        return d.strftime("%Y%m%d")
+    except Exception:
+        return ymd
+
+
 def main():
     # A. 页面（单页结构：只有 index.html 含内容，其余为跳转壳）
     p = os.path.join(DOCS, "index.html")
@@ -109,6 +119,19 @@ def main():
               "异常年份：%s" % _bad_w[:3])
     except Exception as e:
         warns.append("权重形态校验失败：%s" % e)
+
+    # ---- 净值必须跟上最新收盘交易日（SPY 日线晚更新曾导致停滞）----
+    try:
+        _q = load("quotes.json") or {}
+        _e = load("equity.json") or {}
+        _qs = str(_q.get("session") or "").replace("-", "")
+        _es = str(_e.get("last_session") or "")
+        if _qs and _es:
+            check(_es >= _qs,
+                  "净值已跟上最新收盘交易日（%s ≥ %s）" % (_es, _qs),
+                  "净值停在 %s，行情已到 %s" % (_es, _qs))
+    except Exception as e:
+        warns.append("净值交易日校验失败：%s" % e)
 
     # ---- 跨年链路：任意年份都必须能自动切换 ----
     try:
@@ -276,9 +299,10 @@ def main():
 
     if eq and sess:
         last_d = ((eq.get("points") or [{}])[-1] or {}).get("d") or ""
-        check(last_d <= sess.replace("-", ""),
-              "净值末点 %s ≤ 行情交易日 %s" % (last_d, sess),
-              "净值日期(%s)晚于行情交易日(%s)，口径不一致" % (last_d, sess))
+        # 净值日历以「持仓」为准，允许领先行情快照一天（SPY 日线可能晚更新）
+        check(last_d <= _nextday(sess.replace("-", "")),
+              "净值末点 %s ≈ 行情交易日 %s" % (last_d, sess),
+              "净值日期(%s)明显晚于行情交易日(%s)" % (last_d, sess))
 
     sh = load("strategy_history.json")
     check(sh and len(sh.get("years") or []) >= 8,

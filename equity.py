@@ -102,11 +102,17 @@ def main():
         print("ERROR: 没有 SPY 日线", file=sys.stderr)
         return 1
 
-    # 交易日序列（以 SPY 为准）
+    # 交易日序列：以「持仓」为准（SPY 可能晚一天更新）
     cutoff = settled_cutoff()
-    days = sorted(k for k in data["SPY"] if base_ym + "01" <= k <= cutoff)
-    # 找建仓日：base_ym 内最后一个交易日
-    base_days = [d for d in sorted(data["SPY"]) if d[:6] == base_ym]
+    _cal = set()
+    for _t in [p["ticker"] for p in official]:
+        if _t in data:
+            _cal |= set(data[_t].keys())
+    if not _cal:
+        _cal = set(data["SPY"].keys())
+    days = sorted(k for k in _cal if base_ym + "01" <= k <= cutoff)
+    # 找建仓日：base_ym 内最后一个交易日（同样以持仓为准）
+    base_days = [d for d in sorted(_cal) if d[:6] == base_ym]
     if not base_days:
         print("ERROR: 建仓月无交易日", file=sys.stderr)
         return 1
@@ -147,6 +153,9 @@ def main():
         # 不参与净值计算，避免开关翻转时历史收益被改写。
         bd, bp = base_px["SPY"]
         bpx = data["SPY"].get(d)
+        if bpx is None:
+            _cand = [k for k in sorted(data["SPY"]) if k <= d]
+            bpx = data["SPY"][_cand[-1]] if _cand else None
         if bpx is None:
             continue
         b_val = bpx / bp

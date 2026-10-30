@@ -463,7 +463,10 @@
     const totalMv = mv + cash;
     if (!covered || !totalMv) return null;
     const age = DSH.ageHours(quotes && quotes.ts);
-    const live = age != null && age <= 0.75;
+    // 优先用行情自带的 intraday 标志；缺失时退回「45 分钟内」
+    const live = (quotes && typeof quotes.intraday === 'boolean')
+      ? quotes.intraday
+      : (age != null && age <= 0.75);
     return {
       amount: day,
       pct: totalMv - day > 0 ? day / (totalMv - day) : null,
