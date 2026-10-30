@@ -1,62 +1,6 @@
 {
  "runs": [
   {
-   "ts": "2026-10-30T18:30:32Z",
-   "step": "equity.py",
-   "rc": 0,
-   "dur": 4.9,
-   "ok": true,
-   "tail": "净值 209 个交易日（20251231 起）｜策略 +99.45% ｜标普 +12.82% ｜ 最大回撤 -36.7%"
-  },
-  {
-   "ts": "2026-10-30T18:30:34Z",
-   "step": "preview.py",
-   "rc": 0,
-   "dur": 2.4,
-   "ok": true,
-   "tail": "预览：MRNA +646% / SNDK +374% / DELL +230% → 排名池 495 只\n[stderr]\n/home/runner/work/trade/trade/preview.py:31: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).\n  ym = dt.datetime.utcfromtimestamp(int(ts)).strftime(\"%Y-%m\")"
-  },
-  {
-   "ts": "2026-10-30T18:30:34Z",
-   "step": "strategy_history.py",
-   "rc": 0,
-   "dur": 0.3,
-   "ok": true,
-   "tail": "历史已锁定（2010–2025，累计 5059%，校验通过）→ 直接发布，不重算"
-  },
-  {
-   "ts": "2026-10-30T18:30:34Z",
-   "step": "site_build.py",
-   "rc": 0,
-   "dur": 0.0,
-   "ok": true,
-   "tail": "健康状态：ok\n  静态资源版本：13812bba（2 个页面已更新引用）\n站点已构建：12 个静态文件 → /home/runner/work/trade/trade/docs\n  index / portfolio / strategy / signals\n  数据：signal.json history.json curve.json（1 期信号）"
-  },
-  {
-   "ts": "2026-10-30T18:30:35Z",
-   "step": "selftest.py",
-   "rc": 0,
-   "dur": 0.4,
-   "ok": true,
-   "tail": "=== 部署前自检 ===\n  ✅ 页面 index.html\n  ✅ 页面无写死年份区间（动态推导）\n  ✅ 页面无写死日期（全部由数据注入）\n  ✅ 页面无写死年份标题（动态推导）\n  ✅ 单页含区块 todayPct\n  ✅ 单页含区块 yearRet\n  ✅ 单页含区块 bTotal\n  ✅ 单页含区块 yearRows\n  ✅ 单页含区块 posRows\n  ✅ 信号有正式持仓\n  ✅ 持仓有效期 2026-01-01 ~ 2026-12-31（2026 年度）\n  ✅ 行情 508/510 只（100%）\n  ✅ 净值 209 个交易日\n  ✅ 权重形态合规（等权 / 同行业 30-30-40）\n  ✅ 跨年链路自洽（5 个日期）\n  ✅ preview.json 有 3 只候选\n  ✅ 预览权重合计 = 1\n  ✅ 预览行业均已分类\n  ✅ 预览涨幅为有限数\n  ✅ 预览仍在预测期（官方 2025-12）\n  ✅ 预览基准月为 12 月（2026-12）\n  ✅ 年度结转规则一致（2025-12）\n  ✅ 持有年度 = 基准年 + 1（2026）\n  ✅ 当前日期在生效区间内（2026-01-01~2026-12-31）\n  ✅ health.json 存在且状态合法（ok）\n  ✅ 行情年龄 0.0 小时（<72）\n  ✅ 净值末点 = 已收盘日（20261029）\n  ✅ signal.json 不含 NaN/Infinity\n  ✅ 2025-12 持仓与锁定一致（WDC、MU、HOOD）\n  ✅ 正式持仓均为 2025-12 成分股\n  ✅ 理论账户与净值一致（+99.45%）\n  ✅ 全部持仓有建仓价与现价\n  ✅ 正式持仓 3 只均有行情\n  ✅ 全部行情价格为正数\n  ✅ 净值末点 20261029 ≤ 行情交易日 2026-10-29\n  ✅ 逐年记录 16 年\n  ✅ 全部持仓均为标普500 成分股\n  ✅ 全周期曲线 192 个月\n  ✅ 行情 0.0 小时前更新\n  ✅ 净值末值 1.994543\n  ✅ 最大回撤 -36.7%\n  ✅ 逐年收益均为有限且合理\n  ✅ 每年恰好 3 只持仓\n  ✅ 各年权重合计 = 1\n  ✅ 行业上限（≤2 只 / ≤60%）\n  ✅ 历史收益未被改写\n  ✅ 曲线末值 = 逐年复利（51.59 倍）\n  ✅ 历史锁定一致（16 年未改动）\n  ✅ 成分表快照 30 天内（0 天）\n  ✅ 当前成分 503 只\n通过 50 · 警告 0 · 失败 0"
-  },
-  {
-   "ts": "2026-10-30T18:35:26Z",
-   "step": "quotes.py",
-   "rc": 0,
-   "dur": 9.1,
-   "ok": true,
-   "tail": "行情 508 / 510，汇率 6.654，缺失 2"
-  },
-  {
-   "ts": "2026-10-30T18:35:29Z",
-   "step": "monthly_pick.py",
-   "rc": 0,
-   "dur": 2.4,
-   "ok": true,
-   "tail": "[1/5] 获取标普500 成分股 ...\n      539 只\n[增量] 本月排名已存在，只刷新均线开关…\n      标普 769.36 / 10 月均线 729.63 → 满仓"
-  },
-  {
    "ts": "2026-10-30T18:35:34Z",
    "step": "equity.py",
    "rc": 0,
@@ -319,7 +263,63 @@
    "dur": 0.4,
    "ok": true,
    "tail": "=== 部署前自检 ===\n  ✅ 页面 index.html\n  ✅ 页面无写死年份区间（动态推导）\n  ✅ 页面无写死日期（全部由数据注入）\n  ✅ 页面无写死年份标题（动态推导）\n  ✅ 单页含区块 todayPct\n  ✅ 单页含区块 yearRet\n  ✅ 单页含区块 bTotal\n  ✅ 单页含区块 yearRows\n  ✅ 单页含区块 posRows\n  ✅ 信号有正式持仓\n  ✅ 持仓有效期 2026-01-01 ~ 2026-12-31（2026 年度）\n  ✅ 行情 508/510 只（100%）\n  ✅ 净值 209 个交易日\n  ✅ 权重形态合规（等权 / 同行业 30-30-40）\n  ✅ 跨年链路自洽（5 个日期）\n  ✅ preview.json 有 3 只候选\n  ✅ 预览权重合计 = 1\n  ✅ 预览行业均已分类\n  ✅ 预览涨幅为有限数\n  ✅ 预览仍在预测期（官方 2025-12）\n  ✅ 预览基准月为 12 月（2026-12）\n  ✅ 年度结转规则一致（2025-12）\n  ✅ 持有年度 = 基准年 + 1（2026）\n  ✅ 当前日期在生效区间内（2026-01-01~2026-12-31）\n  ✅ health.json 存在且状态合法（ok）\n  ✅ 行情年龄 0.0 小时（<72）\n  ✅ 净值末点 = 已收盘日（20261029）\n  ✅ signal.json 不含 NaN/Infinity\n  ✅ 2025-12 持仓与锁定一致（WDC、MU、HOOD）\n  ✅ 正式持仓均为 2025-12 成分股\n  ✅ 理论账户与净值一致（+99.45%）\n  ✅ 全部持仓有建仓价与现价\n  ✅ 正式持仓 3 只均有行情\n  ✅ 全部行情价格为正数\n  ✅ 净值末点 20261029 ≤ 行情交易日 2026-10-29\n  ✅ 逐年记录 16 年\n  ✅ 全部持仓均为标普500 成分股\n  ✅ 全周期曲线 192 个月\n  ✅ 行情 0.0 小时前更新\n  ✅ 净值末值 1.994543\n  ✅ 最大回撤 -36.7%\n  ✅ 逐年收益均为有限且合理\n  ✅ 每年恰好 3 只持仓\n  ✅ 各年权重合计 = 1\n  ✅ 行业上限（≤2 只 / ≤60%）\n  ✅ 历史收益未被改写\n  ✅ 曲线末值 = 逐年复利（51.59 倍）\n  ✅ 历史锁定一致（16 年未改动）\n  ✅ 成分表快照 30 天内（0 天）\n  ✅ 当前成分 503 只\n通过 50 · 警告 0 · 失败 0"
+  },
+  {
+   "ts": "2026-10-30T19:00:24Z",
+   "step": "quotes.py",
+   "rc": 0,
+   "dur": 9.2,
+   "ok": true,
+   "tail": "行情 508 / 510，汇率 6.654，缺失 2"
+  },
+  {
+   "ts": "2026-10-30T19:00:27Z",
+   "step": "monthly_pick.py",
+   "rc": 0,
+   "dur": 3.0,
+   "ok": true,
+   "tail": "[1/5] 获取标普500 成分股 ...\n      539 只\n[增量] 本月排名已存在，只刷新均线开关…\n      标普 769.36 / 10 月均线 729.63 → 满仓"
+  },
+  {
+   "ts": "2026-10-30T19:00:31Z",
+   "step": "equity.py",
+   "rc": 0,
+   "dur": 4.7,
+   "ok": true,
+   "tail": "净值 209 个交易日（20251231 起）｜策略 +99.45% ｜标普 +12.82% ｜ 最大回撤 -36.7%"
+  },
+  {
+   "ts": "2026-10-30T19:00:34Z",
+   "step": "preview.py",
+   "rc": 0,
+   "dur": 2.3,
+   "ok": true,
+   "tail": "预览：MRNA +642% / SNDK +374% / DELL +231% → 排名池 495 只\n[stderr]\n/home/runner/work/trade/trade/preview.py:31: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).\n  ym = dt.datetime.utcfromtimestamp(int(ts)).strftime(\"%Y-%m\")"
+  },
+  {
+   "ts": "2026-10-30T19:00:34Z",
+   "step": "strategy_history.py",
+   "rc": 0,
+   "dur": 0.3,
+   "ok": true,
+   "tail": "历史已锁定（2010–2025，累计 5059%，校验通过）→ 直接发布，不重算"
+  },
+  {
+   "ts": "2026-10-30T19:00:34Z",
+   "step": "site_build.py",
+   "rc": 0,
+   "dur": 0.0,
+   "ok": true,
+   "tail": "健康状态：ok\n  静态资源版本：13812bba（2 个页面已更新引用）\n站点已构建：12 个静态文件 → /home/runner/work/trade/trade/docs\n  index / portfolio / strategy / signals\n  数据：signal.json history.json curve.json（1 期信号）"
+  },
+  {
+   "ts": "2026-10-30T19:00:34Z",
+   "step": "selftest.py",
+   "rc": 0,
+   "dur": 0.4,
+   "ok": true,
+   "tail": "=== 部署前自检 ===\n  ✅ 页面 index.html\n  ✅ 页面无写死年份区间（动态推导）\n  ✅ 页面无写死日期（全部由数据注入）\n  ✅ 页面无写死年份标题（动态推导）\n  ✅ 单页含区块 todayPct\n  ✅ 单页含区块 yearRet\n  ✅ 单页含区块 bTotal\n  ✅ 单页含区块 yearRows\n  ✅ 单页含区块 posRows\n  ✅ 信号有正式持仓\n  ✅ 持仓有效期 2026-01-01 ~ 2026-12-31（2026 年度）\n  ✅ 行情 508/510 只（100%）\n  ✅ 净值 209 个交易日\n  ✅ 权重形态合规（等权 / 同行业 30-30-40）\n  ✅ 跨年链路自洽（5 个日期）\n  ✅ preview.json 有 3 只候选\n  ✅ 预览权重合计 = 1\n  ✅ 预览行业均已分类\n  ✅ 预览涨幅为有限数\n  ✅ 预览仍在预测期（官方 2025-12）\n  ✅ 预览基准月为 12 月（2026-12）\n  ✅ 年度结转规则一致（2025-12）\n  ✅ 持有年度 = 基准年 + 1（2026）\n  ✅ 当前日期在生效区间内（2026-01-01~2026-12-31）\n  ✅ health.json 存在且状态合法（ok）\n  ✅ 行情年龄 0.0 小时（<72）\n  ✅ 净值末点 = 已收盘日（20261029）\n  ✅ signal.json 不含 NaN/Infinity\n  ✅ 2025-12 持仓与锁定一致（WDC、MU、HOOD）\n  ✅ 正式持仓均为 2025-12 成分股\n  ✅ 理论账户与净值一致（+99.45%）\n  ✅ 全部持仓有建仓价与现价\n  ✅ 正式持仓 3 只均有行情\n  ✅ 全部行情价格为正数\n  ✅ 净值末点 20261029 ≤ 行情交易日 2026-10-29\n  ✅ 逐年记录 16 年\n  ✅ 全部持仓均为标普500 成分股\n  ✅ 全周期曲线 192 个月\n  ✅ 行情 0.0 小时前更新\n  ✅ 净值末值 1.994543\n  ✅ 最大回撤 -36.7%\n  ✅ 逐年收益均为有限且合理\n  ✅ 每年恰好 3 只持仓\n  ✅ 各年权重合计 = 1\n  ✅ 行业上限（≤2 只 / ≤60%）\n  ✅ 历史收益未被改写\n  ✅ 曲线末值 = 逐年复利（51.59 倍）\n  ✅ 历史锁定一致（16 年未改动）\n  ✅ 成分表快照 30 天内（0 天）\n  ✅ 当前成分 503 只\n通过 50 · 警告 0 · 失败 0"
   }
  ],
- "updated": "2026-10-30T18:55:37Z"
+ "updated": "2026-10-30T19:00:34Z"
 }
