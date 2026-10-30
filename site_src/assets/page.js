@@ -96,8 +96,7 @@
       var mvAdj = r.shares * liveAdj;
       var pnlAdj = mvAdj - r.cost;
       return '<div class="pr-row">' +
-        '<div><span class="rk">' + (i + 1) + '</span>' +
-          '<span class="tk">' + DSH.esc(r.ticker) + '</span>' +
+        '<div><span class="tk">' + DSH.esc(r.ticker) + '</span>' +
           '<div class="nm">建仓 ' + eraw.toFixed(2) + '</div>' +
           '<div class="nm">现价 ' + liveRaw.toFixed(2) + '</div></div>' +
         '<div class="r">' + Math.round(r.weight * 100) + '%</div>' +
