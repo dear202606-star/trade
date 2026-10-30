@@ -49,6 +49,9 @@ def main():
     _hard = re.findall(r"20\d\d\s*[–\-]\s*20\d\d", _html)
     check(not _hard, "页面无写死年份区间（动态推导）",
           "发现写死：%s" % _hard[:3])
+    _hard3 = re.findall(r"20\d\d[-/]\d{1,2}", _html)
+    check(not _hard3, "页面无写死日期（全部由数据注入）",
+          "发现写死日期：%s" % _hard3[:3])
     _hard2 = re.findall(r"20\d\d\s*年", _html)
     check(not _hard2, "页面无写死年份标题（动态推导）",
           "发现写死：%s" % _hard2[:3])

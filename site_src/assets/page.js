@@ -80,7 +80,7 @@
       ? EQ.base_date.slice(0, 4) + "-" + EQ.base_date.slice(4, 6) + "-" + EQ.base_date.slice(6, 8) : "—";
     $("posTitle").textContent = "当前持仓明细";
     var pm = $("posMeta");
-    if (pm) pm.textContent = (y ? y + " 年 · " : "") + (y ? (y - 1) + "-12 选出 · " : "") + (bdTxt ? "建仓 " + bdTxt : "");
+    if (pm) pm.textContent = (y ? (y - 1) + "-12 选出 · " : "") + (bdTxt ? "建仓 " + bdTxt : "");
     $("posRows").innerHTML = c.rows.map(function (r) {
       var qq = q[r.ticker] || {};
       var eraw = (r.entry_raw != null) ? r.entry_raw : r.entry;
@@ -111,6 +111,24 @@
       box.innerHTML = DSH.spark(EQ.points.map(function (p) { return { y: p.s }; }),
         { h: 118, color: "#F2C46B" });
     } catch (e) { box.innerHTML = ""; }
+  }
+
+  /* 数据停更检测：按用户当前时间算，不依赖构建时的健康快照 */
+  function checkFreshness() {
+    var ts = Q && Q.ts;
+    if (!ts) return;
+    var ageH = (Date.now() - Date.parse(ts)) / 36e5;
+    if (!isFinite(ageH) || ageH <= 26) return;
+    var bar = document.getElementById("freshBanner");
+    if (!bar) {
+      bar = document.createElement("div");
+      bar.id = "freshBanner";
+      bar.style.cssText = "position:sticky;top:0;z-index:99;background:rgba(255,90,95,.16);" +
+        "border-bottom:1px solid rgba(255,90,95,.4);color:#FFB3B6;font-size:12.5px;" +
+        "padding:8px 16px;text-align:center";
+      document.body.insertBefore(bar, document.body.firstChild);
+    }
+    bar.textContent = "⚠ 行情已 " + Math.round(ageH) + " 小时未更新";
   }
 
   /* 全站统一 SPY 价格：优先实时行情，其次用信号里的收盘价 */
@@ -260,6 +278,7 @@
       EQ = arr[0]; SIG = arr[1]; Q = arr[2]; CV = arr[3]; SH = arr[4]; PV = arr[5]; ZH = arr[6] || {};
     } catch (e) {}
 
+    checkFreshness();
     renderTick();
     renderNow();
     renderYear();

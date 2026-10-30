@@ -44,6 +44,7 @@ def main():
     sig = load("signal.json")
     q = load("quotes.json")
     sh = load("strategy_history.json")
+    pv = load("preview.json")
 
     strat = eq["stats"]["strategy"] * 100
     bench = eq["stats"]["benchmark"] * 100
@@ -119,6 +120,33 @@ def main():
         bm = num(pg.inner_text("#bMdd"))
         ck(bm is not None and abs(abs(bm) - abs(sh["summary"]["worst_intra"] * 100)) <= 0.15,
            "最大回撤 = 谷底口径（%.1f%%）" % (sh["summary"]["worst_intra"] * 100), "页面 %s" % bm)
+
+        print("\n[动态性]")
+        body = pg.inner_text("body")
+        shown = set(re.findall(r"20\d\d-\d{2}(?:-\d{2})?", body))
+        y = int(str(eq["base_date"])[:4]) + 1
+        allowed = {
+            "%d-12" % (y - 1),
+            "%d-12-31" % (y - 1),
+            str(sig.get("valid_from", ""))[:7],
+            str(sig.get("valid_to", ""))[:7],
+            str(pv.get("base_month", ""))[:7],
+            str(pv.get("official_month", ""))[:7],
+        }
+        allowed = {x for x in allowed if x}
+        unknown = sorted(d for d in shown if d not in allowed)
+        ck(not unknown, "页面上所有日期均来自数据源（%d 个）" % len(shown),
+           "无法追溯：%s" % unknown)
+
+        lbl = pg.inner_text("#todayLabel")
+        ck(any(k in lbl for k in ("盘中", "收盘")), "今日状态为盘中/收盘（%s）" % lbl.strip(),
+           "状态异常：%s" % lbl)
+
+        titles = pg.evaluate("() => [...document.querySelectorAll('.card-title')].map(e => e.innerText)")
+        ck(any(str(y) in t for t in titles), "卡片标题含当年（%d）" % y,
+           "标题未随年份：%s" % titles)
+        ck(any(str(y + 1) in t for t in titles), "卡片标题含次年（%d）" % (y + 1),
+           "标题未随年份：%s" % titles)
 
         print("\n[年度]")
         n = pg.locator("#yearRows .yr-row").count()
