@@ -10,9 +10,14 @@
   }
   function pct2(v, d) {
     if (v == null || !isFinite(v)) return "—";
-    return (v >= 0 ? "+" : "") + (v * 100).toFixed(d == null ? 2 : d) + "%";
+    if (Math.abs(v) < 1e-9) return (0).toFixed(d == null ? 2 : d) + "%";
+    return (v > 0 ? "+" : "") + (v * 100).toFixed(d == null ? 2 : d) + "%";
   }
-  function cls(v) { return (v == null || !isFinite(v)) ? "" : (v >= 0 ? "up" : "down"); }
+  function cls(v) {
+    if (v == null || !isFinite(v)) return "";
+    if (Math.abs(v) < 1e-9) return "flat";   // 0 用中性色
+    return v > 0 ? "up" : "down";
+  }
 
   /* ---------- ① 今日 ---------- */
   function renderNow() {
