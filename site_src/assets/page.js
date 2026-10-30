@@ -84,7 +84,7 @@
     var q = (Q && Q.quotes) || {};
     var bdTxt = (EQ && EQ.base_date)
       ? EQ.base_date.slice(0, 4) + "-" + EQ.base_date.slice(4, 6) + "-" + EQ.base_date.slice(6, 8) : "—";
-    $("posTitle").textContent = y ? (String(y).slice(2) + "年持仓明细") : "持仓明细";
+    $("posTitle").textContent = "当年策略明细";
     var pm = $("posMeta");
     if (pm) pm.textContent = (y ? (y - 1) + "-12 选出 · " : "") + (bdTxt ? "建仓 " + bdTxt : "");
     $("posRows").innerHTML = c.rows.map(function (r, i) {
@@ -187,7 +187,7 @@
     var box = $("previewRows");
     if (!box || !PV) return;
     var y = PV.hold_year || "";
-    $("nextYearTitle").textContent = y ? (y + " 年持仓预览") : "持仓预览";
+    $("nextYearTitle").textContent = "次年策略预览";
     $("previewNote").textContent = PV.final ? "已定稿 · 与正式持仓一致" : "年初至今涨幅 · 年末定稿";
     var SEC = {
       "Information Technology": "信息技术",

@@ -147,10 +147,10 @@ def main():
            "状态异常：%s" % foot)
 
         titles = pg.evaluate("() => [...document.querySelectorAll('.card-title')].map(e => e.innerText)")
-        ck(any((str(y) in t) or (str(y)[2:] + "年" in t) for t in titles), "卡片标题含当年（%d）" % y,
-           "标题未随年份：%s" % titles)
-        ck(any(str(y + 1) in t for t in titles), "卡片标题含次年（%d）" % (y + 1),
-           "标题未随年份：%s" % titles)
+        ck(any("当年" in t for t in titles), "存在「当年策略明细」卡片",
+           "缺少当年卡：%s" % titles)
+        ck(any("次年" in t for t in titles), "存在「次年策略预览」卡片",
+           "缺少次年预览卡：%s" % titles)
 
         print("\n[年度]")
         n = pg.locator("#yearRows .yr-row").count()
