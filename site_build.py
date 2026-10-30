@@ -111,7 +111,8 @@ def asset_version():
     """用 css/js 内容哈希做版本号，避免部署后浏览器还在用旧配色/旧脚本"""
     import hashlib
     h = hashlib.md5()
-    for f in ("assets/app.css", "assets/app.js"):
+    for f in ("assets/app.css", "assets/app.js", "assets/page.css",
+              "assets/page.js", "assets/theme.css"):
         p = os.path.join(SRC_SITE, f)
         if os.path.exists(p):
             with open(p, "rb") as fh:
@@ -133,7 +134,8 @@ def bust_cache():
         except Exception:
             continue
         new = html
-        for a in ("assets/app.css", "assets/app.js"):
+        for a in ("assets/app.css", "assets/app.js", "assets/page.css",
+                  "assets/page.js", "assets/theme.css", "assets/tabs.css"):
             new = re.sub(re.escape(a) + r"(\?v=[0-9a-f]+)?", a + "?v=" + v, new)
         if new != html:
             with open(p, "w", encoding="utf-8") as f:
