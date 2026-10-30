@@ -88,6 +88,7 @@ python simulate_rollover.py # 跨年仿真：任意日期推导全链路
 | [PRD](docs/PRD.md) | 产品定位、用户场景、功能清单、验收标准 |
 | [ARCHITECTURE](docs/ARCHITECTURE.md) | 数据流、组件、调度、失败模式 |
 | [DATA_DICTIONARY](docs/DATA_DICTIONARY.md) | 每个字段的含义、口径、来源 |
+| [GITHUB](docs/GITHUB.md) | 工作流、并发、门禁、Issue 策略、Supabase 定时 |
 | [RUNBOOK](docs/RUNBOOK.md) | 日常检查、故障处理、换仓与 Token 轮换 |
 | [CHANGELOG](docs/CHANGELOG.md) | 版本与口径变更（含业绩修正记录） |
 | [KNOWN_ISSUES](docs/KNOWN_ISSUES.md) | 已知问题与待修项 |

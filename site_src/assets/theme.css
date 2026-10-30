@@ -1,0 +1,166 @@
+/* ============================================================
+   主题 v2：深海军蓝 + 极光渐变 + 玻璃质感
+   覆盖 app.css / page.css 的暗色底，保留红涨绿跌语义
+   ============================================================ */
+
+:root{
+  --txt-3:#7E8CA1;   /* 提亮：暗色卡片上对比度 ≥4.5 */
+  --bg-1:#0A1120;
+  --bg-2:#0B1424;
+  --bg-3:#080D18;
+  --surface-1:rgba(255,255,255,.055);
+  --surface-2:rgba(255,255,255,.03);
+  --stroke:rgba(255,255,255,.09);
+  --stroke-soft:rgba(255,255,255,.06);
+  --cyan:#6EE7F9;
+  --violet:#A78BFA;
+  --gold:#F2C46B;
+}
+
+html{background:#080D18}
+body{
+  background:#080D18;              /* 实色兜底，避免超长页面出现白底 */
+  min-height:100%;
+  color:var(--txt);
+}
+/* 顶部基色渐变（随视口固定，滚动时始终有效） */
+body::after{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 40%, var(--bg-3) 100%);
+}
+
+/* 极光层（很慢的漂移，制造科技动感但不抢戏） */
+body::before{
+  content:"";position:fixed;left:-10%;right:-10%;top:-18%;height:58vh;z-index:0;
+  background:
+    radial-gradient(55% 60% at 28% 0%, rgba(110,231,249,.12), transparent 70%),
+    radial-gradient(50% 55% at 74% 8%, rgba(167,139,250,.12), transparent 70%);
+  filter:blur(28px);
+  animation:aurora 28s ease-in-out infinite alternate;
+  pointer-events:none;
+}
+@keyframes aurora{
+  from{transform:translate3d(-2%,0,0) scale(1)}
+  to{transform:translate3d(3%,2%,0) scale(1.07)}
+}
+.top,.wrap,.foot{position:relative;z-index:1}
+
+/* 顶栏：玻璃条 + 细分割 */
+.top{
+  background:linear-gradient(180deg, rgba(10,17,32,.86), rgba(10,17,32,.62));
+  backdrop-filter:saturate(140%) blur(14px);
+  border-bottom:1px solid var(--stroke-soft);
+  box-shadow:0 1px 0 rgba(255,255,255,.04);
+}
+.logo .en{letter-spacing:-.01em}
+.tick{color:var(--txt-2)}
+.tick .chg.up{color:var(--up)}
+.tick .chg.down{color:var(--down)}
+
+/* 卡片：玻璃 + 顶部高光 + 柔和投影 */
+.card{
+  position:relative;
+  background:linear-gradient(180deg, var(--surface-1), var(--surface-2));
+  border:1px solid var(--stroke);
+  border-radius:16px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    0 20px 48px -30px rgba(0,0,0,.95);
+  backdrop-filter:blur(10px);
+  overflow:hidden;
+}
+.card::after{           /* 顶部一道极细的高光，提升质感 */
+  content:"";position:absolute;inset:0 0 auto 0;height:1px;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.16), transparent);
+  pointer-events:none;
+}
+.card.flat{
+  background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015));
+  border-color:var(--stroke-soft);
+}
+.card:hover{border-color:rgba(255,255,255,.14)}
+
+/* 首屏结论卡：金色主调，仍保留科技底色 */
+.hero{
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgba(242,196,107,.13), transparent 58%),
+    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+  border-color:rgba(242,196,107,.30);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 24px 60px -34px rgba(242,196,107,.35),
+    0 20px 48px -30px rgba(0,0,0,.9);
+}
+.hero .verdict{
+  background:linear-gradient(180deg,#FFFFFF,#D8E2F2);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+/* 内嵌小卡（总市值等） */
+.grid > .card.flat{
+  background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+  border-radius:12px;
+}
+
+/* 今日 / 仓位 两个格子 */
+.cell{
+  background:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015));
+  border:1px solid var(--stroke-soft);
+  border-radius:12px;
+}
+
+/* 数字排印：等宽数字 + 更紧的字距 */
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1,"ss01" 1}
+.num-xl{letter-spacing:-.02em}
+
+/* 卡片标题：小标题前加一道渐变短线，形成节奏 */
+.card-title{position:relative;padding-left:12px}
+.card-title::before{
+  content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:3px;height:14px;border-radius:2px;
+  background:linear-gradient(180deg,var(--cyan),var(--violet));
+  opacity:.9;
+}
+
+/* 表头与行：更清晰的层次 */
+.pr-head,.yr-head{color:var(--txt-3);letter-spacing:.02em}
+.pr-row,.yr-row{border-bottom-color:rgba(255,255,255,.055)}
+.pr-row:hover,.pv-row:hover,.yr-row:hover{background:rgba(255,255,255,.022)}
+
+/* 标签：更柔和 */
+.label{color:var(--txt-2)}
+
+/* 本金切换：选中态用金色渐变 */
+.pill-btn{
+  border-color:var(--stroke);
+  background:rgba(255,255,255,.03);
+  transition:background .18s,border-color .18s,color .18s;
+}
+.pill-btn:hover{border-color:rgba(255,255,255,.2);color:var(--txt)}
+.pill-btn.on{
+  background:linear-gradient(180deg,#F7D289,#E9B34E);
+  border-color:rgba(242,196,107,.9);
+  color:#1A1206;
+  box-shadow:0 6px 18px -10px rgba(242,196,107,.9);
+}
+
+/* 页脚：更淡 */
+.foot{color:rgba(169,182,201,.62)}
+.foot > div:first-child{color:var(--txt-3)}
+
+/* 图表图例的小方块加一点光 */
+.legend .dot{box-shadow:0 0 8px rgba(255,255,255,.18)}
+
+/* 滚动条（桌面） */
+@media (min-width:760px){
+  ::-webkit-scrollbar{width:10px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:6px;border:3px solid transparent;background-clip:content-box}
+  ::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.2);background-clip:content-box}
+}
+
+/* 尊重系统「减少动效」 */
+@media (prefers-reduced-motion: reduce){
+  body::before{animation:none}
+}

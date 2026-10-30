@@ -133,12 +133,7 @@ jobs:
             git push
           fi
 
-      - name: 发布信号通知
-        if: steps.pick.outcome == 'success'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python publish_signal.py
-
+      # 已停用：站点是唯一信息源，不再往 Issue 推送重复内容
       - name: 摘要
         if: always()
         run: |
