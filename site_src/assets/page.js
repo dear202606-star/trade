@@ -81,7 +81,7 @@
     $("posTitle").textContent = "当前持仓明细";
     var pm = $("posMeta");
     if (pm) pm.textContent = (y ? (y - 1) + "-12 选出 · " : "") + (bdTxt ? "建仓 " + bdTxt : "");
-    $("posRows").innerHTML = c.rows.map(function (r) {
+    $("posRows").innerHTML = c.rows.map(function (r, i) {
       var qq = q[r.ticker] || {};
       var eraw = (r.entry_raw != null) ? r.entry_raw : r.entry;
       var lraw = (r.last_raw != null) ? r.last_raw : r.last;
@@ -91,7 +91,8 @@
       var mvAdj = r.shares * liveAdj;
       var pnlAdj = mvAdj - r.cost;
       return '<div class="pr-row">' +
-        '<div><div class="tk">' + DSH.esc(r.ticker) + '</div>' +
+        '<div><span class="rk">' + (i + 1) + '</span>' +
+          '<span class="tk">' + DSH.esc(r.ticker) + '</span>' +
           '<div class="nm">建仓 ' + eraw.toFixed(2) + '</div>' +
           '<div class="nm">现价 ' + liveRaw.toFixed(2) + '</div></div>' +
         '<div class="r">' + Math.round(r.weight * 100) + '%</div>' +
