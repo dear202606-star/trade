@@ -295,6 +295,27 @@
     $("tickChg").className = "chg " + cls(q.chg);
   }
 
+  /* 打开期间自动刷新：每 60 秒拉一次行情，重绘受影响的部分 */
+  function startAutoRefresh() {
+    var busy = false;
+    setInterval(async function () {
+      if (busy || document.hidden) return;
+      busy = true;
+      try {
+        var fresh = await DSH.jsonNoCache("quotes", {});
+        if (fresh && fresh.ts && (!Q || fresh.ts !== Q.ts)) {
+          Q = fresh;
+          checkFreshness();
+          renderTick();
+          renderNow();
+          renderYear();
+          renderPreview();
+        }
+      } catch (e) { /* 静默失败，下次再试 */ }
+      busy = false;
+    }, 60000);
+  }
+
   async function boot() {
     initPills();
     try {
@@ -316,6 +337,7 @@
     renderYears();
     drawYearSpark();
     drawAllChart();
+    startAutoRefresh();
 
     var _rt = null;
     window.addEventListener("resize", function () {

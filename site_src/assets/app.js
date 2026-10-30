@@ -63,6 +63,12 @@
 
   /* ---------- 数据 ---------- */
   const cache = {};
+  /* 强制绕过内存缓存重新拉取（用于定时刷新） */
+  DSH.jsonNoCache = async function (name, fallback) {
+    delete cache[name];
+    return DSH.json(name, fallback);
+  };
+
   DSH.json = async function (name, fallback) {
     if (cache[name] !== undefined) return cache[name];
     let url = "data/" + name + ".json";
