@@ -69,8 +69,26 @@ def main():
 
         print("\n[当期]")
         v = num(pg.inner_text("#yearRet"))
-        ck(v is not None and abs(v - strat) <= 0.05,
-           "当期收益 = 数据源（%.2f%%）" % strat, "页面 %s" % v)
+        # 盘中：页面 = (1+收盘) × (1+今日) − 1；收盘后：页面 = 收盘值
+        # 今日涨跌按「真实持股市值」加权（与页面同一算法）
+        _qs = q["quotes"]
+        _amt = 100000.0
+        _dayAmt = 0.0
+        _mv = 0.0
+        for _p in eq["position"]:
+            _q = _qs.get(_p["ticker"]) or {}
+            _sh = _amt * _p["weight"] / _p["entry"] if _p["entry"] else 0
+            _px = _q.get("p") or _p["last"]
+            _pc = _q.get("pc")
+            _mv += _sh * _px
+            if _pc:
+                _dayAmt += _sh * (_px - _pc)
+        _day = (_dayAmt / (_mv - _dayAmt)) if (q.get("intraday") and _mv > _dayAmt) else 0.0
+        want = ((1 + strat / 100) * (1 + _day) - 1) * 100
+        ck(v is not None and abs(v - want) <= 0.1,
+           "当期收益 = %s（收盘 %.2f%% × 今日 %+.2f%%）" % (
+               "盘中口径" if q.get("intraday") else "收盘口径", strat, _day * 100),
+           "页面 %s / 期望 %.2f" % (v, want))
         mv, cost, pnl = (num(pg.inner_text("#tMv")), num(pg.inner_text("#tCost")),
                          num(pg.inner_text("#tPnl")))
         ck(bool(mv and cost and pnl) and abs((mv - cost) - pnl) <= max(1, abs(pnl) * 1e-6),

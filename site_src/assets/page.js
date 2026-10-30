@@ -67,13 +67,35 @@
     var y = EQ && EQ.base_date ? (+String(EQ.base_date).slice(0, 4) + 1) : "";
     $("yearTitle").textContent = (y ? y + " 年" : "") + "策略收益";
     var c = account();
-    $("yearRet").textContent = pct2(c.pnlPct);
-    $("yearRet").className = "num num-xl " + cls(c.pnlPct);
+
+    // 收盘口径（曲线末点）
+    var closePct = (EQ && EQ.stats) ? EQ.stats.strategy : c.pnlPct;
+    // 盘中口径：只有盘中才叠加今日涨跌（收盘后净值已含当日，叠加会重复计算）
+    var td = DSH.today(SIG, Q, EQ);
+    var dayPct = (td && td.pct != null) ? td.pct : 0;
+    var isLive = !!(Q && Q.intraday) && Math.abs(dayPct) > 1e-9;
+    var livePct = (closePct == null) ? null
+      : (isLive ? (1 + closePct) * (1 + dayPct) - 1 : closePct);
+
+    $("yearRet").textContent = pct2(livePct);
+    $("yearRet").className = "num num-xl " + cls(livePct);
 
     var bench = EQ && EQ.stats ? EQ.stats.benchmark : null;
+    var extra = "";
+    if (isLive && closePct != null) {
+      extra = " ｜ 含今日 <span class='" + cls(dayPct) + "'>" + pct2(dayPct) +
+        "</span>（收盘 " + pct2(closePct) + "）";
+    }
     $("yearVs").innerHTML = "同期标普 <span class='" + cls(bench) + "'>" + pct2(bench) + "</span>" +
-      (c.pnlPct != null && bench != null
-        ? " ｜ 跑赢 <span class='" + cls(c.pnlPct - bench) + "'>" + pct2(c.pnlPct - bench) + "</span>" : "");
+      (livePct != null && bench != null
+        ? " ｜ 跑赢 <span class='" + cls(livePct - bench) + "'>" + pct2(livePct - bench) + "</span>" : "") + extra;
+
+    // 金额同步为盘中口径
+    if (livePct != null) {
+      c.pnlPct = livePct;
+      c.pnl = amt * livePct;
+      c.mv = amt + c.pnl;
+    }
 
     $("tMv").textContent = yuan(c.mv);
     $("tPnl").textContent = yuan(c.pnl);

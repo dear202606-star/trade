@@ -133,6 +133,16 @@ def universe():
     return sorted(t for t in tk if t)
 
 
+def is_intraday(now_utc=None):
+    """是否处于美股盘中（美东 09:30–16:10 工作日）"""
+    now_utc = now_utc or dt.datetime.now(dt.timezone.utc)
+    et = now_utc - dt.timedelta(hours=4)
+    if et.weekday() >= 5:
+        return False
+    minutes = et.hour * 60 + et.minute
+    return (9 * 60 + 30) <= minutes <= (16 * 60 + 10)
+
+
 def last_session(now_utc=None):
     """美东时间最后一个已收盘的交易日（YYYY-MM-DD）
 
@@ -158,6 +168,7 @@ def main():
         "ts": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "ts_local": (dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=8)).strftime("%Y-%m-%d %H:%M"),
         "session": last_session(),
+        "intraday": is_intraday(),
         "fx": fx,
         "count": len(quotes),
         "universe": len(tickers),
