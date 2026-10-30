@@ -1,30 +1,6 @@
 {
  "runs": [
   {
-   "ts": "2026-10-30T05:29:23Z",
-   "step": "equity.py",
-   "rc": 0,
-   "dur": 5.2,
-   "ok": true,
-   "tail": "净值 209 个交易日（20251231 起）｜策略 +99.45% ｜标普 +12.82% ｜ 最大回撤 -36.7%"
-  },
-  {
-   "ts": "2026-10-30T05:29:27Z",
-   "step": "preview.py",
-   "rc": 0,
-   "dur": 3.6,
-   "ok": true,
-   "tail": "预览：MRNA +655% / SNDK +460% / DELL +278% → 排名池 495 只\n[stderr]\n/home/runner/work/trade/trade/preview.py:31: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).\n  ym = dt.datetime.utcfromtimestamp(int(ts)).strftime(\"%Y-%m\")"
-  },
-  {
-   "ts": "2026-10-30T05:29:27Z",
-   "step": "strategy_history.py",
-   "rc": 0,
-   "dur": 0.3,
-   "ok": true,
-   "tail": "历史已锁定（2010–2025，累计 5059%，校验通过）→ 直接发布，不重算"
-  },
-  {
    "ts": "2026-10-30T05:29:27Z",
    "step": "site_build.py",
    "rc": 0,
@@ -319,7 +295,31 @@
    "dur": 0.5,
    "ok": true,
    "tail": "=== 部署前自检 ===\n  ✅ 页面 index.html\n  ✅ 页面无写死年份区间（动态推导）\n  ✅ 页面无写死年份标题（动态推导）\n  ✅ 单页含区块 todayPct\n  ✅ 单页含区块 yearRet\n  ✅ 单页含区块 bTotal\n  ✅ 单页含区块 yearRows\n  ✅ 单页含区块 posRows\n  ✅ 信号有正式持仓\n  ✅ 持仓有效期 2026-01-01 ~ 2026-12-31（2026 年度）\n  ✅ 行情 508/510 只（100%）\n  ✅ 净值 209 个交易日\n  ✅ 权重形态合规（等权 / 同行业 30-30-40）\n  ✅ 跨年链路自洽（5 个日期）\n  ✅ preview.json 有 3 只候选\n  ✅ 预览权重合计 = 1\n  ✅ 预览行业均已分类\n  ✅ 预览涨幅为有限数\n  ✅ 预览仍在预测期（官方 2025-12）\n  ✅ 预览基准月为 12 月（2026-12）\n  ✅ 年度结转规则一致（2025-12）\n  ✅ 持有年度 = 基准年 + 1（2026）\n  ✅ 当前日期在生效区间内（2026-01-01~2026-12-31）\n  ✅ health.json 存在且状态合法（ok）\n  ✅ 行情年龄 0.0 小时（<72）\n  ✅ 净值末点 = 已收盘日（20261029）\n  ✅ signal.json 不含 NaN/Infinity\n  ✅ 2025-12 持仓与锁定一致（WDC、MU、HOOD）\n  ✅ 正式持仓均为 2025-12 成分股\n  ✅ 理论账户与净值一致（+99.45%）\n  ✅ 全部持仓有建仓价与现价\n  ✅ 正式持仓 3 只均有行情\n  ✅ 全部行情价格为正数\n  ✅ 净值末点 20261029 ≤ 行情交易日 2026-10-29\n  ✅ 逐年记录 16 年\n  ✅ 全部持仓均为标普500 成分股\n  ✅ 全周期曲线 192 个月\n  ✅ 行情 0.0 小时前更新\n  ✅ 净值末值 1.994543\n  ✅ 最大回撤 -36.7%\n  ✅ 逐年收益均为有限且合理\n  ✅ 每年恰好 3 只持仓\n  ✅ 各年权重合计 = 1\n  ✅ 行业上限（≤2 只 / ≤60%）\n  ✅ 历史收益未被改写\n  ✅ 曲线末值 = 逐年复利（51.59 倍）\n  ✅ 历史锁定一致（16 年未改动）\n  ✅ 成分表快照 30 天内（0 天）\n  ✅ 当前成分 503 只\n通过 49 · 警告 0 · 失败 0"
+  },
+  {
+   "ts": "2026-10-30T12:39:25Z",
+   "step": "quotes.py",
+   "rc": 0,
+   "dur": 9.3,
+   "ok": true,
+   "tail": "行情 508 / 510，汇率 6.6525，缺失 2"
+  },
+  {
+   "ts": "2026-10-30T12:59:01Z",
+   "step": "monthly_pick.py",
+   "rc": 0,
+   "dur": 1176.2,
+   "ok": true,
+   "tail": "True\n      100/540  用时 193s\n      200/540  用时 399s\n      300/540  用时 602s\n      400/540  用时 809s\n      500/540  用时 1002s\n      成功 518 / 失败 21\n      面板已导出 3.7 MB（供净值/逐年记录复用）\n      数据质量 {'sina': 515, 'yahoo': 4, 'both': 516, 'quarantine': 3, 'fail': 18}\n      两源不一致已隔离 3 只: ECHO, FISV, Q\n[3/5] 计算动量排名（当月 + 上一年 12 月）...\n      正式持仓已锁定（2025-12），沿用不重算\n      当月排名池 498 只；正式持仓基准 2025-12\n[4/5] 生成报告 ...\n# 月度信号 · 2026-10\n\n> 生成时间 2026-10-30 ｜ 数据截至 2026-10 ｜ 排名池 498 只\n> 运行环境 GitHub Actions ｜ 代码版本 86b0f67\n\n## 本月动作\n\n**本月不换仓：持有 2026 年度组合（基准 2025-12）；大盘在 10 月均线上方（769 ≥ 730），维持满仓**\n\n## 大盘开关\n\n- SPY 最新收盘：**769.36** ｜ 10 月均线：**729.63**\n- 状态：**满仓** → 目标仓位 100%\n\n## 正式持仓（2025-12 锁定，本年度有效）\n\n| # | 代码 | 公司 | 行业 | 基准涨幅 | 策略内权重 | 占总资产 |\n|---|---|---|---|---|---|---|\n| 1 | **WDC** | Western Digital | Information Technology | +285% | 30% | 9.0% |\n| 2 | **MU** | Micron Technology | Information Technology | +239% | 30% | 9.0% |\n| 3 | **HOOD** | Robinhood Markets | Financials | +204% | 40% | 12.0% |\n\n## 若现在重排（参考，不据此换仓）\n\n| # | 代码 | 行业 | 12月涨幅 |\n|---|---|---|---|\n      跟踪: {\"start\": \"2026-10\", \"months\": 0, \"strategy\": 0.0, \"spy\": 0.0, \"expected\": 0.02171, \"excess_vs_spy\": 0.0, \"gap_vs_backtest\": -0.02171}\n[5/5] 更新看板 ...\n[stderr]\nWARN: 看板生成失败 build() missing 1 required positional argument: 'out_path'"
+  },
+  {
+   "ts": "2026-10-30T12:59:09Z",
+   "step": "equity.py",
+   "rc": 0,
+   "dur": 7.7,
+   "ok": true,
+   "tail": "净值 209 个交易日（20251231 起）｜策略 +99.45% ｜标普 +12.82% ｜ 最大回撤 -36.7%"
   }
  ],
- "updated": "2026-10-30T12:21:18Z"
+ "updated": "2026-10-30T12:59:09Z"
 }
