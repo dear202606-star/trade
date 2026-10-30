@@ -185,3 +185,9 @@
   .hero{padding:20px 16px}
   .hero .verdict{font-size:29px}
 }
+
+/* 桌面：持仓副行稍大，避免过小 */
+@media (min-width:760px){
+  .pr .nm{font-size:11.5px}
+  .pv-row{padding:14px 0}
+}
