@@ -554,8 +554,10 @@
       if (k % stride) return;
       const d0 = pts[i].d;
       const lab = pts[i].label || (d0.slice(4, 6) + "/" + d0.slice(6, 8));
-      svg += '<text x="' + X(i).toFixed(1) + '" y="' + (h - 8) + '" fill="#6F7D92" font-size="' + FS + '" text-anchor="middle">' +
-        lab + "</text>";
+      const first = k === 0, last = k + stride >= idxs.length;
+      const anchor = first ? "start" : (last ? "end" : "middle");
+      svg += '<text x="' + X(i).toFixed(1) + '" y="' + (h - 9) + '" fill="#6F7D92" font-size="' + FS +
+        '" text-anchor="' + anchor + '">' + lab + "</text>";
     });
     svg += "</svg>";
     return svg;

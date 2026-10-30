@@ -36,12 +36,13 @@
       $("todayPct").className = "num num-lg " + cls(t.pct);
       $("todayAmt").textContent = yuan(t.amount);
       $("todayAmt").className = "sub " + cls(t.amount);
-      $("todayLabel").textContent = "今日 · " + (t.live ? "盘中" : "收盘");
+      $("todayLabel").textContent = "策略今日表现";
     }
 
     $("switchTxt").textContent = trend;
-    $("switchSub").textContent = "SPY " + spyNow() + " / " +
-      (SIG && SIG.ma ? SIG.ma.toFixed(0) : "—");
+    var _spy = spyNow(), _ma = (SIG && SIG.ma) ? SIG.ma.toFixed(0) : "—";
+    $("switchSub").textContent = "SPY " + _spy + " " +
+      ((SIG && SIG.trend === "满仓") ? "高于均线 " : "低于均线 ") + _ma;
   }
 
   /* ---------- ② 当期账户 ---------- */
@@ -83,7 +84,7 @@
     var q = (Q && Q.quotes) || {};
     var bdTxt = (EQ && EQ.base_date)
       ? EQ.base_date.slice(0, 4) + "-" + EQ.base_date.slice(4, 6) + "-" + EQ.base_date.slice(6, 8) : "—";
-    $("posTitle").textContent = "当前持仓明细";
+    $("posTitle").textContent = y ? (String(y).slice(2) + "年持仓明细") : "持仓明细";
     var pm = $("posMeta");
     if (pm) pm.textContent = (y ? (y - 1) + "-12 选出 · " : "") + (bdTxt ? "建仓 " + bdTxt : "");
     $("posRows").innerHTML = c.rows.map(function (r, i) {
@@ -97,8 +98,7 @@
       var pnlAdj = mvAdj - r.cost;
       return '<div class="pr-row">' +
         '<div><span class="tk">' + DSH.esc(r.ticker) + '</span>' +
-          '<div class="nm">建仓 ' + eraw.toFixed(2) + '</div>' +
-          '<div class="nm">现价 ' + liveRaw.toFixed(2) + '</div></div>' +
+          '<div class="nm">' + eraw.toFixed(2) + ' → ' + liveRaw.toFixed(2) + '</div></div>' +
         '<div class="r">' + Math.round(r.weight * 100) + '%</div>' +
         '<div class="r">' + eraw.toFixed(2) + '</div>' +
         '<div class="r">' + liveRaw.toFixed(2) + '</div>' +
@@ -173,10 +173,11 @@
     var box = $("allChart");
     if (!box || !CV || !CV.points || CV.points.length < 4) return;
     try {
+      var wpx = Math.max(300, Math.round(box.clientWidth));
       box.innerHTML = DSH.lineChart([
         { name: "策略", color: "#FF6B72", pts: CV.points.map(function (p) { return { d: ymd(p.d), y: p.s, label: yearLab(p.d) }; }) },
         { name: "标普500", color: "#6F7D92", pts: CV.points.map(function (p) { return { d: ymd(p.d), y: p.b, label: yearLab(p.d) }; }) }
-      ], { h: 210, w: 420, fs: 14, l: 46, b: 34, sw: 2.4, log: true, xOnly: true,
+      ], { h: 200, w: wpx, fs: 11, l: 42, b: 30, sw: 2, log: true, xOnly: true,
         fmt: function (v) { return v >= 10 ? Math.round(v) + "×" : v.toFixed(1) + "×"; } });
     } catch (e) { box.innerHTML = ""; }
   }
@@ -186,7 +187,7 @@
     var box = $("previewRows");
     if (!box || !PV) return;
     var y = PV.hold_year || "";
-    $("nextYearTitle").textContent = y ? (y + " 年可能持仓") : "明年可能持仓";
+    $("nextYearTitle").textContent = y ? (y + " 年持仓预览") : "持仓预览";
     $("previewNote").textContent = PV.final ? "已定稿 · 与正式持仓一致" : "年初至今涨幅 · 年末定稿";
     var SEC = {
       "Information Technology": "信息技术",
@@ -294,8 +295,16 @@
     drawYearSpark();
     drawAllChart();
 
+    var _rt = null;
+    window.addEventListener("resize", function () {
+      clearTimeout(_rt);
+      _rt = setTimeout(function () { drawYearSpark(); drawAllChart(); }, 180);
+    });
+
     var when = (Q && Q.ts_local) || (EQ && EQ.updated) || "";
-    if (when) $("footStamp").textContent = "数据更新 " + when.slice(5, 16) + "（北京）";
+    var _td = DSH.today(SIG, Q, EQ);
+    if (when) $("footStamp").textContent = "数据更新 " + when.slice(5, 16) + "（北京）" +
+      (_td ? (" · " + (_td.live ? "盘中" : "收盘")) : "");
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);

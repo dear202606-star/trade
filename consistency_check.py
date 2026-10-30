@@ -107,7 +107,11 @@ def main():
            "今日涨跌与行情方向一致（页面 %+.2f / 加权 %+.2f）" % (tv or 0, exp),
            "页面 %s" % t)
         lbl = pg.inner_text("#todayLabel")
-        ck("盘中" in lbl or "收盘" in lbl, "今日注明盘中/收盘（%s）" % lbl.strip())
+        ck("策略今日表现" in lbl, "今日卡标题为「策略今日表现」（%s）" % lbl.strip(),
+           "标题异常：%s" % lbl)
+        foot = pg.inner_text("#footStamp")
+        ck("盘中" in foot or "收盘" in foot, "页脚标注盘中/收盘（%s）" % foot.strip(),
+           "状态缺失：%s" % foot)
 
         print("\n[全周期]")
         bt = num(pg.inner_text("#bTotal"))
@@ -138,12 +142,12 @@ def main():
         ck(not unknown, "页面上所有日期均来自数据源（%d 个）" % len(shown),
            "无法追溯：%s" % unknown)
 
-        lbl = pg.inner_text("#todayLabel")
-        ck(any(k in lbl for k in ("盘中", "收盘")), "今日状态为盘中/收盘（%s）" % lbl.strip(),
-           "状态异常：%s" % lbl)
+        foot = pg.inner_text("#footStamp")
+        ck(any(k in foot for k in ("盘中", "收盘")), "页脚标注盘中/收盘（%s）" % foot.strip(),
+           "状态异常：%s" % foot)
 
         titles = pg.evaluate("() => [...document.querySelectorAll('.card-title')].map(e => e.innerText)")
-        ck(any(str(y) in t for t in titles), "卡片标题含当年（%d）" % y,
+        ck(any((str(y) in t) or (str(y)[2:] + "年" in t) for t in titles), "卡片标题含当年（%d）" % y,
            "标题未随年份：%s" % titles)
         ck(any(str(y + 1) in t for t in titles), "卡片标题含次年（%d）" % (y + 1),
            "标题未随年份：%s" % titles)

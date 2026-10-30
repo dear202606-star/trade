@@ -150,7 +150,7 @@
 .now-grid{align-items:stretch}
 .cell{display:flex;flex-direction:column;justify-content:flex-start;min-height:112px}
 .cell .num{font-size:27px;line-height:1.12}
-.cell .sub{font-size:12px;white-space:nowrap;color:var(--txt-2);margin-top:10px}
+.cell .sub{font-size:11.5px;white-space:nowrap;color:var(--txt-2);margin-top:10px;letter-spacing:-.01em}
 .cell .label{margin-bottom:10px}
 
 /* 图例 */
@@ -167,3 +167,21 @@
 
 /* 0 值：中性色 */
 .num.flat, .sub.flat, .chg.flat{color:var(--txt-2)}
+
+/* 移动端密度与对齐 */
+@media (max-width:560px){
+  .wrap{padding:12px 12px 6px}
+  .wrap > .card{padding:18px 16px}
+  .card.flat{padding:16px 14px}
+  .cell{padding:12px 13px;min-height:104px}
+  .cell .label{margin-bottom:8px;font-size:11.5px}
+  .cell .num{font-size:25px}
+  .cell .sub{font-size:11px;margin-top:8px}
+  .pr-head,.pr-row{grid-template-columns:1.5fr 1fr 1fr 1fr;gap:4px}
+  .pr-row{padding:12px 0;align-items:center}
+  .pr .nm{font-size:10.5px;line-height:1.5;margin-top:3px}
+  .pv-row{padding:11px 0}
+  .yr-row{padding:11px 0}
+  .hero{padding:20px 16px}
+  .hero .verdict{font-size:29px}
+}
