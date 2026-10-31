@@ -105,3 +105,47 @@ Yahoo（403）、Stooq（JS 挑战）、WSJ／FMP demo（401）、BigQuery（无
 4. **新浪不淘汰**：它是唯一免费覆盖已退市票的源，400+ 只票的历史全靠它；即使复权有缺陷，修复后仍是最低成本的过渡底座。
 5. **Kaggle/MarketParquet 保留**：如果验证含退市票，可把 35 天压缩到 1 天，是唯一能「今天完成」的免费路径。
 6. **QuantConnect / OpenAssetPricing 不做供数**：它们的价值是**裁判**——独立复现我们的回测，验证数字没算错。
+
+## 八、调度真相：数据库里的 source_registry（2026-10-31 更新）
+
+数据源不再写在代码里，而是存在 Supabase 的 source_registry 表，采集脚本按 priority 调度。
+
+| 序 | source_id | 口径 | 状态 | 额度 | 角色 |
+|---|---|---|---|---|---|
+| 1 | alphavantage | total_return | ok | 25/天 | 历史主力（退市票优先） |
+| 2 | eodhd | total_return | ok | 20/天 | 近 13 个月校验 |
+| 3 | **sina（新浪，老底座）** | price_only | ok | ∞ | 退市票桥接 |
+| 4 | hf_ayushkhaire | price_only | ok | ∞ | 现役票覆盖 |
+| 5 | hf_amirtrader | total_return | ok | ∞ | 2019+ 校验 |
+| 6 | marketparquet_free | price_only | **ok（新）** | ∞（近 365 天） | 近期批量 |
+| 7 | nasdaq_api | price_only | ok | ∞ | 抽检 + 股息史 |
+| 8 | stockanalysis | total_return | ok | ∞ | 单票快查 |
+| 1 | fja05680 / datahub_gics | — | ok | ∞ | 成分 / 行业 |
+| — | stooq / yahoo / wsj / macrotrends | — | **blocked** | — | 被 JS 挑战/403/网络层封锁；curl_cffi 也无法绕过 |
+| — | kaggle / bigquery / dolthub | — | **dead** | — | 目标数据集下架 / 无美股 EOD |
+| — | marketparquet_paid / tiingo / sharadar / norgate | — | **excluded_paid** | — | **按决策不考虑付费** |
+
+**付费源全部标记 excluded_paid（priority=NULL，不参与调度），仍保留在册以便日后解锁。**
+
+### 分工与额度使用（不重复劳动）
+
+`
+AV 25/天      → 只做退市票 + 缺口最大的票（别人做不了）
+HF ∞          → 现役票的 12 月缺口（便宜的先补）
+新浪 ∞        → 退市票桥接（AV 未轮到前不留空窗）
+EODHD 20/天   → 只做近 13 个月校验，不碰历史
+校验抽样      → 每个源校验不同样本（AV 15 / HF 15 / AmirTrader 15 / EODHD 10），互不重复
+`
+
+**重叠检查**：v ∩ hf = 0、v ∩ sina = 0、hf ∩ sina = 0（每次生成计划都断言）
+
+### 当前进度
+
+| 指标 | 起始 | 现在 |
+|---|---|---|
+| 12 月覆盖 | 78.9% | **80.9%** |
+| 有缺口的标的 | 416 | 361 |
+| 库内标的 | 840 | 847 |
+| 完全缺失 | 30 | 23 |
+
+AV 今日额度已用尽（25 次），明天起每天自动 24 只，约 35 天补齐历史层。

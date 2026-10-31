@@ -1,0 +1,84 @@
+name: 每日补数与校验
+
+# 按 source_registry（Supabase）的调度顺序分工执行，互不重复：
+#   Alpha Vantage 25 次/天 → 只补退市票等「别人做不了」的历史
+#   HF（无限额度）        → 现役票的 12 月缺口
+#   新浪（本地）           → 退市票的桥接
+#   EODHD（20 次/天）      → 近 13 个月交叉校验
+# 需要仓库 Secrets：ALPHAVANTAGE_API_KEY / EODHD_API_TOKEN / SUPABASE_DB_PASSWORD
+
+on:
+  schedule:
+    - cron: "10 3 * * *"      # 每天 03:10 UTC（北京 11:10）
+  workflow_dispatch:
+    inputs:
+      av_limit:
+        description: "Alpha Vantage 本次调用数"
+        required: false
+        default: "24"
+
+concurrency:
+  group: trade-pipeline
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装依赖
+        run: pip install -q pandas requests lxml psycopg2-binary curl_cffi
+
+      - name: 写入数据库口令
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          mkdir -p output
+          printf '%s' "$SUPABASE_DB_PASSWORD" > output/_supabase_dbpass.txt
+
+      - name: 生成当日分工计划
+        run: python allocate_work.py
+
+      - name: Alpha Vantage 分片（退市票优先）
+        env:
+          ALPHAVANTAGE_API_KEY: ${{ secrets.ALPHAVANTAGE_API_KEY }}
+        run: |
+          LIMIT="${{ github.event.inputs.av_limit }}"
+          python relay_source.py --plan-source alphavantage --symbols "${LIMIT:-24}" --av-quota "${LIMIT:-24}"
+
+      - name: HF 分片（现役票覆盖）
+        run: python relay_source.py --plan-source hf_ayushkhaire --symbols 120 --no-av
+
+      - name: 新浪桥接（退市票）
+        run: python relay_source.py --plan-source sina_local --symbols 60 --no-av
+
+      - name: EODHD 交叉校验（近 13 个月）
+        env:
+          EODHD_API_TOKEN: ${{ secrets.EODHD_API_TOKEN }}
+        continue-on-error: true
+        run: python crosscheck_eodhd.py
+
+      - name: 数据质量验收
+        id: qa
+        continue-on-error: true
+        run: python validate_prices.py
+
+      - name: 提交行情与计划
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add static/prices static/prices_unified static/prices_manifest.json output/work_plan.json 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "无新增"
+          else
+            git commit -m "chore: 每日补数 $(date -u +%Y-%m-%d)"
+            git push || echo "::warning::提交失败"
+          fi

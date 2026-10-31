@@ -73,6 +73,32 @@ HF = ("https://huggingface.co/datasets/AYUSHKHAIRE/all-stock-market-data-daily-u
       "/resolve/main/%s/%s.csv")
 
 
+def load_priority_from_db():
+    """从 Supabase 的 source_registry 读取调度顺序（唯一真相），失败则用内置默认"""
+    try:
+        import psycopg2 as _pg
+        pw = io.open(os.path.join(BASE, "output", "_supabase_dbpass.txt"), encoding="utf-8").read().strip()
+        c = _pg.connect(host=HOST, port=6543, user="postgres." + REF, password=pw,
+                        dbname="postgres", connect_timeout=10, sslmode="require")
+        cur = c.cursor()
+        cur.execute("""select source_id, priority, basis from source_registry
+                       where priority is not null and status in ('ok','untested')
+                       order by priority""")
+        rows = cur.fetchall()
+        c.close()
+        out = {}
+        for sid, pri, basis in rows:
+            key = {"sina": "sina_repaired"}.get(sid, sid)
+            if key in SOURCES:
+                SOURCES[key]["rank"] = pri
+                SOURCES[key]["basis"] = basis or SOURCES[key]["basis"]
+                out[key] = pri
+        return out
+    except Exception as e:
+        print("读 source_registry 失败，用内置优先级：%s" % str(e)[:60])
+        return {}
+
+
 def keys():
     k = {}
     if os.path.exists(os.path.join(BASE, "output", "_api_keys.local.txt")):
@@ -197,8 +223,12 @@ def main():
     ap.add_argument("--av-quota", type=int, default=24, help="本次允许消耗的 AV 调用数")
     ap.add_argument("--gaps", action="store_true", help="只处理有缺口的标的")
     ap.add_argument("--no-av", action="store_true", help="不消耗 Alpha Vantage 额度")
+    ap.add_argument("--plan-source", default="", help="按 work_plan.json 里某个源的任务清单执行")
     a = ap.parse_args()
     k = keys()
+    _prio = load_priority_from_db()
+    if _prio:
+        print("调度顺序（来自 source_registry）:", dict(sorted(_prio.items(), key=lambda x: x[1])), flush=True)
 
     # 目标标的：优先「完全缺失」和「缺口最大」的
     with db() as c, c.cursor() as cur:
@@ -212,8 +242,19 @@ def main():
     missing = [t for t in need if t not in have]
     thin = sorted([t for t in need if t in have and dec.get(t, 0) < 15],
                   key=lambda t: dec.get(t, 0))
-    targets = (missing + thin) if a.gaps else (missing + thin)[:a.symbols]
-    targets = targets[:a.symbols]
+    if a.plan_source:
+        import json as _json
+        _pl = _json.load(open(os.path.join(BASE, "output", "work_plan.json"), encoding="utf-8"))
+        for _a in _pl["assignments"]:
+            if _a["source"] == a.plan_source:
+                targets = _a["symbols"][:a.symbols]
+                print("按计划执行 %s：%d 只" % (a.plan_source, len(targets)))
+                break
+        else:
+            targets = []
+    else:
+        targets = (missing + thin) if a.gaps else (missing + thin)[:a.symbols]
+        targets = targets[:a.symbols]
     print("待处理 %d 只（完全缺失 %d / 12 月不足 %d）" % (len(targets), len(missing), len(thin)))
 
     av_left = 0 if a.no_av else a.av_quota
