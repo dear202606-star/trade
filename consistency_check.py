@@ -12,6 +12,7 @@ from playwright.sync_api import sync_playwright
 
 BASE = (sys.argv[1] if len(sys.argv) > 1
         else "https://dear202606-star.github.io/trade/")
+VARIANT = (sys.argv[2] if len(sys.argv) > 2 else "A").upper()
 BASE = BASE.rstrip("/") + "/"
 H = {"User-Agent": "Mozilla/5.0", "Cache-Control": "no-store"}
 OK, BAD = [], []
@@ -23,7 +24,8 @@ def ck(cond, name, detail=""):
 
 
 def load(n):
-    r = requests.get(BASE + "data/" + n, headers=H, timeout=30)
+    sub = "data/b/" if (VARIANT == "B" and n not in ("quotes.json",)) else "data/"
+    r = requests.get(BASE + sub + n, headers=H, timeout=30)
     r.raise_for_status()
     return r.json()
 
@@ -61,6 +63,8 @@ def main():
     with sync_playwright() as p:
         br = p.chromium.launch(channel="chrome", headless=True)
         ctx = br.new_context(viewport={"width": 1280, "height": 1000})
+        ctx.add_init_script(
+            "localStorage.setItem('dsh.variant.v2','%s')" % VARIANT)
         pg = ctx.new_page()
         errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)[:100]))

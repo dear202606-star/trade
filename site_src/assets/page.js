@@ -317,7 +317,7 @@
   }
 
   /* ---------- 口径切换 ---------- */
-  var VARIANT = localStorage.getItem("dsh.variant") === "B" ? "B" : "A";
+  var VARIANT = localStorage.getItem("dsh.variant.v2") === "A" ? "A" : "B";  // 默认全年成分
 
   function vpath(name) {
     if (VARIANT === "B" && name !== "quotes" && name !== "name_zh") {
@@ -354,12 +354,6 @@
     document.querySelectorAll(".vtab").forEach(function (b) {
       b.classList.toggle("on", b.dataset.variant === VARIANT);
     });
-    var tip = $("vtip");
-    if (tip) {
-      tip.textContent = VARIANT === "B"
-        ? "上一年整年都在指数内才可入选"
-        : "排名日当天在指数内即可";
-    }
   }
 
   function renderAllCards() {
@@ -379,7 +373,7 @@
         var v = b.dataset.variant;
         if (v === VARIANT) return;
         VARIANT = v;
-        localStorage.setItem("dsh.variant", v);
+        localStorage.setItem("dsh.variant.v2", v);
         applyVariantUI();
         await loadVariant();
         renderAllCards();
