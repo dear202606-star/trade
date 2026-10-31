@@ -92,3 +92,6 @@ gh run view <run_id> -R dear202606-star/trade
 | 验收 | alidate_prices.py：NVDA 2021 +125% / NVDA 2024 +171% / DUK 2012-07 ≈0 / AMCR 2026 合理 / 覆盖率 ≥95% / 连续性 |
 | 切换闸门 | 覆盖率 <95% 时整体回退旧快照，避免新旧混算 |
 | Secret | ALPHAVANTAGE_API_KEY |
+
+| 第二源 | EODHD（免费仅近 13 个月）：每日校验持仓与预览前 5 名的月度收益，偏差 >2% 自动覆盖并重接历史 |
+| Secret | ALPHAVANTAGE_API_KEY、EODHD_API_TOKEN |

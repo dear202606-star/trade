@@ -76,6 +76,12 @@ jobs:
         continue-on-error: true
         run: python runner.py strategy_history.py
 
+      - name: 第二数据源交叉校验（EODHD，近 13 个月）
+        continue-on-error: true
+        env:
+          EODHD_API_TOKEN: ${{ secrets.EODHD_API_TOKEN }}
+        run: python crosscheck_eodhd.py
+
       - name: 口径 B 独立审计
         run: python runner.py audit_b.py
 
