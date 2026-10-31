@@ -37,6 +37,8 @@ create table if not exists series_selected (
   primary key (symbol, month)
 );
 create index if not exists idx_series_month on series_selected(month);
+-- CI 用公开 anon key 只读，策略必须随表重建（否则 REST 兜底拿空、CI 悄悄退回旧文件）
+create policy public_read on series_selected for select to anon, authenticated using (true);
 alter table series_selected enable row level security;
 -- CI 用公开 anon key 只读（数据本身公开）
 """

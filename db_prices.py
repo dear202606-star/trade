@@ -137,7 +137,14 @@ def _db_stamp():
         with connect() as c, c.cursor() as cur:
             cur.execute("""select count(*), coalesce(max(fetched_at)::text,''),
                                   count(distinct symbol) from prices_monthly""")
-            return cur.fetchone()
+            a = cur.fetchone()
+            # 必须把 series_selected 也算进指纹：重建选源不改变 prices_monthly，
+            # 只比 prices_monthly 会让旧缓存被误判为新鲜（实测导致本地 31.07x vs CI 30.07x）
+            cur.execute("""select count(*), count(distinct symbol),
+                                  coalesce(sum(adj_close),0)::text
+                           from series_selected""")
+            b = cur.fetchone()
+            return (a[0], a[1], a[2], b[0], b[1], b[2])
     except Exception:
         return None
 
@@ -177,6 +184,8 @@ def load_all(prefer_basis="total_return", chunk=60, use_cache=True):
         print("⚠ 直连数据库失败（%s），改走 REST 只读" % str(_e)[:60], flush=True)
         import db_rest as _rest
         out = _rest.load_selected()
+        if not out:
+            raise RuntimeError("REST 返回 0 行（凭据/RLS 异常），禁止退回文件数据")
     try:
         import json as _json
         payload = {k: {m: [v[0], v[1]] for m, v in d.items()} for k, d in out.items()}
