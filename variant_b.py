@@ -226,6 +226,19 @@ def bench_year(year):
     return (p1 / p0 - 1) if p0 else 0.0
 
 
+def market_switch():
+    """用冻结的 SPY 月线算 10 个月均线，返回 (spy, ma, trend)"""
+    b = load_bars("SPY") or {}
+    months = sorted(b)
+    if len(months) < 11:
+        return None, None, "满仓"
+    px = b[months[-1]][1] or b[months[-1]][0]
+    last10 = [b[m][1] or b[m][0] for m in months[-10:]]
+    ma = sum(last10) / len(last10)
+    trend = "满仓" if px >= ma else "半仓"
+    return round(float(px), 2), round(float(ma), 2), trend
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     # 优先用冻结快照（static/），保证本地与 CI 结果完全一致
@@ -364,6 +377,7 @@ def main():
     picks, pool_n = pick_year(m, sector, hold_year)
     print("\n%d 年持仓（口径 B）：%s" % (hold_year, " / ".join(
         "%s %.0f%%" % (p["ticker"], p["weight"] * 100) for p in picks)))
+    _spy, _ma, _trend = market_switch()
     sig = {
         "variant": "B",
         "month": "%s" % dt.datetime.now().strftime("%Y-%m"),
@@ -372,8 +386,11 @@ def main():
         "valid_from": "%d-01-01" % hold_year,
         "valid_to": "%d-12-31" % hold_year,
         "rebalance_hint": "%d-12 最后一个交易日" % hold_year,
-        "trend": "满仓",
-        "exposure": 1.0,
+        "trend": _trend,
+        "exposure": 1.0,   # 年度口径恒满仓；trend 仅为盘中风控建议
+        "spy": _spy,
+        "ma": _ma,
+        "date": dt.datetime.now().strftime("%Y-%m-%d"),
         "official": [{"rank": i + 1, "ticker": p["ticker"], "name": p["name"],
                       "sector": p["sector"], "ret12": round(p["ret12"], 4),
                       "weight": p["weight"]} for i, p in enumerate(picks)],
@@ -399,11 +416,15 @@ def main():
             bars = load_bars(t)
             if not cur or not bars or base_m not in bars:
                 continue
-            b0 = bars[base_m][1]
-            if not b0 or b0 <= 0 or cur < MIN_PRICE:
+            # 用复权价算涨幅（原始价在拆股/反向拆股前后不可比）
+            months_ok = [k for k in sorted(bars) if k <= base_m]
+            _b0 = bars[base_m][0]
+            _last = [k for k in sorted(bars)][-1]
+            _cur_adj = bars[_last][0]
+            if not _b0 or _b0 <= 0 or not _cur_adj or _cur_adj < MIN_PRICE:
                 continue
             rows2.append({"ticker": t, "sector": sector.get(t) or "Unknown",
-                          "ytd": cur / b0 - 1})
+                          "ytd": _cur_adj / _b0 - 1})
         rows2.sort(key=lambda x: -x["ytd"])
         picks2, cnt2 = [], {}
         for r in rows2:
@@ -432,6 +453,8 @@ def main():
                    "hold_year": hold_year + 1,
                    "official_month": "%d-12" % hold_year,
                    "top": picks2, "final": False, "ranked": len(rows2),
+                   "universe": len(live), "session": q.get("session"),
+                   "excluded_n": len(rows2) - len(picks2),
                    "note": "口径 B：今年以来全程在成分股里"},
                   open(os.path.join(OUT, "preview.json"), "w", encoding="utf-8"),
                   ensure_ascii=False)

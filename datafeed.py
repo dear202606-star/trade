@@ -128,7 +128,8 @@ def _valid_splits(ticker, bars):
             keep.append((ts, ratio))
             continue
         drop = 1 - a / b
-        if drop < 0.35 * (ratio - 1):
+        # 期望跌幅 ≈ 1 − 1/ratio（10:1 应跌 90%），阈值按此比例取 35%
+        if drop < 0.35 * (1 - 1.0 / ratio):
             continue                       # 原始价没跌 → 源已复权，跳过
         keep.append((ts, ratio))
     return keep

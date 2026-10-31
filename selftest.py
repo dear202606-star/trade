@@ -198,6 +198,27 @@ def main():
               "口径 B 净值末点日期与 last_session 一致（%s）" % _es,
               "末点 %s 与 last_session %s 不一致" % (_pd, _es))
 
+        # 预览涨幅必须能用「冻结复权月线」独立复算（防止原始价/拆股口径混用）
+        _pv0 = _b.get("preview.json") or {}
+        try:
+            _bm = json.load(open(os.path.join(_root, "static", "bars_monthly.json"),
+                                 encoding="utf-8"))
+            _base = _pv0.get("base_month")
+            _badpv = []
+            for _x in (_pv0.get("top") or []):
+                _rows = _bm.get(_x.get("ticker")) or []
+                _map = {r[0]: r for r in _rows}
+                if _base not in _map or not _map[_base][1]:
+                    continue
+                _lastk = sorted(_map)[-1]
+                _re = _map[_lastk][1] / _map[_base][1] - 1
+                if abs(_re - (_x.get("ytd") or 0)) > 0.02:
+                    _badpv.append("%s 记录%.0f%%/复算%.0f%%" % (
+                        _x.get("ticker"), (_x.get("ytd") or 0) * 100, _re * 100))
+            check(not _badpv, "B 预览涨幅可用复权月线复算", "不一致：%s" % _badpv)
+        except Exception as _e:
+            warns.append("预览复算失败：%s" % _e)
+
         _pv = _b.get("preview.json") or {}
         _top = _pv.get("top") or []
         check(len(_top) == 3, "口径 B 次年预览 3 只", "实际 %d" % len(_top))

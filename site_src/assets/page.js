@@ -244,43 +244,60 @@
 
   function histView() {
     var years = ((SH && SH.years) || []).filter(function (r) { return r.year >= SHOW_FROM; });
-    var pts = ((CV && CV.points) || []).filter(function (p) {
+    var allPts = (CV && CV.points) || [];
+    // 基准点取「上一年 12 月」（2012-12），否则会漏掉 2013 年 1 月的涨幅
+    var base = null;
+    for (var i = 0; i < allPts.length; i++) {
+      if ((+String(allPts[i].d).slice(0, 4)) < SHOW_FROM) base = allPts[i];
+    }
+    var pts = allPts.filter(function (p) {
       return (+String(p.d).slice(0, 4)) >= SHOW_FROM;
     });
-    var s0 = pts.length ? pts[0].s : 1;
-    var b0 = pts.length ? (pts[0].b || 1) : 1;
+    var s0 = base ? base.s : (pts.length ? pts[0].s : 1);
+    var b0 = base ? (base.b || 1) : (pts.length ? (pts[0].b || 1) : 1);
     var norm = pts.map(function (p) {
       return { d: p.d, s: p.s / s0, b: (p.b ? p.b / b0 : null), label: p.label };
     });
-    var total = norm.length ? norm[norm.length - 1].s - 1 : 0;
-    var bench = norm.length ? norm[norm.length - 1].b - 1 : 0;
+    var ok = norm.length > 1 && years.length > 0;
+    var total = ok ? norm[norm.length - 1].s - 1 : null;
+    var bench = ok ? norm[norm.length - 1].b - 1 : null;
     var peak = 1, mdd = 0;
     norm.forEach(function (p) {
       if (p.s > peak) peak = p.s;
       var dd = p.s / peak - 1;
       if (dd < mdd) mdd = dd;
     });
-    var n = years.length || 1;
-    var cagr = total > -1 ? Math.pow(1 + total, 1 / n) - 1 : 0;
+    var n = years.length;
+    var cagr = (ok && total > -1) ? Math.pow(1 + total, 12 / Math.max(1, n * 12)) - 1 : null;
     var wins = years.filter(function (r) { return (r.ret || 0) > 0; }).length;
     return {
-      years: years, norm: norm, total: total, bench: bench, mdd: mdd,
-      cagr: cagr, wins: wins, n: n, from: SHOW_FROM,
+      years: years, norm: norm, total: total, bench: bench, ok: ok,
+      mdd: ok ? mdd : null, cagr: cagr, wins: wins, n: n, from: SHOW_FROM,
       to: years.length ? years[years.length - 1].year : SHOW_FROM
     };
   }
 
   function renderAll() {
     var v = histView();
-    var s = (SH && SH.summary) || {};
+    if (!v.ok) {
+      ["bTotal", "bCagr", "bMdd", "bWin", "bBench"].forEach(function (id) {
+        var e = $(id); if (e) { e.textContent = "—"; e.className = "num"; }
+      });
+      var rg0 = $("allRange");
+      if (rg0) rg0.textContent = "数据缺失";
+      CV_VIEW = [];
+      var box = $("allChart"); if (box) box.innerHTML = "";
+      return;
+    }
     $("bTotal").textContent = pct2(v.total, 0);
     $("bTotal").className = "num num-xl " + cls(v.total);
     $("bCagr").textContent = pct2(v.cagr, 1);
+    $("bCagr").className = "num " + cls(v.cagr);
     $("bMdd").textContent = "-" + (Math.abs(v.mdd) * 100).toFixed(1) + "%";
     $("bMdd").className = "num " + (v.mdd < 0 ? "down" : "");
     $("bWin").textContent = v.wins + "/" + v.n;
-    var bench = v.bench;
-    $("bBench").textContent = pct2(bench, 0);
+    $("bBench").textContent = pct2(v.bench, 0);
+    $("bBench").className = "num " + cls(v.bench);
     var rg = $("allRange");
     if (rg) rg.textContent = v.from + "–" + v.to + " · " + v.n + " 年";
     CV_VIEW = v.norm;
@@ -406,6 +423,7 @@
         localStorage.setItem("dsh.variant.v2", v);
         applyVariantUI();
         await loadVariant();
+        if (!dataReady()) { showDegraded("该口径的数据缺失，请刷新或切换口径"); return; }
         renderAllCards();
       });
     });

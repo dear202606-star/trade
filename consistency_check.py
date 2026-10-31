@@ -138,8 +138,9 @@ def main():
         print("\n[全周期]")
         # 页面只展示 2013 年起，指标须按该区间重算
         _pts = [p for p in cv["points"] if int(str(p["d"])[:4]) >= 2013]
-        _s0 = _pts[0]["s"] if _pts else 1
-        _b0 = (_pts[0].get("b") or 1) if _pts else 1
+        _pre = [p for p in cv["points"] if int(str(p["d"])[:4]) < 2013]
+        _s0 = _pre[-1]["s"] if _pre else (_pts[0]["s"] if _pts else 1)
+        _b0 = ((_pre[-1].get("b") if _pre else (_pts[0].get("b") if _pts else 1)) or 1)
         _tot = (_pts[-1]["s"] / _s0 - 1) * 100 if _pts else 0
         _ben = ((_pts[-1].get("b") or _b0) / _b0 - 1) * 100 if _pts else 0
         _peak, _mdd = 1.0, 0.0
