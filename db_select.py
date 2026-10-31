@@ -38,6 +38,7 @@ create table if not exists series_selected (
 );
 create index if not exists idx_series_month on series_selected(month);
 alter table series_selected enable row level security;
+-- CI 用公开 anon key 只读（数据本身公开）
 """
 
 BUILD = """
