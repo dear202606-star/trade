@@ -147,6 +147,12 @@ def main():
                   "口径 B 曲线为月度（%d 点）" % len(_bpts), "曲线点过少")
             check(all(p.get("b") for p in _bpts[-3:]),
                   "口径 B 基准线有数据", "基准线为空")
+            _tot = 1 + (_bh.get("summary") or {}).get("total", 0)
+            check(abs((_bpts[-1].get("s") or 0) - _tot) < 0.02,
+                  "口径 B 曲线末点与累计一致（%.2f ≈ %.2f）" % (_bpts[-1].get("s") or 0, _tot),
+                  "曲线末点与 summary 不一致")
+            check((_bh.get("summary") or {}).get("worst_intra") is not None,
+                  "口径 B 最大回撤字段存在", "缺 worst_intra")
             _nz = [r for r in _yrs if (r.get("dd") or 0) < 0]
             check(len(_nz) >= max(1, len(_yrs) - 2),
                   "口径 B 逐年含回撤（%d/%d 年）" % (len(_nz), len(_yrs)),
