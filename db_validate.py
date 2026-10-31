@@ -132,6 +132,25 @@ def main():
     rec("锁定就绪（100% 全收益 + 全检查通过）", "pass" if ready else "warn",
         "全收益 %.1f%%" % (100.0 * tr / max(1, nrows)))
 
+    # ---------- 写站点质量快照（CI 无 DB 写权限时也可用）----------
+    try:
+        import json as _json
+        _q = {
+            "generated_at": __import__("datetime").datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "total_return_ratio": round(tr / max(1, nrows), 4),
+            "degraded": (tr / max(1, nrows)) < 0.999,
+            "reason": "全收益口径 %.1f%%（目标 100%%）" % (100.0 * tr / max(1, nrows)),
+            "checks": [{"name": n, "status": st, "detail": d} for n, st, d in ROWS],
+            "summary": {"pass": sum(1 for r in ROWS if r[1] == "pass"),
+                        "warn": sum(1 for r in ROWS if r[1] == "warn"),
+                        "fail": sum(1 for r in ROWS if r[1] == "fail")},
+        }
+        _json.dump(_q, open(os.path.join(BASE, "docs/data/quality.json"), "w", encoding="utf-8"),
+                   ensure_ascii=False, indent=1)
+        print("质量快照已写 docs/data/quality.json")
+    except Exception as _e:
+        print("质量快照写入失败：%s" % _e)
+
     # ---------- 写库 ----------
     c = db()
     c.autocommit = True
