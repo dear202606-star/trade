@@ -191,3 +191,7 @@
   .pr .nm{font-size:11.5px}
   .pv-row{padding:14px 0}
 }
+
+/* 数据质量提示（降级黄 / 通过绿，贴合红涨绿跌主色系） */
+.foot.warn { color: #F2C46B; }
+.foot.ok   { color: #6FCF97; }

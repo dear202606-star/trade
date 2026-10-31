@@ -483,6 +483,7 @@
     drawYearSpark();
     drawAllChart();
     startAutoRefresh();
+      renderQuality();
 
     var _rt = null;
     window.addEventListener("resize", function () {
@@ -499,3 +500,26 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else boot();
 })();
+
+/* ---------- 数据质量提示（来自 data/quality.json） ---------- */
+function renderQuality() {
+  var el = document.getElementById("dataQuality");
+  if (!el) return;
+  fetch("data/quality.json?t=" + Date.now(), { cache: "no-store" })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (q) {
+      if (!q) { el.hidden = true; return; }
+      var s = q.summary || {};
+      if (q.degraded) {
+        el.hidden = false;
+        el.className = "foot warn";
+        el.textContent = "数据校验中 · " + (q.reason || "口径尚未统一") +
+          " ｜ 检查 " + (s.pass || 0) + " 项通过" + (s.fail ? "、" + s.fail + " 项失败" : "");
+      } else {
+        el.hidden = false;
+        el.className = "foot ok";
+        el.textContent = "数据已校验 · 全收益口径 100% ｜ " + (s.pass || 0) + " 项检查通过";
+      }
+    })
+    .catch(function () { el.hidden = true; });
+}
