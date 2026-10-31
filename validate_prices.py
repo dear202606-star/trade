@@ -17,7 +17,8 @@ except Exception:
     pass
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-PRICES = os.path.join(BASE, "static", "prices")
+PRICES = os.path.join(BASE, "static", "prices_unified")
+AV = os.path.join(BASE, "static", "prices")
 MEMBERS = os.path.join(BASE, "static", "members_frozen.csv")
 
 OK, BAD = [], []
@@ -33,7 +34,7 @@ def bars(t):
     if not os.path.exists(p):
         return {}
     d = json.load(open(p, encoding="utf-8"))
-    return {r[0]: (r[1], r[2]) for r in d.get("bars") or []}
+    return {r[0]: (r[1], r[1] if len(r) < 3 else r[2]) for r in d.get("bars") or []}
 
 
 def ret(t, y0, y1):
@@ -74,6 +75,8 @@ def main():
     m = pd.read_csv(MEMBERS, dtype=str).fillna("2099-12-31")
     need = sorted(set(m[m["end_date"] >= "2009-01-01"]["ticker"].tolist()))
     have = [t for t in need if os.path.exists(os.path.join(PRICES, t + ".json"))]
+    av_n = len([f for f in os.listdir(AV) if f.endswith(".json")]) if os.path.isdir(AV) else 0
+    print("    （权威源已覆盖 %d 只，其余为本地修复）" % av_n)
     ck(len(have) >= 0.95 * len(need),
        "覆盖率 %.1f%%（%d/%d）" % (100.0 * len(have) / max(1, len(need)), len(have), len(need)),
        "低于 95%，需继续回填")

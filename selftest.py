@@ -214,8 +214,16 @@ def main():
         # 预览涨幅必须能用「冻结复权月线」独立复算（防止原始价/拆股口径混用）
         _pv0 = _b.get("preview.json") or {}
         try:
-            _bm = json.load(open(os.path.join(_root, "static", "bars_monthly.json"),
-                                 encoding="utf-8"))
+            _uni = os.path.join(_root, "static", "prices_unified")
+            if os.path.isdir(_uni):
+                _bm = {}
+                for _f in os.listdir(_uni):
+                    if _f.endswith(".json"):
+                        _o = json.load(open(os.path.join(_uni, _f), encoding="utf-8"))
+                        _bm[_o["ticker"]] = [[r[0], r[1], r[1]] for r in _o["bars"]]
+            else:
+                _bm = json.load(open(os.path.join(_root, "static", "bars_monthly.json"),
+                                     encoding="utf-8"))
             _base = _pv0.get("base_month")
             _badpv = []
             for _x in (_pv0.get("top") or []):

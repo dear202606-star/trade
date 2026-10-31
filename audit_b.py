@@ -42,7 +42,16 @@ def ck(cond, name, detail=""):
 
 def main():
     mem = pd.read_csv(MEM, dtype=str).fillna("2099-12-31")
-    bars = json.load(open(BARS, encoding="utf-8"))
+    uni = os.path.join(BASE, "static", "prices_unified")
+    if os.path.isdir(uni):
+        # 优先用统一数据集（本地修复 + 权威源），与 variant_b 保持一致
+        bars = {}
+        for f in os.listdir(uni):
+            if f.endswith(".json"):
+                o = json.load(open(os.path.join(uni, f), encoding="utf-8"))
+                bars[o["ticker"]] = [[r[0], r[1], r[1]] for r in o["bars"]]
+    else:
+        bars = json.load(open(BARS, encoding="utf-8"))
     sect = json.load(open(SECT, encoding="utf-8"))
     hist = json.load(open(HIST, encoding="utf-8"))
     curve = json.load(open(CURVE, encoding="utf-8"))

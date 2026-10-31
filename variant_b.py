@@ -69,15 +69,26 @@ def _dump(obj, path):
 
 
 PRICES_DIR = os.path.join(BASE, "static", "prices")
-PRICE_SOURCE = os.environ.get("PRICES_SOURCE", "alphavantage")
+UNIFIED_DIR = os.path.join(BASE, "static", "prices_unified")
+PRICE_SOURCE = os.environ.get("PRICES_SOURCE", "unified")
 MIN_COVERAGE = 0.95      # 新源覆盖不足 95% 时整体回退旧快照，避免新旧混用造成口径漂移
 _new_src = {"n": 0}
 
 
 def alpha_bars(ticker):
-    """优先读 Alpha Vantage 复权月线（有则用，口径统一、含退市票）"""
-    if PRICE_SOURCE != "alphavantage":
+    """优先读统一数据集（本地修复 + 权威源覆盖），其次 Alpha Vantage 原始产出"""
+    if PRICE_SOURCE not in ("alphavantage", "unified"):
         return None
+    p = os.path.join(UNIFIED_DIR, ticker + ".json")
+    if PRICE_SOURCE == "unified" and os.path.exists(p):
+        try:
+            d = json.load(open(p, encoding="utf-8"))
+            bars = {r[0]: (r[1], r[1]) for r in d.get("bars") or []}
+            if bars:
+                _new_src["n"] += 1
+                return bars
+        except Exception:
+            pass
     p = os.path.join(PRICES_DIR, ticker + ".json")
     if not os.path.exists(p):
         return None
@@ -134,6 +145,25 @@ def load_bars(ticker):
     return b
 
 
+MAX_MONTH_JUMP = 1.5      # 单月 |涨跌| > 150% 视为数据断裂，该票当年不参与排名
+
+
+def _series_ok(bars, start_ym, end_ym):
+    if not bars:
+        return False
+    months = [k for k in sorted(bars) if start_ym <= k <= end_ym]
+    if len(months) < 2:
+        return False
+    for i in range(1, len(months)):
+        a = bars[months[i - 1]][0]
+        b = bars[months[i]][0]
+        if not a or a <= 0 or not b:
+            return False
+        if abs(b / a - 1) > MAX_MONTH_JUMP:
+            return False
+    return True
+
+
 def members_full_year(m, year):
     """该年整年都在成分股里的股票集合"""
     a = "%d-01-01" % year
@@ -160,6 +190,8 @@ def pick_year(m, sector, year):
     _dropped = []
     for t in pool:
         bars = load_bars(t)
+        if not _series_ok(bars, "%d-12" % (y0 - 1), "%d-12" % y0):
+            continue
         r = ret12(bars, rank_m, base_m)
         if r is None:
             continue
@@ -284,10 +316,11 @@ def main():
         with open(os.path.join(BASE, "static", "members_frozen.csv"), encoding="utf-8") as _f:
             _rows = list(_csv.DictReader(_f))
         _need = len({r["ticker"] for r in _rows if r["end_date"] >= "2009-01-01"})
-        _have = len([f for f in os.listdir(PRICES_DIR) if f.endswith(".json")]) \
-            if os.path.isdir(PRICES_DIR) else 0
+        _dir = UNIFIED_DIR if os.path.isdir(UNIFIED_DIR) else PRICES_DIR
+        _have = len([f for f in os.listdir(_dir) if f.endswith(".json")]) \
+            if os.path.isdir(_dir) else 0
         _cov = _have / max(1, _need)
-        if PRICE_SOURCE == "alphavantage" and _cov < MIN_COVERAGE:
+        if PRICE_SOURCE in ("alphavantage", "unified") and _cov < MIN_COVERAGE:
             print("⚠ 复权行情覆盖 %.1f%%（%d/%d）< %.0f%% → 本次仍用旧快照" % (
                 _cov * 100, _have, _need, MIN_COVERAGE * 100), flush=True)
             PRICE_SOURCE = "legacy"
@@ -576,8 +609,8 @@ def main():
 
     try:
         _tot = len([f for f in os.listdir(PRICES_DIR) if f.endswith(".json")])
-        print("复权行情来源：Alpha Vantage %d 只 / 旧快照 %d 只（共 %d）" % (
-            _new_src["n"], 840 - _new_src["n"], _tot), flush=True)
+        print("行情来源：统一数据集命中 %d 次 ｜ 本地文件 %d 只" % (
+            _new_src["n"], _tot), flush=True)
     except Exception:
         pass
     print("已写入:", OUT)

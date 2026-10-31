@@ -1,0 +1,38 @@
+{
+  "generated": "2026-10-31T10:20:13Z",
+  "symbols": 840,
+  "by_source": {
+    "alphavantage": 5,
+    "sina_repaired": 583,
+    "sina_plain": 252
+  },
+  "split_actions_neutralized": 2039,
+  "continuity": {
+    "months": 228274,
+    "jumps_over_150pct": 43,
+    "rate": 0.000188
+  },
+  "suspect": [
+    {
+      "ticker": "MU",
+      "dev": 0.8776
+    },
+    {
+      "ticker": "NVDA",
+      "dev": 0.8336
+    },
+    {
+      "ticker": "STX",
+      "dev": 0.5718
+    },
+    {
+      "ticker": "DUK",
+      "dev": 0.23
+    },
+    {
+      "ticker": "AMCR",
+      "dev": 0.0611
+    }
+  ],
+  "note": "阿里层修复公司行动；Alpha Vantage 到位的标的直接覆盖为权威值；suspect 优先回填"
+}
