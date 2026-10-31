@@ -45,6 +45,20 @@ CASES = [
     # ---- 韩国 ----
     ("naver", "KR", "https://finance.naver.com/world/worldDayListJson.naver?symbol={S}&freq=M", ""),
     ("daum", "KR", "https://finance.daum.net/api/quotes/US/{S}/days?page=1&perPage=2000", ""),
+    # ---- 补充：本机被地区封锁、CI(美国) 可能可达 ----
+    ("yahoo-direct", "US", "https://query1.finance.yahoo.com/v8/finance/chart/{S}?range=1mo&interval=1d", "timestamp"),
+    ("finanzen", "DE", "https://www.finanzen.net/aktien/apple-aktie", ""),
+    ("ariva2", "DE", "https://www.ariva.de/apple-aktie/historische_kurse", "Datum"),
+    ("boerse-frankfurt", "DE", "https://api.boerse-frankfurt.de/v1/data/quote_box/single?isin=US0378331005", ""),
+    ("six-swiss", "CH", "https://www.six-group.com/fqs/pricesChartData.json?instrumentId=US0378331005CHF4&",
+     ""),
+    ("euronext", "EU", "https://live.euronext.com/en/product/equities/US0378331005-XNAS", ""),
+    ("londonstockexchange", "UK", "https://www.londonstockexchange.com/", ""),
+    ("tipranks", "US", "https://www.tipranks.com/api/stocks/getData/?name={S}", ""),
+    ("zacks", "US", "https://www.zacks.com/stock/quote/{S}/detailed-price-history", ""),
+    ("gurufocus", "US", "https://www.gurufocus.com/stock/{S}/data/price", ""),
+    ("macrotrends2", "US", "https://www.macrotrends.net/assets/php/stock_price_history.php?t={S}", ""),
+    ("alphavantage-demo", "US", "https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY_ADJUSTED&symbol={S}&apikey=demo", ""),
     # ---- 中国 ----
     ("eastmoney", "CN", "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=105.{S}&klt=103&fqt=1&beg=20100101&end=20500101&fields1=f1,f2,f3&fields2=f51,f53", ""),
     ("xueqiu", "CN", "https://stock.xueqiu.com/v5/stock/chart/kline.json?symbol={S}&begin={ms}&period=month&type=before&count=-260", ""),
