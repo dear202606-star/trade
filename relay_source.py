@@ -183,6 +183,13 @@ def fetch_hf(sym, key=None):
     return {m: (v, v) for m, v in monthly.items()}
 
 
+RELAYS = [
+    ("translate", "https://query1-finance-yahoo-com.translate.goog/v8/finance/chart/%s"),
+    ("jina", "https://r.jina.ai/https://query1.finance.yahoo.com/v8/finance/chart/%s"),
+    ("direct", "https://query1.finance.yahoo.com/v8/finance/chart/%s"),
+]
+_relay_cd = {}          # 每个中转的冷却截止时间
+_relay_idx = {"i": 0}
 _yahoo_last = {"t": 0.0}
 
 
