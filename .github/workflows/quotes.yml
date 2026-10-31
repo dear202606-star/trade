@@ -58,6 +58,15 @@ jobs:
       - name: 生成明年预览
         run: python runner.py preview.py
 
+      - name: 生成全年成分口径（B）
+        run: python runner.py variant_b.py
+
+      - name: 计算 B 口径净值
+        env:
+          EQ_SIGNAL: output/signal_history_b.json
+          EQ_OUT: docs/data/b/equity.json
+        run: python runner.py equity.py
+
       - name: 生成逐年记录（历史已锁定，不再重算）
         continue-on-error: true
         run: python runner.py strategy_history.py

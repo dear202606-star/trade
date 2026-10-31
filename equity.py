@@ -20,7 +20,7 @@ import requests
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/128.0 Safari/537.36")
 PAT = re.compile(r"\(\s*(\[.*\])\s*\)", re.S)
-OUT = os.path.join("docs", "data", "equity.json")
+OUT = os.environ.get("EQ_OUT", os.path.join("docs", "data", "equity.json"))
 
 
 def settled_cutoff():
@@ -70,7 +70,7 @@ def main():
     if not os.path.exists("output/signal_history.json"):
         print("缺少 signal_history.json", file=sys.stderr)
         return 1
-    hist = json.load(open("output/signal_history.json", encoding="utf-8"))
+    hist = json.load(open(os.environ.get("EQ_SIGNAL", "output/signal_history.json"), encoding="utf-8"))
     rec = hist[0]
     official = rec.get("official") or rec.get("picks") or []
     exposure = rec.get("exposure", 1.0)

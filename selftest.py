@@ -120,6 +120,30 @@ def main():
     except Exception as e:
         warns.append("权重形态校验失败：%s" % e)
 
+    # ---- 口径 B（全年成分）数据集 ----
+    try:
+        import os as _os
+        _bp = _os.path.join(DOCS, "data", "b")
+        if _os.path.isdir(_bp):
+            _bs = json.load(open(_os.path.join(_bp, "signal.json"), encoding="utf-8"))
+            _bh = json.load(open(_os.path.join(_bp, "strategy_history.json"), encoding="utf-8"))
+            _off = _bs.get("official") or []
+            check(len(_off) == 3, "口径 B 正式持仓 3 只", "实际 %d" % len(_off))
+            if _off:
+                _w = sum(x["weight"] for x in _off)
+                check(abs(_w - 1) < 1e-6, "口径 B 权重合计 = 1（%.4f）" % _w, "权重和 %.4f" % _w)
+                _secs = {}
+                for x in _off:
+                    _secs[x["sector"]] = _secs.get(x["sector"], 0) + x["weight"]
+                _mx = max(_secs.values()) if _secs else 0
+                check(_mx <= 0.6001, "口径 B 单行业 ≤60%%（最高 %.0f%%）" % (_mx * 100),
+                      "单行业 %.1f%%" % (_mx * 100))
+            _yrs = _bh.get("years") or []
+            check(len(_yrs) >= 15, "口径 B 回测 %d 年" % len(_yrs), "年份不足")
+            check(_bh.get("rule"), "口径 B 带规则说明", "缺 rule 字段")
+    except Exception as e:
+        warns.append("口径 B 校验失败：%s" % e)
+
     # ---- 净值必须跟上最新收盘交易日（SPY 日线晚更新曾导致停滞）----
     try:
         _q = load("quotes.json") or {}

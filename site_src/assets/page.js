@@ -316,16 +316,82 @@
     }, 60000);
   }
 
+  /* ---------- 口径切换 ---------- */
+  var VARIANT = localStorage.getItem("dsh.variant") === "B" ? "B" : "A";
+
+  function vpath(name) {
+    if (VARIANT === "B" && name !== "quotes" && name !== "name_zh") {
+      return "b/" + name;
+    }
+    return name;
+  }
+
+  async function loadVariant() {
+    var arr = await Promise.all([
+      DSH.json(vpath("equity"), null),
+      DSH.json(vpath("signal"), null),
+      DSH.json("quotes", {}),
+      DSH.json(vpath("curve"), null),
+      DSH.json(vpath("strategy_history"), null),
+      DSH.json(vpath("preview"), null),
+      DSH.json("name_zh", {})
+    ]);
+    EQ = arr[0]; SIG = arr[1]; Q = arr[2]; CV = arr[3]; SH = arr[4]; PV = arr[5]; ZH = arr[6] || {};
+
+    // B 口径的 signal 不含大盘开关，用 A 的补齐（开关与选股口径无关）
+    if (VARIANT === "B") {
+      try {
+        var sigA = await DSH.json("signal", null);
+        if (sigA && SIG) {
+          SIG.trend = sigA.trend; SIG.spy = sigA.spy;
+          SIG.ma = sigA.ma; SIG.rebalance_hint = sigA.rebalance_hint;
+        }
+      } catch (e) {}
+    }
+  }
+
+  function applyVariantUI() {
+    document.querySelectorAll(".vtab").forEach(function (b) {
+      b.classList.toggle("on", b.dataset.variant === VARIANT);
+    });
+    var tip = $("vtip");
+    if (tip) {
+      tip.textContent = VARIANT === "B"
+        ? "上一年整年都在指数内才可入选"
+        : "排名日当天在指数内即可";
+    }
+  }
+
+  function renderAllCards() {
+    renderTick();
+    renderNow();
+    renderYear();
+    renderPreview();
+    renderAll();
+    renderYears();
+    drawYearSpark();
+    drawAllChart();
+  }
+
+  function initVariants() {
+    document.querySelectorAll(".vtab").forEach(function (b) {
+      b.addEventListener("click", async function () {
+        var v = b.dataset.variant;
+        if (v === VARIANT) return;
+        VARIANT = v;
+        localStorage.setItem("dsh.variant", v);
+        applyVariantUI();
+        await loadVariant();
+        renderAllCards();
+      });
+    });
+    applyVariantUI();
+  }
+
   async function boot() {
     initPills();
-    try {
-      var arr = await Promise.all([
-        DSH.json("equity", null), DSH.json("signal", null), DSH.json("quotes", {}),
-        DSH.json("curve", null), DSH.json("strategy_history", null),
-        DSH.json("preview", null), DSH.json("name_zh", {})
-      ]);
-      EQ = arr[0]; SIG = arr[1]; Q = arr[2]; CV = arr[3]; SH = arr[4]; PV = arr[5]; ZH = arr[6] || {};
-    } catch (e) {}
+    await loadVariant();
+    initVariants();
 
     checkFreshness();
     renderTick();
