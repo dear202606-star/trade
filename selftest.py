@@ -141,6 +141,13 @@ def main():
             _yrs = _bh.get("years") or []
             check(len(_yrs) >= 15, "口径 B 回测 %d 年" % len(_yrs), "年份不足")
             check(_bh.get("rule"), "口径 B 带规则说明", "缺 rule 字段")
+            _nz = [r for r in _yrs if (r.get("dd") or 0) < 0]
+            check(len(_nz) >= max(1, len(_yrs) - 2),
+                  "口径 B 逐年含回撤（%d/%d 年）" % (len(_nz), len(_yrs)),
+                  "逐年回撤缺失")
+            _bs = (_bh.get("summary") or {}).get("benchmark")
+            check(_bs not in (None, 0), "口径 B 同期标普已计算（%s）" % _bs,
+                  "缺 benchmark")
     except Exception as e:
         warns.append("口径 B 校验失败：%s" % e)
 

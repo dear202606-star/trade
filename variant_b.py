@@ -100,6 +100,45 @@ def year_return(picks, year):
     return (ret / covered) if covered > 0 else 0.0
 
 
+def year_perf(picks, year):
+    """年内收益与最大回撤（月末口径，与口径 A 一致）"""
+    prev_ym = "%d-12" % (year - 1)
+    seq = ["%d-%02d" % (year, m) for m in range(1, 13)]
+    bars_cache = {}
+    for p in picks:
+        bars = datafeed.load_bars(p["ticker"])
+        if not bars or prev_ym not in bars or not bars[prev_ym][0]:
+            return 0.0, 0.0
+        bars_cache[p["ticker"]] = bars
+    vals = []
+    for mm in seq:
+        v = 0.0
+        for p in picks:
+            bars = bars_cache[p["ticker"]]
+            keys = [k for k in sorted(bars) if k <= mm]
+            if not keys:
+                return 0.0, 0.0
+            px = bars[keys[-1]][0]
+            v += p["weight"] * (px / bars[prev_ym][0])
+        vals.append(v)
+    ret = vals[-1] - 1
+    peak, mdd = 0.0, 0.0
+    for v in [1.0] + vals:
+        peak = max(peak, v)
+        mdd = min(mdd, v / peak - 1)
+    return ret, mdd
+
+
+def bench_year(year):
+    """标普 500 该年收益（年末 vs 上年末）"""
+    bars = datafeed.load_bars("SPY")
+    a, b = "%d-12" % (year - 1), "%d-12" % year
+    if not bars or a not in bars or b not in bars:
+        return 0.0
+    p0, p1 = bars[a][0], bars[b][0]
+    return (p1 / p0 - 1) if p0 else 0.0
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     m = datafeed.load_members()
@@ -121,23 +160,28 @@ def main():
     years = []
     for y in range(START_YEAR, end_year + 1):
         picks, pool_n = pick_year(m, sector, y)
-        ret = year_return(picks, y)
+        ret, mdd = year_perf(picks, y)
+        bret = bench_year(y)
         years.append({
             "year": y,
             "holdings": [{"ticker": p["ticker"], "name": p["name"],
                           "sector": p["sector"], "weight": p["weight"],
                           "ret12": round(p["ret12"], 4)} for p in picks],
             "ret": round(ret, 4),
+            "dd": round(mdd, 4),
+            "bench": round(bret, 4),
             "pool": pool_n,
         })
+        ret = ret
         print("  %d  %+7.2f%%  %s  （全年成分池 %d）" % (
             y, ret * 100, " / ".join(p["ticker"] for p in picks), pool_n))
 
     # 曲线（年末复利）
-    eq, pts = 1.0, []
+    eq, beq, pts = 1.0, 1.0, []
     for r in years:
         eq *= (1 + r["ret"])
-        pts.append({"d": "%d-12" % r["year"], "s": round(eq, 6), "b": None})
+        beq *= (1 + r.get("bench") or 0)
+        pts.append({"d": "%d-12" % r["year"], "s": round(eq, 6), "b": round(beq, 6)})
     total = eq - 1
     n = len(years)
     cagr = (eq ** (1 / n) - 1) if n and eq > 0 else 0
@@ -151,8 +195,9 @@ def main():
         "years": years,
         "summary": {"start": START_YEAR, "end": end_year, "years": n,
                     "total": round(total, 4), "cagr": round(cagr, 4),
-                    "mdd": round(mdd, 4), "worst_intra": round(mdd, 4),
+                    "dd": round(mdd, 4), "worst_intra": round(mdd, 4),
                     "wins": wins, "losses": n - wins,
+                    "benchmark": round(beq - 1, 4),
                     "note": "口径 B：上一年整年都在成分股里"},
         "variant": "B",
         "rule": "排名池 = 上一年 1/1–12/31 全程在标普 500 内的股票",
