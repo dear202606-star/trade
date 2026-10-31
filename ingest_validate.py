@@ -30,8 +30,12 @@ def check_payload(sym, bars, claimed_basis, existing=None, min_months=12):
     bad = [k for k in ks if not (len(k) == 7 and k[4] == "-" and k[:4].isdigit())]
     if bad:
         return False, "月份格式非法：%s" % bad[:3], {}
-    if ks[-1] < "2026-01":
-        return False, "数据过旧（末月 %s）" % ks[-1], {}
+    # 退市票的末月天然早于当下，只有「离今天太远」才拒收
+    import datetime as _dt
+    _today = _dt.date.today()
+    _last = _dt.date(int(ks[-1][:4]), int(ks[-1][5:7]), 1)
+    if (_today.year - _last.year) * 12 + (_today.month - _last.month) > 18:
+        return False, "数据过旧（末月 %s，距今超 18 个月）" % ks[-1], {}
 
     # 价格合法性
     for k in ks:

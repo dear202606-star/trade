@@ -117,18 +117,56 @@ def stats():
                        from prices_monthly""")
         return cur.fetchone()
 
-def _cache_fresh():
+def _db_stamp():
+    """数据版本戳：行数 + 最大抓取时间 + 标的数（一条轻量查询）"""
     try:
-        return (os.path.exists(CACHE_FILE) and
-                __import__("time").time() - os.path.getmtime(CACHE_FILE) < CACHE_TTL)
+        with connect() as c, c.cursor() as cur:
+            cur.execute("""select count(*), coalesce(max(fetched_at)::text,''),
+                                  count(distinct symbol) from prices_monthly""")
+            return cur.fetchone()
+    except Exception:
+        return None
+
+
+def _cache_fresh():
+    """只认数据版本戳，不认 mtime（mtime 会被 git checkout 刷新）"""
+    try:
+        if not os.path.exists(CACHE_FILE):
+            return False
+        import json as _json
+        head = _json.load(open(CACHE_FILE, encoding="utf-8"))
+        stamp = head.get("__stamp__")
+        if not stamp:
+            return False
+        return tuple(stamp) == tuple(_db_stamp() or ())
     except Exception:
         return False
 
 
 def load_all(prefer_basis="total_return", chunk=60, use_cache=True):
+    """对外唯一入口：委托 db_select 的「每票单源」结果（已修正逐月换源造假）"""
+    import db_select as _ds
     if use_cache and prefer_basis == "total_return" and _cache_fresh():
         import json as _json
         raw = _json.load(open(CACHE_FILE, encoding="utf-8"))
+        raw.pop("__stamp__", None)
+        return {k: {m: (v[0], v[1]) for m, v in d.items()} for k, d in raw.items()}
+    out = _ds.load_all()
+    try:
+        import json as _json
+        payload = {k: {m: [v[0], v[1]] for m, v in d.items()} for k, d in out.items()}
+        payload["__stamp__"] = list(_db_stamp() or [])
+        _json.dump(payload, open(CACHE_FILE, "w"), separators=(",", ":"))
+    except Exception as _e:
+        print("写缓存失败：%s" % _e)
+    return out
+
+
+def _load_all_legacy(prefer_basis="total_return", chunk=60, use_cache=True):
+    if use_cache and prefer_basis == "total_return" and _cache_fresh():
+        import json as _json
+        raw = _json.load(open(CACHE_FILE, encoding="utf-8"))
+        raw.pop("__stamp__", None)
         return {k: {m: (v[0], v[1]) for m, v in d.items()} for k, d in raw.items()}
     """分片载入全库（避免单条查询超时），返回 {symbol: {month: (adj, raw)}}"""
     syms = symbols()
@@ -155,8 +193,9 @@ def load_all(prefer_basis="total_return", chunk=60, use_cache=True):
     print()
     try:
         import json as _json
-        _json.dump({k: {m: [v[0], v[1]] for m, v in d.items()} for k, d in out.items()},
-                   open(CACHE_FILE, "w"), separators=(",", ":"))
+        payload = {k: {m: [v[0], v[1]] for m, v in d.items()} for k, d in out.items()}
+        payload["__stamp__"] = list(_db_stamp() or [])
+        _json.dump(payload, open(CACHE_FILE, "w"), separators=(",", ":"))
     except Exception as _e:
         print("写缓存失败：%s" % _e)
     return out

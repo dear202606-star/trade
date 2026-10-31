@@ -50,6 +50,11 @@ def _parse(text, channel):
     return out
 
 
+def _sym(s):
+    """Yahoo 代码规范：BRK.B → BRK-B"""
+    return s.replace(".", "-")
+
+
 def fetch(sym, tries=4):
     """按通道轮换抓取；全部失败返回 {}"""
     tail = _q(sym)
@@ -64,7 +69,7 @@ def fetch(sym, tries=4):
             url = (tpl % sym) + "&" + qs if "?quest=" in tpl else \
                   (tpl % sym) + _up.quote("?" + qs, safe="")
         else:
-            url = (tpl % sym) + tail
+            url = (tpl % _sym(sym)) + tail
         if name == "translate":
             url += "&_x_tr_sl=en&_x_tr_tl=zh-CN&_x_tr_hl=en"
         try:

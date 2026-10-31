@@ -1,0 +1,90 @@
+name: 看门狗（停更告警）
+
+# 覆盖「压根没跑」这个盲区：定时检查线上数据新鲜度与关键表活跃度，
+# 超时就在 Issue 里喊，不再依赖「失败才告警」。
+# 无需任何 Secret：只读线上 health.json 与代码仓库状态。
+
+on:
+  schedule:
+    - cron: "5 * * * *"      # 每小时一次
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 检查线上健康与部署新鲜度
+        id: check
+        run: |
+          python - <<'PY'
+          import json, time, urllib.request, datetime as dt
+          problems = []
+          base = "https://dear202606-star.github.io/trade/data/"
+          # 1) health.json
+          try:
+              h = json.load(urllib.request.urlopen(base + "health.json?nocache=" + str(time.time()), timeout=20))
+              age = h.get("quotes_age_hours")
+              print("health:", h)
+              if h.get("status") != "ok":
+                  problems.append("health.status=%s" % h.get("status"))
+              if isinstance(age, (int, float)) and age > 12:
+                  problems.append("行情年龄 %.1f 小时（>12）" % age)
+          except Exception as e:
+              problems.append("health.json 读取失败: %s" % str(e)[:60])
+          # 2) 构建更新时间（deploy 是否在跑）
+          try:
+              req = urllib.request.Request(base + "b/strategy_history.json?nocache=" + str(time.time()))
+              r = urllib.request.urlopen(req, timeout=20)
+              d = json.load(r)
+              ga = d.get("generated_at", "")
+              print("strategy_history generated_at:", ga)
+              if ga:
+                  t = dt.datetime.fromisoformat(ga.replace("Z", "+00:00"))
+                  lag = (dt.datetime.now(dt.timezone.utc) - t).total_seconds() / 3600
+                  if lag > 6:
+                      problems.append("构建产物 %.1f 小时未更新（>6）" % lag)
+          except Exception as e:
+              problems.append("产物读取失败: %s" % str(e)[:60])
+          # 3) 数据质量标注是否已消失
+          try:
+              q = json.load(urllib.request.urlopen(base + "quality.json?nocache=" + str(time.time()), timeout=20))
+              if q.get("degraded"):
+                  problems.append("数据仍为降级态：%s" % q.get("reason", ""))
+          except Exception:
+              pass
+          with open("problems.txt", "w", encoding="utf-8") as f:
+              f.write("\n".join(problems))
+          print("PROBLEMS=%d" % len(problems))
+          for p in problems:
+              print(" -", p)
+          raise SystemExit(1 if problems else 0)
+          PY
+
+      - name: 开 Issue 告警
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TITLE="看门狗：线上数据不新鲜"
+          BODY="$(date -u '+%Y-%m-%d %H:%M UTC') 检查发现：
+          $(cat problems.txt 2>/dev/null || echo '（无明细）')
+
+          可能原因：工作流未运行 / 部署被跳过 / 采集失败 / 数据库口令未配置。"
+          EXIST=$(gh issue list --label watchdog --state open --json number --jq '.[0].number' || true)
+          if [ -n "$EXIST" ]; then
+            gh issue comment "$EXIST" --body "$BODY"
+          else
+            gh issue create --title "$TITLE" --body "$BODY" --label watchdog || \
+            gh issue create --title "$TITLE" --body "$BODY"
+          fi
