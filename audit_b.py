@@ -42,16 +42,27 @@ def ck(cond, name, detail=""):
 
 def main():
     mem = pd.read_csv(MEM, dtype=str).fillna("2099-12-31")
-    uni = os.path.join(BASE, "static", "prices_unified")
-    if os.path.isdir(uni):
-        # 优先用统一数据集（本地修复 + 权威源），与 variant_b 保持一致
-        bars = {}
-        for f in os.listdir(uni):
-            if f.endswith(".json"):
-                o = json.load(open(os.path.join(uni, f), encoding="utf-8"))
-                bars[o["ticker"]] = [[r[0], r[1], r[1]] for r in o["bars"]]
-    else:
-        bars = json.load(open(BARS, encoding="utf-8"))
+    # 必须与被审计对象同源：variant_b 读在线库，审计也读在线库（DB 或 REST）
+    bars = None
+    try:
+        import db_prices
+        _all = db_prices.load_all()
+        if _all:
+            bars = {t: [[m, v[0], v[1]] for m, v in sorted(d.items())] for t, d in _all.items()}
+            print("审计数据源：在线库 %d 只" % len(bars), flush=True)
+    except Exception as e:
+        print("⚠ 在线库不可用：%s" % str(e)[:70], flush=True)
+    if not bars:
+        uni = os.path.join(BASE, "static", "prices_unified")
+        if os.path.isdir(uni):
+            bars = {}
+            for f in os.listdir(uni):
+                if f.endswith(".json"):
+                    o = json.load(open(os.path.join(uni, f), encoding="utf-8"))
+                    bars[o["ticker"]] = [[r[0], r[1], r[1]] for r in o["bars"]]
+            print("审计数据源：本地统一数据集（回退）%d 只" % len(bars), flush=True)
+        else:
+            bars = json.load(open(BARS, encoding="utf-8"))
     sect = json.load(open(SECT, encoding="utf-8"))
     hist = json.load(open(HIST, encoding="utf-8"))
     curve = json.load(open(CURVE, encoding="utf-8"))

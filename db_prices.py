@@ -155,6 +155,7 @@ def load_all(prefer_basis="total_return", chunk=60, use_cache=True):
         import json as _json
         raw = _json.load(open(CACHE_FILE, encoding="utf-8"))
         raw.pop("__stamp__", None)
+        raw.pop("__built_at__", None)
         return {k: {m: (v[0], v[1]) for m, v in d.items()} for k, d in raw.items()}
     try:
         out = _ds.load_all()
@@ -178,6 +179,7 @@ def _load_all_legacy(prefer_basis="total_return", chunk=60, use_cache=True):
         import json as _json
         raw = _json.load(open(CACHE_FILE, encoding="utf-8"))
         raw.pop("__stamp__", None)
+        raw.pop("__built_at__", None)
         return {k: {m: (v[0], v[1]) for m, v in d.items()} for k, d in raw.items()}
     """分片载入全库（避免单条查询超时），返回 {symbol: {month: (adj, raw)}}"""
     syms = symbols()
