@@ -23,6 +23,11 @@ on:
       - runner.py
       - site_src/**
       - .github/workflows/quotes.yml
+      - variant_b.py
+      - audit_b.py
+      - freeze_fixtures.py
+      - freeze_bars.py
+      - static/**
 
 permissions:
   contents: write
@@ -71,6 +76,9 @@ jobs:
         continue-on-error: true
         run: python runner.py strategy_history.py
 
+      - name: 口径 B 独立审计
+        run: python runner.py audit_b.py
+
       - name: 构建站点
         run: python runner.py site_build.py
 
@@ -116,3 +124,23 @@ jobs:
       - name: 部署
         id: deployment
         uses: actions/deploy-pages@v4
+
+  alert:
+    needs: refresh
+    if: failure()
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: 失败时开 Issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create pipeline --description "流水线失败" --color B60205 --force || true
+          NUM=$(gh issue list --label pipeline --state open --json number --jq '.[0].number // empty' -R ${{ github.repository }})
+          BODY="运行 [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) 失败。站点可能停更，请检查（含口径 B）。"
+          if [ -z "$NUM" ]; then
+            gh issue create -R ${{ github.repository }} --title "流水线失败 $(date -u +%Y-%m-%d)" --body "$BODY" --label pipeline
+          else
+            gh issue comment "$NUM" -R ${{ github.repository }} --body "$BODY"
+          fi

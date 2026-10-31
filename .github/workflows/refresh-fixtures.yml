@@ -1,0 +1,74 @@
+name: 刷新冻结快照
+
+# 口径 B 的历史可复现依赖 static/ 下的三份快照。
+# 每月 1 日刷新；刷新后必须比对历史，若发生漂移则失败并开 Issue（人工确认后才能提升基线）。
+
+on:
+  schedule:
+    - cron: "40 6 1 * *"      # 每月 1 日 06:40 UTC（北京 14:40）
+  workflow_dispatch:
+
+concurrency:
+  group: trade-pipeline
+  cancel-in-progress: false
+
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装依赖
+        run: pip install -q pandas requests lxml
+
+      - name: 冻结成分与行业
+        run: python freeze_fixtures.py
+
+      - name: 冻结月度行情
+        run: python freeze_bars.py
+
+      - name: 校验历史未漂移
+        id: drift
+        continue-on-error: true
+        run: python freeze_check.py
+
+      - name: 历史漂移时开 Issue
+        if: steps.drift.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create history-drift --description "口径B历史漂移" --color B60205 --force || true
+          BODY=$(python -c "import json;d=json.load(open('output/baseline_drift.json'));print(chr(10).join(d.get('drift') or []))")
+          {
+            echo "冻结快照刷新后，口径 B 的逐年收益与基线不一致，已阻止自动提交。"
+            echo ""
+            echo "$BODY"
+            echo ""
+            echo "如确认是数据修正：BASELINE_UPDATE=1 python variant_b.py，并提交 output/baseline_b.json。"
+          } > /tmp/issue.md
+          gh issue create --title "⚠️ 口径 B 历史漂移 $(date -u +%Y-%m-%d)" \
+            --body-file /tmp/issue.md --label history-drift || true
+
+      - name: 漂移则终止
+        if: steps.drift.outcome == 'failure'
+        run: exit 1
+
+      - name: 提交变更
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add static/members_frozen.csv static/sector_frozen.json static/bars_monthly.json 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "快照无变化"
+          else
+            git commit -m "chore: 刷新冻结快照 $(date -u +%Y-%m)"
+            git push || echo "::warning::快照提交失败"
+          fi

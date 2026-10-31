@@ -23,6 +23,34 @@ PAT = re.compile(r"\(\s*(\[.*\])\s*\)", re.S)
 OUT = os.environ.get("EQ_OUT", os.path.join("docs", "data", "equity.json"))
 
 
+def _reconcile_with_quotes(data):
+    """用行情快照校正最后一日收盘价（日线接口偶尔把当日写成昨收）"""
+    import os as _os
+    p = _os.path.join("docs", "data", "quotes.json")
+    if not _os.path.exists(p):
+        return 0
+    try:
+        q = json.load(open(p, encoding="utf-8"))
+    except Exception:
+        return 0
+    sess = str(q.get("session") or "").replace("-", "")
+    qs = q.get("quotes") or {}
+    if not sess:
+        return 0
+    fixed = 0
+    for t, bars in data.items():
+        if t not in bars or sess not in bars:
+            continue
+        px = (qs.get(t) or {}).get("p")
+        if not px:
+            continue
+        old = bars[sess]
+        if old and abs(px / old - 1) > 0.002:
+            bars[sess] = float(px)
+            fixed += 1
+    return fixed
+
+
 def settled_cutoff():
     """返回最后一个「已收盘」交易日的 YYYYMMDD（美东时间 16:10 后算当日已收盘）"""
     try:
@@ -67,10 +95,11 @@ def daily_closes(ticker):
 
 
 def main():
-    if not os.path.exists("output/signal_history.json"):
-        print("缺少 signal_history.json", file=sys.stderr)
+    _sig_path = os.environ.get("EQ_SIGNAL", "output/signal_history.json")
+    if not os.path.exists(_sig_path):
+        print("缺少信号文件：%s" % _sig_path, file=sys.stderr)
         return 1
-    hist = json.load(open(os.environ.get("EQ_SIGNAL", "output/signal_history.json"), encoding="utf-8"))
+    hist = json.load(open(_sig_path, encoding="utf-8"))
     rec = hist[0]
     official = rec.get("official") or rec.get("picks") or []
     exposure = rec.get("exposure", 1.0)
@@ -95,6 +124,10 @@ def main():
                 data[t] = _df.adjust_daily(t, d)
             except Exception:
                 data[t] = d
+    _fixed = _reconcile_with_quotes(data)
+    if _fixed:
+        print("已用行情快照校正 %d 只标的的最新收盘价" % _fixed)
+
     missing = [t for t in tickers if t not in data]
     if missing:
         print(f"WARN: 缺日线 {missing}", file=sys.stderr)

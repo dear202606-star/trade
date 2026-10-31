@@ -24,7 +24,7 @@ def main():
     mem = mem.fillna("2099-12-31")
     # 只需要 2009 年以后还在指数里的票（回测 2010 起，排名看 2009-12）
     mem = mem[mem["end_date"] >= "2009-01-01"]
-    tickers = sorted(set(mem["ticker"].tolist()))
+    tickers = sorted(set(mem["ticker"].tolist()) | {"SPY"})  # 基准也要冻结
     print("需要抓取的票：%d" % len(tickers), flush=True)
 
     datafeed.prefetch(tickers, workers=10)

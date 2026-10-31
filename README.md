@@ -74,7 +74,7 @@ python monthly_pick.py      # 信号（同月自动走增量）
 python equity.py            # 当期净值
 python strategy_history.py  # 历史（已锁定则 1 秒返回）
 python site_build.py        # 构建 docs/
-python selftest.py          # 部署前自检（48 项硬校验）
+python selftest.py          # 部署前自检（78 项硬校验）
 python simulate_rollover.py # 跨年仿真：任意日期推导全链路
 ```
 
@@ -86,7 +86,7 @@ python simulate_rollover.py # 跨年仿真：任意日期推导全链路
 |---|---|
 | 数据源 | 新浪（主）+ Yahoo（交叉核对，不可达时降级并记录） |
 | 公司与行业 | `output/splits.json`（合并写入，不被覆盖）、`static/sector_overrides.json`（退市票行业） |
-| 自检 | 48 项硬校验：无 NaN、3 只持仓、权重和 1、行业 ≤60%、曲线=逐年复利、持仓锁定一致、持仓为排名日成分股、账户=净值 |
+| 自检 | 78 项硬校验：无 NaN、3 只持仓、权重和 1、行业 ≤60%、曲线=逐年复利、持仓锁定一致、持仓为排名日成分股、账户=净值 |
 | 前端 | 页面内不变量校验（市值=Σ股数×价、盈亏=市值−成本），失败即页面提示 |
 | 测试 | `ui_test.py`(34) / `e2e_check.py`(20) / `consistency_check.py`(14) / `live_audit.py`(20) |
 

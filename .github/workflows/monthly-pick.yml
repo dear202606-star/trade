@@ -31,6 +31,11 @@ on:
       - survivorship.py
       - requirements.txt
       - .github/workflows/monthly-pick.yml
+      - variant_b.py
+      - audit_b.py
+      - freeze_fixtures.py
+      - freeze_bars.py
+      - static/**
 
 permissions:
   contents: write
@@ -84,6 +89,9 @@ jobs:
       - name: 生成逐年记录
         continue-on-error: true
         run: python runner.py strategy_history.py
+
+      - name: 口径 B 独立审计
+        run: python runner.py audit_b.py
 
       - name: 生成站点
         id: site

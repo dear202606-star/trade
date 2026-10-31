@@ -24,7 +24,8 @@ def main():
         return 2
 
     t0 = time.time()
-    r = subprocess.run([sys.executable] + cmd, capture_output=True, text=True)
+    r = subprocess.run([sys.executable] + cmd, capture_output=True, text=True,
+                           encoding="utf-8", errors="replace")
     dur = round(time.time() - t0, 1)
 
     out = (r.stdout or "").strip()

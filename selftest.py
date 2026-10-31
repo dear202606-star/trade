@@ -9,11 +9,14 @@
 
 任何一项不通过 → 退出码 1，CI 失败，不会部署坏页面。
 """
+import datetime as dt
 import json
 import os
 import re
 import sys
 import time
+
+import pandas as _pd_b
 
 DOCS = "docs"
 DATA = os.path.join(DOCS, "data")
@@ -120,77 +123,165 @@ def main():
     except Exception as e:
         warns.append("权重形态校验失败：%s" % e)
 
-    # ---- 口径 B 的输入快照必须存在（保证本地与 CI 结果一致）----
-    try:
-        _mf = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                           "static", "members_frozen.csv")
-        _sf = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                           "static", "sector_frozen.json")
-        _bf = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                           "static", "bars_monthly.json")
-        check(os.path.exists(_bf) and os.path.getsize(_bf) > 100000,
-              "冻结行情存在（%.1f MB）" % (os.path.getsize(_bf)/1e6 if os.path.exists(_bf) else 0),
-              "缺少 static/bars_monthly.json")
-        check(os.path.exists(_mf) and os.path.exists(_sf),
-              "冻结快照存在（成分 + 行业）", "缺少 static/members_frozen.csv 或 sector_frozen.json")
-    except Exception as e:
-        warns.append("冻结快照校验失败：%s" % e)
+    # ================= 口径 B（全年成分）=================
+    # 设计原则：结构缺失一律硬失败，绝不用 except → 警告 把整段跳过
+    _root = os.path.dirname(os.path.abspath(__file__))
+    _bd = os.path.join(_root, "docs", "data", "b")
+    _need = ["signal.json", "equity.json", "curve.json",
+             "strategy_history.json", "preview.json"]
 
-    # ---- 口径 B（全年成分）数据集 ----
-    try:
-        import os as _os
-        _bp = _os.path.join(DOCS, "data", "b")
-        if _os.path.isdir(_bp):
-            _bs = json.load(open(_os.path.join(_bp, "signal.json"), encoding="utf-8"))
-            _bh = json.load(open(_os.path.join(_bp, "strategy_history.json"), encoding="utf-8"))
-            _off = _bs.get("official") or []
-            check(len(_off) == 3, "口径 B 正式持仓 3 只", "实际 %d" % len(_off))
-            if _off:
-                _w = sum(x["weight"] for x in _off)
-                check(abs(_w - 1) < 1e-6, "口径 B 权重合计 = 1（%.4f）" % _w, "权重和 %.4f" % _w)
-                _secs = {}
-                for x in _off:
-                    _secs[x["sector"]] = _secs.get(x["sector"], 0) + x["weight"]
-                _mx = max(_secs.values()) if _secs else 0
-                check(_mx <= 0.6001, "口径 B 单行业 ≤60%%（最高 %.0f%%）" % (_mx * 100),
-                      "单行业 %.1f%%" % (_mx * 100))
-            _yrs = _bh.get("years") or []
-            check(len(_yrs) >= 15, "口径 B 回测 %d 年" % len(_yrs), "年份不足")
-            check(_bh.get("rule"), "口径 B 带规则说明", "缺 rule 字段")
-            _bc = json.load(open(_os.path.join(_bp, "curve.json"), encoding="utf-8"))
-            _bpts = _bc.get("points") or []
-            check(len(_bpts) >= 150,
-                  "口径 B 曲线为月度（%d 点）" % len(_bpts), "曲线点过少")
-            check(all(p.get("b") for p in _bpts[-3:]),
-                  "口径 B 基准线有数据", "基准线为空")
-            _tot = 1 + (_bh.get("summary") or {}).get("total", 0)
-            check(abs((_bpts[-1].get("s") or 0) - _tot) < 0.02,
-                  "口径 B 曲线末点与累计一致（%.2f ≈ %.2f）" % (_bpts[-1].get("s") or 0, _tot),
-                  "曲线末点与 summary 不一致")
-            check((_bh.get("summary") or {}).get("worst_intra") is not None,
-                  "口径 B 最大回撤字段存在", "缺 worst_intra")
-            _nz = [r for r in _yrs if (r.get("dd") or 0) < 0]
-            check(len(_nz) >= max(1, len(_yrs) - 2),
-                  "口径 B 逐年含回撤（%d/%d 年）" % (len(_nz), len(_yrs)),
-                  "逐年回撤缺失")
-            _bs = (_bh.get("summary") or {}).get("benchmark")
-            check(_bs not in (None, 0), "口径 B 同期标普已计算（%s）" % _bs,
-                  "缺 benchmark")
-    except Exception as e:
-        warns.append("口径 B 校验失败：%s" % e)
+    if not os.path.isdir(_bd):
+        check(False, "口径 B 数据目录存在", "缺少 docs/data/b/")
+    else:
+        _b = {}
+        for _n in _need:
+            _p = os.path.join(_bd, _n)
+            _ok_file = False
+            try:
+                _b[_n] = json.load(open(_p, encoding="utf-8"))
+                _ok_file = isinstance(_b[_n], dict)
+                _detail = "" if _ok_file else "非对象"
+            except Exception as _e:
+                _b[_n] = None
+                _detail = str(_e)[:80]
+            check(_ok_file, "口径 B 可解析：%s" % _n, _detail)
 
-    # ---- 净值必须跟上最新收盘交易日（SPY 日线晚更新曾导致停滞）----
-    try:
+        # ---------- 持仓合法性 ----------
+        _sig = _b.get("signal.json") or {}
+        _eq = _b.get("equity.json") or {}
+        _off = _sig.get("official") or []
+        _tk = [p.get("ticker") for p in _off]
+        check(len(_off) == 3, "口径 B 持仓 3 只", "实际 %d" % len(_off))
+        check(len(set(_tk)) == len(_tk), "口径 B 持仓不重复", str(_tk))
+
+        _ws = [p.get("weight") for p in _off]
+        check(all(isinstance(w, (int, float)) and 0 < w <= 0.6001 for w in _ws),
+              "口径 B 权重区间 (0, 0.6]", str(_ws))
+        _sum = sum(w for w in _ws if isinstance(w, (int, float)))
+        check(abs(_sum - 1) < 1e-6, "口径 B 权重合计 = 1（%.4f）" % _sum,
+              "权重和 %.4f" % _sum)
+
+        # 上一年整年在册（口径 B 的定义性不变量）
+        try:
+            _mem = _pd_b.read_csv(os.path.join(_root, "static", "members_frozen.csv"),
+                                  dtype=str).fillna("2099-12-31")
+            _y = int(_sig.get("official_year") or 0)
+            _a, _z = "%d-01-01" % (_y - 1), "%d-12-31" % (_y - 1)
+            _bad_mem = []
+            for _p in _off:
+                _r = _mem[_mem["ticker"] == _p["ticker"]]
+                if not (((_r["start_date"] <= _a) & (_r["end_date"] >= _z)).any()):
+                    _bad_mem.append(_p["ticker"])
+            check(not _bad_mem, "口径 B 持仓上一年整年在册",
+                  "不满足：%s" % _bad_mem)
+        except Exception as _e:
+            check(False, "口径 B 持仓成员校验可执行", str(_e)[:80])
+
+        # 与净值持仓一致
+        _ew = {p.get("ticker"): round(p.get("weight") or 0, 6)
+               for p in (_eq.get("weights") or [])}
+        _sw = {p.get("ticker"): round(p.get("weight") or 0, 6) for p in _off}
+        check(_ew == _sw, "口径 B signal 与 equity 持仓一致",
+              "%s vs %s" % (_sw, _ew))
+
+        # ---------- 新鲜度 ----------
         _q = load("quotes.json") or {}
-        _e = load("equity.json") or {}
         _qs = str(_q.get("session") or "").replace("-", "")
-        _es = str(_e.get("last_session") or "")
-        if _qs and _es:
-            check(_es >= _qs,
-                  "净值已跟上最新收盘交易日（%s ≥ %s）" % (_es, _qs),
-                  "净值停在 %s，行情已到 %s" % (_es, _qs))
-    except Exception as e:
-        warns.append("净值交易日校验失败：%s" % e)
+        _es = str(_eq.get("last_session") or "")
+        check(bool(_qs) and _es >= _qs,
+              "口径 B 净值跟上最新交易日（%s ≥ %s）" % (_es, _qs),
+              "B 停在 %s，行情已到 %s" % (_es, _qs))
+
+        _eqp = (_eq.get("points") or [])
+        _pd = str((_eqp[-1] or {}).get("d") or "").replace("-", "") if _eqp else ""
+        check(bool(_es) and _pd == _es,
+              "口径 B 净值末点日期与 last_session 一致（%s）" % _es,
+              "末点 %s 与 last_session %s 不一致" % (_pd, _es))
+
+        _pv = _b.get("preview.json") or {}
+        _top = _pv.get("top") or []
+        check(len(_top) == 3, "口径 B 次年预览 3 只", "实际 %d" % len(_top))
+        _pw = sum((x.get("weight") or 0) for x in _top)
+        check(abs(_pw - 1) < 1e-6, "口径 B 预览权重合计 = 1（%.4f）" % _pw, "权重和 %.4f" % _pw)
+        check(_pv.get("hold_year") == (_sig.get("official_year") or 0) + 1,
+              "口径 B 预览年份 = 当年+1", str(_pv.get("hold_year")))
+
+        # ---------- 历史与曲线 ----------
+        _sh = _b.get("strategy_history.json") or {}
+        _yrs = _sh.get("years") or []
+        check(len(_yrs) >= 15, "口径 B 回测 %d 年" % len(_yrs), "年份不足")
+        check((_sh.get("summary") or {}).get("years") == len(_yrs),
+              "口径 B summary.years 与逐年一致",
+              "%s vs %d" % ((_sh.get("summary") or {}).get("years"), len(_yrs)))
+        _dd = [r for r in _yrs if (r.get("dd") or 0) < 0]
+        check(len(_dd) >= max(1, len(_yrs) - 2),
+              "口径 B 逐年含回撤（%d/%d）" % (len(_dd), len(_yrs)), "回撤缺失")
+
+        # 逐年行业与权重
+        _bad_sec, _bad_w = [], []
+        for r in _yrs:
+            hs = r.get("holdings") or []
+            if len(hs) != 3 or abs(sum(h.get("weight") or 0 for h in hs) - 1) > 1e-6:
+                _bad_w.append(r.get("year"))
+            sec = {}
+            for h in hs:
+                sec[h.get("sector")] = sec.get(h.get("sector"), 0) + (h.get("weight") or 0)
+            if sec and max(sec.values()) > 0.6001:
+                _bad_sec.append(r.get("year"))
+        check(not _bad_w, "口径 B 逐年 3 只且权重和 1", "异常年份 %s" % _bad_w)
+        check(not _bad_sec, "口径 B 逐年单行业 ≤60%", "超标年份 %s" % _bad_sec)
+
+        _pts = (_b.get("curve.json") or {}).get("points") or []
+        check(len(_pts) >= 150, "口径 B 曲线为月度（%d 点）" % len(_pts), "点过少")
+        _tot = 1 + (_sh.get("summary") or {}).get("total", 0)
+        check(abs((_pts[-1].get("s") if _pts else 0) - _tot) < 0.02,
+              "口径 B 曲线末点 = 累计（%.2f）" % _tot, "末点不一致")
+        _prod = 1.0
+        for r in _yrs:
+            _prod *= (1 + (r.get("ret") or 0))
+        check(abs(_prod - _tot) < 0.02,
+              "口径 B 累计 = 逐年复利（%.2f）" % _prod, "%.2f vs %.2f" % (_prod, _tot))
+        check(all(p.get("b") for p in _pts[-3:]), "口径 B 基准线有数据", "基准为空")
+        check((_sh.get("summary") or {}).get("worst_intra") is not None,
+              "口径 B 最大回撤字段存在", "缺 worst_intra")
+
+        # ---------- 不可变基线（防历史静默漂移）----------
+        try:
+            _bl_p = os.path.join(_root, "output", "baseline_b.json")
+            if not os.path.exists(_bl_p):
+                check(False, "口径 B 基线存在", "缺少 output/baseline_b.json")
+            else:
+                _bl = json.load(open(_bl_p, encoding="utf-8"))
+                _drift = []
+                for r in _yrs:
+                    _base = (_bl.get("years") or {}).get(str(r.get("year")))
+                    if _base is None:
+                        _drift.append("%s:缺" % r.get("year"))
+                    elif abs(_base - (r.get("ret") or 0)) > 0.005:
+                        _drift.append("%s:%.2f%%→%.2f%%" % (
+                            r.get("year"), _base * 100, (r.get("ret") or 0) * 100))
+                check(not _drift, "口径 B 历史未漂移（%d 年）" % len(_yrs),
+                      "漂移：%s" % _drift[:3])
+        except Exception as _e:
+            check(False, "口径 B 基线校验可执行", str(_e)[:80])
+
+        # ---------- 冻结输入体检 ----------
+        _bf = os.path.join(_root, "static", "bars_monthly.json")
+        try:
+            _bd_j = json.load(open(_bf, encoding="utf-8"))
+            _maxm = max(max(x[0] for x in rows) for rows in _bd_j.values() if rows)
+            _mn = "%d-12" % ((dt.datetime.now(dt.timezone.utc) -
+                              dt.timedelta(hours=4)).year - 1)
+            check(_maxm >= _mn, "冻结行情覆盖（%s ≥ %s）" % (_maxm, _mn),
+                  "只到 %s" % _maxm)
+            check("SPY" in _bd_j, "冻结行情含基准 SPY", "缺 SPY，基准无法复现")
+            check(len(_bd_j) >= 800, "冻结行情股票数 %d" % len(_bd_j), "数量过少")
+        except Exception as _e:
+            check(False, "冻结行情可解析", str(_e)[:80])
+
+        for _f, _nm in ((os.path.join(_root, "static", "members_frozen.csv"), "成分"),
+                        (os.path.join(_root, "static", "sector_frozen.json"), "行业")):
+            check(os.path.exists(_f), "冻结%s快照存在" % _nm, "缺少 %s" % _f)
 
     # ---- 跨年链路：任意年份都必须能自动切换 ----
     try:

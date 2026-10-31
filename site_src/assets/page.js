@@ -382,10 +382,47 @@
     applyVariantUI();
   }
 
+  /* 数据是否可用：核心文件缺失或持仓为空时，不能给出任何操作建议 */
+  function dataReady() {
+    return !!(EQ && EQ.position && EQ.position.length &&
+              EQ.stats && isFinite(EQ.stats.strategy) &&
+              SIG && (SIG.official || []).length);
+  }
+
+  function showDegraded(reason) {
+    var v = $("verdict");
+    if (v) { v.textContent = "数据未就绪"; v.className = "verdict"; }
+    var vs = $("verdictSub");
+    if (vs) vs.textContent = reason || "数据加载失败，请稍后刷新";
+    ["tMv", "tPnl", "tCost"].forEach(function (id) {
+      var e = $(id); if (e) { e.textContent = "—"; e.className = "num num-lg"; }
+    });
+    var exp = $("tExp"); if (exp) exp.textContent = "—";
+    var ret = $("yearRet");
+    if (ret) { ret.textContent = "—"; ret.className = "num num-xl"; }
+    var vs2 = $("yearVs"); if (vs2) vs2.textContent = "";
+    var b = document.getElementById("freshBanner");
+    if (!b) {
+      b = document.createElement("div");
+      b.id = "freshBanner";
+      b.style.cssText = "position:sticky;top:0;z-index:99;background:rgba(255,90,95,.16);" +
+        "border-bottom:1px solid rgba(255,90,95,.4);color:#FFB3B6;font-size:12.5px;" +
+        "padding:9px 16px;text-align:center;backdrop-filter:blur(8px)";
+      document.body.insertBefore(b, document.body.firstChild);
+    }
+    b.textContent = "⚠ 数据加载失败，已隐藏操作建议";
+    b.style.display = "block";
+  }
+
   async function boot() {
     initPills();
     await loadVariant();
     initVariants();
+
+    if (!dataReady()) {
+      showDegraded("行情或净值数据缺失，请稍后刷新");
+      return;
+    }
 
     checkFreshness();
     renderTick();

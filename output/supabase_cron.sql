@@ -28,7 +28,7 @@ where exists (select 1 from cron.job where jobname = 'trade-dispatch');
 
 select cron.schedule(
   'trade-dispatch',
-  '15 * * * *',
+  '*/5 13-21 * * 1-5',
   $job$
   select net.http_post(
     url := 'https://api.github.com/repos/dear202606-star/trade/actions/workflows/quotes.yml/dispatches',

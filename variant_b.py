@@ -15,6 +15,7 @@
 import datetime as dt
 import json
 import os
+import sys
 
 import datafeed
 
@@ -24,6 +25,40 @@ START_YEAR = 2010
 TOPN = 3
 SECTOR_CAP = 0.60
 MIN_PRICE = 5.0
+
+
+def _input_sha():
+    """三份冻结输入的联合哈希，用于判断历史是否被静默改写"""
+    import hashlib
+    h = hashlib.sha256()
+    for f in ("members_frozen.csv", "sector_frozen.json", "bars_monthly.json"):
+        p = os.path.join(BASE, "static", f)
+        if os.path.exists(p):
+            with open(p, "rb") as fh:
+                while True:
+                    chunk = fh.read(1 << 20)
+                    if not chunk:
+                        break
+                    h.update(chunk)
+    return h.hexdigest()[:16]
+
+
+def _meta():
+    now = dt.datetime.now(dt.timezone.utc)
+    return {
+        "generated_at": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "run_id": os.environ.get("GITHUB_RUN_ID", "local"),
+        "input_sha": _input_sha(),
+        "variant": "B",
+    }
+
+
+def _dump(obj, path):
+    """原子写：先写临时文件，再 rename"""
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(obj, f, ensure_ascii=False)
+    os.replace(tmp, path)
 
 
 _FROZEN_BARS = None
@@ -45,12 +80,25 @@ def frozen_bars(ticker):
     return _FROZEN_BARS.get(ticker)
 
 
+NEED_MONTH = None      # 由 main() 设定：需要覆盖到的最新月份
+_GAP_WARNED = set()
+
+
 def load_bars(ticker):
-    """统一入口：优先冻结快照，其次实时抓取"""
+    """统一入口：冻结快照优先；若未覆盖到 NEED_MONTH 则用实时数据补齐"""
     b = frozen_bars(ticker)
-    if b:
-        return b
-    return datafeed.load_bars(ticker)
+    if not b:
+        return datafeed.load_bars(ticker)
+    if NEED_MONTH and max(b.keys()) < NEED_MONTH:
+        live = datafeed.load_bars(ticker) or {}
+        merged = dict(b)
+        for k, v in live.items():
+            if k >= max(b.keys()):
+                merged[k] = v
+        if ticker not in _GAP_WARNED:
+            _GAP_WARNED.add(ticker)
+        return merged
+    return b
 
 
 def members_full_year(m, year):
@@ -192,7 +240,15 @@ def main():
         print("预热失败（继续）：%s" % _e)
 
     today_et = dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=4)
-    end_year = today_et.year - 1          # 最后一个完整年份
+    end_year = today_et.year - 1
+
+    global NEED_MONTH
+    NEED_MONTH = "%d-12" % end_year
+    _fr = frozen_bars("SPY") or {}
+    _last = max(_fr.keys()) if _fr else None
+    if _last and _last < NEED_MONTH:
+        print("⚠ 冻结行情仅到 %s，缺 %s → 用实时数据补齐（建议重跑 freeze_bars.py）"
+              % (_last, NEED_MONTH), flush=True)   # 最后一个完整年份
 
     years = []
     for y in range(START_YEAR, end_year + 1):
@@ -370,7 +426,8 @@ def main():
         print("次年预览（B）：%s" % " / ".join(
             "%s %+.0f%%" % (p["ticker"], p["ytd"] * 100) for p in picks2))
     except Exception as e:
-        print("预览生成失败：%s" % e)
+        print("✗ 预览生成失败：%s" % e, flush=True)
+        return 3
 
     # 供 equity.py 复用（EQ_SIGNAL 指向它）
     json.dump([{"official_month": sig["official_month"],
@@ -378,8 +435,53 @@ def main():
                 "exposure": 1.0, "trend": sig["trend"]}],
               open("output/signal_history_b.json", "w", encoding="utf-8"),
               ensure_ascii=False)
+    # ---- 统一补溯源信息 + 原子写 + 生成基线 ----
+    _m = _meta()
+    for _n in ("strategy_history.json", "curve.json", "signal.json", "preview.json"):
+        _p = os.path.join(OUT, _n)
+        if os.path.exists(_p):
+            try:
+                _o = json.load(open(_p, encoding="utf-8"))
+                _o.update(_m)
+                _dump(_o, _p)
+            except Exception as _e:
+                print("补 meta 失败 %s：%s" % (_n, _e))
+
+    # ---- 历史基线：只比对，不默认写入（防止历史被静默改写）----
+    _bl_p = os.path.join(BASE, "output", "baseline_b.json")
+    _cur = {str(r["year"]): round(r["ret"], 6) for r in years}
+    _cur_total = round(total, 6)
+    _promote = os.environ.get("BASELINE_UPDATE") == "1"
+    _drift = []
+    if os.path.exists(_bl_p) and not _promote:
+        try:
+            _old = json.load(open(_bl_p, encoding="utf-8"))
+            _oy = _old.get("years") or {}
+            for y, v in _cur.items():
+                if y in _oy and abs(_oy[y] - v) > 0.005:
+                    _drift.append("%s: %.2f%% → %.2f%%" % (y, _oy[y] * 100, v * 100))
+            if abs((_old.get("total") or 0) - _cur_total) > 0.02:
+                _drift.append("累计: %.2f → %.2f" % (
+                    _old.get("total") or 0, _cur_total))
+        except Exception as _e:
+            print("⚠ 基线读取失败：%s" % _e)
+    if _drift:
+        print("\n✗ 口径 B 历史发生漂移（与 output/baseline_b.json 不一致）：", flush=True)
+        for d in _drift[:10]:
+            print("   " + d, flush=True)
+        print("  如确认是数据修正，请人工复核后用 BASELINE_UPDATE=1 提升基线。", flush=True)
+        return 2
+    if _promote or not os.path.exists(_bl_p):
+        _bl = {"variant": "B", "generated_at": _m["generated_at"],
+               "input_sha": _m["input_sha"], "total": _cur_total,
+               "curve_end": round(pts[-1]["s"], 6) if pts else None,
+               "years": _cur}
+        _dump(_bl, _bl_p)
+        print("基线%s：output/baseline_b.json（%d 年）" % (
+            "已提升" if _promote else "已初始化", len(years)))
+
     print("已写入:", OUT)
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
