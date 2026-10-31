@@ -196,9 +196,10 @@
     if (!box || !CV || !CV.points || CV.points.length < 4) return;
     try {
       var wpx = Math.max(300, Math.round(box.clientWidth));
+      var _cv = (typeof CV_VIEW !== "undefined" && CV_VIEW && CV_VIEW.length) ? CV_VIEW : CV.points;
       box.innerHTML = DSH.lineChart([
-        { name: "策略", color: "#FF6B72", pts: CV.points.map(function (p) { return { d: ymd(p.d), y: p.s, label: yearLab(p.d) }; }) },
-        { name: "标普500", color: "#6F7D92", pts: CV.points.map(function (p) { return { d: ymd(p.d), y: p.b, label: yearLab(p.d) }; }) }
+        { name: "策略", color: "#FF6B72", pts: _cv.map(function (p) { return { d: ymd(p.d), y: p.s, label: yearLab(p.d) }; }) },
+        { name: "标普500", color: "#6F7D92", pts: _cv.map(function (p) { return { d: ymd(p.d), y: p.b || 1, label: yearLab(p.d) }; }) }
       ], { h: 200, w: wpx, fs: 11, l: 42, b: 30, sw: 2, log: true, xOnly: true,
         fmt: function (v) { return v >= 10 ? Math.round(v) + "×" : v.toFixed(1) + "×"; } });
     } catch (e) { box.innerHTML = ""; }
@@ -237,27 +238,56 @@
   }
 
   /* ---------- ⑤ 全周期 ---------- */
-  function renderAll() {
-    if (!SH || !SH.summary) return;
-    var s = SH.summary;
-    $("bTotal").textContent = pct2(s.total, 0);
-    $("bTotal").className = "num num-xl " + cls(s.total);
-    $("bCagr").textContent = pct2(s.cagr, 1);
-    $("bMdd").textContent = "-" + (Math.abs(s.worst_intra || 0) * 100).toFixed(1) + "%";
-    $("bMdd").className = "num num-md down";
-    $("bWin").textContent = s.wins + "/" + s.years;
-    var rg = $("allRange");
-    if (rg) {
-      rg.textContent = (s.start && s.end)
-        ? (s.start + "–" + s.end + " · " + s.years + " 年") : "";
-    }
-    var bench = (SH.years || []).reduce(function (a, r) { return a * (1 + (r.bench || 0)); }, 1) - 1;
-    $("bBench").textContent = pct2(bench, 0);
+  /* 历史回测展示起点：2013 年（此前的行情/行业覆盖不足，见 KNOWN_ISSUES G5/G6） */
+  var SHOW_FROM = 2013;
+  var CV_VIEW = null;
+
+  function histView() {
+    var years = ((SH && SH.years) || []).filter(function (r) { return r.year >= SHOW_FROM; });
+    var pts = ((CV && CV.points) || []).filter(function (p) {
+      return (+String(p.d).slice(0, 4)) >= SHOW_FROM;
+    });
+    var s0 = pts.length ? pts[0].s : 1;
+    var b0 = pts.length ? (pts[0].b || 1) : 1;
+    var norm = pts.map(function (p) {
+      return { d: p.d, s: p.s / s0, b: (p.b ? p.b / b0 : null), label: p.label };
+    });
+    var total = norm.length ? norm[norm.length - 1].s - 1 : 0;
+    var bench = norm.length ? norm[norm.length - 1].b - 1 : 0;
+    var peak = 1, mdd = 0;
+    norm.forEach(function (p) {
+      if (p.s > peak) peak = p.s;
+      var dd = p.s / peak - 1;
+      if (dd < mdd) mdd = dd;
+    });
+    var n = years.length || 1;
+    var cagr = total > -1 ? Math.pow(1 + total, 1 / n) - 1 : 0;
+    var wins = years.filter(function (r) { return (r.ret || 0) > 0; }).length;
+    return {
+      years: years, norm: norm, total: total, bench: bench, mdd: mdd,
+      cagr: cagr, wins: wins, n: n, from: SHOW_FROM,
+      to: years.length ? years[years.length - 1].year : SHOW_FROM
+    };
   }
 
-  /* ---------- ⑤ 年度 ---------- */
+  function renderAll() {
+    var v = histView();
+    var s = (SH && SH.summary) || {};
+    $("bTotal").textContent = pct2(v.total, 0);
+    $("bTotal").className = "num num-xl " + cls(v.total);
+    $("bCagr").textContent = pct2(v.cagr, 1);
+    $("bMdd").textContent = "-" + (Math.abs(v.mdd) * 100).toFixed(1) + "%";
+    $("bMdd").className = "num " + (v.mdd < 0 ? "down" : "");
+    $("bWin").textContent = v.wins + "/" + v.n;
+    var bench = v.bench;
+    $("bBench").textContent = pct2(bench, 0);
+    var rg = $("allRange");
+    if (rg) rg.textContent = v.from + "–" + v.to + " · " + v.n + " 年";
+    CV_VIEW = v.norm;
+  }
+
   function renderYears() {
-    var years = (SH && SH.years) || [];
+    var years = ((SH && SH.years) || []).filter(function (x) { return x.year >= SHOW_FROM; });
     $("yearRows").innerHTML = years.slice().reverse().map(function (r) {
       var holds = (r.holdings || []).map(function (h) {
         return '<span class="chip"><b>' + DSH.esc(h.ticker) + '</b><i>' +

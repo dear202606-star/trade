@@ -203,7 +203,7 @@ def main():
         else:
             bad("strategy_history 缺 summary")
         ys = sh.get("years") or []
-        if len(ys) >= 8:
+        if len(ys) >= 13:
             ok("逐年回测明细 %d 年" % len(ys))
         else:
             bad("逐年回测明细不足：%d 年" % len(ys))

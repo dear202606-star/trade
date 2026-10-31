@@ -136,16 +136,40 @@ def main():
            "状态缺失：%s" % foot)
 
         print("\n[全周期]")
+        # 页面只展示 2013 年起，指标须按该区间重算
+        _pts = [p for p in cv["points"] if int(str(p["d"])[:4]) >= 2013]
+        _s0 = _pts[0]["s"] if _pts else 1
+        _b0 = (_pts[0].get("b") or 1) if _pts else 1
+        _tot = (_pts[-1]["s"] / _s0 - 1) * 100 if _pts else 0
+        _ben = ((_pts[-1].get("b") or _b0) / _b0 - 1) * 100 if _pts else 0
+        _peak, _mdd = 1.0, 0.0
+        for p in _pts:
+            v = p["s"] / _s0
+            _peak = max(_peak, v)
+            _mdd = min(_mdd, v / _peak - 1)
+        _yrs = [r for r in sh["years"] if r["year"] >= 2013] or sh["years"]
+        _n = max(1, len(_yrs))
+        _cagr = ((1 + _tot / 100) ** (1.0 / _n) - 1) * 100
+        _wins = sum(1 for r in _yrs if (r.get("ret") or 0) > 0)
+
         bt = num(pg.inner_text("#bTotal"))
-        cv_total = (cv["points"][-1]["s"] - 1) * 100
-        ck(bt is not None and abs(bt - cv_total) <= 1.5,
-           "全周期 = 曲线末值（%.0f%%）" % cv_total, "页面 %s" % bt)
+        ck(bt is not None and abs(bt - _tot) <= 1.5,
+           "区间累计 = 2013 起复利（%.0f%%）" % _tot, "页面 %s" % bt)
         bc = num(pg.inner_text("#bCagr"))
-        ck(bc is not None and abs(bc - sh["summary"]["cagr"] * 100) <= 0.15,
-           "年化 = strategy_history（%.2f%%）" % (sh["summary"]["cagr"] * 100), "页面 %s" % bc)
+        ck(bc is not None and abs(bc - _cagr) <= 0.2,
+           "区间年化 = %.2f%%" % _cagr, "页面 %s" % bc)
         bm = num(pg.inner_text("#bMdd"))
-        ck(bm is not None and abs(abs(bm) - abs(sh["summary"]["worst_intra"] * 100)) <= 0.15,
-           "最大回撤 = 谷底口径（%.1f%%）" % (sh["summary"]["worst_intra"] * 100), "页面 %s" % bm)
+        ck(bm is not None and abs(abs(bm) - abs(_mdd * 100)) <= 0.2,
+           "区间最大回撤 = %.1f%%" % (_mdd * 100), "页面 %s" % bm)
+        bw = pg.inner_text("#bWin")
+        ck(bw.strip() == "%d/%d" % (_wins, _n),
+           "区间胜率 = %d/%d" % (_wins, _n), "页面 %s" % bw)
+        bb = num(pg.inner_text("#bBench"))
+        ck(bb is not None and abs(bb - _ben) <= 1.5,
+           "区间同期标普 = %.0f%%" % _ben, "页面 %s" % bb)
+        rg = pg.inner_text("#allRange")
+        ck(rg.startswith("2013") and ("%d" % _n) in rg,
+           "区间标注 2013 起（%s）" % rg, "范围异常：%s" % rg)
 
         print("\n[动态性]")
         body = pg.inner_text("body")
@@ -176,7 +200,8 @@ def main():
 
         print("\n[年度]")
         n = pg.locator("#yearRows .yr-row").count()
-        ck(n == len(sh["years"]), "年度表 %d 行（数据 %d）" % (n, len(sh["years"])), "行数不符")
+        _exp = len([r for r in sh["years"] if r["year"] >= 2013])
+        ck(n == _exp, "年度表 %d 行（2013 起 %d）" % (n, _exp), "行数不符")
 
         ck(not errs, "无 JS 报错", "；".join(errs[:2]))
 
