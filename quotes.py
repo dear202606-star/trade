@@ -17,6 +17,7 @@ import re
 import sys
 import time
 import datetime as dt
+from zoneinfo import ZoneInfo
 from io import StringIO
 
 import requests
@@ -136,7 +137,7 @@ def universe():
 def is_intraday(now_utc=None):
     """是否处于美股盘中（美东 09:30–16:10 工作日）"""
     now_utc = now_utc or dt.datetime.now(dt.timezone.utc)
-    et = now_utc - dt.timedelta(hours=4)
+    et = now_utc.astimezone(ZoneInfo("America/New_York"))
     if et.weekday() >= 5:
         return False
     minutes = et.hour * 60 + et.minute
@@ -150,7 +151,7 @@ def last_session(now_utc=None):
     界面必须写清楚是哪一天，否则用户会以为那是「今天」。
     """
     now_utc = now_utc or dt.datetime.now(dt.timezone.utc)
-    et = now_utc - dt.timedelta(hours=4)          # 夏令时 EDT=UTC-4（ approximations ）
+    et = now_utc.astimezone(ZoneInfo("America/New_York"))   # 夏令时/冬令时自动切换
     d = et.date()
     # 未到美东 16:00 收盘 → 用前一交易日
     if et.hour < 16:

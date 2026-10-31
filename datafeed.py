@@ -93,45 +93,50 @@ def fetch_sina_bars(ticker):
 
 
 def _valid_splits(ticker, bars):
-    """只保留「原始价确实按比例下跌」的拆股事件，剔除伪拆股（源已复权）"""
+    """返回 [(ts, factor)]：factor 直接乘在「拆股日及之后」的原始价上，
+    使序列连续。方向由原始价的实际跳变决定（见模块 docstring）。"""
     sp = _splits().get(ticker)
     if not sp or not bars:
         return []
+
+    def _px(v):
+        if isinstance(v, (tuple, list)):
+            for x in reversed(v):
+                if isinstance(x, (int, float)) and x > 0:
+                    return float(x)
+            return None
+        return float(v) if isinstance(v, (int, float)) and v > 0 else None
+
     import datetime as _dt
     days = sorted(bars)
     keep = []
     for ts, ratio in sp:
         try:
             md = _dt.datetime.utcfromtimestamp(int(ts)).strftime("%Y%m%d")
-            ratio = float(ratio)
+            r = float(ratio)
         except Exception:
             continue
-        if ratio <= 1.0001:
+        if r <= 0:
             continue
-        def _px(v):
-            """兼容 {d: 价} 与 {d: (复权, 原价)} 两种结构，取原价"""
-            if isinstance(v, (tuple, list)):
-                for x in reversed(v):
-                    if isinstance(x, (int, float)) and x > 0:
-                        return float(x)
-                return None
-            return float(v) if isinstance(v, (int, float)) else None
-
+        if r < 1:
+            r = 1.0 / r
+        if r <= 1.0001:
+            continue
         before = [x for x in (_px(bars[d]) for d in days if d < md) if x][-20:]
         after = [x for x in (_px(bars[d]) for d in days if d >= md) if x][:20]
         if not before or not after:
-            keep.append((ts, ratio))      # 无从判断，保守保留
             continue
         b = sorted(before)[len(before) // 2]
         a = sorted(after)[len(after) // 2]
-        if not b or b <= 0:
-            keep.append((ts, ratio))
+        if not b or b <= 0 or not a:
             continue
-        drop = 1 - a / b
-        # 期望跌幅 ≈ 1 − 1/ratio（10:1 应跌 90%），阈值按此比例取 35%
-        if drop < 0.35 * (1 - 1.0 / ratio):
-            continue                       # 原始价没跌 → 源已复权，跳过
-        keep.append((ts, ratio))
+        jump = a / b
+        # 真跌：a ≈ b/r；真涨：a ≈ b*r；容差 25%
+        if abs(jump - 1.0 / r) <= 0.25 * (1.0 / r):
+            keep.append((ts, r))          # post × r  → 回到拆股前水平
+        elif abs(jump - r) <= 0.25 * r:
+            keep.append((ts, 1.0 / r))    # post ÷ r  → 回到拆股前水平
+        # 其它情况：不是拆股（或数据已损坏）→ 不处理
     return keep
 
 

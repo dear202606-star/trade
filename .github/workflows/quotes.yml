@@ -126,8 +126,8 @@ jobs:
         uses: actions/deploy-pages@v4
 
   alert:
-    needs: refresh
-    if: failure()
+    needs: [refresh, deploy]
+    if: failure() || cancelled()
     runs-on: ubuntu-latest
     permissions:
       issues: write

@@ -192,6 +192,19 @@ def main():
               "口径 B 净值跟上最新交易日（%s ≥ %s）" % (_es, _qs),
               "B 停在 %s，行情已到 %s" % (_es, _qs))
 
+        # 当期收益 = Σ 权重 ×（现价/建仓价）− 1，用持仓自身复算，避免只与 stats 自证
+        _calc = 0.0
+        for _p in (_eq.get("position") or []):
+            _e = _p.get("entry")
+            _l = _p.get("last")
+            _w = _p.get("weight") or 0
+            if _e and _l and _e > 0:
+                _calc += _w * (_l / _e - 1)
+        _stat = (_eq.get("stats") or {}).get("strategy")
+        check(_stat is not None and abs(_calc - _stat) < 0.002,
+              "B 当期收益可独立复算（%.4f ≈ %.4f）" % (_calc, _stat or 0),
+              "持仓复算 %.4f vs stats %.4f" % (_calc, _stat or 0))
+
         _eqp = (_eq.get("points") or [])
         _pd = str((_eqp[-1] or {}).get("d") or "").replace("-", "") if _eqp else ""
         check(bool(_es) and _pd == _es,
@@ -281,6 +294,13 @@ def main():
                     elif abs(_base - (r.get("ret") or 0)) > 0.005:
                         _drift.append("%s:%.2f%%→%.2f%%" % (
                             r.get("year"), _base * 100, (r.get("ret") or 0) * 100))
+                _bl_years = set((_bl.get("years") or {}).keys())
+                _cur_years = set(str(r.get("year")) for r in _yrs)
+                check(_bl_years == _cur_years,
+                      "口径 B 基线年份集合一致（%d 年）" % len(_bl_years),
+                      "缺失 %s / 多余 %s" % (
+                          sorted(_cur_years - _bl_years)[:3],
+                          sorted(_bl_years - _cur_years)[:3]))
                 check(not _drift, "口径 B 历史未漂移（%d 年）" % len(_yrs),
                       "漂移：%s" % _drift[:3])
         except Exception as _e:
