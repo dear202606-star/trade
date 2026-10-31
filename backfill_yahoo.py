@@ -123,6 +123,12 @@ def main(limit=None):
         DB.write_rows(RESULTS)
     print("完成：成功 %d / 跳过 %d / 失败 %d，用时 %.0fs" % (
         STATS["ok"], STATS["skip"], STATS["bad"], time.time() - t0))
+    try:
+        DB.log_run("backfill_yahoo", len(syms), STATS["ok"], failed=STATS["bad"],
+                   duration_s=time.time() - t0,
+                   note="skip=%d（404/429/校验未过）" % STATS["skip"])
+    except Exception as e:
+        print("台账失败：%s" % str(e)[:60])
 
 
 if __name__ == "__main__":

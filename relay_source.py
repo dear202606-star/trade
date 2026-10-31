@@ -324,6 +324,7 @@ def main():
         targets = targets[:a.symbols]
     print("待处理 %d 只（完全缺失 %d / 12 月不足 %d）" % (len(targets), len(missing), len(thin)))
 
+    _t0 = time.time()
     av_left = 0 if a.no_av else a.av_quota
     done, stats = 0, {}
     all_rows = []
@@ -346,9 +347,12 @@ def main():
                     set adj_close=excluded.adj_close, raw_close=excluded.raw_close,
                         basis=excluded.basis, fetched_at=now()""",
             all_rows, page_size=5000)
-        cur.execute("""insert into fetch_runs(source,finished_at,requested,ok,failed,note)
-                       values ('relay',now(),%s,%s,%s,%s)""",
-                    (done, sum(1 for r in all_rows), 0, json.dumps(stats)))
+    try:
+        DB.log_run("relay", done, sum(1 for r in all_rows),
+                   failed=sum(1 for r in all_rows if r[5] == "bad"),
+                   duration_s=time.time() - _t0, note=json.dumps(stats))
+    except Exception as _e:
+        print("台账失败：%s" % str(_e)[:60])
     print("写入 %d 行，来源分布 %s，AV 剩余额度 %d" % (len(all_rows), stats, av_left))
     return 0
 

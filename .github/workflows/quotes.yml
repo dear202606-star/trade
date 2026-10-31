@@ -99,6 +99,18 @@ jobs:
       - name: 口径 B 独立审计
         run: python runner.py audit_b.py
 
+      - name: 数据校验入库（validations）
+        continue-on-error: true
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: python db_validate.py
+
+      - name: 锁定就绪度
+        continue-on-error: true
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: python lock_stage.py --check 2010,2025
+
       - name: 构建站点
         run: python runner.py site_build.py
 

@@ -199,3 +199,16 @@ def _load_all_legacy(prefer_basis="total_return", chunk=60, use_cache=True):
     except Exception as _e:
         print("写缓存失败：%s" % _e)
     return out
+
+
+def log_run(source, requested, ok, failed=0, duration_s=0.0, note=""):
+    """统一采集台账：每次运行都写一行，含耗时与失败数"""
+    try:
+        with connect() as c, c.cursor() as cur:
+            cur.execute("""insert into fetch_runs(source, requested, ok, failed,
+                                                   started_at, finished_at, note)
+                           values (%s,%s,%s,%s,
+                                   now() - make_interval(secs => %s), now(), %s)""",
+                        (source, requested, ok, failed, float(duration_s), (note or "")[:300]))
+    except Exception as e:
+        print("台账写入失败：%s" % str(e)[:80])
