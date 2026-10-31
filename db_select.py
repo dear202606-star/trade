@@ -136,6 +136,9 @@ def load_all(chunks=None, cache_file=None, stamp=None):
             except Exception as e:
                 print("  %s..%s 重试 %d: %s" % (lo, hi, attempt + 1, str(e)[:50]), flush=True)
                 _t.sleep(3)
+    if not out:
+        # 全部失败必须抛错，否则上层会以为「数据为空」并静默退回文件
+        raise RuntimeError("series_selected 读取全部失败（无口令/网络不可达）")
     return out
 
 
