@@ -1,0 +1,56 @@
+name: 探测 Yahoo 可达性
+
+# 背景：Yahoo 自 2021-11-01 起封锁中国大陆访问，本机与用户浏览器均返回地区公告页。
+# 但 GitHub Actions 跑在美国，可能可以访问 —— 本工作流只做探测，不改数据。
+
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装依赖
+        run: pip install -q requests curl_cffi
+
+      - name: 探测 Yahoo 各端点
+        run: |
+          python - <<'PY'
+          import json, requests
+          UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/130 Safari/537.36"}
+          tests = [
+              ("chart AAPL", "https://query1.finance.yahoo.com/v8/finance/chart/AAPL?range=1mo&interval=1d"),
+              ("chart ATVI(退市)", "https://query1.finance.yahoo.com/v8/finance/chart/ATVI?range=1mo&interval=1d"),
+              ("quote page", "https://finance.yahoo.com/quote/AAPL/history/"),
+          ]
+          for name, url in tests:
+              try:
+                  r = requests.get(url, headers=UA, timeout=20)
+                  ok = r.status_code == 200 and '"timestamp"' in r.text
+                  print(f"{name:20s} HTTP {r.status_code}  {len(r.content):7d}B  有效JSON={ok}")
+                  if ok:
+                      d = r.json()["chart"]["result"][0]
+                      n = len(d.get("timestamp") or [])
+                      print(f"{'':20s} 点数={n}  currency={d['meta'].get('currency')}")
+              except Exception as e:
+                  print(f"{name:20s} ERR {str(e)[:80]}")
+          PY
+
+      - name: 用 curl_cffi 再试
+        run: |
+          python - <<'PY'
+          from curl_cffi import requests as cr
+          try:
+              r = cr.get("https://query1.finance.yahoo.com/v8/finance/chart/NVDA?range=1mo&interval=1d",
+                         impersonate="chrome", timeout=20)
+              print("curl_cffi:", r.status_code, len(r.content), "bytes")
+          except Exception as e:
+              print("curl_cffi ERR:", str(e)[:90])
+          PY
