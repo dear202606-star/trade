@@ -35,11 +35,34 @@ MIN_PRICE = 5.0
 MAX_ABS_RET12 = 5.0    # |12 个月涨幅| > 500% 视为价格异常
 
 
+def _db_sha():
+    """数据库侧价格版本戳：行数 + 最大抓取时间 + 选中序列指纹。
+
+    审计 P0：旧 input_sha 只哈希 static 三个文件，而价格已迁到 DB，
+    导致「价格全换了、哈希没变」。这里把真实数据输入纳进来。
+    """
+    try:
+        import db_prices
+        with db_prices.connect() as c, c.cursor() as cur:
+            cur.execute("""select count(*), coalesce(max(fetched_at)::text,''),
+                                  count(distinct symbol), count(distinct source)
+                           from prices_monthly""")
+            a = cur.fetchone()
+            cur.execute("""select count(*), coalesce(sum(adj_close),0),
+                                  count(distinct symbol)
+                           from series_selected""")
+            b = cur.fetchone()
+        return "db:%s|%s|%s|%s" % (a[0], a[1], a[2], a[3]), "sel:%s|%.2f|%s" % (
+            b[0], float(b[1] or 0), b[2])
+    except Exception as e:
+        return "db:unavailable", str(e)[:60]
+
+
 def _input_sha():
-    """三份冻结输入的联合哈希，用于判断历史是否被静默改写"""
+    """冻结输入 + 数据库价格版本戳 的联合哈希（真正覆盖价格输入）"""
     import hashlib
     h = hashlib.sha256()
-    for f in ("members_frozen.csv", "sector_frozen.json", "bars_monthly.json"):
+    for f in ("members_frozen.csv", "sector_frozen.json"):
         p = os.path.join(BASE, "static", f)
         if os.path.exists(p):
             with open(p, "rb") as fh:
@@ -48,7 +71,31 @@ def _input_sha():
                     if not chunk:
                         break
                     h.update(chunk)
+    for part in _db_sha():
+        h.update(part.encode())
     return h.hexdigest()[:16]
+
+
+def _drift_check(years, total):
+    """基线比对：必须在写盘**之前**执行（审计 P0：先写后判 = 闸门形同虚设）"""
+    _bl_p = os.path.join(BASE, "output", "baseline_b.json")
+    if os.environ.get("BASELINE_UPDATE") == "1" or not os.path.exists(_bl_p):
+        return []
+    cur_years = {str(r["year"]): round(r["ret"], 6) for r in years}
+    out = []
+    try:
+        old = json.load(open(_bl_p, encoding="utf-8"))
+        oy = old.get("years") or {}
+        for y, v in cur_years.items():
+            if y in oy and abs(oy[y] - v) > 0.005:
+                out.append("%s: %.2f%% → %.2f%%" % (y, oy[y] * 100, v * 100))
+        if abs((old.get("total") or 0) - round(total, 6)) > 0.02:
+            out.append("累计: %.2f → %.2f" % (old.get("total") or 0, round(total, 6)))
+        if old.get("input_sha") and old.get("input_sha") != _input_sha():
+            out.append("输入指纹: %s → %s" % (old.get("input_sha"), _input_sha()))
+    except Exception as e:
+        print("⚠ 基线读取失败：%s" % e)
+    return out
 
 
 def _meta():
@@ -462,6 +509,20 @@ def main():
         "variant": "B",
         "rule": "排名池 = 上一年 1/1–12/31 全程在标普 500 内的股票",
     }
+    # ---- 基线漂移闸门：写盘之前判定，命中即中止（不产出任何新文件）----
+    _drift = _drift_check(years, total)
+    if _drift and os.environ.get("BASELINE_MODE") == "observe":
+        print("\n⚠ [observe] 历史漂移（迁移期不阻断，仅记录）：", flush=True)
+        for d in _drift[:10]:
+            print("   " + d, flush=True)
+        _drift = []
+    if _drift:
+        print("\n✗ 口径 B 历史发生漂移（未写入任何文件）：", flush=True)
+        for d in _drift[:10]:
+            print("   " + d, flush=True)
+        print("  如确认是数据修正，请人工复核后用 BASELINE_UPDATE=1 提升基线。", flush=True)
+        return 2
+
     json.dump(hist, open(os.path.join(OUT, "strategy_history.json"), "w", encoding="utf-8"),
               ensure_ascii=False)
     json.dump({"points": pts, "years": years,
@@ -585,29 +646,11 @@ def main():
                 print("补 meta 失败 %s：%s" % (_n, _e))
 
     # ---- 历史基线：只比对，不默认写入（防止历史被静默改写）----
+    # 闸门已在写盘前执行（见上方 _drift_check），此处只负责「提升基线」
     _bl_p = os.path.join(BASE, "output", "baseline_b.json")
     _cur = {str(r["year"]): round(r["ret"], 6) for r in years}
     _cur_total = round(total, 6)
     _promote = os.environ.get("BASELINE_UPDATE") == "1"
-    _drift = []
-    if os.path.exists(_bl_p) and not _promote:
-        try:
-            _old = json.load(open(_bl_p, encoding="utf-8"))
-            _oy = _old.get("years") or {}
-            for y, v in _cur.items():
-                if y in _oy and abs(_oy[y] - v) > 0.005:
-                    _drift.append("%s: %.2f%% → %.2f%%" % (y, _oy[y] * 100, v * 100))
-            if abs((_old.get("total") or 0) - _cur_total) > 0.02:
-                _drift.append("累计: %.2f → %.2f" % (
-                    _old.get("total") or 0, _cur_total))
-        except Exception as _e:
-            print("⚠ 基线读取失败：%s" % _e)
-    if _drift:
-        print("\n✗ 口径 B 历史发生漂移（与 output/baseline_b.json 不一致）：", flush=True)
-        for d in _drift[:10]:
-            print("   " + d, flush=True)
-        print("  如确认是数据修正，请人工复核后用 BASELINE_UPDATE=1 提升基线。", flush=True)
-        return 2
     if _promote or not os.path.exists(_bl_p):
         _bl = {"variant": "B", "generated_at": _m["generated_at"],
                "input_sha": _m["input_sha"], "total": _cur_total,
@@ -623,6 +666,23 @@ def main():
             _new_src["n"], _tot), flush=True)
     except Exception:
         pass
+    # 同批生成净值（审计 P0：signal 与 equity 曾相差 2 小时、持仓标的不同）
+    try:
+        import subprocess as _sp
+        _env = dict(os.environ)
+        _env["EQ_SIGNAL"] = os.path.join(BASE, "output", "signal_history_b.json")
+        _env["EQ_OUT"] = os.path.join(OUT, "equity.json")
+        _r = _sp.run([sys.executable, os.path.join(BASE, "equity.py")],
+                     capture_output=True, text=True, encoding="utf-8", errors="replace", env=_env)
+        _tail = [l for l in (_r.stdout or "").strip().splitlines() if l.strip()]
+        print("净值:", _tail[-1] if _tail else "(无输出)", flush=True)
+        if _r.returncode != 0:
+            print("✗ equity 失败：" + (_r.stdout or _r.stderr)[-300:], flush=True)
+            return 4
+    except Exception as _e:
+        print("✗ 生成净值异常：%s" % _e, flush=True)
+        return 4
+
     print("已写入:", OUT)
 
 
