@@ -1,0 +1,71 @@
+name: 回填历史行情
+
+# Alpha Vantage 免费额度 25 次/天，历史数据异步回填：
+# 每次补 22 只，约 40 天覆盖全部 1209 只；产物 static/prices/ 提交入库，回测可离线复现。
+# 需要仓库 Secret：ALPHAVANTAGE_API_KEY
+
+on:
+  schedule:
+    - cron: "10 3 * * *"      # 每天 03:10 UTC（北京 11:10）
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "本次回填只数"
+        required: false
+        default: "22"
+
+concurrency:
+  group: trade-pipeline
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装依赖
+        run: pip install -q pandas requests lxml
+
+      - name: 回填一批
+        env:
+          ALPHAVANTAGE_API_KEY: ${{ secrets.ALPHAVANTAGE_API_KEY }}
+        run: |
+          LIMIT="${{ github.event.inputs.limit }}"
+          python fetch_prices.py --limit "${LIMIT:-22}"
+
+      - name: 数据质量验收
+        id: qa
+        continue-on-error: true
+        run: python validate_prices.py
+
+      - name: 提交行情快照
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add static/prices static/prices_manifest.json 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "无新增行情"
+          else
+            N=$(git diff --staged --name-only | wc -l)
+            git commit -m "chore: 回填复权行情 $(date -u +%Y-%m-%d)（+${N} 文件）"
+            git push || echo "::warning::行情提交失败"
+          fi
+
+      - name: 覆盖率进度
+        run: |
+          python - <<'PY'
+          import json, os
+          p = "static/prices_manifest.json"
+          if os.path.exists(p):
+              d = json.load(open(p, encoding="utf-8"))
+              print("覆盖率 %d/%d（%.0f%%）" % (d["symbols"], d["expected"],
+                    100.0 * d["symbols"] / max(1, d["expected"])))
+          PY

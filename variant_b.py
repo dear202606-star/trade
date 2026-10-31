@@ -68,6 +68,29 @@ def _dump(obj, path):
     os.replace(tmp, path)
 
 
+PRICES_DIR = os.path.join(BASE, "static", "prices")
+PRICE_SOURCE = os.environ.get("PRICES_SOURCE", "alphavantage")
+MIN_COVERAGE = 0.95      # 新源覆盖不足 95% 时整体回退旧快照，避免新旧混用造成口径漂移
+_new_src = {"n": 0}
+
+
+def alpha_bars(ticker):
+    """优先读 Alpha Vantage 复权月线（有则用，口径统一、含退市票）"""
+    if PRICE_SOURCE != "alphavantage":
+        return None
+    p = os.path.join(PRICES_DIR, ticker + ".json")
+    if not os.path.exists(p):
+        return None
+    try:
+        d = json.load(open(p, encoding="utf-8"))
+        bars = {r[0]: (r[1], r[2]) for r in d.get("bars") or []}
+        if bars:
+            _new_src["n"] += 1
+        return bars or None
+    except Exception:
+        return None
+
+
 _FROZEN_BARS = None
 
 
@@ -92,7 +115,10 @@ _GAP_WARNED = set()
 
 
 def load_bars(ticker):
-    """统一入口：冻结快照优先；若未覆盖到 NEED_MONTH 则用实时数据补齐"""
+    """统一入口：Alpha Vantage 复权月线 → 冻结快照（缺口回填）→ 实时"""
+    a = alpha_bars(ticker)
+    if a:
+        return a
     b = frozen_bars(ticker)
     if not b:
         return datafeed.load_bars(ticker)
@@ -249,6 +275,27 @@ def market_switch():
 
 def main():
     os.makedirs(OUT, exist_ok=True)
+    # 覆盖率闸门：新源未满 95% 前只用旧快照，避免新旧混算
+    global PRICE_SOURCE
+    try:
+        _need = len([f for f in os.listdir(os.path.join(BASE, "static"))
+                     if False]) or 0
+        import csv as _csv
+        with open(os.path.join(BASE, "static", "members_frozen.csv"), encoding="utf-8") as _f:
+            _rows = list(_csv.DictReader(_f))
+        _need = len({r["ticker"] for r in _rows if r["end_date"] >= "2009-01-01"})
+        _have = len([f for f in os.listdir(PRICES_DIR) if f.endswith(".json")]) \
+            if os.path.isdir(PRICES_DIR) else 0
+        _cov = _have / max(1, _need)
+        if PRICE_SOURCE == "alphavantage" and _cov < MIN_COVERAGE:
+            print("⚠ 复权行情覆盖 %.1f%%（%d/%d）< %.0f%% → 本次仍用旧快照" % (
+                _cov * 100, _have, _need, MIN_COVERAGE * 100), flush=True)
+            PRICE_SOURCE = "legacy"
+        else:
+            print("复权行情覆盖 %.1f%%（%d/%d）" % (_cov * 100, _have, _need), flush=True)
+    except Exception as _e:
+        print("覆盖率检查失败：%s" % _e, flush=True)
+
     # 优先用冻结快照（static/），保证本地与 CI 结果完全一致
     import pandas as _pd
     _mem = os.path.join(BASE, "static", "members_frozen.csv")
@@ -527,6 +574,12 @@ def main():
         print("基线%s：output/baseline_b.json（%d 年）" % (
             "已提升" if _promote else "已初始化", len(years)))
 
+    try:
+        _tot = len([f for f in os.listdir(PRICES_DIR) if f.endswith(".json")])
+        print("复权行情来源：Alpha Vantage %d 只 / 旧快照 %d 只（共 %d）" % (
+            _new_src["n"], 840 - _new_src["n"], _tot), flush=True)
+    except Exception:
+        pass
     print("已写入:", OUT)
 
 

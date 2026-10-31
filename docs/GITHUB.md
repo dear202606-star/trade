@@ -79,3 +79,16 @@ gh run view <run_id> -R dear202606-star/trade
 - 数据超过 26 小时未更新 → 页面顶部红条「行情已 N 小时未更新」。
 - 部署被自检拦下 → Actions 里能看到具体失败项，修完重新触发即可。
 - Pages 偶发 503 → 等待 1–2 分钟重试，不影响数据。
+
+## 8. 行情数据源（2026-11 起）
+
+| 项 | 内容 |
+|---|---|
+| 源 | Alpha Vantage TIME_SERIES_MONTHLY_ADJUSTED（拆股+分红复权，含退市票，最早 1999） |
+| 额度 | 免费 25 次/天 |
+| 回填 | etch_prices.py 每天补 22 只，约 40 天覆盖 1209 只 |
+| 产物 | static/prices/<TICKER>.json（提交入库，可离线复现） |
+| 工作流 | .github/workflows/backfill-prices.yml（每天 03:10 UTC） |
+| 验收 | alidate_prices.py：NVDA 2021 +125% / NVDA 2024 +171% / DUK 2012-07 ≈0 / AMCR 2026 合理 / 覆盖率 ≥95% / 连续性 |
+| 切换闸门 | 覆盖率 <95% 时整体回退旧快照，避免新旧混算 |
+| Secret | ALPHAVANTAGE_API_KEY |
