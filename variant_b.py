@@ -107,6 +107,14 @@ def main():
     m["end_date"] = m["end_date"].fillna("2099-12-31").astype(str)
     sector, _ = datafeed.load_sector()
 
+    # 并行预热：CI 没有本地缓存，串行抓 700+ 只会很慢
+    try:
+        _all = sorted(set(m["ticker"].unique().tolist()))
+        print("预热行情 %d 只…" % len(_all), flush=True)
+        datafeed.prefetch(_all, workers=10)
+    except Exception as _e:
+        print("预热失败（继续）：%s" % _e)
+
     today_et = dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=4)
     end_year = today_et.year - 1          # 最后一个完整年份
 
