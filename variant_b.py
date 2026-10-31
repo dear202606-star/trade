@@ -18,6 +18,12 @@ import os
 import sys
 
 import datafeed
+import sys as _sys
+try:                                    # Windows cp936 下避免 emoji 打印崩溃
+    _sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    _sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(BASE, "docs", "data", "b")
@@ -192,10 +198,12 @@ def year_perf(picks, year):
     prev_ym = "%d-12" % (year - 1)
     seq = ["%d-%02d" % (year, m) for m in range(1, 13)]
     bars_cache = {}
+    if not picks:
+        raise RuntimeError("year_perf(%d)：没有持仓" % year)
     for p in picks:
         bars = load_bars(p["ticker"])
         if not bars or prev_ym not in bars or not bars[prev_ym][0]:
-            return 0.0, 0.0
+            raise RuntimeError("year_perf(%d)：%s 缺 %s 价格" % (year, p["ticker"], prev_ym))
         bars_cache[p["ticker"]] = bars
     vals = []
     for mm in seq:
@@ -204,7 +212,7 @@ def year_perf(picks, year):
             bars = bars_cache[p["ticker"]]
             keys = [k for k in sorted(bars) if k <= mm]
             if not keys:
-                return 0.0, 0.0
+                raise RuntimeError("year_perf(%d)：%s 缺 %s 价格" % (year, p["ticker"], mm))
             px = bars[keys[-1]][0]
             v += p["weight"] * (px / bars[prev_ym][0])
         vals.append(v)
@@ -449,7 +457,11 @@ def main():
             p["weight"] = ww
             p["rank"] = i + 1
             p["ytd"] = round(p["ytd"], 4)
-        json.dump({"variant": "B", "as_of": q.get("ts_local"), "base_month": base_m,
+        _pv_last_month = None
+        if picks2:
+            _b0 = load_bars(picks2[0]["ticker"]) or {}
+            _pv_last_month = sorted(_b0)[-1] if _b0 else None
+        json.dump({"variant": "B", "as_of": _pv_last_month, "base_month": base_m,
                    "hold_year": hold_year + 1,
                    "official_month": "%d-12" % hold_year,
                    "top": picks2, "final": False, "ranked": len(rows2),

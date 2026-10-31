@@ -10,10 +10,17 @@ CI 无法稳定抓取已退市股票的日线（例如 2010 年的 XL、2022 年
 """
 import json
 import os
+import sys
 
 import pandas as pd
 
 import datafeed
+import sys as _sys
+try:                                    # Windows cp936 下避免 emoji 打印崩溃
+    _sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    _sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(BASE, "static", "bars_monthly.json")

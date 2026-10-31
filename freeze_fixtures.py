@@ -12,10 +12,17 @@
 """
 import json
 import os
+import sys
 
 import pandas as pd
 
 import datafeed
+import sys as _sys
+try:                                    # Windows cp936 下避免 emoji 打印崩溃
+    _sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    _sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 STATIC = os.path.join(BASE, "static")
