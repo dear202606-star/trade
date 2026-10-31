@@ -45,8 +45,10 @@ def _splits():
 
 
 def _reapply(ticker, bars):
-    """用权威拆股表重算复权价：adj = raw × 拆股累计比例"""
-    sp = _splits().get(ticker)
+    """用权威拆股表重算复权价：adj = raw × 拆股累计比例（剔除伪拆股）"""
+    raw_map = {k: (v[1] if isinstance(v, (tuple, list)) else v)
+               for k, v in (bars or {}).items()}
+    sp = _valid_splits(ticker, raw_map)
     if not sp or not bars:
         return bars
     out = {}
@@ -90,13 +92,55 @@ def fetch_sina_bars(ticker):
     return None
 
 
+def _valid_splits(ticker, bars):
+    """只保留「原始价确实按比例下跌」的拆股事件，剔除伪拆股（源已复权）"""
+    sp = _splits().get(ticker)
+    if not sp or not bars:
+        return []
+    import datetime as _dt
+    days = sorted(bars)
+    keep = []
+    for ts, ratio in sp:
+        try:
+            md = _dt.datetime.utcfromtimestamp(int(ts)).strftime("%Y%m%d")
+            ratio = float(ratio)
+        except Exception:
+            continue
+        if ratio <= 1.0001:
+            continue
+        def _px(v):
+            """兼容 {d: 价} 与 {d: (复权, 原价)} 两种结构，取原价"""
+            if isinstance(v, (tuple, list)):
+                for x in reversed(v):
+                    if isinstance(x, (int, float)) and x > 0:
+                        return float(x)
+                return None
+            return float(v) if isinstance(v, (int, float)) else None
+
+        before = [x for x in (_px(bars[d]) for d in days if d < md) if x][-20:]
+        after = [x for x in (_px(bars[d]) for d in days if d >= md) if x][:20]
+        if not before or not after:
+            keep.append((ts, ratio))      # 无从判断，保守保留
+            continue
+        b = sorted(before)[len(before) // 2]
+        a = sorted(after)[len(after) // 2]
+        if not b or b <= 0:
+            keep.append((ts, ratio))
+            continue
+        drop = 1 - a / b
+        if drop < 0.35 * (ratio - 1):
+            continue                       # 原始价没跌 → 源已复权，跳过
+        keep.append((ts, ratio))
+    return keep
+
+
 def adjust_daily(ticker, bars):
     """把日线 {yyyymmdd: close} 用 splits.json 复权。
 
     约定与 _reapply 一致：拆股日（含）之后的价格乘以比例，
     使跨拆股的价格序列保持连续。返回 {yyyymmdd: adj_close}。
     """
-    sp = _splits().get(ticker)
+    sp = _valid_splits(ticker, bars)
     if not sp or not bars:
         return bars
     import datetime as _dt

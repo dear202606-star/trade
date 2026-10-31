@@ -93,6 +93,8 @@ def main():
             raw = b.get("%d-12" % y0, (None, None))[1]
             if not raw or raw < 5:
                 continue
+            if abs(rr) > 5.0:          # 价格异常（伪拆股/拼接）
+                continue
             pool.append((t, rr, sect.get(t) or "Unknown"))
         pool.sort(key=lambda x: -x[1])
         chosen = {h["ticker"] for h in hs}
@@ -100,12 +102,14 @@ def main():
         for t, rr, ss in pool:
             if picked >= 3:
                 break
-            if ss == "Unknown" or cnt.get(ss, 0) >= 2:
+            key = "__unk__" if ss == "Unknown" else ss
+            cap = 1 if ss == "Unknown" else 2
+            if cnt.get(key, 0) >= cap:
                 continue
             if t not in chosen:
                 skipped.append((t, rr))
                 break
-            cnt[ss] = cnt.get(ss, 0) + 1
+            cnt[key] = cnt.get(key, 0) + 1
             picked += 1
         ck(not skipped, "第 %d 年选中的是合格池最优" % y,
            "被跳过的更优票：%s" % (skipped[:1],))
@@ -114,9 +118,13 @@ def main():
         calc = 0.0
         for h in hs:
             b = bmap.get(h["ticker"]) or {}
-            a_m, b_m = "%d-12" % y0, "%d-12" % y
-            if a_m in b and b_m in b and b[a_m][0]:
-                calc += h["weight"] * (b[b_m][0] / b[a_m][0] - 1)
+            a_m = "%d-12" % y0
+            if a_m not in b or not b[a_m][0]:
+                continue
+            later = [k for k in sorted(b) if k <= "%d-12" % y]
+            if not later:
+                continue
+            calc += h["weight"] * (b[later[-1]][0] / b[a_m][0] - 1)
         ck(abs(calc - r["ret"]) < 0.005, "第 %d 年收益可复算" % y,
            "记录 %.4f / 复算 %.4f" % (r["ret"], calc))
         ck(r.get("dd") is not None and r["dd"] <= 0, "第 %d 年回撤非正" % y,

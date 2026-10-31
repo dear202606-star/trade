@@ -25,6 +25,7 @@ START_YEAR = 2010
 TOPN = 3
 SECTOR_CAP = 0.60
 MIN_PRICE = 5.0
+MAX_ABS_RET12 = 5.0    # |12 个月涨幅| > 500% 视为价格异常
 
 
 def _input_sha():
@@ -124,10 +125,14 @@ def pick_year(m, sector, year):
     pool = members_full_year(m, y0)
     rank_m, base_m = "%d-12" % y0, "%d-12" % (y0 - 1)
     rows = []
+    _dropped = []
     for t in pool:
         bars = load_bars(t)
         r = ret12(bars, rank_m, base_m)
         if r is None:
+            continue
+        if abs(r) > MAX_ABS_RET12:
+            _dropped.append((t, round(r, 2)))
             continue
         raw = bars.get(rank_m, (None, None))[1]
         if not raw or raw < MIN_PRICE:
@@ -140,11 +145,18 @@ def pick_year(m, sector, year):
     for r in rows:
         if len(picks) >= TOPN:
             break
-        s = r["sector"]
-        if s == "Unknown" or cnt.get(s, 0) >= 2:
+        sec = r["sector"]
+        if sec == "Unknown":
+            # 未分类统一成 1 个桶，最多 1 只（不再整体剔除）
+            if cnt.get("__unk__", 0) >= 1:
+                continue
+            picks.append(r)
+            cnt["__unk__"] = cnt.get("__unk__", 0) + 1
+            continue
+        if cnt.get(sec, 0) >= 2:
             continue
         picks.append(r)
-        cnt[s] = cnt.get(s, 0) + 1
+        cnt[sec] = cnt.get(sec, 0) + 1
 
     dup = [s for s, c in cnt.items() if c >= 2]
     if dup:
