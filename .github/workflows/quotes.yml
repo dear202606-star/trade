@@ -67,12 +67,10 @@ jobs:
       - name: 更新信号（同月增量，秒级）
         timeout-minutes: 6
         continue-on-error: true
-        continue-on-error: true
         run: python runner.py monthly_pick.py --workers 10
 
       - name: 计算策略净值
         timeout-minutes: 5
-        continue-on-error: true
         continue-on-error: true
         run: python runner.py equity.py
       - name: 生成明年预览
