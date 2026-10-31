@@ -189,6 +189,8 @@ def load_bars(ticker):
     _b = _db_all().get(ticker)
     if _b:
         return _b
+    if os.environ.get("ALLOW_FILE_FALLBACK") != "1":
+        raise RuntimeError("行情只允许来自在线库（%s 无数据），禁止退回本地文件" % ticker)
     """统一入口：本地缓存 → 运行面板 → 实时抓取"""
     if ticker in _mem:
         return _mem[ticker]

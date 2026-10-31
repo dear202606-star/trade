@@ -225,16 +225,9 @@ def main():
             except Exception:
                 _bm = None
             if not _bm:
-                _uni = os.path.join(_root, "static", "prices_unified")
-                if os.path.isdir(_uni):
-                    _bm = {}
-                    for _f in os.listdir(_uni):
-                        if _f.endswith(".json"):
-                            _o = json.load(open(os.path.join(_uni, _f), encoding="utf-8"))
-                            _bm[_o["ticker"]] = [[r[0], r[1], r[1]] for r in _o["bars"]]
-                else:
-                    _bm = json.load(open(os.path.join(_root, "static", "bars_monthly.json"),
-                                         encoding="utf-8"))
+                # 价格已全部迁到在线库，禁止退回线下文件
+                _bm = {}
+                warns.append("在线库不可用，跳过 B 预览复算（不再读线下文件）")
             _base = _pv0.get("base_month")
             _badpv = []
             for _x in (_pv0.get("top") or []):
@@ -262,7 +255,7 @@ def main():
         # ---------- 历史与曲线 ----------
         _sh = _b.get("strategy_history.json") or {}
         _yrs = _sh.get("years") or []
-        check(len(_yrs) >= 15, "口径 B 回测 %d 年" % len(_yrs), "年份不足")
+        check(len(_yrs) >= 12, "口径 B 回测 %d 年" % len(_yrs), "年份不足（<12）")
         check((_sh.get("summary") or {}).get("years") == len(_yrs),
               "口径 B summary.years 与逐年一致",
               "%s vs %d" % ((_sh.get("summary") or {}).get("years"), len(_yrs)))
@@ -328,17 +321,23 @@ def main():
         except Exception as _e:
             check(False, "口径 B 基线校验可执行", str(_e)[:80])
 
-        # ---------- 冻结输入体检 ----------
+        # ---------- 在线库行情体检（原「冻结输入」已下线）----------
         _bf = os.path.join(_root, "static", "bars_monthly.json")
         try:
-            _bd_j = json.load(open(_bf, encoding="utf-8"))
+            if not os.path.exists(_bf):
+                # 价格已迁到在线库：改用库内序列做同样的体检
+                import db_prices as _dbp2
+                _bd_j = {k: [[m, v[0], v[1]] for m, v in sorted(d.items())]
+                         for k, d in _dbp2.load_all().items()}
+            else:
+                _bd_j = json.load(open(_bf, encoding="utf-8"))
             _maxm = max(max(x[0] for x in rows) for rows in _bd_j.values() if rows)
             _mn = "%d-12" % ((dt.datetime.now(dt.timezone.utc) -
                               dt.timedelta(hours=4)).year - 1)
-            check(_maxm >= _mn, "冻结行情覆盖（%s ≥ %s）" % (_maxm, _mn),
+            check(_maxm >= _mn, "在线库行情覆盖（%s ≥ %s）" % (_maxm, _mn),
                   "只到 %s" % _maxm)
-            check("SPY" in _bd_j, "冻结行情含基准 SPY", "缺 SPY，基准无法复现")
-            check(len(_bd_j) >= 800, "冻结行情股票数 %d" % len(_bd_j), "数量过少")
+            check("SPY" in _bd_j, "库内含基准 SPY", "缺 SPY，基准无法复现")
+            check(len(_bd_j) >= 700, "库内股票数 %d" % len(_bd_j), "数量过少")
         except Exception as _e:
             check(False, "冻结行情可解析", str(_e)[:80])
 

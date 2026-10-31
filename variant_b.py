@@ -121,6 +121,7 @@ UNIFIED_DIR = os.path.join(BASE, "static", "prices_unified")
 PRICE_SOURCE = os.environ.get("PRICES_SOURCE", "unified")
 MIN_COVERAGE = 0.95      # 新源覆盖不足 95% 时整体回退旧快照，避免新旧混用造成口径漂移
 _new_src = {"n": 0}
+_miss = {"n": 0}
 
 
 def alpha_bars(ticker):
@@ -197,10 +198,9 @@ def load_bars(ticker):
         print("⚠ 读取在线库失败（%s）" % str(e)[:60], flush=True)
         if os.environ.get("ALLOW_FILE_FALLBACK") != "1":
             raise RuntimeError("在线库不可用且未允许退回文件（避免用陈旧数据出数）")
-    b = alpha_bars(ticker) or frozen_bars(ticker)
-    if b:
-        return b
-    return datafeed.load_bars(ticker)
+    # 库内确实没有该标的：返回空（下游按缺数据剔除），绝不退回文件
+    _miss["n"] = _miss.get("n", 0) + 1
+    return {}
 
 
 
@@ -371,45 +371,28 @@ def main():
     try:
         _need = len([f for f in os.listdir(os.path.join(BASE, "static"))
                      if False]) or 0
-        import csv as _csv
-        with open(os.path.join(BASE, "static", "members_frozen.csv"), encoding="utf-8") as _f:
-            _rows = list(_csv.DictReader(_f))
-        _need = len({r["ticker"] for r in _rows if r["end_date"] >= "2009-01-01"})
-        _dir = UNIFIED_DIR if os.path.isdir(UNIFIED_DIR) else PRICES_DIR
-        _have = len([f for f in os.listdir(_dir) if f.endswith(".json")]) \
-            if os.path.isdir(_dir) else 0
+        import db_ref as _ref0
+        _mem0 = _ref0.load_members()
+        _need = len([t for t in _mem0 if max(b for _, b in _mem0[t]) >= "2009-01-01"])
+        import db_prices as _dbp0
+        _have = len(_dbp0.load_all())
         _cov = _have / max(1, _need)
-        if PRICE_SOURCE in ("alphavantage", "unified") and _cov < MIN_COVERAGE:
-            print("⚠ 复权行情覆盖 %.1f%%（%d/%d）< %.0f%% → 本次仍用旧快照" % (
-                _cov * 100, _have, _need, MIN_COVERAGE * 100), flush=True)
-            PRICE_SOURCE = "legacy"
-        else:
-            print("复权行情覆盖 %.1f%%（%d/%d）" % (_cov * 100, _have, _need), flush=True)
+        print("在线库行情覆盖 %.1f%%（%d/%d 只）" % (_cov * 100, _have, _need), flush=True)
     except Exception as _e:
         print("覆盖率检查失败：%s" % _e, flush=True)
 
-    # 优先用冻结快照（static/），保证本地与 CI 结果完全一致
+    # 口径定义一律来自在线库（用户要求：禁止线下文件做数据依据）
     import pandas as _pd
-    _mem = os.path.join(BASE, "static", "members_frozen.csv")
-    if os.path.exists(_mem):
-        m = _pd.read_csv(_mem, dtype=str).fillna("2099-12-31")
-    else:
-        m = datafeed.load_members()
-        m["start_date"] = m["start_date"].astype(str)
-        m["end_date"] = m["end_date"].fillna("2099-12-31").astype(str)
-    _secf = os.path.join(BASE, "static", "sector_frozen.json")
-    if os.path.exists(_secf):
-        sector = json.load(open(_secf, encoding="utf-8"))
-    else:
-        sector, _ = datafeed.load_sector()
-
-    # 并行预热：CI 没有本地缓存，串行抓 700+ 只会很慢
+    import db_ref as _ref
     try:
-        _all = sorted(set(m["ticker"].unique().tolist()))
-        print("预热行情 %d 只…" % len(_all), flush=True)
-        datafeed.prefetch(_all, workers=10)
+        _mem_db = _ref.load_members()
+        _rows = [{"ticker": k, "start_date": a, "end_date": b}
+                 for k, segs in _mem_db.items() for a, b in segs]
+        m = _pd.DataFrame(_rows)
+        sector = _ref.load_sectors()
+        print("口径来自在线库：成分 %d 行 / 行业 %d 只" % (len(m), len(sector)), flush=True)
     except Exception as _e:
-        print("预热失败（继续）：%s" % _e)
+        raise RuntimeError("在线库不可用，禁止退回线下文件：%s" % str(_e)[:120])
 
     today_et = dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=4)
     end_year = today_et.year - 1
