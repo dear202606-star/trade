@@ -20,7 +20,7 @@ def _months(d):
     return sorted(d)
 
 
-def check_payload(sym, bars, claimed_basis, existing=None, min_months=12):
+def check_payload(sym, bars, claimed_basis, existing=None, min_months=12, allow_stale=False):
     """bars: {YYYY-MM: (adj, raw)}；existing: 库内同源或异源序列"""
     if not bars:
         return False, "空数据", {}
@@ -34,7 +34,7 @@ def check_payload(sym, bars, claimed_basis, existing=None, min_months=12):
     import datetime as _dt
     _today = _dt.date.today()
     _last = _dt.date(int(ks[-1][:4]), int(ks[-1][5:7]), 1)
-    if (_today.year - _last.year) * 12 + (_today.month - _last.month) > 18:
+    if not allow_stale and (_today.year - _last.year) * 12 + (_today.month - _last.month) > 18:
         return False, "数据过旧（末月 %s，距今超 18 个月）" % ks[-1], {}
 
     # 价格合法性
@@ -55,7 +55,22 @@ def check_payload(sym, bars, claimed_basis, existing=None, min_months=12):
         elif abs(r) > 1.5:
             spikes += 1
     if jumps:
-        return False, "存在 %d 处断裂（|月涨跌|>300%%），疑似未复权" % jumps, {}
+        # 交叉验证：若库内另一源在同一月份也出现同向同量级跳变，说明是真实行情
+        # （GME 2021-01 真的涨了 16 倍，不能当未复权拒收）
+        genuine = 0
+        if existing:
+            for i in range(1, len(ks)):
+                a0, a1 = bars[ks[i - 1]][0], bars[ks[i]][0]
+                if not a0 or abs(a1 / a0 - 1) <= 3.0:
+                    continue
+                m0, m1 = ks[i - 1], ks[i]
+                if m0 in existing and m1 in existing and existing[m0][0]:
+                    r_alt = existing[m1][0] / existing[m0][0]
+                    if r_alt > 1.5:          # 库内同向大涨
+                        genuine += 1
+        real_jumps = jumps - genuine
+        if real_jumps > 0:
+            return False, "存在 %d 处断裂（|月涨跌|>300%%），疑似未复权" % real_jumps, {}
     if spikes > 2:
         return False, "异常月份过多（%d 个月 |涨跌|>150%%）" % spikes, {}
 

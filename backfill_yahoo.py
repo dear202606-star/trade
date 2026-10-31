@@ -72,7 +72,7 @@ def worker(channel_name, channel_tpl):
             with LOCK:
                 STATS["skip"] += 1
             continue
-        good, why, _ = IV.check_payload(sym, bars, "total_return")
+        good, why, _ = IV.check_payload(sym, bars, "total_return", allow_stale=True)
         if not good:
             with LOCK:
                 STATS["bad"] += 1
