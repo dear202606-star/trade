@@ -89,10 +89,15 @@ def db():
 def build_table():
     c = db()
     with c.cursor() as cur:
+        cur.execute("set statement_timeout = '600s'" + "")   # 池化器默认超时太短，重建会被打断
         for st in [x.strip() for x in DDL.split(";") if x.strip()]:
             cur.execute(st)
-        cur.execute("truncate series_selected")
-        cur.execute(BUILD)
+        cur.execute("drop table if exists series_selected_new")
+        cur.execute(DDL.replace("series_selected", "series_selected_new")
+                       .replace("idx_series_month", "idx_series_month_new"))
+        cur.execute(BUILD.replace("insert into series_selected", "insert into series_selected_new"))
+        cur.execute("drop table if exists series_selected")
+        cur.execute("alter table series_selected_new rename to series_selected")
         cur.execute("""select count(*), count(distinct symbol), count(distinct source),
                               count(*) filter (where basis='total_return')
                        from series_selected""")
