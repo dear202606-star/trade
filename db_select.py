@@ -87,15 +87,26 @@ def db():
     return c
 
 
+def _stmts(ddl):
+    """按分号切分，剔掉空语句与纯注释块"""
+    out = []
+    for x in ddl.split(";"):
+        body = "\n".join(l for l in x.splitlines() if not l.strip().startswith("--")).strip()
+        if body:
+            out.append(body)
+    return out
+
+
 def build_table():
     c = db()
     with c.cursor() as cur:
         cur.execute("set statement_timeout = '600s'" + "")   # 池化器默认超时太短，重建会被打断
-        for st in [x.strip() for x in DDL.split(";") if x.strip()]:
+        for st in _stmts(DDL):
             cur.execute(st)
         cur.execute("drop table if exists series_selected_new")
-        cur.execute(DDL.replace("series_selected", "series_selected_new")
-                       .replace("idx_series_month", "idx_series_month_new"))
+        for st in _stmts(DDL.replace("series_selected", "series_selected_new")
+                            .replace("idx_series_month", "idx_series_month_new")):
+            cur.execute(st)
         cur.execute(BUILD.replace("insert into series_selected", "insert into series_selected_new"))
         cur.execute("drop table if exists series_selected")
         cur.execute("alter table series_selected_new rename to series_selected")
