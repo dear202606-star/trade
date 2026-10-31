@@ -19,20 +19,22 @@ import urllib.parse
 import urllib.request
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-CFG = os.path.join(BASE, "docs", "data", "cloud.json")
+CANDIDATES = [os.path.join(BASE, "static", "cloud.json"),
+              os.path.join(BASE, "docs", "data", "cloud.json")]
 PAGE = 1000
 UA = {"User-Agent": "trade-pipeline/1.0"}
 
 
 def cfg():
-    if not os.path.exists(CFG):
-        return None
-    try:
-        d = json.load(open(CFG, encoding="utf-8"))
-        if d.get("url") and d.get("key"):
-            return d["url"].rstrip("/"), d["key"]
-    except Exception:
-        pass
+    for p in CANDIDATES:
+        if not os.path.exists(p):
+            continue
+        try:
+            d = json.load(open(p, encoding="utf-8"))
+            if d.get("url") and d.get("key"):
+                return d["url"].rstrip("/"), d["key"]
+        except Exception:
+            continue
     return None
 
 
