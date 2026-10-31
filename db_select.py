@@ -82,7 +82,7 @@ def db():
         if os.path.exists(p):
             pw = io.open(p, encoding="utf-8").read().strip()
     c = psycopg2.connect(host=HOST, port=6543, user="postgres." + REF, password=pw,
-                         dbname="postgres", connect_timeout=20, sslmode="require")
+                         dbname="postgres", connect_timeout=6, sslmode="require")
     c.autocommit = True
     return c
 
@@ -119,6 +119,7 @@ def load_all(chunks=None, cache_file=None, stamp=None):
     import time as _t
 
     out = {}
+    attempted = 0
     for lo, hi in (chunks or RANGES):
         sql = ("select symbol, month, adj_close, raw_close from series_selected "
                "where month between %s and %s")
@@ -136,6 +137,10 @@ def load_all(chunks=None, cache_file=None, stamp=None):
                 break
             except Exception as e:
                 print("  %s..%s 重试 %d: %s" % (lo, hi, attempt + 1, str(e)[:50]), flush=True)
+                attempted += 1
+                if attempted >= 1:
+                    # 首块就连不上，说明口令/网络不可用，继续重试只是白等
+                    raise RuntimeError("数据库不可达（首个分片即失败）：%s" % str(e)[:80])
                 _t.sleep(3)
     if not out:
         # 全部失败必须抛错，否则上层会以为「数据为空」并静默退回文件

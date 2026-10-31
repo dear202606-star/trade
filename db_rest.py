@@ -53,8 +53,16 @@ def get(table, params, page=PAGE, max_pages=400):
             "Range-Unit": "items",
             "Prefer": "count=none",
         })
-        with urllib.request.urlopen(req, timeout=60) as r:
-            rows = json.loads(r.read().decode())
+        rows = None
+        for attempt in range(4):
+            try:
+                with urllib.request.urlopen(req, timeout=60) as r:
+                    rows = json.loads(r.read().decode())
+                break
+            except Exception as e:
+                if attempt == 3:
+                    raise
+                __import__("time").sleep(3 * (attempt + 1))
         if not rows:
             break
         out += rows

@@ -23,13 +23,17 @@ PRIORITY = {"alphavantage": 1, "yahoo_relay": 2, "eodhd": 3,
             "hf_ayushkhaire": 4, "sina_repaired": 5, "sina_repaired+eodhd": 3}
 
 _conn = None
+_DB_DEAD = None      # True = 本进程已确认连不上
+_MARKER = os.path.join(BASE, "output", ".db_unavailable")
 CACHE_FILE = os.path.join(BASE, "output", "_prices_cache.json")
 CACHE_TTL = 6 * 3600      # 派生缓存，6 小时内直接用
 _cache = {}
 
 
 def connect():
-    global _conn
+    global _conn, _DB_DEAD
+    if _DB_DEAD:
+        raise RuntimeError("数据库不可用（本进程已判定）")
     if _conn is not None and not _conn.closed:
         return _conn
     pw = ""
@@ -39,8 +43,16 @@ def connect():
         pw = env.strip()
     elif os.path.exists(p):
         pw = io.open(p, encoding="utf-8").read().strip()
-    _conn = psycopg2.connect(host=HOST, port=6543, user="postgres." + REF, password=pw,
-                             dbname="postgres", connect_timeout=20, sslmode="require")
+    try:
+        _conn = psycopg2.connect(host=HOST, port=6543, user="postgres." + REF, password=pw,
+                                 dbname="postgres", connect_timeout=6, sslmode="require")
+    except Exception:
+        _DB_DEAD = True
+        try:
+            open(_MARKER, "w").write("1")
+        except Exception:
+            pass
+        raise
     return _conn
 
 
@@ -119,6 +131,8 @@ def stats():
 
 def _db_stamp():
     """数据版本戳：行数 + 最大抓取时间 + 标的数（一条轻量查询）"""
+    if _DB_DEAD and os.path.exists(_MARKER):
+        return None
     try:
         with connect() as c, c.cursor() as cur:
             cur.execute("""select count(*), coalesce(max(fetched_at)::text,''),
@@ -166,7 +180,10 @@ def load_all(prefer_basis="total_return", chunk=60, use_cache=True):
     try:
         import json as _json
         payload = {k: {m: [v[0], v[1]] for m, v in d.items()} for k, d in out.items()}
-        payload["__stamp__"] = list(_db_stamp() or [])
+        _live = _db_stamp()
+        # DB 不可达时必须给一个真值标记，否则空列表会被当作「无指纹」而永不命中缓存
+        payload["__stamp__"] = list(_live) if _live else ["rest", len(out),
+                                                          sum(len(d) for d in out.values())]
         payload["__built_at__"] = __import__("time").time()
         _json.dump(payload, open(CACHE_FILE, "w"), separators=(",", ":"))
     except Exception as _e:
@@ -207,7 +224,10 @@ def _load_all_legacy(prefer_basis="total_return", chunk=60, use_cache=True):
     try:
         import json as _json
         payload = {k: {m: [v[0], v[1]] for m, v in d.items()} for k, d in out.items()}
-        payload["__stamp__"] = list(_db_stamp() or [])
+        _live = _db_stamp()
+        # DB 不可达时必须给一个真值标记，否则空列表会被当作「无指纹」而永不命中缓存
+        payload["__stamp__"] = list(_live) if _live else ["rest", len(out),
+                                                          sum(len(d) for d in out.values())]
         payload["__built_at__"] = __import__("time").time()
         _json.dump(payload, open(CACHE_FILE, "w"), separators=(",", ":"))
     except Exception as _e:
