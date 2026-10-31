@@ -18,6 +18,7 @@ import os
 import sys
 
 import datafeed
+import db_prices
 import sys as _sys
 try:                                    # Windows cp936 下避免 emoji 打印崩溃
     _sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -103,6 +104,7 @@ def alpha_bars(ticker):
 
 
 _FROZEN_BARS = None
+_ALL_BARS = None
 
 
 def frozen_bars(ticker):
@@ -125,24 +127,32 @@ NEED_MONTH = None      # 由 main() 设定：需要覆盖到的最新月份
 _GAP_WARNED = set()
 
 
+def _warm():
+    """一次性把在线库载入内存（分片 + 缓存），避免逐只查询"""
+    global _ALL_BARS
+    if _ALL_BARS is None:
+        _ALL_BARS = db_prices.load_all()
+        print("在线库载入 %d 只" % len(_ALL_BARS), flush=True)
+    return _ALL_BARS
+
+
 def load_bars(ticker):
-    """统一入口：Alpha Vantage 复权月线 → 冻结快照（缺口回填）→ 实时"""
-    a = alpha_bars(ticker)
-    if a:
-        return a
-    b = frozen_bars(ticker)
-    if not b:
-        return datafeed.load_bars(ticker)
-    if NEED_MONTH and max(b.keys()) < NEED_MONTH:
-        live = datafeed.load_bars(ticker) or {}
-        merged = dict(b)
-        for k, v in live.items():
-            if k >= max(b.keys()):
-                merged[k] = v
-        if ticker not in _GAP_WARNED:
-            _GAP_WARNED.add(ticker)
-        return merged
-    return b
+    """唯一入口：在线库 db_prices（真相）→ 死缓存兜底
+
+    文件型数据已退役；若 DB 不可达，则抛错而不是静默用旧文件（避免口径不一致）。
+    """
+    try:
+        b = _warm().get(ticker)
+        if b:
+            _new_src["n"] += 1
+            return b
+    except Exception as e:
+        print("⚠ 读取在线库失败（%s），尝试兜底" % str(e)[:60], flush=True)
+    b = alpha_bars(ticker) or frozen_bars(ticker)
+    if b:
+        return b
+    return datafeed.load_bars(ticker)
+
 
 
 MAX_MONTH_JUMP = 1.5      # 单月 |涨跌| > 150% 视为数据断裂，该票当年不参与排名

@@ -23,6 +23,7 @@ import argparse
 import csv
 import io
 import json
+import ingest_validate
 import os
 import sys
 import time
@@ -46,6 +47,7 @@ UA = {"User-Agent": "Mozilla/5.0"}
 _MATRIX = os.path.join(BASE, "static", "source_matrix.json")
 _DEFAULT = {
     "alphavantage":   {"rank": 1, "basis": "total_return"},
+    "yahoo_relay":    {"rank": 2, "basis": "total_return"},
     "eodhd":          {"rank": 2, "basis": "total_return"},
     "hf_ayushkhaire": {"rank": 3, "basis": "price_only"},
     "sina_repaired":  {"rank": 4, "basis": "price_only"},
@@ -181,6 +183,55 @@ def fetch_hf(sym, key=None):
     return {m: (v, v) for m, v in monthly.items()}
 
 
+_yahoo_last = {"t": 0.0}
+
+
+def _yahoo_throttle(min_gap=2.5):
+    """礼貌限速：每次请求至少间隔 min_gap 秒"""
+    gap = time.time() - _yahoo_last["t"]
+    if gap < min_gap:
+        time.sleep(min_gap - gap)
+    _yahoo_last["t"] = time.time()
+
+
+def fetch_yahoo_relay(sym, key=None):
+    """Yahoo chart（拆股+分红复权）。本地走 translate.goog 中转，CI(美国) 可直连。"""
+    import datetime as _dt
+    UA2 = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/130 Safari/537.36"}
+    tail = ("?period1=1262304000&period2=%d&interval=1mo&events=div%%2Csplit" % int(time.time()))
+    urls = [
+        "https://query1.finance.yahoo.com/v8/finance/chart/%s" % sym + tail,
+        "https://query1-finance-yahoo-com.translate.goog/v8/finance/chart/%s" % sym
+        + tail + "&_x_tr_sl=en&_x_tr_tl=zh-CN&_x_tr_hl=en",
+    ]
+    last_err = None
+    for attempt, u in enumerate(urls):
+        _yahoo_throttle()
+        try:
+            raw = urllib.request.urlopen(urllib.request.Request(u, headers=UA2), timeout=45) \
+                .read().decode("utf-8", "replace")
+            d = json.loads(raw)["chart"]["result"][0]
+            ts = d.get("timestamp") or []
+            adj = (d["indicators"].get("adjclose") or [{}])[0].get("adjclose") or []
+            close = (d["indicators"].get("quote") or [{}])[0].get("close") or []
+            out = {}
+            for i, x in enumerate(ts):
+                ym = _dt.datetime.fromtimestamp(x, _dt.timezone.utc).strftime("%Y-%m")
+                a = adj[i] if i < len(adj) else None
+                c = close[i] if i < len(close) else None
+                if a:
+                    out[ym] = (float(a), float(c) if c else None)
+            if out:
+                return out
+        except Exception as e:
+            last_err = e
+            if "429" in str(e):
+                time.sleep(15 * (attempt + 1))
+    if last_err:
+        raise last_err
+    return {}
+
+
 def sina_local(sym):
     p = os.path.join(BASE, "static", "prices_unified", sym + ".json")
     if not os.path.exists(p):
@@ -194,6 +245,7 @@ def relay(sym, k, av_left):
     rows, used_av = [], False
     got = {}
     for src, fn in (("alphavantage", lambda: fetch_av(sym, k.get("alphavantage_key", ""))),
+                    ("yahoo_relay", lambda: fetch_yahoo_relay(sym)),
                     ("eodhd", lambda: fetch_eodhd(sym, k.get("eodhd_token", ""))),
                     ("hf_ayushkhaire", lambda: fetch_hf(sym)),
                     ("sina_repaired", lambda: sina_local(sym))):
@@ -212,6 +264,14 @@ def relay(sym, k, av_left):
             if m in got or not adj:
                 continue
             got[m] = (adj, raw, src)
+    # 采集环节强制校验：断裂/异常/口径不符一律拒收
+    if got:
+        _bars = {m: (v[0], v[1]) for m, v in got.items()}
+        _basis = SOURCES[sorted(got.values(), key=lambda x: SOURCES[x[2]]["rank"])[0][2]]["basis"]
+        _ok, _why, _ = ingest_validate.check_payload(sym, _bars, _basis)
+        if not _ok:
+            print("    ✗ %s 采集校验未过：%s" % (sym, _why), flush=True)
+            return [], False, 0
     for m, (adj, raw, src) in got.items():
         rows.append((sym, m, adj, raw, src, "ok", SOURCES[src]["basis"]))
     return rows, used_av, len(got)
