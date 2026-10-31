@@ -510,6 +510,11 @@ def main():
         for _r in years:
             _eq *= (1 + _r["ret"])
         eq = _eq
+        # 基准也要按保留下来的年份重算，否则 summary.benchmark 仍含被排除年份
+        _beq_new = 1.0
+        for _r in years:
+            _beq_new *= (1 + (_r.get("bench") or 0))
+        beq = _beq_new
         # 曲线是按全期链累乘的，排除年份后必须整体除以被排除段的累计因子
         _excl_factor = (_eq_before_gate / eq) if eq else 1.0
         if _excl_factor and abs(_excl_factor - 1.0) > 1e-12:
