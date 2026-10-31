@@ -178,10 +178,49 @@ def main():
 
     # 曲线（年末复利）
     eq, beq, pts = 1.0, 1.0, []
+    spy = datafeed.load_bars("SPY") or {}
     for r in years:
-        eq *= (1 + r["ret"])
-        beq *= (1 + r.get("bench") or 0)
-        pts.append({"d": "%d-12" % r["year"], "s": round(eq, 6), "b": round(beq, 6)})
+        y = r["year"]
+        prev_ym = "%d-12" % (y - 1)
+        bars_cache = {}
+        ok = True
+        for h in r["holdings"]:
+            b = datafeed.load_bars(h["ticker"])
+            if not b or prev_ym not in b or not b[prev_ym][0]:
+                ok = False
+                break
+            bars_cache[h["ticker"]] = b
+        spy0 = spy.get(prev_ym, (None, None))[0]
+        for mi in range(1, 13):
+            ym = "%d-%02d" % (y, mi)
+            if ok:
+                v = 0.0
+                for h in r["holdings"]:
+                    b = bars_cache[h["ticker"]]
+                    keys = [k for k in sorted(b) if k <= ym]
+                    px = b[keys[-1]][0] if keys else None
+                    if not px:
+                        ok = False
+                        break
+                    v += h["weight"] * (px / b[prev_ym][0])
+            if not ok:
+                v = 1.0
+            val = eq * v
+            # 基准
+            if spy0:
+                skeys = [k for k in sorted(spy) if k <= ym]
+                spx = spy[skeys[-1]][0] if skeys else None
+                bval = beq * (spx / spy0) if spx else beq
+            else:
+                bval = beq
+            pts.append({"d": ym, "s": round(val, 6), "b": round(bval, 6)})
+        if ok:
+            eq *= v
+            if spy0:
+                skeys = [k for k in sorted(spy) if k <= "%d-12" % y]
+                spx = spy[skeys[-1]][0] if skeys else None
+                if spx:
+                    beq *= (spx / spy0)
     total = eq - 1
     n = len(years)
     cagr = (eq ** (1 / n) - 1) if n and eq > 0 else 0

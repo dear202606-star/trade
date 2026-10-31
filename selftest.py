@@ -141,6 +141,12 @@ def main():
             _yrs = _bh.get("years") or []
             check(len(_yrs) >= 15, "口径 B 回测 %d 年" % len(_yrs), "年份不足")
             check(_bh.get("rule"), "口径 B 带规则说明", "缺 rule 字段")
+            _bc = json.load(open(_os.path.join(_bp, "curve.json"), encoding="utf-8"))
+            _bpts = _bc.get("points") or []
+            check(len(_bpts) >= 150,
+                  "口径 B 曲线为月度（%d 点）" % len(_bpts), "曲线点过少")
+            check(all(p.get("b") for p in _bpts[-3:]),
+                  "口径 B 基准线有数据", "基准线为空")
             _nz = [r for r in _yrs if (r.get("dd") or 0) < 0]
             check(len(_nz) >= max(1, len(_yrs) - 2),
                   "口径 B 逐年含回撤（%d/%d 年）" % (len(_nz), len(_yrs)),
