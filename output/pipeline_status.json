@@ -1,46 +1,6 @@
 {
  "runs": [
   {
-   "ts": "2026-10-31T11:14:02Z",
-   "step": "monthly_pick.py",
-   "rc": 0,
-   "dur": 2.2,
-   "ok": true,
-   "tail": "[1/5] 获取标普500 成分股 ...\n      539 只\n[增量] 本月排名已存在，只刷新均线开关…\n      标普 755.72 / 10 月均线 728.26 → 满仓"
-  },
-  {
-   "ts": "2026-10-31T11:14:09Z",
-   "step": "quotes.py",
-   "rc": 0,
-   "dur": 7.4,
-   "ok": true,
-   "tail": "行情 508 / 510，汇率 6.654，缺失 2"
-  },
-  {
-   "ts": "2026-10-31T11:14:16Z",
-   "step": "equity.py",
-   "rc": 0,
-   "dur": 7.1,
-   "ok": true,
-   "tail": "净值 210 个交易日（20251231 起）｜策略 +86.81% ｜标普 +10.82% ｜ 最大回撤 -36.7%"
-  },
-  {
-   "ts": "2026-10-31T11:14:19Z",
-   "step": "preview.py",
-   "rc": 0,
-   "dur": 2.3,
-   "ok": true,
-   "tail": "预览：MRNA +652% / SNDK +385% / DELL +237% → 排名池 495 只\n[stderr]\n/home/runner/work/trade/trade/preview.py:31: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).\n  ym = dt.datetime.utcfromtimestamp(int(ts)).strftime(\"%Y-%m\")"
-  },
-  {
-   "ts": "2026-10-31T11:15:45Z",
-   "step": "variant_b.py",
-   "rc": 0,
-   "dur": 86.0,
-   "ok": true,
-   "tail": "复权行情覆盖 96.7%（840/869）\n预热行情 1209 只…\n已加载冻结行情 840 只\n  2010   +14.59%  MU / FCX / XL  （全年成分池 267）\n  2011   -31.82%  CMI / AIG / HBAN  （全年成分池 372）\n  2012   +22.75%  COG / ISRG / MA  （全年成分池 384）\n  2013   +33.54%  PHM / WHR / BAC  （全年成分池 402）\n  2014   +17.16%  MU / BBY / NFLX  （全年成分池 412）\n  2015   +23.99%  LUV / EA / EW  （全年成分池 429）\n  2016    +9.47%  AMZN / NFLX / CVC  （全年成分池 420）\n  2017   +20.55%  OKE / NEM / AMAT  （全年成分池 438）\n  2018    +2.76%  NRG / VRTX / WYNN  （全年成分池 445）\n  2019   +81.34%  AMD / AAP / CMG  （全年成分池 452）\n  2020   +44.29%  AMD / LRCX / TGT  （全年成分池 461）\n  2021   +73.62%  LB / NVDA / PYPL  （全年成分池 475）\n  2022   -11.22%  DVN / FTNT / F  （全年成分池 478）\n  2023    +8.30%  OXY / HES / MCK  （全年成分池 476）\n  2024  +104.94%  NVDA / META / RCL  （全年成分池 480）\n  2025   +32.52%  NVDA / UAL / AVGO  （全年成分池 481）\n\n2026 年持仓（口径 B）：MU 30% / STX 30% / NEM 40%\n次年预览（B）：SNDK +385% / MU +210% / MPC +177%\n行情来源：统一数据集命中 9235 次 ｜ 本地文件 5 只\n已写入: /home/runner/work/trade/trade/docs/data/b"
-  },
-  {
    "ts": "2026-10-31T11:15:49Z",
    "step": "equity.py",
    "rc": 0,
@@ -319,7 +279,47 @@
    "dur": 0.1,
    "ok": false,
    "tail": "[stderr]\nTraceback (most recent call last):\n  File \"/home/runner/work/trade/trade/variant_b.py\", line 21, in <module>\n    import db_prices\n  File \"/home/runner/work/trade/trade/db_prices.py\", line 14, in <module>\n    import psycopg2\nModuleNotFoundError: No module named 'psycopg2'"
+  },
+  {
+   "ts": "2026-10-31T14:20:24Z",
+   "step": "quotes.py",
+   "rc": 0,
+   "dur": 7.9,
+   "ok": true,
+   "tail": "行情 508 / 510，汇率 6.654，缺失 2"
+  },
+  {
+   "ts": "2026-10-31T14:20:27Z",
+   "step": "monthly_pick.py",
+   "rc": 0,
+   "dur": 3.3,
+   "ok": true,
+   "tail": "[1/5] 获取标普500 成分股 ...\n      539 只\n[增量] 本月排名已存在，只刷新均线开关…\n      标普 755.72 / 10 月均线 728.26 → 满仓"
+  },
+  {
+   "ts": "2026-10-31T14:20:32Z",
+   "step": "equity.py",
+   "rc": 0,
+   "dur": 4.6,
+   "ok": true,
+   "tail": "净值 210 个交易日（20251231 起）｜策略 +86.81% ｜标普 +10.82% ｜ 最大回撤 -36.7%"
+  },
+  {
+   "ts": "2026-10-31T14:20:35Z",
+   "step": "preview.py",
+   "rc": 0,
+   "dur": 2.8,
+   "ok": true,
+   "tail": "预览：MRNA +652% / SNDK +385% / DELL +237% → 排名池 495 只\n[stderr]\n/home/runner/work/trade/trade/preview.py:31: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).\n  ym = dt.datetime.utcfromtimestamp(int(ts)).strftime(\"%Y-%m\")"
+  },
+  {
+   "ts": "2026-10-31T14:20:35Z",
+   "step": "variant_b.py",
+   "rc": 1,
+   "dur": 0.1,
+   "ok": false,
+   "tail": "[stderr]\nTraceback (most recent call last):\n  File \"/home/runner/work/trade/trade/variant_b.py\", line 21, in <module>\n    import db_prices\n  File \"/home/runner/work/trade/trade/db_prices.py\", line 14, in <module>\n    import psycopg2\nModuleNotFoundError: No module named 'psycopg2'"
   }
  ],
- "updated": "2026-10-31T12:57:58Z"
+ "updated": "2026-10-31T14:20:35Z"
 }
