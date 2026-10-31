@@ -194,7 +194,9 @@ def load_bars(ticker):
             _new_src["n"] += 1
             return b
     except Exception as e:
-        print("⚠ 读取在线库失败（%s），尝试兜底" % str(e)[:60], flush=True)
+        print("⚠ 读取在线库失败（%s）" % str(e)[:60], flush=True)
+        if os.environ.get("ALLOW_FILE_FALLBACK") != "1":
+            raise RuntimeError("在线库不可用且未允许退回文件（避免用陈旧数据出数）")
     b = alpha_bars(ticker) or frozen_bars(ticker)
     if b:
         return b

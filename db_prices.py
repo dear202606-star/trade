@@ -151,7 +151,12 @@ def load_all(prefer_basis="total_return", chunk=60, use_cache=True):
         raw = _json.load(open(CACHE_FILE, encoding="utf-8"))
         raw.pop("__stamp__", None)
         return {k: {m: (v[0], v[1]) for m, v in d.items()} for k, d in raw.items()}
-    out = _ds.load_all()
+    try:
+        out = _ds.load_all()
+    except Exception as _e:
+        print("⚠ 直连数据库失败（%s），改走 REST 只读" % str(_e)[:60], flush=True)
+        import db_rest as _rest
+        out = _rest.load_selected()
     try:
         import json as _json
         payload = {k: {m: [v[0], v[1]] for m, v in d.items()} for k, d in out.items()}
