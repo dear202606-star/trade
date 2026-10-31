@@ -138,7 +138,12 @@ def _cache_fresh():
         stamp = head.get("__stamp__")
         if not stamp:
             return False
-        return tuple(stamp) == tuple(_db_stamp() or ())
+        live = _db_stamp()
+        if live is None:
+            # DB 不可达（CI 走 REST）时用缓存内置构建时间，而不是 mtime
+            built = head.get("__built_at__") or 0
+            return (__import__("time").time() - float(built)) < 2 * 3600
+        return tuple(stamp) == tuple(live or ())
     except Exception:
         return False
 
@@ -161,6 +166,7 @@ def load_all(prefer_basis="total_return", chunk=60, use_cache=True):
         import json as _json
         payload = {k: {m: [v[0], v[1]] for m, v in d.items()} for k, d in out.items()}
         payload["__stamp__"] = list(_db_stamp() or [])
+        payload["__built_at__"] = __import__("time").time()
         _json.dump(payload, open(CACHE_FILE, "w"), separators=(",", ":"))
     except Exception as _e:
         print("写缓存失败：%s" % _e)
@@ -200,6 +206,7 @@ def _load_all_legacy(prefer_basis="total_return", chunk=60, use_cache=True):
         import json as _json
         payload = {k: {m: [v[0], v[1]] for m, v in d.items()} for k, d in out.items()}
         payload["__stamp__"] = list(_db_stamp() or [])
+        payload["__built_at__"] = __import__("time").time()
         _json.dump(payload, open(CACHE_FILE, "w"), separators=(",", ":"))
     except Exception as _e:
         print("写缓存失败：%s" % _e)

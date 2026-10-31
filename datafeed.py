@@ -168,7 +168,27 @@ def adjust_daily(ticker, bars):
     return out
 
 
+_ALL_BARS = None
+
+
+def _db_all():
+    """在线库（DB 或 REST）一次性载入；失败返回 None"""
+    global _ALL_BARS
+    if _ALL_BARS is None:
+        try:
+            import db_prices
+            _ALL_BARS = db_prices.load_all()
+        except Exception as e:
+            print("⚠ datafeed 在线库不可用：%s" % str(e)[:60], flush=True)
+            _ALL_BARS = {}
+    return _ALL_BARS
+
+
 def load_bars(ticker):
+    """统一入口：本地缓存 → 运行面板 → 实时抓取"""
+    _b = _db_all().get(ticker)
+    if _b:
+        return _b
     """统一入口：本地缓存 → 运行面板 → 实时抓取"""
     if ticker in _mem:
         return _mem[ticker]
