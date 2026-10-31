@@ -1,78 +1,6 @@
 {
  "runs": [
   {
-   "ts": "2026-10-31T19:37:41Z",
-   "step": "equity.py",
-   "rc": 0,
-   "dur": 5.2,
-   "ok": true,
-   "tail": "净值 210 个交易日（20251231 起）｜策略 +105.92% ｜标普 +10.82% ｜ 最大回撤 -31.2%"
-  },
-  {
-   "ts": "2026-10-31T19:37:41Z",
-   "step": "strategy_history.py",
-   "rc": 0,
-   "dur": 0.4,
-   "ok": true,
-   "tail": "历史已锁定（2010–2025，累计 5059%，校验通过）→ 直接发布，不重算"
-  },
-  {
-   "ts": "2026-10-31T19:37:43Z",
-   "step": "audit_b.py",
-   "rc": 0,
-   "dur": 1.3,
-   "ok": true,
-   "tail": "审计数据源：在线库 847 只\n\n口径 B 审计：检查 180 项，问题 0 项\n  ✅ 全部通过\n  累计 31.07 倍 ｜ 年化 24.0% ｜ 最深回撤 -21.7% ｜ 基准 7.09 倍"
-  },
-  {
-   "ts": "2026-10-31T19:37:45Z",
-   "step": "site_build.py",
-   "rc": 0,
-   "dur": 0.0,
-   "ok": true,
-   "tail": "健康状态：ok\n  静态资源版本：fa430001（2 个页面已更新引用）\n站点已构建：12 个静态文件 → /home/runner/work/trade/trade/docs\n  index / portfolio / strategy / signals\n  数据：signal.json history.json curve.json（1 期信号）"
-  },
-  {
-   "ts": "2026-10-31T19:37:47Z",
-   "step": "selftest.py",
-   "rc": 0,
-   "dur": 1.4,
-   "ok": true,
-   "tail": "预览年份 = 当年+1\n  ✅ 口径 B 回测 16 年\n  ✅ 口径 B summary.years 与逐年一致\n  ✅ 口径 B 逐年含回撤（16/16）\n  ✅ 口径 B 逐年 3 只且权重和 1\n  ✅ 口径 B 逐年单行业 ≤60%\n  ✅ 口径 B 曲线为月度（192 点）\n  ✅ 口径 B 曲线末点 = 累计（31.07）\n  ✅ 口径 B 累计 = 逐年复利（31.07）\n  ✅ 口径 B 基准线有数据\n  ✅ 口径 B 最大回撤字段存在\n  ✅ 口径 B 基线年份集合一致（16 年）\n  ✅ 冻结行情覆盖（2026-10 ≥ 2025-12）\n  ✅ 冻结行情含基准 SPY\n  ✅ 冻结行情股票数 840\n  ✅ 冻结成分快照存在\n  ✅ 冻结行业快照存在\n  ✅ 跨年链路自洽（5 个日期）\n  ✅ preview.json 有 3 只候选\n  ✅ 预览权重合计 = 1\n  ✅ 预览行业均已分类\n  ✅ 预览涨幅为有限数\n  ✅ 预览仍在预测期（官方 2025-12）\n  ✅ 预览基准月为 12 月（2026-12）\n  ✅ 年度结转规则一致（2025-12）\n  ✅ 持有年度 = 基准年 + 1（2026）\n  ✅ 当前日期在生效区间内（2026-01-01~2026-12-31）\n  ✅ health.json 存在且状态合法（ok）\n  ✅ 行情年龄 0.1 小时（<72）\n  ✅ 净值末点 = 已收盘日（20261030）\n  ✅ signal.json 不含 NaN/Infinity\n  ✅ 2025-12 持仓与锁定一致（WDC、MU、HOOD）\n  ✅ 正式持仓均为 2025-12 成分股\n  ✅ 理论账户与净值一致（+86.81%）\n  ✅ 全部持仓有建仓价与现价\n  ✅ 正式持仓 3 只均有行情\n  ✅ 全部行情价格为正数\n  ✅ 净值末点 20261030 ≈ 行情交易日 2026-10-30\n  ✅ 逐年记录 16 年\n  ✅ 全部持仓均为标普500 成分股\n  ✅ 全周期曲线 192 个月\n  ✅ 行情 0.1 小时前更新\n  ✅ 净值末值 1.868114\n  ✅ 最大回撤 -36.7%\n  ✅ 逐年收益均为有限且合理\n  ✅ 每年恰好 3 只持仓\n  ✅ 各年权重合计 = 1\n  ✅ 行业上限（≤2 只 / ≤60%）\n  ✅ 历史收益未被改写\n  ✅ 曲线末值 = 逐年复利（51.59 倍）\n  ✅ 历史锁定一致（16 年未改动）\n  ✅ 成分表快照 30 天内（0 天）\n  ✅ 当前成分 503 只\n  ⚠️  迁移期历史漂移（不阻断）：['2010:14.59%→29.48%', '2011:-31.82%→0.82%', '2013:33.54%→34.87%']\n通过 84 · 警告 1 · 失败 0"
-  },
-  {
-   "ts": "2026-10-31T19:46:54Z",
-   "step": "quotes.py",
-   "rc": 0,
-   "dur": 8.0,
-   "ok": true,
-   "tail": "行情 508 / 510，汇率 6.654，缺失 2"
-  },
-  {
-   "ts": "2026-10-31T19:53:12Z",
-   "step": "equity.py",
-   "rc": 0,
-   "dur": 5.2,
-   "ok": true,
-   "tail": "净值 210 个交易日（20251231 起）｜策略 +86.81% ｜标普 +10.82% ｜ 最大回撤 -36.7%"
-  },
-  {
-   "ts": "2026-10-31T19:54:09Z",
-   "step": "preview.py",
-   "rc": 0,
-   "dur": 57.4,
-   "ok": true,
-   "tail": "at \"aws-0-ap-northeast-），改走 REST 只读\n  2008-01..2010-12 重试 1: connection to server at \"aws-0-ap-northeast-1.pool\n⚠ 直连数据库失败（数据库不可达（首个分片即失败）：connection to server at \"aws-0-ap-northeast-），改走 REST 只读\n  2008-01..2010-12 重试 1: connection to server at \"aws-0-ap-northeast-1.pool\n⚠ 直连数据库失败（数据库不可达（首个分片即失败）：connection to server at \"aws-0-ap-northeast-），改走 REST 只读\n  2008-01..2010-12 重试 1: connection to server at \"aws-0-ap-northeast-1.pool\n  2008-01..2010-12 重试 1: connection to server at \"aws-0-ap-northeast-1.pool\n⚠ 直连数据库失败（数据库不可达（首个分片即失败）：connection to server at \"aws-0-ap-northeast-），改走 REST 只读\n  2008-01..2010-12 重试 1: connection to server at \"aws-0-ap-northeast-1.pool\n  2008-01..2010-12 重试 1: connection to server at \"aws-0-ap-northeast-1.pool\n⚠ 直连数据库失败（数据库不可达（首个分片即失败）：connection to server at \"aws-0-ap-northeast-），改走 REST 只读\n⚠ 直连数据库失败（数据库不可达（首个分片即失败）：connection to server at \"aws-0-ap-northeast-），改走 REST 只读\n  2008-01..2010-12 重试 1: connection to server at \"aws-0-ap-northeast-1.pool\n⚠ 直连数据库失败（数据库不可达（首个分片即失败）：connection to server at \"aws-0-ap-northeast-），改走 REST 只读\n⚠ 直连数据库失败（数据库不可达（首个分片即失败）：connection to server at \"aws-0-ap-northeast-），改走 REST 只读\n预览：CTVA +671% / MRNA +652% / SNDK +385% → 排名池 496 只\n[stderr]\n/home/runner/work/trade/trade/preview.py:31: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).\n  ym = dt.datetime.utcfromtimestamp(int(ts)).strftime(\"%Y-%m\")"
-  },
-  {
-   "ts": "2026-10-31T19:54:54Z",
-   "step": "variant_b.py",
-   "rc": 0,
-   "dur": 45.4,
-   "ok": true,
-   "tail": "/ HES / XL  （全年成分池 93）\n  2012   +23.01%  COG / ISRG / MA  （全年成分池 371）\n  2013   +34.87%  PHM / WHR / BAC  （全年成分池 382）\n  2014   +17.95%  NFLX / BBY / MU  （全年成分池 384）\n  2015   +11.55%  LUV / EW / DAL  （全年成分池 390）\n  2016    +9.50%  NFLX / AMZN / CVC  （全年成分池 385）\n  2017   +15.55%  OKE / FCX / NEM  （全年成分池 392）\n  2018    +3.32%  NRG / VRTX / WYNN  （全年成分池 400）\n  2019   +37.09%  AAP / CMG / ORLY  （全年成分池 399）\n  2020   +49.83%  LRCX / KLAC / TGT  （全年成分池 393）\n  2021   +57.55%  GPS / NVDA / ALB  （全年成分池 399）\n  2022    -7.77%  DVN / FTNT / F  （全年成分池 394）\n  2023   +12.93%  OXY / HES / CAH  （全年成分池 386）\n  2024  +102.52%  NVDA / RCL / CCL  （全年成分池 382）\n  2025   +22.19%  NVDA / NFLX / RCL  （全年成分池 378）\n\n⚠ [observe] 历史漂移（迁移期不阻断，仅记录）：\n   2013: 33.54% → 34.87%\n   2014: 17.16% → 17.95%\n   2015: 23.99% → 11.55%\n   2017: 20.55% → 15.55%\n   2018: 2.76% → 3.32%\n   2019: 81.34% → 37.09%\n   2020: 44.29% → 49.83%\n   2021: 73.62% → 57.55%\n   2022: -11.22% → -7.77%\n   2023: 8.30% → 12.93%\n\n2026 年持仓（口径 B）：MU 30% / STX 30% / NEM 40%\n次年预览（B）：MRNA +652% / SNDK +385% / DELL +241%\n行情来源：统一数据集命中 9244 次 ｜ 本地文件 5 只\n净值: 净值 210 个交易日（20251231 起）｜策略 +105.92% ｜标普 +10.82% ｜ 最大回撤 -31.2%\n已写入: /home/runner/work/trade/trade/docs/data/b"
-  },
-  {
    "ts": "2026-10-31T19:55:01Z",
    "step": "equity.py",
    "rc": 0,
@@ -319,7 +247,79 @@
    "dur": 1.6,
    "ok": true,
    "tail": "on 一致（20261030）\n  ✅ B 预览涨幅可用复权月线复算\n  ✅ 口径 B 次年预览 3 只\n  ✅ 口径 B 预览权重合计 = 1（1.0000）\n  ✅ 口径 B 预览年份 = 当年+1\n  ✅ 口径 B 回测 14 年\n  ✅ 口径 B summary.years 与逐年一致\n  ✅ 口径 B 逐年含回撤（14/14）\n  ✅ 口径 B 逐年 3 只且权重和 1\n  ✅ 口径 B 逐年单行业 ≤60%\n  ✅ 口径 B 曲线为月度（168 点）\n  ✅ 口径 B 曲线末点 = 累计（23.80）\n  ✅ 口径 B 累计 = 逐年复利（23.80）\n  ✅ 口径 B 基准线有数据\n  ✅ 口径 B 最大回撤字段存在\n  ✅ 口径 B 基线年份集合一致（14 年）\n  ✅ 在线库行情覆盖（2026-10 ≥ 2025-12）\n  ✅ 库内含基准 SPY\n  ✅ 库内股票数 847\n  ✅ 冻结成分快照存在\n  ✅ 冻结行业快照存在\n  ✅ 跨年链路自洽（5 个日期）\n  ✅ preview.json 有 3 只候选\n  ✅ 预览权重合计 = 1\n  ✅ 预览行业均已分类\n  ✅ 预览涨幅为有限数\n  ✅ 预览仍在预测期（官方 2025-12）\n  ✅ 预览基准月为 12 月（2026-12）\n  ✅ 年度结转规则一致（2025-12）\n  ✅ 持有年度 = 基准年 + 1（2026）\n  ✅ 当前日期在生效区间内（2026-01-01~2026-12-31）\n  ✅ health.json 存在且状态合法（ok）\n  ✅ 行情年龄 0.2 小时（<72）\n  ✅ 净值末点 = 已收盘日（20261030）\n  ✅ signal.json 不含 NaN/Infinity\n  ✅ 2025-12 持仓与锁定一致（WDC、MU、HOOD）\n  ✅ 正式持仓均为 2025-12 成分股\n  ✅ 理论账户与净值一致（+86.81%）\n  ✅ 全部持仓有建仓价与现价\n  ✅ 正式持仓 3 只均有行情\n  ✅ 全部行情价格为正数\n  ✅ 净值末点 20261030 ≈ 行情交易日 2026-10-30\n  ✅ 逐年记录 16 年\n  ✅ 全部持仓均为标普500 成分股\n  ✅ 全周期曲线 192 个月\n  ✅ 行情 0.2 小时前更新\n  ✅ 净值末值 1.868114\n  ✅ 最大回撤 -36.7%\n  ✅ 逐年收益均为有限且合理\n  ✅ 每年恰好 3 只持仓\n  ✅ 各年权重合计 = 1\n  ✅ 行业上限（≤2 只 / ≤60%）\n  ✅ 历史收益未被改写\n  ✅ 曲线末值 = 逐年复利（51.59 倍）\n  ✅ 历史锁定一致（16 年未改动）\n  ✅ 成分表快照 30 天内（0 天）\n  ✅ 当前成分 503 只\n通过 84 · 警告 0 · 失败 0"
+  },
+  {
+   "ts": "2026-10-31T21:49:50Z",
+   "step": "quotes.py",
+   "rc": 0,
+   "dur": 8.3,
+   "ok": true,
+   "tail": "行情 508 / 510，汇率 6.654，缺失 2"
+  },
+  {
+   "ts": "2026-10-31T22:02:09Z",
+   "step": "equity.py",
+   "rc": 0,
+   "dur": 6.0,
+   "ok": true,
+   "tail": "净值 210 个交易日（20251231 起）｜策略 +86.81% ｜标普 +10.82% ｜ 最大回撤 -36.7%"
+  },
+  {
+   "ts": "2026-10-31T22:03:03Z",
+   "step": "preview.py",
+   "rc": 0,
+   "dur": 54.2,
+   "ok": true,
+   "tail": "at \"aws-0-ap-northeast-），改走 REST 只读\n  2008-01..2010-12 重试 1: connection to server at \"aws-0-ap-northeast-1.pool\n  2008-01..2010-12 重试 1: connection to server at \"aws-0-ap-northeast-1.pool\n⚠ 直连数据库失败（数据库不可达（首个分片即失败）：connection to server at \"aws-0-ap-northeast-），改走 REST 只读\n  2008-01..2010-12 重试 1: connection to server at \"aws-0-ap-northeast-1.pool\n  2008-01..2010-12 重试 1: connection to server at \"aws-0-ap-northeast-1.pool\n⚠ 直连数据库失败（数据库不可达（首个分片即失败）：connection to server at \"aws-0-ap-northeast-），改走 REST 只读\n  2008-01..2010-12 重试 1: connection to server at \"aws-0-ap-northeast-1.pool\n⚠ 直连数据库失败（数据库不可达（首个分片即失败）：connection to server at \"aws-0-ap-northeast-），改走 REST 只读\n  2008-01..2010-12 重试 1: connection to server at \"aws-0-ap-northeast-1.pool\n⚠ 直连数据库失败（数据库不可达（首个分片即失败）：connection to server at \"aws-0-ap-northeast-），改走 REST 只读\n  2008-01..2010-12 重试 1: connection to server at \"aws-0-ap-northeast-1.pool\n⚠ 直连数据库失败（数据库不可达（首个分片即失败）：connection to server at \"aws-0-ap-northeast-），改走 REST 只读\n⚠ 直连数据库失败（数据库不可达（首个分片即失败）：connection to server at \"aws-0-ap-northeast-），改走 REST 只读\n⚠ 直连数据库失败（数据库不可达（首个分片即失败）：connection to server at \"aws-0-ap-northeast-），改走 REST 只读\n预览：CTVA +671% / MRNA +652% / SNDK +385% → 排名池 496 只\n[stderr]\n/home/runner/work/trade/trade/preview.py:31: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).\n  ym = dt.datetime.utcfromtimestamp(int(ts)).strftime(\"%Y-%m\")"
+  },
+  {
+   "ts": "2026-10-31T22:03:14Z",
+   "step": "variant_b.py",
+   "rc": 0,
+   "dur": 10.2,
+   "ok": true,
+   "tail": "n to server at \"aws-0-ap-northeast-1.pool），改走 REST\n⚠ sectors 直连失败（connection to server at \"aws-0-ap-northeast-1.pool），改走 REST\n口径来自在线库：成分 1262 行 / 行业 513 只\n在线库载入 847 只\n  2010   +29.48%  XL / PXD / COG  （全年成分池 79）\n  2011    +0.82%  WFM / HES / XL  （全年成分池 93）\n  2012   +23.01%  COG / ISRG / MA  （全年成分池 371）\n  2013   +34.87%  PHM / WHR / BAC  （全年成分池 382）\n  2014   +17.95%  NFLX / BBY / MU  （全年成分池 384）\n  2015   +11.55%  LUV / EW / DAL  （全年成分池 390）\n  2016    +9.50%  NFLX / AMZN / CVC  （全年成分池 385）\n  2017   +15.55%  OKE / FCX / NEM  （全年成分池 392）\n  2018    +3.32%  NRG / VRTX / WYNN  （全年成分池 400）\n  2019   +37.09%  AAP / CMG / ORLY  （全年成分池 399）\n  2020   +49.83%  LRCX / KLAC / TGT  （全年成分池 393）\n  2021   +57.55%  GPS / NVDA / ALB  （全年成分池 399）\n  2022    -7.77%  DVN / FTNT / F  （全年成分池 394）\n  2023   +12.93%  OXY / HES / CAH  （全年成分池 386）\n  2024  +102.52%  NVDA / RCL / CCL  （全年成分池 382）\n  2025   +22.19%  NVDA / NFLX / RCL  （全年成分池 378）\n\n⚠ [observe] 历史漂移（迁移期不阻断，仅记录）：\n   输入指纹: bff8f078c65f42c7 → 51c42cb7bef6c789\n\n2026 年持仓（口径 B）：MU 30% / STX 30% / NEM 40%\n次年预览（B）：MRNA +652% / SNDK +385% / DELL +241%\n净值: 净值 210 个交易日（20251231 起）｜策略 +105.92% ｜标普 +10.82% ｜ 最大回撤 -31.2%\n已写入: /home/runner/work/trade/trade/docs/data/b"
+  },
+  {
+   "ts": "2026-10-31T22:03:19Z",
+   "step": "equity.py",
+   "rc": 0,
+   "dur": 5.2,
+   "ok": true,
+   "tail": "净值 210 个交易日（20251231 起）｜策略 +105.92% ｜标普 +10.82% ｜ 最大回撤 -31.2%"
+  },
+  {
+   "ts": "2026-10-31T22:03:19Z",
+   "step": "strategy_history.py",
+   "rc": 0,
+   "dur": 0.4,
+   "ok": true,
+   "tail": "历史已锁定（2010–2025，累计 5059%，校验通过）→ 直接发布，不重算"
+  },
+  {
+   "ts": "2026-10-31T22:03:21Z",
+   "step": "audit_b.py",
+   "rc": 0,
+   "dur": 1.3,
+   "ok": true,
+   "tail": "审计数据源：在线库 847 只\n\n口径 B 审计：检查 158 项，问题 0 项\n  ✅ 全部通过\n  累计 23.80 倍 ｜ 年化 25.4% ｜ 最深回撤 -21.7% ｜ 基准 6.96 倍"
+  },
+  {
+   "ts": "2026-10-31T22:03:23Z",
+   "step": "site_build.py",
+   "rc": 0,
+   "dur": 0.0,
+   "ok": true,
+   "tail": "健康状态：ok\n  静态资源版本：fa430001（2 个页面已更新引用）\n站点已构建：12 个静态文件 → /home/runner/work/trade/trade/docs\n  index / portfolio / strategy / signals\n  数据：signal.json history.json curve.json（1 期信号）"
+  },
+  {
+   "ts": "2026-10-31T22:03:25Z",
+   "step": "selftest.py",
+   "rc": 0,
+   "dur": 1.7,
+   "ok": true,
+   "tail": "on 一致（20261030）\n  ✅ B 预览涨幅可用复权月线复算\n  ✅ 口径 B 次年预览 3 只\n  ✅ 口径 B 预览权重合计 = 1（1.0000）\n  ✅ 口径 B 预览年份 = 当年+1\n  ✅ 口径 B 回测 14 年\n  ✅ 口径 B summary.years 与逐年一致\n  ✅ 口径 B 逐年含回撤（14/14）\n  ✅ 口径 B 逐年 3 只且权重和 1\n  ✅ 口径 B 逐年单行业 ≤60%\n  ✅ 口径 B 曲线为月度（168 点）\n  ✅ 口径 B 曲线末点 = 累计（23.80）\n  ✅ 口径 B 累计 = 逐年复利（23.80）\n  ✅ 口径 B 基准线有数据\n  ✅ 口径 B 最大回撤字段存在\n  ✅ 口径 B 基线年份集合一致（14 年）\n  ✅ 在线库行情覆盖（2026-10 ≥ 2025-12）\n  ✅ 库内含基准 SPY\n  ✅ 库内股票数 847\n  ✅ 冻结成分快照存在\n  ✅ 冻结行业快照存在\n  ✅ 跨年链路自洽（5 个日期）\n  ✅ preview.json 有 3 只候选\n  ✅ 预览权重合计 = 1\n  ✅ 预览行业均已分类\n  ✅ 预览涨幅为有限数\n  ✅ 预览仍在预测期（官方 2025-12）\n  ✅ 预览基准月为 12 月（2026-12）\n  ✅ 年度结转规则一致（2025-12）\n  ✅ 持有年度 = 基准年 + 1（2026）\n  ✅ 当前日期在生效区间内（2026-01-01~2026-12-31）\n  ✅ health.json 存在且状态合法（ok）\n  ✅ 行情年龄 0.2 小时（<72）\n  ✅ 净值末点 = 已收盘日（20261030）\n  ✅ signal.json 不含 NaN/Infinity\n  ✅ 2025-12 持仓与锁定一致（WDC、MU、HOOD）\n  ✅ 正式持仓均为 2025-12 成分股\n  ✅ 理论账户与净值一致（+86.81%）\n  ✅ 全部持仓有建仓价与现价\n  ✅ 正式持仓 3 只均有行情\n  ✅ 全部行情价格为正数\n  ✅ 净值末点 20261030 ≈ 行情交易日 2026-10-30\n  ✅ 逐年记录 16 年\n  ✅ 全部持仓均为标普500 成分股\n  ✅ 全周期曲线 192 个月\n  ✅ 行情 0.2 小时前更新\n  ✅ 净值末值 1.868114\n  ✅ 最大回撤 -36.7%\n  ✅ 逐年收益均为有限且合理\n  ✅ 每年恰好 3 只持仓\n  ✅ 各年权重合计 = 1\n  ✅ 行业上限（≤2 只 / ≤60%）\n  ✅ 历史收益未被改写\n  ✅ 曲线末值 = 逐年复利（51.59 倍）\n  ✅ 历史锁定一致（16 年未改动）\n  ✅ 成分表快照 30 天内（0 天）\n  ✅ 当前成分 503 只\n通过 84 · 警告 0 · 失败 0"
   }
  ],
- "updated": "2026-10-31T21:27:03Z"
+ "updated": "2026-10-31T22:03:25Z"
 }
