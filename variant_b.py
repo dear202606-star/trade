@@ -26,6 +26,33 @@ SECTOR_CAP = 0.60
 MIN_PRICE = 5.0
 
 
+_FROZEN_BARS = None
+
+
+def frozen_bars(ticker):
+    """从 static/bars_monthly.json 取月度行情（复权价, 原始价）"""
+    global _FROZEN_BARS
+    if _FROZEN_BARS is None:
+        p = os.path.join(BASE, "static", "bars_monthly.json")
+        if os.path.exists(p):
+            with open(p, encoding="utf-8") as f:
+                raw = json.load(f)
+            _FROZEN_BARS = {t: {x[0]: (x[1], x[2]) for x in rows}
+                            for t, rows in raw.items()}
+            print("已加载冻结行情 %d 只" % len(_FROZEN_BARS), flush=True)
+        else:
+            _FROZEN_BARS = {}
+    return _FROZEN_BARS.get(ticker)
+
+
+def load_bars(ticker):
+    """统一入口：优先冻结快照，其次实时抓取"""
+    b = frozen_bars(ticker)
+    if b:
+        return b
+    return datafeed.load_bars(ticker)
+
+
 def members_full_year(m, year):
     """该年整年都在成分股里的股票集合"""
     a = "%d-01-01" % year
@@ -50,7 +77,7 @@ def pick_year(m, sector, year):
     rank_m, base_m = "%d-12" % y0, "%d-12" % (y0 - 1)
     rows = []
     for t in pool:
-        bars = datafeed.load_bars(t)
+        bars = load_bars(t)
         r = ret12(bars, rank_m, base_m)
         if r is None:
             continue
@@ -91,7 +118,7 @@ def year_return(picks, year):
     y0, y1 = "%d-12" % (year - 1), "%d-12" % year
     ret, covered = 0.0, 0.0
     for p in picks:
-        bars = datafeed.load_bars(p["ticker"])
+        bars = load_bars(p["ticker"])
         r = ret12(bars, y1, y0)
         if r is None:
             continue
@@ -106,7 +133,7 @@ def year_perf(picks, year):
     seq = ["%d-%02d" % (year, m) for m in range(1, 13)]
     bars_cache = {}
     for p in picks:
-        bars = datafeed.load_bars(p["ticker"])
+        bars = load_bars(p["ticker"])
         if not bars or prev_ym not in bars or not bars[prev_ym][0]:
             return 0.0, 0.0
         bars_cache[p["ticker"]] = bars
@@ -131,7 +158,7 @@ def year_perf(picks, year):
 
 def bench_year(year):
     """标普 500 该年收益（年末 vs 上年末）"""
-    bars = datafeed.load_bars("SPY")
+    bars = load_bars("SPY")
     a, b = "%d-12" % (year - 1), "%d-12" % year
     if not bars or a not in bars or b not in bars:
         return 0.0
@@ -188,7 +215,7 @@ def main():
 
     # 曲线（年末复利）
     eq, beq, pts = 1.0, 1.0, []
-    spy = datafeed.load_bars("SPY") or {}
+    spy = load_bars("SPY") or {}
     for r in years:
         y = r["year"]
         prev_ym = "%d-12" % (y - 1)
@@ -198,7 +225,7 @@ def main():
             ym = "%d-%02d" % (y, mi)
             v, ok_sh = 0.0, True
             for h in r["holdings"]:
-                b = datafeed.load_bars(h["ticker"])
+                b = load_bars(h["ticker"])
                 if not b or prev_ym not in b or not b[prev_ym][0]:
                     ok_sh = False
                     break
@@ -301,7 +328,7 @@ def main():
         for t in live:
             qq = quotes.get(t) or {}
             cur = qq.get("p")
-            bars = datafeed.load_bars(t)
+            bars = load_bars(t)
             if not cur or not bars or base_m not in bars:
                 continue
             b0 = bars[base_m][1]

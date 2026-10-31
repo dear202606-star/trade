@@ -126,6 +126,11 @@ def main():
                            "static", "members_frozen.csv")
         _sf = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                            "static", "sector_frozen.json")
+        _bf = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                           "static", "bars_monthly.json")
+        check(os.path.exists(_bf) and os.path.getsize(_bf) > 100000,
+              "冻结行情存在（%.1f MB）" % (os.path.getsize(_bf)/1e6 if os.path.exists(_bf) else 0),
+              "缺少 static/bars_monthly.json")
         check(os.path.exists(_mf) and os.path.exists(_sf),
               "冻结快照存在（成分 + 行业）", "缺少 static/members_frozen.csv 或 sector_frozen.json")
     except Exception as e:
