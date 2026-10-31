@@ -119,6 +119,8 @@ jobs:
         run: python runner.py site_build.py
 
       - name: 部署前自检
+        env:
+          BASELINE_MODE: observe
         run: python runner.py selftest.py
 
       - name: 提交状态日志

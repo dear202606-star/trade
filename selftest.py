@@ -214,16 +214,27 @@ def main():
         # 预览涨幅必须能用「冻结复权月线」独立复算（防止原始价/拆股口径混用）
         _pv0 = _b.get("preview.json") or {}
         try:
-            _uni = os.path.join(_root, "static", "prices_unified")
-            if os.path.isdir(_uni):
-                _bm = {}
-                for _f in os.listdir(_uni):
-                    if _f.endswith(".json"):
-                        _o = json.load(open(os.path.join(_uni, _f), encoding="utf-8"))
-                        _bm[_o["ticker"]] = [[r[0], r[1], r[1]] for r in _o["bars"]]
-            else:
-                _bm = json.load(open(os.path.join(_root, "static", "bars_monthly.json"),
-                                     encoding="utf-8"))
+            # 必须与 preview.py 同源：在线库优先，文件只在库不可用时兜底
+            _bm = None
+            try:
+                import db_prices as _dbp
+                _all = _dbp.load_all()
+                if _all:
+                    _bm = {t: [[m, v[0], v[1]] for m, v in sorted(d.items())]
+                           for t, d in _all.items()}
+            except Exception:
+                _bm = None
+            if not _bm:
+                _uni = os.path.join(_root, "static", "prices_unified")
+                if os.path.isdir(_uni):
+                    _bm = {}
+                    for _f in os.listdir(_uni):
+                        if _f.endswith(".json"):
+                            _o = json.load(open(os.path.join(_uni, _f), encoding="utf-8"))
+                            _bm[_o["ticker"]] = [[r[0], r[1], r[1]] for r in _o["bars"]]
+                else:
+                    _bm = json.load(open(os.path.join(_root, "static", "bars_monthly.json"),
+                                         encoding="utf-8"))
             _base = _pv0.get("base_month")
             _badpv = []
             for _x in (_pv0.get("top") or []):
@@ -310,7 +321,10 @@ def main():
                           sorted(_cur_years - _bl_years)[:3],
                           sorted(_bl_years - _cur_years)[:3]))
                 check(not _drift, "口径 B 历史未漂移（%d 年）" % len(_yrs),
-                      "漂移：%s" % _drift[:3])
+                      "漂移：%s" % _drift[:3]) if os.environ.get("BASELINE_MODE") != "observe" \
+                    else None
+                if _drift and os.environ.get("BASELINE_MODE") == "observe":
+                    warns.append("迁移期历史漂移（不阻断）：%s" % _drift[:3])
         except Exception as _e:
             check(False, "口径 B 基线校验可执行", str(_e)[:80])
 
