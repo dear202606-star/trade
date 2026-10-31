@@ -120,6 +120,17 @@ def main():
     except Exception as e:
         warns.append("权重形态校验失败：%s" % e)
 
+    # ---- 口径 B 的输入快照必须存在（保证本地与 CI 结果一致）----
+    try:
+        _mf = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                           "static", "members_frozen.csv")
+        _sf = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                           "static", "sector_frozen.json")
+        check(os.path.exists(_mf) and os.path.exists(_sf),
+              "冻结快照存在（成分 + 行业）", "缺少 static/members_frozen.csv 或 sector_frozen.json")
+    except Exception as e:
+        warns.append("冻结快照校验失败：%s" % e)
+
     # ---- 口径 B（全年成分）数据集 ----
     try:
         import os as _os

@@ -141,10 +141,20 @@ def bench_year(year):
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    m = datafeed.load_members()
-    m["start_date"] = m["start_date"].astype(str)
-    m["end_date"] = m["end_date"].fillna("2099-12-31").astype(str)
-    sector, _ = datafeed.load_sector()
+    # 优先用冻结快照（static/），保证本地与 CI 结果完全一致
+    import pandas as _pd
+    _mem = os.path.join(BASE, "static", "members_frozen.csv")
+    if os.path.exists(_mem):
+        m = _pd.read_csv(_mem, dtype=str).fillna("2099-12-31")
+    else:
+        m = datafeed.load_members()
+        m["start_date"] = m["start_date"].astype(str)
+        m["end_date"] = m["end_date"].fillna("2099-12-31").astype(str)
+    _secf = os.path.join(BASE, "static", "sector_frozen.json")
+    if os.path.exists(_secf):
+        sector = json.load(open(_secf, encoding="utf-8"))
+    else:
+        sector, _ = datafeed.load_sector()
 
     # 并行预热：CI 没有本地缓存，串行抓 700+ 只会很慢
     try:
