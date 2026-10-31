@@ -1,0 +1,340 @@
+{
+  "version": "2026-10-31.1",
+  "purpose": "标普500年度动量策略 2010-2026 历史回测的数据源能力矩阵与分配策略",
+  "basis_policy": {
+    "preferred": "total_return",
+    "description": "全收益（拆股+分红复权）；price_only 仅作过渡，不参与最终锁定数据集",
+    "mixed_rule": "同一 (symbol,month) 只允许一个 basis 进入锁定数据集；total_return 优先"
+  },
+  "sources": [
+    {
+      "id": "alphavantage",
+      "name": "Alpha Vantage",
+      "access": "REST，TIME_SERIES_MONTHLY_ADJUSTED / TIME_SERIES_DAILY_ADJUSTED",
+      "cost": "免费 25 次/天（每次返回全历史）",
+      "depth": "1999-12 起",
+      "delisted": "是（实测 ATVI/ETFC/CERN/XL/TWTR 全有；LEHMQ 类缺失）",
+      "adjustment": "total_return",
+      "frequency": "日/月",
+      "tested": "NVDA2021 +125.5% / NVDA2024 +171.2% / DUK2012-07 -2.02% / AMCR2026 +18.8%",
+      "role": "history_primary",
+      "strategy": "历史主源：所有 symbol-month 的首选；额度按「缺口最大优先」排序消耗",
+      "keep_reason": "唯一免费且同时满足全收益+退市覆盖的源，不可替代",
+      "credential_stored": true
+    },
+    {
+      "id": "eodhd",
+      "name": "EODHD",
+      "access": "REST，/api/eod/{S}.US?period=m",
+      "cost": "免费 20 次/天（仅近 13 个月）；付费 $19.99/月 10 万次/天 30+ 年",
+      "depth": "免费 13 个月 / 付费 30+ 年",
+      "delisted": "付费层是（实证 TWTR 完整）；免费层不适用",
+      "adjustment": "total_return",
+      "frequency": "日/月",
+      "tested": "抓出 SNDK 142.75%、MPC 3.16% 偏差并修补",
+      "role": "recent_crosscheck + paid_bulk",
+      "strategy": "① 每日校验近 13 个月（持仓+预览候选）② 若订阅，作为 869 只全量回填的加速通道",
+      "keep_reason": "唯一能低成本验证「当年数据」的第二全收益源",
+      "credential_stored": true,
+      "note": "token 6ae5...0010 已存入 data_sources 表（RLS 保护），免费层实测仅近 13 个月"
+    },
+    {
+      "id": "hf_ayushkhaire",
+      "name": "HuggingFace AYUSHKHAIRE/all-stock-market-data-daily-updates",
+      "access": "HTTPS 直下 CSV，无需账号；路径 {首字母}/{TICKER}.csv",
+      "cost": "免费，CC0",
+      "depth": "2010-01-04 起",
+      "delisted": "否（ATVI/ETFC/CERN/XL/LEHMQ 全 404）",
+      "adjustment": "price_only（拆股复权，无分红）",
+      "frequency": "日",
+      "tested": "NVDA2021 +125.1% / DUK2012-07 -1.6%；时间戳为 Unix 秒（已适配）",
+      "role": "coverage_bulk",
+      "strategy": "现役票的覆盖兜底与交叉校验；AV 未覆盖时临时顶上，标 basis=price_only",
+      "keep_reason": "免费、无额度、17k 票，是覆盖率最快的来源"
+    },
+    {
+      "id": "hf_amirtrader",
+      "name": "HuggingFace AmirTrader/YahooFinance",
+      "access": "HTTPS 直下 parquet，无需账号",
+      "cost": "免费，MIT",
+      "depth": "2019-10-31 起",
+      "delisted": "否",
+      "adjustment": "total_return（adj_close）",
+      "frequency": "日",
+      "tested": "NVDA2021 +125.5%（与 AV 一致）",
+      "role": "third_party_check",
+      "strategy": "2019 年后的第三源交叉校验，用于仲裁 AV/HF 分歧",
+      "keep_reason": "免费且为全收益，可作为 2019+ 的独立裁判"
+    },
+    {
+      "id": "sina_local",
+      "name": "新浪财经（现有本地数据）",
+      "access": "本地缓存 static/bars_monthly.json + datafeed 抓取",
+      "cost": "免费",
+      "depth": "1972 起（个股多为 1999+）",
+      "delisted": "是（这是它唯一不可替代的优势）",
+      "adjustment": "price_only（复权口径混乱，已做本地修复）",
+      "frequency": "日/月",
+      "tested": "修复 583 只 / 2077 次公司行动；残余跳变 0.019%",
+      "role": "delisted_bridge",
+      "strategy": "AV 未到位前，已退市票的历史底座；AV 覆盖后逐批降级为「校验用」",
+      "keep_reason": "唯一免费且覆盖已退市票的原始来源，丢弃会立刻丢掉 400+ 只票的历史"
+    },
+    {
+      "id": "fja05680",
+      "name": "fja05680/sp500 成分表",
+      "access": "GitHub raw CSV（已冻结 static/members_frozen.csv）",
+      "cost": "免费",
+      "depth": "1996 起，1263 行",
+      "delisted": "不适用（仅成分）",
+      "adjustment": "不适用",
+      "frequency": "不定期更新",
+      "tested": "已用于口径 B 的池子定义，16 年回测稳定",
+      "role": "membership_primary",
+      "strategy": "成分进出的唯一权威；冻结后作为可复现基线",
+      "keep_reason": "口径定义的地基，无替代品"
+    },
+    {
+      "id": "coil_chinobing",
+      "name": "coil.trade PIT S&P500 / chinobing/historical_sp500_constituents",
+      "access": "网页/CSV",
+      "cost": "免费",
+      "depth": "1976 起 / 每日快照",
+      "delisted": "不适用",
+      "adjustment": "不适用",
+      "frequency": "每日/定期",
+      "tested": "未验证",
+      "role": "membership_crosscheck",
+      "strategy": "与 fja05680 交叉验证成分变更日期，冲突时人工裁定",
+      "keep_reason": "成分表是回测正确性的源头，值得双源"
+    },
+    {
+      "id": "datahub_gics",
+      "name": "datahub s-and-p-500-companies",
+      "access": "GitHub raw CSV",
+      "cost": "免费",
+      "depth": "当前时点",
+      "delisted": "否（只有现役票的分类）",
+      "adjustment": "不适用",
+      "frequency": "不定期",
+      "tested": "已冻结 sector_frozen.json（513/869）",
+      "role": "sector_current",
+      "strategy": "现役票行业；已退市票用手工 overrides + 未分类桶；无 PIT 是已知限制",
+      "keep_reason": "免费源里唯一的 GICS 分类"
+    },
+    {
+      "id": "nasdaq_api",
+      "name": "Nasdaq 官方 API",
+      "access": "REST，api.nasdaq.com/api/quote/{S}/historical",
+      "cost": "免费无 key",
+      "depth": "约 10 年（实测 2016 起）",
+      "delisted": "否",
+      "adjustment": "price_only",
+      "frequency": "日",
+      "tested": "实测可用（AAPL 2514 条）",
+      "role": "recent_spotcheck",
+      "strategy": "近 10 年现役票的第三方抽检，不作为主力",
+      "keep_reason": "无 key、稳定，可做抽查备用"
+    },
+    {
+      "id": "kaggle_vladosht",
+      "name": "Kaggle vladosht/monthly-us-stock-prices",
+      "access": "Kaggle API（需 kaggle.json）",
+      "cost": "免费",
+      "depth": "2010-2025 月频",
+      "delisted": "待验证",
+      "adjustment": "待验证",
+      "frequency": "月",
+      "tested": "2026-10-31 实测：Kaggle token 有效（可列数据集），但 vladosht 名下 0 个数据集，目标数据集已下架/私有 → 本路径关闭",
+      "role": "bulk_candidate_closed",
+      "strategy": "验证通过后作为 2010-2025 的批量覆盖源；若含退市票则可大幅缩短 AV 回填周期",
+      "keep_reason": "唯一的免费月频全市场数据集，潜力最大"
+    },
+    {
+      "id": "marketparquet",
+      "name": "MarketParquet",
+      "access": "HTTPS parquet 按日分文件；DuckDB 直查",
+      "cost": "免费近 365 天；$79 一次性完整包",
+      "depth": "2000-01 起",
+      "delisted": "是（宣称 8,500 只退市）",
+      "adjustment": "price_only（无分红）",
+      "frequency": "日",
+      "tested": "实测免费文件：单日 6,503 只，schema 确认",
+      "role": "paid_bulk_alt",
+      "strategy": "$79 买断可作为「覆盖最全」的备用方案；因无分红，仅在 AV 长期无法补齐时启用",
+      "keep_reason": "覆盖退市最全的低价方案，作为 Plan C"
+    },
+    {
+      "id": "tiingo",
+      "name": "Tiingo",
+      "access": "REST，/tiingo/daily/{S}/prices",
+      "cost": "免费 500 symbols/月、1000 请求/日",
+      "depth": "1962 起",
+      "delisted": "未验证",
+      "adjustment": "total_return（adjClose + divCash + splitFactor）",
+      "frequency": "日",
+      "tested": "未验证（无 key）",
+      "role": "second_total_return",
+      "strategy": "若注册，作为 AV 的第二全收益源；500/月可覆盖高价值标的的交叉校验",
+      "keep_reason": "免费层给全收益+分红事件，是 AV 的潜在替代"
+    },
+    {
+      "id": "sharadar",
+      "name": "Sharadar SEP (Nasdaq Data Link)",
+      "access": "REST datatables",
+      "cost": "付费订阅",
+      "depth": "1998 起，21,000+ 公司",
+      "delisted": "是（ACTIONS 表含退市原因/代码变更）",
+      "adjustment": "三套价格（未复权/拆股/拆股+分红）",
+      "frequency": "日",
+      "tested": "未验证",
+      "role": "gold_standard_paid",
+      "strategy": "机构级基准；若预算允许，这是最省心的终局方案",
+      "keep_reason": "唯一同时给三套价格+退市原因的源"
+    },
+    {
+      "id": "norgate",
+      "name": "Norgate Data",
+      "access": "桌面数据库",
+      "cost": "$630/年",
+      "depth": "1990 起",
+      "delisted": "是（全覆盖）",
+      "adjustment": "total_return",
+      "frequency": "日",
+      "tested": "未验证",
+      "role": "sp500_specialist",
+      "strategy": "S&P 500 历史成分回测的对口产品（含 PIT 成分），预算充足时的终局选择",
+      "keep_reason": "唯一同时给 PIT 成分 + 退市全收益的现成产品"
+    },
+    {
+      "id": "quantconnect",
+      "name": "QuantConnect LEAN",
+      "access": "平台内 Python/C#",
+      "cost": "回测免费",
+      "depth": "1998 起，27,500 只",
+      "delisted": "是（引擎内置退市清算/并购/改码）",
+      "adjustment": "total_return",
+      "frequency": "日/分钟",
+      "tested": "未验证",
+      "role": "independent_replication",
+      "strategy": "作为独立复现环境，用来验证我们本地回测的数字（不作为数据源，数据不可导出）",
+      "keep_reason": "第三方独立实现的交叉验证，价值在『裁判』而非『供数』"
+    },
+    {
+      "id": "openassetpricing",
+      "name": "OpenAssetPricing",
+      "access": "pip 包",
+      "cost": "免费",
+      "depth": "至 2024-12",
+      "delisted": "是（CRSP 口径）",
+      "adjustment": "returns（非价格）",
+      "frequency": "月",
+      "tested": "未验证",
+      "role": "academic_benchmark",
+      "strategy": "用 CRSP 口径的 Mom12m 因子收益做「方向性」校验：我们的年度动量是否同向、量级是否合理",
+      "keep_reason": "学术基准，能给『结论是否可信』提供外部锚点"
+    },
+    {
+      "id": "stockanalysis",
+      "name": "stockanalysis.com",
+      "access": "REST JSON",
+      "cost": "免费",
+      "depth": "近 12 个月",
+      "delisted": "否",
+      "adjustment": "total_return（含 a 字段）",
+      "frequency": "日",
+      "tested": "实测返回 12 条",
+      "role": "micro_check",
+      "strategy": "单票近 12 个月的第三源快查",
+      "keep_reason": "零成本、零 key，适合临时抽检"
+    },
+    {
+      "id": "excluded",
+      "name": "已排除（保留记录，避免重复踩坑）",
+      "access": "-",
+      "cost": "-",
+      "depth": "-",
+      "delisted": "-",
+      "adjustment": "-",
+      "frequency": "-",
+      "tested": "Yahoo 403 / Stooq JS 挑战 / WSJ 401 / FMP demo 401 / Nasdaq 仅 10 年无退市 / stockanalysis 仅 12 月 / BigQuery 无美股 EOD / DoltHub 404 / Polygon 免费 2 年 / Alpaca 2016 起 / Twelve Data 无退市 / Finnhub 付费 / Kaggle 常规 S&P 集只有现役",
+      "role": "excluded",
+      "strategy": "不参与生产，但保留在册：若某天上游恢复可用（如 Yahoo 解封），按 role 直接接入",
+      "keep_reason": "排除了也要留档，避免下次重复调研；上游策略可能变化"
+    }
+  ],
+  "gap_playbook": [
+    {
+      "gap": "完全缺失的标的（当前 23 只，多为 2000 年前破产票 LEHMQ/ANRZQ/CITGQ）",
+      "primary": "alphavantage",
+      "fallback": [
+        "eodhd_paid",
+        "marketparquet"
+      ],
+      "final": "仍无 → 标记 permanent_missing，该标的所有年份不入池（严格策略）"
+    },
+    {
+      "gap": "12 月缺失（当前 2,653 个 symbol-month，覆盖 82%）",
+      "primary": "alphavantage",
+      "fallback": [
+        "hf_ayushkhaire（现役票）",
+        "sina_local（已退市票）",
+        "eodhd（近 13 月）"
+      ],
+      "final": "仍无 → 该年不入池，并计入覆盖率指标"
+    },
+    {
+      "gap": "口径不足（price_only 冒充 total_return，当前占 99%）",
+      "primary": "alphavantage",
+      "fallback": [
+        "eodhd_paid",
+        "tiingo",
+        "sharadar"
+      ],
+      "final": "未升级前，数据集标 basis=price_only，不允许进入 locked 状态"
+    },
+    {
+      "gap": "可疑序列（残余跳变 43 处，如 CBE 357461%）",
+      "primary": "alphavantage",
+      "fallback": [
+        "hf_amirtrader",
+        "eodhd"
+      ],
+      "final": "无法解释 → 该标的该年不参与排名"
+    },
+    {
+      "gap": "行业分类（513/869，已退市票多为 Unknown）",
+      "primary": "datahub_gics",
+      "fallback": [
+        "static/sector_overrides.json 手工补",
+        "sharadar/norgate（付费）"
+      ],
+      "final": "未分类桶最多 1 只（已实现的近似策略）"
+    },
+    {
+      "gap": "成分变更冲突",
+      "primary": "fja05680",
+      "fallback": [
+        "coil_chinobing"
+      ],
+      "final": "人工裁定并记录到 corporate_actions"
+    }
+  ],
+  "update_policy": {
+    "new_month": "append-only，自动入库",
+    "history_correction": "必须新建 dataset 版本，人工批准后提升基线；旧版本永久保留",
+    "lock_rule": "只有 basis 全部为 total_return、覆盖率 ≥95%、6 项验收全绿，才允许 status=locked",
+    "conflict_rule": "同一 symbol-month 两源偏差 >2% → 记 validations，高等级源胜出，并保留双方原始值",
+    "no_discard_rule": "任何源都不删除；低等级源在 prices_monthly 中保留，仅供追溯与对比"
+  },
+  "credentials": {
+    "table": "data_sources",
+    "rls": true,
+    "stored": [
+      "alphavantage",
+      "eodhd",
+      "kaggle"
+    ],
+    "policy": "只有 postgres/service 可读；anon 无 policy 即无法访问"
+  }
+}
