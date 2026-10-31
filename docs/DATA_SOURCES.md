@@ -149,3 +149,29 @@ EODHD 20/天   → 只做近 13 个月校验，不碰历史
 | 完全缺失 | 30 | 23 |
 
 AV 今日额度已用尽（25 次），明天起每天自动 24 只，约 35 天补齐历史层。
+
+## 九、全球免费源扫描（2026-11-01，19 个端点并发实测）
+
+对每个源用 AAPL（现役）+ ATVI（退市）双标的探测，只读、15 秒超时。
+
+| 源 | 国家 | AAPL | ATVI | 结论 |
+|---|---|---|---|---|
+| **stockanalysis** | US | ✅ 全收益 10 年 | ✅ 26 只退市可查 | **已接入** |
+| nasdaq | US | ✅ 10 年 | ❌ | 仅抽检 |
+| stooq | PL | ❌ JS 挑战 | ❌ | 封锁 |
+| morningstar / marketwatch / wsj | US | ❌ 401 | ❌ | 封锁 |
+| finanzen.net / onvista / ariva | DE | ❌ 403/400/404 | ❌ | 封锁 |
+| marketscreener / boursorama | FR | ❌ 403 / 无数据 | ❌ | 封锁 |
+| investing.com | EU | ❌ 403 | ❌ | 封锁 |
+| **yahoo-jp**（日文 Yahoo） | JP | ✅ HTML 有数据 | ⚠️ ATVI 有、ETFC 无 | 仅 HTML 表格，无批量接口 |
+| minkabu / kabutan | JP | ❌ 405 | ❌ | 封锁 |
+| naver / daum | KR | ❌ 空结构 / 403 | ❌ | 封锁 |
+| eastmoney | CN | ⚠️ 曾 200 后连接重置 | ❌ | 不稳 |
+| tencent / netease / xueqiu | CN | ❌ DNS/502/400 | ❌ | 封锁 |
+
+**结论**
+1. 能稳定供美股历史价的只有 4 家：**stockanalysis（全收益，含部分退市）**、Nasdaq（10 年，无退市）、Yahoo 中转（现役）、Alpha Vantage（全收益，含退市，25/天）。
+2. **日韩欧主流财经站点全部有反爬或需登录**，没有一家能免费批量取美股历史。
+3. 唯一能补「2010–2016 退市票」的仍是 **Alpha Vantage**。
+
+注册表现状：ok 11 / blocked 20 / untested 5 / excluded_paid 4 / dead 3 / partial 1
