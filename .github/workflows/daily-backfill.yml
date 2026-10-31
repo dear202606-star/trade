@@ -54,6 +54,10 @@ jobs:
           LIMIT="${{ github.event.inputs.av_limit }}"
           python relay_source.py --plan-source alphavantage --symbols "${LIMIT:-24}" --av-quota "${LIMIT:-24}"
 
+      - name: stockanalysis 补退市票（免费，10 年全收益）
+        continue-on-error: true
+        run: python fetch_stockanalysis.py --symbols 80
+
       - name: HF 分片（现役票覆盖）
         run: python relay_source.py --plan-source hf_ayushkhaire --symbols 120 --no-av
 

@@ -64,6 +64,10 @@ def main():
         cur.execute("""select symbol from prices_monthly where basis='total_return'""")
         tr = {r[0] for r in cur.fetchall()}
 
+    def early_gap(t):
+        """2010-2016 的 12 月缺口数（stockanalysis 只能补近 10 年，这段只能靠 AV）"""
+        return sum(1 for y in range(2010, 2017) if "%d-12" % y not in dec.get(t, set()))
+
     def gaps(t):
         return [y for y in YEARS if "%d-12" % y not in dec.get(t, set())]
 
@@ -72,7 +76,7 @@ def main():
         g = gaps(t)
         if not g:
             continue
-        score = len(g) * (1.0 if t in delisted else 0.55) \
+        score = len(g) * (1.0 if t in delisted else 0.55) + early_gap(t) * 1.5 \
             + (3.0 if t not in have else 0) + (1.0 if t not in tr else 0)
         scored.append((t, len(g), t in delisted, score))
     scored.sort(key=lambda x: -x[3])
