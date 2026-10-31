@@ -491,6 +491,33 @@ def main():
             if spx:
                 beq *= (spx / spy0)
 
+    # ---- 覆盖闸门：池子过小的年份不进入正式业绩（避免用 20% 的池子出数）----
+    # 2010 池 79、2011 池 93（2009-12 缺全收益），而 2012 起有 370+；
+    # 这类年份必须显式排除，否则「16 年累计」里混着两个不可靠年份。
+    _eq_before_gate = eq
+    import statistics as _stat
+    _pools = [r.get("pool") or 0 for r in years]
+    _med = _stat.median([p for p in _pools if p]) if any(_pools) else 0
+    _cut = 0.6 * _med
+    _excluded = [r["year"] for r in years if (r.get("pool") or 0) < _cut]
+    if _excluded:
+        _keep = [i for i, r in enumerate(years) if (r.get("pool") or 0) >= _cut]
+        years = [years[i] for i in _keep]
+        _first_month = "%d-01" % years[0]["year"] if years else None
+        pts = [p for p in pts if _first_month and p["d"] >= _first_month]
+        # 用保留下来的年份重算累计与基准
+        _eq = 1.0
+        for _r in years:
+            _eq *= (1 + _r["ret"])
+        eq = _eq
+        # 曲线是按全期链累乘的，排除年份后必须整体除以被排除段的累计因子
+        _excl_factor = (_eq_before_gate / eq) if eq else 1.0
+        if _excl_factor and abs(_excl_factor - 1.0) > 1e-12:
+            for _p in pts:
+                _p["s"] = round(_p["s"] / _excl_factor, 6)
+                if _p.get("b"):
+                    _p["b"] = round(_p["b"] / _excl_factor, 6)
+
     total = eq - 1
     n = len(years)
     cagr = (eq ** (1 / n) - 1) if n and eq > 0 else 0
@@ -502,7 +529,9 @@ def main():
 
     hist = {
         "years": years,
-        "summary": {"start": START_YEAR, "end": end_year, "years": n,
+        "summary": {"start": years[0]["year"] if years else START_YEAR,
+                    "end": end_year, "years": n,
+                    "excluded_years": _excluded if '_excluded' in dir() else [],
                     "total": round(total, 4), "cagr": round(cagr, 4),
                     "dd": round(mdd, 4), "worst_intra": round(mdd, 4),
                     "wins": wins, "losses": n - wins,

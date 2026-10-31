@@ -175,3 +175,23 @@ AV 今日额度已用尽（25 次），明天起每天自动 24 只，约 35 天
 3. 唯一能补「2010–2016 退市票」的仍是 **Alpha Vantage**。
 
 注册表现状：ok 11 / blocked 20 / untested 5 / excluded_paid 4 / dead 3 / partial 1
+
+## 十、反爬绕过实测（2026-11-01，目标：把被拦的源直接拉下来）
+
+工具：stealth_fetch.py（curl_cffi TLS 指纹 + Playwright 反检测 + Cookie 复用 + 浏览器内 fetch）
+
+| 源 | 手段 | 结果 |
+|---|---|---|
+| **ariva.de** | Playwright + 反检测脚本（抹 webdriver/plugins/chrome） | ✅ **200，历史表可取**：AAPL 美元/美交所；**ATVI 退市后仍有德国所欧元价** |
+| **naver.com** | 同上 | ✅ 200，美股票页面可开；无历史 JSON 接口 |
+| finanzen.net | 同上 | ❌ Akamai 403（Cookie 只有 Bot-Information） |
+| onvista | 同上 | ❌ Vercel Security Checkpoint，停在挑战页 |
+| eastmoney | curl_cffi | ❌ 主机连接超时（网络层不通，不是反爬） |
+| minkabu / kabutan | 浏览器 | ❌ 405 |
+| investing / marketscreener | curl_cffi | ❌ 403 |
+
+**关键结论**
+1. 反爬**可以绕过一部分**（ariva、naver 已通），但拿到的是**收盘价（未复权）**，不是全收益。
+2. 退市票在 ariva 上只剩**德国交易所的欧元价**，与美股美元全收益不可比。
+3. 因此对「2010–2016 退市票全收益」这个唯一缺口，**绕过后仍然没有替代 Alpha Vantage 的免费源**。
+4. 绕过工具已沉淀为 stealth_fetch.py，未来任何源被拦可直接复用。
