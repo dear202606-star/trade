@@ -41,10 +41,14 @@ jobs:
           echo "口令长度 ${#SUPABASE_DB_PASSWORD}"
 
       - name: stockanalysis 补缺（免费，10 年全收益）
+        if: ${{ github.event.inputs.sa_limit != '0' }}
         continue-on-error: true
         env:
           SA_LIMIT: ${{ github.event.inputs.sa_limit }}
-        run: python fetch_stockanalysis.py --symbols "${SA_LIMIT:-120}"
+        run: |
+          N="${SA_LIMIT:-120}"
+          if [ "$N" = "0" ]; then echo "跳过 stockanalysis"; exit 0; fi
+          python fetch_stockanalysis.py --symbols "$N"
 
       # Alpha Vantage 每天 25 次额度：交给 daily-backfill（每天 10:30 UTC）单独跑，
       # 这里不跑，否则每 6 小时跑一次会 4 倍超量、全部失败。
