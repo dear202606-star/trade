@@ -94,8 +94,9 @@ def main():
         g = gaps(t)
         if not g:
             continue
+        no_data_boost = 12.0 if t not in have else 0.0   # 完全没数据的最优先（一轮就能清掉）
         score = len(g) * (1.0 if t in delisted else 0.55) + early_gap(t) * 1.5 \
-            + (3.0 if t not in have else 0) + (1.0 if t not in tr else 0)
+            + (3.0 if t not in have else 0) + (1.0 if t not in tr else 0) + no_data_boost
         scored.append((t, len(g), t in delisted, score))
     scored.sort(key=lambda x: -x[3])
 
