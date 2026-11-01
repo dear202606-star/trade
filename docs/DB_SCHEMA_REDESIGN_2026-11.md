@@ -7,18 +7,21 @@
 > ① 用公开 anon key 插 1 行 `__AUDIT_PROBE__` 到 `prices_monthly` 后立即删除（行数已复原 351,889）；
 > ② 对 13 张表各插 1 行探测行再删（除 `prices_monthly` 外全部被 RLS 拒绝，无一残留）；
 > ③ 全程未做 UPDATE 既有行、未 TRUNCATE、未建临时 schema（本机到 5432/6543 不可达，详见 §1.2）。
+> 另外：本文 §6 的全部 DDL 已在**本机临时 PostgreSQL 17 实例**（独立 cluster，用完销毁）上完整跑过一遍，
+> 158 条语句 0 错误 + 21 条功能断言全过，见 §6.10。
 
 ---
 
-## 0. 结论摘要（先看这 8 条）
+## 0. 结论摘要（先看这 9 条）
 
 | # | 结论 | 依据 | 动作 |
 |---|---|---|---|
-| **C1** | **`prices_monthly` 可被公开 anon key 直接 INSERT/DELETE**（RLS 策略写成了 `for all`/缺 `for select` 语义），"历史不可篡改"目前只靠行级触发器兜住"已锁月份"，未锁月份可被任意重写 | 实测 INSERT 201 → 回读 200 → DELETE 204，行数复原 | **P0 立刻修**（§7 P0，30 分钟，可秒级回滚） |
-| **C2** | **标的级锁把"当年热层"一起冻死了**：`locked_symbols` 命中即拦截该标的**所有月份**的写入。430 只已锁标的覆盖了当年 13,186 行中的 8,640 行（65%），锁定后这些标的的 2026 月线**一次都没更新过** | 锁时间 00:51–00:53Z；2026 行 `fetched_at > locked_at` 计数 = **0** | **P0** 改触发器语义：锁必须带 `month_from/month_to` 范围（§7 P1） |
+| **C1** | ~~`prices_monthly` 可被公开 anon key 直接 INSERT / DELETE~~ → **已修复**（commit `c17e66d`，2026-11-01 09:17 +0800：17 张表 anon 转只读、回收默认权限、`prices_monthly` 补 RLS）。复核：写/删均返回 `401 permission denied`，且带 hint `GRANT INSERT ON public.prices_monthly TO anon` | 本审计 09:06 实测可写（INSERT 201 → 回读 200 → DELETE 204）；09:35 复测 401 | 保留 §7 P0 的**回归探针**，每次动权限后必跑 |
+| **C1b** | ⚠️ **那次修复引入了一个新回归（今天必须处理）**：`alter default privileges ... revoke all on tables` 之后，`db_select.py` 每 6 小时 `DROP TABLE series_selected` + 重建，新表**不再自动获得 anon 的 SELECT**，而它的 DDL 里只有 `create policy`（policy ≠ 授权）→ 下一次 collect-full（`15 */6 * * *`，06:15 UTC）之后 CI 的 REST 读会 401，`variant_b / site_build / selftest` 全红、页面停止更新 | 本机 PG17 复刻实测：重建后 `has_table_privilege('anon','public.series_selected','SELECT') = false`；`set role anon; select count(*)` → `permission denied for table series_selected` | **补一行 grant**（§7 P0 第 4 步，1 分钟） |
+| **C2** | **守卫函数被两个脚本互相覆盖 → 要么"过度冻结"、要么"完全失效"**：`lock_symbols.py --lock`（每 6 小时）安装的强版本按 symbol 拦截**所有月份**，连当年热层一起冻死；而 `lock_stage.py`（**每 2 小时**，`--check`/`--list` 都会）把同名函数覆盖成只读 `locks` 的弱版本 —— `locks` 是空表，于是**什么都不拦**。真实状态在"冻结"与"无保护"之间每 2 小时来回切换 | 两脚本都执行 `create or replace function guard_locked_months()`；`quotes.yml` 每 2h 跑 `lock_stage.py --check 2010,2025`；`collect-full.yml` 每 6h 跑 `lock_symbols.py --lock`。旁证：430 只锁建于 00:51–00:53Z，00:59Z 的 stockanalysis 批次 `requested=80 / ok=0 / failed=80`（正落在强版本窗口内） | **P0**：① 从两个脚本里**删掉**建函数语句（函数归 DB 管）；② 锁必须带 `month_from/month_to` 范围（§7 P1） |
 | **C3** | **锁定承诺对"站点实际读的那张表"不成立**：`series_selected` 是每 6 小时 `DROP TABLE` + `RENAME` 重建的物化副本，既无锁也无保护；而站点导出、`variant_b`、`db_validate` 全部读它 | `db_select.build_table()`；`collect-full.yml` 每 6 小时 | 改为**视图/物化视图**（§7 P4），从根上消除副本 |
 | **C4** | 两套锁、两张源表、三层价格副本：`locks`(0 行，从未用) 与 `locked_symbols`(430)；`source_registry`(44) 与 `data_sources`(3，凭据)；`prices_monthly`(351,889) → `series_selected`(117,113) → `dataset_rows`(347,833) | 见 §3 实测 | 合并锁→`data_lock`；合并源→`data_source`；副本降级为 view/snapshot |
-| **C5** | **`locks` 的 append-only 触发器与 `lock_stage.lock()` 的 upsert 逻辑互斥**：`locks` 一旦有行，第二次 `--lock` 必然抛 `locks is append-only`。现在没炸只因为 `locks` 还是空表 | `db_hardening.py` vs `lock_stage.py` 第 148 行 | 改"作废-新建"版本链（§6.5） |
+| **C5** | **`locks` 的 append-only 触发器与 `lock_stage.lock()` 的 upsert 逻辑互斥**：对同一 `(kind, scope_from, scope_to)` 再次锁定（哪怕只是重算哈希）必然走 `on conflict do update` → 撞 append-only → 抛 `locks is append-only`。现在没炸只因为 `locks` 还是空表 | `db_hardening.py` vs `lock_stage.py` 第 148 行 | 改"作废-新建"版本链（§6.5） |
 | **C6** | **审计层"有表无链"**：305 条 `validations` 中 304 条 `dataset_id is null`；无 `run_id`、无被校验数据的指纹 → 无法回答"这条 pass 是通过哪一版数据"。`fetch_runs` 的 `requested`/`ok` 单位混用（标的 vs 行数） | 实测 ST 段 | 加 `run_id` + `fingerprint` + 单位拆分（§6.6） |
 | **C7** | **`corporate_actions` 空表，而全收益的原料正在被下载后丢弃**：`relay_source.fetch_yahoo_relay()` 明确请求 `events=div,split`，解析时只取 `adjclose/close`，`d["events"]` 直接扔掉 | `relay_source.py` L208–L232 | 落 `corporate_action` → 反推 `adj_factor`，让"全收益"可证（§6.3） |
 | **C8** | **不建议分区**（当前 35 万行，估算 ~30–55 MB 堆 + ~25 MB 索引）。分区的真正价值是把"冻结"变成 `REVOKE` 分区写权限的 O(0) 操作，但按当前规模用触发器 + `data_lock` 已足够；触发分区的量化阈值见 §11 | 容量估算 + 访问模式 | 只留 `month_start` 生成列作为**未来**分区锚点 |
@@ -31,7 +34,7 @@
 
 | 等级 | 含义 | 本文用法 |
 |---|---|---|
-| **E1 实测** | 本次直接对生产库执行只读查询/REST 采样得到 | 行数、分布、锁定时间、写权限探测、2026 热层更新情况 |
+| **E1 实测** | 本次直接对生产库执行只读查询/REST 采样得到；DDL 另在本机 PG17 影子库实测 | 行数、分布、锁定时间、写权限探测、2026 热层更新情况；§6 的 DDL 可执行性（§6.10） |
 | **E2 代码对账** | 线上表结构无法直连读取（见 §1.2），用仓库内 DDL + 线上"列数/索引数/触发器数"交叉验证 | 17/17 张表的列数、索引数与仓库 DDL **完全吻合**（`prices_monthly` 4 索引 = PK+3；`series_selected` 2；`locks` 2；`datasets` 2；其余 1 或 2），据此认定**仓库 DDL 即线上 DDL** |
 | **E3 推断** | 由代码/行为反推，需在生产上复核（本文标注"待复核"并给出验证 SQL） | 如 `prices_monthly` 的策略具体写成什么、`trg_guard_truncate` 是否存在 |
 
@@ -56,7 +59,7 @@
 | `dataset_rows` | 8/1/1(guard) | 347,833 | **保留，限用途** | 229,114 行属于 `baseline_v1`（status=draft，永不锁定）→ 死重量；守卫触发器**从未生效**（无任何 dataset 处于 locked）；anon 读不到 → 审计 SQL 在 CI 里跑不了 | P1 |
 | `datasets` | 10/2/0 | 2 | **保留，补列** | `months` 列实际存**行数**、`symbols` 存文件数；`status` 永远停在 draft；无 `row_count/definition/parent_id/locked_by`；无状态机约束 | P1 |
 | `locks` | 11/2/0 | **0** | **合并进 `data_lock`** | 从未启用；`monthly_only` 死列；与 append-only 触发器冲突（C5）；`scope_from` 曾被忽略（`lock_stage.py` 第 38 行只取 `max(scope_to)`） | **P0** |
-| `locked_symbols` | 5/1/0 | 430 | **合并进 `data_lock`** | 只有标的、**没有月份范围** → 冻死热层（C2）；`hash` 是"sha256 前 16 位"，与 `datasets.input_hash`(md5)、`locks.hash`(md5) 三种算法并存且**都不可独立复算** | **P0** |
+| `locked_symbols` | 5/1/0 | 430 | **合并进 `data_lock`** | 只有标的、**没有月份范围** → 强版本函数下冻死热层（C2）；`hash` 是"sha256 前 16 位"，与 `datasets.input_hash`(md5)、`locks.hash`(md5) 三种算法并存且**都不可独立复算**；守卫函数被 `lock_stage.py` 每 2 小时覆盖（P0-02） | **P0** |
 | `members` | 4/1/0 | 1,262 / 1,209 标的 | **保留，补约束** | 无 FK→`symbol`；`2099-12-31` 哨兵代替 NULL（503 只在册）；缺 `as_of`（G5 要求的快照日）；PK(symbol,start_date) 合理 | P1 |
 | `sectors` | 4/1/0 | 513 | **并入 `symbol`** | 只有当前快照（无 PIT），覆盖 **42.4%** 的 1,209 只成分股（696 只无行业），而 60% 行业上限依赖它；与 `symbols.gics_sector` 重复 | P1 |
 | `symbols` | 8/1/0 | **0** | **启用为维度表** | 空表但定义了 `gics_sector`（与 sectors 重复）、`first_month/last_month`（可由事实表派生 → 必然过期）；无任何 FK 指向它 | P1 |
@@ -74,7 +77,8 @@
 | # | 问题 | 证据 | 后果 | 级别 |
 |---|---|---|---|---|
 | **P0-01** | **匿名可写事实表** | anon POST `prices_monthly` → 201；GET 可回读；DELETE → 204 | 公开 key 就在 `docs/cloud.json`（随站点发布）→ 任何人可改未锁月份、可删行。RLS 对其他 12 张表都拦住了（42501），只有这张表漏 | **P0** |
-| **P0-02** | **锁粒度错误：标的锁 = 永久全区间锁** | `locked_symbols` 命中即抛，不判断月份；2026 年 8,640 行锁定后 0 次更新 | 当年层停更；`relay_source`/`staging` 写入被拒 → 采集"失败但不报错"（`log_run` 记 failed） | **P0** |
+| **P0-02** | **守卫函数被脚本抢管 → 锁在"过度冻结"与"完全失效"之间震荡** | `lock_symbols.py` 与 `lock_stage.py` 都 `create or replace function guard_locked_months()`；前者每 6h 装强版本（按 symbol 全区间拦），后者每 2h（`--check`/`--list` 都会）装弱版本（只读 `locks`，而 `locks` 为空=不拦）。430 只锁建立于 00:51–00:53Z，00:59Z 的采集批次 `requested=80/ok=0/failed=80` 正落在强版本窗口 | ① 强版本窗口内当年层停更 6 小时；② 其余 18 小时**没有任何保护**，锁形同虚设；③ 采集失败只记在 `fetch_runs.failed`，不告警 | **P0** |
+| **P0-02b** | **DDL 写在应用脚本里** | 同一函数被两个业务脚本当"自己的 DDL"反复重建（`lock_stage.ensure_table()`、`lock_symbols.ensure()`） | 任何一方升级都会被另一方回退；运维在库里改的修复活不过 2 小时 | **P0** |
 | **P0-03** | **锁保护错了对象** | 触发器只挂在 `prices_monthly`；站点读 `series_selected`（6 小时重建一次） | 锁定后仍可通过"重跑选源/改选源"改变已发布序列 → **换源造假涨幅**这个原始风险没被堵住 | **P0** |
 | **P0-04** | `locks` append-only ↔ `lock_stage` upsert 互斥 | `db_hardening.py` 建 `trg_locks_append`；`lock_stage.py` 用 `on conflict do update` | 第一次锁成功、第二次改锁必失败；运维会以为"锁坏了" | **P0**（潜在） |
 | **P0-05** | `series_selected` 重建非原子 | `db_select.build_table()` 用 autocommit：`drop table` → `alter rename` 两条独立事务 | 连接在两条之间断（池化器常态）→ **导出表消失**，`db_rest` 404，整条流水线红 | **P0** |
@@ -108,6 +112,8 @@ dataset_rows     347,833 = baseline_v1 229,114 + b_2026_10_31 118,719（后者�
 datasets         1 baseline_v1(840 只/draft/hash 843f661e) 2 b_2026_10_31(847 只/draft/hash 08df22e1...)
 locked_symbols   430 只，locked_at 2026-11-01T00:51:22Z ~ 00:53:42Z，months 160~168
                  → 当年 13,186 行中 8,640 行属已锁标的；fetched_at > locked_at 的行数 = 0
+                 ⚠ 该"0"只说明采样时点在强版本窗口内（锁后 12 分钟），不等于锁长期有效：
+                   守卫函数每 2 小时会被 lock_stage.py 覆盖成不检查 locked_symbols 的弱版本
 locks            0 行（从未启用）
 members          1,262 行 / 1,209 只；503 只在册（end_date=2099-12-31）；end<start 0 例
 sectors          513 行 / 11 个行业；覆盖 42.4% 成分（696 只无行业）
@@ -492,8 +498,9 @@ where month >= '2008-01'
 group by symbol, source
 on conflict (symbol) do nothing;
 
--- 6.4.4 视图：同名替换（读路径零改动）
-create or replace view public.series_selected with (security_invoker = true) as
+-- 6.4.4 影子视图（先不叫 series_selected，留给对账；正式改名见 §7 P4 ④）
+--        注意：表→视图不能用 create or replace 覆盖，同名替换必须"先改名再建视图"
+create or replace view public.series_selected_v with (security_invoker = true) as
   select p.symbol, p.month, p.adj_close, p.raw_close, p.source, p.basis,
          p.quality, p.fetched_at
   from public.prices_monthly p
@@ -501,8 +508,9 @@ create or replace view public.series_selected with (security_invoker = true) as
     on k.symbol = p.symbol and k.source_id = p.source
   where p.month >= k.from_month;
 
-revoke all on public.series_selected from anon, authenticated;
-grant select on public.series_selected to anon, authenticated;
+revoke all on public.series_selected_v from anon, authenticated;
+grant select on public.series_selected_v to anon, authenticated;
+-- 目标态的 series_selected 是"改过名的这张视图"；改名动作见 §7 P4 ④（单事务，毫秒级）
 ```
 
 **视图 vs 物化视图 → 判据（不要无脑选一边）**
@@ -857,6 +865,9 @@ grant execute on function public.promote_staging(int) to postgres;
 
 ```sql
 -- 逐表落实（幂等；policy 先删后建，避免"for all"残留）
+-- 注意 1：RLS 与 policy 只能加在表/分区表上，**视图会报 "ENABLE ROW SECURITY cannot be performed on relation"**
+--         → 视图走 security_invoker，靠底层表的 RLS 生效，只做 grant/revoke
+-- 注意 2：`locks`/`locked_symbols`/`sectors`/`source_registry`/`data_sources` 到这一步已经是视图
 do $$
 declare r record;
 begin
@@ -870,16 +881,20 @@ begin
 end $$;
 
 do $$
-declare t text;
+declare t text; is_table boolean;
 begin
   foreach t in array array['prices_monthly','series_selected','dataset_rows','datasets',
                            'validations','validation_check','fetch_runs','data_source',
                            'members','symbols','locks','locked_symbols','sectors',
                            'source_registry','data_sources','series_pick','series_pick_history','data_lock']
   loop
-    execute format('alter table public.%I enable row level security', t);
-    execute format('drop policy if exists public_read on public.%I', t);
-    execute format('create policy public_read on public.%I for select to anon, authenticated using (true)', t);
+    select c.relkind = 'r' into is_table
+      from pg_class c join pg_namespace n on n.oid = c.relnamespace
+     where n.nspname = 'public' and c.relname = t;
+    if coalesce(is_table, false) then
+      execute format('alter table public.%I enable row level security', t);
+      execute format('create policy public_read on public.%I for select to anon, authenticated using (true)', t);
+    end if;
     execute format('revoke insert, update, delete, truncate on public.%I from anon, authenticated', t);
     execute format('grant select on public.%I to anon, authenticated', t);
   end loop;
@@ -909,4 +924,628 @@ grant insert, select on public.ingest_staging to anon, authenticated;
 
 > 索引不是越多越好：`prices_monthly` 每多 1 个索引，每次 `execute_values` 批量 upsert（CI 每 6 小时数万行）就要多写一棵 B-tree。删掉 2 个废索引 ≈ 写入吞吐 +25~30%，并省下约 15–20 MB（免费额度 500 MB，见 §11）。
 
-<!-- PART3 -->
+### 6.10 本文 DDL 的实测验证（不是"看起来能跑"）
+
+§6 的全部 SQL 已在一台**临时 PostgreSQL 17 实例**（`initdb` 新建的独立 cluster，端口 55432，用完即销毁）上实际执行过：
+
+| 步骤 | 做法 | 结果 |
+|---|---|---|
+| ① 复刻现状 | 用仓库内 DDL 重建 17 张表 + 触发器 + RLS + 样本数据（含 `prices_monthly` 上那条 `for all` 宽松策略） | 成功 |
+| ② 顺序执行 §6 全部块 | 9 个 `sql` 代码块 / 158 条语句，逐块 `psql -f`，`ON_ERROR_STOP=1` | **0 错误** |
+| ③ 功能断言 | 21 条语义断言 | 全部符合预期 |
+| ④ 修掉 2 个真实缺陷 | 见下 | —— |
+
+**功能断言（全部通过）**
+
+| 断言 | 期望 | 实测 |
+|---|---|---|
+| 已锁标的被锁区间写入（AAA/2020-06） | 抛 `frozen:` | ✅ `frozen: AAA 2020-06 is covered by data_lock#1` |
+| 已锁标的**当年**写入（AAA/2026-11） | 放行（热层） | ✅ `INSERT 0 1` |
+| 未锁标的任意月份 | 放行 | ✅ |
+| 已锁区间 DELETE / UPDATE | 抛错 | ✅ 均抛 `frozen: CCC 2011-03` |
+| 改 `month` | 抛错 | ✅ `month is immutable (2020-06 -> 2020-07)` |
+| 换源（已锁标的的 `series_pick`） | 抛错 | ✅ `选源已冻结：AAA …` |
+| `data_lock` 的 UPDATE（作废） | 抛错 | ✅ `data_lock is append-only` |
+| 作废走"插 void + supersedes_id" | 成功后守卫放行 | ✅ |
+| anon 读 `prices_monthly` / 视图 / 锁视图 | 允许 | ✅ |
+| anon 写 / 改 / 删 `prices_monthly` | 拒绝 | ✅ 全部 42501 |
+| anon 写 `locks` | 拒绝 | ✅ |
+| `promote_staging()` 正常行 | 合并 1 行 + 标记 promoted | ✅ 返回 `1│0│1` |
+| `promote_staging()` 坏月份 | 拒收 + 写 `reject_reason` | ✅ 返回 `0│1│0`，`bad_month` |
+| P4 ④"表 → 视图"切换 | 成功且 `relkind='v'` | ✅ |
+| 切换块重复执行 | 幂等（第二次 no-op） | ✅ |
+| `series_fingerprint()` over 视图 | 返回 `sha256:…` | ✅ |
+| `month_start` / `row_count` 生成列 | `is_generated = ALWAYS` | ✅ |
+| `prices_monthly` 索引数 | 4（PK + month + export + month_start） | ✅ |
+| 约束 | 全部 VALIDATE（`prices_run_fk` 故意 NOT VALID，待回填） | ✅ |
+
+**本轮实测改掉的两个真实缺陷（写在这里，免得下一个人再踩）**
+
+1. `create or replace view public.series_selected` **不能覆盖同名表** → 报 `"series_selected" is not a view`。已改为：先建影子视图 `series_selected_v`，切换动作放到 §7 P4 ④ 的 `DO` 块里（按 `relkind` 判断，可重入）。
+2. `alter table ... enable row level security` / `create policy` **不能作用于视图** → 报 `ALTER action ENABLE ROW SECURITY cannot be performed on relation "locks"`。M8 的清单里 `locks/locked_symbols/sectors/source_registry/data_sources` 到那一步已是视图 → 已在循环里加 `relkind='r'` 判断，视图只做 `grant/revoke`（靠 `security_invoker` 走底层表 RLS）。
+
+---
+
+## 7. ④分阶段迁移（每步：动作 / 锁 / 耗时 / 验证 SQL / 回滚）
+
+### 7.0 总览与窗口
+
+| 阶段 | 目标 | 结构风险 | 锁级别 | 预计耗时 | 可回滚性 |
+|---|---|---|---|---|---|
+| **P0** 权限止血 | 匿名写 `prices_monthly` 归零 | 无结构变更 | 无 | 30 min | 秒级（重建 policy） |
+| **P1** 锁止血 | 标的锁不再冻死当年层 | 加 2 列 | ACCESS EXCLUSIVE（ms） | 30 min | 秒级（换回旧函数） |
+| **P2** 索引瘦身 | 去 2 个废索引、加 2 个有用 | 无 | CONCURRENTLY（不阻塞） | 20 min | 分钟级（重建索引） |
+| **P3** 约束上线 | 6 个 CHECK/FK 生效 | NOT VALID→VALIDATE | SUE（不阻塞读写） | 30 min | 秒级（DROP CONSTRAINT） |
+| **P4** 选源视图化 | 删 11.7 万行副本 | **最高**（读路径切换） | ACCESS EXCLUSIVE（ms，仅改名） | 90 min | 秒级（改回名）+ 旧表保留 2 周 |
+| **P5** 快照瘦身 | 删 22.9 万行死快照 | 中（批量 DELETE） | 行锁 + 膨胀 | 45 min | 有备份可恢复 |
+| **P6** 锁合并 | 2 张锁表 → `data_lock` | 中（双写期） | ACCESS EXCLUSIVE（ms） | 90 min | 双写期可随时切回 |
+| **P7** 源表合并 | 2 张源表 → 1 + 1 | 低 | ACCESS EXCLUSIVE（ms） | 60 min | 旧表保留 |
+| **P8** 审计补链 | run_id / 指纹 / 字典 | 低（只加列） | 仅元数据 | 45 min | 秒级 |
+| **P9** 接入层重写 | staging 修函数 + 收尾 | 中（函数替换） | 无表锁 | 60 min | 秒级（换回旧函数） |
+
+**窗口选择**（CI 节奏，全 UTC）：
+
+```
+:05 每小时 watchdog           :00/:30 偶数小时 quotes（跑全站构建+部署）
+:15 每 6h collect-full        :25 每 6h collect-ci
+03:10 daily-backfill          10:00/22:00 monthly-pick
+11:40/22:40 data-check        */10min pg_cron promote_staging（最频繁的 prices 写入）
+```
+
+- **首选窗口：UTC 04:00–05:00 与 07:00–09:00**（北京 12:00–13:00 / 15:00–17:00）——避开 3 个采集 workflow，且 `promote_staging` 每 10 分钟一次、单次 < 5 s，任何 < 3 s 的排他锁都能挤在两次 promote 之间。
+- P4 必须避开 `:15/:25` 的 collect 批次（它会跑 `db_select.py`）。
+- 全程 `set lock_timeout='3s'`：**抢不到锁就失败重来，绝不排队**。排队比失败危险得多，因为排队会把后续所有读写堵在它后面。
+
+### P0 — 权限止血（30 分钟，立刻做）
+
+```sql
+-- ① 先把现状 policy 全量存档（唯一可靠的"回滚源"）
+select tablename, policyname, cmd, roles::text, qual, with_check
+from pg_policies where schemaname='public' order by 1,2;   -- 结果存 output/_policies_before.json
+select tablename, grantee, privilege_type
+from information_schema.role_table_grants
+where table_schema='public' and grantee in ('anon','authenticated') order by 1,2,3;
+
+-- ② 只针对出事的这张表动手
+begin;
+set local lock_timeout='3s';
+do $$
+declare r record;
+begin
+  for r in select policyname from pg_policies
+            where schemaname='public' and tablename='prices_monthly'
+  loop execute format('drop policy %I on public.prices_monthly', r.policyname); end loop;
+end $$;
+create policy public_read on public.prices_monthly
+  for select to anon, authenticated using (true);
+revoke insert, update, delete, truncate on public.prices_monthly from anon, authenticated;
+grant select on public.prices_monthly to anon, authenticated;
+commit;
+```
+
+**验证（外部探针，不写任何业务数据）**
+
+```bash
+python - <<'PY'
+# 期望：POST/PATCH/DELETE 全部 401/403，GET 200
+...
+PY
+```
+SQL 侧等价验证：
+```sql
+select has_table_privilege('anon','public.prices_monthly','INSERT') as anon_ins,   -- 期望 f
+       has_table_privilege('anon','public.prices_monthly','UPDATE') as anon_upd,   -- 期望 f
+       has_table_privilege('anon','public.prices_monthly','DELETE') as anon_del,   -- 期望 f
+       (select count(*) from pg_policies where schemaname='public'
+          and tablename='prices_monthly' and cmd='SELECT') as sel_policy_cnt;       -- 期望 1
+```
+
+**回滚**：按 ① 存档重建 policy（一条 `create policy ... for all ...`），**不要**恢复 grant（那是 bug 本身）。
+**失败特征**：站点 REST 读空 → `count(*)` 变 0。这是"policy 建成 ALL 但 USING 写错"的典型症状，用 `select count(*) from prices_monthly` 在 SQL Editor 里对照即可。
+
+### P1 — 锁止血（30 分钟）
+
+不改表结构，只给旧锁表补"范围"语义。
+
+```sql
+begin;
+set local lock_timeout='3s';
+alter table public.locked_symbols
+  add column if not exists month_from text default '2012-01',
+  add column if not exists month_to   text default '2025-12';
+commit;
+
+-- 兼容旧函数名（lock_symbols.py 每次启动都会 create or replace 它，所以这里先改代码再改库，
+-- 否则下一次 CI 跑 lock_symbols.py 会把函数覆盖回去 —— 见 §8 的顺序要求）
+create or replace function public.guard_locked_months() returns trigger
+language plpgsql set search_path = public, pg_temp as $$
+declare v_sym text; v_mon text; r record;
+begin
+  if tg_op = 'DELETE' then v_sym := old.symbol; v_mon := old.month;
+  else v_sym := new.symbol; v_mon := new.month; end if;
+
+  if tg_op = 'UPDATE' and new.month <> old.month then
+    raise exception 'month is immutable (% -> %)', old.month, new.month;
+  end if;
+
+  -- 关键修复：标的锁只在 month_from..month_to 内生效
+  if exists (select 1 from public.locked_symbols l
+              where l.symbol = v_sym
+                and v_mon >= coalesce(l.month_from,'0000-01')
+                and v_mon <= coalesce(l.month_to,'9999-12')) then
+    raise exception 'symbol % month % is locked', v_sym, v_mon;
+  end if;
+
+  for r in select scope_from, scope_to from public.locks
+            where kind='monthly_prices' and status='locked' loop
+    if v_mon between r.scope_from and r.scope_to then
+      raise exception 'month % is locked (% .. %)', v_mon, r.scope_from, r.scope_to;
+    end if;
+  end loop;
+  return case when tg_op='DELETE' then old else new end;
+end $$;
+```
+
+**验证（事务内实验，允许，全部 ROLLBACK）**
+
+```sql
+-- A. 历史月：必须被拦
+begin;
+update public.prices_monthly set adj_close = adj_close where symbol='MSFT' and month='2020-06';
+rollback;   -- 期望：ERROR symbol MSFT month 2020-06 is locked
+
+-- B. 当年月：必须放行（这是修复的核心）
+begin;
+insert into public.prices_monthly(symbol,month,adj_close,raw_close,source,quality,basis)
+values ('MSFT','2026-11',1,1,'yahoo_relay','ok','total_return');
+select 'inserted' as ok;
+rollback;   -- 期望：成功（然后回滚，不留痕）
+
+-- C. 未锁标的：放行
+begin;
+insert into public.prices_monthly(symbol,month,adj_close,raw_close,source,quality,basis)
+values ('__PROBE_UNLOCKED__','2020-06',1,1,'yahoo_relay','ok','total_return');
+rollback;
+```
+
+**P1 的第 0 步（顺序不能反）**：先改代码，再改库。两个脚本都必须**删掉**建函数的语句，而不是"改一改"：
+
+```python
+# lock_symbols.py:ensure()     删除  cur.execute(TRIGGER)      ← 第 95 行
+# lock_stage.py:ensure_table() 删除  cur.execute(TRIGGER)      ← 第 73 行，只保留 create table locks
+# 函数从此只由 sql/ 目录下的迁移脚本管理（schema_migration 记账）
+```
+若顺序反了（先改库、后改代码），下一次 CI —— **最多 2 小时后** —— `lock_stage.py --check` 就会把库里的修复覆盖回去，而且不会有任何报错。
+
+**验证（函数是否还在、内容是否含 locked_symbols / month 范围）**
+```sql
+select p.proname, p.prosrc like '%locked_symbols%' as checks_symbols,
+       p.prosrc like '%month_from%'            as checks_range,
+       p.prosrc like '%data_lock%'             as uses_new_table
+from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+where n.nspname='public' and p.proname in ('guard_locked_months','guard_frozen_prices');
+-- 迁移完成后应只剩 guard_frozen_prices，且 checks_range/uses_new_table 均为 true
+```
+
+**回滚**：把 `guard_locked_months` 换回 `output/_fix_lock_trigger.py` 里那份（仓库内已有），一条 `create or replace`。
+**风险**：见上。这是本阶段唯一一个"改库不算数、必须同时改代码"的动作，也是本文最容易被执行者忽略的一步。
+
+### P2 — 索引瘦身（20 分钟）
+
+```sql
+set statement_timeout = '300s';   -- CONCURRENTLY 不受 lock_timeout 约束
+drop index concurrently if exists public.idx_prices_symbol;
+drop index concurrently if exists public.idx_prices_basis;
+create index concurrently if not exists idx_prices_export
+  on public.prices_monthly (symbol, month) include (adj_close, raw_close, source, basis, quality);
+create index concurrently if not exists idx_prices_month_start
+  on public.prices_monthly (month_start);   -- 需先完成 P3 的列（或先建普通列）
+```
+
+**验证**
+```sql
+select indexrelname, idx_scan, pg_size_pretty(pg_relation_size(indexrelid)) sz
+from pg_stat_user_indexes where relname='prices_monthly' order by idx_scan;
+-- 观察 1 周：idx_prices_month 若 idx_scan 仍为 0，可再删
+explain (analyze, buffers) select symbol,month,adj_close from public.prices_monthly
+ where symbol='AAPL' and month between '2010-01' and '2025-12';   -- 期望 Index Only Scan on idx_prices_export
+```
+
+**回滚**：`create index concurrently` 原索引即可（几秒，不阻塞）。
+
+### P3 — 约束上线（30 分钟）
+
+按 §6.3.2 的 `ADD ... NOT VALID` → `VALIDATE` 两步。**注意一个致命顺序**：`prices_source_fk` 依赖 `data_source` 已有全部 7 个 `source` 取值（含 `sina_repaired+eodhd`），所以 **P7 的 M1 段（建 `data_source` + 灌 4 个历史值）必须先做**，或者说 P3 与 P7 的 M1 子步骤要合并成一次窗口。
+
+**验证**
+```sql
+select conname, convalidated from pg_constraint
+ where conrelid='public.prices_monthly'::regclass order by 1;   -- 期望全部 t
+-- 现有数据是否满足（在 VALIDATE 之前先跑一遍，避免 VALIDATE 报错回滚）
+select count(*) from public.prices_monthly where month !~ '^[0-9]{4}-(0[1-9]|1[0-2])$';   -- 期望 0
+select count(*) from public.prices_monthly where adj_close <= 0;                            -- 期望 0
+select distinct source from public.prices_monthly
+ where source not in (select source_id from public.data_source);                            -- 期望 0 行
+```
+
+**回滚**：`alter table public.prices_monthly drop constraint <name>;`（ACCESS EXCLUSIVE，ms）。
+
+### P4 — 选源视图化（90 分钟，最高风险）
+
+**这是唯一一步会切换"站点数据来源"的操作**，必须按下面 6 个子步走，每步都有独立回滚点。
+
+```sql
+-- ① 建决策表并回填（只读旁路，不影响任何现有读写）
+--    见 §6.4.1 / §6.4.3
+-- ② 建"影子视图"（名字带 _v，避免与现有表冲突；DDL 同 §6.4.4）
+create or replace view public.series_selected_v with (security_invoker = true) as
+  select p.symbol, p.month, p.adj_close, p.raw_close, p.source, p.basis, p.quality, p.fetched_at
+  from public.prices_monthly p
+  join public.series_pick k on k.symbol = p.symbol and k.source_id = p.source
+  where p.month >= k.from_month;
+revoke all on public.series_selected_v from anon, authenticated;
+grant select on public.series_selected_v to anon, authenticated;
+```
+
+**③ 对账（必须在 `repeatable read` 里做，否则 CI 写入会造成假差异）**
+
+```sql
+begin isolation level repeatable read;
+
+-- 行数
+select (select count(*) from public.series_selected)      as legacy_rows,   -- 117,113
+       (select count(*) from public.series_selected_v)    as view_rows,     -- 期望相等
+       (select count(distinct symbol) from public.series_selected) as legacy_syms,
+       (select count(distinct symbol) from public.series_selected_v) as view_syms;
+
+-- 双向 EXCEPT ALL（比 md5 更能定位差异）
+select 'legacy_only' as side, count(*) from (
+  select symbol,month,adj_close,raw_close,source,basis from public.series_selected
+  except all
+  select symbol,month,adj_close,raw_close,source,basis from public.series_selected_v) x
+union all
+select 'view_only', count(*) from (
+  select symbol,month,adj_close,raw_close,source,basis from public.series_selected_v
+  except all
+  select symbol,month,adj_close,raw_close,source,basis from public.series_selected) y;
+
+-- 指纹：两侧用同一表达式（series_fingerprint() 定义在视图上，切换完成后再用更省事）
+with f(tag, fp) as (
+  select 'legacy',
+         'sha256:' || encode(extensions.digest(coalesce(string_agg(
+           symbol||'|'||month||'|'||coalesce(adj_close::text,''), E'\n' order by symbol,month),''),'sha256'),'hex')
+    from public.series_selected where month between '2008-01' and '2026-12'
+  union all
+  select 'view',
+         'sha256:' || encode(extensions.digest(coalesce(string_agg(
+           symbol||'|'||month||'|'||coalesce(adj_close::text,''), E'\n' order by symbol,month),''),'sha256'),'hex')
+    from public.series_selected_v where month between '2008-01' and '2026-12'
+) select tag, fp from f;                                                    -- 两行必须完全相同
+
+-- 逐票选源是否与旧规则一致（差异必须为 0，否则说明回填规则写错了）
+select count(*) from public.series_pick k
+ join (select symbol, source from (
+         select symbol, source, row_number() over (
+           partition by symbol order by max(case when basis='total_return' then 0 else 1 end),
+             case source when 'alphavantage' then 1 when 'yahoo_relay' then 2
+                         when 'eodhd' then 3 when 'hf_amirtrader' then 3
+                         when 'hf_ayushkhaire' then 4 when 'sina_repaired+eodhd' then 4
+                         else 5 end, count(*) desc) rn
+           from public.prices_monthly where month >= '2008-01' group by symbol, source) q
+        where rn=1) old on old.symbol=k.symbol
+ where old.source is distinct from k.source_id;                              -- 期望 0
+commit;
+```
+
+**④ 单事务切换**（毫秒级排他）
+
+```sql
+begin;
+set local lock_timeout='3s';
+do $$
+begin
+  if exists (select 1 from pg_class c join pg_namespace n on n.oid=c.relnamespace
+              where n.nspname='public' and c.relname='series_selected' and c.relkind='r') then
+    execute 'alter table public.series_selected rename to series_selected_legacy';
+  end if;
+  if exists (select 1 from pg_class c join pg_namespace n on n.oid=c.relnamespace
+              where n.nspname='public' and c.relname='series_selected_v' and c.relkind='v') then
+    execute 'alter view public.series_selected_v rename to series_selected';
+  end if;
+end $$;
+commit;
+-- 权限：视图不继承旧表的 grant，必须显式给
+revoke all on public.series_selected from anon, authenticated;
+grant select on public.series_selected to anon, authenticated;
+```
+
+**⑤ 切换前后各跑一次站点导出，逐字节对比**
+```bash
+python runner.py site_build.py && git diff --stat docs/data/
+# 期望：signal.json / curve.json / strategy_history.json 无变化（或仅 created_at 变）
+```
+**这是最终裁判**：`docs/data/*.json` 是用户看到的数字，比任何 SQL 对账都硬。
+
+**⑥ 回滚**（秒级）
+```sql
+begin;
+set local lock_timeout='3s';
+alter view  public.series_selected rename to series_selected_v;
+alter table public.series_selected_legacy rename to series_selected;
+commit;
+```
+并把 `collect-full.yml` 的 `python db_select.py` 步骤恢复（或 `git revert` 那一个 commit）。
+**保留期**：`series_selected_legacy` 至少留 14 天（占用 ~15 MB），确认 5 次月度换仓无误后再 `drop table`。
+
+### P5 — 数据集快照瘦身（45 分钟）
+
+`baseline_v1` 的 229,114 行是 2026-10-31 从 `static/prices_unified` 灌进来的死重量（三源拼接口径，与当前"每票单源"口径**不同**，留着比删掉更危险：`dataset_rows` 的可追溯性校验会被它污染）。
+
+```sql
+-- ① 归档哈希（留证，不留数据）
+insert into public.datasets(definition, status)
+select jsonb_build_object('archived_from','baseline_v1','input_hash', input_hash,
+                          'symbols', symbols, 'rows', months, 'reason','只保留哈希，避免与单源口径混淆'),
+       'superseded'
+from public.datasets where name='baseline_v1';
+
+-- ② 关掉行级守卫再分批删（guard_locked_dataset 会为每一行查一次 datasets，22.9 万行 = 22.9 万次索引查找）
+begin;
+set local lock_timeout='3s';
+alter table public.dataset_rows disable trigger trg_guard_rows;
+commit;
+do $$
+declare n int;
+begin
+  loop
+    delete from public.dataset_rows where ctid in (
+      select ctid from public.dataset_rows where dataset_id=1 limit 5000);
+    get diagnostics n = row_count;
+    commit;
+    exit when n = 0;
+  end loop;
+end $$;
+begin;
+alter table public.dataset_rows enable trigger trg_guard_rows;
+commit;
+delete from public.datasets where name='baseline_v1';
+-- ③ 回收膨胀（免费额度紧张时做；会锁表，别在交易时段）
+vacuum (full, analyze) public.dataset_rows;   -- ⚠️ 仅在确认可停 30 s 时执行
+```
+
+**验证**：`select count(*) from dataset_rows` 应等于 `select sum(months) from datasets where status in ('draft','verified','locked')`。
+**回滚**：① 的哈希行 + 离线备份（`pg_dump -t dataset_rows` 事先做，约 25 MB）。
+
+### P6 — 锁合并（90 分钟 + 2 周双写）
+
+```sql
+-- ① 建 data_lock（§6.5.1）+ 灌入两把旧锁（§6.5.7 前半）
+-- ② 代码双写（见 §8：lock_stage.py / lock_symbols.py 各加一段 insert into data_lock）
+-- ③ 对账：旧表与 data_lock 必须逐条一致
+select 'locked_symbols' as src,
+       (select count(*) from public.locked_symbols) as old_cnt,
+       (select count(*) from public.data_lock where scope='symbol_month') as new_cnt
+union all
+select 'locks',
+       (select count(*) from public.locks where status='locked'),
+       (select count(*) from public.data_lock where scope='month_range');
+-- 期望：两侧相等
+
+-- ④ 切守卫：把 trg_guard_months 指向 guard_frozen_prices（§6.5.4）
+-- ⑤ 旧表改名 + 建兼容视图（§6.5.7 后半）
+```
+
+**验证**（与 P1 相同的三个事务实验，期望结果一致）+ `select * from public.locks; select * from public.locked_symbols;` 视图可读、行数一致。
+**回滚**：把 `trg_guard_months` 指回 `guard_locked_months`，旧表改名回来，`drop table data_lock`。
+**双写期结束条件**：连续 14 天、≥ 2 次月度换仓、两表计数每夜对账为 0 差异 → 才允许 `drop table locks_legacy, locked_symbols_legacy`。
+
+### P7 — 源表合并（60 分钟）
+
+按 §6.1 执行。**同一窗口内必须改 3 个文件**（`db_sources.py` 写 `data_source`、`db_credentials.py` 写 `data_source_secret`、`relay_source.load_priority_from_db` 读 `data_source`），否则 `db_sources.set_status()` 会对着视图 UPDATE 报错。
+
+**验证**
+```sql
+select count(*) from public.data_source;                       -- 期望 ≥ 44
+select count(*) from public.source_registry;                   -- 视图：应与上一条相等
+select count(*) from public.data_sources;                      -- 视图：3 行，且不含 credential 列
+select count(*) from public.prices_monthly p
+ where not exists (select 1 from public.data_source d where d.source_id=p.source);  -- 期望 0
+```
+**回滚**：`drop view source_registry; alter table source_registry_legacy rename to source_registry;`（同理 data_sources），代码 `git revert`。
+
+### P8 — 审计补链（45 分钟）
+
+```sql
+-- 列与字典见 §6.6.3 / §6.6.4；代码改 3 处：
+--   db_prices.log_run()      → 写 run_id / symbols_* / rows_written / stats(jsonb) / duration_ms
+--   db_validate.main()       → 每条 validations 带同一个 run_id + fingerprint=series_fingerprint()
+--   db_dataset.build()       → validations 带 subject_kind='dataset' + subject_id
+```
+**验证**
+```sql
+-- 跑一次 CI 后
+select count(*) filter (where run_id is null) as no_run, count(*) from public.validations;  -- no_run 应为 0
+select * from public.fetch_runs_clean order by id desc limit 5;   -- symbols_ok / rows_written 分列，不再混用
+select check_name, count(*) from public.validations
+ where check_key is null group by 1;                              -- 期望 0 行
+```
+**回滚**：纯加列，回滚 = 不读新列（无需 DDL 回退）。
+
+### P9 — 接入层重写与收尾（60 分钟）
+
+```sql
+-- ① 替换 promote_staging（§6.7），先在一个事务里跑一次演练
+begin;
+select * from public.promote_staging(1000);   -- 期望 (inserted, rejected, claimed)
+rollback;
+-- ② 真的跑：pg_cron 下次自动调用；或手动 select promote_staging();
+-- ③ 收尾（确认两周无异常后）：
+alter table public.prices_monthly drop column if exists month_start_old;  -- 若有
+drop table if exists public.series_selected_legacy;
+drop table if exists public.locks_legacy, public.locked_symbols_legacy;
+drop table if exists public.source_registry_legacy, public.data_sources_legacy;
+drop table if exists public.sectors_legacy;
+comment on column public.datasets.months is 'DEPRECATED: 行数（等同 row_count）；新代码用 row_count';
+```
+
+**P9 的特殊验证**（免 secret 通道必须仍可用）：
+```bash
+python staging_write.py          # 应打印"写入 1 行"（探测行）
+# 然后 10 分钟内 pg_cron 会 promote；检查：
+#   select count(*) from ingest_staging where symbol='ZZPROBE';
+#   select * from prices_monthly where symbol='ZZPROBE';
+# 清理：
+#   delete from prices_monthly where symbol='ZZPROBE' and source='probe';
+```
+
+---
+
+## 8. 代码切换矩阵（哪一步改哪个文件）
+
+| 模块 | 现读写对象 | 受影响阶段 | 必改内容 | 不改的后果 | 阻断? |
+|---|---|---|---|---|---|
+| `db_prices.py` | prices_monthly / validations / fetch_runs；委托 `db_select.load_all` | **P8** | `log_run()` 写新列；`_db_stamp()` 里 `sum(adj_close) from series_selected` 变成视图聚合（慢 ~100 ms，可接受） | 台账继续混单位 | 否 |
+| `db_select.py` | `series_selected`（DDL + BUILD + load_all） | **P4** | `build_table()` → `refresh_pick()`：只 `insert into series_pick ... on conflict do update`（**禁止再 DROP/RENAME**）；`load_all()` 的 6 段分片可保留 | 下一次 CI 会 `create table if not exists series_selected` → 与视图同名 → **该步骤直接报错**（响但不静默） | **是** |
+| `db_ref.py` | members / sectors | **P7** | `bootstrap()` 的 `create table if not exists sectors` 会与视图冲突（被 try/except 吞掉并打印），改为只读 | 打印噪音，不致命 | 否 |
+| `db_dataset.py` | datasets / dataset_rows | **P5** | 只在 `status→locked` 时 materialize；`insert into datasets` 带 `definition`；`months` 继续写（`row_count` 是生成列） | 每天一份 11.8 万行副本 | 否 |
+| `lock_stage.py` | locks（upsert） | **P1 → P6** | P1：不再 `create or replace` 旧触发器函数；P6：写 `data_lock`（append-only，作废=插 void 行） | P1 的函数会被 CI 覆盖回去 | **是**（P1） |
+| `lock_symbols.py` | locked_symbols + 触发器函数 | **P1 → P6** | 同上：**必须删掉 `ensure()` 里的 `create or replace function`**（函数归 DB 管，不归脚本管） | 每 6 小时覆盖修复 | **是**（P1） |
+| `db_validate.py` | series_selected / validations | **P8** | 写 `run_id` + `fingerprint` | 审计结论无法绑定版本 | 否 |
+| `db_sources.py` | source_registry | **P7** | 表名改 `data_source`（2 处） | 对视图 UPDATE 报错 | **是** |
+| `db_credentials.py` | data_sources | **P7** | 写 `data_source_secret` | 同上 | **是** |
+| `staging_write.py` | ingest_staging | **P9** | 加 `batch_id`；失败重试改为"整批重推"（不再依赖 promoted 幂等） | 重复行 | 否 |
+| `allocate_work.py` | work_plans | **P8** | 写 `plan_date`（同名唯一键 → 每日一份） | 无限增长 | 否 |
+| `variant_b.py` / `site_build.py` / `audit_b.py` / `selftest.py` | 全部通过 `db_prices.load_all()` | **无** | **零改动** | —— | 否 |
+
+> **这也是本次重构能"不停机"的根本原因**：读路径已经收敛到 `db_prices.load_all()` 一个函数（→ `db_select.load_all()` → `series_selected`），所以把 `series_selected` 从表换成同名视图，**读侧 0 行代码改动**。写侧分散在 5 个模块，逐个替换。
+
+---
+
+## 9. 风险清单（重构期间站点不能停）
+
+| # | 风险 | 触发条件 | 影响 | 缓解 |
+|---|---|---|---|---|
+| **R1** | **排他锁把 CI 堵死** | `ALTER TABLE ... ADD COLUMN ... GENERATED ... STORED`（重写全表 2–4 s）、`ALTER TYPE`（重写 + 长锁）、`VACUUM FULL`（分钟级）、`CREATE INDEX`（非并发，全表写锁） | 所有读写排在该 DDL 后面 → `promote_staging`（每 10 min）堆积、`quotes.yml` 超时 | ① `set lock_timeout='3s'` **抢不到就失败重来**；② 生成列只做一次且放在 04:00 UTC；③ 索引一律 `CONCURRENTLY`；④ 永不做 `VACUUM FULL`/`CLUSTER`/`ALTER TYPE` |
+| **R2** | **窗口撞上采集** | `:15/:25` 每 6h 的 collect 批次、`03:10` daily-backfill、`10:00/22:00` monthly-pick | P4 期间 `db_select.py` 会与切换互相打断 | 窗口定在 **04:00–05:00 / 07:00–09:00 UTC**；P4 前先 `workflow disable` 掉 collect-full（`gh workflow disable collect-full.yml`），完成后再 enable |
+| **R3** | **DDL 走错连接** | 用 6543 事务池跑 `CREATE INDEX CONCURRENTLY` | 报 `cannot run inside a transaction block`；或 `SET LOCAL` 不生效导致长锁 | 全部 DDL 走 **5432 直连 / Supabase SQL Editor**；迁移脚本开头断言 `select inet_server_port()` |
+| **R4** | **RLS 改动静默打断站点读** | policy 写成 `for all`（现状 bug）或漏建同名视图的 grant | REST 返回 0 行 → 页面数字变 0/空白，**不报错** | 每次改 policy 后立刻跑外部探针（读 3 张表各 1 行 + 写探测），并 `curl` 一次线上页面 JSON 比对 |
+| **R5** | **双写不一致** | P6 期间两个写入端只成功一个 | 锁视图与实际守卫语义分叉 | 每夜对账 SQL（§7 P6 ③）；差异 > 0 就告警并暂停推进 |
+| **R6** | **`db_select.py` 把视图 DROP 掉** | P4 后忘记改 CI 步骤 | `create table if not exists series_selected` 与视图重名 → 该 step 失败（不静默），但整条 collect-full 会红 | P4 同窗口改代码 + 改 workflow；保留 `git revert` 一键路径 |
+| **R7** | **对账被 CI 写入污染** | 对账 SQL 不在同一快照里 | 假的"差异 N 行"，可能误判回滚 | 对账统一 `begin isolation level repeatable read`；或先 `pg_advisory_xact_lock` 让采集等 30 s |
+| **R8** | **删数据无法回滚** | P5 批量 DELETE、P9 drop legacy 表 | 数据丢失 | 删之前 `pg_dump -t <table> -f bak.sql`；legacy 表保留 ≥ 14 天；`datasets` 里留哈希行 |
+| **R9** | **免费额度打满** | Supabase 500 MB：现 ~70 MB；若保留 legacy 副本 + 物化视图 + 索引 | 写入失败（磁盘满）→ 全站停 | 容量预算见 §11；P5 删 22.9 万行、P2 删 2 索引，**先减后加** |
+| **R10** | **回滚脚本本身没演练** | 第一次真用就是出事时 | 回滚失败 | 每个 P 阶段在**事务里**预演一次回滚（`begin; ...; rollback;`），P4/P6 还要在影子名上演一遍 |
+
+---
+
+## 10. ⑤不建议改的地方（以及为什么）
+
+| # | 不改 | 理由（量化） |
+|---|---|---|
+| **D1** | **不重命名任何既有表** | 17 张表被 ~20 个模块硬编码、被 13 个 workflow 间接触发。改名 → 至少 30 处改动，每处都要与 2 小时一次的 CI 抢窗口，收益 = 0（视图已经能把旧名保住）。代价/收益严重倒挂 |
+| **D2** | **不把 `month text` 改成 `date`** | 会重写 35 万行（ACCESS EXCLUSIVE 数秒）+ 打断 6 个模块的字符串比较 + 打断 PostgREST 的 `month=gte.2010-01` 过滤器 + 打断 `locks.scope_from` 的比较。**加一个 `month_start` 生成列就够**（未来分区也用它） |
+| **D3** | **不合并 `prices_monthly` 与 `dataset_rows`** | 生命周期冲突（J3）：一个要写到冻结日，一个写一次永不变。合并后每次价格修正都会改写审计快照 → "当初发布的就是这些数"这个承诺失效 |
+| **D4** | **不把 `series_selected` 做成 `prices_monthly.is_selected` 列** | J1：换源要 UPDATE 该票全部月份（~140 行/只 × 847 只 = 11.7 万行/次），且撞上冻结锁；更糟的是把"跨行批决策"塞进行级写路径，采集端必须懂选源规则 |
+| **D5** | **不重命名 `datasets.months` / `fetch_runs.ok`** | 名字确实误导，但改名要动 4 个模块 + 所有历史查询。**加 `row_count` 生成列 + `comment on column` + `fetch_runs_clean` 视图**，成本 1/10，效果相同（旧名可读，新名可写） |
+| **D6** | **不把 `holdings` 迁到 `app` schema** | PostgREST 只暴露 `public`（`db-schemas` 改配置要动 Supabase 控制台且要重启 API）。浏览器 `app.js` 直接 POST `/rest/v1/holdings`，迁 schema = **站点云同步立刻 404**。改为：加 CHECK 约束 + payload 大小上限 + 保留策略，等有维护窗口再迁 |
+| **D7** | **不给 `prices_monthly` 加代理主键 `id`** | 现在的 PK `(symbol,month,source)` 正是 upsert（`on conflict`）的冲突键，换成 `id` 就丢掉幂等；且多一个 4 字节/行的列 + 一个索引，35 万行白涨 ~3 MB |
+| **D8** | **不把 `sector` 规范化成独立 `sector` 表** | 只有 11 个取值。建维表 = 每次选股多一次 join、多一个 FK、多一次维护，换来的是"防拼写错误"——用 `CHECK (sector in (...))` 一行就够 |
+| **D9** | **不引入 Alembic/Django 迁移框架** | 项目是脚本式 + CI 直接跑，没有 ORM 上下文。引入迁移框架 = 多一层依赖 + 多一套心智模型 + CI 要多装包。**用 `sql/NNN_*.sql` + `schema_migration` 账本**（§6 M0）足够，且离线可审 |
+| **D10** | **不现在分区** | 见 §11：35 万行 ≈ 30–55 MB，分区收益为负（规划时间 ×18、upsert 路由、唯一键限制）。留 `month_start` 作锚点，到阈值再上 |
+| **D11** | **不把 `validations` 和 `fetch_runs` 合并** | 粒度不同（run 1:N check）。合并后每条检查重复存 run 的元数据，写放大且丢失一致性约束 |
+| **D12** | **不动 `locks.status='draft'` 之外的语义扩展** | 现在只有 locked/draft；新表用 locked/void 两态 + `supersedes_id` 链即可，不要引入 `pending_approval` 之类无消费者的状态 |
+
+---
+
+## 11. 容量与分区结论
+
+### 11.1 现状容量（估算，附测量 SQL）
+
+| 对象 | 行数 | 估算体积 | 说明 |
+|---|---|---|---|
+| `prices_monthly` 堆 | 351,889 | ~30–45 MB | 每行 ≈ 80–100 B（numeric×2 + text×2 + timestamptz） |
+| `prices_monthly` 索引 ×4 | — | ~25 MB | 删 2 个后约 −15 MB |
+| `series_selected`（表） | 117,113 | ~10 MB + 索引 3 MB | **P4 后归零**（视图不占空间） |
+| `dataset_rows` | 347,833 | ~30 MB | **P5 后归零**（只留锁定快照） |
+| 其余 14 张表 | < 3,000 | < 2 MB | |
+| **合计** | | **~100 MB** | 免费额度 500 MB |
+
+```sql
+select relname, n_live_tup,
+       pg_size_pretty(pg_total_relation_size(c.oid)) total,
+       pg_size_pretty(pg_relation_size(c.oid)) heap,
+       pg_size_pretty(pg_indexes_size(c.oid)) idx
+from pg_class c join pg_namespace n on n.oid=c.relnamespace
+where n.nspname='public' and c.relkind in ('r','m') order by pg_total_relation_size(c.oid) desc;
+```
+
+**P4 + P5 + P2 之后预计降到 ~40–50 MB**，为"未来存日线"留出空间。
+
+### 11.2 要不要分区？——不要，原因与阈值
+
+**为什么现在分区是负收益**
+
+1. **访问模式不匹配**：主查询是"全量扫 847 只票的全部月份"（导出）+ "单票全历史"（`db_prices.series`）+ "月份区间"（锁校验）。只有第 3 类能受益于月份分区；前两类在 `RANGE(month)` 下要扫全部 18 个分区，规划时间从 ~0.3 ms 涨到 ~5 ms，执行不变。
+2. **`HASH(symbol)` 更糟**：把全表扫描摊到 N 个分区，两边都要扫；且 `PK(symbol,month,source)` 虽包含分区键（合法），但 `on conflict` 每次要路由，`execute_values` 批量 upsert 的吞吐会掉。
+3. **`LIST(symbol)` 不现实**：847 个分区，`pg_class` 膨胀，每个连接都要打开 847 个 relation。
+4. **唯一约束代价**：分区表的唯一约束必须包含分区键。按 month 分区恰好满足（PK 已含 month），按 year 分区则要加 `year` 列——又多一列冗余。
+5. **体量不配**：35 万行、40 MB，B-tree 高度 3 层，全表 seq scan 约 30–60 ms。分区的运维复杂度（attach/detach、默认分区、autovacuum 逐分区）远超收益。
+
+**什么时候该分区（量化阈值，满足任一条）**
+
+| 触发条件 | 阈值 | 建议分区方式 |
+|---|---|---|
+| 行数 | > 5,000,000 行（≈ 14 倍当前） | `PARTITION BY RANGE (month_start)`，按年，18+1 个分区 |
+| 单表体积 | > 1 GB | 同上 |
+| 开始存**日线** | 35 万 → 8,000 万行（250 倍） | **必须按月分区** + 冷热分离（`DETACH` 冷分区到对象存储） |
+| 需要"零成本冻结" | 冻结操作 > 每年 4 次 | 见下 |
+
+**分区真正的杀手级收益（也是唯一值得为它付出复杂度的理由）**：冻结可以变成**权限操作**——给写入角色只授"当年 + 未锁年份"分区的 INSERT/UPDATE，冻结时 `REVOKE UPDATE ON prices_monthly_2020 FROM pipeline_writer`，全程 0 行扫描、0 触发器开销。**但这要求写入者不是 `postgres` 超级用户**（超级用户绕过权限检查）。当前所有写入都用 `postgres.<ref>` 直连 → 这条先得换成专用角色 `pipeline_writer`。
+
+**结论**：现在用"触发器 + `data_lock`"；当年行数破 500 万、或开始接日线、或写入角色改造完成，再上按年 `RANGE(month_start)` 分区。生成列 `month_start` 已经把这条路留好了（`ALTER TABLE ... PARTITION BY` 仍要重写一次，约 1–2 分钟，可接受）。
+
+---
+
+## 12. 验收 SQL 总表（迁移完成后的"出院检查"）
+
+| # | 检查 | SQL | 期望 |
+|---|---|---|---|
+| A1 | 匿名不可写事实表 | 外部探针：POST/PATCH/DELETE `prices_monthly` | 401/403 |
+| A2 | 匿名可读导出表 | `select count(*) from series_selected`（anon） | 117,113 ± CI 增量 |
+| A3 | 历史不可改 | `begin; update prices_monthly set adj_close=adj_close where symbol='MSFT' and month='2020-06'; rollback;` | 抛 `frozen:` |
+| A4 | 当年可写 | 同上，`month='2026-11'` | 成功（再 rollback） |
+| A5 | 选源不可偷换 | `begin; update series_pick set source_id='sina_repaired' where symbol='MSFT'; rollback;` | 抛 `选源已冻结` |
+| A6 | 全收益可复算 | `select count(*) from corporate_actions;` + `select count(*) from prices_monthly where adj_factor is null and basis='total_return';` | 前者 > 0，后者 → 0（逐步） |
+| A7 | 三处指纹一致 | `series_fingerprint('2008-01','2026-12')` 与 `docs/data/` 构建日志里的 hash | 相等 |
+| A8 | 审计可回溯 | `select count(*) from validations where run_id is null and ran_at > now()-interval '1 day';` | 0 |
+| A9 | 单位不再混用 | `select count(*) from fetch_runs_clean where symbols_ok is null and status='ok';` | 0（新行） |
+| A10 | 无孤儿外键 | `select count(*) from prices_monthly p where not exists (select 1 from data_source d where d.source_id=p.source);` | 0 |
+| A11 | 索引不再冗余 | `select indexrelname from pg_stat_user_indexes where relname='prices_monthly' and idx_scan=0;`（观察 7 天） | 空 |
+| A12 | 站点数字不变 | `python runner.py site_build.py && git diff --stat docs/data/` | 仅 `created_at` 类字段变化 |
+| A13 | 免 secret 通道可用 | `python staging_write.py` → 10 min 后查 `prices_monthly where symbol='ZZPROBE'` | 1 行（测完删） |
+| A14 | 锁表可读且一致 | `select count(*) from locked_symbols;` vs `select count(*) from data_lock where scope='symbol_month'` | 相等 |
+
+---
+
+## 13. 待你拍板的 6 件事
+
+| # | 问题 | 选项 | 我的建议 |
+|---|---|---|---|
+| Q1 | P0/P1 何时执行？ | 立即 / 下个窗口 | **立即**。匿名可写事实表 = 任何人都能改你的历史；标的锁冻死热层 = 当年数据已停更 8 小时 |
+| Q2 | `series_selected` 先上视图还是直接物化视图？ | 视图 / 物化视图 | **先视图**，用 `explain analyze` 实测导出耗时；> 800 ms 再升级 |
+| Q3 | 是否接受"锁定期内不能换源"？ | 接受 / 需要换源流程 | **接受**，换源必须走"新锁版本 + `series_pick_history` 留痕"。这正是你原始要求的"避免换源造假涨幅" |
+| Q4 | 凭据进 Vault 还是留在 `data_source_secret`？ | Vault / 表 | **Vault**（项目已在用）；表方案只作过渡 |
+| Q5 | `baseline_v1` 的 22.9 万行删不删？ | 删 / 留 | **删**（口径与现在不同，留着会污染可追溯性校验），只留哈希 |
+| Q6 | 写入角色要不要从 `postgres` 换成 `pipeline_writer`？ | 换 / 不换 | **建议换**（未来分区冻结靠权限、也避免应用侧误操作绕过 RLS）。但它是独立项目，别和本次重构混做 |
+
+---
+
+## 附录 A：本文与仓库文档的冲突（需一并修正）
+
+| 文件 | 冲突 | 处置 |
+|---|---|---|
+| `docs/DATABASE.md` | 描述 14 张**线上不存在**的表（`instruments`/`picks_yearly`/`equity_history`/`signal_current`/`run_log`…） | 标注"历史方案（未实施）"，指向本文；或按本文重写 |
+| `docs/LOCKING.md` | ① 说"`scope_to >= 新行 month` 即锁"（与线上实际不一致，实际是 `between scope_from and scope_to`）② 说"全收益 75.9%"（实测 81.1%）③ 说"锁定后不可写"（对 `series_selected` 不成立） | 按本文 §6.5 / §3 更新 |
+| `docs/ARCH_PLAN.md` | 目标 schema（`instruments`/`memberships`/`picks_yearly`）与实际迁移方向不同 | 保留为"最初设想"，加一行指向本文 |
+| `output/supabase_cron.sql` | `delete from public.holdings;` 写在脚本第 2 行（一次性脚本，误跑会清空用户云同步数据） | 加注释或移出脚本 |
+

@@ -120,6 +120,13 @@ def build_table():
         cur.execute(BUILD.replace("insert into series_selected", "insert into series_selected_new"))
         cur.execute("drop table if exists series_selected")
         cur.execute("alter table series_selected_new rename to series_selected")
+        # 关键：默认权限已被 revoke，新建的表不会自动获得 anon 读权限
+        # （架构师实测：drop+recreate 之后 anon select = false → CI 的 REST 读会 401）
+        cur.execute("grant select on series_selected to anon, authenticated")
+        # 后置断言：确认 anon 真的能读，否则直接失败而不是静默上线
+        cur.execute("""select has_table_privilege('anon','public.series_selected','SELECT')""")
+        if not cur.fetchone()[0]:
+            raise RuntimeError("重建后 anon 无 SELECT 权限，拒绝继续（否则 CI 读路径会 401）")
         cur.execute("""select count(*), count(distinct symbol), count(distinct source),
                               count(*) filter (where basis='total_return')
                        from series_selected""")
