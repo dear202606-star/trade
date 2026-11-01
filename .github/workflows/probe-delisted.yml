@@ -1,0 +1,20 @@
+name: 退市票源探测（美国出口）
+
+# 目的：171 只退市票只有 Alpha Vantage 能补（25/天 ≈ 7 天）。
+# 中文门户对新浪能拿到退市票（price_only），若东财/雪球有「前复权」，
+# 就能免费拿到全收益。本机访问东财超时，只能在 CI 探。
+
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 探测
+        run: python probe_delisted.py
