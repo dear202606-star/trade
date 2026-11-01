@@ -116,7 +116,9 @@ def refresh(dry_run=False):
                         on conflict (symbol) do update
                           set source = excluded.source, chosen_at = now(),
                               reason = excluded.reason""",
-                [(s, src, "total_return", "auto") for s, src in rows], page_size=500)
+                [(s, src, "total_return", __import__("datetime").datetime.now(
+                    __import__("datetime").timezone.utc), "auto") for s, src in rows],
+                page_size=500)
         cur.execute("select count(*), count(distinct symbol) from v_series")
         n, syms = cur.fetchone()
         print("v_series: %d 行 / %d 只" % (n, syms))
