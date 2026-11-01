@@ -52,7 +52,7 @@ def compute_picks(cur):
         with cand as (
           select symbol, source,
                  max(case when basis = 'total_return' then 0 else 1 end) as basis_rank,
-                 count(*) filter (where month between '2010-01' and '2025-12') as cov
+                 count(*) filter (where month between '2012-01' and '2025-12') as cov
           from prices_monthly
           where month >= '2008-01'
           group by symbol, source
@@ -60,13 +60,19 @@ def compute_picks(cur):
         select symbol, source from (
           select symbol, source,
                  row_number() over (partition by symbol
-                   order by basis_rank,
-                            case source
-                              when 'alphavantage' then 1 when 'yahoo_relay' then 2
-                              when 'eodhd' then 3 when 'stockanalysis' then 3
-                              when 'hf_amirtrader' then 3 when 'hf_ayushkhaire' then 4
-                              when 'sina_repaired+eodhd' then 4 else 5 end,
-                            cov desc) as rn
+                   order by
+                     -- 1) 覆盖够（>=150 个月）且是全收益 最优
+                     case when basis_rank = 0 and cov >= 150 then 0 else 1 end,
+                     -- 2) 其次：覆盖够（不限口径）
+                     case when cov >= 150 then 0 else 1 end,
+                     -- 3) 覆盖越多越好
+                     -cov,
+                     basis_rank,
+                     case source
+                       when 'alphavantage' then 1 when 'yahoo_relay' then 2
+                       when 'stockanalysis' then 3 when 'eodhd' then 4
+                       when 'hf_amirtrader' then 4 when 'hf_ayushkhaire' then 5
+                       when 'sina_repaired+eodhd' then 5 else 6 end) as rn
           from cand
         ) t where rn = 1
     """)

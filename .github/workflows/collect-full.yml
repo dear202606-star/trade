@@ -49,6 +49,10 @@ jobs:
       # Alpha Vantage 每天 25 次额度：交给 daily-backfill（每天 10:30 UTC）单独跑，
       # 这里不跑，否则每 6 小时跑一次会 4 倍超量、全部失败。
 
+      - name: 给「选源非全收益」的标的补 Yahoo 全收益
+        continue-on-error: true
+        run: python fill_yahoo_gaps.py --limit 220
+
       - name: 重建选源（每票单源）
         run: python db_select.py
 
