@@ -117,9 +117,11 @@ def dataset_id(name):
 
 def log_validation(dataset, check_name, status, detail=""):
     with connect() as c, c.cursor() as cur:
-        cur.execute("""insert into validations(dataset_id, check_name, status, detail)
-                       values ((select id from datasets where name=%s), %s, %s, %s)""",
-                    (dataset, check_name, status, detail))
+        cur.execute("""insert into sys_event(kind, source, subject, status, detail,
+                                            dataset_id, finished_at)
+                       values ('validation','db_prices',%s,%s,%s,
+                               (select id from datasets where name=%s), now())""",
+                    (check_name, status, detail, dataset))
 
 
 def stats():
@@ -248,10 +250,15 @@ def log_run(source, requested, ok, failed=0, duration_s=0.0, note=""):
     """统一采集台账：每次运行都写一行，含耗时与失败数"""
     try:
         with connect() as c, c.cursor() as cur:
-            cur.execute("""insert into fetch_runs(source, requested, ok, failed,
-                                                   started_at, finished_at, note)
-                           values (%s,%s,%s,%s,
-                                   now() - make_interval(secs => %s), now(), %s)""",
-                        (source, requested, ok, failed, float(duration_s), (note or "")[:300]))
+            cur.execute("""insert into sys_event(kind, source, subject, status, detail,
+                                                metrics, started_at, finished_at)
+                           values ('fetch', %s, 'run',
+                                   case when %s > 0 then 'warn' else 'ok' end,
+                                   %s,
+                                   jsonb_build_object('requested', %s, 'ok', %s, 'failed', %s,
+                                                      'duration_ms', %s),
+                                   now() - make_interval(secs => %s), now())""",
+                        (source, failed, (note or "")[:300], requested, ok, failed,
+                         int(float(duration_s)*1000), float(duration_s)))
     except Exception as e:
         print("台账写入失败：%s" % str(e)[:80])

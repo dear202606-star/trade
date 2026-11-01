@@ -146,7 +146,8 @@ def main():
         cur.execute("""create table if not exists work_plans(
                          id serial primary key, generated timestamptz default now(),
                          plan jsonb)""")
-        cur.execute("insert into work_plans(plan) values (%s)",
+        cur.execute("insert into sys_event(kind, source, subject, status, metrics, finished_at) "
+                    "values ('plan','allocate_work','daily','ok',%s, now())",
                     (json.dumps(plan, ensure_ascii=False),))
 
     print("标的 %d ｜ 有缺口 %d ｜ 已退市 %d" % (len(need), plan["gaps_total"], len(delisted)))

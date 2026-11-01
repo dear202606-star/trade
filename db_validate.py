@@ -168,8 +168,10 @@ def main():
         cur.execute("select id from datasets where name=%s", (a.dataset,)) if a.dataset else None
         did = cur.fetchone()[0] if a.dataset and cur.rowcount else None
         for name, status, detail in ROWS:
-            cur.execute("""insert into validations(dataset_id, check_name, status, detail)
-                           values (%s,%s,%s,%s)""", (did, name, status, detail))
+            cur.execute("""insert into sys_event(kind, source, subject, status, detail,
+                                                dataset_id, finished_at)
+                           values ('validation','db_validate',%s,%s,%s,%s, now())""",
+                        (name, status, detail, did))
     c.close()
     ok = sum(1 for r in ROWS if r[1] == "pass")
     print("\n写入 validations：%d 条（通过 %d / 警告 %d / 失败 %d）" % (
