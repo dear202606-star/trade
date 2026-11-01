@@ -99,9 +99,12 @@ def main():
         syms = [s.strip().upper() for s in a.symbols.split(",") if s.strip()]
     else:
         with c.cursor() as cur:
-            cur.execute("""select distinct symbol from prices_monthly
-                           where source='yahoo_relay' and basis='total_return'
-                           order by symbol limit %s""", (a.limit,))
+            # 增量：跳过已经采过事件的标的，避免每次重复抓同一批
+            cur.execute("""select distinct p.symbol from prices_monthly p
+                           where p.source='yahoo_relay' and p.basis='total_return'
+                             and not exists (select 1 from corporate_actions c
+                                              where c.symbol = p.symbol)
+                           order by p.symbol limit %s""", (a.limit,))
             syms = [r[0] for r in cur.fetchall()]
     print("目标 %d 只" % len(syms))
 

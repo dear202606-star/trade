@@ -45,7 +45,7 @@ EXPECTED_TABLES = [
 EXPECTED_VIEWS = [
     "series_selected", "v_series", "sectors", "source_registry", "data_sources",
     "locks", "locked_symbols", "fetch_runs", "validations", "work_plans",
-    "v_membership_open",
+    "v_membership_open", "v_collect_state", "v_collect_summary",
 ]
 REST_READABLE = ["series_selected", "v_series", "sectors", "source_registry",
                  "data_sources", "locked_symbols", "locks", "fetch_runs",

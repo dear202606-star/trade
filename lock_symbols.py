@@ -71,9 +71,14 @@ def candidates():
               where month between %s and %s
               group by symbol
             )
-            select symbol, n from s
-            where n >= %s and tr = n
-            order by symbol
+            select s.symbol, s.n from s
+            where s.n >= %s and s.tr = s.n
+              and not exists (select 1 from data_lock l
+                               where l.scope='symbol_month' and l.symbol = s.symbol
+                                 and l.status='locked'
+                                 and not exists (select 1 from data_lock x
+                                                  where x.supersedes_id=l.id and x.status='void'))
+            order by s.symbol
         """, (Y0, Y1, MIN_MONTHS))
         rows = cur.fetchall()
         out = []
