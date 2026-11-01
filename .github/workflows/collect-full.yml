@@ -68,6 +68,10 @@ jobs:
         continue-on-error: true
         run: python lock_symbols.py --lock
 
+      - name: 采集分红/拆股事件（让全收益可独立复算）
+        continue-on-error: true
+        run: python fetch_actions.py --limit 160
+
       - name: 校验锁是否仍然有效
         continue-on-error: true
         run: python verify_locks.py
