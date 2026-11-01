@@ -45,6 +45,25 @@ def db():
                             dbname="postgres", connect_timeout=20, sslmode="require")
 
 
+def _reason_text(ratio, cov):
+    """把「缺多少」说清楚：缺口里多少是源限制（退市票），多少是还没轮到"""
+    need = cov.get("need") or 0
+    full = cov.get("full") or 0
+    miss = cov.get("missing") or 0
+    head = "全收益口径 %.1f%%" % (100.0 * ratio)
+    if not need:
+        return head
+    tail = "已覆盖 %d/%d 只" % (full, need)
+    if miss:
+        tail += "，缺 %d 只" % miss
+        dl = cov.get("delisted_gap")
+        if dl is not None and miss:
+            share = 100.0 * dl / miss
+            if share >= 50:
+                tail += "（%.0f%% 为退市票，仅 Alpha Vantage 有数据）" % share
+    return head + " · " + tail
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dataset", default="")
@@ -162,6 +181,15 @@ def main():
             _row = _cur.fetchone()
             coverage_detail = {"need": _row[0], "missing": _row[1],
                                "partial": _row[2], "full": _row[3]}
+            _cur.execute("""
+              select count(*) from members m
+               where m.symbol in (
+                 select symbol from members where end_date >= '2009-06-30'
+                 except
+                 select symbol from series_selected
+                  where month between '2012-01' and '2025-12' and basis='total_return')
+                 and m.end_date < '2099-01-01'""")
+            coverage_detail["delisted_gap"] = _cur.fetchone()[0]
         _c.close()
     except Exception as _e:
         print("覆盖率明细失败：%s" % str(_e)[:60])
@@ -173,7 +201,7 @@ def main():
             "generated_at": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "total_return_ratio": round(_tr_ratio or 0, 4),
             "degraded": (_tr_ratio or 0) < 0.999,
-            "reason": "全收益口径 %.1f%%（目标 100%%）" % (100.0 * (_tr_ratio or 0)),
+            "reason": _reason_text(_tr_ratio or 0, coverage_detail),
             "checks": [{"name": n, "status": st, "detail": d} for n, st, d in ROWS],
             "coverage": coverage_detail,
             "summary": {"pass": sum(1 for r in ROWS if r[1] == "pass"),
