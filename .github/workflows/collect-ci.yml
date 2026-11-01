@@ -27,7 +27,7 @@ jobs:
           python-version: "3.12"
 
       - name: 安装依赖
-        run: pip install -q pandas requests
+        run: pip install -q pandas requests psycopg2-binary
 
       - name: 采集并写入暂存表
         env:
