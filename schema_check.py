@@ -106,7 +106,8 @@ def check_consistency(cur):
         ("sectors", "select count(*) from sectors",
          "select count(*) from symbols where sector is not null"),
         ("locked_symbols", "select count(*) from locked_symbols",
-         "select count(*) from data_lock where scope='symbol_month' and status='locked'"),
+         """select count(*) from data_lock l where l.scope='symbol_month' and l.status='locked'
+            and not exists (select 1 from data_lock x where x.supersedes_id=l.id and x.status='void')"""),
         ("fetch_runs", "select count(*) from fetch_runs",
          "select count(*) from sys_event where kind='fetch'"),
         ("validations", "select count(*) from validations",
