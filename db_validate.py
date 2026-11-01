@@ -138,6 +138,34 @@ def main():
     rec("锁定就绪（100% 全收益 + 全检查通过）", "pass" if ready else "warn",
         "全收益 %.1f%%" % (100.0 * (_tr_ratio or 0)))
 
+    # ---------- 覆盖率明细（供页面显示进度）----------
+    coverage_detail = {}
+    try:
+        _c = db()
+        with _c.cursor() as _cur:
+            _cur.execute("""
+              with need as (
+                select distinct symbol from members
+                 where end_date >= '2009-01-01'
+              ), have as (
+                select symbol,
+                       count(*) filter (where basis='total_return') tr,
+                       count(*) n
+                  from series_selected where month between '2012-01' and '2025-12'
+                 group by symbol
+              )
+              select count(*) as need_total,
+                     count(*) filter (where coalesce(h.tr,0) = 0) as missing_all,
+                     count(*) filter (where coalesce(h.tr,0) > 0 and coalesce(h.tr,0) < coalesce(h.n,1)) as partial,
+                     count(*) filter (where coalesce(h.tr,0) > 0 and coalesce(h.tr,0) = coalesce(h.n,0)) as full
+                from need left join have h on h.symbol = need.symbol""")
+            _row = _cur.fetchone()
+            coverage_detail = {"need": _row[0], "missing": _row[1],
+                               "partial": _row[2], "full": _row[3]}
+        _c.close()
+    except Exception as _e:
+        print("覆盖率明细失败：%s" % str(_e)[:60])
+
     # ---------- 写站点质量快照（CI 无 DB 写权限时也可用）----------
     try:
         import json as _json
@@ -147,6 +175,7 @@ def main():
             "degraded": (_tr_ratio or 0) < 0.999,
             "reason": "全收益口径 %.1f%%（目标 100%%）" % (100.0 * (_tr_ratio or 0)),
             "checks": [{"name": n, "status": st, "detail": d} for n, st, d in ROWS],
+            "coverage": coverage_detail,
             "summary": {"pass": sum(1 for r in ROWS if r[1] == "pass"),
                         "warn": sum(1 for r in ROWS if r[1] == "warn"),
                         "fail": sum(1 for r in ROWS if r[1] == "fail")},

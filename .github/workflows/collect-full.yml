@@ -60,6 +60,14 @@ jobs:
         continue-on-error: true
         run: python lock_symbols.py --lock
 
+      - name: 校验锁是否仍然有效
+        continue-on-error: true
+        run: python verify_locks.py
+
+      - name: 结构冒烟
+        continue-on-error: true
+        run: python schema_check.py --quick
+
       - name: 汇总
         run: |
           python - <<'PY'
