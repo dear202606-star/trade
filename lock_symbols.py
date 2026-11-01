@@ -35,41 +35,6 @@ HOST = "aws-0-ap-northeast-1.pooler.supabase.com"
 Y0, Y1 = "2012-01", "2025-12"
 MIN_MONTHS = 160
 
-DDL = """
-create table if not exists locked_symbols (
-  symbol    text primary key,
-  locked_at timestamptz default now(),
-  months    int,
-  hash      text,
-  note      text
-)
-"""
-
-# 触发器：时间锁 + 标的锁
-TRIGGER = r"""
-create or replace function guard_locked_months() returns trigger as $$
-declare
-  r record;
-  sym text := case when tg_op = 'DELETE' then old.symbol else new.symbol end;
-  m   text := case when tg_op = 'DELETE' then old.month  else new.month  end;
-begin
-  if tg_op = 'UPDATE' and new.month <> old.month then
-    raise exception 'month is immutable (attempt % -> %)', old.month, new.month;
-  end if;
-  if exists (select 1 from locked_symbols where symbol = sym) then
-    raise exception 'symbol % is locked (locked_symbols)', sym;
-  end if;
-  for r in select scope_from, scope_to from locks
-            where kind = 'monthly_prices' and status = 'locked' loop
-    if m between r.scope_from and r.scope_to then
-      raise exception 'month % is locked (% .. %)', m, r.scope_from, r.scope_to;
-    end if;
-  end loop;
-  return case when tg_op = 'DELETE' then old else new end;
-end $$ language plpgsql
-"""
-
-
 def db():
     pw = os.environ.get("SUPABASE_DB_PASSWORD", "")
     if not pw:
@@ -83,16 +48,12 @@ def db():
 
 
 def ensure():
+    """DDL 已收归 sql/050_data_lock.sql；这里只确认结构就绪"""
     c = db()
     with c.cursor() as cur:
-        cur.execute(DDL)
-        cur.execute("alter table locked_symbols enable row level security")
-        try:
-            cur.execute("create policy public_read on locked_symbols for select to anon, "
-                        "authenticated using (true)")
-        except Exception:
-            pass
-        # 不再重建守卫函数：只由 sql/010_guard_locked.sql 管理
+        cur.execute("select to_regclass('public.data_lock') is not null")
+        if not cur.fetchone()[0]:
+            raise RuntimeError("data_lock 不存在：请先执行 sql/050_data_lock.sql")
     c.close()
 
 
@@ -150,7 +111,7 @@ def main():
     if a.list:
         c = db()
         with c.cursor() as cur:
-            cur.execute("""select count(*), min(locked_at), sum(months) from locked_symbols""")
+            cur.execute("""select count(*), min(locked_at), count(*)*168 from data_lock where scope='symbol_month' and status='locked'""")
             print("已锁标的: %s（%s 起，共 %s 个月）" % cur.fetchone())
             cur.execute("select symbol from locked_symbols order by symbol limit 10")
             print("样例:", [r[0] for r in cur.fetchall()])
@@ -167,12 +128,13 @@ def main():
     n = 0
     with c.cursor() as cur:
         for sym, months, ser in cands:
-            cur.execute("""insert into locked_symbols(symbol, months, hash, note)
-                           values (%s,%s,%s,%s)
-                           on conflict (symbol) do nothing""",
-                        (sym, months, hash_series(ser), "%s..%s 全收益完整" % (Y0, Y1)))
+            cur.execute("""insert into data_lock(scope, symbol, month_from, month_to, status,
+                                                symbol_count, fingerprint, fingerprint_algo, note)
+                           values ('symbol_month', %s, %s, %s, 'locked', 1, %s, 'sha256-16', %s)
+                           on conflict do nothing""",
+                        (sym, Y0, Y1, hash_series(ser), "%s..%s 全收益完整" % (Y0, Y1)))
             n += cur.rowcount
-        cur.execute("select count(*) from locked_symbols")
+        cur.execute("select count(*) from data_lock where scope='symbol_month' and status='locked'")
         total = cur.fetchone()[0]
     c.close()
     print("✅ 本次锁定 %d 只，累计 %d 只" % (n, total))
