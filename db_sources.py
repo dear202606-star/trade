@@ -131,7 +131,7 @@ def init():
         cur.execute(DDL)
         for row in SEED:
             (sid, disp, kind, pri, basis, delisted, depth, freq, quota, free, status, role, access, tested) = row
-            cur.execute("""insert into source_registry
+            cur.execute("""insert into data_source
                 (source_id, display, kind, priority, basis, delisted, depth, frequency,
                  quota_per_day, free, status, role, access, tested, last_ok)
                 values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
@@ -159,7 +159,7 @@ def listing():
 
 def set_status(sid, status=None, tested=None):
     with db() as c, c.cursor() as cur:
-        cur.execute("""update source_registry set
+        cur.execute("""update data_source set
                          status = coalesce(%s, status),
                          tested = coalesce(%s, tested),
                          last_ok = case when %s = 'ok' then now() else last_ok end,
