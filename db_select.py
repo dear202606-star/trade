@@ -62,7 +62,7 @@ def compute_picks(cur):
                  row_number() over (partition by symbol
                    order by
                      -- 1) 覆盖够（>=150 个月）且是全收益 最优
-                     case when basis_rank = 0 and cov >= 150 then 0 else 1 end,
+                     case when basis_rank = 0 and cov >= 100 then 0 else 1 end,
                      -- 2) 其次：覆盖够（不限口径）
                      case when cov >= 150 then 0 else 1 end,
                      -- 3) 覆盖越多越好
