@@ -1589,3 +1589,28 @@ where n.nspname='public' and c.relkind in ('r','m') order by pg_total_relation_s
 | `docs/ARCH_PLAN.md` | 目标 schema（`instruments`/`memberships`/`picks_yearly`）与实际迁移方向不同 | 保留为"最初设想"，加一行指向本文 |
 | `output/supabase_cron.sql` | `delete from public.holdings;` 写在脚本第 2 行（一次性脚本，误跑会清空用户云同步数据） | 加注释或移出脚本 |
 
+---
+
+## 14. 执行记录（2026-11-01 实施）
+
+| 阶段 | 状态 | 实际结果 |
+|---|---|---|
+| P0 权限止血 | ✅ | 17 表 anon 只读；prices_monthly 补 RLS；默认权限收回；实测改/删返回 401 |
+| P0-01b 回归修复 | ✅ | 重建后补 grant select + 后置断言（否则 CI REST 401） |
+| P1 守卫归口 | ✅ | sql/010_guard_locked.sql 唯一权威；两个脚本不再 create or replace |
+| P4 选源视图化 | ✅ | series_selected 降级为视图；series_pick 847 行决策表；逐行差异 0 |
+| M1 源表合并 | ✅ | data_source 46 + data_source_secret 3；anon 读不到凭据 |
+| M2 维度层 | ✅ | symbols 1,210（含行业）；sectors 降级视图；members 补 FK/CHECK |
+| M5 锁层合并 | ✅ | data_lock 430，append-only；统一守卫同时保护价格与选源 |
+| M7 接入层加固 | ✅ | 7 条校验门槛；新标的需 ≥24 个月；冻结区拒收 |
+| M6 事件层合并 | ✅ | sys_event 合并三类事件；三张旧表降级视图 |
+| P2 索引瘦身 | ⏸ 暂缓 | 索引扫描次数均 ≤3，库仅 137 MB，等访问模式稳定 |
+| 旧表清理 | ✅ | 9 张 legacy 表先备份 1,364 行再 drop；残留 0 |
+
+**最终结构：12 张表 + 11 视图 + 1 物化视图（原 17 张表）。**
+
+验收基线（迁移前后完全一致）：
+- input_sha = 546d20e1666b33a8
+- 策略累计 +2280%（2012-2025），年化 25.4%
+- 审计 158/158、自检 84/84
+- prices_monthly 351,889 行（与迁移前一致）

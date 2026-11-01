@@ -103,6 +103,10 @@ jobs:
       - name: 口径 B 独立审计
         run: python runner.py audit_b.py
 
+      - name: 数据库结构冒烟（schema_check）
+        continue-on-error: true
+        run: python schema_check.py --quick
+
       - name: 数据校验入库（validations）
         continue-on-error: true
         env:
