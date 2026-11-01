@@ -47,11 +47,16 @@ def db():
 
 
 def main():
-    mem = list(csv.DictReader(open(os.path.join(BASE, "static", "members_frozen.csv"), encoding="utf-8")))
-    need = sorted({r["ticker"] for r in mem if r["end_date"] >= "2009-01-01"})
-    # 退市判定：end_date 不是占位符
-    delisted = {r["ticker"] for r in mem
-                if r["end_date"] < "2099-01-01" and r["end_date"] >= "2009-01-01"}
+    # 成分与退市判定一律从数据库读（唯一数据源），不再读本地 frozen CSV
+    import datetime as _dt
+    with db() as _c0, _c0.cursor() as _cur0:
+        _cur0.execute("""select symbol, min(start_date)::text, max(end_date)::text
+                         from members where end_date >= '2009-01-01'
+                         group by symbol""")
+        _mem = _cur0.fetchall()
+    need = sorted({r[0] for r in _mem})
+    delisted = {r[0] for r in _mem if r[2] < '2099-01-01'}
+    mem = [{"ticker": r[0], "start_date": r[1], "end_date": r[2]} for r in _mem]
 
     with db() as c, c.cursor() as cur:
         cur.execute("select distinct symbol from prices_monthly")
@@ -65,11 +70,24 @@ def main():
         tr = {r[0] for r in cur.fetchall()}
 
     def early_gap(t):
-        """2010-2016 的 12 月缺口数（stockanalysis 只能补近 10 年，这段只能靠 AV）"""
-        return sum(1 for y in range(2010, 2017) if "%d-12" % y not in dec.get(t, set()))
+        """2010-2016 且当年在指数里的 12 月缺口（stockanalysis 只补近 10 年，这段只能 AV）"""
+        yrs = member_years.get(t, set(YEARS))
+        return sum(1 for y in range(2010, 2017)
+                   if y in yrs and "%d-12" % y not in dec.get(t, set()))
+
+    # 每票「应当有数据」的年份：当年 12 月末在指数内
+    member_years = {}
+    for r in mem:
+        t = r["ticker"]
+        try:
+            s0 = int(r["start_date"][:4]); s1 = int(r["end_date"][:4])
+        except Exception:
+            continue
+        member_years[t] = set(range(max(2010, s0), min(2025, s1) + 1))
 
     def gaps(t):
-        return [y for y in YEARS if "%d-12" % y not in dec.get(t, set())]
+        yrs = member_years.get(t, set(YEARS))
+        return [y for y in YEARS if y in yrs and "%d-12" % y not in dec.get(t, set())]
 
     scored = []
     for t in need:
