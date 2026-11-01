@@ -46,14 +46,8 @@ jobs:
           SA_LIMIT: ${{ github.event.inputs.sa_limit }}
         run: python fetch_stockanalysis.py --symbols "${SA_LIMIT:-120}"
 
-      - name: Alpha Vantage 补退市票（额度内）
-        continue-on-error: true
-        env:
-          AV_QUOTA: ${{ github.event.inputs.av_quota }}
-          ALPHAVANTAGE_API_KEY: ${{ secrets.ALPHAVANTAGE_API_KEY }}
-        run: |
-          Q="${AV_QUOTA:-24}"
-          python relay_source.py --plan-source alphavantage --symbols "$Q" --av-quota "$Q"
+      # Alpha Vantage 每天 25 次额度：交给 daily-backfill（每天 10:30 UTC）单独跑，
+      # 这里不跑，否则每 6 小时跑一次会 4 倍超量、全部失败。
 
       - name: 重建选源（每票单源）
         run: python db_select.py

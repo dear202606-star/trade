@@ -9,7 +9,7 @@ name: 每日补数与校验
 
 on:
   schedule:
-    - cron: "10 3 * * *"      # 每天 03:10 UTC（北京 11:10）
+    - cron: "30 10 * * *"      # 每天 03:10 UTC（北京 11:10）
   workflow_dispatch:
     inputs:
       av_limit:
