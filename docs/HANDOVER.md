@@ -1,111 +1,153 @@
-# 项目状态与移交（2026-11-01）
+# 交接说明（给下一个 agent）
 
-> 这份文件回答三个问题：**做到哪一步了、还差什么、下一个人接手该从哪开始。**
+> 最后更新：2026-11-01 18:10（北京）
+> 仓库：`dear202606-star/trade`（分支 `main`）｜ 站点：<https://dear202606-star.github.io/trade/>
 
-## 一、已经做完的（可验证）
+---
 
-### 1.1 数据库重构：17 张表 → 12 张表 + 11 个视图
+## 一、这个项目在干什么
 
-| 阶段 | 动作 | 验收证据 |
-|---|---|---|
-| P0 | 权限止血：17 表 anon 只读、`prices_monthly` 开 RLS、撤销默认写权限 | 实测改/删返回 401 |
-| P1 | 守卫函数收归 `sql/`，脚本不再抢管 | 跑完 `lock_stage --check` 后守卫仍是强版本 |
-| P4 | `series_selected` 11.7 万行实体表 → 视图（决策表 `series_pick` 847 行） | 逐行 diff = 0 |
-| M1 | `source_registry` + `data_sources` → `data_source` + `data_source_secret`（凭据分离） | anon 读凭据表 = False |
-| M2 | `sectors` 并入 `symbols`；`members` 补外键与 CHECK | 孤儿成分 = 0 |
-| M5 | `locks` + `locked_symbols` → `data_lock`（append-only + supersede） | 5 种攻击全部拦截 |
-| M6 | `fetch_runs` + `validations` + `work_plans` → `sys_event(kind)` | 三类行数一致 |
-| M7 | `ingest_staging` 七条校验门槛 | 6 个正负样本全部按预期 |
-| 清理 | 9 张旧表先备份 1,364 行再 drop | 残留 legacy = 0 |
+每**年末**用过去 12 个月的涨幅，在当时的标普 500 成分里选前 3 名，**持有一整年**。
+约束：同行业最多 2 只、单只权重不超过 60%。数据口径是**全收益**（含分红、拆股调整）。
 
-### 1.2 质量保证：六层闸门，每层都被验证过"能失败"
+- 官方区间：**2012–2025**（2010–2011 因池子过小被排除）
+- 当前成绩：累计 **+3678%（36.78 倍）**，年化 29.62%，最大回撤 -21.7%
+- 页面展示 2013–2025（13 年，+2972%），因为起点是 2012-12
 
-| 层 | 机制 | 它曾经拦住过什么 |
-|---|---|---|
-| L1 入口 | 暂存区 7 条门槛 | AAPL 写 9999 → 拒收 |
-| L2 单票 | 每月全收益 + 无跳变才锁 | 5 种篡改攻击全部拦截 |
-| L3 数值 | 原始价+分红独立复算 | 抓出 AIV 分拆口径问题 |
-| L4 完整 | 标的-年缺口口径 | 纠正"81.1% 全收益"的假象 |
-| L5 发布 | selftest 85 + audit 158 + schema 25 | **拦住了一次 +60% 的数字跳变** |
-| L6 监控 | 锁校验 + 实时层 + 看门狗 | 抓到 AAPL/MSFT 指纹漂移 |
+---
 
-### 1.3 数据现状
+## 二、必须先知道的三条铁律
 
-| 指标 | 值 |
+1. **在线数据库是唯一数据源**。`prices_monthly` / `series_pick` / `members` 等都在 Supabase。
+   本地文件和 `docs/data/*.json` 都是**可重建产物**，不许当数据源。
+2. **读不到库就报错，不许静默退回文件**。曾经因为这个让站点用了 3 天旧数据。
+3. **锁过的数据不可改**。`data_lock` 是 append-only，改历史要插新锁版本，不能 UPDATE。
+
+---
+
+## 三、需要你手上有的东西（**这些不在 git 里**）
+
+### 3.1 四份凭据（本地文件）
+
+| 文件 | 内容 | 用途 | 缺失后果 |
+|---|---|---|---|
+| `output/_supabase_dbpass.txt` | Supabase 数据库口令（32 位） | 直连数据库跑脚本、DDL | **所有需要写库的脚本全部失败** |
+| `output/_api_keys.local.txt` | `alphavantage_key`、`eodhd_token`（另有 email/password/kaggle_token 是历史遗留） | 补退市票全收益、交叉校验 | 覆盖率停在 83%，无法推进 |
+| `output/_pat_token.txt` | GitHub PAT（fine-grained，**2027-01-25 到期**） | 触发 workflow、查运行状态 | 无法手动触发构建 |
+| `~/.ssh/id_ed25519_trade` | SSH 私钥 | `git push` | 无法推送 |
+
+**权限边界（实测）**：这个 PAT **不能**管理仓库 secrets（调用返回 403），
+所以 `SUPABASE_DB_PASSWORD` 这个 secret 只能在网页上改。
+
+### 3.2 已经配置在 GitHub 上的（不需要你再设）
+
+- Repository secret：`SUPABASE_DB_PASSWORD`（已确认存在，长度 32，与本地口令一致）
+- Pages：`build_type: workflow`，用 Actions 上传 `docs/` 产物
+
+### 3.3 公开信息（已在 git 里，不用另找）
+
+- Supabase 项目 ref：`fnvahsyrzmmxwovbsqpc`
+- 连接串：`aws-0-ap-northeast-1.pooler.supabase.com`，端口 **6543**（事务池，日常用）/ **5432**（会话模式，大事务用）
+- anon 公钥：`static/cloud.json`（公开读，写被禁）
+
+### 3.4 在数据库里、不在 git 里的东西
+
+| 对象 | 说明 |
 |---|---|
-| `prices_monthly` | 351,889 → 现在约 40 万行 |
-| 口径 | 全收益 108,742 行（75%） |
-| 已锁标的 | 963 只（指纹全部校验通过） |
-| 覆盖率（标的-年） | **83.3%**（6,694 / 8,032） |
-| 缺口 | 1,338 格；**99% 是退市票** |
-| 分红事件 | 8,573 条 / 151 只（持续采集中） |
-| 全收益独立复算 | 85 通过 / 0 超阈值 / 50 跳过（拆股类） |
+| **pg_cron 三个任务** | job 4 `trade-dispatch`（每 2h）、job 5 `trade-dispatch-market`（盘中每 5 分钟）、job 6 `promote_staging`（每 10 分钟）。**换库要重建**，脚本在 `output/supabase_cron.sql` |
+| **RLS 与 GRANT** | 17 张表 anon 只读、`prices_monthly` 开 RLS、`data_source_secret` 禁读。重建方法：`python db_security_fix.py` |
+| **锁数据** | `data_lock` 961 条，是逐条积累的，**不在任何文件里**，只能从库里导 |
+| **`series_pick`** | 847 条选源决策，同上 |
 
-### 1.4 实时层
+> ⚠️ **换 Supabase 项目 = 这些全丢**（除了能由 `prices_monthly` 重算的 `series_pick`）。
+> 锁的指纹可以重算，但「已锁定」这个事实会丢，需要重新跑 `lock_symbols.py --lock`。
 
-- 盘中每 5 分钟派发：**196 次运行 / 196 次成功**
-- `signal.json` / `equity.json` 新鲜度自动校验
-- 四个 pg_cron 任务全部健康
-
-## 二、还差什么（以及为什么）
-
-### 2.1 唯一剩余工作：退市票补数
+### 3.5 本地运行环境
 
 ```
-1,338 格缺口 → 1,288 格在退市票上 → 只有 Alpha Vantage 有数据
-25 次/天 → 约 7 天
+Python: C:\Users\Administrator\.dsh\dsh-runtimes\dsh-next-primary-runtime\dependencies\python\python.exe
+依赖:   pip install -r requirements.txt（含 psycopg2-binary、pyarrow、playwright）
+浏览器: Chrome（playwright 用 channel='chrome'）
 ```
 
-已做的所有努力：
-- 30+ 个数据源实测（Yahoo/stockanalysis/Nasdaq/Stooq/Barchart/WSJ/FT/CNBC/
-  东财/雪球/网易/FMP/TwelveData/Polygon/EODHD/Tiingo/Marketstack）
-- HuggingFace 数据集（HexQuant/paperswithbacktest/AYUSHKHAIRE/no-ry 等）
-- GitHub 数据集仓库
-- 互联网档案馆（Wayback）
-- 境外后缀（.MX/.DE/.L/.TO）、翻译中转、指纹伪装、Cookie 复用
+---
 
-**结论**：免费世界里没有第二家提供美股退市票的全收益历史。
-
-### 2.2 100% 不可达的部分
-
-2010 年前破产、从未被数字化的小盘成分，任何免费源都没有记录。
-现实目标应是 **≥95% 且每个缺口可解释**，而非 100%。
-
-## 三、接手第一件事
+## 四、接手后第一件事（按顺序）
 
 ```bash
-# 1. 看现在卡在哪
-python coverage_pit.py          # 缺口按年份
-python -c "import psycopg2,io; ..."  # 或直接 select * from v_collect_summary
+# 1. 确认能连库
+python -c "import db_prices; print(len(db_prices.load_all()))"     # 应输出 ~848
 
-# 2. 触发补数（AV 恢复后）
-gh workflow run daily-backfill.yml
+# 2. 看现在缺什么
+python coverage_pit.py                    # 按年份的缺口
+# 或直接查库：select * from v_collect_summary;
 
-# 3. 全量验收
-python selftest.py && python audit_b.py && python schema_check.py
-python verify_locks.py && python verify_tr.py && python realtime_check.py
+# 3. 全量验收（7 项，必须全绿）
+python selftest.py            # 85 项
+python audit_b.py             # 158 项
+python schema_check.py        # 25 项
+python verify_locks.py        # 961 只锁指纹
+python verify_tr.py           # 全收益独立复算
+python realtime_check.py      # 5 分钟实时层
+python db_validate.py         # 28 条校验
+
+# 4. 继续补数据
+gh workflow run daily-backfill.yml        # Alpha Vantage 25 只/天
 ```
 
-**关键约束（不要违反）**：
-1. 数据库是唯一数据源，不许读本地 CSV（`allocate_work` 曾犯过，已修）
-2. 不许静默回退到文件
-3. 锁表只能 append + supersede，不能 UPDATE
-4. DDL 只写在 `sql/` 里，脚本不许 `create or replace function`
-5. 每个权限/DDL 变更后面必须跟断言
+---
 
-## 四、已知的坑（踩过并修好的）
+## 五、当前唯一的剩余工作
 
-| 坑 | 症状 | 教训 |
+```
+缺口 1,338 个「标的-年」，其中 1,288 个（96%）在退市票上
+只有 Alpha Vantage 有退市票的全收益历史 → 25 次/天 → 约 7 天
+```
+
+已穷举 30+ 个源（见 `docs/SOURCE_EXHAUSTION.md`），免费世界没有第二家。
+
+**注意**：2010 年前破产、从未被数字化的成分股，任何免费源都没有记录，
+所以 **100% 不可达**。现实目标是 ≥95% 且每个缺口可解释。
+
+---
+
+## 六、常见操作
+
+| 想做什么 | 怎么做 |
+|---|---|
+| 改页面文案 | 改 `site_src/index.html` → `python site_build.py` → push。**CI 会重新构建，约 10–20 分钟后生效** |
+| 手动触发构建 | `gh workflow run quotes.yml` 或 `collect-full.yml` |
+| 查某只票的源 | `select * from series_pick where symbol='AAPL'` |
+| 查某只票的覆盖 | `select * from v_collect_state where symbol='AAPL'` |
+| 补某只票 | `python relay_source.py --symbols 1`（会自动按优先级选源） |
+| 提升基线（数据修正后） | `BASELINE_UPDATE=1 python variant_b.py` —— **会改对外数字，先想清楚** |
+| 看数据库结构 | `docs/DATABASE.md`、`docs/DB_SCHEMA_REDESIGN_2026-11.md` |
+
+---
+
+## 七、踩过的坑（都修好了，但别再犯）
+
+| 坑 | 症状 | 现在怎么防 |
 |---|---|---|
-| 选源只看口径不看覆盖 | 选了 13 个月的 EODHD，丢了 189 个月的新浪 | 覆盖优先，口径其次 |
-| `series_pick` INSERT 列数不符 | CI 每 6 小时全失败，拉了的数据白拉 | 构建失败必须让管线停下 |
-| 看板用 `count(*)` 当月份数 | 171 > 168 的荒谬判定 | 多源表必须 `count(distinct month)` |
-| 基线漂移检查太松 | +60% 的数字静默上线 | 漂移必须人工确认才能提基线 |
-| `relay_source` 没导入 `DB` | 所有采集运行都没写进台账 | 被 try/except 吞掉的错误最危险 |
+| 选源只看口径不看覆盖 | 选了 13 个月的 EODHD，丢了 189 个月的新浪 | 覆盖优先，≥100 个月才优先全收益 |
+| `series_pick` INSERT 列数不符 | CI 每 6 小时全失败，拉的数据白拉 | 构建失败必然让管线停 |
+| 看板 `count(*)` 当月份数 | 出现 171 > 168 的荒谬判定 | 多源表必须 `count(distinct month)` |
+| 基线漂移检查太松 | +60% 的数字差点静默上线 | 漂移必须人工确认才能提基线 |
+| `relay_source` 没导入 `DB` | 所有采集运行都没写进台账，被 try/except 吞掉 | 静默的异常最危险 |
+| 页面改动以为推送即生效 | 实际要等下一轮 CI 完整跑完 | 推送后等 10–20 分钟再验证 |
 
-## 五、数字口径提醒
+---
 
-线上展示的是 **2012-2025（14 年）+3678%**，历史卡片展示 2013-2025（13 年）。
-两个数字不同是正常的（起点不同），不要混用。
+## 八、文档地图
 
-2010-2011 因池子过小（79/93 只）不计入官方记录。
+| 文件 | 内容 |
+|---|---|
+| `docs/HANDOVER.md` | 本文件 |
+| `docs/QA_MECHANISM.md` | 六层质量闸门 + 每层验证证据 + 基线变更记录 |
+| `docs/SOURCE_EXHAUSTION.md` | 30+ 数据源穷举结论 + 敏感性分析 |
+| `docs/COVERAGE_STATUS.md` | 覆盖率现状与口径决策 |
+| `docs/DATABASE.md` | 库表说明 |
+| `docs/DB_SCHEMA_REDESIGN_2026-11.md` | 架构师的 1591 行重构设计（含 P0–P9 迁移步骤） |
+| `docs/LOCKING.md` | 锁定机制 |
+| `docs/DATA_SOURCES.md` | 数据源能力矩阵 |
+| `sql/*.sql` | 唯一的 DDL 来源（010 守卫、020 选源、030 源表、040 维度、050 锁、060 暂存、070 事件、080 看板） |
