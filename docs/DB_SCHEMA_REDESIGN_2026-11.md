@@ -76,7 +76,8 @@
 
 | # | 问题 | 证据 | 后果 | 级别 |
 |---|---|---|---|---|
-| **P0-01** | **匿名可写事实表** | anon POST `prices_monthly` → 201；GET 可回读；DELETE → 204 | 公开 key 就在 `docs/cloud.json`（随站点发布）→ 任何人可改未锁月份、可删行。RLS 对其他 12 张表都拦住了（42501），只有这张表漏 | **P0** |
+| **P0-01** | **匿名可写事实表**（**已于 2026-11-01 09:17 修复**，`c17e66d`） | 09:06 实测 anon POST `prices_monthly` → 201、可回读、DELETE → 204；09:35 复测写/删均 401 | 公开 key 就在 `docs/cloud.json`（随站点发布）→ 任何人可改未锁月份、可删行。RLS 对其他 12 张表都拦住了（42501），只有这张表漏 | ~~P0~~ 已修 |
+| **P0-01b** | **权限修复引入的回归：重建表丢授权** | `db_security_fix.py` 收回默认权限 + `db_select.build_table()` 每 6h `DROP`+`CREATE` | 新 `series_selected` 对 anon 无 SELECT → CI 的 REST 兜底 401 → 构建链全红（预计 06:15 UTC 触发） | **P0（今日）** |
 | **P0-02** | **守卫函数被脚本抢管 → 锁在"过度冻结"与"完全失效"之间震荡** | `lock_symbols.py` 与 `lock_stage.py` 都 `create or replace function guard_locked_months()`；前者每 6h 装强版本（按 symbol 全区间拦），后者每 2h（`--check`/`--list` 都会）装弱版本（只读 `locks`，而 `locks` 为空=不拦）。430 只锁建立于 00:51–00:53Z，00:59Z 的采集批次 `requested=80/ok=0/failed=80` 正落在强版本窗口 | ① 强版本窗口内当年层停更 6 小时；② 其余 18 小时**没有任何保护**，锁形同虚设；③ 采集失败只记在 `fetch_runs.failed`，不告警 | **P0** |
 | **P0-02b** | **DDL 写在应用脚本里** | 同一函数被两个业务脚本当"自己的 DDL"反复重建（`lock_stage.ensure_table()`、`lock_symbols.ensure()`） | 任何一方升级都会被另一方回退；运维在库里改的修复活不过 2 小时 | **P0** |
 | **P0-03** | **锁保护错了对象** | 触发器只挂在 `prices_monthly`；站点读 `series_selected`（6 小时重建一次） | 锁定后仍可通过"重跑选源/改选源"改变已发布序列 → **换源造假涨幅**这个原始风险没被堵住 | **P0** |
@@ -121,6 +122,10 @@ validations      305 行（pass 225 / warn 78 / fail 2）；dataset_id is null 3
 fetch_runs       11 行；requested/ok 单位混用（186/17,317）
 source_registry  44 行：price 可用 10 + 被排除 30 + membership/sector/validation 4
 data_sources     3 行（RLS 屏蔽，anon 不可见）
+-- 2026-11-01 09:35 复测（权限修复 c17e66d 之后）--
+prices_monthly   写/删 → 401 permission denied；【读也变成 0 行】——RLS 已启用但无 for select 策略
+series_selected  仍可读 117,113 行；但 db_select 下次重建后会丢授权（见 §7 P0 副作用 1）
+holdings / ingest_staging  可写（站点云同步 + CI 免 secret 通道均正常）
 ```
 
 ---
@@ -972,8 +977,7 @@ grant insert, select on public.ingest_staging to anon, authenticated;
 
 | 阶段 | 目标 | 结构风险 | 锁级别 | 预计耗时 | 可回滚性 |
 |---|---|---|---|---|---|
-| **P0** 权限止血 | 匿名写 `prices_monthly` 归零 | 无结构变更 | 无 | 30 min | 秒级（重建 policy） |
-| **P1** 锁止血 | 标的锁不再冻死当年层 | 加 2 列 | ACCESS EXCLUSIVE（ms） | 30 min | 秒级（换回旧函数） |
+| **P0** 权限止血 | 匿名写 `prices_monthly` 归零（**已由 `c17e66d` 完成**，只剩 P0-01b 的一行 grant） | 无结构变更 | 无 | 30 min | 秒级（重建 policy） || **P1** 锁止血 | 标的锁不再冻死当年层 | 加 2 列 | ACCESS EXCLUSIVE（ms） | 30 min | 秒级（换回旧函数） |
 | **P2** 索引瘦身 | 去 2 个废索引、加 2 个有用 | 无 | CONCURRENTLY（不阻塞） | 20 min | 分钟级（重建索引） |
 | **P3** 约束上线 | 6 个 CHECK/FK 生效 | NOT VALID→VALIDATE | SUE（不阻塞读写） | 30 min | 秒级（DROP CONSTRAINT） |
 | **P4** 选源视图化 | 删 11.7 万行副本 | **最高**（读路径切换） | ACCESS EXCLUSIVE（ms，仅改名） | 90 min | 秒级（改回名）+ 旧表保留 2 周 |
@@ -1042,6 +1046,33 @@ select has_table_privilege('anon','public.prices_monthly','INSERT') as anon_ins,
 
 **回滚**：按 ① 存档重建 policy（一条 `create policy ... for all ...`），**不要**恢复 grant（那是 bug 本身）。
 **失败特征**：站点 REST 读空 → `count(*)` 变 0。这是"policy 建成 ALL 但 USING 写错"的典型症状，用 `select count(*) from prices_monthly` 在 SQL Editor 里对照即可。
+
+> **✅ 执行状态（2026-11-01 09:17 +0800，commit `c17e66d`）**：①②③ 已由 `db_security_fix.py` 落地并通过外部探针复核（写/删均 401）。本节保留为**回归脚本**：以后每次动 RLS / grant 都要重跑一遍。
+>
+> **本次修复的两个副作用（必须一起处理）**
+>
+> **副作用 1（P0，今日到期）：`series_selected` 重建后会丢 anon 的 SELECT。**
+> `alter default privileges ... revoke all on tables` 只影响**新建**的表；而 `db_select.build_table()` 每 6 小时 `drop table series_selected` → `create table series_selected_new` → `rename`，新表拿到的是"空默认权限"，DDL 里只有 `create policy`（**policy 不等于授权**）。
+> 本机 PG17 复刻实测：重建后 `has_table_privilege('anon','public.series_selected','SELECT') = false`，`set role anon; select` → `permission denied`。
+> 修法（二选一，建议 A+B 都做）：
+> ```sql
+> -- A. 兜住所有"未来新建的表"：默认权限改成"只读"
+> alter default privileges in schema public grant select on tables to anon, authenticated;
+> --    ⚠️ 副作用：以后新建的敏感表（如 data_source_secret）默认可被 anon 读，
+> --       必须在建表后紧跟 revoke all，或建表时就不放进 public。
+> ```
+> ```python
+> # B. 外科式：在 db_select.py 的 build_table() 里 rename 之后补一行
+> cur.execute("grant select on series_selected to anon, authenticated")
+> ```
+> 若走 B 而没走 A，那 `db_select.py` 必须**永远**是唯一建这张表的地方（这与 §7 P4 把它改成视图的方向一致）。
+>
+> **副作用 2（可接受，但要知情）：`prices_monthly` 现在对 anon 完全不可见。**
+> `alter table prices_monthly enable row level security` 之后，若没有 `for select` 策略，匿名查询返回 0 行（实测 `*/0`）。REST 侧的 `db_rest.load_selected()` 只读 `series_selected`，所以站点不受影响；但**任何"从 REST 抽查 prices_monthly"的脚本/看板会看到空**。若需要保留这条抽查通道：
+> ```sql
+> create policy public_read on public.prices_monthly
+>   for select to anon, authenticated using (true);
+> ```
 
 ### P1 — 锁止血（30 分钟）
 
@@ -1435,6 +1466,8 @@ python staging_write.py          # 应打印"写入 1 行"（探测行）
 | **R8** | **删数据无法回滚** | P5 批量 DELETE、P9 drop legacy 表 | 数据丢失 | 删之前 `pg_dump -t <table> -f bak.sql`；legacy 表保留 ≥ 14 天；`datasets` 里留哈希行 |
 | **R9** | **免费额度打满** | Supabase 500 MB：现 ~70 MB；若保留 legacy 副本 + 物化视图 + 索引 | 写入失败（磁盘满）→ 全站停 | 容量预算见 §11；P5 删 22.9 万行、P2 删 2 索引，**先减后加** |
 | **R10** | **回滚脚本本身没演练** | 第一次真用就是出事时 | 回滚失败 | 每个 P 阶段在**事务里**预演一次回滚（`begin; ...; rollback;`），P4/P6 还要在影子名上演一遍 |
+| **R11** | **收回默认权限后，脚本重建表就丢授权** | `alter default privileges ... revoke all` 生效后，任何 `DROP`+`CREATE` 的脚本路径（当前只有 `db_select.build_table()` 的 `series_selected`） | 新表对 anon 零权限 → REST 401 → 构建链全红。**不需要等"有人改权限"，日常 6 小时一轮就会踩** | 每个 `CREATE TABLE` 之后紧跟 `grant select`；或把默认权限设成"只读"兜底；验收加 §12-A15 |
+| **R12** | **REST 侧"某表突然读空"难以区分原因** | RLS 无策略 / 权限被收 / 表真空 三种都表现为 `200 []` | 排查时误判为"数据没了" | 探针同时看 `Content-Range`（`*/0` = 0 行）与 `has_table_privilege`；本文 P0 自带探针脚本可复用 |
 
 ---
 
@@ -1524,6 +1557,8 @@ where n.nspname='public' and c.relkind in ('r','m') order by pg_total_relation_s
 | A12 | 站点数字不变 | `python runner.py site_build.py && git diff --stat docs/data/` | 仅 `created_at` 类字段变化 |
 | A13 | 免 secret 通道可用 | `python staging_write.py` → 10 min 后查 `prices_monthly where symbol='ZZPROBE'` | 1 行（测完删） |
 | A14 | 锁表可读且一致 | `select count(*) from locked_symbols;` vs `select count(*) from data_lock where scope='symbol_month'` | 相等 |
+| A15 | **授权不因重建而丢失** | `select has_table_privilege('anon','public.series_selected','SELECT');`（`db_select.py` 每次跑完都要查一次） | `t` |
+| A16 | 探针可区分"空表/无权限/RLS 拦" | 外部探针同时看 HTTP 码 + `Content-Range` + `has_table_privilege` | 三种原因可分辨 |
 
 ---
 
