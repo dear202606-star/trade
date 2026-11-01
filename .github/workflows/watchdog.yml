@@ -24,6 +24,10 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: 实时层健康（5 分钟级）
+        continue-on-error: true
+        run: python realtime_check.py
+
       - name: 检查线上健康与部署新鲜度
         id: check
         run: |
