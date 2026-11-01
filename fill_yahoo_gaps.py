@@ -63,6 +63,7 @@ def targets(cur, limit):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int, default=200)
+    ap.add_argument("--max-seconds", type=int, default=1200)
     a = ap.parse_args()
 
     import yahoo_fetch as YF
@@ -79,7 +80,12 @@ def main():
     ok = bad = rows = 0
     batch = []
     t0 = time.time()
+    deadline = t0 + a.max_seconds
     for i, sym in enumerate(syms, 1):
+        if time.time() > deadline:
+            print("  ⏱ 达到时间预算 %ds，停止（剩余 %d 只留待下次）" % (a.max_seconds, len(syms)-i+1),
+                  flush=True)
+            break
         try:
             bars = YF.fetch(sym)
         except Exception as e:

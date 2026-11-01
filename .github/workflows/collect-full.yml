@@ -51,7 +51,7 @@ jobs:
 
       - name: 给「选源非全收益」的标的补 Yahoo 全收益
         continue-on-error: true
-        run: python fill_yahoo_gaps.py --limit 220
+        run: python fill_yahoo_gaps.py --limit 400 --max-seconds 900
 
       - name: 重建选源（每票单源）
         run: python db_select.py
