@@ -92,7 +92,7 @@ def ensure():
                         "authenticated using (true)")
         except Exception:
             pass
-        cur.execute(TRIGGER)
+        # 不再重建守卫函数：只由 sql/010_guard_locked.sql 管理
     c.close()
 
 

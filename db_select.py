@@ -1,21 +1,28 @@
 # -*- coding: utf-8 -*-
-"""db_select.py — 序列选源（在库内计算，落成 series_selected 表）
+"""db_select.py — 选源（改为「决策表 + 视图」，不再重建实体表）
 
-问题（两份审计的 P0）
-  逐月挑「最高等级源」会在源切换处拼出假收益：两源价格水平不可比，
-  实测 574 处断层、最大单月 +9,155%，2010 年 Top12 只重合 1/12，2011 年 3/3 持仓是假的。
+背景（架构师审计 P0-03 / P0-01b）
+  旧的 build_table() 每 6 小时 DROP + RENAME 一张 11.7 万行的表：
+    · 重建窗口里 CI 可能读到半成品；
+    · 锁只挂在 prices_monthly，换源能绕过锁改历史；
+    · 权限收紧后新表会丢 anon 读权限。
 
-规则（按审计建议：选源粒度从 (symbol,month) 改为 symbol）
-  1. 每只票只选**一个主源**：口径优先（total_return > price_only）→ 源等级 → 覆盖月数
-  2. 同源整段取用，绝不逐月换源 → 序列内部连续，无拼接跳变
-  3. 主源覆盖不到的月份就是缺口（下游按「缺 12 月剔除」处理），宁缺勿错
-  4. 计算全部在数据库内完成，结果落 series_selected，下游一次扫描即可
+新结构
+  series_pick(847 行)  决策：每票用哪个源（已锁/已冻结的不可改）
+  v_series             视图：决策 join 价格，实时得出序列
+  series_selected      同名视图（指向 v_series），所有读代码零改动
+
+用法
+  python db_select.py            # 刷新决策（幂等）
+  python db_select.py --dry-run  # 只看会改哪些票
 """
+import argparse
 import io
 import os
 import sys
 
 import psycopg2
+import psycopg2.extras
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -26,56 +33,6 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 REF = "fnvahsyrzmmxwovbsqpc"
 HOST = "aws-0-ap-northeast-1.pooler.supabase.com"
 
-DDL = """
-create table if not exists series_selected (
-  symbol    text not null,
-  month     text not null,
-  adj_close numeric,
-  raw_close numeric,
-  source    text,
-  basis     text,
-  primary key (symbol, month)
-);
-create index if not exists idx_series_month on series_selected(month);
--- CI 用公开 anon key 只读，策略必须随表重建（否则 REST 兜底拿空、CI 悄悄退回旧文件）
-create policy public_read on series_selected for select to anon, authenticated using (true);
-alter table series_selected enable row level security;
--- CI 用公开 anon key 只读（数据本身公开）
-"""
-
-BUILD = """
-with cand as (
-  select symbol, source,
-         max(case when basis = 'total_return' then 0 else 1 end) as basis_rank,
-         count(*) filter (where month between '2010-01' and '2025-12') as cov,
-         case source
-           when 'alphavantage' then 1
-           when 'yahoo_relay'  then 2
-           when 'eodhd'        then 3
-           when 'hf_amirtrader' then 3
-           when 'hf_ayushkhaire' then 4
-           when 'sina_repaired+eodhd' then 4
-           else 5 end as src_rank
-  from prices_monthly
-  group by symbol, source
-),
-pick as (
-  select symbol, source,
-         row_number() over (partition by symbol
-                            order by basis_rank, src_rank, cov desc) as rn
-  from cand
-)
-insert into series_selected(symbol, month, adj_close, raw_close, source, basis)
-select p.symbol, p.month, p.adj_close, p.raw_close, p.source, p.basis
-from prices_monthly p
-join pick on pick.symbol = p.symbol and pick.source = p.source and pick.rn = 1
-where p.month >= '2008-01'
-  and p.adj_close is not null
-on conflict (symbol, month) do update
-  set adj_close = excluded.adj_close, raw_close = excluded.raw_close,
-      source = excluded.source, basis = excluded.basis;
-"""
-
 
 def db():
     pw = os.environ.get("SUPABASE_DB_PASSWORD", "")
@@ -84,97 +41,84 @@ def db():
         if os.path.exists(p):
             pw = io.open(p, encoding="utf-8").read().strip()
     c = psycopg2.connect(host=HOST, port=6543, user="postgres." + REF, password=pw,
-                         dbname="postgres", connect_timeout=6, sslmode="require")
+                         dbname="postgres", connect_timeout=20, sslmode="require")
     c.autocommit = True
     return c
 
 
-def _stmts(ddl):
-    """按分号切分，剔掉空语句与纯注释块"""
-    out = []
-    for x in ddl.split(";"):
-        body = "\n".join(l for l in x.splitlines() if not l.strip().startswith("--")).strip()
-        if body:
-            out.append(body)
-    return out
+def compute_picks(cur):
+    """每票选一个主源：全收益优先 → 源等级 → 2010-2025 覆盖月数"""
+    cur.execute("""
+        with cand as (
+          select symbol, source,
+                 max(case when basis = 'total_return' then 0 else 1 end) as basis_rank,
+                 count(*) filter (where month between '2010-01' and '2025-12') as cov
+          from prices_monthly
+          where month >= '2008-01'
+          group by symbol, source
+        )
+        select symbol, source from (
+          select symbol, source,
+                 row_number() over (partition by symbol
+                   order by basis_rank,
+                            case source
+                              when 'alphavantage' then 1 when 'yahoo_relay' then 2
+                              when 'eodhd' then 3 when 'stockanalysis' then 3
+                              when 'hf_amirtrader' then 3 when 'hf_ayushkhaire' then 4
+                              when 'sina_repaired+eodhd' then 4 else 5 end,
+                            cov desc) as rn
+          from cand
+        ) t where rn = 1
+    """)
+    return cur.fetchall()
 
 
-def build_table():
+def refresh(dry_run=False):
     c = db()
+    changed = kept = blocked = 0
     with c.cursor() as cur:
-        cur.execute("set statement_timeout = '600s'" + "")   # 池化器默认超时太短，重建会被打断
-        for st in _stmts(DDL):
-            try:
-                cur.execute(st)
-            except Exception as _e:
-                if "already exists" not in str(_e):
-                    raise
-        cur.execute("drop table if exists series_selected_new")
-        for st in _stmts(DDL.replace("series_selected", "series_selected_new")
-                            .replace("idx_series_month", "idx_series_month_new")):
-            try:
-                cur.execute(st)
-            except Exception as _e:
-                if "already exists" not in str(_e):
-                    raise
-        cur.execute(BUILD.replace("insert into series_selected", "insert into series_selected_new"))
-        cur.execute("drop table if exists series_selected")
-        cur.execute("alter table series_selected_new rename to series_selected")
-        # 关键：默认权限已被 revoke，新建的表不会自动获得 anon 读权限
-        # （架构师实测：drop+recreate 之后 anon select = false → CI 的 REST 读会 401）
-        cur.execute("grant select on series_selected to anon, authenticated")
-        # 后置断言：确认 anon 真的能读，否则直接失败而不是静默上线
-        cur.execute("""select has_table_privilege('anon','public.series_selected','SELECT')""")
-        if not cur.fetchone()[0]:
-            raise RuntimeError("重建后 anon 无 SELECT 权限，拒绝继续（否则 CI 读路径会 401）")
-        cur.execute("""select count(*), count(distinct symbol), count(distinct source),
-                              count(*) filter (where basis='total_return')
-                       from series_selected""")
-        n, syms, srcs, tr = cur.fetchone()
+        picks = compute_picks(cur)
+        cur.execute("select symbol, source from series_pick")
+        cur_pick = dict(cur.fetchall())
+        cur.execute("select symbol from locked_symbols")
+        locked = {r[0] for r in cur.fetchall()}
+        cur.execute("select symbol from series_pick where frozen")
+        frozen = {r[0] for r in cur.fetchall()}
+
+        rows = []
+        for sym, src in picks:
+            old = cur_pick.get(sym)
+            if old == src:
+                kept += 1
+                continue
+            if old is not None and (sym in locked or sym in frozen):
+                blocked += 1
+                continue
+            changed += 1
+            rows.append((sym, src))
+
+        print("决策：不变 %d ｜ 变更 %d ｜ 因锁定/冻结而拒绝 %d" % (kept, changed, blocked))
+        if dry_run:
+            print("样例变更:", rows[:10])
+            c.close()
+            return
+
+        if rows:
+            psycopg2.extras.execute_values(
+                cur, """insert into series_pick(symbol, source, basis, chosen_at, reason)
+                        values %s
+                        on conflict (symbol) do update
+                          set source = excluded.source, chosen_at = now(),
+                              reason = excluded.reason""",
+                [(s, src, "total_return", "auto") for s, src in rows], page_size=500)
+        cur.execute("select count(*), count(distinct symbol) from v_series")
+        n, syms = cur.fetchone()
+        print("v_series: %d 行 / %d 只" % (n, syms))
     c.close()
-    print("series_selected: %d 行 / %d 只 / %d 个源 / 全收益 %d 行（%.1f%%）" % (
-        n, syms, srcs, tr, 100.0 * tr / max(1, n)))
-    return n
-
-
-RANGES = [('2008-01','2010-12'), ('2011-01','2013-12'), ('2014-01','2016-12'),
-          ('2017-01','2019-12'), ('2020-01','2022-12'), ('2023-01','2026-12')]
-
-
-def load_all(chunks=None, cache_file=None, stamp=None):
-    """按年份分片读取（池化器吞吐差、易断连 → 分片 + 重试 + 派生缓存）"""
-    import json as _json
-    import time as _t
-
-    out = {}
-    attempted = 0
-    for lo, hi in (chunks or RANGES):
-        sql = ("select symbol, month, adj_close, raw_close from series_selected "
-               "where month between %s and %s")
-        for attempt in range(3):
-            try:
-                c = db()
-                with c.cursor() as cur:
-                    cur.execute(sql, (lo, hi))
-                    rows = cur.fetchall()
-                c.close()
-                for sym, month, adj, raw in rows:
-                    out.setdefault(sym, {})[month] = (
-                        float(adj), float(raw) if raw else float(adj))
-                print("  %s..%s %d 行" % (lo, hi, len(rows)), flush=True)
-                break
-            except Exception as e:
-                print("  %s..%s 重试 %d: %s" % (lo, hi, attempt + 1, str(e)[:50]), flush=True)
-                attempted += 1
-                if attempted >= 1:
-                    # 首块就连不上，说明口令/网络不可用，继续重试只是白等
-                    raise RuntimeError("数据库不可达（首个分片即失败）：%s" % str(e)[:80])
-                _t.sleep(3)
-    if not out:
-        # 全部失败必须抛错，否则上层会以为「数据为空」并静默退回文件
-        raise RuntimeError("series_selected 读取全部失败（无口令/网络不可达）")
-    return out
 
 
 if __name__ == "__main__":
-    build_table()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dry-run", action="store_true")
+    a = ap.parse_args()
+    refresh(a.dry_run)

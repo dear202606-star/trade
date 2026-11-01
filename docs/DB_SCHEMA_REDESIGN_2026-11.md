@@ -8,7 +8,7 @@
 > ② 对 13 张表各插 1 行探测行再删（除 `prices_monthly` 外全部被 RLS 拒绝，无一残留）；
 > ③ 全程未做 UPDATE 既有行、未 TRUNCATE、未建临时 schema（本机到 5432/6543 不可达，详见 §1.2）。
 > 另外：本文 §6 的全部 DDL 已在**本机临时 PostgreSQL 17 实例**（独立 cluster，用完销毁）上完整跑过一遍，
-> 158 条语句 0 错误 + 21 条功能断言全过，见 §6.10。
+> 160 条语句 0 错误 + 19 条功能断言全过，见 §6.10。
 
 ---
 
@@ -155,7 +155,7 @@ holdings / ingest_staging  可写（站点云同步 + CI 免 secret 通道均正
 | `members` 与 `symbols` | **不合并**：`members` 是 1:N 区间（1,209 只 / 1,262 段），`symbol` 是 1:1 维度 | J5 |
 | `validations` 与 `fetch_runs` | **不合并**：粒度不同（run 1:N check）；用 `run_id` FK 连接 | J5 |
 | `work_plans` 与 `fetch_runs` | **不合并**：计划是"意图"，台账是"事实" | J3 |
-| `holdings` 与行情仓库 | **移出 `public`** → `app.notebook` | J6（匿名可写）+ 领域不同 |
+| `holdings` 与行情仓库 | **隔离**（本次不迁，见 §10-D6）：加 CHECK + 大小上限 + 保留期；目标位置是 `app.notebook`，但迁 schema 会断站点云同步（PostgREST 只暴露 public） | J6（匿名可写）+ 领域不同 |
 
 ---
 
@@ -207,15 +207,20 @@ holdings / ingest_staging  可写（站点云同步 + CI 免 secret 通道均正
   ┌──────────────────────┐        ┌──────────────────────┐
   │ ingest_staging (0)   │        │ ingest_plan (2)      │      ┌──────────────────┐
   │ + batch_id/claimed_at│        │ = work_plans         │      │ app.notebook (0) │
-  │ + 唯一键/claim 语义   │        │ + plan_date UNIQUE   │      │ = holdings 迁出  │
+  │ + 唯一键/claim 语义   │        │ + plan_date UNIQUE   │      │ = holdings（暂不迁）│
   └──────────────────────┘        └──────────────────────┘      └──────────────────┘
 ```
 
-**表数变化**：17 张表 → **15 张表 + 6 个兼容视图 + 1 个可选物化视图**（净减 2 张，但删掉 1 张 11.7 万行副本、1 个死锁表、1 个死维度表的沉余；新增 2 张：`series_pick`、`validation_check`）。
+**表数变化**（拍手数一遍，别含糊）：17 张表 → **18 张表 + 8 个视图 + 1 个物化视图**。张数只多 1，但**数据量少一大半**：
+- 删掉 11.7 万行的派生副本（`series_selected` 表 → 视图）+ 22.9 万行的死快照（`baseline_v1`）；
+- 合并掉 2 张锁表（→ `data_lock`）、2 张源表（→ `data_source` + `data_source_secret`）、1 张行业表（→ `symbol.sector`）；
+- 换来 4 张新表：`data_lock`、`series_pick`、`validation_check`、`data_source`；外加 `series_pick_history`、`data_source_secret`、`schema_migration`。
 
-| 保留（改列） | 合并/迁移 | 新增 | 降级为视图 | 移出 |
+> 判断标准不是"表数少"，而是"**每张表只有一个写者、只有一种生命周期、能被一次原子操作冻结**"。按这个标准，17 张里合掉了 5 张、新增了 4 张功能明确的表。
+
+| 保留（改列） | 合并/迁移 | 新增 | 降级为视图 | 本次不动 |
 |---|---|---|---|---|
-| prices_monthly, datasets, dataset_rows, members, validations, fetch_runs, source_registry→data_source, ingest_staging, work_plans→ingest_plan, symbols→symbol | locks + locked_symbols → **data_lock**；sectors → **symbol.sector**；data_sources.credential → **data_source_secret** | **series_pick**, **validation_check**, data_lock, data_source_secret | series_selected, source_registry(兼容), data_sources(兼容), sectors(兼容), locks(兼容), locked_symbols(兼容), symbols(兼容) | holdings → **app.notebook** |
+| prices_monthly, datasets, dataset_rows, members, validations, fetch_runs, source_registry→data_source, ingest_staging, work_plans, symbols | locks + locked_symbols → **data_lock**；sectors → **symbol.sector**；data_sources.credential → **data_source_secret** | **series_pick**, **series_pick_history**, **validation_check**, **data_lock**, **data_source**, **data_source_secret**, schema_migration | series_selected, source_registry(兼容), data_sources(兼容), sectors(兼容), locks(兼容), locked_symbols(兼容) | holdings（暂留 public，见 §10-D6） |
 
 ---
 
@@ -936,8 +941,8 @@ grant insert, select on public.ingest_staging to anon, authenticated;
 | 步骤 | 做法 | 结果 |
 |---|---|---|
 | ① 复刻现状 | 用仓库内 DDL 重建 17 张表 + 触发器 + RLS + 样本数据（含 `prices_monthly` 上那条 `for all` 宽松策略） | 成功 |
-| ② 顺序执行 §6 全部块 | 9 个 `sql` 代码块 / 158 条语句，逐块 `psql -f`，`ON_ERROR_STOP=1` | **0 错误** |
-| ③ 功能断言 | 21 条语义断言 | 全部符合预期 |
+| ② 顺序执行 §6 全部块 | 9 个 `sql` 代码块 / 160 条语句，逐块 `psql -f`，`ON_ERROR_STOP=1` | **0 错误** |
+| ③ 功能断言 | 19 条语义断言 | 全部符合预期 |
 | ④ 修掉 2 个真实缺陷 | 见下 | —— |
 
 **功能断言（全部通过）**

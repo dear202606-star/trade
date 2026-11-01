@@ -30,23 +30,7 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 REF = "fnvahsyrzmmxwovbsqpc"
 HOST = "aws-0-ap-northeast-1.pooler.supabase.com"
 
-TRIGGER = """
-create or replace function guard_locked_months() returns trigger as $$
-declare
-  bound text;
-begin
-  select max(scope_to) into bound from locks
-   where kind = 'monthly_prices' and status = 'locked';
-  if bound is not null and new.month <= bound then
-    raise exception 'month % is locked (frozen through %)', new.month, bound;
-  end if;
-  return new;
-end $$ language plpgsql;
-
-drop trigger if exists trg_guard_months on prices_monthly;
-create trigger trg_guard_months before insert or update on prices_monthly
-for each row execute function guard_locked_months();
-"""
+TRIGGER = ""  # 守卫函数只由 sql/010_guard_locked.sql 管理（审计 P0-02）
 
 
 def db():
@@ -70,7 +54,7 @@ def ensure_table():
           note text,
           unique (kind, scope_from, scope_to)
         )""")
-        cur.execute(TRIGGER)
+        # 不再重建守卫函数：只由 sql/010_guard_locked.sql 管理
 
 
 def measure(y0, y1):
