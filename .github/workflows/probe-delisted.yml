@@ -16,5 +16,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: 探测
+      - name: 探测现有站点
+        continue-on-error: true
         run: python probe_delisted.py
+
+      - name: 探测互联网档案馆
+        continue-on-error: true
+        run: python probe_wayback.py
+
+      - name: 穷举候选源
+        continue-on-error: true
+        run: python probe_all_sources.py
