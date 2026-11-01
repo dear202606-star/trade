@@ -513,10 +513,8 @@ function renderQuality() {
       if (q.degraded) {
         el.hidden = false;
         el.className = "foot warn";
-        var cov = q.coverage || {};
-        var tail = cov.need ? (" ｜ 已覆盖 " + (cov.full || 0) + "/" + cov.need + " 只") : "";
         el.textContent = "数据校验中 · " + (q.reason || "口径尚未统一") +
-          tail + " ｜ 检查 " + (s.pass || 0) + " 项通过" + (s.fail ? "、" + s.fail + " 项失败" : "");
+          " ｜ 检查 " + (s.pass || 0) + " 项通过" + (s.fail ? "、" + s.fail + " 项失败" : "");
       } else {
         el.hidden = false;
         el.className = "foot ok";
