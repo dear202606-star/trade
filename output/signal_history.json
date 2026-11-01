@@ -1,7 +1,7 @@
 [
   {
     "month": "2026-10",
-    "date": "2026-11-01",
+    "date": "2026-11-02",
     "official_month": "2025-12",
     "official_year": 2026,
     "valid_from": "2026-01-01",
@@ -139,7 +139,7 @@
     },
     "track_records": [
       {
-        "date": "2026-11-01",
+        "date": "2026-11-02",
         "month": "2026-10",
         "picks": [
           {
