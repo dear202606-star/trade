@@ -23,6 +23,7 @@ import argparse
 import csv
 import io
 import json
+import db_prices as DB
 import ingest_validate
 import os
 import sys
@@ -284,6 +285,31 @@ def relay(sym, k, av_left):
     return rows, used_av, len(got)
 
 
+def av_used_today():
+    """今天已经用掉多少次 AV 调用（从 sys_event 的采集记录反推）"""
+    try:
+        import psycopg2
+        pw = os.environ.get("SUPABASE_DB_PASSWORD", "")
+        if not pw:
+            _p = os.path.join(BASE, "output", "_supabase_dbpass.txt")
+            if os.path.exists(_p):
+                pw = io.open(_p, encoding="utf-8").read().strip()
+        if not pw:
+            return 0
+        c = psycopg2.connect(host=HOST, port=6543, user="postgres." + REF, password=pw,
+                             dbname="postgres", connect_timeout=15, sslmode="require")
+        with c.cursor() as cur:
+            cur.execute("""select coalesce(sum((metrics->>'ok')::int),0)
+                             from sys_event
+                            where kind='fetch' and source like 'alphavantage%'
+                              and created_at::date = (now() at time zone 'utc')::date""")
+            n = cur.fetchone()[0] or 0
+        c.close()
+        return int(n)
+    except Exception:
+        return 0
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--symbols", type=int, default=20, help="本次处理多少只")
@@ -325,7 +351,11 @@ def main():
     print("待处理 %d 只（完全缺失 %d / 12 月不足 %d）" % (len(targets), len(missing), len(thin)))
 
     _t0 = time.time()
-    av_left = 0 if a.no_av else a.av_quota
+    # 跨运行累计：今天已用掉的要从额度里扣掉，避免一天跑多次把额度重复算
+    _used = av_used_today() if not a.no_av else 0
+    av_left = 0 if a.no_av else max(0, a.av_quota - _used)
+    if _used:
+        print("今天已用 AV %d 次，本次剩余额度 %d" % (_used, av_left))
     done, stats = 0, {}
     all_rows = []
     for t in targets:
