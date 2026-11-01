@@ -104,11 +104,19 @@ def build_table():
     with c.cursor() as cur:
         cur.execute("set statement_timeout = '600s'" + "")   # 池化器默认超时太短，重建会被打断
         for st in _stmts(DDL):
-            cur.execute(st)
+            try:
+                cur.execute(st)
+            except Exception as _e:
+                if "already exists" not in str(_e):
+                    raise
         cur.execute("drop table if exists series_selected_new")
         for st in _stmts(DDL.replace("series_selected", "series_selected_new")
                             .replace("idx_series_month", "idx_series_month_new")):
-            cur.execute(st)
+            try:
+                cur.execute(st)
+            except Exception as _e:
+                if "already exists" not in str(_e):
+                    raise
         cur.execute(BUILD.replace("insert into series_selected", "insert into series_selected_new"))
         cur.execute("drop table if exists series_selected")
         cur.execute("alter table series_selected_new rename to series_selected")
