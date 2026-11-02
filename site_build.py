@@ -112,7 +112,7 @@ def asset_version():
     import hashlib
     h = hashlib.md5()
     for f in ("assets/app.css", "assets/app.js", "assets/page.css",
-              "assets/page.js", "assets/theme.css"):
+              "assets/page.js", "assets/theme.css", "assets/dashboard.css"):
         p = os.path.join(SRC_SITE, f)
         if os.path.exists(p):
             with open(p, "rb") as fh:
@@ -135,7 +135,7 @@ def bust_cache():
             continue
         new = html
         for a in ("assets/app.css", "assets/app.js", "assets/page.css",
-                  "assets/page.js", "assets/theme.css", "assets/tabs.css"):
+                  "assets/page.js", "assets/theme.css", "assets/tabs.css", "assets/dashboard.css"):
             new = re.sub(re.escape(a) + r"(\?v=[0-9a-f]+)?", a + "?v=" + v, new)
         if new != html:
             with open(p, "w", encoding="utf-8") as f:

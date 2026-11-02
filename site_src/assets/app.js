@@ -720,10 +720,16 @@
   };
 
   function showErr(msg) {
-    var d = document.createElement('div');
-    d.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#7a1a1a;color:#fff;padding:12px;font:12px/1.5 monospace;z-index:9999;white-space:pre-wrap';
-    d.textContent = 'JS ERROR: ' + msg;
-    document.body && document.body.appendChild(d);
+    console.error('页面显示异常', msg);
+    if (!document.body) return;
+    var d = document.getElementById('appError');
+    if (!d) {
+      d = document.createElement('div'); d.id = 'appError';
+      d.setAttribute('role', 'alert');
+      d.style.cssText = 'position:fixed;bottom:20px;left:20px;right:20px;background:#fff6ee;color:#784b32;padding:14px 20px;border:1px solid #eacdb8;border-radius:12px;font:14px/1.5 sans-serif;z-index:9999';
+      document.body.appendChild(d);
+    }
+    d.textContent = '页面显示暂时出了问题，请刷新重试。';
   }
   window.addEventListener('error', function (e) { showErr(e.message + ' @ ' + (e.filename||'').split('/').pop() + ':' + e.lineno); });
   window.addEventListener('unhandledrejection', function (e) { showErr('Promise: ' + (e.reason && e.reason.message || e.reason)); });
