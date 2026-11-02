@@ -7,6 +7,7 @@
     {"old": "BLL", "current": "BALL", "effective_date": "2022-05-10", "evidence": "https://www.ball.com/newswire/article/124123/ball-board-declares-quarterly-dividend-stock-ticker-symbol-changing-to-ball"},
     {"old": "LB", "current": "BBWI", "effective_date": "2021-08-03", "evidence": "https://www.sec.gov/Archives/edgar/data/701985/000114036121026658/nt10026698x7_8k.htm", "note": "Continuing parent common stock; distributed VSCO shares require the separate actual-consideration event path."},
     {"old": "FB", "current": "META", "effective_date": "2022-06-09", "evidence": "https://www.sec.gov/Archives/edgar/data/1326801/000132680122000070/fb-20220531.htm"},
-    {"old": "MMC", "current": "MRSH", "effective_date": "2026-01-14", "evidence": "https://www.marsh.com/en/corp/about/news/marsh-mclennan-to-change-nyse-symbol-to-mrsh.html"}
+    {"old": "MMC", "current": "MRSH", "effective_date": "2026-01-14", "evidence": "https://www.marsh.com/en/corp/about/news/marsh-mclennan-to-change-nyse-symbol-to-mrsh.html"},
+    {"old": "BK", "current": "BNY", "effective_date": "2026-05-21", "evidence": "https://www.sec.gov/Archives/edgar/data/1390777/000119312526281160/d137058d8k.htm", "note": "Same issuer common stock; effective date confirmed by issuer announcement and OCC memo 58945. Membership continuity only; no old-code price transfer."}
   ]
 }

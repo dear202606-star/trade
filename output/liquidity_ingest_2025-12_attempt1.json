@@ -1,0 +1,2568 @@
+{
+  "write": true,
+  "snapshot_stamp": [
+    406639,
+    "2026-11-02 12:22:11.753983+00",
+    849,
+    143637,
+    837,
+    "16115491.355340132718478142"
+  ],
+  "results": [
+    {
+      "symbol": "A",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "c57ae679dc8c438e4e9b995eb7cc80591d8a699945067c341d716e2791617f96",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 60973435487.0,
+        "independent_lower": 60049988135.340034,
+        "independent_upper": 61782736595.65002,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ABBV",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "9eae82cd996679e220a05d097098ef3000357f6bb207629a8d0881924009d780",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 316687264000.0,
+        "independent_lower": 312242296110.2,
+        "independent_upper": 320546125152.89014,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ABNB",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "27fe6014af807cecaed346d9d47529f8a24c15216c49d8aa89a2f5ff30598a45",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 163738315515.0,
+        "independent_lower": 161194367701.56998,
+        "independent_upper": 166137228737.38004,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ABT",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "013bf8104d845c99bcd5f1450444c370d071085b861fec1c04b294df39ea0928",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 210724044479.0,
+        "independent_lower": 208257472111.65997,
+        "independent_upper": 213009441388.15,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ACGL",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "92f4974e2e44d169a2e59f4cd56aea5e4ac5f8933c0152af98cc8fcf538e791d",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 45765310707.0,
+        "independent_lower": 45270487879.95998,
+        "independent_upper": 46239420238.36,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ACN",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "fc298ce1a7cf55c608633a4a1155c0a7c4e80e1ffe61e8e82163f51fc9b35a03",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 273654489200.0,
+        "independent_lower": 270013251423.58008,
+        "independent_upper": 276981686647.15015,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ADBE",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "43db91709a2576f5ddbcde0abe31c2cb377f3173bc874aad467dfa3c2541e0bb",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 369750870240.0,
+        "independent_lower": 364763898056.15985,
+        "independent_upper": 374782203259.11993,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ADI",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "1ed3cbb80d102164a0a167181ecb2c5a6a296a6151fa77ab5e8915b3faaa12bf",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 215647502843.0,
+        "independent_lower": 212180083740.52002,
+        "independent_upper": 218793933682.86002,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ADM",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "89133c52147a4f9fa62f7f041cc11803417ba5fd3b90f268a9d7ecca72a83e07",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 50195109157.0,
+        "independent_lower": 49477577692.59001,
+        "independent_upper": 50865338262.82002,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ADP",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "316db64ce45304c1b7fed9ab76a46e37378c7681e1bc95b238bd994126f9bb60",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 135244655273.0,
+        "independent_lower": 133888855745.95999,
+        "independent_upper": 136434227466.57004,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ADSK",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "109002915c89f5d4299b1d098ff2d610e531cb42bc146d338ad6866caee46981",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 113700326583.0,
+        "independent_lower": 112314545151.77007,
+        "independent_upper": 115138165889.45999,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "AEE",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "b815bfed6fb3b7cab2c1ed2f85818473f31e444c21d3d2c99f46f1646c5ba878",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 42098615583.0,
+        "independent_lower": 41714158982.01003,
+        "independent_upper": 42428473609.27,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "AEP",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "7bb70844cd7ed154ab4009ae3bb7567a3b7bc908e7081bdb57dd9b8034b72b64",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 95299083202.0,
+        "independent_lower": 94364217511.41,
+        "independent_upper": 96092300024.35005,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "AES",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices"
+    },
+    {
+      "symbol": "AFL",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "4c139301751d0d0edaf2afb86be560a6cd851c4cfd4d269b45a62b27c497bac5",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 59363638009.0,
+        "independent_lower": 58749330509.05003,
+        "independent_upper": 59842193160.91998,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "AIG",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "8fc6cd465c83738abe1ad6912460448c791ca30490e640deeadb72c479d893ca",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 90730273979.0,
+        "independent_lower": 89647809521.59999,
+        "independent_upper": 91714218023.89992,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "AIZ",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "54d9d35ea5f1500b34cd799f3659edeeaf11effc6361a46aeb984d48d236cbd7",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 22129600261.0,
+        "independent_lower": 21850470157.110004,
+        "independent_upper": 22367792680.03999,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "AJG",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "255465120000a9c6d8f53d9105a18465493cc4c517eb9e56021c23a73b76f6c1",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 116461913006.0,
+        "independent_lower": 115086129515.57997,
+        "independent_upper": 117787391304.18,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "AKAM",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "307bfaa0ff4e3f62c1640b5c57029b70711674eddea3e9964ca10ce5bc1dcf1e",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 49564303596.0,
+        "independent_lower": 48700986018.89996,
+        "independent_upper": 50443744084.30006,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ALB",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "cec95a5b6fc2c8daea191a679edc6255b83e1ed879dc0a86b5bc6bcc326e6f45",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 72671851376.0,
+        "independent_lower": 70771548831.44,
+        "independent_upper": 74594462555.19997,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ALGN",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices"
+    },
+    {
+      "symbol": "ALL",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "cea83bee598be78a755042647ccc50634088d9c7dea035a609253d7115d70067",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 81001163419.0,
+        "independent_lower": 80030659254.04004,
+        "independent_upper": 81922059445.91006,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ALLE",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "637c75f8d2e8eabffcafa733d10fca17f3b68c41ff0fa897364ecc0ebba46fe4",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 34425076207.0,
+        "independent_lower": 34047094441.59999,
+        "independent_upper": 34770695116.99001,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "AMAT",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices"
+    },
+    {
+      "symbol": "AMCR",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "de5c75eb7e5c4c7299993a620add4680bee89cc21954a3b9b37df419d77d6d15",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 60448213705.0,
+        "independent_lower": 59784530181.32,
+        "independent_upper": 61201225714.62999,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "AMD",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "e5a17ae29e07d12dcf661dbc62eff70a5819a0d31ab1cfd5fef4be66b41c4351",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 1906232300272.0,
+        "independent_lower": 1861524531420.6702,
+        "independent_upper": 1950571993923.0,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "AME",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "170fd471f867a7ad05a73fc27d25d63b65a361944e7a2491cce51d1486687304",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 61823429942.0,
+        "independent_lower": 61109367293.89,
+        "independent_upper": 62339334874.090004,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "AMGN",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "03311612d7f7f5e8add286a205623f973e67775ac0032800e14a6ec9af4c38b0",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 204971759418.0,
+        "independent_lower": 202114031348.50998,
+        "independent_upper": 207373504958.1902,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "AMP",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "16ccb1ff6e390f97437d3fb9638b80958cafe1de6e1f65ef385d41ddbfe5514a",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 66074109579.0,
+        "independent_lower": 65247136280.67,
+        "independent_upper": 66826165656.69996,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "AMT",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "64844b2626d45b7c3702f83983af187ccc00f20da40e3572fd71fdebefbd0db1",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 138945570307.0,
+        "independent_lower": 137255323857.80992,
+        "independent_upper": 140573755242.58002,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "AMZN",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices"
+    },
+    {
+      "symbol": "ANET",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "28c9387a977901459b6a440547ae0acb8059e09128bce3c5dc30e7eeecbc1770",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 265894832833.0,
+        "independent_lower": 260003148363.9199,
+        "independent_upper": 271498065118.04,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "AON",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "77b5d761579f9ecfaa9666b130998b962f15754f2ce6ce0ae0f6bada886fa7f2",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 114176623931.0,
+        "independent_lower": 112971102358.52998,
+        "independent_upper": 115310113960.43001,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "AOS",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "f111115d4fe8ef8803403c7e714e71256d6287db773706321b28c31550414a57",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 23846186577.0,
+        "independent_lower": 23565683725.130013,
+        "independent_upper": 24106585781.54,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "APA",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "8c361dbf84e0262709f3e13c04d26757221db276637076c5af1ebf90a1a15b46",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 39302160067.0,
+        "independent_lower": 38463063370.17996,
+        "independent_upper": 40205240727.200005,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "APD",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "3bcacc7c293ee0bd804c19e9515d6df5a7702ca4b7ae77904d655c7feda455dc",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 91600891811.0,
+        "independent_lower": 90345087270.73003,
+        "independent_upper": 92599772576.08994,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "APH",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "2a618f471947733a521020dec25e30e0f5f42cf9035560fdfa4535fd478197bb",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 205007738400.0,
+        "independent_lower": 201608127228.20996,
+        "independent_upper": 208003337260.94986,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "APO",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "d46f84f9209b3c74851f5e5c8d3ab7ef03a50dabbb1d6eec8c3a508e372cb629",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 121976257827.0,
+        "independent_lower": 119766587933.29004,
+        "independent_upper": 124272435408.79,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "APP",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "8062c32558f2bd6edb7c4f3df250b76a2ea65fa1e3ef008e49aa300218df6d60",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 713791468336.0,
+        "independent_lower": 688074560102.3999,
+        "independent_upper": 737188008819.5698,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "APTV",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "c42f9ab0bb5dc120f1fbc911cddb92ba258b417b1be58189d78c520e3a96839d",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 46049836822.0,
+        "independent_lower": 45344296113.369995,
+        "independent_upper": 46723904801.87998,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ARE",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "48ebf33f37db3c405ed0d2695acdb4c122dfd46231e262ffdfc5f6e56e2d4399",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 34325164912.0,
+        "independent_lower": 33788414363.85999,
+        "independent_upper": 34974636189.49,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ARES",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "7720349bba357ad915801faaf1c818f3a594d3938755c3157d4a8d4ce2c3ebc0",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 81349650208.0,
+        "independent_lower": 79811595244.90999,
+        "independent_upper": 82749583875.23006,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ATO",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "7b1c5af5e8ed418015a17fabfdcfb3bd5674c5fef4d06c730d20dda96d378441",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 38319937340.0,
+        "independent_lower": 37967525079.159996,
+        "independent_upper": 38623137683.94999,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "AVB",
+      "status": "review_required",
+      "reason": "Security directory identity missing/ambiguous: AVB"
+    },
+    {
+      "symbol": "AVGO",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "a048e75d5302fa9e2dcba531173ca9e24a4cc14475790c40f4757464416d749d",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 1807756559872.0,
+        "independent_lower": 1770159965884.4106,
+        "independent_upper": 1845508194110.04,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "AVY",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "e8489fdceb019f772b369f64f11e3cc5852262325e8d469a1272bad8fc47c976",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 32156035461.0,
+        "independent_lower": 31773860376.71999,
+        "independent_upper": 32504313233.039978,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "AWK",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "7b2d905e1881d4e2c3e235643210c25fa1c53d4962f22084a72e0d7be01485be",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 51220803847.0,
+        "independent_lower": 50603421315.75999,
+        "independent_upper": 51780586923.95002,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "AXON",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices"
+    },
+    {
+      "symbol": "AXP",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "c128f2b694aab9ecdaaa422c9756bef561fc7f63b773096990a2bab32b76d3f8",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 215369403744.0,
+        "independent_lower": 212471215604.4001,
+        "independent_upper": 217886227266.1799,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "AZO",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "51152ada8bebfd3364ba621f611bc640e7feadef0885c00c67e4ceb1c37b4737",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 124365121741.0,
+        "independent_lower": 122732237042.43002,
+        "independent_upper": 125641387459.10004,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "BA",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "0d838b09386be7a85430f9fa59a5b953051528ff0986f26f0b8e420dca3ad3e6",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 405931955024.0,
+        "independent_lower": 399585564008.1801,
+        "independent_upper": 412295947327.86993,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "BAC",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "635056173eb6ea54b72f67b472fe93ce6540f37dbff250ade0f94daa8feb0d54",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 460962828640.0,
+        "independent_lower": 455342739442.8796,
+        "independent_upper": 466144518916.7597,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "BALL",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "e51975ff8e7bc236e03eec360c602f97a2ed0f0cbadf7adf5da35742088d7a12",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 34294609478.0,
+        "independent_lower": 33874056271.310017,
+        "independent_upper": 34694889178.77,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "BAX",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "e8f519e3bbc4838c96ab6b013700faf65d9e684afd4c19a509ffbfa74ecb10d6",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 38553767049.0,
+        "independent_lower": 37921278675.75003,
+        "independent_upper": 39211096856.490005,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "BBY",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "f41d1fe23341ce148a95335506016fb7b7616b2990fb5894bd416e689dc6c8d1",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 67902613162.0,
+        "independent_lower": 66729563077.349976,
+        "independent_upper": 69144654449.43002,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "BDX",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "24098e7b0c9b00f673029e75f2ba1256cb1d7b5ee7bea6d2522c1327b5dd5506",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 116671644803.0,
+        "independent_lower": 115218671931.28,
+        "independent_upper": 118117247649.20992,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "BEN",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "b264ef2253f937a0f7e1b638a7a0cd7af764899c3348f9fdfb0c6fafcaa5761f",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 24072992097.0,
+        "independent_lower": 23677360806.57999,
+        "independent_upper": 24364878836.260006,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "BF.B",
+      "status": "review_required",
+      "reason": "Security directory identity missing/ambiguous: BF.B"
+    },
+    {
+      "symbol": "BG",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "1bab978f9c8498ed8f58a30e8620f221982484b3207f1ba634137bb331dd97b2",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 36165771605.0,
+        "independent_lower": 35613221785.37,
+        "independent_upper": 36695912554.58999,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "BIIB",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "4b0b72304f3d672998ee15dd9fe5c8325660d2a6c0686e2acd0c9cdbe5999c9c",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 60161950200.0,
+        "independent_lower": 59134877304.74001,
+        "independent_upper": 61107828460.90999,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "BK",
+      "status": "review_required",
+      "reason": "Security directory identity missing/ambiguous: BK"
+    },
+    {
+      "symbol": "BKNG",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "773ea02d630dcaa20e1c31a11c571f9d4883ed36e8db199f893c208708c1490c",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 314922682464.0,
+        "independent_lower": 310097310027.79016,
+        "independent_upper": 318817233432.41,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "BKR",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "bd52d0d04965bdfe0cf5928fbdde689607afd4f9921520c86963014bd202fbef",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 81424927583.0,
+        "independent_lower": 80166621354.43001,
+        "independent_upper": 82685470724.04994,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "BLDR",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "5da0a9ed8c603de81bacedbbc774642c69a8b9d7c11552744e05956a7a007fd8",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 61489685856.0,
+        "independent_lower": 60226071553.640015,
+        "independent_upper": 62708493062.17001,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "BLK",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices"
+    },
+    {
+      "symbol": "BMY",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "bc31a5dc0786963c682ab659cd5660ee529eea9d98e6e6bbd7f883113a39e809",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 175660444800.0,
+        "independent_lower": 173145233843.8101,
+        "independent_upper": 177804757885.03003,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "BR",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "383c4fa6b30eeba0ae662c978c233e8b073466a2f970210d7b2efc61317f3b9c",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 36896377774.0,
+        "independent_lower": 36486090720.72002,
+        "independent_upper": 37239554297.130005,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "BRK.B",
+      "status": "review_required",
+      "reason": "Security directory identity missing/ambiguous: BRK.B"
+    },
+    {
+      "symbol": "BRO",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "9c9cbdc082fa30fd5a13e67bc2ac33cdaaf4349b1b4ef769d1ef62534ec05537",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 65048206635.0,
+        "independent_lower": 64335290400.270035,
+        "independent_upper": 65729680809.73996,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "BSX",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "6f244e749e171f124f7df64c3301a3e2d84a54121255847e8ba8a735a45099b0",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 204586842984.0,
+        "independent_lower": 202081040937.56006,
+        "independent_upper": 207030093747.61987,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "BX",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "315be77d103815c0f05b07640ebfb01afd623985dd0c6444ec4825ce0ac010f6",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 157854388951.0,
+        "independent_lower": 155211526059.30005,
+        "independent_upper": 160497765416.88,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "BXP",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "367b6cd22ba72fb23693012710b6f26bda631e14b4092e56398d935d743d45a1",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 27836123161.0,
+        "independent_lower": 27439932095.449997,
+        "independent_upper": 28209588916.240005,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "C",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "1d51fb1c9f7740627d50be02cdccf26bc7eb34f05d91c731d2f8ecaa7ee942f4",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 316113994352.0,
+        "independent_lower": 311369781990.12006,
+        "independent_upper": 320044645889.1902,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CAG",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "d7cd6c7ac93a8b5e74a68e05e78921b21094e8cb34ef53051dad66bd791b8ca2",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 46054676905.0,
+        "independent_lower": 45509796668.60001,
+        "independent_upper": 46657531897.20001,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CAH",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "011dcfb51aa9d071663d80e9fad0b986bc36cf4b5c080a6e9e6b809777d9dcc6",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 92519610187.0,
+        "independent_lower": 91246455597.84004,
+        "independent_upper": 93502878564.59001,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CARR",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "9506aa3abc56096122d640a32909a759772d7de2b8c531d457050431315ffdb5",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 91832573340.0,
+        "independent_lower": 90582925690.68004,
+        "independent_upper": 93060720630.87999,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CAT",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "0004dc59f72bf618096f806ecb574801b50921d6bbb917684bf2320795ac089a",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 288224865120.0,
+        "independent_lower": 284196498150.2602,
+        "independent_upper": 291832390826.0101,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CB",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "d51a06620424c23bdd7f64549e3f1fb191e6c36b79fc58a7a1b64e2bd3639226",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 126866909568.0,
+        "independent_lower": 125625417635.41995,
+        "independent_upper": 127927087606.87999,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CBOE",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "d5b74f29032fa78983581a25c83c4eb4c1c3c64c2be776e647757bdfafc80dab",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 47920426339.0,
+        "independent_lower": 47338412949.74999,
+        "independent_upper": 48461506567.729996,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CBRE",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "9eecdf85446c6e9e68384276be34a45667ebb5206c8789533ffcdd8bfab290fa",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 60151111113.0,
+        "independent_lower": 59320419531.28002,
+        "independent_upper": 60886175462.96998,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CCI",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "364e9b160796e0d50fae24fb257f5257f66c15e3de1ac61b6cadf8de865b80a2",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 77841849728.0,
+        "independent_lower": 76851133196.63,
+        "independent_upper": 78707334196.69,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CCL",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "8ca428940ec9b213dd25a5e80e250ef4804c2ab866ee2a636681fdc351d4941e",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 145144644581.0,
+        "independent_lower": 141993261626.68997,
+        "independent_upper": 148000706277.87,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CDNS",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "1e9141d9e47feea9ee74bab1f107d5ecf01aea1248794561c68f5722670ff977",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 146799193224.0,
+        "independent_lower": 144300072050.42993,
+        "independent_upper": 149092255316.63995,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CDW",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "1ece8597dbf824db06d1938e133f25c56d59c2850def3a6ea9fe18ead6de917a",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 58031244688.0,
+        "independent_lower": 57182135183.75001,
+        "independent_upper": 58932652978.64999,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CEG",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "4aefb46475c2b2f3646ec0d5cbdaab52e450b2cab4fc7e6d744ddae5ad1d1caf",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 240656111625.0,
+        "independent_lower": 234347979330.8299,
+        "independent_upper": 247197653644.28992,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CF",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "0af3c3dd35d09cedee232efb2b083edb8e2a5bf5927ce2f4730d094d4d0b3d28",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 55953204734.0,
+        "independent_lower": 55044938303.289986,
+        "independent_upper": 56756339826.05002,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CFG",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "d1c402174da6a6dff9b86f170d980c8bc7397a9f7f20da558cca22d4c090248d",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 54376314341.0,
+        "independent_lower": 53597339519.03996,
+        "independent_upper": 55054323506.51,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CHD",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "b874d6fd1df7299602f8c022558c17827925c4da0283585d5c1a22021c6d667e",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 50739708534.0,
+        "independent_lower": 50230541116.319984,
+        "independent_upper": 51235593634.61001,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CHRW",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "26d416e1ae86e95f31d975611847aed1a2021ebff3c2b230b45fa31b532a37d2",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 42038857759.0,
+        "independent_lower": 41434789426.63997,
+        "independent_upper": 42536620560.08999,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CHTR",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "a3367e2043fac9c19bdd25edd4ae1a980c432c78f18702418e6108e19e941568",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 124951399296.0,
+        "independent_lower": 122891079046.95004,
+        "independent_upper": 127189585839.88995,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CI",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "52483e00e3c195902d0fbe7b60f730d9ffe00bac0bf152f824c41ed873bdee7b",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 136523337290.0,
+        "independent_lower": 134487580414.09006,
+        "independent_upper": 138433585899.4501,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CINF",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "e1abb7a0c61c6fe2de42b53ff5e7e542deee2f6d407d96e9e488d8ce5ebdd093",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 23126104250.0,
+        "independent_lower": 22841180604.479992,
+        "independent_upper": 23341336347.269997,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CL",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "253e156eb6463e803213ddc0eb064fe5ca4ddcf638799bf88ce9b9a896019376",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 118821774480.0,
+        "independent_lower": 117648096237.20003,
+        "independent_upper": 119957464870.50005,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CLX",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "7e22a00e2482e09d49dfbc8aca65b825af6d3e8119b36c23e0cb8ab4c8eb4c69",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 56767877765.0,
+        "independent_lower": 56183305869.56999,
+        "independent_upper": 57423875661.33999,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CMCSA",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "feb43bc56fe29c970b9e7a7d9ffa81f10815c9324565b05ba608f39a45cee144",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 217060108080.0,
+        "independent_lower": 214302962642.49997,
+        "independent_upper": 219662076056.17,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CME",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "6e00a02b9b7b98a80ad0e618a2a1887886b044ec2d177a6bd5df1198d335e5df",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 143586361147.0,
+        "independent_lower": 142044960125.52994,
+        "independent_upper": 144956955466.35995,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CMG",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices"
+    },
+    {
+      "symbol": "CMI",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "6a095bd68ac48867326670b305df5b7f4bf3be85ca91d57403d6d02810791d30",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 83600581515.0,
+        "independent_lower": 82437099038.47998,
+        "independent_upper": 84593054300.25002,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CMS",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "effe5a9802f5d9c20ecfeb8866b31f11b3e8e750082a140c708a0044546d43ce",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 43139190745.0,
+        "independent_lower": 42712205271.310005,
+        "independent_upper": 43475215744.800026,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CNC",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "51c007348f1166a6c788196cadb9c98c56262155aef3d6bbc3b0e97b1e960d53",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 90506073527.0,
+        "independent_lower": 88708610873.54996,
+        "independent_upper": 92395281633.13998,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CNP",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "e02ee2179f5a4973665fd26e2ae69a806c2169979095ceb1505467760a480122",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 47389498454.0,
+        "independent_lower": 46937287186.26002,
+        "independent_upper": 47815142377.72002,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "COF",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "305a6756b31d4e059424c5b6958e2f2305c932b3482adfe17f1c6232ebc8e0fd",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 205431276828.0,
+        "independent_lower": 202138941366.08002,
+        "independent_upper": 208604559182.51004,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "COIN",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "b031b712a6d82b90ad9b7aafae0bc61ff8f99a438bb0790f2ed7e1ac84277e7f",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 764164182640.0,
+        "independent_lower": 740392003329.5195,
+        "independent_upper": 786624007754.0101,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "COO",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "17e3b8febcbc25484ea36f74094cde0c602055392a666cc5bd2fcda07fc22c82",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 46613569177.0,
+        "independent_lower": 45916725351.22001,
+        "independent_upper": 47327253846.41998,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "COP",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "03877544b790a3f09029506270a131c594305f0b3146dc5e97f92712d1f3dfe7",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 177366988048.0,
+        "independent_lower": 174847616262.61005,
+        "independent_upper": 179698476117.09998,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "COR",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "a97068b8e89198ca179b34f701b0a2816e9ff24af6adf2592a74953c95e93db5",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 112316723107.0,
+        "independent_lower": 110932919110.27998,
+        "independent_upper": 113538850224.84999,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "COST",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "1cdb0a1e23f121820edf670d42f25b2500ed5aab9759e6ed797e8149ac850f3f",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 554683734848.0,
+        "independent_lower": 548713638342.14044,
+        "independent_upper": 560119866862.89,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CPAY",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "b78395017dfe37215944629dc6a72fda978e2233dc7ca77371d20104b3440f41",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 40864376227.0,
+        "independent_lower": 40233656835.55001,
+        "independent_upper": 41489415023.29999,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CPB",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "e4bf6a2db074f455328ba1cafe8993a2e775bbde9295084095ee99ff3813a522",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 41043985442.0,
+        "independent_lower": 40530940380.24999,
+        "independent_upper": 41615033245.89003,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CPRT",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "0aa091e93dc83c17caa72f7a187da2e068ebe66482c453cadabf5c36775adb76",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 78919274572.0,
+        "independent_lower": 78077075255.99998,
+        "independent_upper": 79912578775.19,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CPT",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "e7051827938ff60028776f4672605d5391940a1a228d63190af9e5354666544c",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 29452124132.0,
+        "independent_lower": 29131928539.350014,
+        "independent_upper": 29746530007.530006,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CRH",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "015f70f67eae1fa245cda08b57eda019d45b523767646555addd50e91ca2c2aa",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 151460618003.0,
+        "independent_lower": 149519050858.48993,
+        "independent_upper": 153540833460.13995,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CRL",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "d29906313aa1b1b6ee3e171122bf1ffd1a5418a7da0dc60c2300c5d0dc5de67a",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 43779270313.0,
+        "independent_lower": 42737619412.22002,
+        "independent_upper": 44751591551.399994,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CRM",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "2a02037e7c6a98172de9768527bbdde1ebaeab9a4925de993609c4098c5cccae",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 516012995568.0,
+        "independent_lower": 508359617449.0695,
+        "independent_upper": 523309813943.19,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CRWD",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "a6841656fd1c92e093c998f87c3a58239e29eae51a10fc73ca0c299930bc7d0a",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 361091733584.0,
+        "independent_lower": 353016377897.23987,
+        "independent_upper": 367958150299.3599,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CSCO",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "41ff62c93a487ccf83e18c8871fb5107dd1f5202c92851d620d043acda4da07f",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 347816532032.0,
+        "independent_lower": 343571005598.4501,
+        "independent_upper": 351005907517.37,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CSGP",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "969251c3e658cd0633470745faabf512a2cb5e592c37d0d2aff7aa11e81efbea",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 64187994563.0,
+        "independent_lower": 63228788295.500015,
+        "independent_upper": 65164546291.940025,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CSX",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "69fe6e973d8fa09bbd2c9f78bcbc7720844b15facc328cc339188ba824f5e426",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 130814432527.0,
+        "independent_lower": 129247811605.42001,
+        "independent_upper": 132351467337.23994,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CTAS",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "3e31f1f0a06a8945d58f0e199475eda8de58492b64c2841ccbd66b6ed414775c",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 93617613144.0,
+        "independent_lower": 92571423543.41997,
+        "independent_upper": 94490186585.03995,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CTRA",
+      "status": "review_required",
+      "reason": "Security directory identity missing/ambiguous: CTRA"
+    },
+    {
+      "symbol": "CTSH",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "de4e33fe6c6f8b7139f4a8252468d1b37d854f5365405f2e0d5d8718a55f727a",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 77664555056.0,
+        "independent_lower": 76716316307.21994,
+        "independent_upper": 78599124225.00005,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CTVA",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "ae97b20dffb3b6ed2abc633a59abad72e3be9553fa593aca5748f2a69c4fd4da",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 66305334624.0,
+        "independent_lower": 65527175258.839966,
+        "independent_upper": 67035900832.73001,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CVNA",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices"
+    },
+    {
+      "symbol": "CVS",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "f51810819719c146fed8da2a3d8bc965719bcdea6470fa27bb9e2c2dd1c57b2b",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 148788902368.0,
+        "independent_lower": 146503071241.69995,
+        "independent_upper": 150864474013.68,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "CVX",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "c65a0c8c2be2fefd4563cebf967b969c1c3f4383fff28b4d0a5a95f8fa319a80",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 330415727904.0,
+        "independent_lower": 326988762796.6101,
+        "independent_upper": 334012292858.58984,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "D",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "d5904cbe8107e5436f5bb2c556b1276f683e34dc0ff0077664172fea1537e195",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 76828710892.0,
+        "independent_lower": 75974665866.39995,
+        "independent_upper": 77603364153.25998,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "DAL",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "37347a836bad1807b44231e21cecd17fd3ecf57856d423617505624d072e47ea",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 132662619298.0,
+        "independent_lower": 129831791906.72002,
+        "independent_upper": 135340550442.71991,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "DASH",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices"
+    },
+    {
+      "symbol": "DAY",
+      "status": "review_required",
+      "reason": "Security directory identity missing/ambiguous: DAY"
+    },
+    {
+      "symbol": "DD",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "1025f654bf041b3c765c61818c83c23689698e2126ef4ec970204f35e377f14b",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 55306879236.0,
+        "independent_lower": 54457852896.360016,
+        "independent_upper": 56055397580.45002,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "DDOG",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices"
+    },
+    {
+      "symbol": "DE",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "6cf9d5b8f0271645a2a0d4d5c00eed88b273ce4eb7399e0e0b56640d2903895f",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 164814226581.0,
+        "independent_lower": 162583531262.26996,
+        "independent_upper": 166824256472.27008,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "DECK",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices"
+    },
+    {
+      "symbol": "DELL",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "83c73f994d824f363244b56bf86690888eb1624a47814b00f8a7cfab49ef3c3f",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 208430505361.0,
+        "independent_lower": 203960504038.95987,
+        "independent_upper": 212751292342.91016,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "DG",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "a390d7e5ff3fbc1c1d5d78d3d9d641ca8bb9803cba6cc30d0fdd70247df5d9e0",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 89681064670.0,
+        "independent_lower": 87962662398.19995,
+        "independent_upper": 91083733722.64996,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "DGX",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "3d18938a03dc0fbbf48748675e30a385c0145c07362572cdfe7d115251c96204",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 47671016720.0,
+        "independent_lower": 47099650259.29999,
+        "independent_upper": 48222923532.93002,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "DHI",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "a781a2c82ceec03d6c23a478c33cd75083f771d924311be69e27a920c509a5d8",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 126911491677.0,
+        "independent_lower": 124762221782.94012,
+        "independent_upper": 128815698378.81,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "DHR",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "78276a7bfd03f749cf4c824a7e19c2f8b04e53e94e77d55dfa4f460687bd9b79",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 211473274812.0,
+        "independent_lower": 208476085514.61996,
+        "independent_upper": 214516874418.73993,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "DIS",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "be291aa682bb8d198f2723f881f1f7030771df1fc015028491e65a7d9fd59777",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 262340833328.0,
+        "independent_lower": 259203603222.42984,
+        "independent_upper": 265292870932.72012,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "DLR",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "c4d8c897969e309c8ab03cd4c0c47992cad43c2f2df5c904744e17fed6dddfcf",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 80458644024.0,
+        "independent_lower": 79327283616.93997,
+        "independent_upper": 81479266147.35005,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "DLTR",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "a63ad69991fdcc8d4e00b51a0afca97b56eb9103485a8129c55341ccc6379a0e",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 95315605519.0,
+        "independent_lower": 93202482281.60995,
+        "independent_upper": 97037362773.38994,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "DOC",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "0bcc22c082bc8bbb764532f83c904a59b4796cf41a78d9fcbec08673abfd5f7f",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 30370661573.0,
+        "independent_lower": 30026236667.21001,
+        "independent_upper": 30726296201.310005,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "DOV",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "72d4797759715495304f0797a5fb182d8ea9772cb592ce0cb26d8b716d1bee26",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 48342248027.0,
+        "independent_lower": 47762274308.23997,
+        "independent_upper": 48911581670.37,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "DOW",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "a8ad761f99b45d0a23266acf413c5fea8baa25b1055c4a1ec291a93af967705d",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 78590336951.0,
+        "independent_lower": 77122170056.51,
+        "independent_upper": 80179648868.97,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "DPZ",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "62395fabf1fb5a54fbee6063723741ac50fdf60a5ab7211e2d47787172cbb5fd",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 70548094510.0,
+        "independent_lower": 69502073081.11003,
+        "independent_upper": 71504604215.95,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "DRI",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "2a11c43ac5eb7c0cc068356991125019ad7c2d5e57c04b9e8d28b4220a38d922",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 66366834554.0,
+        "independent_lower": 65553426585.01998,
+        "independent_upper": 67110010054.43001,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "DTE",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "533b96c916bc677112d8c56a1adef40f513d0f1d33f25df00134c3acd6be8c47",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 45331858595.0,
+        "independent_lower": 44895515724.44002,
+        "independent_upper": 45676996327.34996,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "DUK",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "27f58186f6ab368d5c6979a858b41cc6e0c61714d0f77a99ac0b3559608433be",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 100573532344.0,
+        "independent_lower": 99667070140.35002,
+        "independent_upper": 101411280570.47011,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "DVA",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "8498ba1413cc32d1ff956abf2151d10f4594b09f3bccf74391e99b52c047a246",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 29547631778.0,
+        "independent_lower": 29124528043.57001,
+        "independent_upper": 29989390262.080013,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "DVN",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "a305c5fc3c24e817086cd7dbd3fe55c61ad32277f870eb2161a97f4aab4e6adf",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 71928807633.0,
+        "independent_lower": 70711226542.17996,
+        "independent_upper": 73186414792.48994,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "DXCM",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "33f114e3b1f203310d7b8ffd7832517a57ebc0671c3e31f817e6135dd17fb304",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 84563032060.0,
+        "independent_lower": 83002986188.59998,
+        "independent_upper": 86237598470.37003,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "EA",
+      "status": "review_required",
+      "reason": "Security directory identity missing/ambiguous: EA"
+    },
+    {
+      "symbol": "EBAY",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "2a4e12cfb94566fe31ee095624081a93c6cd3e7eb3fc764456dd967756e8ac94",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 107809265253.0,
+        "independent_lower": 106193427932.40997,
+        "independent_upper": 109298332259.36008,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ECL",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "bc90a971afd2b15d9ec11d8dcaaa20a86ae0a05c607f9e34d10818772fea3eef",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 87909609425.0,
+        "independent_lower": 87058343085.54001,
+        "independent_upper": 88673211417.18996,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ED",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "5aa3cd2e6cb270d6568e761fa1884447a96597c36e9f5dbc4985ad36347646d8",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 63824579083.0,
+        "independent_lower": 63193378712.12001,
+        "independent_upper": 64412663782.000015,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "EFX",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "64b8960ffb4d055ff89ad2ae94627f6ff8a67504584880c3f1e5bada5dc920ea",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 68419385715.0,
+        "independent_lower": 67376676598.34994,
+        "independent_upper": 69386722668.73003,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "EG",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "b69234d515e7676f8f05da2272d7d3f772ea48451474899a0038967a83bb363e",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 33754180032.0,
+        "independent_lower": 33368201220.129986,
+        "independent_upper": 34132065056.67999,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "EIX",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "1329921dca713ccd92d97199aa0802b6d37597f51a0f99718c81923996fc5059",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 55077405817.0,
+        "independent_lower": 54158198022.84002,
+        "independent_upper": 56124339617.72002,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "EL",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "2d775bba6f74e4b9dd771175288c7c7edd9e3bb19ca716ad65b170fcba12678a",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 78001661260.0,
+        "independent_lower": 76440426440.09999,
+        "independent_upper": 79526943993.47,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ELV",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "1b9d0756a83bfac559be30a36585e232e919f6074b1809562b7f0a7e95d99579",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 168730137949.0,
+        "independent_lower": 166014659163.80008,
+        "independent_upper": 171456415313.16995,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "EME",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "14dff148b35d4339e6c36641826b18302ec7f975e614cbdcf2b1851f40360e6c",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 67242422320.0,
+        "independent_lower": 65941727894.10003,
+        "independent_upper": 68317947367.59997,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "EMR",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "7a000ded8124be2eebe640f6ce98e6d0ff31baf96186cc5adb1b66cd23edfa1b",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 93364062867.0,
+        "independent_lower": 92106146602.22995,
+        "independent_upper": 94466400003.29,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "EOG",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "840b7bb45ae33db119fce136eceac1cb7be291e17145e44e29806d0e5568e26b",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 105681301626.0,
+        "independent_lower": 104362136115.93,
+        "independent_upper": 107085208210.92003,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "EPAM",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "2fd3bdf63e880436c871721861ac8abe43fe830c1bf5870e87b749697b88a21f",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 35320175051.0,
+        "independent_lower": 34660438319.67002,
+        "independent_upper": 35928722632.22,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "EQIX",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "868200758e2f22270de99aa6e5f8551aba7bbcf124fedc2d690cefca30fda08d",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 120125220324.0,
+        "independent_lower": 118444755905.33998,
+        "independent_upper": 121667750838.99002,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "EQR",
+      "status": "review_required",
+      "reason": "Security directory identity missing/ambiguous: EQR"
+    },
+    {
+      "symbol": "EQT",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "46f85b849d7da7feb5670467e2383fcae2c0de586ec54c9edf4b321ee9c1e58b",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 108919079069.0,
+        "independent_lower": 106940535857.54996,
+        "independent_upper": 110851163318.12001,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ERIE",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "137ad00d7fbe6a3d4be7f1b0ac6c5be6e011f35edfcf6e8485d7d3ad63c1d242",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 13221116105.0,
+        "independent_lower": 13027369438.77,
+        "independent_upper": 13415260339.009998,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ES",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "609f4b70ecaa04863455a18dbe4be107409486147723dc5459c5ddb06d72b67f",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 44067745416.0,
+        "independent_lower": 43500457382.99,
+        "independent_upper": 44585343441.10002,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ESS",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "fdf493159f9695812cda0b26ea1a8e4d2f9d9326e1f93c9f68af0f91e1b78155",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 32860756335.0,
+        "independent_lower": 32460765647.92,
+        "independent_upper": 33242253636.47998,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ETN",
+      "rank_month": "2025-12",
+      "status": "stored",
+      "inserted": 1,
+      "evidence_sha256": "39ecb8e1f923e0b12453bacf78198ffe03fdb411b3dd658989e93f79fd453f8b",
+      "summary": {
+        "trading_days": 250,
+        "primary_amount": 232840426589.0,
+        "independent_lower": 229143918077.13,
+        "independent_upper": 236683983063.36002,
+        "first_date": "2025-01-02",
+        "last_date": "2025-12-31",
+        "calendar_sha256": "3e1f76799ad61f423dc1f4ba4b5cc351a4c4126a111f0668251ebe08a57bd4a3"
+      }
+    },
+    {
+      "symbol": "ETR",
+      "status": "network_failure",
+      "type": "ReadTimeout"
+    }
+  ],
+  "prices_sources_locks_and_published_outputs_changed": false
+}

@@ -1,0 +1,27 @@
+{
+  "write": true,
+  "alias": {
+    "old": "BK",
+    "current": "BNY",
+    "effective_date": "2026-05-21",
+    "evidence": "https://www.sec.gov/Archives/edgar/data/1390777/000119312526281160/d137058d8k.htm",
+    "note": "Same issuer common stock; effective date confirmed by issuer announcement and OCC memo 58945. Membership continuity only; no old-code price transfer."
+  },
+  "evidence_record_sha256": "7ec51539702648288be803cc7a7ffedfccd3a096efb03ba9b24844a79bfb1be4",
+  "other_primary_sources": [
+    "https://www.bny.com/corporate/global/en/about-us/newsroom/press-release/bny-announces-planned-change-of-stock-ticker-symbol-to-bny-130465.html",
+    "https://infomemo.theocc.com/infomemos?number=58945"
+  ],
+  "membership_year_changes": {
+    "2026": {
+      "added": [
+        "BNY"
+      ],
+      "removed": []
+    }
+  },
+  "selection_years_2010_through_2026_unchanged": true,
+  "first_affected_selection_year": 2027,
+  "prices_source_picks_and_published_outputs_changed": false,
+  "baseline_b_sha256": "20c0680276cf79cbb06d8aaab35c3e40cde010447f6e15e75abd95ff0ef33c90"
+}
