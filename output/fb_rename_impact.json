@@ -1,0 +1,3136 @@
+{
+  "reviewed_replacement": {
+    "old": "FB",
+    "current": "META",
+    "through": "2022-12",
+    "months": 128,
+    "independent_return_pairs": 65,
+    "median_return_deviation": 1.4594287223168578e-07,
+    "max_return_deviation": 0.0005990108111545434
+  },
+  "issuer_evidence": "https://www.sec.gov/Archives/edgar/data/1326801/000132680122000070/fb-20220531.htm",
+  "comparison_scope": "FB source change only; same actual-consideration and verified-continuity policies; fixed nominal-floor snapshot with both missing-price predicate bounds",
+  "selected_input_stamp": [
+    406511,
+    "2026-11-02 06:40:00.243296+00",
+    849,
+    143648,
+    837,
+    "16111549.637344811063187142"
+  ],
+  "nominal_input_sha": "18ac6b007c5f5d23e4b2ea5517eeef8e2ed0aaf7da3fee1bc9af6bc4448260e2",
+  "reference_input_sha": "8be807c07c265e13fde5e5c7cb13dc2139ada8a01716308f6d7a1b6f4829e98f",
+  "event_input_sha": "6fda621260c877262c5b615aaff5b92f87c3e0d51565e190974f039ab4c94aff",
+  "alias_input_sha": "68b66f9a47920d78490348c3e9df42edbaa2588704ff4faa28fbd078e19537aa",
+  "baseline_b_sha256": "20c0680276cf79cbb06d8aaab35c3e40cde010447f6e15e75abd95ff0ef33c90",
+  "changes": [],
+  "source_choices_prices_locks_and_published_outputs_changed": false,
+  "before": [
+    {
+      "variant": "A",
+      "year": 2010,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "XL",
+              0.4
+            ],
+            [
+              "PXD",
+              0.3
+            ],
+            [
+              "WFM",
+              0.3
+            ]
+          ],
+          "return_value": 0.5697658657822575,
+          "drawdown": -0.08995087368284638,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "XL",
+              0.4
+            ],
+            [
+              "PXD",
+              0.3
+            ],
+            [
+              "WFM",
+              0.3
+            ]
+          ],
+          "return_value": 0.5697658657822575,
+          "drawdown": -0.08995087368284638,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2011,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "WFM",
+              0.3
+            ],
+            [
+              "PXD",
+              0.3
+            ],
+            [
+              "HES",
+              0.4
+            ]
+          ],
+          "return_value": 0.020457495074723164,
+          "drawdown": -0.2514711838925646,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "WFM",
+              0.3
+            ],
+            [
+              "PXD",
+              0.3
+            ],
+            [
+              "HES",
+              0.4
+            ]
+          ],
+          "return_value": 0.020457495074723164,
+          "drawdown": -0.2514711838925646,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2012,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "COG",
+              0.3333
+            ],
+            [
+              "ISRG",
+              0.3333
+            ],
+            [
+              "MA",
+              0.3333
+            ]
+          ],
+          "return_value": 0.2299930015236702,
+          "drawdown": -0.09158417830765753,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "COG",
+              0.3333
+            ],
+            [
+              "ISRG",
+              0.3333
+            ],
+            [
+              "MA",
+              0.3333
+            ]
+          ],
+          "return_value": 0.2299930015236702,
+          "drawdown": -0.09158417830765753,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2013,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "PHM",
+              0.3
+            ],
+            [
+              "WHR",
+              0.3
+            ],
+            [
+              "BAC",
+              0.4
+            ]
+          ],
+          "return_value": 0.3486620979277808,
+          "drawdown": -0.09140922760376524,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "PHM",
+              0.3
+            ],
+            [
+              "WHR",
+              0.3
+            ],
+            [
+              "BAC",
+              0.4
+            ]
+          ],
+          "return_value": 0.3486620979277808,
+          "drawdown": -0.09140922760376524,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2014,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "NFLX",
+              0.3333
+            ],
+            [
+              "BBY",
+              0.3333
+            ],
+            [
+              "MU",
+              0.3333
+            ]
+          ],
+          "return_value": 0.1793043880711005,
+          "drawdown": -0.09656657835952354,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "NFLX",
+              0.3333
+            ],
+            [
+              "BBY",
+              0.3333
+            ],
+            [
+              "MU",
+              0.3333
+            ]
+          ],
+          "return_value": 0.1793043880711005,
+          "drawdown": -0.09656657835952354,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2015,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "LUV",
+              0.3333
+            ],
+            [
+              "EW",
+              0.3333
+            ],
+            [
+              "AVGO",
+              0.3333
+            ]
+          ],
+          "return_value": 0.24148275271561337,
+          "drawdown": -0.09127431346818482,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "LUV",
+              0.3333
+            ],
+            [
+              "EW",
+              0.3333
+            ],
+            [
+              "AVGO",
+              0.3333
+            ]
+          ],
+          "return_value": 0.24148275271561337,
+          "drawdown": -0.09127431346818482,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2016,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "NFLX",
+              0.3
+            ],
+            [
+              "AMZN",
+              0.4
+            ],
+            [
+              "ATVI",
+              0.3
+            ]
+          ],
+          "return_value": 0.05060195102400877,
+          "drawdown": -0.18256788478539665,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "NFLX",
+              0.3
+            ],
+            [
+              "AMZN",
+              0.4
+            ],
+            [
+              "ATVI",
+              0.3
+            ]
+          ],
+          "return_value": 0.05060195102400877,
+          "drawdown": -0.18256788478539665,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2017,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "NVDA",
+              0.3333
+            ],
+            [
+              "OKE",
+              0.3333
+            ],
+            [
+              "FCX",
+              0.3333
+            ]
+          ],
+          "return_value": 0.4119184633158386,
+          "drawdown": -0.11475358482561693,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "NVDA",
+              0.3333
+            ],
+            [
+              "OKE",
+              0.3333
+            ],
+            [
+              "FCX",
+              0.3333
+            ]
+          ],
+          "return_value": 0.4119184633158386,
+          "drawdown": -0.11475358482561693,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2018,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "NRG",
+              0.4
+            ],
+            [
+              "ALGN",
+              0.3
+            ],
+            [
+              "VRTX",
+              0.3
+            ]
+          ],
+          "return_value": 0.17285925553734716,
+          "drawdown": -0.20318545652526732,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "NRG",
+              0.4
+            ],
+            [
+              "ALGN",
+              0.3
+            ],
+            [
+              "VRTX",
+              0.3
+            ]
+          ],
+          "return_value": 0.17285925553734716,
+          "drawdown": -0.20318545652526732,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2019,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "AMD",
+              0.3
+            ],
+            [
+              "ABMD",
+              0.4
+            ],
+            [
+              "FTNT",
+              0.3
+            ]
+          ],
+          "return_value": 0.4099677094910057,
+          "drawdown": -0.14417916867035607,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "AMD",
+              0.3
+            ],
+            [
+              "ABMD",
+              0.4
+            ],
+            [
+              "FTNT",
+              0.3
+            ]
+          ],
+          "return_value": 0.4099677094910057,
+          "drawdown": -0.14417916867035607,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2020,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "AMD",
+              0.3
+            ],
+            [
+              "LRCX",
+              0.3
+            ],
+            [
+              "TGT",
+              0.4
+            ]
+          ],
+          "return_value": 0.6543638213025473,
+          "drawdown": -0.16306452069459954,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "AMD",
+              0.3
+            ],
+            [
+              "LRCX",
+              0.3
+            ],
+            [
+              "TGT",
+              0.4
+            ]
+          ],
+          "return_value": 0.6543638213025473,
+          "drawdown": -0.16306452069459954,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2021,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "TSLA",
+              0.3
+            ],
+            [
+              "ETSY",
+              0.3
+            ],
+            [
+              "LB",
+              0.4
+            ]
+          ],
+          "return_value": 0.7737239372845035,
+          "drawdown": -0.09422795734043621,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "TSLA",
+              0.3
+            ],
+            [
+              "ETSY",
+              0.3
+            ],
+            [
+              "LB",
+              0.4
+            ]
+          ],
+          "return_value": 0.7737239372845035,
+          "drawdown": -0.09422795734043621,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2022,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "DVN",
+              0.3333
+            ],
+            [
+              "MRNA",
+              0.3333
+            ],
+            [
+              "FTNT",
+              0.3333
+            ]
+          ],
+          "return_value": -0.03475548049177024,
+          "drawdown": -0.16893212043593875,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "DVN",
+              0.3333
+            ],
+            [
+              "MRNA",
+              0.3333
+            ],
+            [
+              "FTNT",
+              0.3333
+            ]
+          ],
+          "return_value": -0.03475548049177024,
+          "drawdown": -0.16893212043593875,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2023,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "OXY",
+              0.3
+            ],
+            [
+              "HES",
+              0.3
+            ],
+            [
+              "FSLR",
+              0.4
+            ]
+          ],
+          "return_value": 0.05657064291666791,
+          "drawdown": -0.1642559944960349,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "OXY",
+              0.3
+            ],
+            [
+              "HES",
+              0.3
+            ],
+            [
+              "FSLR",
+              0.4
+            ]
+          ],
+          "return_value": 0.05657064291666791,
+          "drawdown": -0.1642559944960349,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2024,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "NVDA",
+              0.3333
+            ],
+            [
+              "META",
+              0.3333
+            ],
+            [
+              "RCL",
+              0.3333
+            ]
+          ],
+          "return_value": 1.0540654903661335,
+          "drawdown": -0.05425948600707886,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "NVDA",
+              0.3333
+            ],
+            [
+              "META",
+              0.3333
+            ],
+            [
+              "RCL",
+              0.3333
+            ]
+          ],
+          "return_value": 1.0540654903661335,
+          "drawdown": -0.05425948600707886,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2025,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "PLTR",
+              0.3
+            ],
+            [
+              "VST",
+              0.4
+            ],
+            [
+              "NVDA",
+              0.3
+            ]
+          ],
+          "return_value": 0.5924549313267227,
+          "drawdown": -0.15208841838022003,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "PLTR",
+              0.3
+            ],
+            [
+              "VST",
+              0.4
+            ],
+            [
+              "NVDA",
+              0.3
+            ]
+          ],
+          "return_value": 0.5924549313267227,
+          "drawdown": -0.15208841838022003,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2026,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "WDC",
+              0.3
+            ],
+            [
+              "MU",
+              0.3
+            ],
+            [
+              "HOOD",
+              0.4
+            ]
+          ]
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "WDC",
+              0.3
+            ],
+            [
+              "MU",
+              0.3
+            ],
+            [
+              "HOOD",
+              0.4
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2010,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "XL",
+              0.3333
+            ],
+            [
+              "PXD",
+              0.3333
+            ],
+            [
+              "COG",
+              0.3334
+            ]
+          ],
+          "return_value": 0.29481784067032324,
+          "drawdown": -0.09785648423878934,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "XL",
+              0.3333
+            ],
+            [
+              "PXD",
+              0.3333
+            ],
+            [
+              "COG",
+              0.3334
+            ]
+          ],
+          "return_value": 0.29481784067032324,
+          "drawdown": -0.09785648423878934,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2011,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "WFM",
+              0.3333
+            ],
+            [
+              "HES",
+              0.3333
+            ],
+            [
+              "XL",
+              0.3334
+            ]
+          ],
+          "return_value": 0.009342411168774767,
+          "drawdown": -0.19856353800676974,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "WFM",
+              0.3333
+            ],
+            [
+              "HES",
+              0.3333
+            ],
+            [
+              "XL",
+              0.3334
+            ]
+          ],
+          "return_value": 0.009342411168774767,
+          "drawdown": -0.19856353800676974,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2012,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "COG",
+              0.3333
+            ],
+            [
+              "ISRG",
+              0.3333
+            ],
+            [
+              "MA",
+              0.3334
+            ]
+          ],
+          "return_value": 0.23012509452370233,
+          "drawdown": -0.09158520977923934,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "COG",
+              0.3333
+            ],
+            [
+              "ISRG",
+              0.3333
+            ],
+            [
+              "MA",
+              0.3334
+            ]
+          ],
+          "return_value": 0.23012509452370233,
+          "drawdown": -0.09158520977923934,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2013,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "PHM",
+              0.3
+            ],
+            [
+              "WHR",
+              0.3
+            ],
+            [
+              "BAC",
+              0.4
+            ]
+          ],
+          "return_value": 0.3486620979277808,
+          "drawdown": -0.09140922760376524,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "PHM",
+              0.3
+            ],
+            [
+              "WHR",
+              0.3
+            ],
+            [
+              "BAC",
+              0.4
+            ]
+          ],
+          "return_value": 0.3486620979277808,
+          "drawdown": -0.09140922760376524,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2014,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "NFLX",
+              0.3333
+            ],
+            [
+              "BBY",
+              0.3333
+            ],
+            [
+              "MU",
+              0.3334
+            ]
+          ],
+          "return_value": 0.17946535361192595,
+          "drawdown": -0.09645779674175547,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "NFLX",
+              0.3333
+            ],
+            [
+              "BBY",
+              0.3333
+            ],
+            [
+              "MU",
+              0.3334
+            ]
+          ],
+          "return_value": 0.17946535361192595,
+          "drawdown": -0.09645779674175547,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2015,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "LUV",
+              0.3
+            ],
+            [
+              "EW",
+              0.4
+            ],
+            [
+              "DAL",
+              0.3
+            ]
+          ],
+          "return_value": 0.1154824357369082,
+          "drawdown": -0.09877473383555091,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "LUV",
+              0.3
+            ],
+            [
+              "EW",
+              0.4
+            ],
+            [
+              "DAL",
+              0.3
+            ]
+          ],
+          "return_value": 0.1154824357369082,
+          "drawdown": -0.09877473383555091,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2016,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "NFLX",
+              0.3333
+            ],
+            [
+              "AMZN",
+              0.3333
+            ],
+            [
+              "NVDA",
+              0.3334
+            ]
+          ],
+          "return_value": 0.8206169381746484,
+          "drawdown": -0.14663813361009892,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "NFLX",
+              0.3333
+            ],
+            [
+              "AMZN",
+              0.3333
+            ],
+            [
+              "NVDA",
+              0.3334
+            ]
+          ],
+          "return_value": 0.8206169381746484,
+          "drawdown": -0.14663813361009892,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2017,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "NVDA",
+              0.3333
+            ],
+            [
+              "OKE",
+              0.3333
+            ],
+            [
+              "FCX",
+              0.3334
+            ]
+          ],
+          "return_value": 0.41206220857614384,
+          "drawdown": -0.11476748164711004,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "NVDA",
+              0.3333
+            ],
+            [
+              "OKE",
+              0.3333
+            ],
+            [
+              "FCX",
+              0.3334
+            ]
+          ],
+          "return_value": 0.41206220857614384,
+          "drawdown": -0.11476748164711004,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2018,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "NRG",
+              0.3333
+            ],
+            [
+              "VRTX",
+              0.3333
+            ],
+            [
+              "WYNN",
+              0.3334
+            ]
+          ],
+          "return_value": 0.03324283142631468,
+          "drawdown": -0.11532806992804456,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "NRG",
+              0.3333
+            ],
+            [
+              "VRTX",
+              0.3333
+            ],
+            [
+              "WYNN",
+              0.3334
+            ]
+          ],
+          "return_value": 0.03324283142631468,
+          "drawdown": -0.11532806992804456,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2019,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "AMD",
+              0.3333
+            ],
+            [
+              "AAP",
+              0.3333
+            ],
+            [
+              "CMG",
+              0.3334
+            ]
+          ],
+          "return_value": 0.8139086017720873,
+          "drawdown": -0.035893613294794124,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "AMD",
+              0.3333
+            ],
+            [
+              "AAP",
+              0.3333
+            ],
+            [
+              "CMG",
+              0.3334
+            ]
+          ],
+          "return_value": 0.8139086017720873,
+          "drawdown": -0.035893613294794124,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2020,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "AMD",
+              0.3
+            ],
+            [
+              "LRCX",
+              0.3
+            ],
+            [
+              "TGT",
+              0.4
+            ]
+          ],
+          "return_value": 0.6543638213025473,
+          "drawdown": -0.16306452069459954,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "AMD",
+              0.3
+            ],
+            [
+              "LRCX",
+              0.3
+            ],
+            [
+              "TGT",
+              0.4
+            ]
+          ],
+          "return_value": 0.6543638213025473,
+          "drawdown": -0.16306452069459954,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2021,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "LB",
+              0.3333
+            ],
+            [
+              "NVDA",
+              0.3333
+            ],
+            [
+              "PYPL",
+              0.3334
+            ]
+          ],
+          "return_value": 0.8159677410255091,
+          "drawdown": -0.08734933900306552,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "LB",
+              0.3333
+            ],
+            [
+              "NVDA",
+              0.3333
+            ],
+            [
+              "PYPL",
+              0.3334
+            ]
+          ],
+          "return_value": 0.8159677410255091,
+          "drawdown": -0.08734933900306552,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2022,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "DVN",
+              0.3333
+            ],
+            [
+              "FTNT",
+              0.3333
+            ],
+            [
+              "BBWI",
+              0.3334
+            ]
+          ],
+          "return_value": -0.06508475032375671,
+          "drawdown": -0.21286671460678153,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "DVN",
+              0.3333
+            ],
+            [
+              "FTNT",
+              0.3333
+            ],
+            [
+              "BBWI",
+              0.3334
+            ]
+          ],
+          "return_value": -0.06508475032375671,
+          "drawdown": -0.21286671460678153,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2023,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "OXY",
+              0.3
+            ],
+            [
+              "HES",
+              0.3
+            ],
+            [
+              "CAH",
+              0.4
+            ]
+          ],
+          "return_value": 0.1331041200234342,
+          "drawdown": -0.06845835620689644,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "OXY",
+              0.3
+            ],
+            [
+              "HES",
+              0.3
+            ],
+            [
+              "CAH",
+              0.4
+            ]
+          ],
+          "return_value": 0.1331041200234342,
+          "drawdown": -0.06845835620689644,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2024,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "NVDA",
+              0.3333
+            ],
+            [
+              "META",
+              0.3333
+            ],
+            [
+              "RCL",
+              0.3334
+            ]
+          ],
+          "return_value": 1.0542444734784642,
+          "drawdown": -0.05425505862156599,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "NVDA",
+              0.3333
+            ],
+            [
+              "META",
+              0.3333
+            ],
+            [
+              "RCL",
+              0.3334
+            ]
+          ],
+          "return_value": 1.0542444734784642,
+          "drawdown": -0.05425505862156599,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2025,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "NVDA",
+              0.4
+            ],
+            [
+              "UAL",
+              0.3
+            ],
+            [
+              "AXON",
+              0.3
+            ]
+          ],
+          "return_value": 0.1878239403632933,
+          "drawdown": -0.20927578056234875,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "NVDA",
+              0.4
+            ],
+            [
+              "UAL",
+              0.3
+            ],
+            [
+              "AXON",
+              0.3
+            ]
+          ],
+          "return_value": 0.1878239403632933,
+          "drawdown": -0.20927578056234875,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2026,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "WDC",
+              0.3
+            ],
+            [
+              "MU",
+              0.3
+            ],
+            [
+              "NEM",
+              0.4
+            ]
+          ]
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "WDC",
+              0.3
+            ],
+            [
+              "MU",
+              0.3
+            ],
+            [
+              "NEM",
+              0.4
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "after": [
+    {
+      "variant": "A",
+      "year": 2010,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "XL",
+              0.4
+            ],
+            [
+              "PXD",
+              0.3
+            ],
+            [
+              "WFM",
+              0.3
+            ]
+          ],
+          "return_value": 0.5697658657822575,
+          "drawdown": -0.08995087368284638,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "XL",
+              0.4
+            ],
+            [
+              "PXD",
+              0.3
+            ],
+            [
+              "WFM",
+              0.3
+            ]
+          ],
+          "return_value": 0.5697658657822575,
+          "drawdown": -0.08995087368284638,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2011,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "WFM",
+              0.3
+            ],
+            [
+              "PXD",
+              0.3
+            ],
+            [
+              "HES",
+              0.4
+            ]
+          ],
+          "return_value": 0.020457495074723164,
+          "drawdown": -0.2514711838925646,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "WFM",
+              0.3
+            ],
+            [
+              "PXD",
+              0.3
+            ],
+            [
+              "HES",
+              0.4
+            ]
+          ],
+          "return_value": 0.020457495074723164,
+          "drawdown": -0.2514711838925646,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2012,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "COG",
+              0.3333
+            ],
+            [
+              "ISRG",
+              0.3333
+            ],
+            [
+              "MA",
+              0.3333
+            ]
+          ],
+          "return_value": 0.2299930015236702,
+          "drawdown": -0.09158417830765753,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "COG",
+              0.3333
+            ],
+            [
+              "ISRG",
+              0.3333
+            ],
+            [
+              "MA",
+              0.3333
+            ]
+          ],
+          "return_value": 0.2299930015236702,
+          "drawdown": -0.09158417830765753,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2013,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "PHM",
+              0.3
+            ],
+            [
+              "WHR",
+              0.3
+            ],
+            [
+              "BAC",
+              0.4
+            ]
+          ],
+          "return_value": 0.3486620979277808,
+          "drawdown": -0.09140922760376524,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "PHM",
+              0.3
+            ],
+            [
+              "WHR",
+              0.3
+            ],
+            [
+              "BAC",
+              0.4
+            ]
+          ],
+          "return_value": 0.3486620979277808,
+          "drawdown": -0.09140922760376524,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2014,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "NFLX",
+              0.3333
+            ],
+            [
+              "BBY",
+              0.3333
+            ],
+            [
+              "MU",
+              0.3333
+            ]
+          ],
+          "return_value": 0.1793043880711005,
+          "drawdown": -0.09656657835952354,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "NFLX",
+              0.3333
+            ],
+            [
+              "BBY",
+              0.3333
+            ],
+            [
+              "MU",
+              0.3333
+            ]
+          ],
+          "return_value": 0.1793043880711005,
+          "drawdown": -0.09656657835952354,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2015,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "LUV",
+              0.3333
+            ],
+            [
+              "EW",
+              0.3333
+            ],
+            [
+              "AVGO",
+              0.3333
+            ]
+          ],
+          "return_value": 0.24148275271561337,
+          "drawdown": -0.09127431346818482,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "LUV",
+              0.3333
+            ],
+            [
+              "EW",
+              0.3333
+            ],
+            [
+              "AVGO",
+              0.3333
+            ]
+          ],
+          "return_value": 0.24148275271561337,
+          "drawdown": -0.09127431346818482,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2016,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "NFLX",
+              0.3
+            ],
+            [
+              "AMZN",
+              0.4
+            ],
+            [
+              "ATVI",
+              0.3
+            ]
+          ],
+          "return_value": 0.05060195102400877,
+          "drawdown": -0.18256788478539665,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "NFLX",
+              0.3
+            ],
+            [
+              "AMZN",
+              0.4
+            ],
+            [
+              "ATVI",
+              0.3
+            ]
+          ],
+          "return_value": 0.05060195102400877,
+          "drawdown": -0.18256788478539665,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2017,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "NVDA",
+              0.3333
+            ],
+            [
+              "OKE",
+              0.3333
+            ],
+            [
+              "FCX",
+              0.3333
+            ]
+          ],
+          "return_value": 0.4119184633158386,
+          "drawdown": -0.11475358482561693,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "NVDA",
+              0.3333
+            ],
+            [
+              "OKE",
+              0.3333
+            ],
+            [
+              "FCX",
+              0.3333
+            ]
+          ],
+          "return_value": 0.4119184633158386,
+          "drawdown": -0.11475358482561693,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2018,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "NRG",
+              0.4
+            ],
+            [
+              "ALGN",
+              0.3
+            ],
+            [
+              "VRTX",
+              0.3
+            ]
+          ],
+          "return_value": 0.17285925553734716,
+          "drawdown": -0.20318545652526732,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "NRG",
+              0.4
+            ],
+            [
+              "ALGN",
+              0.3
+            ],
+            [
+              "VRTX",
+              0.3
+            ]
+          ],
+          "return_value": 0.17285925553734716,
+          "drawdown": -0.20318545652526732,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2019,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "AMD",
+              0.3
+            ],
+            [
+              "ABMD",
+              0.4
+            ],
+            [
+              "FTNT",
+              0.3
+            ]
+          ],
+          "return_value": 0.4099677094910057,
+          "drawdown": -0.14417916867035607,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "AMD",
+              0.3
+            ],
+            [
+              "ABMD",
+              0.4
+            ],
+            [
+              "FTNT",
+              0.3
+            ]
+          ],
+          "return_value": 0.4099677094910057,
+          "drawdown": -0.14417916867035607,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2020,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "AMD",
+              0.3
+            ],
+            [
+              "LRCX",
+              0.3
+            ],
+            [
+              "TGT",
+              0.4
+            ]
+          ],
+          "return_value": 0.6543638213025473,
+          "drawdown": -0.16306452069459954,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "AMD",
+              0.3
+            ],
+            [
+              "LRCX",
+              0.3
+            ],
+            [
+              "TGT",
+              0.4
+            ]
+          ],
+          "return_value": 0.6543638213025473,
+          "drawdown": -0.16306452069459954,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2021,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "TSLA",
+              0.3
+            ],
+            [
+              "ETSY",
+              0.3
+            ],
+            [
+              "LB",
+              0.4
+            ]
+          ],
+          "return_value": 0.7737239372845035,
+          "drawdown": -0.09422795734043621,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "TSLA",
+              0.3
+            ],
+            [
+              "ETSY",
+              0.3
+            ],
+            [
+              "LB",
+              0.4
+            ]
+          ],
+          "return_value": 0.7737239372845035,
+          "drawdown": -0.09422795734043621,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2022,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "DVN",
+              0.3333
+            ],
+            [
+              "MRNA",
+              0.3333
+            ],
+            [
+              "FTNT",
+              0.3333
+            ]
+          ],
+          "return_value": -0.03475548049177024,
+          "drawdown": -0.16893212043593875,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "DVN",
+              0.3333
+            ],
+            [
+              "MRNA",
+              0.3333
+            ],
+            [
+              "FTNT",
+              0.3333
+            ]
+          ],
+          "return_value": -0.03475548049177024,
+          "drawdown": -0.16893212043593875,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2023,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "OXY",
+              0.3
+            ],
+            [
+              "HES",
+              0.3
+            ],
+            [
+              "FSLR",
+              0.4
+            ]
+          ],
+          "return_value": 0.05657064291666791,
+          "drawdown": -0.1642559944960349,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "OXY",
+              0.3
+            ],
+            [
+              "HES",
+              0.3
+            ],
+            [
+              "FSLR",
+              0.4
+            ]
+          ],
+          "return_value": 0.05657064291666791,
+          "drawdown": -0.1642559944960349,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2024,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "NVDA",
+              0.3333
+            ],
+            [
+              "META",
+              0.3333
+            ],
+            [
+              "RCL",
+              0.3333
+            ]
+          ],
+          "return_value": 1.0540654903661335,
+          "drawdown": -0.05425948600707886,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "NVDA",
+              0.3333
+            ],
+            [
+              "META",
+              0.3333
+            ],
+            [
+              "RCL",
+              0.3333
+            ]
+          ],
+          "return_value": 1.0540654903661335,
+          "drawdown": -0.05425948600707886,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2025,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "PLTR",
+              0.3
+            ],
+            [
+              "VST",
+              0.4
+            ],
+            [
+              "NVDA",
+              0.3
+            ]
+          ],
+          "return_value": 0.5924549313267227,
+          "drawdown": -0.15208841838022003,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "PLTR",
+              0.3
+            ],
+            [
+              "VST",
+              0.4
+            ],
+            [
+              "NVDA",
+              0.3
+            ]
+          ],
+          "return_value": 0.5924549313267227,
+          "drawdown": -0.15208841838022003,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "A",
+      "year": 2026,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "WDC",
+              0.3
+            ],
+            [
+              "MU",
+              0.3
+            ],
+            [
+              "HOOD",
+              0.4
+            ]
+          ]
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "WDC",
+              0.3
+            ],
+            [
+              "MU",
+              0.3
+            ],
+            [
+              "HOOD",
+              0.4
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2010,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "XL",
+              0.3333
+            ],
+            [
+              "PXD",
+              0.3333
+            ],
+            [
+              "COG",
+              0.3334
+            ]
+          ],
+          "return_value": 0.29481784067032324,
+          "drawdown": -0.09785648423878934,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "XL",
+              0.3333
+            ],
+            [
+              "PXD",
+              0.3333
+            ],
+            [
+              "COG",
+              0.3334
+            ]
+          ],
+          "return_value": 0.29481784067032324,
+          "drawdown": -0.09785648423878934,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2011,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "WFM",
+              0.3333
+            ],
+            [
+              "HES",
+              0.3333
+            ],
+            [
+              "XL",
+              0.3334
+            ]
+          ],
+          "return_value": 0.009342411168774767,
+          "drawdown": -0.19856353800676974,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "WFM",
+              0.3333
+            ],
+            [
+              "HES",
+              0.3333
+            ],
+            [
+              "XL",
+              0.3334
+            ]
+          ],
+          "return_value": 0.009342411168774767,
+          "drawdown": -0.19856353800676974,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2012,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "COG",
+              0.3333
+            ],
+            [
+              "ISRG",
+              0.3333
+            ],
+            [
+              "MA",
+              0.3334
+            ]
+          ],
+          "return_value": 0.23012509452370233,
+          "drawdown": -0.09158520977923934,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "COG",
+              0.3333
+            ],
+            [
+              "ISRG",
+              0.3333
+            ],
+            [
+              "MA",
+              0.3334
+            ]
+          ],
+          "return_value": 0.23012509452370233,
+          "drawdown": -0.09158520977923934,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2013,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "PHM",
+              0.3
+            ],
+            [
+              "WHR",
+              0.3
+            ],
+            [
+              "BAC",
+              0.4
+            ]
+          ],
+          "return_value": 0.3486620979277808,
+          "drawdown": -0.09140922760376524,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "PHM",
+              0.3
+            ],
+            [
+              "WHR",
+              0.3
+            ],
+            [
+              "BAC",
+              0.4
+            ]
+          ],
+          "return_value": 0.3486620979277808,
+          "drawdown": -0.09140922760376524,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2014,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "NFLX",
+              0.3333
+            ],
+            [
+              "BBY",
+              0.3333
+            ],
+            [
+              "MU",
+              0.3334
+            ]
+          ],
+          "return_value": 0.17946535361192595,
+          "drawdown": -0.09645779674175547,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "NFLX",
+              0.3333
+            ],
+            [
+              "BBY",
+              0.3333
+            ],
+            [
+              "MU",
+              0.3334
+            ]
+          ],
+          "return_value": 0.17946535361192595,
+          "drawdown": -0.09645779674175547,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2015,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "LUV",
+              0.3
+            ],
+            [
+              "EW",
+              0.4
+            ],
+            [
+              "DAL",
+              0.3
+            ]
+          ],
+          "return_value": 0.1154824357369082,
+          "drawdown": -0.09877473383555091,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "LUV",
+              0.3
+            ],
+            [
+              "EW",
+              0.4
+            ],
+            [
+              "DAL",
+              0.3
+            ]
+          ],
+          "return_value": 0.1154824357369082,
+          "drawdown": -0.09877473383555091,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2016,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "NFLX",
+              0.3333
+            ],
+            [
+              "AMZN",
+              0.3333
+            ],
+            [
+              "NVDA",
+              0.3334
+            ]
+          ],
+          "return_value": 0.8206169381746484,
+          "drawdown": -0.14663813361009892,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "NFLX",
+              0.3333
+            ],
+            [
+              "AMZN",
+              0.3333
+            ],
+            [
+              "NVDA",
+              0.3334
+            ]
+          ],
+          "return_value": 0.8206169381746484,
+          "drawdown": -0.14663813361009892,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2017,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "NVDA",
+              0.3333
+            ],
+            [
+              "OKE",
+              0.3333
+            ],
+            [
+              "FCX",
+              0.3334
+            ]
+          ],
+          "return_value": 0.41206220857614384,
+          "drawdown": -0.11476748164711004,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "NVDA",
+              0.3333
+            ],
+            [
+              "OKE",
+              0.3333
+            ],
+            [
+              "FCX",
+              0.3334
+            ]
+          ],
+          "return_value": 0.41206220857614384,
+          "drawdown": -0.11476748164711004,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2018,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "NRG",
+              0.3333
+            ],
+            [
+              "VRTX",
+              0.3333
+            ],
+            [
+              "WYNN",
+              0.3334
+            ]
+          ],
+          "return_value": 0.03324283142631468,
+          "drawdown": -0.11532806992804456,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "NRG",
+              0.3333
+            ],
+            [
+              "VRTX",
+              0.3333
+            ],
+            [
+              "WYNN",
+              0.3334
+            ]
+          ],
+          "return_value": 0.03324283142631468,
+          "drawdown": -0.11532806992804456,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2019,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "AMD",
+              0.3333
+            ],
+            [
+              "AAP",
+              0.3333
+            ],
+            [
+              "CMG",
+              0.3334
+            ]
+          ],
+          "return_value": 0.8139086017720873,
+          "drawdown": -0.035893613294794124,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "AMD",
+              0.3333
+            ],
+            [
+              "AAP",
+              0.3333
+            ],
+            [
+              "CMG",
+              0.3334
+            ]
+          ],
+          "return_value": 0.8139086017720873,
+          "drawdown": -0.035893613294794124,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2020,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "AMD",
+              0.3
+            ],
+            [
+              "LRCX",
+              0.3
+            ],
+            [
+              "TGT",
+              0.4
+            ]
+          ],
+          "return_value": 0.6543638213025473,
+          "drawdown": -0.16306452069459954,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "AMD",
+              0.3
+            ],
+            [
+              "LRCX",
+              0.3
+            ],
+            [
+              "TGT",
+              0.4
+            ]
+          ],
+          "return_value": 0.6543638213025473,
+          "drawdown": -0.16306452069459954,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2021,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "LB",
+              0.3333
+            ],
+            [
+              "NVDA",
+              0.3333
+            ],
+            [
+              "PYPL",
+              0.3334
+            ]
+          ],
+          "return_value": 0.8159677410255091,
+          "drawdown": -0.08734933900306552,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "LB",
+              0.3333
+            ],
+            [
+              "NVDA",
+              0.3333
+            ],
+            [
+              "PYPL",
+              0.3334
+            ]
+          ],
+          "return_value": 0.8159677410255091,
+          "drawdown": -0.08734933900306552,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2022,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "DVN",
+              0.3333
+            ],
+            [
+              "FTNT",
+              0.3333
+            ],
+            [
+              "BBWI",
+              0.3334
+            ]
+          ],
+          "return_value": -0.06508475032375671,
+          "drawdown": -0.21286671460678153,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "DVN",
+              0.3333
+            ],
+            [
+              "FTNT",
+              0.3333
+            ],
+            [
+              "BBWI",
+              0.3334
+            ]
+          ],
+          "return_value": -0.06508475032375671,
+          "drawdown": -0.21286671460678153,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2023,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "OXY",
+              0.3
+            ],
+            [
+              "HES",
+              0.3
+            ],
+            [
+              "CAH",
+              0.4
+            ]
+          ],
+          "return_value": 0.1331041200234342,
+          "drawdown": -0.06845835620689644,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "OXY",
+              0.3
+            ],
+            [
+              "HES",
+              0.3
+            ],
+            [
+              "CAH",
+              0.4
+            ]
+          ],
+          "return_value": 0.1331041200234342,
+          "drawdown": -0.06845835620689644,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2024,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "NVDA",
+              0.3333
+            ],
+            [
+              "META",
+              0.3333
+            ],
+            [
+              "RCL",
+              0.3334
+            ]
+          ],
+          "return_value": 1.0542444734784642,
+          "drawdown": -0.05425505862156599,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "NVDA",
+              0.3333
+            ],
+            [
+              "META",
+              0.3333
+            ],
+            [
+              "RCL",
+              0.3334
+            ]
+          ],
+          "return_value": 1.0542444734784642,
+          "drawdown": -0.05425505862156599,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2025,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "NVDA",
+              0.4
+            ],
+            [
+              "UAL",
+              0.3
+            ],
+            [
+              "AXON",
+              0.3
+            ]
+          ],
+          "return_value": 0.1878239403632933,
+          "drawdown": -0.20927578056234875,
+          "return_status": "complete"
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "NVDA",
+              0.4
+            ],
+            [
+              "UAL",
+              0.3
+            ],
+            [
+              "AXON",
+              0.3
+            ]
+          ],
+          "return_value": 0.1878239403632933,
+          "drawdown": -0.20927578056234875,
+          "return_status": "complete"
+        }
+      ]
+    },
+    {
+      "variant": "B",
+      "year": 2026,
+      "bounds": [
+        {
+          "unknown_floor": "all_fail",
+          "holdings": [
+            [
+              "WDC",
+              0.3
+            ],
+            [
+              "MU",
+              0.3
+            ],
+            [
+              "NEM",
+              0.4
+            ]
+          ]
+        },
+        {
+          "unknown_floor": "all_pass",
+          "holdings": [
+            [
+              "WDC",
+              0.3
+            ],
+            [
+              "MU",
+              0.3
+            ],
+            [
+              "NEM",
+              0.4
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

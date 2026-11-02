@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-11-02T04:07:01.269163+00:00",
+  "generated_at": "2026-11-02T12:22:54.784905+00:00",
   "definition": "2010-2025, member on December 31, selected December basis=total_return",
   "need": 8032,
-  "total_return": 6791,
-  "coverage": 0.8454930278884463,
-  "additional_to_95pct": 840,
+  "total_return": 6800,
+  "coverage": 0.8466135458167331,
+  "additional_to_95pct": 831,
   "no_data": 292,
-  "price_only": 949,
-  "unreviewed_archive_alternatives": 755,
-  "unreviewed_cc0_2017_alternatives": 602,
-  "unreviewed_yahoo2020_alternatives": 488,
+  "price_only": 940,
+  "unreviewed_archive_alternatives": 748,
+  "unreviewed_cc0_2017_alternatives": 598,
+  "unreviewed_yahoo2020_alternatives": 481,
   "archive_selected": 0,
   "quarantined_gap_cells": 45,
   "existing_tr_candidate_cells": 12,
@@ -6419,20 +6419,6 @@
       ]
     },
     {
-      "symbol": "FB",
-      "year": 2013,
-      "source": "sina_repaired",
-      "reason": "price_only",
-      "archive_candidate_unreviewed": true,
-      "locked": false,
-      "quarantined": false,
-      "existing_tr_candidates_unreviewed": [],
-      "archive_sources_unreviewed": [
-        "kaggle_cc0",
-        "kaggle_yahoo2020"
-      ]
-    },
-    {
       "symbol": "FDO",
       "year": 2013,
       "source": "sina_repaired",
@@ -8142,20 +8128,6 @@
       ]
     },
     {
-      "symbol": "FB",
-      "year": 2014,
-      "source": "sina_repaired",
-      "reason": "price_only",
-      "archive_candidate_unreviewed": true,
-      "locked": false,
-      "quarantined": false,
-      "existing_tr_candidates_unreviewed": [],
-      "archive_sources_unreviewed": [
-        "kaggle_cc0",
-        "kaggle_yahoo2020"
-      ]
-    },
-    {
       "symbol": "FDO",
       "year": 2014,
       "source": "sina_repaired",
@@ -9791,20 +9763,6 @@
       ]
     },
     {
-      "symbol": "FB",
-      "year": 2015,
-      "source": "sina_repaired",
-      "reason": "price_only",
-      "archive_candidate_unreviewed": true,
-      "locked": false,
-      "quarantined": false,
-      "existing_tr_candidates_unreviewed": [],
-      "archive_sources_unreviewed": [
-        "kaggle_cc0",
-        "kaggle_yahoo2020"
-      ]
-    },
-    {
       "symbol": "FLIR",
       "year": 2015,
       "source": "sina_repaired",
@@ -11096,20 +11054,6 @@
       ]
     },
     {
-      "symbol": "FB",
-      "year": 2016,
-      "source": "sina_repaired",
-      "reason": "price_only",
-      "archive_candidate_unreviewed": true,
-      "locked": false,
-      "quarantined": false,
-      "existing_tr_candidates_unreviewed": [],
-      "archive_sources_unreviewed": [
-        "kaggle_cc0",
-        "kaggle_yahoo2020"
-      ]
-    },
-    {
       "symbol": "FBHS",
       "year": 2016,
       "source": "sina_repaired",
@@ -12198,19 +12142,6 @@
       "archive_sources_unreviewed": []
     },
     {
-      "symbol": "FB",
-      "year": 2017,
-      "source": "sina_repaired",
-      "reason": "price_only",
-      "archive_candidate_unreviewed": true,
-      "locked": false,
-      "quarantined": false,
-      "existing_tr_candidates_unreviewed": [],
-      "archive_sources_unreviewed": [
-        "kaggle_yahoo2020"
-      ]
-    },
-    {
       "symbol": "FBHS",
       "year": 2017,
       "source": "sina_repaired",
@@ -13015,19 +12946,6 @@
       ]
     },
     {
-      "symbol": "FB",
-      "year": 2018,
-      "source": "sina_repaired",
-      "reason": "price_only",
-      "archive_candidate_unreviewed": true,
-      "locked": false,
-      "quarantined": false,
-      "existing_tr_candidates_unreviewed": [],
-      "archive_sources_unreviewed": [
-        "kaggle_yahoo2020"
-      ]
-    },
-    {
       "symbol": "FBHS",
       "year": 2018,
       "source": "sina_repaired",
@@ -13737,19 +13655,6 @@
       ]
     },
     {
-      "symbol": "FB",
-      "year": 2019,
-      "source": "sina_repaired",
-      "reason": "price_only",
-      "archive_candidate_unreviewed": true,
-      "locked": false,
-      "quarantined": false,
-      "existing_tr_candidates_unreviewed": [],
-      "archive_sources_unreviewed": [
-        "kaggle_yahoo2020"
-      ]
-    },
-    {
       "symbol": "FBHS",
       "year": 2019,
       "source": "sina_repaired",
@@ -14281,17 +14186,6 @@
       "archive_sources_unreviewed": []
     },
     {
-      "symbol": "FB",
-      "year": 2020,
-      "source": "sina_repaired",
-      "reason": "price_only",
-      "archive_candidate_unreviewed": false,
-      "locked": false,
-      "quarantined": false,
-      "existing_tr_candidates_unreviewed": [],
-      "archive_sources_unreviewed": []
-    },
-    {
       "symbol": "FBHS",
       "year": 2020,
       "source": "sina_repaired",
@@ -14691,17 +14585,6 @@
     },
     {
       "symbol": "EQR",
-      "year": 2021,
-      "source": "sina_repaired",
-      "reason": "price_only",
-      "archive_candidate_unreviewed": false,
-      "locked": false,
-      "quarantined": false,
-      "existing_tr_candidates_unreviewed": [],
-      "archive_sources_unreviewed": []
-    },
-    {
-      "symbol": "FB",
       "year": 2021,
       "source": "sina_repaired",
       "reason": "price_only",

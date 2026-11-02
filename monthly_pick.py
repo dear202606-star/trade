@@ -9,21 +9,15 @@
   5. 换仓：**每年 12 月末锁定**，次年全年不变；其余月份只监控开关
   6. 开关：标普500 上月收盘 < 10 月均线 -> 整体仓位减半
 """
-import os, sys, json, re, time, argparse, datetime as dt
-from concurrent.futures import ThreadPoolExecutor, as_completed
+import os, sys, json, argparse, datetime as dt
 
-import requests
 import pandas as pd
 
-import market_data
 import nominal_prices
 import db_prices
 import holding_paths
 import liquidity_prices
 
-UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0"
-PAT = re.compile(r"\(\s*(\[.*\])\s*\)", re.S)
-NICE = [1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 10, 12, 15, 20, 25, 30, 40, 50, 100]
 PIPELINE_VERSION = "2.1"   # 数据同源(新浪)+年度锁定+实盘跟踪
 MIN_PRICE = 5.0
 MIN_DV = 20e6
@@ -66,92 +60,19 @@ def members_at(ym):
     return set(m[(m["start_date"] <= day) & (m["end_date"] >= day)]["ticker"].unique().tolist())
 
 
-def nice_ratio(k, tol=0.04):
-    best = min(NICE, key=lambda z: abs(z - k))
-    return best if abs(best - k) / k <= tol else None
-
-
-def get(url, tries=4, timeout=30):
-    last = None
-    for i in range(tries):
-        try:
-            r = requests.get(url, headers={"User-Agent": UA}, timeout=timeout)
-            if r.status_code == 200:
-                return r
-        except Exception as e:
-            last = e
-        time.sleep(1.2 + i)
-    raise RuntimeError(f"GET failed {url}: {last}")
-
-
 def fetch_sp500():
-    r = get("https://raw.githubusercontent.com/fja05680/sp500/master/sp500.csv")
-    from io import StringIO
-    df = pd.read_csv(StringIO(r.text))
-    df["Symbol"] = df["Symbol"].astype(str).str.strip()
-    return df[["Symbol", "Security", "GICS Sector"]].rename(
-        columns={"Symbol": "ticker", "Security": "name", "GICS Sector": "sector"})
+    """Online reference universe; ranking applies point-in-time membership."""
+    import db_ref
+    members=db_ref.load_members();sectors=db_ref.load_sectors()
+    return pd.DataFrame([{"ticker":ticker,"name":ticker,
+                          "sector":sectors.get(ticker) or "Unknown"} for ticker in members])
 
 
 def fetch_history(tk):
-    """返回 [[ym, adj_close, raw_close, month_volume], ...]，自建拆股复权"""
-    url = ("https://stock.finance.sina.com.cn/usstock/api/jsonp_v2.php/x/"
-           f"US_MinKService.getDailyK?symbol={tk}")
-    for _ in range(3):
-        try:
-            r = requests.get(url, headers={"User-Agent": UA,
-                                           "Referer": "https://finance.sina.com.cn"},
-                             timeout=30)
-            m = PAT.search(r.text)
-            if not m:
-                return None
-            arr = json.loads(m.group(1))
-            if not arr:
-                return None
-            out, factor = [], 1.0
-            prev_c = prev_v = None
-            cur_ym = cur_adj = cur_raw = None
-            cur_v = 0.0
-            for x in arr:
-                try:
-                    d, c = x["d"], float(x["c"])
-                    v = float(x.get("v") or 0)
-                    o = float(x.get("o") or 0)
-                except Exception:
-                    continue
-                if c <= 0 or not d[:4].isdigit():
-                    continue
-                if prev_c and prev_c > 0:
-                    K = None
-                    if o > 0:
-                        k1 = prev_c / o
-                        if k1 >= 1.45 or k1 <= 0.69:
-                            nk = nice_ratio(k1 if k1 >= 1 else 1 / k1)
-                            if nk:
-                                K = nk if k1 >= 1 else 1.0 / nk
-                    if K is None:
-                        k2 = prev_c / c
-                        if k2 >= 1.45 or k2 <= 0.69:
-                            nk = nice_ratio(k2 if k2 >= 1 else 1 / k2, tol=0.025)
-                            if nk:
-                                K = nk if k2 >= 1 else 1.0 / nk
-                    if K is not None and prev_v and prev_v > 0:
-                        if 0.25 <= (v / prev_v) / K <= 4.0:
-                            factor *= K
-                ym = d[:7]
-                if ym != cur_ym:
-                    if cur_ym:
-                        out.append([cur_ym, cur_adj, cur_raw, cur_v])
-                    cur_ym, cur_v = ym, 0.0
-                cur_adj, cur_raw = c * factor, c
-                cur_v += v
-                prev_c, prev_v = c, v
-            if cur_ym:
-                out.append([cur_ym, cur_adj, cur_raw, cur_v])
-            return out
-        except Exception:
-            time.sleep(0.8)
-    return None
+    """Selected online monthly prices; volume is not inferred from prices."""
+    bars=db_prices.load_all().get(tk)
+    if not bars:return None
+    return [[month,values[0],values[1],None] for month,values in sorted(bars.items())]
 
 
 def month_end_series(rows):
@@ -298,50 +219,15 @@ def main():
             return 0
         print("      SPY 获取失败，回退到全量重排", flush=True)
 
-    print("[2/5] 拉取行情（新浪主源 + Yahoo 交叉核对）...", flush=True)
-    yahoo_ok = market_data.probe_yahoo()
-    market_data.reset_stats()
-    print(f"      Yahoo 可达: {yahoo_ok}", flush=True)
-    data, fail = {}, []
-    t0 = time.time()
-    with ThreadPoolExecutor(max_workers=args.workers) as ex:
-        futs = {ex.submit(market_data.get_history,t,yahoo_ok,yahoo_ok):t for t in tickers+["SPY"]}
-        for i, fu in enumerate(as_completed(futs), 1):
-            t = futs[fu]
-            try:
-                r, _src = fu.result()
-            except Exception:
-                r, _src = None, None
-            if r and len(r) >= 14:
-                # 与回测同一套除权来源：market_data 拿原始序列，再用 splits.json 统一复权
-                try:
-                    import datafeed as _df
-                    _bars = {x[0]: (x[1], x[2]) for x in r}
-                    _fixed = _df._reapply(t, _bars)
-                    if _fixed:
-                        _vol = {x[0]: (x[3] if len(x) > 3 else 0) for x in r}
-                        r = [[ym, v[0], v[1], _vol.get(ym, 0)] for ym, v in _fixed.items()]
-                except Exception:
-                    pass
-                data[t] = month_end_series(r)
-            else:
-                fail.append(t)
-            if i % 100 == 0:
-                print(f"      {i}/{len(tickers)+1}  用时 {time.time()-t0:.0f}s", flush=True)
-
-    print(f"      成功 {len(data)-1} / 失败 {len(fail)}", flush=True)
-    market_data.save_splits()
-    try:
-        import datafeed
-        sz = datafeed.save_panel(data)
-        print(f"      面板已导出 {sz/1048576:.1f} MB（供净值/逐年记录复用）", flush=True)
-    except Exception as e:
-        print(f"WARN: 面板导出失败 {e}", flush=True)
-
-    print(f"      数据质量 {market_data.STATS}", flush=True)
-    if market_data.QUARANTINE:
-        print(f"      两源不一致已隔离 {len(market_data.QUARANTINE)} 只: "
-              + ", ".join(list(market_data.QUARANTINE)[:12]), flush=True)
+    print("[2/5] 读取在线库选中行情...", flush=True)
+    canonical=db_prices.load_all()
+    data,fail={},[]
+    for ticker in tickers+["SPY"]:
+        bars=canonical.get(ticker)
+        if bars and len(bars)>=14:
+            data[ticker]=month_end_series([[month,v[0],v[1],None] for month,v in sorted(bars.items())])
+        else:fail.append(ticker)
+    print("      在线序列 %d / 缺数据 %d" % (len(data),len(fail)),flush=True)
     if "SPY" not in data:
         print("ERROR: SPY 行情获取失败", file=sys.stderr)
         sys.exit(1)

@@ -18,9 +18,53 @@ import import_verified_renames as renames
 import relay_source as relay
 import site_build
 import ingest_validate
+import datafeed
+import db_ref
+import variant_b
+import monthly_pick
 
 
 class PipelineTests(unittest.TestCase):
+    def test_monthly_signal_reads_prices_members_and_sectors_from_database(self):
+        with patch.object(db_prices,'load_all',return_value={'TEST':{'2025-12':(12,13)}}), \
+             patch.object(db_ref,'load_members',return_value={'TEST':[('2020-01-01','2099-12-31')]}), \
+             patch.object(db_ref,'load_sectors',return_value={'TEST':'Tech'}):
+            self.assertEqual(monthly_pick.fetch_history('TEST'),[['2025-12',12,13,None]])
+            self.assertIsNone(monthly_pick.fetch_history('MISSING'))
+            self.assertEqual(monthly_pick.fetch_sp500().to_dict('records'),
+                             [{'ticker':'TEST','name':'TEST','sector':'Tech'}])
+        with patch.object(db_prices,'load_all',side_effect=RuntimeError('offline')),self.assertRaises(RuntimeError):
+            monthly_pick.fetch_history('TEST')
+
+    def test_database_read_never_uses_disk_cache_even_when_requested(self):
+        expected={'TEST':{'2025-12':(10,10)}}
+        with tempfile.TemporaryDirectory() as directory, \
+             patch.object(db_prices,'CACHE_FILE',str(Path(directory)/'snapshot.json')), \
+             patch.object(db_prices,'_db_stamp',return_value=(1,'stamp',1,1,1,'10')), \
+             patch.object(db_prices,'_cache_fresh',side_effect=AssertionError('disk cache consulted')), \
+             patch.object(db_select,'load_all',return_value=expected) as online:
+            self.assertEqual(db_prices.load_all(use_cache=True),expected)
+            self.assertEqual(db_prices._load_all_legacy(use_cache=True),expected)
+            self.assertEqual(online.call_count,2)
+
+    def test_legacy_flag_cannot_enable_offline_prices(self):
+        with patch.dict('os.environ',{'ALLOW_FILE_FALLBACK':'1'}), \
+             patch.object(datafeed,'_db_all',return_value={}), \
+             self.assertRaises(RuntimeError):
+            datafeed.load_bars('TEST')
+        with patch.dict('os.environ',{'ALLOW_FILE_FALLBACK':'1'}), \
+             patch.object(variant_b,'_warm',side_effect=RuntimeError('offline')), \
+             self.assertRaises(RuntimeError):
+            variant_b.load_bars('TEST')
+
+    def test_members_and_sector_constraints_are_online_only(self):
+        with patch.object(db_ref,'load_members',return_value={'TEST':[('2020-01-01','2099-12-31')]}), \
+             patch.object(db_ref,'load_sectors',return_value={'TEST':'Tech'}):
+            self.assertEqual(datafeed.load_members().iloc[0]['ticker'],'TEST')
+            self.assertEqual(datafeed.load_sector(),({'TEST':'Tech'},{'TEST':'TEST'}))
+        for name,loader in [('load_members',datafeed.load_members),('load_sectors',datafeed.load_sector)]:
+            with patch.object(db_ref,name,side_effect=RuntimeError('offline')),self.assertRaises(RuntimeError):loader()
+
     def test_selected_change_during_read_does_not_stamp_old_data_as_new(self):
         before=(100,'old',2,50,2,'1000')
         after=(101,'new',2,50,2,'1001')

@@ -1,5 +1,5 @@
 {
-  "audited_at": "2026-11-02T11:38:14.200871+00:00",
+  "audited_at": "2026-11-02T12:23:03.494653+00:00",
   "selected_native_sources": [
     {
       "source": "alphavantage_native",
@@ -8,8 +8,8 @@
     },
     {
       "source": "eastmoney_native",
-      "rows": 9956,
-      "symbols": 193
+      "rows": 10568,
+      "symbols": 210
     },
     {
       "source": "kaggle_tech2026",

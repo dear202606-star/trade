@@ -198,7 +198,7 @@ def _warm():
 
 
 def load_bars(ticker):
-    """唯一入口：在线库 db_prices（真相）→ 死缓存兜底
+    """唯一入口：在线库 db_prices。
 
     文件型数据已退役；若 DB 不可达，则抛错而不是静默用旧文件（避免口径不一致）。
     """
@@ -209,8 +209,7 @@ def load_bars(ticker):
             return b
     except Exception as e:
         print("⚠ 读取在线库失败（%s）" % str(e)[:60], flush=True)
-        if os.environ.get("ALLOW_FILE_FALLBACK") != "1":
-            raise RuntimeError("在线库不可用且未允许退回文件（避免用陈旧数据出数）")
+        raise RuntimeError("在线库不可用，禁止退回文件或忽略读取失败") from e
     # 库内确实没有该标的：返回空（下游按缺数据剔除），绝不退回文件
     _miss["n"] = _miss.get("n", 0) + 1
     return {}

@@ -1,0 +1,50 @@
+{
+  "symbol": "FB",
+  "raw_sources": [
+    {
+      "source": "eodhd",
+      "basis": "total_return",
+      "rows": 13,
+      "first": "2025-10",
+      "last": "2026-10"
+    },
+    {
+      "source": "kaggle_cc0",
+      "basis": "total_return",
+      "rows": 67,
+      "first": "2012-05",
+      "last": "2017-11"
+    },
+    {
+      "source": "kaggle_yahoo2020",
+      "basis": "total_return",
+      "rows": 95,
+      "first": "2012-05",
+      "last": "2020-03"
+    },
+    {
+      "source": "sina_repaired",
+      "basis": "price_only",
+      "rows": 139,
+      "first": "2012-05",
+      "last": "2026-10"
+    },
+    {
+      "source": "yahoo_relay",
+      "basis": "total_return",
+      "rows": 145,
+      "first": "2012-05",
+      "last": "2026-10"
+    }
+  ],
+  "selected": [
+    128,
+    "2012-05",
+    "2022-12",
+    "yahoo_relay",
+    "total_return"
+  ],
+  "canonical_copy_numeric_mismatches": 0,
+  "public_post_window_rows": 0,
+  "baseline_b_sha256": "20c0680276cf79cbb06d8aaab35c3e40cde010447f6e15e75abd95ff0ef33c90"
+}

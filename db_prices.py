@@ -172,15 +172,9 @@ def _cache_fresh():
         return False
 
 
-def load_all(prefer_basis="total_return", chunk=60, use_cache=True):
-    """对外唯一入口：委托 db_select 的「每票单源」结果（已修正逐月换源造假）"""
+def load_all(prefer_basis="total_return", chunk=60, use_cache=False):
+    """始终在线读取选中序列；兼容旧参数，本地快照仅用于诊断。"""
     import db_select as _ds
-    if use_cache and prefer_basis == "total_return" and _cache_fresh():
-        import json as _json
-        raw = _json.load(open(CACHE_FILE, encoding="utf-8"))
-        raw.pop("__stamp__", None)
-        raw.pop("__built_at__", None)
-        return {k: {m: (v[0], v[1]) for m, v in d.items()} for k, d in raw.items()}
     before = _db_stamp()
     try:
         out = _ds.load_all()
@@ -217,48 +211,9 @@ def load_all(prefer_basis="total_return", chunk=60, use_cache=True):
     return out
 
 
-def _load_all_legacy(prefer_basis="total_return", chunk=60, use_cache=True):
-    if use_cache and prefer_basis == "total_return" and _cache_fresh():
-        import json as _json
-        raw = _json.load(open(CACHE_FILE, encoding="utf-8"))
-        raw.pop("__stamp__", None)
-        raw.pop("__built_at__", None)
-        return {k: {m: (v[0], v[1]) for m, v in d.items()} for k, d in raw.items()}
-    """分片载入全库（避免单条查询超时），返回 {symbol: {month: (adj, raw)}}"""
-    syms = symbols()
-    best = {}
-    conn = connect()
-    for i in range(0, len(syms), chunk):
-        part = syms[i:i + chunk]
-        with conn.cursor() as cur:
-            cur.execute("""select symbol, month, adj_close, raw_close, source, basis
-                           from prices_monthly where symbol = any(%s)""", (part,))
-            rows = cur.fetchall()
-        for sym, month, adj, raw, source, basis in rows:
-            rank = PRIORITY.get(source, 99)
-            score = (0 if basis == prefer_basis else 1, rank)
-            d = best.setdefault(sym, {})
-            cur_s = d.get(month)
-            if cur_s is None or score < (cur_s[2], cur_s[3]):
-                d[month] = (adj, raw, score[0], score[1])
-        print("  载入 %d/%d" % (min(i + chunk, len(syms)), len(syms)), end="\r", flush=True)
-    out = {}
-    for sym, months in best.items():
-        out[sym] = {m: (float(v[0]), float(v[1]) if v[1] else float(v[0]))
-                    for m, v in months.items() if v[0]}
-    print()
-    try:
-        import json as _json
-        payload = {k: {m: [v[0], v[1]] for m, v in d.items()} for k, d in out.items()}
-        _live = _db_stamp()
-        # DB 不可达时必须给一个真值标记，否则空列表会被当作「无指纹」而永不命中缓存
-        payload["__stamp__"] = list(_live) if _live else ["rest", len(out),
-                                                          sum(len(d) for d in out.values())]
-        payload["__built_at__"] = __import__("time").time()
-        _json.dump(payload, open(CACHE_FILE, "w"), separators=(",", ":"))
-    except Exception as _e:
-        print("写缓存失败：%s" % _e)
-    return out
+def _load_all_legacy(prefer_basis="total_return", chunk=60, use_cache=False):
+    """Compatibility entry point with the same online-only requirement."""
+    return load_all(prefer_basis=prefer_basis, chunk=chunk, use_cache=False)
 
 
 def log_run(source, requested, ok, failed=0, duration_s=0.0, note=""):

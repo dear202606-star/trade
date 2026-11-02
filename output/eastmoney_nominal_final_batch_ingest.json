@@ -1,0 +1,309 @@
+{
+  "write": true,
+  "requested_limit": 300,
+  "results": [
+    {
+      "symbol": "FB",
+      "status": "review_required",
+      "reason": "independent native-price units not proved"
+    },
+    {
+      "symbol": "UAA",
+      "status": "review_required",
+      "reason": "independent native-price units not proved"
+    },
+    {
+      "symbol": "CPB",
+      "status": "review_required",
+      "reason": "independent native-price units not proved"
+    },
+    {
+      "symbol": "DPZ",
+      "status": "review_required",
+      "reason": "independent native-price units not proved"
+    },
+    {
+      "symbol": "MTCH",
+      "status": "review_required",
+      "reason": "independent native-price units not proved"
+    },
+    {
+      "symbol": "TDY",
+      "status": "review_required",
+      "reason": "independent native-price units not proved"
+    },
+    {
+      "symbol": "VTRS",
+      "status": "review_required",
+      "reason": "independent native-price units not proved"
+    },
+    {
+      "symbol": "FTI",
+      "status": "review_required",
+      "reason": "independent native-price units not proved"
+    },
+    {
+      "symbol": "AMT",
+      "status": "review_required",
+      "reason": "independent native-price units not proved"
+    },
+    {
+      "symbol": "CCI",
+      "status": "review_required",
+      "reason": "independent native-price units not proved"
+    },
+    {
+      "native_pairs": 166,
+      "native_median_relative_deviation": 6.605368918499721e-09,
+      "native_max_relative_deviation": 0.0037902716361339905,
+      "overlap_returns": 201,
+      "median_log_deviation": 3.077826322280395e-07,
+      "p90_log_deviation": 0.005923921037096379,
+      "threshold_uncertainty_usd": 0.019023462270133504,
+      "symbol": "CMCSA",
+      "status": "stored",
+      "prepared": 36,
+      "stored": 36,
+      "payload_sha256": "60da55d30f0d419167053a67d6c80f9e66a14f8398e989a532b12439066aede6"
+    },
+    {
+      "native_pairs": 166,
+      "native_median_relative_deviation": 0.0,
+      "native_max_relative_deviation": 0.0007288629737609575,
+      "overlap_returns": 201,
+      "median_log_deviation": 2.893657011890549e-07,
+      "p90_log_deviation": 0.006517748772065292,
+      "threshold_uncertainty_usd": 0.01,
+      "symbol": "CME",
+      "status": "stored",
+      "prepared": 36,
+      "stored": 36,
+      "payload_sha256": "3d2c7bb96c982743de47cb4b4c6327eef2c39a991ac5324b9107a067fa617162"
+    },
+    {
+      "native_pairs": 166,
+      "native_median_relative_deviation": 0.0,
+      "native_max_relative_deviation": 0.006632320720080465,
+      "overlap_returns": 201,
+      "median_log_deviation": 3.0053092355552946e-08,
+      "p90_log_deviation": 7.136511371444544e-08,
+      "threshold_uncertainty_usd": 0.0333830104321904,
+      "symbol": "CMG",
+      "status": "stored",
+      "prepared": 36,
+      "stored": 36,
+      "payload_sha256": "0000b31f403552564cf736cbd420ce1e4de48e6393616b702c6058ee16438369"
+    },
+    {
+      "native_pairs": 166,
+      "native_median_relative_deviation": 0.0,
+      "native_max_relative_deviation": 0.003294705748693616,
+      "overlap_returns": 201,
+      "median_log_deviation": 1.9343357687727042e-07,
+      "p90_log_deviation": 0.006841292773837964,
+      "threshold_uncertainty_usd": 0.016527983586003197,
+      "symbol": "CMI",
+      "status": "stored",
+      "prepared": 36,
+      "stored": 36,
+      "payload_sha256": "ac7470e46a825b5ba2e1b53ab0fd42f25db97c838a89190df4c660e949f163c4"
+    },
+    {
+      "native_pairs": 165,
+      "native_median_relative_deviation": 0.0,
+      "native_max_relative_deviation": 0.0005194805194805863,
+      "overlap_returns": 201,
+      "median_log_deviation": 2.584040747964105e-08,
+      "p90_log_deviation": 6.732091355607791e-08,
+      "threshold_uncertainty_usd": 0.01,
+      "symbol": "CNC",
+      "status": "stored",
+      "prepared": 36,
+      "stored": 36,
+      "payload_sha256": "da3200154e27e8904794551c755572edd32052418252d72276c3fecf92aa0008"
+    },
+    {
+      "native_pairs": 166,
+      "native_median_relative_deviation": 0.0,
+      "native_max_relative_deviation": 0.00449278789311891,
+      "overlap_returns": 201,
+      "median_log_deviation": 3.017307499393039e-07,
+      "p90_log_deviation": 0.004579720657293221,
+      "threshold_uncertainty_usd": 0.02256532066508298,
+      "symbol": "COF",
+      "status": "stored",
+      "prepared": 36,
+      "stored": 36,
+      "payload_sha256": "4c38507e6f984cdc8218823d38258fdb810b0dfcdb095a39d444ec15f5740fc4"
+    },
+    {
+      "native_pairs": 166,
+      "native_median_relative_deviation": 0.0,
+      "native_max_relative_deviation": 0.002607383010841291,
+      "overlap_returns": 201,
+      "median_log_deviation": 3.803959834152247e-07,
+      "p90_log_deviation": 0.00977537207560852,
+      "threshold_uncertainty_usd": 0.01307099614749621,
+      "symbol": "COP",
+      "status": "stored",
+      "prepared": 36,
+      "stored": 36,
+      "payload_sha256": "b2ab5170125ce835e1503c0f0278bbc451fb643164bd05b25e78c4d5f3552e35"
+    },
+    {
+      "native_pairs": 166,
+      "native_median_relative_deviation": 0.0,
+      "native_max_relative_deviation": 0.0022636252829530967,
+      "overlap_returns": 201,
+      "median_log_deviation": 2.591400489118927e-07,
+      "p90_log_deviation": 0.0028773206928876314,
+      "threshold_uncertainty_usd": 0.011343804537521495,
+      "symbol": "COST",
+      "status": "stored",
+      "prepared": 36,
+      "stored": 36,
+      "payload_sha256": "5c9e62980faf95507aa6a20e001457c7dc3bcb3bf68d904271abe24cd7f01460"
+    },
+    {
+      "native_pairs": 165,
+      "native_median_relative_deviation": 0.0,
+      "native_max_relative_deviation": 0.0023696682464455776,
+      "overlap_returns": 201,
+      "median_log_deviation": 3.0890079416292655e-08,
+      "p90_log_deviation": 0.000273268618039065,
+      "threshold_uncertainty_usd": 0.011876484560570473,
+      "symbol": "CPRT",
+      "status": "stored",
+      "prepared": 36,
+      "stored": 36,
+      "payload_sha256": "2a22fd5116eeb034742c43e175f4aa02fbfe08bfba94ef1ad00d04f0d8fd697e"
+    },
+    {
+      "native_pairs": 95,
+      "native_median_relative_deviation": 3.198265208226303e-08,
+      "native_max_relative_deviation": 0.00038535645472048685,
+      "overlap_returns": 130,
+      "median_log_deviation": 1.9497088121914174e-07,
+      "p90_log_deviation": 0.0036895528554916467,
+      "threshold_uncertainty_usd": 0.01,
+      "symbol": "CSX",
+      "status": "stored",
+      "prepared": 36,
+      "stored": 36,
+      "payload_sha256": "6a72d4ef42b5ef23dc8f585612ec3f9e171bf92a30bf1f0025b7ef27ab242825"
+    },
+    {
+      "native_pairs": 166,
+      "native_median_relative_deviation": 0.0,
+      "native_max_relative_deviation": 0.0006389776357826893,
+      "overlap_returns": 201,
+      "median_log_deviation": 1.4404230912940207e-07,
+      "p90_log_deviation": 0.0025329753377943596,
+      "threshold_uncertainty_usd": 0.01,
+      "symbol": "CTAS",
+      "status": "stored",
+      "prepared": 36,
+      "stored": 36,
+      "payload_sha256": "8625bce7326e6a3f4a87b47733bc54102f0c5d39ad6b365e34a3b98d166c3d11"
+    },
+    {
+      "native_pairs": 166,
+      "native_median_relative_deviation": 0.0,
+      "native_max_relative_deviation": 0.000916170407695871,
+      "overlap_returns": 201,
+      "median_log_deviation": 1.8413083299093296e-07,
+      "p90_log_deviation": 0.003387154705483019,
+      "threshold_uncertainty_usd": 0.01,
+      "symbol": "CTSH",
+      "status": "stored",
+      "prepared": 36,
+      "stored": 36,
+      "payload_sha256": "4af98a8c935eaa47987843292d522036eb34e1cb87ed686e5b5ba3427784c836"
+    },
+    {
+      "native_pairs": 53,
+      "native_median_relative_deviation": 3.478047105875959e-08,
+      "native_max_relative_deviation": 2.609761783345377e-07,
+      "overlap_returns": 88,
+      "median_log_deviation": 1.422009596265646e-07,
+      "p90_log_deviation": 0.003065296065669736,
+      "threshold_uncertainty_usd": 0.01,
+      "symbol": "CTVA",
+      "status": "stored",
+      "prepared": 36,
+      "stored": 36,
+      "payload_sha256": "7419b3a704b726f14f3a5e6c45bdcc27c31fdb18895ff94829f9d09aae9f89f3"
+    },
+    {
+      "native_pairs": 166,
+      "native_median_relative_deviation": 0.0,
+      "native_max_relative_deviation": 0.006130456105934323,
+      "overlap_returns": 201,
+      "median_log_deviation": 2.2413882835827564e-07,
+      "p90_log_deviation": 0.007591956877314677,
+      "threshold_uncertainty_usd": 0.030841352084875612,
+      "symbol": "CVS",
+      "status": "stored",
+      "prepared": 36,
+      "stored": 36,
+      "payload_sha256": "5860566f3c32c254a3e19d99f5d9c4a332b202504cada7e65e70caead0ff69bc"
+    },
+    {
+      "native_pairs": 166,
+      "native_median_relative_deviation": 0.0,
+      "native_max_relative_deviation": 0.0024958402662229595,
+      "overlap_returns": 201,
+      "median_log_deviation": 2.2155739542214823e-07,
+      "p90_log_deviation": 0.01044441941793831,
+      "threshold_uncertainty_usd": 0.01251042535446204,
+      "symbol": "CVX",
+      "status": "stored",
+      "prepared": 36,
+      "stored": 36,
+      "payload_sha256": "6291d3578da559c9f1c38e09612d80ce9c6e5a35bd1b71adbad0572a8ba7b588"
+    },
+    {
+      "native_pairs": 166,
+      "native_median_relative_deviation": 0.0,
+      "native_max_relative_deviation": 0.0022607385079127518,
+      "overlap_returns": 201,
+      "median_log_deviation": 2.344335838248875e-07,
+      "p90_log_deviation": 0.011225862398064473,
+      "threshold_uncertainty_usd": 0.0113293051359525,
+      "symbol": "D",
+      "status": "stored",
+      "prepared": 36,
+      "stored": 36,
+      "payload_sha256": "6f3f4a14d5d45ca2ac76bfb90a409fb185b4c2d3486b79d6d580ae32b2055eaf"
+    },
+    {
+      "native_pairs": 165,
+      "native_median_relative_deviation": 0.0,
+      "native_max_relative_deviation": 0.003708281829418958,
+      "overlap_returns": 201,
+      "median_log_deviation": 1.6654664135805248e-07,
+      "p90_log_deviation": 0.00347990982357589,
+      "threshold_uncertainty_usd": 0.018610421836227894,
+      "symbol": "DAL",
+      "status": "stored",
+      "prepared": 36,
+      "stored": 36,
+      "payload_sha256": "3517b2cfe10769b9cd06a696128768fe1fa83575c2d02edf211281040b81f201"
+    },
+    {
+      "symbol": "DE",
+      "status": "network_failure",
+      "type": "ReadTimeout"
+    }
+  ],
+  "snapshot_stamp": [
+    406511,
+    "2026-11-02 06:40:00.243296+00",
+    849,
+    143648,
+    837,
+    "16111549.637344811063187142"
+  ],
+  "independent_native_snapshot_sha256": "33020fe12cf6cb4d84b2dcb57aca9062d953d5bbfcc2cecc69949e36986032eb",
+  "return_prices_sources_locks_and_baselines_changed": false
+}

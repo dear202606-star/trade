@@ -185,40 +185,10 @@ def _db_all():
 
 
 def load_bars(ticker):
-    """统一入口：本地缓存 → 运行面板 → 实时抓取"""
-    _b = _db_all().get(ticker)
-    if _b:
-        return _b
-    if os.environ.get("ALLOW_FILE_FALLBACK") != "1":
-        raise RuntimeError("行情只允许来自在线库（%s 无数据），禁止退回本地文件" % ticker)
-    """统一入口：本地缓存 → 运行面板 → 实时抓取"""
-    if ticker in _mem:
-        return _mem[ticker]
-    bars = None
-
-    p = os.path.join(CACHE, ticker + ".json")
-    if os.environ.get("DSH_NO_CACHE"):
-        p = ""
-    if p and os.path.exists(p):
-        try:
-            d = json.load(open(p, encoding="utf-8"))
-            b = d.get("bars") or []
-            if b:
-                bars = {x[0]: (x[1], x[2]) for x in b}
-        except Exception:
-            bars = None
-
-    if bars is None:
-        pn = _load_panel().get(ticker)
-        if pn:
-            bars = {x[0]: (x[1], x[2]) for x in pn}
-
-    if bars is None:
-        bars = fetch_sina_bars(ticker)
-    if bars:
-        bars = _reapply(ticker, bars)
-
-    _mem[ticker] = bars
+    """Read selected online-database prices; never use file or provider fallbacks."""
+    bars = _db_all().get(ticker)
+    if not bars:
+        raise RuntimeError("Online database has no selected prices: %s" % ticker)
     return bars
 
 
@@ -238,74 +208,19 @@ def save_panel(panel_dict):
 
 
 def load_members(max_age_days=7):
-    """标普 500 时点成分表：本地有过期机制，超过 max_age_days 就从网络刷新并回写
-
-    成分股每年约 20-25 次调整（每月 1-2 次），所以快照不能永久冻结。
-    """
+    """Online reference data; retain the argument for existing callers."""
     import pandas as pd
-    for p in (MEMBERS, os.path.join(BASE, "data", "sp500_ticker_start_end.csv")):
-        if os.path.exists(p):
-            try:
-                age = (time.time() - os.path.getmtime(p)) / 86400.0
-                if age <= max_age_days:
-                    return pd.read_csv(p)
-                # 过期：尝试刷新，成功则覆盖本地快照（下次提交即生效）
-                for url in ("https://raw.githubusercontent.com/fja05680/sp500/master/"
-                            "sp500_ticker_start_end.csv",):
-                    try:
-                        r = requests.get(url, headers={"User-Agent": UA}, timeout=30)
-                        if r.status_code == 200:
-                            df = pd.read_csv(StringIO(r.text))
-                            if "ticker" in df.columns and "start_date" in df.columns:
-                                try:
-                                    df.to_csv(p, index=False)
-                                except Exception:
-                                    pass
-                                print("      成分表已刷新（本地快照 %.1f 天，刷新后回写）" % age)
-                                return df
-                    except Exception:
-                        continue
-                print("      成分表快照已 %.1f 天，但刷新失败，沿用本地" % age, file=sys.stderr)
-                return pd.read_csv(p)
-            except Exception:
-                pass
-    import pandas as pd
-    for url in ("https://raw.githubusercontent.com/fja05680/sp500/master/"
-                "sp500_ticker_start_end.csv",
-                "https://raw.githubusercontent.com/fja05680/sp500/master/sp500.csv"):
-        try:
-            r = requests.get(url, headers={"User-Agent": UA}, timeout=30)
-            if r.status_code == 200:
-                df = pd.read_csv(StringIO(r.text))
-                if "ticker" in df.columns and "start_date" in df.columns:
-                    return df
-        except Exception:
-            continue
-    return None
+    import db_ref
+    members = db_ref.load_members()
+    return pd.DataFrame([{"ticker": ticker, "start_date": start, "end_date": end}
+                         for ticker, periods in members.items() for start, end in periods])
 
 
 def load_sector():
-    """行业分类：本地优先，CI 从 GitHub 取；都拿不到就返回空（按等权处理）"""
-    import pandas as pd
-    try:
-        if os.path.exists(SP500):
-            sp = pd.read_csv(SP500)
-        else:
-            r = requests.get("https://raw.githubusercontent.com/fja05680/sp500/master/sp500.csv",
-                             headers={"User-Agent": UA}, timeout=30)
-            sp = pd.read_csv(StringIO(r.text))
-        sec = dict(zip(sp["Symbol"], sp["GICS Sector"]))
-        # 补上已退市/被并购的历史成分股行业（否则行业约束对其失效）
-        try:
-            ov = json.load(open(os.path.join(BASE, "static", "sector_overrides.json"), encoding="utf-8"))
-            for k, v in ov.items():
-                if not k.startswith("_"):
-                    sec.setdefault(k, v)
-        except Exception:
-            pass
-        return sec, dict(zip(sp["Symbol"], sp["Security"]))
-    except Exception:
-        return {}, {}
+    """Read sector constraints online; absent company names display tickers."""
+    import db_ref
+    sectors = db_ref.load_sectors()
+    return sectors, {ticker: ticker for ticker in sectors}
 
 
 def prefetch(tickers, workers=8):

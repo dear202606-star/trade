@@ -1,0 +1,163 @@
+{
+  "generated_at": "2026-11-02T12:14:05.129830+00:00",
+  "identity_evidence": "https://www.sec.gov/Archives/edgar/data/1326801/000132680122000070/fb-20220531.htm",
+  "rename_date": "2022-06-09",
+  "proof": {
+    "old": "FB",
+    "current": "META",
+    "through": "2022-12",
+    "months": 128,
+    "independent_return_pairs": 65,
+    "median_return_deviation": 1.4594287223168578e-07,
+    "max_return_deviation": 0.0005990108111545434
+  },
+  "selected_decisions": [
+    {
+      "symbol": "FB",
+      "source": "sina_repaired",
+      "basis": "price_only",
+      "frozen": false
+    },
+    {
+      "symbol": "META",
+      "source": "yahoo_relay",
+      "basis": "total_return",
+      "frozen": false
+    }
+  ],
+  "selected_ranges": [
+    {
+      "symbol": "FB",
+      "first": "2012-05",
+      "last": "2026-10",
+      "months": 139
+    },
+    {
+      "symbol": "META",
+      "first": "2012-05",
+      "last": "2026-10",
+      "months": 174
+    }
+  ],
+  "candidate_gap_cells": [
+    {
+      "symbol": "FB",
+      "year": 2013,
+      "source": "sina_repaired",
+      "reason": "price_only",
+      "archive_candidate_unreviewed": true,
+      "locked": false,
+      "quarantined": false,
+      "existing_tr_candidates_unreviewed": [],
+      "archive_sources_unreviewed": [
+        "kaggle_cc0",
+        "kaggle_yahoo2020"
+      ]
+    },
+    {
+      "symbol": "FB",
+      "year": 2014,
+      "source": "sina_repaired",
+      "reason": "price_only",
+      "archive_candidate_unreviewed": true,
+      "locked": false,
+      "quarantined": false,
+      "existing_tr_candidates_unreviewed": [],
+      "archive_sources_unreviewed": [
+        "kaggle_cc0",
+        "kaggle_yahoo2020"
+      ]
+    },
+    {
+      "symbol": "FB",
+      "year": 2015,
+      "source": "sina_repaired",
+      "reason": "price_only",
+      "archive_candidate_unreviewed": true,
+      "locked": false,
+      "quarantined": false,
+      "existing_tr_candidates_unreviewed": [],
+      "archive_sources_unreviewed": [
+        "kaggle_cc0",
+        "kaggle_yahoo2020"
+      ]
+    },
+    {
+      "symbol": "FB",
+      "year": 2016,
+      "source": "sina_repaired",
+      "reason": "price_only",
+      "archive_candidate_unreviewed": true,
+      "locked": false,
+      "quarantined": false,
+      "existing_tr_candidates_unreviewed": [],
+      "archive_sources_unreviewed": [
+        "kaggle_cc0",
+        "kaggle_yahoo2020"
+      ]
+    },
+    {
+      "symbol": "FB",
+      "year": 2017,
+      "source": "sina_repaired",
+      "reason": "price_only",
+      "archive_candidate_unreviewed": true,
+      "locked": false,
+      "quarantined": false,
+      "existing_tr_candidates_unreviewed": [],
+      "archive_sources_unreviewed": [
+        "kaggle_yahoo2020"
+      ]
+    },
+    {
+      "symbol": "FB",
+      "year": 2018,
+      "source": "sina_repaired",
+      "reason": "price_only",
+      "archive_candidate_unreviewed": true,
+      "locked": false,
+      "quarantined": false,
+      "existing_tr_candidates_unreviewed": [],
+      "archive_sources_unreviewed": [
+        "kaggle_yahoo2020"
+      ]
+    },
+    {
+      "symbol": "FB",
+      "year": 2019,
+      "source": "sina_repaired",
+      "reason": "price_only",
+      "archive_candidate_unreviewed": true,
+      "locked": false,
+      "quarantined": false,
+      "existing_tr_candidates_unreviewed": [],
+      "archive_sources_unreviewed": [
+        "kaggle_yahoo2020"
+      ]
+    },
+    {
+      "symbol": "FB",
+      "year": 2020,
+      "source": "sina_repaired",
+      "reason": "price_only",
+      "archive_candidate_unreviewed": false,
+      "locked": false,
+      "quarantined": false,
+      "existing_tr_candidates_unreviewed": [],
+      "archive_sources_unreviewed": []
+    },
+    {
+      "symbol": "FB",
+      "year": 2021,
+      "source": "sina_repaired",
+      "reason": "price_only",
+      "archive_candidate_unreviewed": false,
+      "locked": false,
+      "quarantined": false,
+      "existing_tr_candidates_unreviewed": [],
+      "archive_sources_unreviewed": []
+    }
+  ],
+  "preapplication_strategy_impact_complete": false,
+  "database_or_published_outputs_changed": false
+}
