@@ -10,6 +10,7 @@
 """
 import io
 import os
+import tempfile
 
 import psycopg2
 import psycopg2.extras
@@ -163,9 +164,9 @@ def _cache_fresh():
             return False
         live = _db_stamp()
         if live is None:
-            # DB 不可达（CI 走 REST）时用缓存内置构建时间，而不是 mtime
-            built = head.get("__built_at__") or 0
-            return (__import__("time").time() - float(built)) < 2 * 3600
+            # An offline cache cannot prove that a source was not quarantined
+            # since it was built. Read the guarded REST view instead.
+            return False
         return tuple(stamp) == tuple(live or ())
     except Exception:
         return False
@@ -180,6 +181,7 @@ def load_all(prefer_basis="total_return", chunk=60, use_cache=True):
         raw.pop("__stamp__", None)
         raw.pop("__built_at__", None)
         return {k: {m: (v[0], v[1]) for m, v in d.items()} for k, d in raw.items()}
+    before = _db_stamp()
     try:
         out = _ds.load_all()
     except Exception as _e:
@@ -188,15 +190,28 @@ def load_all(prefer_basis="total_return", chunk=60, use_cache=True):
         out = _rest.load_selected()
         if not out:
             raise RuntimeError("REST 返回 0 行（凭据/RLS 异常），禁止退回文件数据")
+    after = _db_stamp()
+    if before is not None and after is not None and tuple(before[-3:]) != tuple(after[-3:]):
+        raise RuntimeError('选中价格在读取期间变化，禁止把旧数据缓存为新版本；请重新读取')
     try:
         import json as _json
         payload = {k: {m: [v[0], v[1]] for m, v in d.items()} for k, d in out.items()}
-        _live = _db_stamp()
+        _live = after if before is not None else None
         # DB 不可达时必须给一个真值标记，否则空列表会被当作「无指纹」而永不命中缓存
         payload["__stamp__"] = list(_live) if _live else ["rest", len(out),
                                                           sum(len(d) for d in out.values())]
         payload["__built_at__"] = __import__("time").time()
-        _json.dump(payload, open(CACHE_FILE, "w"), separators=(",", ":"))
+        temporary = None
+        try:
+            with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8',
+                    dir=os.path.dirname(CACHE_FILE), prefix='_prices.', suffix='.tmp',
+                    delete=False) as file:
+                temporary = file.name
+                _json.dump(payload, file, separators=(",", ":"))
+            os.replace(temporary, CACHE_FILE)
+        finally:
+            if temporary and os.path.exists(temporary):
+                os.unlink(temporary)
     except Exception as _e:
         print("写缓存失败：%s" % _e)
     return out

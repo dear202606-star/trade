@@ -254,6 +254,16 @@ def main():
 
         # ---------- 历史与曲线 ----------
         _sh = _b.get("strategy_history.json") or {}
+        check(_sh.get('price_screen_basis') == 'as_traded',
+              '口径 B 使用当时实际股价筛选',
+              '口径 B 历史尚未通过名义股价修正验收')
+        check(_sh.get('holding_event_policy') == 'cash_and_all_successor_shares' and
+              _sh.get('momentum_event_policy') == 'cash_and_all_successor_shares',
+              '口径 B 保留现金和全部后继股票',
+              '口径 B 企业行动口径尚未通过验收')
+        check(_sh.get('membership_policy') == 'verified_same_equity_continuity',
+              '口径 B 按同一证券全年连续成分资格筛选',
+              '口径 B 同股更名连续成分资格尚未通过验收')
         _yrs = _sh.get("years") or []
         check(len(_yrs) >= 12, "口径 B 回测 %d 年" % len(_yrs), "年份不足（<12）")
         check((_sh.get("summary") or {}).get("years") == len(_yrs),
@@ -517,6 +527,13 @@ def main():
               "净值日期(%s)明显晚于行情交易日(%s)" % (last_d, sess))
 
     sh = load("strategy_history.json")
+    check((sh or {}).get('price_screen_basis') == 'as_traded',
+          '口径 A 使用当时实际股价筛选',
+          '口径 A 历史尚未通过名义股价修正验收')
+    check((sh or {}).get('holding_event_policy') == 'cash_and_all_successor_shares' and
+          (sh or {}).get('momentum_event_policy') == 'cash_and_all_successor_shares',
+          '口径 A 保留现金和全部后继股票',
+          '口径 A 企业行动口径尚未通过验收')
     check(sh and len(sh.get("years") or []) >= 8,
           f"逐年记录 {len(sh.get('years') or []) if sh else 0} 年",
           "strategy_history.json 逐年记录不足")

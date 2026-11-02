@@ -9,11 +9,12 @@
   2. 连续性：相邻月 |涨跌| > 300% 视为断裂（拆股未复权/拼接），整条拒收
   3. 合理性：价格 > 0；单月 |涨跌| > 150% 的月份数不超过 2 个
   4. 交叉：与库内已有序列重叠月份的收益偏差中位数 > 5% → 判为口径不一致，拒收
-  5. 来源一致性：basis 必须与源声明一致（total_return 源不得给出仅拆股数据）
+  5. 口径枚举：basis 必须为 total_return 或 price_only；源声明由调用方核验
 
 返回 (ok: bool, reason: str, cleaned: dict)
 """
 import statistics
+import math
 
 
 def _months(d):
@@ -24,12 +25,17 @@ def check_payload(sym, bars, claimed_basis, existing=None, min_months=12, allow_
     """bars: {YYYY-MM: (adj, raw)}；existing: 库内同源或异源序列"""
     if not bars:
         return False, "空数据", {}
+    if claimed_basis not in ("total_return", "price_only"):
+        return False, "收益口径非法", {}
+    bad = [k for k in bars if not (isinstance(k, str) and len(k) == 7
+           and k[4] == "-" and k[:4].isascii() and k[:4].isdigit()
+           and k[5:].isascii() and k[5:].isdigit()
+           and 1 <= int(k[:4]) <= 9999 and 1 <= int(k[5:]) <= 12)]
+    if bad:
+        return False, "月份格式非法：%s" % bad[:3], {}
     ks = _months(bars)
     if len(ks) < min_months:
         return False, "月份不足（%d）" % len(ks), {}
-    bad = [k for k in ks if not (len(k) == 7 and k[4] == "-" and k[:4].isdigit())]
-    if bad:
-        return False, "月份格式非法：%s" % bad[:3], {}
     # 退市票的末月天然早于当下，只有「离今天太远」才拒收
     import datetime as _dt
     _today = _dt.date.today()
@@ -39,8 +45,17 @@ def check_payload(sym, bars, claimed_basis, existing=None, min_months=12, allow_
 
     # 价格合法性
     for k in ks:
-        a = bars[k][0]
-        if not a or a <= 0:
+        values = bars[k]
+        if not isinstance(values, (tuple, list)) or len(values) != 2:
+            return False, "%s 价格结构非法" % k, {}
+        a, raw = values
+        try:
+            valid = (math.isfinite(a) and a > 0 and not isinstance(a, bool)
+                     and (raw is None or (math.isfinite(raw) and raw > 0
+                                          and not isinstance(raw, bool))))
+        except (TypeError, ValueError, OverflowError):
+            valid = False
+        if not valid:
             return False, "%s 价格非法" % k, {}
 
     # 连续性 + 异常月

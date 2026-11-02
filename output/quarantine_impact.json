@@ -1,0 +1,383 @@
+{
+  "snapshot_stamp": [
+    392632,
+    "2026-11-01 13:17:38.799049+00",
+    849,
+    145178,
+    848,
+    "42384624.900769239383105362"
+  ],
+  "snapshot_built_at": 1793549174.503393,
+  "suspects_for_review": [
+    "BMC",
+    "CBE",
+    "COV",
+    "EP",
+    "GAS",
+    "HAR",
+    "PARA",
+    "PCL",
+    "SBNY",
+    "SCG",
+    "TIE"
+  ],
+  "definition": "B pick_year/year_perf, 2010-2025; no aggregate coverage gate or publication",
+  "current_snapshot": [
+    {
+      "year": 2010,
+      "tickers": [
+        "XL",
+        "PXD",
+        "COG"
+      ],
+      "return": 0.29481784067032324,
+      "drawdown": -0.09785648423878934,
+      "pool": 85
+    },
+    {
+      "year": 2011,
+      "tickers": [
+        "WFM",
+        "HES",
+        "XL"
+      ],
+      "return": 0.008177119641534114,
+      "drawdown": -0.19907000817196696,
+      "pool": 99
+    },
+    {
+      "year": 2012,
+      "tickers": [
+        "COG",
+        "ISRG",
+        "MA"
+      ],
+      "return": 0.23012509452370233,
+      "drawdown": -0.09158520977923934,
+      "pool": 415
+    },
+    {
+      "year": 2013,
+      "tickers": [
+        "PHM",
+        "WHR",
+        "BAC"
+      ],
+      "return": 0.3486620979277808,
+      "drawdown": -0.09140922760376524,
+      "pool": 427
+    },
+    {
+      "year": 2014,
+      "tickers": [
+        "NFLX",
+        "BBY",
+        "MU"
+      ],
+      "return": 0.17946535361192595,
+      "drawdown": -0.09645779674175547,
+      "pool": 433
+    },
+    {
+      "year": 2015,
+      "tickers": [
+        "LUV",
+        "EW",
+        "DAL"
+      ],
+      "return": 0.1154824357369082,
+      "drawdown": -0.09877473383555091,
+      "pool": 444
+    },
+    {
+      "year": 2016,
+      "tickers": [
+        "NFLX",
+        "AMZN",
+        "CVC"
+      ],
+      "return": 0.09497195921175883,
+      "drawdown": -0.115358208048425,
+      "pool": 439
+    },
+    {
+      "year": 2017,
+      "tickers": [
+        "OKE",
+        "FCX",
+        "NEM"
+      ],
+      "return": 0.15549004991479198,
+      "drawdown": -0.1564046717213784,
+      "pool": 456
+    },
+    {
+      "year": 2018,
+      "tickers": [
+        "NRG",
+        "VRTX",
+        "WYNN"
+      ],
+      "return": 0.03324283142631468,
+      "drawdown": -0.11532806992804456,
+      "pool": 469
+    },
+    {
+      "year": 2019,
+      "tickers": [
+        "AMD",
+        "AAP",
+        "CMG"
+      ],
+      "return": 0.8139086017720873,
+      "drawdown": -0.035893613294794124,
+      "pool": 474
+    },
+    {
+      "year": 2020,
+      "tickers": [
+        "AMD",
+        "LRCX",
+        "TGT"
+      ],
+      "return": 0.6543638213025473,
+      "drawdown": -0.16306452069459954,
+      "pool": 473
+    },
+    {
+      "year": 2021,
+      "tickers": [
+        "LB",
+        "NVDA",
+        "PYPL"
+      ],
+      "return": 0.7362385143819217,
+      "drawdown": -0.048933301208681224,
+      "pool": 484
+    },
+    {
+      "year": 2022,
+      "tickers": [
+        "DVN",
+        "FTNT",
+        "F"
+      ],
+      "return": -0.07770110579758194,
+      "drawdown": -0.18396290129030035,
+      "pool": 484
+    },
+    {
+      "year": 2023,
+      "tickers": [
+        "OXY",
+        "HES",
+        "CAH"
+      ],
+      "return": 0.12930740669793117,
+      "drawdown": -0.06845833529944423,
+      "pool": 480
+    },
+    {
+      "year": 2024,
+      "tickers": [
+        "NVDA",
+        "META",
+        "RCL"
+      ],
+      "return": 1.0542444734784642,
+      "drawdown": -0.05425505862156599,
+      "pool": 483
+    },
+    {
+      "year": 2025,
+      "tickers": [
+        "NVDA",
+        "UAL",
+        "AXON"
+      ],
+      "return": 0.1878239403632933,
+      "drawdown": -0.20927578056234875,
+      "pool": 483
+    }
+  ],
+  "exclusion_scenario": [
+    {
+      "year": 2010,
+      "tickers": [
+        "XL",
+        "PXD",
+        "COG"
+      ],
+      "return": 0.29481784067032324,
+      "drawdown": -0.09785648423878934,
+      "pool": 83
+    },
+    {
+      "year": 2011,
+      "tickers": [
+        "WFM",
+        "HES",
+        "XL"
+      ],
+      "return": 0.008177119641534114,
+      "drawdown": -0.19907000817196696,
+      "pool": 95
+    },
+    {
+      "year": 2012,
+      "tickers": [
+        "COG",
+        "ISRG",
+        "MA"
+      ],
+      "return": 0.23012509452370233,
+      "drawdown": -0.09158520977923934,
+      "pool": 411
+    },
+    {
+      "year": 2013,
+      "tickers": [
+        "PHM",
+        "WHR",
+        "BAC"
+      ],
+      "return": 0.3486620979277808,
+      "drawdown": -0.09140922760376524,
+      "pool": 424
+    },
+    {
+      "year": 2014,
+      "tickers": [
+        "NFLX",
+        "BBY",
+        "MU"
+      ],
+      "return": 0.17946535361192595,
+      "drawdown": -0.09645779674175547,
+      "pool": 430
+    },
+    {
+      "year": 2015,
+      "tickers": [
+        "LUV",
+        "EW",
+        "DAL"
+      ],
+      "return": 0.1154824357369082,
+      "drawdown": -0.09877473383555091,
+      "pool": 440
+    },
+    {
+      "year": 2016,
+      "tickers": [
+        "NFLX",
+        "AMZN",
+        "CVC"
+      ],
+      "return": 0.09497195921175883,
+      "drawdown": -0.115358208048425,
+      "pool": 437
+    },
+    {
+      "year": 2017,
+      "tickers": [
+        "OKE",
+        "FCX",
+        "NEM"
+      ],
+      "return": 0.15549004991479198,
+      "drawdown": -0.1564046717213784,
+      "pool": 455
+    },
+    {
+      "year": 2018,
+      "tickers": [
+        "NRG",
+        "VRTX",
+        "WYNN"
+      ],
+      "return": 0.03324283142631468,
+      "drawdown": -0.11532806992804456,
+      "pool": 469
+    },
+    {
+      "year": 2019,
+      "tickers": [
+        "AMD",
+        "AAP",
+        "CMG"
+      ],
+      "return": 0.8139086017720873,
+      "drawdown": -0.035893613294794124,
+      "pool": 474
+    },
+    {
+      "year": 2020,
+      "tickers": [
+        "AMD",
+        "LRCX",
+        "TGT"
+      ],
+      "return": 0.6543638213025473,
+      "drawdown": -0.16306452069459954,
+      "pool": 473
+    },
+    {
+      "year": 2021,
+      "tickers": [
+        "LB",
+        "NVDA",
+        "PYPL"
+      ],
+      "return": 0.7362385143819217,
+      "drawdown": -0.048933301208681224,
+      "pool": 484
+    },
+    {
+      "year": 2022,
+      "tickers": [
+        "DVN",
+        "FTNT",
+        "F"
+      ],
+      "return": -0.07770110579758194,
+      "drawdown": -0.18396290129030035,
+      "pool": 484
+    },
+    {
+      "year": 2023,
+      "tickers": [
+        "OXY",
+        "HES",
+        "CAH"
+      ],
+      "return": 0.12930740669793117,
+      "drawdown": -0.06845833529944423,
+      "pool": 479
+    },
+    {
+      "year": 2024,
+      "tickers": [
+        "NVDA",
+        "META",
+        "RCL"
+      ],
+      "return": 1.0542444734784642,
+      "drawdown": -0.05425505862156599,
+      "pool": 482
+    },
+    {
+      "year": 2025,
+      "tickers": [
+        "NVDA",
+        "UAL",
+        "AXON"
+      ],
+      "return": 0.1878239403632933,
+      "drawdown": -0.20927578056234875,
+      "pool": 482
+    }
+  ],
+  "exclusion_changes": [],
+  "current_vs_published_changes": []
+}

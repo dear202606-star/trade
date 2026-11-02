@@ -1,9 +1,16 @@
 # 数据源全景与分配策略
 
-> 版本 2026-10-31.1 ｜ 机器可读版：[`static/source_matrix.json`](../static/source_matrix.json) ｜ 可执行补数计划：`output/gap_plan.json`
+> 版本 2026-11-02.2 ｜ 机器可读版：[`static/source_matrix.json`](../static/source_matrix.json) ｜ 实时逐格审计：`output/coverage_audit.json`
 > 原则：**不丢弃任何数据源**。每个源都有明确的角色、优先级与兜底位；低等级源保留在 `prices_monthly`，仅供追溯与对比。
 
-## 一、当前基线的真实残缺情况（决策依据）
+> 口径标签核验：28 个选源元数据原误标 total_return，实际对应源全是 price_only；已按实库行口径纠正，剩余不一致 0。`db_select.refresh` 同时比较来源和口径，锁定/冻结决策仍受保护。不得用 `series_pick` 标签替代 `series_selected` 逐月实际 basis 计算覆盖率；纠正标签本身没有新增全收益数据。
+> 最新 PIT 全收益覆盖 6,791/8,032（84.55%），距 95% 差 840 格。两个 CC0 档案已入库且禁止自动选源；4 组同股更名补入 50 格，3 个已核验 AV 源再补 36 格。筛选价已决定按当时名义股价修正，实施未完成，见 `PRICE_FILTER_BASIS_DECISION.md`。
+
+> 名义价源独立于收益价：WIKI 原始价、2022 同版本 Yahoo 事件逆推价及 AV 官方原价均经单位证据门控；新浪原始观察单位未证明，不能进入筛选视图。AV 月线已实测可用，当前滚动预约 25/25，不再请求。095 视图守卫禁止越过已核验证券生命周期；新旧 LB 不能拼接。最新落库和验收见 `CONVERGENCE_REVIEW_2026-11-02.md`。
+
+> 新增 2023 固定 Yahoo 事件快照（v2）和 2026 科技股固定事件档案（清单在 `static/tech_actions2026_archives.json`）。分别入库 4,768/893 条原价观察，当前可用 4,768/528 条；均只填补筛选观察。至少 24 个既有独立原价锚点及收益交叉匹配，排除自身锚点；门槛附近按实际最大偏差保留不确定性。096–097 支持这两个独立源，不改变收益选源优先级。2026 档案首批 4 个超时在续跑后恢复，当前选中 18 代码全部通过；已固定各版本和实际档案 SHA256，缓存键包括版本，重跑无重复行。证据见对应 `output/*review_summary.json`。
+
+## 一、历史调查快照（下面数字与结论不是当前覆盖状态）
 
 | 指标 | 数值 |
 |---|---|
@@ -30,7 +37,9 @@
 | **HF AYUSHKHAIRE** | ❌ 全缺 | price_only | 2010+ | 无限制 | NVDA2021 +125.1% ✓ | **覆盖兜底** |
 | **HF AmirTrader** | ❌ | 全收益 | 2019+ | 无限制 | NVDA2021 +125.5% ✓ | **第三源裁判** |
 | **本地新浪** | ✅ **唯一免费覆盖退市** | price_only（已修复） | 1999+ | 无限制 | 修复 583 只／2077 次 | **退市桥接** |
-| Kaggle vladosht | ? | ? | 2010–2025 月频 | 免费（需 token） | 未验证 | **批量覆盖候选** |
+| Kaggle vladosht | ? | ? | 2010–2025 月频 | 免费（需 token） | 目标数据集下架 | 历史候选（关闭） |
+| **Kaggle CC0 全市场档案** | ✅ 有退市票；不保证全覆盖 | **total_return**（数据卡声明拆股+分红复权） | 各票不一，最晚 2017-11 | 免费，CC0 | v3 文件清单命中 794 个 PIT 成分代码；单票实读 2005–2017 | **一次性历史补缺** |
+| **Kaggle CC0 Yahoo-2020 档案** | ✅ 有 2020 年后退市者 | Adj Close 为全收益，Close 仅拆股复权 | 完整月末至 2020-03 | 免费，CC0 | 12,201 行/88 代码已正式入库；另有名称元数据 | **候选档案，禁止自动选源** |
 | MarketParquet | ✅ 8,500 只退市 | price_only | 2000+ | 365 天／$79 买断 | 格式已验证 | **Plan C 买断** |
 | Tiingo | ? | 全收益 | 1962+ | 500 symbols/月 | 未验证 | **第二全收益源** |
 | Sharadar SEP | ✅ 21,000 | 三套价格 | 1998+ | 付费 | 未验证 | **机构级终局** |
@@ -50,7 +59,7 @@
 
 ### 2.3 已排除但保留在册（7 类）
 
-Yahoo（403）、Stooq（JS 挑战）、WSJ／FMP demo（401）、BigQuery（无美股 EOD）、DoltHub（404）、Polygon 免费（2 年）、Alpaca（2016 起）、Twelve Data／Finnhub（无退市或付费）、Kaggle 常规 S&P 集（只有现役）。
+Yahoo（403）、Stooq（JS 挑战）、WSJ／FMP demo（401）、BigQuery（无美股 EOD）、DoltHub（404）、Polygon 免费（2 年）、Alpaca（2016 起）、Twelve Data／Finnhub（无退市或付费）、Kaggle 常规 S&P 集（只有现役）。旧 `kaggle_vladosht` 路径仍下架；新发现的 CC0 全市场档案单独登记。
 
 > **保留原因**：上游策略会变（Yahoo 曾可用），留档避免重复调研；且每个源的接入代码路径一致，恢复即可用。
 
@@ -72,7 +81,7 @@ Yahoo（403）、Stooq（JS 挑战）、WSJ／FMP demo（401）、BigQuery（无
 每天 11:10 UTC   alphavantage 回填 22–25 只       → 按「缺口数」降序，优先退市票
 每次流水线       eodhd 校验近 13 个月（持仓+候选） → 偏差 >2% 自动覆盖
 每周一次         fja05680 成分刷新 + 交叉验证
-一次性（可选）   Kaggle vladosht / MarketParquet  → 若验证含退市，可把 35 天压缩到 1 天
+一次性           Kaggle CC0 档案                  → 仅补可验证的 2010–2016 历史缺口；不覆盖 2017-12 以后
 ```
 
 ## 五、锁定条件（数据必须「绝对可靠」）
@@ -99,11 +108,11 @@ Yahoo（403）、Stooq（JS 挑战）、WSJ／FMP demo（401）、BigQuery（无
 
 ## 七、为什么这样分配（决策理由）
 
-1. **AV 做主力**：唯一「免费 + 含退市 + 全收益」三条件同时满足的源，没有替代品。
+1. **AV 做持续主力**：现有可按免费额度持续请求、覆盖退市票的全收益源；Kaggle CC0 档案只覆盖到 2017-11，不能替代后续年份。
 2. **EODHD 做校验**：免费层只有 13 个月，恰好覆盖「当年持仓与次年预览」——这正是最需要准确、也最容易出错的部分。
 3. **HF 做覆盖**：无额度限制，能立刻把覆盖率从 79% 拉到 90%+，代价是口径降级（需标记）。
 4. **新浪不淘汰**：它是唯一免费覆盖已退市票的源，400+ 只票的历史全靠它；即使复权有缺陷，修复后仍是最低成本的过渡底座。
-5. **Kaggle/MarketParquet 保留**：如果验证含退市票，可把 35 天压缩到 1 天，是唯一能「今天完成」的免费路径。
+5. **Kaggle CC0 档案**：能一次性补一部分 2010–2016 的全收益年末缺口；2017-12 以后仍需现有源。MarketParquet 完整包属于付费选项，按当前决策不启用。
 6. **QuantConnect / OpenAssetPricing 不做供数**：它们的价值是**裁判**——独立复现我们的回测，验证数字没算错。
 
 ## 八、调度真相：数据库里的 source_registry（2026-10-31 更新）
@@ -120,9 +129,11 @@ Yahoo（403）、Stooq（JS 挑战）、WSJ／FMP demo（401）、BigQuery（无
 | 6 | marketparquet_free | price_only | **ok（新）** | ∞（近 365 天） | 近期批量 |
 | 7 | nasdaq_api | price_only | ok | ∞ | 抽检 + 股息史 |
 | 8 | stockanalysis | total_return | ok | ∞ | 单票快查 |
+| — | kaggle_cc0 | total_return | **ok（历史档案）** | 一次性 | CC0；逐票历史最晚至 2017-11；不参与日常调度 |
+| — | kaggle_yahoo2020 | total_return | **ok（历史档案）** | 一次性 | CC0；完整月末至 2020-03；数据库约束禁止自动选源 |
 | 1 | fja05680 / datahub_gics | — | ok | ∞ | 成分 / 行业 |
 | — | stooq / yahoo / wsj / macrotrends | — | **blocked** | — | 被 JS 挑战/403/网络层封锁；curl_cffi 也无法绕过 |
-| — | kaggle / bigquery / dolthub | — | **dead** | — | 目标数据集下架 / 无美股 EOD |
+| — | kaggle_vladosht / bigquery / dolthub | — | **dead** | — | 目标数据集下架 / 无美股 EOD；`kaggle_cc0` 是单独可用的历史档案 |
 | — | marketparquet_paid / tiingo / sharadar / norgate | — | **excluded_paid** | — | **按决策不考虑付费** |
 
 **付费源全部标记 excluded_paid（priority=NULL，不参与调度），仍保留在册以便日后解锁。**

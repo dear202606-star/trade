@@ -1,0 +1,62 @@
+{
+  "verified_at": "2026-11-02T05:01:31.407988+00:00",
+  "active_guard_sha256": "b26d6e8a7f5a761dd35398395f70765c06b97026bb5a332356a74045546ed50d",
+  "basis_evidence_guard_sha256": "1f8781f6920aaa6c164ff14112e308cae6be7942e5dd900eafb0f5ebfe5e8a04",
+  "legacy_lock_view_sha256": "37fa64a21a18e6e78f64a9c114debc29395d686c1880dba597ebc00b3a350d09",
+  "legacy_lock_compatibility": "locked_symbols is an active symbol_month data_lock view",
+  "probes": [
+    {
+      "probe": "unlocked metadata update",
+      "result": "allowed then rolled back"
+    },
+    {
+      "probe": "unlocked wrong basis",
+      "result": "rejected"
+    },
+    {
+      "probe": "unobserved source",
+      "result": "rejected"
+    },
+    {
+      "probe": "wrong basis insert/upsert",
+      "result": "rejected"
+    },
+    {
+      "probe": "unlocked valid upsert",
+      "result": "allowed then rolled back"
+    },
+    {
+      "probe": "frozen basis",
+      "result": "rejected"
+    },
+    {
+      "probe": "frozen delete",
+      "result": "rejected"
+    },
+    {
+      "probe": "frozen rename",
+      "result": "rejected"
+    },
+    {
+      "probe": "frozen thaw",
+      "result": "rejected"
+    },
+    {
+      "probe": "active lock basis",
+      "result": "rejected"
+    },
+    {
+      "probe": "active lock delete",
+      "result": "rejected"
+    },
+    {
+      "probe": "active lock rename",
+      "result": "rejected"
+    },
+    {
+      "probe": "active lock unchanged metadata",
+      "result": "rejected"
+    }
+  ],
+  "all_probe_changes_rolled_back": true
+}

@@ -4,7 +4,7 @@
 严格对齐策略口径（output/排名策略对比.html）：
   1. 股票池：当前标普500 成分股
   2. 过滤：股价 >= 5 美元；过去 12 个月日均成交额 >= 2000 万美元
-  3. 排序：过去 12 个自然月涨幅（adj）
+  3. 排序：过去 12 个自然月实际承接收益
   4. 持仓：前 3 名；同一 GICS 行业最多 2 只，出现 2 只时该行业权重上限 60%
   5. 换仓：**每年 12 月末锁定**，次年全年不变；其余月份只监控开关
   6. 开关：标普500 上月收盘 < 10 月均线 -> 整体仓位减半
@@ -16,6 +16,10 @@ import requests
 import pandas as pd
 
 import market_data
+import nominal_prices
+import db_prices
+import holding_paths
+import liquidity_prices
 
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0"
 PAT = re.compile(r"\(\s*(\[.*\])\s*\)", re.S)
@@ -29,6 +33,14 @@ SECTOR_WEIGHT_CAP = 0.60
 
 
 _MEMBERS = None
+
+
+def signal_policy_matches(record):
+    return (record.get('price_screen_basis')=='as_traded'
+            and record.get('momentum_event_policy')==holding_paths.POLICY
+            and record.get('holding_event_input_sha')==holding_paths.input_sha()
+            and record.get('liquidity_basis')==liquidity_prices.POLICY
+            and record.get('liquidity_input_sha')==liquidity_prices.input_sha())
 
 
 def official_month_for(latest):
@@ -157,27 +169,33 @@ def ranking_at(data, months, sp, m):
     base = months[i - 12]
     rows = []
     live = members_at(m)          # 当时属于标普 500 的股票
+    canonical=db_prices.load_all()
     for tk, df in data.items():
         if tk == "SPY":
             continue
         if tk not in live:        # 排名日还没纳入的股票不能入选
             continue
+        bars=canonical.get(tk,{})
+        if m not in bars:continue
+        momentum=holding_paths.momentum_bars(tk,bars,base,m)
+        if base not in momentum or m not in momentum:continue
         if base not in df.index or m not in df.index:
             continue
         win = df.loc[base:m]
         if len(win) != 13:                              # 13 个月必须连续
             continue
-        ratio = (win["adj"] / win["adj"].shift(1)).dropna()
+        if any(month not in momentum for month in win.index):continue
+        wealth=pd.Series({month:momentum[month][0] for month in win.index})
+        ratio = (wealth / wealth.shift(1)).dropna()
         if len(ratio) < 12 or ratio.max() > 8 or ratio.min() < 1 / 8:
             continue                                    # 剔除代码复用/拆股异常
-        px = df.at[m, "raw"]
+        px = nominal_prices.price(tk, m)
         if px < MIN_PRICE:
             continue
-        seg = win.iloc[:-1]
-        dv = (seg["raw"] * seg["vol"]).mean()
+        dv = liquidity_prices.average_daily(tk,base,m,MIN_DV)
         if dv < MIN_DV:
             continue
-        rows.append({"ticker": tk, "ret12": df.at[m, "adj"] / df.at[base, "adj"] - 1,
+        rows.append({"ticker": tk, "ret12": momentum[m][0] / momentum[base][0] - 1,
                      "price": px, "dv": dv})
     if not rows:
         return None, 0
@@ -246,6 +264,7 @@ def main():
             hist_prev = []
     if (hist_prev and hist_prev[0].get("month") == this_month
             and hist_prev[0].get("picks") and hist_prev[0].get("official")
+            and signal_policy_matches(hist_prev[0])
             and "--rerank" not in sys.argv):
         print("[增量] 本月排名已存在，只刷新均线开关…", flush=True)
         spy_bars = fetch_history("SPY")
@@ -286,11 +305,11 @@ def main():
     data, fail = {}, []
     t0 = time.time()
     with ThreadPoolExecutor(max_workers=args.workers) as ex:
-        futs = {ex.submit(fetch_history, t): t for t in tickers + ["SPY"]}
+        futs = {ex.submit(market_data.get_history,t,yahoo_ok,yahoo_ok):t for t in tickers+["SPY"]}
         for i, fu in enumerate(as_completed(futs), 1):
             t = futs[fu]
             try:
-                r, _src = market_data.get_history(t, yahoo_ok, yahoo_ok)
+                r, _src = fu.result()
             except Exception:
                 r, _src = None, None
             if r and len(r) >= 14:
@@ -344,15 +363,14 @@ def main():
 
     # 已锁定过就沿用，绝不重算（否则数据微小修订会让持仓漂移）
     locked = None
-    try:
-        if os.path.exists("output/signal_history.json"):
-            _h = json.load(open("output/signal_history.json", encoding="utf-8"))
-            for _r in _h:
-                if _r.get("official_month") == official_month and _r.get("official"):
-                    locked = _r["official"]
-                    break
-    except Exception:
-        locked = None
+    if os.path.exists("output/signal_history.json"):
+        _h = json.load(open("output/signal_history.json", encoding="utf-8"))
+        for _r in _h:
+            if _r.get("official_month") == official_month and _r.get("official"):
+                if not signal_policy_matches(_r):
+                    raise RuntimeError('正式信号的原价/企业行动口径或证据版本未验收；保留旧锁定结果，先生成差异报告')
+                locked = _r["official"]
+                break
 
     if locked:
         class _P(dict):
@@ -453,6 +471,11 @@ def main():
     # 当月排名每月更新，只作参考。
     official_year = int(official_month[:4]) + 1
     rec = {
+        "price_screen_basis": "as_traded",
+        "momentum_event_policy": holding_paths.POLICY,
+        "holding_event_input_sha": holding_paths.input_sha(),
+        "liquidity_basis": liquidity_prices.POLICY,
+        "liquidity_input_sha": liquidity_prices.input_sha(),
         "month": latest, "date": today, "official_month": official_month,
         "official_year": official_year,
         "valid_from": f"{official_year}-01-01",
@@ -506,7 +529,7 @@ def main():
     print("[5/5] 更新看板 ...", flush=True)
     try:
         import dashboard
-        dashboard.build(hist)
+        dashboard.build(hist, os.path.join("output", "dashboard.html"))
         print("      看板: output/dashboard.html")
     except Exception as e:
         print(f"WARN: 看板生成失败 {e}", file=sys.stderr)

@@ -1,0 +1,45 @@
+{
+  "write": true,
+  "staged": 648,
+  "checks": [
+    {
+      "old": "ANTM",
+      "current": "ELV",
+      "through": "2022-12",
+      "months": 156,
+      "independent_return_pairs": 93,
+      "median_return_deviation": 4.031879604005084e-05,
+      "max_return_deviation": 0.00443712054473111
+    },
+    {
+      "old": "ABC",
+      "current": "COR",
+      "through": "2023-12",
+      "months": 168,
+      "independent_return_pairs": 93,
+      "median_return_deviation": 2.8985789410573837e-05,
+      "max_return_deviation": 0.002970855398839678
+    },
+    {
+      "old": "PKI",
+      "current": "RVTY",
+      "through": "2023-12",
+      "months": 168,
+      "independent_return_pairs": 93,
+      "median_return_deviation": 2.687210553498076e-05,
+      "max_return_deviation": 0.003792799689946613
+    },
+    {
+      "old": "BLL",
+      "current": "BALL",
+      "through": "2022-12",
+      "months": 156,
+      "independent_return_pairs": 93,
+      "median_return_deviation": 3.719329576923336e-05,
+      "max_return_deviation": 0.002123614814661612
+    }
+  ],
+  "historical_B_unchanged": true,
+  "official_B_2026_unchanged": true,
+  "provenance": "static/verified_ticker_renames.json; exact numeric DB copies from reviewed canonical Yahoo rows"
+}

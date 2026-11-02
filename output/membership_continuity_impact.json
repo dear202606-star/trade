@@ -1,0 +1,1938 @@
+{
+  "policy": "verified_same_equity_continuity",
+  "comparison_scope": "membership rule only; both use current actual-consideration returns and nominal-floor bounds",
+  "snapshot_stamp": [
+    406511,
+    "2026-11-02 06:40:00.243296+00",
+    849,
+    143648,
+    837,
+    "16111549.637344811063187142"
+  ],
+  "nominal_input_sha": "147b731a0a498d5170057de8515d7a02908eb28960d0144161c7b815f01c433f",
+  "membership_alias_input_sha": "68b66f9a47920d78490348c3e9df42edbaa2588704ff4faa28fbd078e19537aa",
+  "holding_event_input_sha": "6fda621260c877262c5b615aaff5b92f87c3e0d51565e190974f039ab4c94aff",
+  "baseline_b_sha256": "20c0680276cf79cbb06d8aaab35c3e40cde010447f6e15e75abd95ff0ef33c90",
+  "complete_data_acceptance": false,
+  "published_outputs_changed": false,
+  "years": [
+    {
+      "year": 2010,
+      "membership_added": [],
+      "membership_removed": [],
+      "holdings_changed": false,
+      "return_delta": 0.0,
+      "before": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "XL",
+                "weight": 0.3333,
+                "ret12": 2.0444232131165068
+              },
+              {
+                "ticker": "PXD",
+                "weight": 0.3333,
+                "ret12": 1.9771312544462885
+              },
+              {
+                "ticker": "COG",
+                "weight": 0.3334,
+                "ret12": 0.6769224068088961
+              }
+            ],
+            "passing_pool": 76,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.29481784067032324,
+            "drawdown": -0.09785648423878934,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "XL",
+                "weight": 0.3333,
+                "ret12": 2.0444232131165068
+              },
+              {
+                "ticker": "PXD",
+                "weight": 0.3333,
+                "ret12": 1.9771312544462885
+              },
+              {
+                "ticker": "COG",
+                "weight": 0.3334,
+                "ret12": 0.6769224068088961
+              }
+            ],
+            "passing_pool": 88,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.29481784067032324,
+            "drawdown": -0.09785648423878934,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      },
+      "after": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "XL",
+                "weight": 0.3333,
+                "ret12": 2.0444232131165068
+              },
+              {
+                "ticker": "PXD",
+                "weight": 0.3333,
+                "ret12": 1.9771312544462885
+              },
+              {
+                "ticker": "COG",
+                "weight": 0.3334,
+                "ret12": 0.6769224068088961
+              }
+            ],
+            "passing_pool": 76,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.29481784067032324,
+            "drawdown": -0.09785648423878934,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "XL",
+                "weight": 0.3333,
+                "ret12": 2.0444232131165068
+              },
+              {
+                "ticker": "PXD",
+                "weight": 0.3333,
+                "ret12": 1.9771312544462885
+              },
+              {
+                "ticker": "COG",
+                "weight": 0.3334,
+                "ret12": 0.6769224068088961
+              }
+            ],
+            "passing_pool": 88,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.29481784067032324,
+            "drawdown": -0.09785648423878934,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      }
+    },
+    {
+      "year": 2011,
+      "membership_added": [],
+      "membership_removed": [],
+      "holdings_changed": false,
+      "return_delta": 0.0,
+      "before": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "WFM",
+                "weight": 0.3333,
+                "ret12": 0.842987439944155
+              },
+              {
+                "ticker": "HES",
+                "weight": 0.3333,
+                "ret12": 0.2735443660816794
+              },
+              {
+                "ticker": "XL",
+                "weight": 0.3334,
+                "ret12": 0.19039833564128505
+              }
+            ],
+            "passing_pool": 87,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.009342411168774767,
+            "drawdown": -0.19856353800676974,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "WFM",
+                "weight": 0.3333,
+                "ret12": 0.842987439944155
+              },
+              {
+                "ticker": "HES",
+                "weight": 0.3333,
+                "ret12": 0.2735443660816794
+              },
+              {
+                "ticker": "XL",
+                "weight": 0.3334,
+                "ret12": 0.19039833564128505
+              }
+            ],
+            "passing_pool": 99,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.009342411168774767,
+            "drawdown": -0.19856353800676974,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      },
+      "after": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "WFM",
+                "weight": 0.3333,
+                "ret12": 0.842987439944155
+              },
+              {
+                "ticker": "HES",
+                "weight": 0.3333,
+                "ret12": 0.2735443660816794
+              },
+              {
+                "ticker": "XL",
+                "weight": 0.3334,
+                "ret12": 0.19039833564128505
+              }
+            ],
+            "passing_pool": 87,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.009342411168774767,
+            "drawdown": -0.19856353800676974,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "WFM",
+                "weight": 0.3333,
+                "ret12": 0.842987439944155
+              },
+              {
+                "ticker": "HES",
+                "weight": 0.3333,
+                "ret12": 0.2735443660816794
+              },
+              {
+                "ticker": "XL",
+                "weight": 0.3334,
+                "ret12": 0.19039833564128505
+              }
+            ],
+            "passing_pool": 99,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.009342411168774767,
+            "drawdown": -0.19856353800676974,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      }
+    },
+    {
+      "year": 2012,
+      "membership_added": [],
+      "membership_removed": [],
+      "holdings_changed": false,
+      "return_delta": 0.0,
+      "before": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "COG",
+                "weight": 0.3333,
+                "ret12": 1.0063412656434587
+              },
+              {
+                "ticker": "ISRG",
+                "weight": 0.3333,
+                "ret12": 0.7963530665880965
+              },
+              {
+                "ticker": "MA",
+                "weight": 0.3334,
+                "ret12": 0.6671962965178959
+              }
+            ],
+            "passing_pool": 406,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.23012509452370233,
+            "drawdown": -0.09158520977923934,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "COG",
+                "weight": 0.3333,
+                "ret12": 1.0063412656434587
+              },
+              {
+                "ticker": "ISRG",
+                "weight": 0.3333,
+                "ret12": 0.7963530665880965
+              },
+              {
+                "ticker": "MA",
+                "weight": 0.3334,
+                "ret12": 0.6671962965178959
+              }
+            ],
+            "passing_pool": 424,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.23012509452370233,
+            "drawdown": -0.09158520977923934,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      },
+      "after": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "COG",
+                "weight": 0.3333,
+                "ret12": 1.0063412656434587
+              },
+              {
+                "ticker": "ISRG",
+                "weight": 0.3333,
+                "ret12": 0.7963530665880965
+              },
+              {
+                "ticker": "MA",
+                "weight": 0.3334,
+                "ret12": 0.6671962965178959
+              }
+            ],
+            "passing_pool": 406,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.23012509452370233,
+            "drawdown": -0.09158520977923934,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "COG",
+                "weight": 0.3333,
+                "ret12": 1.0063412656434587
+              },
+              {
+                "ticker": "ISRG",
+                "weight": 0.3333,
+                "ret12": 0.7963530665880965
+              },
+              {
+                "ticker": "MA",
+                "weight": 0.3334,
+                "ret12": 0.6671962965178959
+              }
+            ],
+            "passing_pool": 424,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.23012509452370233,
+            "drawdown": -0.09158520977923934,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      }
+    },
+    {
+      "year": 2013,
+      "membership_added": [],
+      "membership_removed": [],
+      "holdings_changed": false,
+      "return_delta": 0.0,
+      "before": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "PHM",
+                "weight": 0.3,
+                "ret12": 1.877971693639875
+              },
+              {
+                "ticker": "WHR",
+                "weight": 0.3,
+                "ret12": 1.20255537963728
+              },
+              {
+                "ticker": "BAC",
+                "weight": 0.4,
+                "ret12": 1.0982554392594337
+              }
+            ],
+            "passing_pool": 416,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.3486620979277808,
+            "drawdown": -0.09140922760376524,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "PHM",
+                "weight": 0.3,
+                "ret12": 1.877971693639875
+              },
+              {
+                "ticker": "WHR",
+                "weight": 0.3,
+                "ret12": 1.20255537963728
+              },
+              {
+                "ticker": "BAC",
+                "weight": 0.4,
+                "ret12": 1.0982554392594337
+              }
+            ],
+            "passing_pool": 434,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.3486620979277808,
+            "drawdown": -0.09140922760376524,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      },
+      "after": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "PHM",
+                "weight": 0.3,
+                "ret12": 1.877971693639875
+              },
+              {
+                "ticker": "WHR",
+                "weight": 0.3,
+                "ret12": 1.20255537963728
+              },
+              {
+                "ticker": "BAC",
+                "weight": 0.4,
+                "ret12": 1.0982554392594337
+              }
+            ],
+            "passing_pool": 416,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.3486620979277808,
+            "drawdown": -0.09140922760376524,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "PHM",
+                "weight": 0.3,
+                "ret12": 1.877971693639875
+              },
+              {
+                "ticker": "WHR",
+                "weight": 0.3,
+                "ret12": 1.20255537963728
+              },
+              {
+                "ticker": "BAC",
+                "weight": 0.4,
+                "ret12": 1.0982554392594337
+              }
+            ],
+            "passing_pool": 434,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.3486620979277808,
+            "drawdown": -0.09140922760376524,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      }
+    },
+    {
+      "year": 2014,
+      "membership_added": [],
+      "membership_removed": [],
+      "holdings_changed": false,
+      "return_delta": 0.0,
+      "before": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "NFLX",
+                "weight": 0.3333,
+                "ret12": 2.976348016430466
+              },
+              {
+                "ticker": "BBY",
+                "weight": 0.3333,
+                "ret12": 2.4420215343985583
+              },
+              {
+                "ticker": "MU",
+                "weight": 0.3334,
+                "ret12": 2.4305993468190152
+              }
+            ],
+            "passing_pool": 423,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.17946535361192595,
+            "drawdown": -0.09645779674175547,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "NFLX",
+                "weight": 0.3333,
+                "ret12": 2.976348016430466
+              },
+              {
+                "ticker": "BBY",
+                "weight": 0.3333,
+                "ret12": 2.4420215343985583
+              },
+              {
+                "ticker": "MU",
+                "weight": 0.3334,
+                "ret12": 2.4305993468190152
+              }
+            ],
+            "passing_pool": 437,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.17946535361192595,
+            "drawdown": -0.09645779674175547,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      },
+      "after": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "NFLX",
+                "weight": 0.3333,
+                "ret12": 2.976348016430466
+              },
+              {
+                "ticker": "BBY",
+                "weight": 0.3333,
+                "ret12": 2.4420215343985583
+              },
+              {
+                "ticker": "MU",
+                "weight": 0.3334,
+                "ret12": 2.4305993468190152
+              }
+            ],
+            "passing_pool": 423,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.17946535361192595,
+            "drawdown": -0.09645779674175547,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "NFLX",
+                "weight": 0.3333,
+                "ret12": 2.976348016430466
+              },
+              {
+                "ticker": "BBY",
+                "weight": 0.3333,
+                "ret12": 2.4420215343985583
+              },
+              {
+                "ticker": "MU",
+                "weight": 0.3334,
+                "ret12": 2.4305993468190152
+              }
+            ],
+            "passing_pool": 437,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.17946535361192595,
+            "drawdown": -0.09645779674175547,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      }
+    },
+    {
+      "year": 2015,
+      "membership_added": [],
+      "membership_removed": [],
+      "holdings_changed": false,
+      "return_delta": 0.0,
+      "before": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "LUV",
+                "weight": 0.3,
+                "ret12": 1.2630600805843724
+              },
+              {
+                "ticker": "EW",
+                "weight": 0.4,
+                "ret12": 0.9370437471116764
+              },
+              {
+                "ticker": "DAL",
+                "weight": 0.3,
+                "ret12": 0.8053376502684646
+              }
+            ],
+            "passing_pool": 433,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.1154824357369082,
+            "drawdown": -0.09877473383555091,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "LUV",
+                "weight": 0.3,
+                "ret12": 1.2630600805843724
+              },
+              {
+                "ticker": "EW",
+                "weight": 0.4,
+                "ret12": 0.9370437471116764
+              },
+              {
+                "ticker": "DAL",
+                "weight": 0.3,
+                "ret12": 0.8053376502684646
+              }
+            ],
+            "passing_pool": 447,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.1154824357369082,
+            "drawdown": -0.09877473383555091,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      },
+      "after": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "LUV",
+                "weight": 0.3,
+                "ret12": 1.2630600805843724
+              },
+              {
+                "ticker": "EW",
+                "weight": 0.4,
+                "ret12": 0.9370437471116764
+              },
+              {
+                "ticker": "DAL",
+                "weight": 0.3,
+                "ret12": 0.8053376502684646
+              }
+            ],
+            "passing_pool": 433,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.1154824357369082,
+            "drawdown": -0.09877473383555091,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "LUV",
+                "weight": 0.3,
+                "ret12": 1.2630600805843724
+              },
+              {
+                "ticker": "EW",
+                "weight": 0.4,
+                "ret12": 0.9370437471116764
+              },
+              {
+                "ticker": "DAL",
+                "weight": 0.3,
+                "ret12": 0.8053376502684646
+              }
+            ],
+            "passing_pool": 447,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.1154824357369082,
+            "drawdown": -0.09877473383555091,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      }
+    },
+    {
+      "year": 2016,
+      "membership_added": [],
+      "membership_removed": [],
+      "holdings_changed": false,
+      "return_delta": 0.0,
+      "before": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "NFLX",
+                "weight": 0.3333,
+                "ret12": 1.3437836426593366
+              },
+              {
+                "ticker": "AMZN",
+                "weight": 0.3333,
+                "ret12": 1.1778313909946103
+              },
+              {
+                "ticker": "NVDA",
+                "weight": 0.3334,
+                "ret12": 0.6711552699756176
+              }
+            ],
+            "passing_pool": 430,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.8206169381746484,
+            "drawdown": -0.14663813361009892,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "NFLX",
+                "weight": 0.3333,
+                "ret12": 1.3437836426593366
+              },
+              {
+                "ticker": "AMZN",
+                "weight": 0.3333,
+                "ret12": 1.1778313909946103
+              },
+              {
+                "ticker": "NVDA",
+                "weight": 0.3334,
+                "ret12": 0.6711552699756176
+              }
+            ],
+            "passing_pool": 443,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.8206169381746484,
+            "drawdown": -0.14663813361009892,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      },
+      "after": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "NFLX",
+                "weight": 0.3333,
+                "ret12": 1.3437836426593366
+              },
+              {
+                "ticker": "AMZN",
+                "weight": 0.3333,
+                "ret12": 1.1778313909946103
+              },
+              {
+                "ticker": "NVDA",
+                "weight": 0.3334,
+                "ret12": 0.6711552699756176
+              }
+            ],
+            "passing_pool": 430,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.8206169381746484,
+            "drawdown": -0.14663813361009892,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "NFLX",
+                "weight": 0.3333,
+                "ret12": 1.3437836426593366
+              },
+              {
+                "ticker": "AMZN",
+                "weight": 0.3333,
+                "ret12": 1.1778313909946103
+              },
+              {
+                "ticker": "NVDA",
+                "weight": 0.3334,
+                "ret12": 0.6711552699756176
+              }
+            ],
+            "passing_pool": 443,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.8206169381746484,
+            "drawdown": -0.14663813361009892,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      }
+    },
+    {
+      "year": 2017,
+      "membership_added": [],
+      "membership_removed": [],
+      "holdings_changed": false,
+      "return_delta": 0.0,
+      "before": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "NVDA",
+                "weight": 0.3333,
+                "ret12": 2.269603259199194
+              },
+              {
+                "ticker": "OKE",
+                "weight": 0.3333,
+                "ret12": 1.4962498029080105
+              },
+              {
+                "ticker": "FCX",
+                "weight": 0.3334,
+                "ret12": 0.9483012591245323
+              }
+            ],
+            "passing_pool": 445,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.41206220857614384,
+            "drawdown": -0.11476748164711004,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "NVDA",
+                "weight": 0.3333,
+                "ret12": 2.269603259199194
+              },
+              {
+                "ticker": "OKE",
+                "weight": 0.3333,
+                "ret12": 1.4962498029080105
+              },
+              {
+                "ticker": "FCX",
+                "weight": 0.3334,
+                "ret12": 0.9483012591245323
+              }
+            ],
+            "passing_pool": 458,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.41206220857614384,
+            "drawdown": -0.11476748164711004,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      },
+      "after": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "NVDA",
+                "weight": 0.3333,
+                "ret12": 2.269603259199194
+              },
+              {
+                "ticker": "OKE",
+                "weight": 0.3333,
+                "ret12": 1.4962498029080105
+              },
+              {
+                "ticker": "FCX",
+                "weight": 0.3334,
+                "ret12": 0.9483012591245323
+              }
+            ],
+            "passing_pool": 445,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.41206220857614384,
+            "drawdown": -0.11476748164711004,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "NVDA",
+                "weight": 0.3333,
+                "ret12": 2.269603259199194
+              },
+              {
+                "ticker": "OKE",
+                "weight": 0.3333,
+                "ret12": 1.4962498029080105
+              },
+              {
+                "ticker": "FCX",
+                "weight": 0.3334,
+                "ret12": 0.9483012591245323
+              }
+            ],
+            "passing_pool": 458,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.41206220857614384,
+            "drawdown": -0.11476748164711004,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      }
+    },
+    {
+      "year": 2018,
+      "membership_added": [],
+      "membership_removed": [],
+      "holdings_changed": false,
+      "return_delta": 0.0,
+      "before": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "NRG",
+                "weight": 0.3333,
+                "ret12": 1.3369422494535956
+              },
+              {
+                "ticker": "VRTX",
+                "weight": 0.3333,
+                "ret12": 1.034206655831345
+              },
+              {
+                "ticker": "WYNN",
+                "weight": 0.3334,
+                "ret12": 0.9809063877773105
+              }
+            ],
+            "passing_pool": 457,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.03324283142631468,
+            "drawdown": -0.11532806992804456,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "NRG",
+                "weight": 0.3333,
+                "ret12": 1.3369422494535956
+              },
+              {
+                "ticker": "VRTX",
+                "weight": 0.3333,
+                "ret12": 1.034206655831345
+              },
+              {
+                "ticker": "WYNN",
+                "weight": 0.3334,
+                "ret12": 0.9809063877773105
+              }
+            ],
+            "passing_pool": 471,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.03324283142631468,
+            "drawdown": -0.11532806992804456,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      },
+      "after": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "NRG",
+                "weight": 0.3333,
+                "ret12": 1.3369422494535956
+              },
+              {
+                "ticker": "VRTX",
+                "weight": 0.3333,
+                "ret12": 1.034206655831345
+              },
+              {
+                "ticker": "WYNN",
+                "weight": 0.3334,
+                "ret12": 0.9809063877773105
+              }
+            ],
+            "passing_pool": 457,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.03324283142631468,
+            "drawdown": -0.11532806992804456,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "NRG",
+                "weight": 0.3333,
+                "ret12": 1.3369422494535956
+              },
+              {
+                "ticker": "VRTX",
+                "weight": 0.3333,
+                "ret12": 1.034206655831345
+              },
+              {
+                "ticker": "WYNN",
+                "weight": 0.3334,
+                "ret12": 0.9809063877773105
+              }
+            ],
+            "passing_pool": 471,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.03324283142631468,
+            "drawdown": -0.11532806992804456,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      }
+    },
+    {
+      "year": 2019,
+      "membership_added": [],
+      "membership_removed": [],
+      "holdings_changed": false,
+      "return_delta": 0.0,
+      "before": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "AMD",
+                "weight": 0.3333,
+                "ret12": 0.795719801943733
+              },
+              {
+                "ticker": "AAP",
+                "weight": 0.3333,
+                "ret12": 0.5821684499583779
+              },
+              {
+                "ticker": "CMG",
+                "weight": 0.3334,
+                "ret12": 0.49392801017784915
+              }
+            ],
+            "passing_pool": 408,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.8139086017720873,
+            "drawdown": -0.035893613294794124,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "AMD",
+                "weight": 0.3333,
+                "ret12": 0.795719801943733
+              },
+              {
+                "ticker": "AAP",
+                "weight": 0.3333,
+                "ret12": 0.5821684499583779
+              },
+              {
+                "ticker": "CMG",
+                "weight": 0.3334,
+                "ret12": 0.49392801017784915
+              }
+            ],
+            "passing_pool": 477,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.8139086017720873,
+            "drawdown": -0.035893613294794124,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      },
+      "after": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "AMD",
+                "weight": 0.3333,
+                "ret12": 0.795719801943733
+              },
+              {
+                "ticker": "AAP",
+                "weight": 0.3333,
+                "ret12": 0.5821684499583779
+              },
+              {
+                "ticker": "CMG",
+                "weight": 0.3334,
+                "ret12": 0.49392801017784915
+              }
+            ],
+            "passing_pool": 408,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.8139086017720873,
+            "drawdown": -0.035893613294794124,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "AMD",
+                "weight": 0.3333,
+                "ret12": 0.795719801943733
+              },
+              {
+                "ticker": "AAP",
+                "weight": 0.3333,
+                "ret12": 0.5821684499583779
+              },
+              {
+                "ticker": "CMG",
+                "weight": 0.3334,
+                "ret12": 0.49392801017784915
+              }
+            ],
+            "passing_pool": 477,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.8139086017720873,
+            "drawdown": -0.035893613294794124,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      }
+    },
+    {
+      "year": 2020,
+      "membership_added": [],
+      "membership_removed": [],
+      "holdings_changed": false,
+      "return_delta": 0.0,
+      "before": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "AMD",
+                "weight": 0.3,
+                "ret12": 1.4842905138021374
+              },
+              {
+                "ticker": "LRCX",
+                "weight": 0.3,
+                "ret12": 1.1933348178363108
+              },
+              {
+                "ticker": "TGT",
+                "weight": 0.4,
+                "ret12": 1.0017273591669653
+              }
+            ],
+            "passing_pool": 428,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.6543638213025473,
+            "drawdown": -0.16306452069459954,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "AMD",
+                "weight": 0.3,
+                "ret12": 1.4842905138021374
+              },
+              {
+                "ticker": "LRCX",
+                "weight": 0.3,
+                "ret12": 1.1933348178363108
+              },
+              {
+                "ticker": "TGT",
+                "weight": 0.4,
+                "ret12": 1.0017273591669653
+              }
+            ],
+            "passing_pool": 474,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.6543638213025473,
+            "drawdown": -0.16306452069459954,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      },
+      "after": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "AMD",
+                "weight": 0.3,
+                "ret12": 1.4842905138021374
+              },
+              {
+                "ticker": "LRCX",
+                "weight": 0.3,
+                "ret12": 1.1933348178363108
+              },
+              {
+                "ticker": "TGT",
+                "weight": 0.4,
+                "ret12": 1.0017273591669653
+              }
+            ],
+            "passing_pool": 428,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.6543638213025473,
+            "drawdown": -0.16306452069459954,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "AMD",
+                "weight": 0.3,
+                "ret12": 1.4842905138021374
+              },
+              {
+                "ticker": "LRCX",
+                "weight": 0.3,
+                "ret12": 1.1933348178363108
+              },
+              {
+                "ticker": "TGT",
+                "weight": 0.4,
+                "ret12": 1.0017273591669653
+              }
+            ],
+            "passing_pool": 474,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.6543638213025473,
+            "drawdown": -0.16306452069459954,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      }
+    },
+    {
+      "year": 2021,
+      "membership_added": [],
+      "membership_removed": [],
+      "holdings_changed": false,
+      "return_delta": 0.0,
+      "before": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "LB",
+                "weight": 0.3333,
+                "ret12": 1.358427982071916
+              },
+              {
+                "ticker": "NVDA",
+                "weight": 0.3333,
+                "ret12": 1.2229568654501661
+              },
+              {
+                "ticker": "PYPL",
+                "weight": 0.3334,
+                "ret12": 1.165110185354962
+              }
+            ],
+            "passing_pool": 455,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.8159677410255091,
+            "drawdown": -0.08734933900306552,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "LB",
+                "weight": 0.3333,
+                "ret12": 1.358427982071916
+              },
+              {
+                "ticker": "NVDA",
+                "weight": 0.3333,
+                "ret12": 1.2229568654501661
+              },
+              {
+                "ticker": "PYPL",
+                "weight": 0.3334,
+                "ret12": 1.165110185354962
+              }
+            ],
+            "passing_pool": 484,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.8159677410255091,
+            "drawdown": -0.08734933900306552,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      },
+      "after": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "LB",
+                "weight": 0.3333,
+                "ret12": 1.358427982071916
+              },
+              {
+                "ticker": "NVDA",
+                "weight": 0.3333,
+                "ret12": 1.2229568654501661
+              },
+              {
+                "ticker": "PYPL",
+                "weight": 0.3334,
+                "ret12": 1.165110185354962
+              }
+            ],
+            "passing_pool": 455,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.8159677410255091,
+            "drawdown": -0.08734933900306552,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "LB",
+                "weight": 0.3333,
+                "ret12": 1.358427982071916
+              },
+              {
+                "ticker": "NVDA",
+                "weight": 0.3333,
+                "ret12": 1.2229568654501661
+              },
+              {
+                "ticker": "PYPL",
+                "weight": 0.3334,
+                "ret12": 1.165110185354962
+              }
+            ],
+            "passing_pool": 484,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.8159677410255091,
+            "drawdown": -0.08734933900306552,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      }
+    },
+    {
+      "year": 2022,
+      "membership_added": [
+        "BBWI"
+      ],
+      "membership_removed": [],
+      "holdings_changed": true,
+      "return_delta": 0.012616355473825225,
+      "before": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "DVN",
+                "weight": 0.3333,
+                "ret12": 1.958916769732809
+              },
+              {
+                "ticker": "FTNT",
+                "weight": 0.3333,
+                "ret12": 1.419713147755186
+              },
+              {
+                "ticker": "F",
+                "weight": 0.3334,
+                "ret12": 1.3748097669475432
+              }
+            ],
+            "passing_pool": 466,
+            "unknown_native_predicate": "all_fail",
+            "return_value": -0.07770110579758194,
+            "drawdown": -0.18396290129030035,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "DVN",
+                "weight": 0.3333,
+                "ret12": 1.958916769732809
+              },
+              {
+                "ticker": "FTNT",
+                "weight": 0.3333,
+                "ret12": 1.419713147755186
+              },
+              {
+                "ticker": "F",
+                "weight": 0.3334,
+                "ret12": 1.3748097669475432
+              }
+            ],
+            "passing_pool": 484,
+            "unknown_native_predicate": "all_pass",
+            "return_value": -0.07770110579758194,
+            "drawdown": -0.18396290129030035,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      },
+      "after": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "DVN",
+                "weight": 0.3333,
+                "ret12": 1.958916769732809
+              },
+              {
+                "ticker": "FTNT",
+                "weight": 0.3333,
+                "ret12": 1.419713147755186
+              },
+              {
+                "ticker": "BBWI",
+                "weight": 0.3334,
+                "ret12": 1.3881764890763368
+              }
+            ],
+            "passing_pool": 467,
+            "unknown_native_predicate": "all_fail",
+            "return_value": -0.06508475032375671,
+            "drawdown": -0.21286671460678153,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "DVN",
+                "weight": 0.3333,
+                "ret12": 1.958916769732809
+              },
+              {
+                "ticker": "FTNT",
+                "weight": 0.3333,
+                "ret12": 1.419713147755186
+              },
+              {
+                "ticker": "BBWI",
+                "weight": 0.3334,
+                "ret12": 1.3881764890763368
+              }
+            ],
+            "passing_pool": 485,
+            "unknown_native_predicate": "all_pass",
+            "return_value": -0.06508475032375671,
+            "drawdown": -0.21286671460678153,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      }
+    },
+    {
+      "year": 2023,
+      "membership_added": [
+        "BALL",
+        "ELV",
+        "META"
+      ],
+      "membership_removed": [],
+      "holdings_changed": false,
+      "return_delta": 0.0,
+      "before": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "OXY",
+                "weight": 0.3,
+                "ret12": 1.1909839779690268
+              },
+              {
+                "ticker": "HES",
+                "weight": 0.3,
+                "ret12": 0.9407143685295525
+              },
+              {
+                "ticker": "CAH",
+                "weight": 0.4,
+                "ret12": 0.5408152803110009
+              }
+            ],
+            "passing_pool": 427,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.1331041200234342,
+            "drawdown": -0.06845835620689644,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "OXY",
+                "weight": 0.3,
+                "ret12": 1.1909839779690268
+              },
+              {
+                "ticker": "HES",
+                "weight": 0.3,
+                "ret12": 0.9407143685295525
+              },
+              {
+                "ticker": "CAH",
+                "weight": 0.4,
+                "ret12": 0.5408152803110009
+              }
+            ],
+            "passing_pool": 480,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.1331041200234342,
+            "drawdown": -0.06845835620689644,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      },
+      "after": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "OXY",
+                "weight": 0.3,
+                "ret12": 1.1909839779690268
+              },
+              {
+                "ticker": "HES",
+                "weight": 0.3,
+                "ret12": 0.9407143685295525
+              },
+              {
+                "ticker": "CAH",
+                "weight": 0.4,
+                "ret12": 0.5408152803110009
+              }
+            ],
+            "passing_pool": 430,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.1331041200234342,
+            "drawdown": -0.06845835620689644,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "OXY",
+                "weight": 0.3,
+                "ret12": 1.1909839779690268
+              },
+              {
+                "ticker": "HES",
+                "weight": 0.3,
+                "ret12": 0.9407143685295525
+              },
+              {
+                "ticker": "CAH",
+                "weight": 0.4,
+                "ret12": 0.5408152803110009
+              }
+            ],
+            "passing_pool": 483,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.1331041200234342,
+            "drawdown": -0.06845835620689644,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      }
+    },
+    {
+      "year": 2024,
+      "membership_added": [
+        "COR",
+        "RVTY"
+      ],
+      "membership_removed": [],
+      "holdings_changed": false,
+      "return_delta": 0.0,
+      "before": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "NVDA",
+                "weight": 0.3333,
+                "ret12": 2.390172061149652
+              },
+              {
+                "ticker": "META",
+                "weight": 0.3333,
+                "ret12": 1.9413328557641707
+              },
+              {
+                "ticker": "RCL",
+                "weight": 0.3334,
+                "ret12": 1.6196641317461493
+              }
+            ],
+            "passing_pool": 209,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 1.0542444734784642,
+            "drawdown": -0.05425505862156599,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "NVDA",
+                "weight": 0.3333,
+                "ret12": 2.390172061149652
+              },
+              {
+                "ticker": "META",
+                "weight": 0.3333,
+                "ret12": 1.9413328557641707
+              },
+              {
+                "ticker": "RCL",
+                "weight": 0.3334,
+                "ret12": 1.6196641317461493
+              }
+            ],
+            "passing_pool": 483,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 1.0542444734784642,
+            "drawdown": -0.05425505862156599,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      },
+      "after": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "NVDA",
+                "weight": 0.3333,
+                "ret12": 2.390172061149652
+              },
+              {
+                "ticker": "META",
+                "weight": 0.3333,
+                "ret12": 1.9413328557641707
+              },
+              {
+                "ticker": "RCL",
+                "weight": 0.3334,
+                "ret12": 1.6196641317461493
+              }
+            ],
+            "passing_pool": 209,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 1.0542444734784642,
+            "drawdown": -0.05425505862156599,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "NVDA",
+                "weight": 0.3333,
+                "ret12": 2.390172061149652
+              },
+              {
+                "ticker": "META",
+                "weight": 0.3333,
+                "ret12": 1.9413328557641707
+              },
+              {
+                "ticker": "RCL",
+                "weight": 0.3334,
+                "ret12": 1.6196641317461493
+              }
+            ],
+            "passing_pool": 485,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 1.0542444734784642,
+            "drawdown": -0.05425505862156599,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      }
+    },
+    {
+      "year": 2025,
+      "membership_added": [],
+      "membership_removed": [],
+      "holdings_changed": false,
+      "return_delta": 0.0,
+      "before": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "NVDA",
+                "weight": 0.4,
+                "ret12": 1.7124926908417453
+              },
+              {
+                "ticker": "UAL",
+                "weight": 0.3,
+                "ret12": 1.3533689390250294
+              },
+              {
+                "ticker": "AXON",
+                "weight": 0.3,
+                "ret12": 1.3006233817844555
+              }
+            ],
+            "passing_pool": 210,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.1878239403632933,
+            "drawdown": -0.20927578056234875,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "NVDA",
+                "weight": 0.4,
+                "ret12": 1.7124926908417453
+              },
+              {
+                "ticker": "UAL",
+                "weight": 0.3,
+                "ret12": 1.3533689390250294
+              },
+              {
+                "ticker": "AXON",
+                "weight": 0.3,
+                "ret12": 1.3006233817844555
+              }
+            ],
+            "passing_pool": 483,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.1878239403632933,
+            "drawdown": -0.20927578056234875,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      },
+      "after": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "NVDA",
+                "weight": 0.4,
+                "ret12": 1.7124926908417453
+              },
+              {
+                "ticker": "UAL",
+                "weight": 0.3,
+                "ret12": 1.3533689390250294
+              },
+              {
+                "ticker": "AXON",
+                "weight": 0.3,
+                "ret12": 1.3006233817844555
+              }
+            ],
+            "passing_pool": 210,
+            "unknown_native_predicate": "all_fail",
+            "return_value": 0.1878239403632933,
+            "drawdown": -0.20927578056234875,
+            "return_status": "complete"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "NVDA",
+                "weight": 0.4,
+                "ret12": 1.7124926908417453
+              },
+              {
+                "ticker": "UAL",
+                "weight": 0.3,
+                "ret12": 1.3533689390250294
+              },
+              {
+                "ticker": "AXON",
+                "weight": 0.3,
+                "ret12": 1.3006233817844555
+              }
+            ],
+            "passing_pool": 483,
+            "unknown_native_predicate": "all_pass",
+            "return_value": 0.1878239403632933,
+            "drawdown": -0.20927578056234875,
+            "return_status": "complete"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      }
+    },
+    {
+      "year": 2026,
+      "membership_added": [],
+      "membership_removed": [],
+      "holdings_changed": false,
+      "return_delta": null,
+      "before": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "WDC",
+                "weight": 0.3,
+                "ret12": 3.2267010212216665
+              },
+              {
+                "ticker": "MU",
+                "weight": 0.3,
+                "ret12": 2.402392474708632
+              },
+              {
+                "ticker": "NEM",
+                "weight": 0.4,
+                "ret12": 1.7281806922137415
+              }
+            ],
+            "passing_pool": 199,
+            "unknown_native_predicate": "all_fail"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "WDC",
+                "weight": 0.3,
+                "ret12": 3.2267010212216665
+              },
+              {
+                "ticker": "MU",
+                "weight": 0.3,
+                "ret12": 2.402392474708632
+              },
+              {
+                "ticker": "NEM",
+                "weight": 0.4,
+                "ret12": 1.7281806922137415
+              }
+            ],
+            "passing_pool": 483,
+            "unknown_native_predicate": "all_pass"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      },
+      "after": {
+        "bounds": [
+          {
+            "holdings": [
+              {
+                "ticker": "WDC",
+                "weight": 0.3,
+                "ret12": 3.2267010212216665
+              },
+              {
+                "ticker": "MU",
+                "weight": 0.3,
+                "ret12": 2.402392474708632
+              },
+              {
+                "ticker": "NEM",
+                "weight": 0.4,
+                "ret12": 1.7281806922137415
+              }
+            ],
+            "passing_pool": 199,
+            "unknown_native_predicate": "all_fail"
+          },
+          {
+            "holdings": [
+              {
+                "ticker": "WDC",
+                "weight": 0.3,
+                "ret12": 3.2267010212216665
+              },
+              {
+                "ticker": "MU",
+                "weight": 0.3,
+                "ret12": 2.402392474708632
+              },
+              {
+                "ticker": "NEM",
+                "weight": 0.4,
+                "ret12": 1.7281806922137415
+              }
+            ],
+            "passing_pool": 483,
+            "unknown_native_predicate": "all_pass"
+          }
+        ],
+        "holdings_invariant_to_unknown_floor": true
+      }
+    }
+  ]
+}

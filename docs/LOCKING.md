@@ -2,6 +2,8 @@
 
 > 目标：**历史层异步补齐后逐段锁定，永不重抓**；**当年持仓层尽量快**，准且新。
 
+> 2026-11-02 实库核验：050 之后 `locked_symbols` 是有效 `data_lock(scope='symbol_month')` 的兼容视图，实际选源触发器绑定 `guard_frozen_pick`。最新 098 保留有效锁原有的全部更新/删除保护，并补上 `series_pick.frozen` 的口径、代码名、删除及解除冻结保护；不能只修改 020 的未绑定函数来宣称已部署。`research/verify_selection_guards.py` 已完成 9 项真实回滚探针，未保留测试锁或修改，回执为 `output/selection_guard_verification.json`。下文旧表和旧门槛说明属于历史设计，不代替当前发布验收。
+
 ## 一、两层架构
 
 | 层 | 范围 | 更新方式 | 存储 | 锁定 |

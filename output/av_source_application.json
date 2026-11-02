@@ -1,0 +1,46 @@
+{
+  "applied_at": "2026-11-02T04:04:36.483089+00:00",
+  "before": [
+    [
+      "ALXN",
+      "sina_repaired",
+      "price_only",
+      false
+    ],
+    [
+      "HES",
+      "sina_repaired",
+      "price_only",
+      false
+    ],
+    [
+      "XLNX",
+      "sina_repaired",
+      "price_only",
+      false
+    ]
+  ],
+  "after": [
+    [
+      "ALXN",
+      "alphavantage",
+      "total_return"
+    ],
+    [
+      "HES",
+      "alphavantage",
+      "total_return"
+    ],
+    [
+      "XLNX",
+      "alphavantage",
+      "total_return"
+    ]
+  ],
+  "selected_rows_symbols": [
+    143649,
+    837
+  ],
+  "published_baseline_and_locks_changed": false,
+  "impact_report": "output/av_source_impact.json"
+}

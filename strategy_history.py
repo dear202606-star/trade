@@ -24,6 +24,8 @@ import sys
 import pandas as pd
 
 import datafeed
+import holding_paths
+from holding_consideration import POLICY
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 CACHE = os.path.join(BASE, "data", "sina2")
@@ -83,6 +85,7 @@ def picks_from_frozen(y, tickers, sector):
     picks = []
     for t in tickers:
         bars = load_bars(t)
+        bars=holding_paths.momentum_bars(t,bars,f'{y-2}-12',rank_ym)
         r = None
         if bars and rank_ym in bars:
             rr, ok = ret_12m(bars, rank_ym)
@@ -121,18 +124,20 @@ def assign_weights(picks):
     return picks
 
 
-def pick_for_year(y, members, sector):
+def pick_for_year(y, members, sector, price_lookup=None):
+    import nominal_prices
     cand = []
     rank_ym = f"{y-1}-12"
     for t in members:
         bars = load_bars(t)
         if not bars or rank_ym not in bars:
             continue
-        price = bars[rank_ym][1]
-        if price < MIN_PRICE:
-            continue
+        bars=holding_paths.momentum_bars(t,bars,f'{y-2}-12',rank_ym)
         r, ok = ret_12m(bars, rank_ym)
         if not ok:
+            continue
+        price = (price_lookup or nominal_prices.price)(t, rank_ym)
+        if price < MIN_PRICE:
             continue
         cand.append((t, r, price))
     cand.sort(key=lambda x: -x[1])
@@ -155,39 +160,17 @@ def pick_for_year(y, members, sector):
 def year_perf(y, picks):
     """组合在 Y 年的收益与年内最大回撤（月末）"""
     seq = [f"{y}-{m:02d}" for m in range(1, 13)]
-    prev_ym = f"{y-1}-12"
-    curves, ok = [], True
+    paths={}
+    if not picks:return None,None,None,None
     for p in picks:
-        bars = load_bars(p["ticker"])
-        if not bars or prev_ym not in bars:
-            ok = False
-            break
-        p["_bars"] = bars
-
-    if not ok:
-        return None, None, None, None
+        try:paths[p['ticker']]=holding_paths.values(p['ticker'],y,load_bars)
+        except RuntimeError:return None,None,None,None
 
     vals = []
-    for m in seq:
+    for index,m in enumerate(seq):
         v = 0.0
         for p in picks:
-            bars = p["_bars"]
-            if m not in bars:
-                # 用上一个有效月
-                cand_m = [k for k in sorted(bars) if k <= m]
-                if not cand_m:
-                    v = None
-                    break
-                px = bars[cand_m[-1]][0]
-            else:
-                px = bars[m][0]
-            base = bars[prev_ym][0]
-            if not base or base <= 0:
-                v = None
-                break
-            v += p["weight"] * (px / base)
-        if v is None:
-            return None, None, None, None
+            v += p["weight"] * paths[p['ticker']][index]
         vals.append(v)
 
     ret = vals[-1] - 1
@@ -199,16 +182,13 @@ def year_perf(y, picks):
     # 月度收益序列（曲线与分年共用同一份计算）
     months, prev_v = [], 1.0
     for i, v in enumerate(vals):
-        months.append({"ym": seq[i], "p": round(v / prev_v - 1, 6)})
+        if prev_v==0 and v!=0:return None,None,None,None
+        months.append({"ym": seq[i], "p": round(v / prev_v - 1, 6) if prev_v else 0.0})
         prev_v = v
 
     # 每只股票在 Y 年的收益
     for p in picks:
-        bars = p.pop("_bars", None)
-        if bars and prev_ym in bars and f"{y}-12" in bars:
-            p["ret_year"] = round(bars[f"{y}-12"][0] / bars[prev_ym][0] - 1, 4)
-        else:
-            p["ret_year"] = None
+        p['ret_year']=round(paths[p['ticker']][-1]-1,4)
     return round(ret, 4), round(mdd, 4), True, months
 
 
@@ -237,7 +217,13 @@ def locked_ok():
         if not (os.path.exists(sh_p) and os.path.exists(cv_p)):
             return False, "缺少已锁定的历史文件"
         sh = json.load(open(sh_p, encoding="utf-8"))
+        if sh.get('price_screen_basis') != 'as_traded':
+            return False, '历史产物仍为旧筛选口径，不能直接作为名义股价结果发布'
+        if sh.get('holding_event_policy')!=POLICY or sh.get('momentum_event_policy')!=POLICY or sh.get('holding_event_input_sha')!=holding_paths.input_sha():
+            return False,'企业行动口径或证据版本尚未核验'
         cv = json.load(open(cv_p, encoding="utf-8"))
+        if cv.get('holding_event_policy')!=POLICY or cv.get('momentum_event_policy')!=POLICY or cv.get('holding_event_input_sha')!=holding_paths.input_sha():
+            return False,'曲线企业行动口径或证据版本尚未核验'
         ys = sh.get("years") or []
         if len(ys) < 8:
             return False, "历史年份不足"
@@ -325,11 +311,13 @@ def main():
     # 已冻结的年份直接沿用，不再重算；确需重算时加 --refresh。
     frozen, frozen_years = {}, {}
     fps = os.path.join(BASE, "output", "backtest_picks.json")
-    refresh = "--refresh" in sys.argv
+    refresh = refresh or "--refresh" in sys.argv
     if os.path.exists(fps) and not refresh:
         try:
             fd = json.load(open(fps, encoding="utf-8"))
-            frozen = {int(k): v for k, v in (fd.get("years") or {}).items()}
+            frozen = ({int(k): v for k, v in (fd.get("years") or {}).items()}
+                      if fd.get('price_screen_basis') == 'as_traded' and
+                         fd.get('holding_event_policy') == POLICY and fd.get('momentum_event_policy') == POLICY else {})
             frozen_years = fd.get("generated_years") or {}
             print(f"      选股已冻结（{len(frozen)} 年，{fd.get('generated','')}）", flush=True)
         except Exception:
@@ -426,17 +414,14 @@ def main():
 
     if not healthy:
         print(f"WARN: 本次数据不完整（{len(MONTHS)} 个月，{n_nan} 个年份缺失），"
-              f"沿用上次完整结果", file=sys.stderr)
-        for src, dst in ((SNAP_SH, OUT), (SNAP_CV, CURVE)):
-            if os.path.exists(src):
-                os.makedirs(os.path.dirname(dst), exist_ok=True)
-                shutil.copy2(src, dst)
-                print(f"      已沿用 {os.path.basename(src)}")
-        if os.path.exists(OUT):
-            return 0
-        print("没有可沿用的历史结果，按本次输出", file=sys.stderr)
+              f"保留旧产物，本次验收失败", file=sys.stderr)
+        return 1
 
     out = {"years": years, "stocks": stocks, "summary": summary,
+           "price_screen_basis": "as_traded",
+           "holding_event_policy": POLICY,
+           "momentum_event_policy": POLICY,
+           "holding_event_input_sha": holding_paths.input_sha(),
            "generated": (pd.Timestamp.utcnow() + pd.Timedelta(hours=8)).strftime("%Y-%m-%d")}
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
@@ -482,6 +467,10 @@ def main():
                            "dd": round(ydd, 4)})
         with open(CURVE, "w", encoding="utf-8") as f:
             json.dump({"points": pts, "stats": cstats, "years": cyears,
+                       "price_screen_basis": "as_traded",
+                       "holding_event_policy": POLICY,
+                       "momentum_event_policy": POLICY,
+                       "holding_event_input_sha": holding_paths.input_sha(),
                        "updated": (pd.Timestamp.utcnow() + pd.Timedelta(hours=8)).strftime("%Y-%m-%d")},
                       f, ensure_ascii=False, separators=(",", ":"))
         for _src, _dst in ((OUT, SNAP_SH), (CURVE, SNAP_CV)):
@@ -495,6 +484,9 @@ def main():
     # 写入选股快照（回测的唯一事实来源，供全周期曲线复用）
     if not frozen:
         snap = {"generated": (pd.Timestamp.utcnow() + pd.Timedelta(hours=8)).strftime("%Y-%m-%d"),
+                "price_screen_basis": "as_traded",
+                "holding_event_policy": POLICY,
+                "momentum_event_policy": POLICY,
                 "note": "冻结的逐年持仓，回测与曲线均以此为准；重算用 --refresh",
                 "years": {str(r["year"]): [p["ticker"] for p in r["holdings"]] for r in years}}
         with open(fps, "w", encoding="utf-8") as f:

@@ -1,0 +1,18 @@
+{
+  "source": "https://www.kaggle.com/datasets/benjaminpo/sp500-spx-components-stock-price/versions/1421",
+  "catalog_last_updated": "2026-07-15",
+  "probed_file": "data/1d/NVDA.csv",
+  "actual_last_quote": "2022-02-15",
+  "fields": [
+    "Date",
+    "Adj Close",
+    "Close",
+    "High",
+    "Low",
+    "Open",
+    "Volume"
+  ],
+  "nominal_unit_events_available": false,
+  "csv_normalized_text_sha256": "04055a2752708e55aaed2b5f7ceca59fa67f5c3db998e5298c2b3a67e9fd2d44",
+  "decision": "Not a current native-price bulk source; catalog update date is not quote freshness; no database writes"
+}

@@ -1,0 +1,12 @@
+{
+  "scope": "Same common equity after a documented name/ticker change; no merger-exchange aliases",
+  "aliases": [
+    {"old": "ANTM", "current": "ELV", "effective_date": "2022-06-28", "evidence": "https://www.sec.gov/Archives/edgar/data/1156039/000115603922000081/elv-20220630.htm"},
+    {"old": "ABC", "current": "COR", "effective_date": "2023-08-30", "evidence": "https://www.sec.gov/Archives/edgar/data/1140859/000110465923096698/tm2324358d1_8k.htm"},
+    {"old": "PKI", "current": "RVTY", "effective_date": "2023-05-16", "evidence": "https://www.sec.gov/Archives/edgar/data/31791/000003179123000011/pki-20230702.htm"},
+    {"old": "BLL", "current": "BALL", "effective_date": "2022-05-10", "evidence": "https://www.ball.com/newswire/article/124123/ball-board-declares-quarterly-dividend-stock-ticker-symbol-changing-to-ball"},
+    {"old": "LB", "current": "BBWI", "effective_date": "2021-08-03", "evidence": "https://www.sec.gov/Archives/edgar/data/701985/000114036121026658/nt10026698x7_8k.htm", "note": "Continuing parent common stock; distributed VSCO shares require the separate actual-consideration event path."},
+    {"old": "FB", "current": "META", "effective_date": "2022-06-09", "evidence": "https://www.sec.gov/Archives/edgar/data/1326801/000132680122000070/fb-20220531.htm"},
+    {"old": "MMC", "current": "MRSH", "effective_date": "2026-01-14", "evidence": "https://www.marsh.com/en/corp/about/news/marsh-mclennan-to-change-nyse-symbol-to-mrsh.html"}
+  ]
+}

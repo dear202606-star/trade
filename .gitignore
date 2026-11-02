@@ -107,4 +107,23 @@ output/_chrome_copy/
 output/_chrome_profile/
 # 娲剧敓缂撳瓨锛堜笉鍙叆搴擄細mtime 浼氳 checkout 鍒锋柊锛屽鑷?CI 姘镐箙鍛戒腑鏃х紦瀛橈級
 output/_prices_cache.json
+output/_quarantine_review_prices.json
+output/_nominal_daily/
+output/_wiki_prices.zip
+output/_wiki_prices.part
+output/wiki_monthly_archive.json
+output/nominal_price_review.json
+output/wiki_nominal_review.json
+output/_yfinance_actions2022.zip
+output/_yfinance_actions2022.part
+output/yfinance_actions2022_review.json
+output/_av_monthly_native/
+output/_yfinance_actions2023.zip
+output/_yfinance_actions2023.part
+output/yfinance_actions2023_review.json
+output/_tech_actions2026/
+output/_holding_evidence/
+output/_eastmoney_probe/
+output/_liquidity_probe/
+output/_liquidity_windows/
 output/_chrome_copy2/

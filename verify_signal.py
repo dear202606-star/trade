@@ -11,6 +11,8 @@ import sys
 import pandas as pd
 
 import datafeed
+import nominal_prices
+import holding_paths
 
 BASE_YEAR = 2026          # 当期持仓所属年度
 RANK_AT = "2025-12"       # 排名所用月份
@@ -40,7 +42,8 @@ def main():
         b = datafeed.load_bars(t)
         if not b or RANK_AT not in b or PREV not in b:
             continue
-        adj_now, raw_now = b[RANK_AT][0], b[RANK_AT][1]
+        b=holding_paths.momentum_bars(t,b,PREV,RANK_AT)
+        adj_now, raw_now = b[RANK_AT][0], nominal_prices.price(t, RANK_AT)
         adj_prev = b[PREV][0]
         if not adj_prev or adj_prev <= 0 or not raw_now or raw_now < MIN_PRICE:
             continue
@@ -53,7 +56,7 @@ def main():
                      "price": raw_now})
 
     q = pd.DataFrame(rows).sort_values("ret12", ascending=False).reset_index(drop=True)
-    print("通过筛选（价格≥$5、日均成交额≥$2000万）：%d 只" % len(q))
+    print("通过价格与收益筛选（成交额门槛未在此复算）：%d 只" % len(q))
 
     # 前 3 名 + 行业上限（同行业最多 2 只）
     picks, cnt = [], {}

@@ -74,6 +74,7 @@ AV = ("https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY_ADJUSTED"
 EOD = ("https://eodhd.com/api/eod/%s.US?api_token=%s&fmt=json&period=m&order=a")
 HF = ("https://huggingface.co/datasets/AYUSHKHAIRE/all-stock-market-data-daily-updates"
       "/resolve/main/%s/%s.csv")
+AV_DAILY_LIMIT = 25
 
 
 def load_priority_from_db():
@@ -109,11 +110,19 @@ def keys():
             if "=" in line:
                 a, b = line.split("=", 1)
                 k[a.strip()] = b.strip()
+    for name, env_name in (("alphavantage_key", "ALPHAVANTAGE_API_KEY"),
+                           ("eodhd_token", "EODHD_API_TOKEN"),
+                           ("kaggle_token", "KAGGLE_API_TOKEN")):
+        value = os.environ.get(env_name, "").strip()
+        if value:
+            k[name] = value
     return k
 
 
 def db():
-    pw = io.open(os.path.join(BASE, "output", "_supabase_dbpass.txt"), encoding="utf-8").read().strip()
+    pw = os.environ.get("SUPABASE_DB_PASSWORD", "").strip()
+    if not pw:
+        pw = io.open(os.path.join(BASE, "output", "_supabase_dbpass.txt"), encoding="utf-8").read().strip()
     return psycopg2.connect(host=HOST, port=5432 if False else 6543,
                             user="postgres." + REF, password=pw,
                             dbname="postgres", connect_timeout=20, sslmode="require")
@@ -250,7 +259,7 @@ def sina_local(sym):
 
 def relay(sym, k, av_left):
     """按优先级逐源取数，返回该标的的候选行 [(sym,month,adj,raw,source,quality,basis)]"""
-    rows, used_av = [], False
+    rows, av_reserved = [], False
     got = {}
     for src, fn in (("alphavantage", lambda: fetch_av(sym, k.get("alphavantage_key", ""))),
                     ("yahoo_relay", lambda: fetch_yahoo_relay(sym)),
@@ -261,13 +270,15 @@ def relay(sym, k, av_left):
             continue
         if src == "alphavantage" and not k.get("alphavantage_key"):
             continue
+        if src == "alphavantage":
+            if not reserve_av_call(sym):
+                continue
+            av_reserved = True
         try:
             data = fn()
         except Exception as e:
             print("    ! %s/%s 失败 %s" % (sym, src, str(e)[:50]))
             data = {}
-        if src == "alphavantage" and data:
-            used_av = True
         for m, (adj, raw) in (data or {}).items():
             if m in got or not adj:
                 continue
@@ -279,35 +290,47 @@ def relay(sym, k, av_left):
         _ok, _why, _ = ingest_validate.check_payload(sym, _bars, _basis)
         if not _ok:
             print("    ✗ %s 采集校验未过：%s" % (sym, _why), flush=True)
-            return [], False, 0
+            return [], av_reserved, 0
     for m, (adj, raw, src) in got.items():
         rows.append((sym, m, adj, raw, src, "ok", SOURCES[src]["basis"]))
-    return rows, used_av, len(got)
+    return rows, av_reserved, len(got)
 
 
-def av_used_today():
-    """今天已经用掉多少次 AV 调用（从 sys_event 的采集记录反推）"""
+def av_used_last_24h():
+    """过去 24 小时已预约多少次 AV 调用；查询失败返回 None，调用方必须停用 AV。"""
     try:
-        import psycopg2
-        pw = os.environ.get("SUPABASE_DB_PASSWORD", "")
-        if not pw:
-            _p = os.path.join(BASE, "output", "_supabase_dbpass.txt")
-            if os.path.exists(_p):
-                pw = io.open(_p, encoding="utf-8").read().strip()
-        if not pw:
-            return 0
-        c = psycopg2.connect(host=HOST, port=6543, user="postgres." + REF, password=pw,
-                             dbname="postgres", connect_timeout=15, sslmode="require")
-        with c.cursor() as cur:
-            cur.execute("""select coalesce(sum((metrics->>'ok')::int),0)
+        with db() as c, c.cursor() as cur:
+            cur.execute("""select coalesce(sum((metrics->>'requested')::int),0)
                              from sys_event
-                            where kind='fetch' and source like 'alphavantage%'
-                              and created_at::date = (now() at time zone 'utc')::date""")
-            n = cur.fetchone()[0] or 0
-        c.close()
-        return int(n)
-    except Exception:
-        return 0
+                            where kind='fetch' and source='alphavantage_quota'
+                              and created_at >= now() - interval '24 hours'""")
+            return int(cur.fetchone()[0] or 0)
+    except Exception as e:
+        print("读取 AV 当日额度失败：%s" % str(e)[:80])
+        return None
+
+
+def reserve_av_call(sym):
+    """发出请求前原子预约额度；失败时不调用上游，预约不回收以避免崩溃后超额。"""
+    try:
+        with db() as c, c.cursor() as cur:
+            cur.execute("select pg_advisory_xact_lock(hashtext('leaderquant_alphavantage_daily_quota')::bigint)")
+            cur.execute("""select coalesce(sum((metrics->>'requested')::int),0)
+                             from sys_event
+                            where kind='fetch' and source='alphavantage_quota'
+                              and created_at >= now() - interval '24 hours'""")
+            used = int(cur.fetchone()[0] or 0)
+            if used >= AV_DAILY_LIMIT:
+                return False
+            cur.execute("""insert into sys_event(kind, source, subject, status, detail, metrics,
+                                                   started_at, finished_at)
+                           values ('fetch', 'alphavantage_quota', 'api_request', 'reserved', %s,
+                                   jsonb_build_object('requested', 1, 'ok', 0, 'failed', 0), now(), now())""",
+                        (sym,))
+        return True
+    except Exception as e:
+        print("AV 额度预约失败，跳过 %s：%s" % (sym, str(e)[:70]))
+        return False
 
 
 def main():
@@ -351,11 +374,14 @@ def main():
     print("待处理 %d 只（完全缺失 %d / 12 月不足 %d）" % (len(targets), len(missing), len(thin)))
 
     _t0 = time.time()
-    # 跨运行累计：今天已用掉的要从额度里扣掉，避免一天跑多次把额度重复算
-    _used = av_used_today() if not a.no_av else 0
-    av_left = 0 if a.no_av else max(0, a.av_quota - _used)
-    if _used:
-        print("今天已用 AV %d 次，本次剩余额度 %d" % (_used, av_left))
+    # 跨运行累计：按滚动 24 小时计数，不依赖供应商的日界线时区
+    _used = av_used_last_24h() if not a.no_av else 0
+    _run_quota = max(0, min(a.av_quota, AV_DAILY_LIMIT))
+    av_left = 0 if a.no_av or _used is None else max(0, _run_quota - _used)
+    if _used is None and not a.no_av:
+        print("无法确认当日 AV 额度，按 fail-closed 停用 AV")
+    elif _used:
+        print("过去 24 小时已预约 AV %d 次，本次剩余额度 %d" % (_used, av_left))
     done, stats = 0, {}
     all_rows = []
     for t in targets:
@@ -365,7 +391,7 @@ def main():
         all_rows += rows
         for r in rows:
             stats[r[4]] = stats.get(r[4], 0) + 1
-        print("  %-6s %s → %d 个月" % (t, "AV" if used else "接力", n), flush=True)
+        print("  %-6s %s → %d 个月" % (t, "AV调用已预约" if used else "接力", n), flush=True)
         done += 1
         time.sleep(0.8)
 

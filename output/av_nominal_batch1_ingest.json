@@ -1,0 +1,92 @@
+{
+  "write": true,
+  "requested_limit": 18,
+  "results": [
+    {
+      "symbol": "WDC",
+      "status": "stored",
+      "prepared_native_observations": 323,
+      "stored_native_observations": 323,
+      "staged_tr": 0,
+      "payload_sha256": "a93be42166035c36e383422ac71c7cd3f40bf938418da391740a0418015b2131",
+      "median_log_deviation": 9.879039236317668e-07,
+      "p90_log_deviation": 0.00010105748957436516
+    },
+    {
+      "symbol": "MU",
+      "status": "stored",
+      "prepared_native_observations": 323,
+      "stored_native_observations": 323,
+      "staged_tr": 0,
+      "payload_sha256": "0727d93c0c222de2e8d91ec171ef330716717b7d235b5437f110af79071f7cf2",
+      "median_log_deviation": 1.0808166478529033e-06,
+      "p90_log_deviation": 8.26042615080592e-05
+    },
+    {
+      "symbol": "RCL",
+      "status": "stored",
+      "prepared_native_observations": 323,
+      "stored_native_observations": 323,
+      "staged_tr": 0,
+      "payload_sha256": "0468ba7e58095e7c8b115a38569b25851ddd1932a1702480e6f157a9a4b59c6a",
+      "median_log_deviation": 5.592991862752712e-07,
+      "p90_log_deviation": 6.283283772319963e-05
+    },
+    {
+      "symbol": "META",
+      "status": "stored",
+      "prepared_native_observations": 173,
+      "stored_native_observations": 173,
+      "staged_tr": 0,
+      "payload_sha256": "4f8e5e2f1ab60f2d45251ddfd909a7d20ed89993b07cbed461a9de2bbca9cb1c",
+      "median_log_deviation": 2.4298060268207427e-07,
+      "p90_log_deviation": 3.8532683946881284e-05
+    },
+    {
+      "symbol": "HES",
+      "status": "stored",
+      "prepared_native_observations": 307,
+      "stored_native_observations": 307,
+      "staged_tr": 307,
+      "payload_sha256": "bb1ca9ba770a25a3199adbb67a67f7fdc623de39a129702956cbb7022cd283e5",
+      "median_log_deviation": 9.766154851966716e-07,
+      "p90_log_deviation": 0.004284534923901446
+    },
+    {
+      "symbol": "OXY",
+      "status": "stored",
+      "prepared_native_observations": 323,
+      "stored_native_observations": 323,
+      "staged_tr": 0,
+      "payload_sha256": "d7a9258833cb0fb33642ecb2631d954ddcbd55f041f9499cb36453e586b3326e",
+      "median_log_deviation": 1.074522905081465e-06,
+      "p90_log_deviation": 0.00013677229141421346
+    },
+    {
+      "symbol": "LB",
+      "status": "stored",
+      "prepared_native_observations": 28,
+      "stored_native_observations": 28,
+      "staged_tr": 0,
+      "payload_sha256": "52a0a3e0dc05aa8881c8c4ac7da368826fdd2f9b54a5981481eb5687db8fcfb2",
+      "median_log_deviation": 6.537871147784594e-07,
+      "p90_log_deviation": 0.0016248027715697888
+    },
+    {
+      "symbol": "NEM",
+      "status": "stored",
+      "prepared_native_observations": 323,
+      "stored_native_observations": 323,
+      "staged_tr": 0,
+      "payload_sha256": "895e4ee387b40971040b2991df86f1a0c957676bfc95baa2e8f1d9640240fc1e",
+      "median_log_deviation": 1.6604700610983369e-06,
+      "p90_log_deviation": 8.966368834427555e-05
+    },
+    {
+      "symbol": "HOOD",
+      "status": "network_failure",
+      "type": "ReadTimeout"
+    }
+  ],
+  "remaining_daily_calls": 9
+}

@@ -265,13 +265,13 @@ def main():
     except Exception as e:
         print("WARN 健康状态生成失败：%s" % e)
 
-        with open(os.path.join(DATA, "history.json"), "w", encoding="utf-8") as f:
-            json.dump([with_validity(r) for r in hist], f, ensure_ascii=False)
+    with open(os.path.join(DATA, "history.json"), "w", encoding="utf-8") as f:
+        json.dump([with_validity(r) for r in hist], f, ensure_ascii=False)
 
     # 净值为 equity.py 直接写入 docs/data/，这里无需复制
     # 数据质量明细（output/data_quality.json）仅供内部核查，不再发布到站点
 
-        dashboard.build(hist, os.path.join(DOCS, "signals.html"))
+    dashboard.build(hist, os.path.join(DOCS, "signals.html"))
     inject_nav(os.path.join(DOCS, "signals.html"), "signals.html")
 
     for fn in ("策略模型研究与行动步骤.pdf", "策略模型研究与行动步骤.xlsx"):

@@ -1,0 +1,50 @@
+{
+  "producer": "wdc_distribution",
+  "symbol": "WDC",
+  "hold_year": 2025,
+  "event_date": "2025-02-24",
+  "holding_event_policy": "cash_and_all_successor_shares",
+  "issuer_terms": "https://www.sec.gov/Archives/edgar/data/106040/000010604025000038/wdc-20250627.htm",
+  "child_dividend_policy_source": "https://investor.sandisk.com/ir-resources/investor-faqs",
+  "consideration": {
+    "cash_per_old_share": 0,
+    "successor_shares": {
+      "WDC": 1,
+      "SNDK": 0.3333333333333333
+    }
+  },
+  "post_event_valuation_anchor": "2025-02-28",
+  "pre_event_date": "2025-02-21",
+  "native_before": 68.705,
+  "native_base": 59.63,
+  "pre_event_growth": 1.152188830559909,
+  "parent_primary_monthly_response_sha256": "5a1e5899a6c47775fad826375bdab4062736c65373f8b28e6dcd47c6260dc4a6",
+  "parent_primary_response_received_at": "2026-11-02T03:19:50.576588+00:00",
+  "raw_evidence_sha256": {
+    "WDC_eastmoney_2025": "b59e009d2b41c5d4feb2ff9bc8f4c8cda5fb750351e692a80a3bcf6fc4159ae3",
+    "SNDK_eastmoney_2025": "e527be7717aa4c4e74de7b3e12d955e98c69a96e735a8f86c496fcb17029419d",
+    "WDC_pre_event": "9f7620c5e7de4a6befa493ee83130e8b79326e4cde13be0ab2d63c4c9b7b54ba",
+    "SNDK_qfq_2025": "f9412109b762d8571c132f84110c2ed203fbe23fa173402200027aa0718fa2b6"
+  },
+  "child_independent_daily_sha256": "6e866d22a93b33f47b0ab2b768c67ab6556d2a1457a30824e8629f2243a3931a",
+  "child_independent_months": 11,
+  "child_adjusted_equals_native_holding_months": true,
+  "pre_2025_reused_SNDK_history_excluded": true,
+  "retained_monthly_values": {
+    "2025-01": 1.0922357693671039,
+    "2025-02": 1.082453218589723,
+    "2025-03": 0.9441566735481861,
+    "2025-04": 0.9150317038952083,
+    "2025-05": 1.0751872233303443,
+    "2025-06": 1.32859735264248,
+    "2025-07": 1.5619868249598003,
+    "2025-08": 1.6430929853301448,
+    "2025-09": 2.64654672387419,
+    "2025-10": 3.640712975214861,
+    "2025-11": 3.995264873819839,
+    "2025-12": 4.2267010212216665
+  },
+  "retained_2025_return": 3.2267010212216665,
+  "parent_provider_adjusted_2025_return": 2.8363552458216015,
+  "quoted_prices_locks_and_baselines_changed": false
+}

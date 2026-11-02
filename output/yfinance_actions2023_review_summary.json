@@ -1,0 +1,3489 @@
+{
+  "source_url": "https://www.kaggle.com/datasets/iveeaten3223times/massive-yahoo-finance-dataset/versions/2",
+  "archive_sha256": "1b6c78baa277488d659b0e53465a417b18bc95d8668bd2fb15d1d5eb9c77b4b1",
+  "snapshot_stamp": [
+    406511,
+    "2026-11-02 03:40:00.337201+00",
+    849,
+    143649,
+    837,
+    "16111566.971344811063187142"
+  ],
+  "independent_nominal_snapshot_sha256": "11350fc583ac457feaa0a1bb4a836287a0c0ec37d2f906330d1723f3db76e8b1",
+  "independent_nominal_sources": [
+    "alphavantage_native",
+    "kaggle_yfinance2022",
+    "quandl_wiki"
+  ],
+  "method": "same-vintage inverse cash/split events; latest quote D=1; >=24 independent native anchors",
+  "statuses": {
+    "crosscheck_pass": 306,
+    "review_required": 40
+  },
+  "write": true,
+  "prepared_observations": 4768,
+  "stored_observations": 4768,
+  "return_prices_locks_and_baselines_changed": false,
+  "results": {
+    "A": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.455055436457979e-07,
+      "p90_log_deviation": 2.6636891986106666e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.486996450063344e-08,
+      "native_max_relative_deviation": 3.336537699460962e-07,
+      "ambiguous_threshold_months": []
+    },
+    "AAPL": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4407762499028452e-07,
+      "p90_log_deviation": 3.352553769944815e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.17185086873684e-08,
+      "native_max_relative_deviation": 2.3387111314221443e-07,
+      "ambiguous_threshold_months": []
+    },
+    "ABBV": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.7033726565130847e-07,
+      "p90_log_deviation": 3.8155737861908087e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.032409908904526e-08,
+      "native_max_relative_deviation": 3.2682878237100255e-07,
+      "ambiguous_threshold_months": []
+    },
+    "ABNB": {
+      "status": "review_required",
+      "overlap_returns": 34,
+      "median_log_deviation": 1.3877787807814457e-15,
+      "p90_log_deviation": 3.330669073875475e-15,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "ABT": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3458991490233967e-07,
+      "p90_log_deviation": 3.4420176802514484e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.757236338193138e-08,
+      "native_max_relative_deviation": 3.442704816780662e-07,
+      "ambiguous_threshold_months": []
+    },
+    "ACGL": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 2.167726208351865e-08,
+      "p90_log_deviation": 5.923538617365385e-08,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "ACN": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0799671084558307e-07,
+      "p90_log_deviation": 3.1629235313701604e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.436882015239178e-08,
+      "native_max_relative_deviation": 2.8226322190683106e-07,
+      "ambiguous_threshold_months": []
+    },
+    "ADBE": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 8.881784197001248e-16,
+      "p90_log_deviation": 1.6653345369377362e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.661338147750939e-16,
+      "native_max_relative_deviation": 1.7763568394002505e-15,
+      "ambiguous_threshold_months": []
+    },
+    "ADI": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 9.673697903359247e-08,
+      "p90_log_deviation": 2.53389326503448e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.069487001880702e-08,
+      "native_max_relative_deviation": 3.812714911566317e-07,
+      "ambiguous_threshold_months": []
+    },
+    "ADM": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4883495248185974e-07,
+      "p90_log_deviation": 3.9920896563224296e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.468505458518848e-08,
+      "native_max_relative_deviation": 3.4749811406165065e-07,
+      "ambiguous_threshold_months": []
+    },
+    "ADP": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4179379432279504e-07,
+      "p90_log_deviation": 3.1479261438854765e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.314101118678252e-08,
+      "native_max_relative_deviation": 3.0455665966933054e-07,
+      "ambiguous_threshold_months": []
+    },
+    "ADSK": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4988010832439613e-15,
+      "p90_log_deviation": 3.774758283725525e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.3322676295501878e-15,
+      "native_max_relative_deviation": 3.3306690738754696e-15,
+      "ambiguous_threshold_months": []
+    },
+    "AEE": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.5635473239073408e-07,
+      "p90_log_deviation": 3.789019262160485e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.381799126462198e-08,
+      "native_max_relative_deviation": 2.614602301331814e-07,
+      "ambiguous_threshold_months": []
+    },
+    "AEP": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4852816463986923e-07,
+      "p90_log_deviation": 4.123726684743028e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.026586966776051e-08,
+      "native_max_relative_deviation": 4.634273129688893e-07,
+      "ambiguous_threshold_months": []
+    },
+    "AFL": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.6624444165437303e-07,
+      "p90_log_deviation": 3.644866603751795e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.661028077534439e-08,
+      "native_max_relative_deviation": 2.8499406456994336e-07,
+      "ambiguous_threshold_months": []
+    },
+    "AIG": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3584590546002053e-07,
+      "p90_log_deviation": 2.8683472047872656e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.0704041743010464e-08,
+      "native_max_relative_deviation": 3.1969638492057584e-07,
+      "ambiguous_threshold_months": []
+    },
+    "AJG": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.333654551987101e-07,
+      "p90_log_deviation": 3.5573462509956345e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.834827896515463e-08,
+      "native_max_relative_deviation": 3.513095678808753e-07,
+      "ambiguous_threshold_months": []
+    },
+    "ALL": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 9.853136669463645e-08,
+      "p90_log_deviation": 2.3998527727547474e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.679525927337892e-08,
+      "native_max_relative_deviation": 2.9437027904144486e-07,
+      "ambiguous_threshold_months": []
+    },
+    "AMAT": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2712537388567266e-07,
+      "p90_log_deviation": 2.925290038410772e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.655197815064184e-08,
+      "native_max_relative_deviation": 3.8801076718275596e-07,
+      "ambiguous_threshold_months": []
+    },
+    "AMD": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 7.216449660063518e-16,
+      "p90_log_deviation": 3.1086244689504336e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.551115123125783e-16,
+      "native_max_relative_deviation": 4.218847493575595e-15,
+      "ambiguous_threshold_months": []
+    },
+    "AME": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.488700541214894e-07,
+      "p90_log_deviation": 3.274219936500811e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.520418697839261e-08,
+      "native_max_relative_deviation": 2.655528978934285e-07,
+      "ambiguous_threshold_months": []
+    },
+    "AMGN": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1077493783126328e-07,
+      "p90_log_deviation": 2.5539972717087766e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.6951297627551014e-08,
+      "native_max_relative_deviation": 3.3665425458462295e-07,
+      "ambiguous_threshold_months": []
+    },
+    "AMP": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1768958071733746e-07,
+      "p90_log_deviation": 3.631060843980075e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.574838178925347e-08,
+      "native_max_relative_deviation": 2.715284843635146e-07,
+      "ambiguous_threshold_months": []
+    },
+    "AMT": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2793489186519806e-07,
+      "p90_log_deviation": 2.706969233202119e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.25712952959401e-08,
+      "native_max_relative_deviation": 2.851305429540929e-07,
+      "ambiguous_threshold_months": []
+    },
+    "AMZN": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.5543122344752192e-15,
+      "p90_log_deviation": 4.218847493575586e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.1102230246251565e-15,
+      "native_max_relative_deviation": 3.774758283725532e-15,
+      "ambiguous_threshold_months": []
+    },
+    "ANET": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 8.881784197001248e-16,
+      "p90_log_deviation": 3.996802888650556e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.440892098500626e-16,
+      "native_max_relative_deviation": 4.218847493575595e-15,
+      "ambiguous_threshold_months": []
+    },
+    "ANSS": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 2.695218351519405e-08,
+      "p90_log_deviation": 6.511786277938196e-08,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.1102230246251565e-15,
+      "native_max_relative_deviation": 2.4424906541753444e-15,
+      "ambiguous_threshold_months": []
+    },
+    "AON": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.5880185822680393e-07,
+      "p90_log_deviation": 3.1581908646012455e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.0097209712789379e-07,
+      "native_max_relative_deviation": 3.114533104753292e-07,
+      "ambiguous_threshold_months": []
+    },
+    "APD": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1744563553660948e-07,
+      "p90_log_deviation": 2.713525644615308e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.566617283265686e-08,
+      "native_max_relative_deviation": 3.49652981679327e-07,
+      "ambiguous_threshold_months": []
+    },
+    "APH": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.7932387803517387e-07,
+      "p90_log_deviation": 3.1356977161267723e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.61418347763987e-08,
+      "native_max_relative_deviation": 4.3492385348731233e-07,
+      "ambiguous_threshold_months": []
+    },
+    "APO": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.6419850462595277e-07,
+      "p90_log_deviation": 3.068046865361892e-07,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "APTV": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1657341758564144e-15,
+      "p90_log_deviation": 4.884981308350677e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.9984014443252818e-15,
+      "native_max_relative_deviation": 9.671858691717716e-08,
+      "ambiguous_threshold_months": []
+    },
+    "ARES": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.570473353906613e-07,
+      "p90_log_deviation": 2.961620684271482e-07,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "AVB": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 5.1547247696185526e-08,
+      "p90_log_deviation": 1.7322239319217315e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.20074663334924e-08,
+      "native_max_relative_deviation": 2.673485568482903e-07,
+      "ambiguous_threshold_months": []
+    },
+    "AVGO": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 9.257899315293529e-08,
+      "p90_log_deviation": 3.5255665251423805e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.773529026560254e-08,
+      "native_max_relative_deviation": 3.411606470660189e-07,
+      "ambiguous_threshold_months": []
+    },
+    "AWK": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.315972691946294e-07,
+      "p90_log_deviation": 3.1247737161576187e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.061583106095839e-08,
+      "native_max_relative_deviation": 3.8420411807571497e-07,
+      "ambiguous_threshold_months": []
+    },
+    "AXP": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1410971390065235e-07,
+      "p90_log_deviation": 2.855126575298569e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.393917290597017e-08,
+      "native_max_relative_deviation": 2.1651531323385598e-07,
+      "ambiguous_threshold_months": []
+    },
+    "AZO": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 2.2204460492503107e-15,
+      "p90_log_deviation": 4.551914400963152e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.6653345369377348e-15,
+      "native_max_relative_deviation": 4.884981308350689e-15,
+      "ambiguous_threshold_months": []
+    },
+    "BA": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.7208456881689926e-15,
+      "p90_log_deviation": 4.6629367034256685e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.1102230246251565e-15,
+      "native_max_relative_deviation": 9.689072200114168e-08,
+      "ambiguous_threshold_months": []
+    },
+    "BAC": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2339217538558816e-07,
+      "p90_log_deviation": 3.742939659394373e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.311731330452488e-08,
+      "native_max_relative_deviation": 2.846554876256846e-07,
+      "ambiguous_threshold_months": []
+    },
+    "BDX": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.5368757092524873e-07,
+      "p90_log_deviation": 2.7427810143075933e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.215343067468183e-08,
+      "native_max_relative_deviation": 1.9420133212655344e-07,
+      "ambiguous_threshold_months": []
+    },
+    "BIIB": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.332267629550187e-15,
+      "p90_log_deviation": 2.5535129566378632e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.1102230246251565e-15,
+      "native_max_relative_deviation": 2.220446049250313e-15,
+      "ambiguous_threshold_months": []
+    },
+    "BK": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 2.11607110817827e-07,
+      "p90_log_deviation": 0.00852014180246237,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.07574027042557e-08,
+      "native_max_relative_deviation": 2.4513109342372275e-07,
+      "ambiguous_threshold_months": []
+    },
+    "BKNG": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 7.943610697909188e-08,
+      "p90_log_deviation": 2.680997839613081e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.4432899320127035e-15,
+      "native_max_relative_deviation": 3.1086244689504383e-15,
+      "ambiguous_threshold_months": []
+    },
+    "BKR": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4851820835460168e-07,
+      "p90_log_deviation": 3.146019476863947e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.037668552951516e-08,
+      "native_max_relative_deviation": 3.9617872937824927e-07,
+      "ambiguous_threshold_months": []
+    },
+    "BLK": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.842457864636063e-07,
+      "p90_log_deviation": 3.3046871159970976e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.259917383401927e-08,
+      "native_max_relative_deviation": 2.8888138081661907e-07,
+      "ambiguous_threshold_months": []
+    },
+    "BMY": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 9.947940413881718e-08,
+      "p90_log_deviation": 3.4154261714923994e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.1415082135091126e-07,
+      "native_max_relative_deviation": 3.0184017163481514e-07,
+      "ambiguous_threshold_months": []
+    },
+    "BR": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.302920081951743e-07,
+      "p90_log_deviation": 3.111434359054815e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.862177575646001e-08,
+      "native_max_relative_deviation": 2.99625003252757e-07,
+      "ambiguous_threshold_months": []
+    },
+    "BRO": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2894856539122274e-07,
+      "p90_log_deviation": 3.1340103960269676e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.622116293681813e-08,
+      "native_max_relative_deviation": 2.9235829690499315e-07,
+      "ambiguous_threshold_months": []
+    },
+    "BSX": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 6.661338147750939e-16,
+      "p90_log_deviation": 1.5543122344752203e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.661338147750939e-16,
+      "native_max_relative_deviation": 1.3322676295501878e-15,
+      "ambiguous_threshold_months": []
+    },
+    "BX": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.058820021578952e-07,
+      "p90_log_deviation": 3.1264792013330897e-07,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "C": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2702951849206414e-07,
+      "p90_log_deviation": 3.210891174402277e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.243511035426309e-08,
+      "native_max_relative_deviation": 3.200103465550441e-07,
+      "ambiguous_threshold_months": []
+    },
+    "CAH": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.360985955683653e-07,
+      "p90_log_deviation": 2.739301718723722e-07,
+      "native_overlap_months": 59,
+      "native_median_relative_deviation": 3.6945258186094065e-08,
+      "native_max_relative_deviation": 1.1869541172160325e-07,
+      "ambiguous_threshold_months": []
+    },
+    "CARR": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 43,
+      "median_log_deviation": 9.482400226074343e-08,
+      "p90_log_deviation": 2.5646698200994515e-07,
+      "native_overlap_months": 28,
+      "native_median_relative_deviation": 5.4111576996973554e-08,
+      "native_max_relative_deviation": 2.4108988116999797e-07,
+      "ambiguous_threshold_months": []
+    },
+    "CAT": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2360077807336188e-07,
+      "p90_log_deviation": 3.256064589652074e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.81779853789277e-08,
+      "native_max_relative_deviation": 2.220618404713548e-07,
+      "ambiguous_threshold_months": []
+    },
+    "CB": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 9.70063729766059e-08,
+      "p90_log_deviation": 3.0637636402730375e-07,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "CBRE": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 6.661338147750937e-16,
+      "p90_log_deviation": 1.554312234475218e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.440892098500626e-16,
+      "native_max_relative_deviation": 4.3298697960381105e-15,
+      "ambiguous_threshold_months": []
+    },
+    "CCEP": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 7.084321941328737e-08,
+      "p90_log_deviation": 2.2733417645578892e-07,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "CCI": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4720597811787197e-07,
+      "p90_log_deviation": 4.278709593841123e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.242151822683951e-08,
+      "native_max_relative_deviation": 5.149473991661324e-07,
+      "ambiguous_threshold_months": []
+    },
+    "CCL": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 4.492762235678138e-08,
+      "p90_log_deviation": 9.388054652478616e-08,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.4432899320127035e-15,
+      "native_max_relative_deviation": 9.346556861800082e-10,
+      "ambiguous_threshold_months": []
+    },
+    "CDNS": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2767564783189308e-15,
+      "p90_log_deviation": 3.774758283725539e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.661338147750939e-16,
+      "native_max_relative_deviation": 3.774758283725532e-15,
+      "ambiguous_threshold_months": []
+    },
+    "CDW": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 9.565146770862148e-08,
+      "p90_log_deviation": 2.3597146378804383e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.069831970378914e-08,
+      "native_max_relative_deviation": 1.9712088439316489e-07,
+      "ambiguous_threshold_months": []
+    },
+    "CEG": {
+      "status": "review_required",
+      "overlap_returns": 21,
+      "median_log_deviation": 6.679608089907685e-08,
+      "p90_log_deviation": 1.7243770723391063e-07,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "CHD": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0518055899977742e-07,
+      "p90_log_deviation": 3.8290453626695647e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.451031531184981e-08,
+      "native_max_relative_deviation": 4.5199037879140036e-07,
+      "ambiguous_threshold_months": []
+    },
+    "CHTR": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 4.996003610813206e-16,
+      "p90_log_deviation": 1.332267629550187e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.440892098500626e-16,
+      "native_max_relative_deviation": 1.3322676295501878e-15,
+      "ambiguous_threshold_months": []
+    },
+    "CI": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0150364862134472e-07,
+      "p90_log_deviation": 3.1119478437052616e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.632111742594816e-08,
+      "native_max_relative_deviation": 1.8929340106499382e-07,
+      "ambiguous_threshold_months": []
+    },
+    "CL": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4394966559587102e-07,
+      "p90_log_deviation": 3.2410556471095823e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.912556881401912e-08,
+      "native_max_relative_deviation": 3.330560877090605e-07,
+      "ambiguous_threshold_months": []
+    },
+    "CMCSA": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.307730094294111e-07,
+      "p90_log_deviation": 3.140204977264235e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.786581062736332e-08,
+      "native_max_relative_deviation": 2.4624487027224973e-07,
+      "ambiguous_threshold_months": []
+    },
+    "CME": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.764797253452192e-07,
+      "p90_log_deviation": 4.1547798572905937e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.538858875528632e-08,
+      "native_max_relative_deviation": 3.5256748898149226e-07,
+      "ambiguous_threshold_months": []
+    },
+    "CMG": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 3.129638919260291e-08,
+      "p90_log_deviation": 7.708361057899421e-08,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 3.3306690738754696e-16,
+      "native_max_relative_deviation": 3.774758283725532e-15,
+      "ambiguous_threshold_months": []
+    },
+    "CMI": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0206803951254106e-07,
+      "p90_log_deviation": 3.4984718397697365e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.128938772638094e-08,
+      "native_max_relative_deviation": 3.3018300649168e-07,
+      "ambiguous_threshold_months": []
+    },
+    "CNC": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 4.440892098500627e-16,
+      "p90_log_deviation": 8.881784197001256e-16,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 2.220446049250313e-16,
+      "native_max_relative_deviation": 8.881784197001252e-16,
+      "ambiguous_threshold_months": []
+    },
+    "COF": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.391015512614861e-07,
+      "p90_log_deviation": 3.90649125412375e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.634450744336107e-08,
+      "native_max_relative_deviation": 3.737196994091363e-07,
+      "ambiguous_threshold_months": []
+    },
+    "COIN": {
+      "status": "review_required",
+      "overlap_returns": 30,
+      "median_log_deviation": 6.661338147750941e-16,
+      "p90_log_deviation": 1.9984014443252798e-15,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "COP": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.7299262692958918e-07,
+      "p90_log_deviation": 3.8642086624766095e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.700010506983546e-08,
+      "native_max_relative_deviation": 2.8424014908434714e-07,
+      "ambiguous_threshold_months": []
+    },
+    "COR": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.630691548181704e-07,
+      "p90_log_deviation": 0.012581103639936642,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "COST": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1859410867110863e-07,
+      "p90_log_deviation": 2.7953485949193377e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.793915212163995e-08,
+      "native_max_relative_deviation": 3.6769014455373394e-07,
+      "ambiguous_threshold_months": []
+    },
+    "CPRT": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 8.881784197001252e-16,
+      "p90_log_deviation": 1.9984014443252798e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.661338147750939e-16,
+      "native_max_relative_deviation": 2.6645352591003757e-15,
+      "ambiguous_threshold_months": []
+    },
+    "CRH": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 9.917944392266291e-08,
+      "p90_log_deviation": 3.4609650272950514e-07,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "CRM": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 8.153898279401307e-08,
+      "p90_log_deviation": 1.9828087816757695e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.1102230246251565e-15,
+      "native_max_relative_deviation": 3.3306690738754696e-15,
+      "ambiguous_threshold_months": []
+    },
+    "CRWD": {
+      "status": "review_required",
+      "overlap_returns": 52,
+      "median_log_deviation": 1.1102230246251565e-15,
+      "p90_log_deviation": 3.1086244689504336e-15,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "CSCO": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 9.470756866605327e-08,
+      "p90_log_deviation": 2.757710257375872e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.821768495588685e-08,
+      "native_max_relative_deviation": 1.7835062615656483e-07,
+      "ambiguous_threshold_months": []
+    },
+    "CSGP": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 4.440892098500625e-16,
+      "p90_log_deviation": 8.881784197001256e-16,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "CSX": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0779704157337549e-07,
+      "p90_log_deviation": 2.7862609756893025e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.569709005115442e-08,
+      "native_max_relative_deviation": 2.3017851447093562e-07,
+      "ambiguous_threshold_months": []
+    },
+    "CTAS": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2049981485973343e-07,
+      "p90_log_deviation": 3.2670055764195715e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.120440037589049e-08,
+      "native_max_relative_deviation": 3.116688422899472e-07,
+      "ambiguous_threshold_months": []
+    },
+    "CTRA": {
+      "status": "review_required",
+      "overlap_returns": 50,
+      "median_log_deviation": 0.022814242559113275,
+      "p90_log_deviation": 0.21028305362354252,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "CTSH": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4962923497021253e-07,
+      "p90_log_deviation": 3.7915502699370896e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.2263687443336835e-07,
+      "native_max_relative_deviation": 4.3367956004125574e-07,
+      "ambiguous_threshold_months": []
+    },
+    "CTVA": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 53,
+      "median_log_deviation": 9.393950836573736e-08,
+      "p90_log_deviation": 2.3939991823504217e-07,
+      "native_overlap_months": 38,
+      "native_median_relative_deviation": 6.109913364138464e-08,
+      "native_max_relative_deviation": 2.5220979016360445e-07,
+      "ambiguous_threshold_months": []
+    },
+    "CVS": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 8.537566780516082e-08,
+      "p90_log_deviation": 2.7563153017226827e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.21131682754239e-08,
+      "native_max_relative_deviation": 3.005328119698447e-07,
+      "ambiguous_threshold_months": []
+    },
+    "CVX": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.7775458232549206e-07,
+      "p90_log_deviation": 3.6811581668688666e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.1685408507489115e-07,
+      "native_max_relative_deviation": 2.8419331088436195e-07,
+      "ambiguous_threshold_months": []
+    },
+    "D": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1515836313675074e-07,
+      "p90_log_deviation": 3.112145341648035e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.138507101573822e-08,
+      "native_max_relative_deviation": 3.961565588905813e-07,
+      "ambiguous_threshold_months": []
+    },
+    "DAL": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0332599219706014e-07,
+      "p90_log_deviation": 2.087904913042287e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 3.41522042868192e-08,
+      "native_max_relative_deviation": 1.0889894541676881e-07,
+      "ambiguous_threshold_months": []
+    },
+    "DASH": {
+      "status": "review_required",
+      "overlap_returns": 34,
+      "median_log_deviation": 6.661338147750941e-16,
+      "p90_log_deviation": 3.219646771412959e-15,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "DD": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3135950739380636e-07,
+      "p90_log_deviation": 2.921960219880796e-07,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "DDOG": {
+      "status": "review_required",
+      "overlap_returns": 49,
+      "median_log_deviation": 6.661338147750937e-16,
+      "p90_log_deviation": 3.1086244689504336e-15,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "DE": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.5067206422035854e-07,
+      "p90_log_deviation": 3.5649476985485903e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.962458391576945e-08,
+      "native_max_relative_deviation": 2.796749750677563e-07,
+      "ambiguous_threshold_months": []
+    },
+    "DELL": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1581091281414163e-07,
+      "p90_log_deviation": 3.197853747860254e-07,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "DFS": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 3.158036755282537e-07,
+      "p90_log_deviation": 0.005762437973393423,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.125710043189628e-08,
+      "native_max_relative_deviation": 2.597957741157231e-07,
+      "ambiguous_threshold_months": []
+    },
+    "DG": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4975405836875394e-07,
+      "p90_log_deviation": 3.342732371762791e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.738136842405652e-08,
+      "native_max_relative_deviation": 4.283555383732818e-07,
+      "ambiguous_threshold_months": []
+    },
+    "DHI": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3464849059634326e-07,
+      "p90_log_deviation": 2.7140775013477523e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.014007368828402e-08,
+      "native_max_relative_deviation": 4.0003484991224525e-07,
+      "ambiguous_threshold_months": []
+    },
+    "DHR": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 2.0008718242482933e-07,
+      "p90_log_deviation": 0.0001398284255721556,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.982684452871979e-08,
+      "native_max_relative_deviation": 3.3589868997374595e-07,
+      "ambiguous_threshold_months": []
+    },
+    "DIS": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 5.159021126893824e-08,
+      "p90_log_deviation": 1.216638365234202e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.5543122344752192e-15,
+      "native_max_relative_deviation": 4.440892098500626e-15,
+      "ambiguous_threshold_months": []
+    },
+    "DLR": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4407202891170536e-07,
+      "p90_log_deviation": 4.4533818756922454e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.779479328449355e-08,
+      "native_max_relative_deviation": 2.9578837856814033e-07,
+      "ambiguous_threshold_months": []
+    },
+    "DLTR": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.720845688168993e-15,
+      "p90_log_deviation": 4.6629367034256464e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.440892098500626e-16,
+      "native_max_relative_deviation": 4.3298697960381105e-15,
+      "ambiguous_threshold_months": []
+    },
+    "DOV": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4763701883283432e-07,
+      "p90_log_deviation": 2.446496403734087e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.058099260603967e-08,
+      "native_max_relative_deviation": 3.584482124452393e-07,
+      "ambiguous_threshold_months": []
+    },
+    "DOW": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 55,
+      "median_log_deviation": 1.0967968664658482e-07,
+      "p90_log_deviation": 2.7342445300189876e-07,
+      "native_overlap_months": 40,
+      "native_median_relative_deviation": 5.5096531725862263e-08,
+      "native_max_relative_deviation": 3.548418177068413e-07,
+      "ambiguous_threshold_months": []
+    },
+    "DTE": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0959850267588664e-07,
+      "p90_log_deviation": 3.2110779805883835e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.116093441756789e-08,
+      "native_max_relative_deviation": 3.0564843189750945e-07,
+      "ambiguous_threshold_months": []
+    },
+    "DUK": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3044507744719548e-07,
+      "p90_log_deviation": 4.172820229146688e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.253200457440045e-08,
+      "native_max_relative_deviation": 3.441124825087627e-07,
+      "ambiguous_threshold_months": []
+    },
+    "DVN": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1075522766013448e-07,
+      "p90_log_deviation": 3.169240912310145e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.333125490698421e-08,
+      "native_max_relative_deviation": 3.174019858054322e-07,
+      "ambiguous_threshold_months": []
+    },
+    "DXCM": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 6.106226635438361e-16,
+      "p90_log_deviation": 4.218847493575586e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.440892098500626e-16,
+      "native_max_relative_deviation": 4.3298697960381105e-15,
+      "ambiguous_threshold_months": []
+    },
+    "EA": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.080537248220838e-07,
+      "p90_log_deviation": 2.323098088286462e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.2123465120694732e-07,
+      "native_max_relative_deviation": 3.143041680253589e-07,
+      "ambiguous_threshold_months": []
+    },
+    "EBAY": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4000397061444234e-07,
+      "p90_log_deviation": 3.375517054921318e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.071663965518837e-08,
+      "native_max_relative_deviation": 2.9435766857321966e-07,
+      "ambiguous_threshold_months": []
+    },
+    "ECL": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2494442286641413e-07,
+      "p90_log_deviation": 3.4111957759045965e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.592667833871246e-08,
+      "native_max_relative_deviation": 2.705207229336537e-07,
+      "ambiguous_threshold_months": []
+    },
+    "ED": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 2.140310894087122e-07,
+      "p90_log_deviation": 4.738670640639499e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.0490534108065219e-07,
+      "native_max_relative_deviation": 3.0602732137285926e-07,
+      "ambiguous_threshold_months": []
+    },
+    "EFX": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.807303887689169e-07,
+      "p90_log_deviation": 3.155209448545313e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.0603910016726559e-07,
+      "native_max_relative_deviation": 4.1893723534691674e-07,
+      "ambiguous_threshold_months": []
+    },
+    "EIX": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1223490749640611e-07,
+      "p90_log_deviation": 2.52086436635412e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.981774685639209e-08,
+      "native_max_relative_deviation": 5.38765006052877e-07,
+      "ambiguous_threshold_months": []
+    },
+    "EL": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4303779962378968e-07,
+      "p90_log_deviation": 2.991156763456687e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.048448057261453e-07,
+      "native_max_relative_deviation": 2.461033485889885e-07,
+      "ambiguous_threshold_months": []
+    },
+    "ELV": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.118531256578989e-07,
+      "p90_log_deviation": 3.2092926540150774e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.298079912094636e-08,
+      "native_max_relative_deviation": 2.5998197727972183e-07,
+      "ambiguous_threshold_months": []
+    },
+    "EMR": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.6268816301894947e-07,
+      "p90_log_deviation": 3.4651052169210944e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.733387175079542e-08,
+      "native_max_relative_deviation": 2.75308399078078e-07,
+      "ambiguous_threshold_months": []
+    },
+    "EOG": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1286806716382944e-07,
+      "p90_log_deviation": 2.8986388849153057e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.0334384104027095e-07,
+      "native_max_relative_deviation": 3.802244692430179e-07,
+      "ambiguous_threshold_months": []
+    },
+    "EQIX": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.630874863806872e-07,
+      "p90_log_deviation": 3.82456830067653e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.506071763087931e-08,
+      "native_max_relative_deviation": 2.8777826566184217e-07,
+      "ambiguous_threshold_months": []
+    },
+    "EQR": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 4.2083548620086617e-07,
+      "p90_log_deviation": 0.009998678794353583,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.760107655409911e-08,
+      "native_max_relative_deviation": 3.6990483187615553e-07,
+      "ambiguous_threshold_months": []
+    },
+    "ES": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0554323732298432e-07,
+      "p90_log_deviation": 2.401744749507964e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.213421137133082e-08,
+      "native_max_relative_deviation": 2.9603284712464983e-07,
+      "ambiguous_threshold_months": []
+    },
+    "ETN": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.225855567266656e-07,
+      "p90_log_deviation": 2.9527927443907943e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.690573422536318e-08,
+      "native_max_relative_deviation": 2.717585199096817e-07,
+      "ambiguous_threshold_months": []
+    },
+    "ETR": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0815746406314739e-07,
+      "p90_log_deviation": 3.3891813052596946e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.94565669423497e-08,
+      "native_max_relative_deviation": 2.1176943043599294e-07,
+      "ambiguous_threshold_months": []
+    },
+    "EW": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 4.996003610813206e-16,
+      "p90_log_deviation": 2.4424906541753412e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.440892098500626e-16,
+      "native_max_relative_deviation": 3.6637359812630166e-15,
+      "ambiguous_threshold_months": []
+    },
+    "EXC": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4626822000646114e-07,
+      "p90_log_deviation": 4.040164599406467e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.867465490196679e-08,
+      "native_max_relative_deviation": 3.7765810412260237e-07,
+      "ambiguous_threshold_months": []
+    },
+    "EXR": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3245617389287686e-07,
+      "p90_log_deviation": 2.453852747862833e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.1088885121246506e-07,
+      "native_max_relative_deviation": 3.1916933906916967e-07,
+      "ambiguous_threshold_months": []
+    },
+    "F": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2357619586277785e-07,
+      "p90_log_deviation": 2.8497558798769927e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.420934095530129e-08,
+      "native_max_relative_deviation": 2.411311486039125e-07,
+      "ambiguous_threshold_months": []
+    },
+    "FANG": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 8.321438175478639e-08,
+      "p90_log_deviation": 2.3607123667180262e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.759960867799066e-08,
+      "native_max_relative_deviation": 3.0512220439149473e-07,
+      "ambiguous_threshold_months": []
+    },
+    "FAST": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0434890172927438e-07,
+      "p90_log_deviation": 3.3777627293266403e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.090275239678533e-08,
+      "native_max_relative_deviation": 3.1176896042595104e-07,
+      "ambiguous_threshold_months": []
+    },
+    "FCX": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4529923504136913e-07,
+      "p90_log_deviation": 3.1136786356175087e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.0764677350656484e-08,
+      "native_max_relative_deviation": 3.323684536482574e-07,
+      "ambiguous_threshold_months": []
+    },
+    "FDX": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2872055475345757e-07,
+      "p90_log_deviation": 3.642533104542204e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.137918250383791e-08,
+      "native_max_relative_deviation": 3.1154930180132823e-07,
+      "ambiguous_threshold_months": []
+    },
+    "FE": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.619013104169204e-07,
+      "p90_log_deviation": 3.1790316477656346e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.106609944962372e-08,
+      "native_max_relative_deviation": 2.241557331972288e-07,
+      "ambiguous_threshold_months": []
+    },
+    "FERG": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 8.687637809100645e-08,
+      "p90_log_deviation": 2.8290409786406065e-07,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "FI": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 7.666460893469147e-08,
+      "p90_log_deviation": 1.6138287847259268e-07,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "FICO": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 8.326672684688674e-16,
+      "p90_log_deviation": 1.7763568394002489e-15,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "FIS": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.5807467382828964e-07,
+      "p90_log_deviation": 3.6213129199791916e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.03107364050004e-08,
+      "native_max_relative_deviation": 2.4399012121811836e-07,
+      "ambiguous_threshold_months": []
+    },
+    "FITB": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.076454488670362e-07,
+      "p90_log_deviation": 3.2819254048679474e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.254603061670252e-08,
+      "native_max_relative_deviation": 3.353503734704333e-07,
+      "ambiguous_threshold_months": []
+    },
+    "FTNT": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 5.551115123125785e-16,
+      "p90_log_deviation": 2.1094237467877998e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.661338147750939e-16,
+      "native_max_relative_deviation": 3.1086244689504383e-15,
+      "ambiguous_threshold_months": []
+    },
+    "FTV": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4984386996427208e-07,
+      "p90_log_deviation": 2.8831052696880825e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.798705809440975e-08,
+      "native_max_relative_deviation": 2.7729166218737333e-07,
+      "ambiguous_threshold_months": []
+    },
+    "GD": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.609881387643057e-07,
+      "p90_log_deviation": 3.679395031647039e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.492997078362151e-08,
+      "native_max_relative_deviation": 3.2982492226274474e-07,
+      "ambiguous_threshold_months": []
+    },
+    "GE": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3177457575694977e-07,
+      "p90_log_deviation": 3.5434092066513896e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.1831682344976002e-07,
+      "native_max_relative_deviation": 5.433088251516338e-07,
+      "ambiguous_threshold_months": []
+    },
+    "GEHC": {
+      "status": "review_required",
+      "overlap_returns": 10,
+      "median_log_deviation": 8.253413787917095e-08,
+      "p90_log_deviation": 1.596530347044801e-07,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "GILD": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.273233131162268e-07,
+      "p90_log_deviation": 2.7795874158432517e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.88997683351289e-08,
+      "native_max_relative_deviation": 2.805952850071236e-07,
+      "ambiguous_threshold_months": []
+    },
+    "GIS": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0773981145057097e-07,
+      "p90_log_deviation": 2.134719030688805e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.677776990901776e-08,
+      "native_max_relative_deviation": 2.784937225275286e-07,
+      "ambiguous_threshold_months": []
+    },
+    "GLW": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2848521684541667e-07,
+      "p90_log_deviation": 3.7537144231003306e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.905115567170441e-08,
+      "native_max_relative_deviation": 2.708444959420575e-07,
+      "ambiguous_threshold_months": []
+    },
+    "GM": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2987357907387305e-07,
+      "p90_log_deviation": 2.909236011171613e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.031305571114643e-08,
+      "native_max_relative_deviation": 3.186129161614204e-07,
+      "ambiguous_threshold_months": []
+    },
+    "GOOGL": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 6.23874348630013e-08,
+      "p90_log_deviation": 2.0339456049278788e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 2.5933783787124298e-08,
+      "native_max_relative_deviation": 9.038429871210951e-08,
+      "ambiguous_threshold_months": []
+    },
+    "GPN": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.579660670276715e-07,
+      "p90_log_deviation": 3.430054105345838e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.075422985864833e-08,
+      "native_max_relative_deviation": 2.736526631963443e-07,
+      "ambiguous_threshold_months": []
+    },
+    "GRMN": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3654569043729672e-07,
+      "p90_log_deviation": 3.3481906704150047e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.548040970029035e-08,
+      "native_max_relative_deviation": 2.6328309443712783e-07,
+      "ambiguous_threshold_months": []
+    },
+    "GS": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3159360806905154e-07,
+      "p90_log_deviation": 4.1959459230443327e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.744520164581047e-08,
+      "native_max_relative_deviation": 2.6478507719751576e-07,
+      "ambiguous_threshold_months": []
+    },
+    "GWW": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4239643638225024e-07,
+      "p90_log_deviation": 3.705487765929224e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.263351715052323e-08,
+      "native_max_relative_deviation": 3.748699652916798e-07,
+      "ambiguous_threshold_months": []
+    },
+    "HAL": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0294058397346153e-07,
+      "p90_log_deviation": 2.884796527444895e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.360902027324755e-08,
+      "native_max_relative_deviation": 3.8142210323499626e-07,
+      "ambiguous_threshold_months": []
+    },
+    "HCA": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0384969772462084e-07,
+      "p90_log_deviation": 3.161862817966535e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.298004068787776e-08,
+      "native_max_relative_deviation": 3.879266766704248e-07,
+      "ambiguous_threshold_months": []
+    },
+    "HD": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.489554045025486e-07,
+      "p90_log_deviation": 4.4013925654684534e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.60770707436609e-08,
+      "native_max_relative_deviation": 3.1839574043956986e-07,
+      "ambiguous_threshold_months": []
+    },
+    "HES": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 6.086237125372802e-07,
+      "p90_log_deviation": 0.00011195891106415085,
+      "native_overlap_months": 59,
+      "native_median_relative_deviation": 5.8512006018140994e-08,
+      "native_max_relative_deviation": 2.150664470956798e-07,
+      "ambiguous_threshold_months": []
+    },
+    "HIG": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2508214436864864e-07,
+      "p90_log_deviation": 3.3085318784445076e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.925945044728877e-08,
+      "native_max_relative_deviation": 4.136447697700163e-07,
+      "ambiguous_threshold_months": []
+    },
+    "HLT": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0758308334355622e-07,
+      "p90_log_deviation": 2.472407328539849e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.765736453890781e-08,
+      "native_max_relative_deviation": 2.553692616258374e-07,
+      "ambiguous_threshold_months": []
+    },
+    "HON": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.210661173042277e-07,
+      "p90_log_deviation": 3.2643914172736965e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.761913039556646e-08,
+      "native_max_relative_deviation": 2.583296145886038e-07,
+      "ambiguous_threshold_months": []
+    },
+    "HPE": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1828153270387335e-07,
+      "p90_log_deviation": 2.7491224234481043e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.890544306832226e-08,
+      "native_max_relative_deviation": 2.732248988168706e-07,
+      "ambiguous_threshold_months": []
+    },
+    "HPQ": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.5965149401384157e-07,
+      "p90_log_deviation": 3.597838121833389e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.019775437657529e-08,
+      "native_max_relative_deviation": 2.5870576947362167e-07,
+      "ambiguous_threshold_months": []
+    },
+    "HSY": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 9.818530916910445e-08,
+      "p90_log_deviation": 2.5442060475247855e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.561527664596724e-08,
+      "native_max_relative_deviation": 3.1061255967301804e-07,
+      "ambiguous_threshold_months": []
+    },
+    "HUM": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1390662074933957e-07,
+      "p90_log_deviation": 3.320192256170624e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.5530730125319394e-08,
+      "native_max_relative_deviation": 3.5942957832268974e-07,
+      "ambiguous_threshold_months": []
+    },
+    "HWM": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0815942655642127e-07,
+      "p90_log_deviation": 3.120007280976174e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.540095610572337e-08,
+      "native_max_relative_deviation": 2.9414992641640936e-07,
+      "ambiguous_threshold_months": []
+    },
+    "IBKR": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.6952341829500597e-07,
+      "p90_log_deviation": 3.035014023610649e-07,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "IBM": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1258445324023509e-07,
+      "p90_log_deviation": 3.134558203555563e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.4435126184415594e-08,
+      "native_max_relative_deviation": 2.5037067197253293e-07,
+      "ambiguous_threshold_months": []
+    },
+    "ICE": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0082997212582794e-07,
+      "p90_log_deviation": 3.0949305680687286e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.0663784499875817e-07,
+      "native_max_relative_deviation": 2.9020529401790895e-07,
+      "ambiguous_threshold_months": []
+    },
+    "IDXX": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 6.661338147750941e-16,
+      "p90_log_deviation": 1.5543122344752203e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.440892098500626e-16,
+      "native_max_relative_deviation": 1.9984014443252818e-15,
+      "ambiguous_threshold_months": []
+    },
+    "IFF": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1768717017102389e-07,
+      "p90_log_deviation": 3.421720039210517e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.1797640997457393e-07,
+      "native_max_relative_deviation": 3.7940037334038834e-07,
+      "ambiguous_threshold_months": []
+    },
+    "INTC": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 9.526476112096763e-08,
+      "p90_log_deviation": 2.201020110810688e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 3.8166714899645626e-08,
+      "native_max_relative_deviation": 3.485413864190434e-07,
+      "ambiguous_threshold_months": []
+    },
+    "INTU": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1086677208266605e-07,
+      "p90_log_deviation": 3.015906208806908e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.631178772753543e-08,
+      "native_max_relative_deviation": 2.291207714666399e-07,
+      "ambiguous_threshold_months": []
+    },
+    "INVH": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.251740223053913e-07,
+      "p90_log_deviation": 3.061865615731485e-07,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "IQV": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.8318679906315083e-15,
+      "p90_log_deviation": 4.440892098500617e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.5543122344752192e-15,
+      "native_max_relative_deviation": 3.9968028886505635e-15,
+      "ambiguous_threshold_months": []
+    },
+    "IR": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.189662560765703e-07,
+      "p90_log_deviation": 3.0506603611354893e-07,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "ISRG": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4432899320127045e-15,
+      "p90_log_deviation": 3.108624468950443e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.1102230246251565e-15,
+      "native_max_relative_deviation": 3.1086244689504383e-15,
+      "ambiguous_threshold_months": []
+    },
+    "IT": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.7763568394002489e-15,
+      "p90_log_deviation": 3.9968028886505714e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.4432899320127035e-15,
+      "native_max_relative_deviation": 3.552713678800501e-15,
+      "ambiguous_threshold_months": []
+    },
+    "ITW": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2112660338282124e-07,
+      "p90_log_deviation": 3.505528237063353e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.4144815185801463e-07,
+      "native_max_relative_deviation": 3.8143421798864097e-07,
+      "ambiguous_threshold_months": []
+    },
+    "JCI": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.195431268757573e-07,
+      "p90_log_deviation": 3.1961751866628395e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.882911734480302e-08,
+      "native_max_relative_deviation": 2.672570663664331e-07,
+      "ambiguous_threshold_months": []
+    },
+    "JNJ": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3855410641731826e-07,
+      "p90_log_deviation": 3.18918433877378e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.013388881813796e-08,
+      "native_max_relative_deviation": 2.867550110696726e-07,
+      "ambiguous_threshold_months": []
+    },
+    "JPM": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4425296488279938e-07,
+      "p90_log_deviation": 3.2105229872329187e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.345215352090207e-08,
+      "native_max_relative_deviation": 2.7570472771465404e-07,
+      "ambiguous_threshold_months": []
+    },
+    "KDP": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2892532068282372e-07,
+      "p90_log_deviation": 3.0371488806405465e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.4477669264585415e-08,
+      "native_max_relative_deviation": 2.1210320721998244e-07,
+      "ambiguous_threshold_months": []
+    },
+    "KEYS": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 8.881784197001248e-16,
+      "p90_log_deviation": 4.773959005888184e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.440892098500626e-16,
+      "native_max_relative_deviation": 3.6637359812630166e-15,
+      "ambiguous_threshold_months": []
+    },
+    "KHC": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.428672461530366e-07,
+      "p90_log_deviation": 3.4813505232237035e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.389565881421589e-08,
+      "native_max_relative_deviation": 2.935477161347677e-07,
+      "ambiguous_threshold_months": []
+    },
+    "KKR": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1724335772493925e-07,
+      "p90_log_deviation": 2.3758813685545162e-07,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "KLAC": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.6676209861725584e-07,
+      "p90_log_deviation": 3.5489826646815367e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.090443404107361e-08,
+      "native_max_relative_deviation": 4.0146991553413613e-07,
+      "ambiguous_threshold_months": []
+    },
+    "KMB": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4868622759129963e-07,
+      "p90_log_deviation": 3.6782783804089864e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.0370697367534376e-07,
+      "native_max_relative_deviation": 3.16612926765103e-07,
+      "ambiguous_threshold_months": []
+    },
+    "KMI": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3837069340258027e-07,
+      "p90_log_deviation": 3.205666351476442e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.205457662808669e-08,
+      "native_max_relative_deviation": 2.9946884594345136e-07,
+      "ambiguous_threshold_months": []
+    },
+    "KO": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 9.695007919177194e-08,
+      "p90_log_deviation": 2.990050733275777e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.609958713710284e-08,
+      "native_max_relative_deviation": 2.2141469524505908e-07,
+      "ambiguous_threshold_months": []
+    },
+    "KR": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.429165069226612e-07,
+      "p90_log_deviation": 3.1895302278825795e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.310947380823052e-08,
+      "native_max_relative_deviation": 2.577073429099741e-07,
+      "ambiguous_threshold_months": []
+    },
+    "KVUE": {
+      "status": "review_required",
+      "overlap_returns": 5,
+      "median_log_deviation": 1.0343421732254858e-07,
+      "p90_log_deviation": 1.2166068678495967e-07,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "LEN": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3834949051428052e-07,
+      "p90_log_deviation": 2.8143709443862797e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.0441384867831971e-07,
+      "native_max_relative_deviation": 2.316564775561858e-07,
+      "ambiguous_threshold_months": []
+    },
+    "LHX": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.41336321656982e-07,
+      "p90_log_deviation": 3.4160695011065035e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.714525418478502e-08,
+      "native_max_relative_deviation": 2.735234783113327e-07,
+      "ambiguous_threshold_months": []
+    },
+    "LIN": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.119982529087811e-07,
+      "p90_log_deviation": 3.7851373527104235e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.747850510637534e-08,
+      "native_max_relative_deviation": 2.825630887048902e-07,
+      "ambiguous_threshold_months": []
+    },
+    "LLY": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 9.49507080896445e-08,
+      "p90_log_deviation": 2.8905655443751556e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.0830083396751178e-07,
+      "native_max_relative_deviation": 3.4905290335895955e-07,
+      "ambiguous_threshold_months": []
+    },
+    "LMT": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2107502833656096e-07,
+      "p90_log_deviation": 2.912341975340054e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.267318978878336e-08,
+      "native_max_relative_deviation": 3.156949225369132e-07,
+      "ambiguous_threshold_months": []
+    },
+    "LOW": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3083541270963664e-07,
+      "p90_log_deviation": 3.0327262725730276e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.961331590003226e-08,
+      "native_max_relative_deviation": 2.732789552428727e-07,
+      "ambiguous_threshold_months": []
+    },
+    "LRCX": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2564750927441123e-07,
+      "p90_log_deviation": 3.045506491756886e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.758702674249719e-08,
+      "native_max_relative_deviation": 2.6224651672457355e-07,
+      "ambiguous_threshold_months": []
+    },
+    "LULU": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 9.43689570931383e-16,
+      "p90_log_deviation": 2.664535259100372e-15,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "LVS": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 6.798358309603461e-08,
+      "p90_log_deviation": 1.948107567576284e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 2.9300792458997194e-08,
+      "native_max_relative_deviation": 1.726707370419689e-07,
+      "ambiguous_threshold_months": []
+    },
+    "LYB": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4309561405591625e-07,
+      "p90_log_deviation": 3.777450549441801e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.027715314717909e-08,
+      "native_max_relative_deviation": 2.7539922275998663e-07,
+      "ambiguous_threshold_months": []
+    },
+    "LYV": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 4.440892098500627e-16,
+      "p90_log_deviation": 1.554312234475218e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.440892098500626e-16,
+      "native_max_relative_deviation": 4.3298697960381105e-15,
+      "ambiguous_threshold_months": []
+    },
+    "MA": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.5043424738003944e-07,
+      "p90_log_deviation": 4.2991002997902325e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.3092105533019094e-07,
+      "native_max_relative_deviation": 4.907580453128446e-07,
+      "ambiguous_threshold_months": []
+    },
+    "MAR": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0492688100505506e-07,
+      "p90_log_deviation": 3.1952419863292205e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.706880907257016e-08,
+      "native_max_relative_deviation": 2.029192243124811e-07,
+      "ambiguous_threshold_months": []
+    },
+    "MCD": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.211630958766015e-07,
+      "p90_log_deviation": 2.8250052437153553e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.5274541388428133e-08,
+      "native_max_relative_deviation": 2.3667706006147426e-07,
+      "ambiguous_threshold_months": []
+    },
+    "MCHP": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4724844529164114e-07,
+      "p90_log_deviation": 3.1724068519363824e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.0473293965418407e-07,
+      "native_max_relative_deviation": 3.040179010760369e-07,
+      "ambiguous_threshold_months": []
+    },
+    "MCK": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0350827014931295e-07,
+      "p90_log_deviation": 3.2883294076810365e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.335172452245132e-08,
+      "native_max_relative_deviation": 3.4904040990824114e-07,
+      "ambiguous_threshold_months": []
+    },
+    "MCO": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.485317691718553e-07,
+      "p90_log_deviation": 3.346549285882767e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.640390536385212e-08,
+      "native_max_relative_deviation": 2.6901411009916387e-07,
+      "ambiguous_threshold_months": []
+    },
+    "MDLZ": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1059434959422932e-07,
+      "p90_log_deviation": 3.0094871973455583e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.884831908557601e-08,
+      "native_max_relative_deviation": 2.992522859512903e-07,
+      "ambiguous_threshold_months": []
+    },
+    "MDT": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1969963336766782e-07,
+      "p90_log_deviation": 2.780285538603504e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.710937305864917e-08,
+      "native_max_relative_deviation": 2.7585339590352476e-07,
+      "ambiguous_threshold_months": []
+    },
+    "MET": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0757250527029402e-07,
+      "p90_log_deviation": 2.9399783421839177e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.668774425541926e-08,
+      "native_max_relative_deviation": 4.045981081279848e-07,
+      "ambiguous_threshold_months": []
+    },
+    "META": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 8.413962650032983e-08,
+      "p90_log_deviation": 1.9825505248752464e-07,
+      "native_overlap_months": 59,
+      "native_median_relative_deviation": 1.8953543956534702e-08,
+      "native_max_relative_deviation": 5.567419325558376e-08,
+      "ambiguous_threshold_months": []
+    },
+    "MLM": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.396035871094466e-07,
+      "p90_log_deviation": 3.360341950762253e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.779689936704415e-08,
+      "native_max_relative_deviation": 2.9179517668787014e-07,
+      "ambiguous_threshold_months": []
+    },
+    "MMC": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3694783024666048e-07,
+      "p90_log_deviation": 0.004062646670415907,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.398725399010431e-08,
+      "native_max_relative_deviation": 2.4034940959705153e-07,
+      "ambiguous_threshold_months": []
+    },
+    "MMM": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.207110969500409e-07,
+      "p90_log_deviation": 3.087077701030246e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.248665274100063e-08,
+      "native_max_relative_deviation": 1.5566100852737463e-07,
+      "ambiguous_threshold_months": []
+    },
+    "MO": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1103227788625625e-07,
+      "p90_log_deviation": 3.323789669649875e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.13878107236232e-08,
+      "native_max_relative_deviation": 1.7158821608020958e-07,
+      "ambiguous_threshold_months": []
+    },
+    "MOH": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.5543122344752192e-15,
+      "p90_log_deviation": 3.5527136788004946e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.1102230246251565e-15,
+      "native_max_relative_deviation": 3.9968028886505635e-15,
+      "ambiguous_threshold_months": []
+    },
+    "MPWR": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.5135228213855604e-07,
+      "p90_log_deviation": 3.123284053964939e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.981249489612651e-08,
+      "native_max_relative_deviation": 3.5588824920385065e-07,
+      "ambiguous_threshold_months": []
+    },
+    "MRK": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3417049000466095e-07,
+      "p90_log_deviation": 2.973983518699642e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.036792586985086e-08,
+      "native_max_relative_deviation": 2.888653913846184e-07,
+      "ambiguous_threshold_months": []
+    },
+    "MRNA": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3322676295501878e-15,
+      "p90_log_deviation": 3.774758283725525e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.1102230246251565e-15,
+      "native_max_relative_deviation": 3.1086244689504383e-15,
+      "ambiguous_threshold_months": []
+    },
+    "MRVL": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.428426928825842e-07,
+      "p90_log_deviation": 4.088041628940751e-07,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "MS": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1863442832479936e-07,
+      "p90_log_deviation": 3.0327086883878964e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.568180954680258e-08,
+      "native_max_relative_deviation": 3.143605749045264e-07,
+      "ambiguous_threshold_months": []
+    },
+    "MSCI": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 8.430741896474966e-08,
+      "p90_log_deviation": 2.4484077276983575e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.581802713956364e-08,
+      "native_max_relative_deviation": 2.404444061632205e-07,
+      "ambiguous_threshold_months": []
+    },
+    "MSFT": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0629571299480661e-07,
+      "p90_log_deviation": 2.3895352306290223e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.69296525979135e-08,
+      "native_max_relative_deviation": 2.7982016059802106e-07,
+      "ambiguous_threshold_months": []
+    },
+    "MSI": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3451527631112328e-07,
+      "p90_log_deviation": 3.211831992128374e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.5127955533862405e-08,
+      "native_max_relative_deviation": 2.548290138904008e-07,
+      "ambiguous_threshold_months": []
+    },
+    "MTB": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.5447797309877134e-07,
+      "p90_log_deviation": 3.6853006161699123e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.828598102057384e-08,
+      "native_max_relative_deviation": 2.261914876511284e-07,
+      "ambiguous_threshold_months": []
+    },
+    "MTD": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 4.440892098500626e-16,
+      "p90_log_deviation": 3.552713678800507e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 3.3306690738754696e-16,
+      "native_max_relative_deviation": 4.440892098500626e-15,
+      "ambiguous_threshold_months": []
+    },
+    "MU": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1667907376573619e-07,
+      "p90_log_deviation": 3.097983265217782e-07,
+      "native_overlap_months": 59,
+      "native_median_relative_deviation": 5.79585981430597e-08,
+      "native_max_relative_deviation": 9.98965159999532e-05,
+      "ambiguous_threshold_months": []
+    },
+    "NDAQ": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.054198377422678e-07,
+      "p90_log_deviation": 2.9238455667634547e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.6894557398656787e-08,
+      "native_max_relative_deviation": 2.5198011455174196e-07,
+      "ambiguous_threshold_months": []
+    },
+    "NEE": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.219845403597307e-07,
+      "p90_log_deviation": 3.047839518937053e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.954767555773401e-08,
+      "native_max_relative_deviation": 3.0713864951348313e-07,
+      "ambiguous_threshold_months": []
+    },
+    "NEM": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1548851511870669e-07,
+      "p90_log_deviation": 2.6390926825357115e-07,
+      "native_overlap_months": 59,
+      "native_median_relative_deviation": 5.702510674776562e-08,
+      "native_max_relative_deviation": 3.342514161008836e-07,
+      "ambiguous_threshold_months": []
+    },
+    "NFLX": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 3.498013390030595e-08,
+      "p90_log_deviation": 7.862644600306985e-08,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.440892098500626e-16,
+      "native_max_relative_deviation": 2.886579864025407e-15,
+      "ambiguous_threshold_months": []
+    },
+    "NKE": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.132794784413807e-07,
+      "p90_log_deviation": 3.330298186677675e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.283980162422267e-08,
+      "native_max_relative_deviation": 2.5272257297981326e-07,
+      "ambiguous_threshold_months": []
+    },
+    "NOC": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1719120632224842e-07,
+      "p90_log_deviation": 2.8469085921892073e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.151577013393307e-08,
+      "native_max_relative_deviation": 3.756135757981838e-07,
+      "ambiguous_threshold_months": []
+    },
+    "NOW": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 4.163497515557936e-08,
+      "p90_log_deviation": 1.0458950042310352e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.440892098500626e-16,
+      "native_max_relative_deviation": 1.7763568394002505e-15,
+      "ambiguous_threshold_months": []
+    },
+    "NSC": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3043431205953928e-07,
+      "p90_log_deviation": 3.139430193726185e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.593061934763057e-08,
+      "native_max_relative_deviation": 3.04290855290823e-07,
+      "ambiguous_threshold_months": []
+    },
+    "NUE": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.34509692995511e-07,
+      "p90_log_deviation": 3.034036644781572e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.647487731965441e-08,
+      "native_max_relative_deviation": 2.450219318550495e-07,
+      "ambiguous_threshold_months": []
+    },
+    "NVDA": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3966288550397762e-07,
+      "p90_log_deviation": 2.849431182848462e-07,
+      "native_overlap_months": 59,
+      "native_median_relative_deviation": 5.880081532794179e-08,
+      "native_max_relative_deviation": 2.67229493422505e-07,
+      "ambiguous_threshold_months": []
+    },
+    "NVR": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 0.0,
+      "p90_log_deviation": 1.554312234475218e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 0.0,
+      "native_max_relative_deviation": 1.9984014443252818e-15,
+      "ambiguous_threshold_months": []
+    },
+    "NXPI": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4379679459802884e-07,
+      "p90_log_deviation": 4.0023664587315353e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.409171758927414e-08,
+      "native_max_relative_deviation": 3.246817240620814e-07,
+      "ambiguous_threshold_months": []
+    },
+    "O": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 2.2323491107530453e-07,
+      "p90_log_deviation": 5.959450593611094e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.1422992973741941e-07,
+      "native_max_relative_deviation": 5.095103473573559e-07,
+      "ambiguous_threshold_months": []
+    },
+    "ODFL": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1256004429831235e-07,
+      "p90_log_deviation": 2.9442149522718925e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.742466478002143e-08,
+      "native_max_relative_deviation": 2.83531106148871e-07,
+      "ambiguous_threshold_months": []
+    },
+    "OKE": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3454793495585624e-07,
+      "p90_log_deviation": 3.7868974846555996e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.910288281008036e-08,
+      "native_max_relative_deviation": 3.035664839501351e-07,
+      "ambiguous_threshold_months": []
+    },
+    "ON": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 7.216449660063519e-16,
+      "p90_log_deviation": 2.7755575615628953e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.661338147750939e-16,
+      "native_max_relative_deviation": 2.886579864025407e-15,
+      "ambiguous_threshold_months": []
+    },
+    "ORCL": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3153777034532796e-07,
+      "p90_log_deviation": 3.831654900921373e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.802650043269409e-08,
+      "native_max_relative_deviation": 3.421606302733693e-07,
+      "ambiguous_threshold_months": []
+    },
+    "OTIS": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 43,
+      "median_log_deviation": 9.304804049571493e-08,
+      "p90_log_deviation": 2.5920161090558554e-07,
+      "native_overlap_months": 28,
+      "native_median_relative_deviation": 8.125357442434478e-08,
+      "native_max_relative_deviation": 2.5153018379242553e-07,
+      "ambiguous_threshold_months": []
+    },
+    "OXY": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4761842861446206e-07,
+      "p90_log_deviation": 3.1042479364996556e-07,
+      "native_overlap_months": 59,
+      "native_median_relative_deviation": 5.658479795833671e-08,
+      "native_max_relative_deviation": 2.103300341671499e-07,
+      "ambiguous_threshold_months": []
+    },
+    "PANW": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0547118733938987e-15,
+      "p90_log_deviation": 4.996003610813217e-15,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "PAYX": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1179812754029872e-07,
+      "p90_log_deviation": 3.0356640734676804e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.1573637360746716e-08,
+      "native_max_relative_deviation": 2.7235317467955156e-07,
+      "ambiguous_threshold_months": []
+    },
+    "PCAR": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2198763094910627e-07,
+      "p90_log_deviation": 3.029337013138346e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.7208749576199693e-08,
+      "native_max_relative_deviation": 2.294272323233315e-07,
+      "ambiguous_threshold_months": []
+    },
+    "PCG": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 7.666119765707694e-08,
+      "p90_log_deviation": 2.063859194843526e-07,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "PEG": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0615343081571855e-07,
+      "p90_log_deviation": 2.610123564859826e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.115723506448177e-08,
+      "native_max_relative_deviation": 3.789594060776835e-07,
+      "ambiguous_threshold_months": []
+    },
+    "PEP": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 8.993339144804187e-08,
+      "p90_log_deviation": 2.776895485468679e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.1503719450684e-08,
+      "native_max_relative_deviation": 2.886521803802111e-07,
+      "ambiguous_threshold_months": []
+    },
+    "PFE": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0575839133454376e-07,
+      "p90_log_deviation": 2.79400900463309e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.0212702927780981e-07,
+      "native_max_relative_deviation": 3.5853392310603027e-07,
+      "ambiguous_threshold_months": []
+    },
+    "PG": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0781279750605048e-07,
+      "p90_log_deviation": 3.12685513739967e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.02619096845558e-08,
+      "native_max_relative_deviation": 2.7716509598540995e-07,
+      "ambiguous_threshold_months": []
+    },
+    "PGR": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.466451605949987e-07,
+      "p90_log_deviation": 3.607958627138594e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.048613764355395e-08,
+      "native_max_relative_deviation": 4.784507352528777e-07,
+      "ambiguous_threshold_months": []
+    },
+    "PH": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.366232027087883e-07,
+      "p90_log_deviation": 3.7490312065995406e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.789160532707285e-08,
+      "native_max_relative_deviation": 3.3832695445212835e-07,
+      "ambiguous_threshold_months": []
+    },
+    "PLD": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.707636124826514e-07,
+      "p90_log_deviation": 4.7082554114817906e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.510623072943702e-08,
+      "native_max_relative_deviation": 3.603836585819309e-07,
+      "ambiguous_threshold_months": []
+    },
+    "PLTR": {
+      "status": "review_required",
+      "overlap_returns": 37,
+      "median_log_deviation": 1.4432899320127045e-15,
+      "p90_log_deviation": 3.330669073875464e-15,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "PM": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0325623622484025e-07,
+      "p90_log_deviation": 2.698585244119048e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.474961899982645e-08,
+      "native_max_relative_deviation": 2.551873397038662e-07,
+      "ambiguous_threshold_months": []
+    },
+    "PNC": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3082782219926106e-07,
+      "p90_log_deviation": 2.5922470099697e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.830834342608227e-08,
+      "native_max_relative_deviation": 2.0501625508373422e-07,
+      "ambiguous_threshold_months": []
+    },
+    "PPG": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3548382696369898e-07,
+      "p90_log_deviation": 3.084799951660421e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.630334907306803e-08,
+      "native_max_relative_deviation": 2.8015166142481007e-07,
+      "ambiguous_threshold_months": []
+    },
+    "PPL": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0837043059253558e-07,
+      "p90_log_deviation": 2.4776944945454987e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.426556314360511e-08,
+      "native_max_relative_deviation": 1.8093939002650217e-07,
+      "ambiguous_threshold_months": []
+    },
+    "PRU": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 9.30450519407515e-08,
+      "p90_log_deviation": 1.9017913856093377e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.0759868751542001e-07,
+      "native_max_relative_deviation": 3.3336865157274076e-07,
+      "ambiguous_threshold_months": []
+    },
+    "PSA": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.393924915550229e-07,
+      "p90_log_deviation": 3.7045763879515324e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.638699368011203e-08,
+      "native_max_relative_deviation": 3.0406764728319047e-07,
+      "ambiguous_threshold_months": []
+    },
+    "PSX": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2060397535547715e-07,
+      "p90_log_deviation": 3.65346086176369e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.067046648932205e-08,
+      "native_max_relative_deviation": 3.8708300476031354e-07,
+      "ambiguous_threshold_months": []
+    },
+    "PWR": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3281725095496784e-07,
+      "p90_log_deviation": 3.2176043937495956e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.326138879408916e-08,
+      "native_max_relative_deviation": 3.792238996158659e-07,
+      "ambiguous_threshold_months": []
+    },
+    "PXD": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 4.5979722078135534e-07,
+      "p90_log_deviation": 0.016322160993158735,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.762398445190001e-08,
+      "native_max_relative_deviation": 2.9225974507163244e-07,
+      "ambiguous_threshold_months": []
+    },
+    "PYPL": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 4.96176649869044e-08,
+      "p90_log_deviation": 1.3795029966070636e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.1102230246251565e-15,
+      "native_max_relative_deviation": 4.440892098500626e-15,
+      "ambiguous_threshold_months": []
+    },
+    "QCOM": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3405157766368818e-07,
+      "p90_log_deviation": 3.286617639739056e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.3907340580881e-08,
+      "native_max_relative_deviation": 3.954856999666134e-07,
+      "ambiguous_threshold_months": []
+    },
+    "RCL": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 8.186332732291947e-08,
+      "p90_log_deviation": 1.5483569826616207e-07,
+      "native_overlap_months": 59,
+      "native_median_relative_deviation": 2.3650924885210145e-08,
+      "native_max_relative_deviation": 8.174087784418305e-08,
+      "ambiguous_threshold_months": []
+    },
+    "REGN": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 6.161075426406095e-08,
+      "p90_log_deviation": 1.431729783266612e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.440892098500626e-16,
+      "native_max_relative_deviation": 1.5543122344752192e-15,
+      "ambiguous_threshold_months": []
+    },
+    "RJF": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1996589664962644e-07,
+      "p90_log_deviation": 2.2721539344534328e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.680594188956945e-08,
+      "native_max_relative_deviation": 2.70620392317511e-07,
+      "ambiguous_threshold_months": []
+    },
+    "RMD": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2138205855851915e-07,
+      "p90_log_deviation": 3.79203855826745e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.25462007636446e-08,
+      "native_max_relative_deviation": 3.9632300086189787e-07,
+      "ambiguous_threshold_months": []
+    },
+    "ROK": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1534471804898176e-07,
+      "p90_log_deviation": 2.9523480254423707e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.896114546073306e-08,
+      "native_max_relative_deviation": 2.711066273697327e-07,
+      "ambiguous_threshold_months": []
+    },
+    "ROL": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0222781565620015e-07,
+      "p90_log_deviation": 3.416406349657273e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.628969661028663e-08,
+      "native_max_relative_deviation": 3.6878229947578944e-07,
+      "ambiguous_threshold_months": []
+    },
+    "ROST": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3559344504843066e-07,
+      "p90_log_deviation": 2.6148621157975044e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.711313238483285e-08,
+      "native_max_relative_deviation": 2.448837195245801e-07,
+      "ambiguous_threshold_months": []
+    },
+    "RSG": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1060197179316609e-07,
+      "p90_log_deviation": 2.845717567471853e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.550132646334418e-08,
+      "native_max_relative_deviation": 3.5216777072299976e-07,
+      "ambiguous_threshold_months": []
+    },
+    "RTX": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1198580990536361e-07,
+      "p90_log_deviation": 3.2479038959190643e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.493253205761221e-08,
+      "native_max_relative_deviation": 3.295224373367489e-07,
+      "ambiguous_threshold_months": []
+    },
+    "SBAC": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.6106061019554997e-07,
+      "p90_log_deviation": 3.769156669213455e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.983942856310989e-08,
+      "native_max_relative_deviation": 4.6129882025347513e-07,
+      "ambiguous_threshold_months": []
+    },
+    "SBUX": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1287641148260032e-07,
+      "p90_log_deviation": 2.733661121411942e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.300255112583585e-08,
+      "native_max_relative_deviation": 3.5433206224677605e-07,
+      "ambiguous_threshold_months": []
+    },
+    "SCHW": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3539627335280117e-07,
+      "p90_log_deviation": 3.452368338737848e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.834008308726936e-08,
+      "native_max_relative_deviation": 4.172406483649027e-07,
+      "ambiguous_threshold_months": []
+    },
+    "SE": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 8.881784197001248e-16,
+      "p90_log_deviation": 3.1086244689504336e-15,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "SHW": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 9.865670041560675e-08,
+      "p90_log_deviation": 3.3841854609924855e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.035990729458263e-08,
+      "native_max_relative_deviation": 1.766025390370629e-07,
+      "ambiguous_threshold_months": []
+    },
+    "SLB": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 9.981438811003755e-08,
+      "p90_log_deviation": 2.9800008437972903e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.368217824765821e-08,
+      "native_max_relative_deviation": 3.2662009263884073e-07,
+      "ambiguous_threshold_months": []
+    },
+    "SNPS": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 7.216449660063519e-16,
+      "p90_log_deviation": 2.2204460492503107e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.661338147750939e-16,
+      "native_max_relative_deviation": 3.3306690738754696e-15,
+      "ambiguous_threshold_months": []
+    },
+    "SO": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.44918522227583e-07,
+      "p90_log_deviation": 3.472552988412514e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.437270709344858e-08,
+      "native_max_relative_deviation": 3.029054759240424e-07,
+      "ambiguous_threshold_months": []
+    },
+    "SPG": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 9.078957637047215e-08,
+      "p90_log_deviation": 3.0277722760798364e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.110800320260125e-08,
+      "native_max_relative_deviation": 2.487158328179362e-07,
+      "ambiguous_threshold_months": []
+    },
+    "SPGI": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.285280906818279e-07,
+      "p90_log_deviation": 2.666512746406475e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.361531378398013e-08,
+      "native_max_relative_deviation": 3.07413260181022e-07,
+      "ambiguous_threshold_months": []
+    },
+    "SRE": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.9976049617598553e-07,
+      "p90_log_deviation": 0.00827510137722121,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.123829348643085e-08,
+      "native_max_relative_deviation": 3.7960463994402005e-07,
+      "ambiguous_threshold_months": []
+    },
+    "STE": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1206752709263913e-07,
+      "p90_log_deviation": 2.6644150560477025e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.415854851368977e-08,
+      "native_max_relative_deviation": 3.876387950629834e-07,
+      "ambiguous_threshold_months": []
+    },
+    "STT": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.5053853196250314e-07,
+      "p90_log_deviation": 3.273696304423573e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.313197375984458e-08,
+      "native_max_relative_deviation": 3.9514382632610534e-07,
+      "ambiguous_threshold_months": []
+    },
+    "STZ": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.456798584462746e-07,
+      "p90_log_deviation": 4.014314458336441e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.861698603228717e-08,
+      "native_max_relative_deviation": 3.297960446957404e-07,
+      "ambiguous_threshold_months": []
+    },
+    "SYK": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0473205377364615e-07,
+      "p90_log_deviation": 2.752607625423509e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.749525688880652e-08,
+      "native_max_relative_deviation": 2.6131800656692405e-07,
+      "ambiguous_threshold_months": []
+    },
+    "SYY": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0567870801365423e-07,
+      "p90_log_deviation": 3.4712057924166653e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.65289977949979e-08,
+      "native_max_relative_deviation": 3.5498221884200376e-07,
+      "ambiguous_threshold_months": []
+    },
+    "T": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3101414469706294e-07,
+      "p90_log_deviation": 3.4044498154142114e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.735065692988542e-08,
+      "native_max_relative_deviation": 3.667028369847003e-07,
+      "ambiguous_threshold_months": []
+    },
+    "TDG": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 7.439198933022065e-08,
+      "p90_log_deviation": 1.7790520584927148e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 3.500157430558204e-08,
+      "native_max_relative_deviation": 1.0472655520565866e-07,
+      "ambiguous_threshold_months": []
+    },
+    "TEL": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.350244088172561e-07,
+      "p90_log_deviation": 3.1303446682676503e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.896434090464254e-08,
+      "native_max_relative_deviation": 2.769057343421366e-07,
+      "ambiguous_threshold_months": []
+    },
+    "TFC": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3081694815449799e-07,
+      "p90_log_deviation": 3.505586803671883e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.844546496242998e-08,
+      "native_max_relative_deviation": 4.429898596836068e-07,
+      "ambiguous_threshold_months": []
+    },
+    "TGT": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 9.347368946471276e-08,
+      "p90_log_deviation": 2.754631827380767e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.637271272007638e-08,
+      "native_max_relative_deviation": 3.5113326180002957e-07,
+      "ambiguous_threshold_months": []
+    },
+    "TJX": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.195417131556719e-07,
+      "p90_log_deviation": 2.829205558148339e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.6694812622382074e-08,
+      "native_max_relative_deviation": 2.3467064702575868e-07,
+      "ambiguous_threshold_months": []
+    },
+    "TMO": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2254775657510335e-07,
+      "p90_log_deviation": 2.6902912698072675e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.159331438799654e-08,
+      "native_max_relative_deviation": 2.5799261127446016e-07,
+      "ambiguous_threshold_months": []
+    },
+    "TMUS": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0427756698240881e-07,
+      "p90_log_deviation": 2.275049507561199e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.1102230246251565e-15,
+      "native_max_relative_deviation": 3.774758283725532e-15,
+      "ambiguous_threshold_months": []
+    },
+    "TRGP": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.8216730252125783e-07,
+      "p90_log_deviation": 3.5002081435957083e-07,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "TROW": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1241906215138682e-07,
+      "p90_log_deviation": 2.7655777995968836e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.072703245292189e-08,
+      "native_max_relative_deviation": 2.4875248572087116e-07,
+      "ambiguous_threshold_months": []
+    },
+    "TRV": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2041897443833248e-07,
+      "p90_log_deviation": 2.5433147391596515e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.946623010151143e-08,
+      "native_max_relative_deviation": 3.031090940464054e-07,
+      "ambiguous_threshold_months": []
+    },
+    "TSCO": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4532350210853505e-07,
+      "p90_log_deviation": 4.435096190456344e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.96536242017487e-08,
+      "native_max_relative_deviation": 2.58828388277621e-07,
+      "ambiguous_threshold_months": []
+    },
+    "TSLA": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.5543122344752203e-15,
+      "p90_log_deviation": 2.4424906541753412e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 2.8656081951794476e-08,
+      "native_max_relative_deviation": 8.566064624293546e-08,
+      "ambiguous_threshold_months": []
+    },
+    "TT": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.5760219600006274e-07,
+      "p90_log_deviation": 3.0908784018315825e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.012716096710392e-08,
+      "native_max_relative_deviation": 4.131724913314372e-07,
+      "ambiguous_threshold_months": []
+    },
+    "TTD": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 6.661338147750937e-16,
+      "p90_log_deviation": 2.4424906541753412e-15,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "TTWO": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 2.1094237467877998e-15,
+      "p90_log_deviation": 4.2188474935756035e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.1102230246251565e-15,
+      "native_max_relative_deviation": 3.885780586188048e-15,
+      "ambiguous_threshold_months": []
+    },
+    "TXN": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4447963985998394e-07,
+      "p90_log_deviation": 2.849433092078745e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.37087999524988e-08,
+      "native_max_relative_deviation": 2.771580288607467e-07,
+      "ambiguous_threshold_months": []
+    },
+    "UBER": {
+      "status": "review_required",
+      "overlap_returns": 53,
+      "median_log_deviation": 6.661338147750941e-16,
+      "p90_log_deviation": 2.3314683517128315e-15,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "ULTA": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 9.436895709313835e-16,
+      "p90_log_deviation": 2.4424906541753475e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.1102230246251565e-15,
+      "native_max_relative_deviation": 1.7763568394002505e-15,
+      "ambiguous_threshold_months": []
+    },
+    "UNH": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0959018790193439e-07,
+      "p90_log_deviation": 3.888282513617137e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.1419445122839988e-07,
+      "native_max_relative_deviation": 4.138609394077619e-07,
+      "ambiguous_threshold_months": []
+    },
+    "UNP": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0894871424445469e-07,
+      "p90_log_deviation": 2.7576077682758394e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.154106907934164e-08,
+      "native_max_relative_deviation": 2.5998989583442267e-07,
+      "ambiguous_threshold_months": []
+    },
+    "UPS": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.5523024347006168e-07,
+      "p90_log_deviation": 3.063417920843667e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.0315872978061691e-07,
+      "native_max_relative_deviation": 2.6907920747110126e-07,
+      "ambiguous_threshold_months": []
+    },
+    "URI": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2600507333584626e-07,
+      "p90_log_deviation": 3.0040286675821496e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.0108935062121986e-08,
+      "native_max_relative_deviation": 1.101414041082549e-07,
+      "ambiguous_threshold_months": []
+    },
+    "USB": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0955260053670878e-07,
+      "p90_log_deviation": 2.9530181403190484e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.4352812473013046e-08,
+      "native_max_relative_deviation": 2.2984428649230892e-07,
+      "ambiguous_threshold_months": []
+    },
+    "V": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2806911507930693e-07,
+      "p90_log_deviation": 3.153895540259442e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.978422640800062e-08,
+      "native_max_relative_deviation": 3.409681621491245e-07,
+      "ambiguous_threshold_months": []
+    },
+    "VEEV": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.6653345369377346e-15,
+      "p90_log_deviation": 4.773959005888184e-15,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "VICI": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2697817245849965e-07,
+      "p90_log_deviation": 3.063654052345148e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 4.898223660010359e-08,
+      "native_max_relative_deviation": 3.4715366026283334e-07,
+      "ambiguous_threshold_months": []
+    },
+    "VLO": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 9.33474182328717e-08,
+      "p90_log_deviation": 3.1154034184547913e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.059216233784582e-08,
+      "native_max_relative_deviation": 3.0058863842441497e-07,
+      "ambiguous_threshold_months": []
+    },
+    "VMC": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 7.043019425822728e-08,
+      "p90_log_deviation": 2.7935734820257735e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.947569497484096e-08,
+      "native_max_relative_deviation": 2.7091439669391093e-07,
+      "ambiguous_threshold_months": []
+    },
+    "VRSK": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 9.278074619009352e-08,
+      "p90_log_deviation": 2.523113788228866e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.990763251086719e-08,
+      "native_max_relative_deviation": 2.8654093664481906e-07,
+      "ambiguous_threshold_months": []
+    },
+    "VRSN": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 5.985022209686271e-08,
+      "p90_log_deviation": 1.1511274892440048e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.1102230246251565e-15,
+      "native_max_relative_deviation": 2.6645352591003757e-15,
+      "ambiguous_threshold_months": []
+    },
+    "VRTX": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 9.992007221626415e-16,
+      "p90_log_deviation": 2.2204460492503154e-15,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.881784197001252e-16,
+      "native_max_relative_deviation": 3.1086244689504383e-15,
+      "ambiguous_threshold_months": []
+    },
+    "VZ": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4181938216815107e-07,
+      "p90_log_deviation": 2.902168581764919e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.575657529594992e-08,
+      "native_max_relative_deviation": 1.9901764847229941e-07,
+      "ambiguous_threshold_months": []
+    },
+    "WAB": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.1444777926124316e-07,
+      "p90_log_deviation": 2.401521787805273e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.368448745077472e-08,
+      "native_max_relative_deviation": 2.4224124550720205e-07,
+      "ambiguous_threshold_months": []
+    },
+    "WBD": {
+      "status": "review_required",
+      "overlap_returns": 18,
+      "median_log_deviation": 1.0990295579007521e-06,
+      "p90_log_deviation": 8.785923131010521e-06,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "WDAY": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.4988010832439613e-15,
+      "p90_log_deviation": 3.885780586188056e-15,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "WEC": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.5704485700896e-07,
+      "p90_log_deviation": 3.770427830215659e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.349922375749941e-08,
+      "native_max_relative_deviation": 2.5049808249910654e-07,
+      "ambiguous_threshold_months": []
+    },
+    "WELL": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.915926958917524e-07,
+      "p90_log_deviation": 3.975044392104597e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.810759049599937e-08,
+      "native_max_relative_deviation": 4.625505619637593e-07,
+      "ambiguous_threshold_months": []
+    },
+    "WFC": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3621514276596548e-07,
+      "p90_log_deviation": 3.1220295037758056e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.175828387051553e-08,
+      "native_max_relative_deviation": 2.316494360776744e-07,
+      "ambiguous_threshold_months": []
+    },
+    "WM": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.740575880139519e-07,
+      "p90_log_deviation": 3.7518616880530205e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.114332173901005e-08,
+      "native_max_relative_deviation": 2.6227812932599903e-07,
+      "ambiguous_threshold_months": []
+    },
+    "WMB": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.0059719606471485e-07,
+      "p90_log_deviation": 2.9236962539510014e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 9.539992129603547e-08,
+      "native_max_relative_deviation": 3.788094078416293e-07,
+      "ambiguous_threshold_months": []
+    },
+    "WMT": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2072393658488564e-07,
+      "p90_log_deviation": 3.1938816331602144e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 5.637004873992879e-08,
+      "native_max_relative_deviation": 3.4843056817557283e-07,
+      "ambiguous_threshold_months": []
+    },
+    "WST": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.284401403606717e-07,
+      "p90_log_deviation": 3.67082195402379e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.0559289354006296e-07,
+      "native_max_relative_deviation": 3.7762681470709936e-07,
+      "ambiguous_threshold_months": []
+    },
+    "WTW": {
+      "status": "review_required",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2191580745556469e-07,
+      "p90_log_deviation": 2.9777600200471317e-07,
+      "native_overlap_months": 0,
+      "native_median_relative_deviation": null,
+      "native_max_relative_deviation": null,
+      "ambiguous_threshold_months": []
+    },
+    "WY": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2122955191081862e-07,
+      "p90_log_deviation": 3.9960609156756573e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.801759771552952e-08,
+      "native_max_relative_deviation": 3.439004043759297e-07,
+      "ambiguous_threshold_months": []
+    },
+    "XEL": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 9.916559481724355e-08,
+      "p90_log_deviation": 2.6846920737623573e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 1.0092770041936205e-07,
+      "native_max_relative_deviation": 3.319117516387138e-07,
+      "ambiguous_threshold_months": []
+    },
+    "XOM": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.2208287243735258e-07,
+      "p90_log_deviation": 3.00682656347936e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.298674170070797e-08,
+      "native_max_relative_deviation": 3.501392811244841e-07,
+      "ambiguous_threshold_months": []
+    },
+    "XYL": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.53543335110705e-07,
+      "p90_log_deviation": 3.919732956051482e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.499977599552011e-08,
+      "native_max_relative_deviation": 3.269614506917762e-07,
+      "ambiguous_threshold_months": []
+    },
+    "YUM": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.330452876350999e-07,
+      "p90_log_deviation": 2.951548802768222e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 8.00637260933712e-08,
+      "native_max_relative_deviation": 3.213801685886253e-07,
+      "ambiguous_threshold_months": []
+    },
+    "ZBH": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.024087226981883e-07,
+      "p90_log_deviation": 3.121589427884806e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 7.77911716154378e-08,
+      "native_max_relative_deviation": 3.0763729919058846e-07,
+      "ambiguous_threshold_months": []
+    },
+    "ZTS": {
+      "status": "crosscheck_pass",
+      "overlap_returns": 58,
+      "median_log_deviation": 1.3965183564464993e-07,
+      "p90_log_deviation": 2.769109773332165e-07,
+      "native_overlap_months": 43,
+      "native_median_relative_deviation": 6.196726376472839e-08,
+      "native_max_relative_deviation": 3.0248112126152193e-07,
+      "ambiguous_threshold_months": []
+    }
+  }
+}

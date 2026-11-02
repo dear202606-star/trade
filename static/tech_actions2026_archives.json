@@ -1,0 +1,163 @@
+{
+  "catalog_checked_at": "2026-11-02",
+  "archives": [
+    {
+      "symbol": "AMD",
+      "dataset": "ivanvaccari/amd-stock-price-history",
+      "version": 4,
+      "last_quote": "2026-08-27",
+      "filename": "AMD_stock_history.csv",
+      "archive_sha256": "46bbbe8b487bb98c5a5956fb865951a930182d8d76ef3c5ac8cedc4e4ffecc8f"
+    },
+    {
+      "symbol": "INTC",
+      "dataset": "ivanvaccari/intc-stock-price-history",
+      "version": 4,
+      "last_quote": "2026-08-27",
+      "filename": "INTC_stock_history.csv",
+      "archive_sha256": "9438b5e702ec9cb370082e2037e451c02cbac7b9689a3e7ad2f657daaac29315"
+    },
+    {
+      "symbol": "NVDA",
+      "dataset": "ivanvaccari/nvda-stock-price-history",
+      "version": 4,
+      "last_quote": "2026-08-27",
+      "filename": "NVDA_stock_history.csv",
+      "archive_sha256": "3e7b48a990419e293260db96329352b3e0fcd3f049d3d84379d8f90b2d94374e"
+    },
+    {
+      "symbol": "TSLA",
+      "dataset": "ivanvaccari/tsla-stock-price-history",
+      "version": 4,
+      "last_quote": "2026-08-27",
+      "filename": "TSLA_stock_history.csv",
+      "archive_sha256": "a5cffee49e3398e62925138cc1d6070db45f8817e2048490c007891228b46705"
+    },
+    {
+      "symbol": "META",
+      "dataset": "ivanvaccari/meta-stock-price-history",
+      "version": 4,
+      "last_quote": "2026-08-27",
+      "filename": "META_stock_history.csv",
+      "archive_sha256": "85790dd977461dbbf9d2ec146a9f3b09f442e7dcd995c8f5a9c29503c1ac898c"
+    },
+    {
+      "symbol": "IBM",
+      "dataset": "ivanvaccari/ibm-stock-price-history",
+      "version": 4,
+      "last_quote": "2026-08-27",
+      "filename": "IBM_stock_history.csv",
+      "archive_sha256": "7de6d40d2e545b676de97f8050a7140040633098b6c447a8ff88e8f51b0c68ee"
+    },
+    {
+      "symbol": "MSFT",
+      "dataset": "ivanvaccari/msft-stock-price-history",
+      "version": 4,
+      "last_quote": "2026-08-27",
+      "filename": "MSFT_stock_history.csv",
+      "archive_sha256": "ff83c7e8a40a6ea505f0059232c6e7a9007c7fcf69ebeb1c61308cd160e9d401"
+    },
+    {
+      "symbol": "GOOGL",
+      "dataset": "ivanvaccari/googl-stock-price-history",
+      "version": 4,
+      "last_quote": "2026-08-27",
+      "filename": "GOOGL_stock_history.csv",
+      "archive_sha256": "3348302d846008ab1a332b9c35220bc2c96bd430cc6903e545bfb6e648b57596"
+    },
+    {
+      "symbol": "AMZN",
+      "dataset": "ivanvaccari/amzn-stock-price-history",
+      "version": 4,
+      "last_quote": "2026-08-27",
+      "filename": "AMZN_stock_history.csv",
+      "archive_sha256": "fd74a142c28fb6e2e2ab8822bac140dc7fee304c4c2b774ee5838a8e3637ea0e"
+    },
+    {
+      "symbol": "TSM",
+      "dataset": "ivanvaccari/tsm-stock-price-history",
+      "version": 4,
+      "last_quote": "2026-08-27",
+      "filename": "TSM_stock_history.csv"
+    },
+    {
+      "symbol": "AVGO",
+      "dataset": "ivanvaccari/avgo-stock-price-history",
+      "version": 4,
+      "last_quote": "2026-08-27",
+      "filename": "AVGO_stock_history.csv",
+      "archive_sha256": "d093224c29ee6f4333d42db7f144475234214ba3587b44c541c74bf44d5b2daa"
+    },
+    {
+      "symbol": "ORCL",
+      "dataset": "ivanvaccari/orcl-stock-price-history",
+      "version": 4,
+      "last_quote": "2026-08-27",
+      "filename": "ORCL_stock_history.csv",
+      "archive_sha256": "c67d02fb28e1d06c7754f8181a9326b8e89b162f3160bae5f1f31072acecf6b2"
+    },
+    {
+      "symbol": "CRM",
+      "dataset": "ivanvaccari/crm-stock-price-history",
+      "version": 4,
+      "last_quote": "2026-08-27",
+      "filename": "CRM_stock_history.csv",
+      "archive_sha256": "a896fabba96f34d8ed8365573bb8ef391a320629c52b830468725346ceb2c9d4"
+    },
+    {
+      "symbol": "CSCO",
+      "dataset": "ivanvaccari/csco-stock-price-history",
+      "version": 4,
+      "last_quote": "2026-08-27",
+      "filename": "CSCO_stock_history.csv",
+      "archive_sha256": "7ecd0f5ecf855fd1095f5eab0f1be60c0a4a5cbe614a57cd93643d46f3def61e"
+    },
+    {
+      "symbol": "QCOM",
+      "dataset": "ivanvaccari/qcom-stock-price-history",
+      "version": 4,
+      "last_quote": "2026-08-27",
+      "filename": "QCOM_stock_history.csv",
+      "archive_sha256": "5a864f9863e5f42644ecfed2b16518a2ebcff3e27b18671b83260fd820a868f3"
+    },
+    {
+      "symbol": "TXN",
+      "dataset": "ivanvaccari/txn-stock-price-history",
+      "version": 4,
+      "last_quote": "2026-08-27",
+      "filename": "TXN_stock_history.csv",
+      "archive_sha256": "ba71ff8ed45e60de6013cd14b3271b49c062b33e3cca7af43d69640b6039fe74"
+    },
+    {
+      "symbol": "NFLX",
+      "dataset": "ivanvaccari/nflx-stock-price-history",
+      "version": 4,
+      "last_quote": "2026-08-27",
+      "filename": "NFLX_stock_history.csv",
+      "archive_sha256": "93e6289e4ba4ae36216eb27e181c9847888ddae99e22ba546fada8c9932aca4f"
+    },
+    {
+      "symbol": "SAP",
+      "dataset": "ivanvaccari/sap-stock-price-history",
+      "version": 4,
+      "last_quote": "2026-08-27",
+      "filename": "SAP_stock_history.csv"
+    },
+    {
+      "symbol": "ADBE",
+      "dataset": "ivanvaccari/adbe-stock-price-history",
+      "version": 4,
+      "last_quote": "2026-08-27",
+      "filename": "ADBE_stock_history.csv",
+      "archive_sha256": "023af8e2dacf26c24896af5e37061e6985c5545c68ae9a04d9fa8e95473e401b"
+    },
+    {
+      "symbol": "AAPL",
+      "dataset": "ivanvaccari/aapl-stock-price-history",
+      "version": 6,
+      "last_quote": "2026-08-27",
+      "filename": "AAPL_stock_history.csv",
+      "archive_sha256": "14758fc863a256b55911f2c0e361b76e0f167c6f7e87ab41a6285db6d65562e1"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "write": true,
+  "prepared_paths": 4,
+  "inserted_versions": 4,
+  "active_verified_paths": 4,
+  "policy": "cash_and_all_successor_shares",
+  "paths": [
+    {
+      "symbol": "LB",
+      "hold_year": 2021,
+      "event_date": "2021-08-03",
+      "policy": "cash_and_all_successor_shares",
+      "evidence_sha256": "5ab6f4a641b372351d8dc9968a198fef3a68b2c7f651042e5f06bdf9e1354804",
+      "calculator_sha256": "1b047e7994aba2a2c266384cbeecc3613c4ceb026c45fccc23d130ee9089e656"
+    },
+    {
+      "symbol": "BBWI",
+      "hold_year": 2021,
+      "event_date": "2021-08-03",
+      "policy": "cash_and_all_successor_shares",
+      "evidence_sha256": "6e690ab4c64270ac37af9ed8ef76f4ca99d1381b9d94e41d9ecdc5f2fb831b84",
+      "calculator_sha256": "1b047e7994aba2a2c266384cbeecc3613c4ceb026c45fccc23d130ee9089e656"
+    },
+    {
+      "symbol": "CVC",
+      "hold_year": 2016,
+      "event_date": "2016-06-21",
+      "policy": "cash_and_all_successor_shares",
+      "evidence_sha256": "ece6e92f0073303cb3435ad15b62b05a15eb9005f53944abed7bea285f6e8bbc",
+      "calculator_sha256": "9842aad8ef6f4a4691bf1230876a6fa660d157dd84a9cbc8b5bec7302f8989a6"
+    },
+    {
+      "symbol": "WDC",
+      "hold_year": 2025,
+      "event_date": "2025-02-24",
+      "policy": "cash_and_all_successor_shares",
+      "evidence_sha256": "22a69f3611222a96d819b4380b2faf57c60f0a07cfebbd79e01122e393ab393c",
+      "calculator_sha256": "e39859073d3f9a072204e7842fb3e5368fa7e0bbb96d474c8bf3775226ff35af"
+    }
+  ],
+  "quoted_prices_locks_and_published_baselines_changed": false
+}

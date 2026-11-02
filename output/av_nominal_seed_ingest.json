@@ -1,0 +1,27 @@
+{
+  "write": true,
+  "requested_limit": 2,
+  "results": [
+    {
+      "symbol": "NVDA",
+      "status": "stored",
+      "prepared_native_observations": 323,
+      "stored_native_observations": 323,
+      "staged_tr": 0,
+      "payload_sha256": "a6560255875a0057a21959b55050772323d0c8c399e5e181f596a4c04848d017",
+      "median_log_deviation": 8.377431913274417e-06,
+      "p90_log_deviation": 0.00014887613470638837
+    },
+    {
+      "symbol": "BJS",
+      "status": "stored",
+      "prepared_native_observations": 39,
+      "stored_native_observations": 39,
+      "staged_tr": 0,
+      "payload_sha256": "46e0966e93cafb1bb32f668903505bde7060afe57dede798976dfd5a5437aa05",
+      "median_log_deviation": 2.5815850808562547e-06,
+      "p90_log_deviation": 0.0029045634965589517
+    }
+  ],
+  "remaining_daily_calls": 18
+}

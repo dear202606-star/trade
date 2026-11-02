@@ -9,8 +9,8 @@ name: 每日补数与校验
 
 on:
   schedule:
-    # 每 2 小时尝试一次（额度恢复时刻不确定；脚本内部按当天已用次数扣减，不会超用）
-    - cron: "0 10,12,14,16,18,20 * * *"      # 每天 03:10 UTC（北京 11:10）
+    # 每日一次；Alpha Vantage 调用额度由数据库原子预约统一限制
+    - cron: "0 10 * * *"      # 18:00 北京时间
   workflow_dispatch:
     inputs:
       av_limit:
@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
-      contents: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -37,6 +37,16 @@ jobs:
 
       - name: 安装依赖
         run: pip install -q pandas requests lxml psycopg2-binary curl_cffi
+
+      - name: 补数与档案隔离回归
+        run: python -m unittest test_data_pipeline test_nominal_prices test_holding_consideration test_holding_paths test_eastmoney_nominal test_security_membership test_liquidity_prices
+
+      - name: 恢复已取得的月线响应（不含凭据）
+        uses: actions/cache@v4
+        with:
+          path: output/_av_monthly_native
+          key: av-native-v1-${{ github.run_id }}
+          restore-keys: av-native-v1-
 
       - name: 写入数据库口令
         env:
@@ -48,12 +58,29 @@ jobs:
       - name: 生成当日分工计划
         run: python allocate_work.py
 
+      - name: 核验并补充名义股价（共享 AV 日额度）
+        env:
+          ALPHAVANTAGE_API_KEY: ${{ secrets.ALPHAVANTAGE_API_KEY }}
+          AV_LIMIT: ${{ github.event.inputs.av_limit }}
+        run: |
+          python - <<'PY'
+          import os
+          import collect_av_nominal, relay_source
+          budget = int(os.environ.get('AV_LIMIT') or 24)
+          if not 0 <= budget <= 25:
+              raise SystemExit('AV 调用预算须为 0..25')
+          used = relay_source.av_used_last_24h()
+          if used is None:
+              raise SystemExit('无法核实共享额度，不发起请求')
+          collect_av_nominal.run(min(8, max(0, budget - used)), write=True)
+          PY
+
       - name: Alpha Vantage 分片（退市票优先）
         env:
           ALPHAVANTAGE_API_KEY: ${{ secrets.ALPHAVANTAGE_API_KEY }}
+          AV_LIMIT: ${{ github.event.inputs.av_limit }}
         run: |
-          LIMIT="${{ github.event.inputs.av_limit }}"
-          python relay_source.py --plan-source alphavantage --symbols "${LIMIT:-24}" --av-quota "${LIMIT:-24}"
+          python relay_source.py --plan-source alphavantage --symbols "${AV_LIMIT:-24}" --av-quota "${AV_LIMIT:-24}"
 
       - name: stockanalysis 补退市票（免费，10 年全收益）
         continue-on-error: true
@@ -71,19 +98,5 @@ jobs:
         continue-on-error: true
         run: python crosscheck_eodhd.py
 
-      - name: 数据质量验收
-        id: qa
-        continue-on-error: true
-        run: python validate_prices.py
-
-      - name: 提交行情与计划
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add static/prices static/prices_unified static/prices_manifest.json output/work_plan.json 2>/dev/null || true
-          if git diff --staged --quiet; then
-            echo "无新增"
-          else
-            git commit -m "chore: 每日补数 $(date -u +%Y-%m-%d)"
-            git push || echo "::warning::提交失败"
-          fi
+      - name: 数据库质量验收
+        run: python db_validate.py --data-only

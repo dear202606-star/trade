@@ -1,0 +1,44 @@
+{
+  "write": true,
+  "requested_limit": 4,
+  "results": [
+    {
+      "symbol": "AYE",
+      "status": "stored",
+      "prepared_native_observations": 49,
+      "stored_native_observations": 49,
+      "staged_tr": 0,
+      "payload_sha256": "14312a37978d99b6b3a2278220a01c72d08cc93756c4f97f37844b7f016b76a8",
+      "median_log_deviation": 0.0,
+      "p90_log_deviation": 0.0
+    },
+    {
+      "symbol": "GPS",
+      "status": "no_series",
+      "fields": [
+        "Error Message"
+      ]
+    },
+    {
+      "symbol": "ALXN",
+      "status": "stored",
+      "prepared_native_observations": 260,
+      "stored_native_observations": 260,
+      "staged_tr": 260,
+      "payload_sha256": "bd92aec0b65f6187c5f857a7877049cf257f532a21bee0b745a326e13f034d55",
+      "median_log_deviation": 7.46760556012473e-07,
+      "p90_log_deviation": 2.9350744036403793e-05
+    },
+    {
+      "symbol": "XLNX",
+      "status": "stored",
+      "prepared_native_observations": 266,
+      "stored_native_observations": 266,
+      "staged_tr": 266,
+      "payload_sha256": "4c1478ba8ebd09809f96d069e571e9f7f646864b0e07ce1088b48eec08165df0",
+      "median_log_deviation": 1.431400666327687e-06,
+      "p90_log_deviation": 0.0065434684526153334
+    }
+  ],
+  "remaining_daily_calls": 0
+}

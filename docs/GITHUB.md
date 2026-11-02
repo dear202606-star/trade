@@ -3,12 +3,20 @@
 > 项目**没有服务器**：一切由 GitHub Actions + Pages + Supabase 定时触发组成。
 > 本文说明每个工作流做什么、怎么改、出问题怎么查。
 
+> 2026-11-02 状态：本轮工作流修改尚未提交/推送，不能当作线上已运行。每日流程加入原价采集、共享 AV 25 次滚动额度和不含凭据的响应缓存；两条采集流程都运行 `test_data_pipeline` 与 `test_nominal_prices`。本地 45 项回归通过；发布自检因 A/B 旧口径历史仍失败 2 项，禁止绕过。数据库 090–095 已部署，不等于 GitHub 工作流已部署。
+
+> 后续增量：数据库已部署至 098，最新本地回归 49 项通过。选源刷新现在同时比较 source/basis；实时纠正 28 个旧口径标签，不改变报价。真实绑定的锁守卫通过 9 项回滚探针；本轮代码和工作流仍未推送，不能宣称 Actions 验收完成。
+
+> 最新：099 已部署以拒绝旧客户端的错误 basis 标签；真实守卫验证 13 项通过。两个采集工作流测试命令已扩展到 `test_holding_consideration`，本地三组共 56 项通过。实际现金/股票承接已获用户选择，生产收益账本接入仍在进行；代码和工作流继续留在本地，尚未通过 Actions/Browser 发布验收。
+
 ## 1. 工作流一览
 
 | 文件 | 名称 | 触发 | 作用 |
 |---|---|---|---|
 | `.github/workflows/quotes.yml` | 行情快照 | Supabase 定时（盘中每 5 分钟）+ 手动 | 抓行情 → 信号（同月增量）→ 净值 → 预览 → 逐年记录 → 构建 → 自检 → 部署 |
 | `.github/workflows/monthly-pick.yml` | 每日全量更新 | 每日定时 + 手动 | 同上的完整版，额外做生存者偏差审计、落盘选股快照 |
+| `.github/workflows/daily-backfill.yml` | 每日补数与校验 | 每日定时 + 手动 | 从获准数据源补行情到 Supabase，再执行数据库质量校验 |
+| `.github/workflows/collect-full.yml` | 采集与锁定 | 每 6 小时 + 手动 | 补数、重建选源、校验、锁定与汇总 |
 | `.github/workflows/e2e.yml` | 线上 E2E 校验 | 工作流完成后 + 定时 | 对**线上真实 URL** 做端到端校验（`e2e_check.py`，历史脚本，主要覆盖口径 A） |
 | `.github/workflows/data-check.yml` | 数据质量核对 | 每日 | 双源一致率、覆盖率报表 → 只记录，不再开 Issue |
 
@@ -47,7 +55,10 @@ concurrency:
 | 名称 | 用途 | 位置 |
 |---|---|---|
 | `gh_dispatch_token` | Supabase 调 GitHub API 触发工作流 | Supabase Vault |
-| `GITHUB_TOKEN` | 工作流内部使用（Pages 部署、提交） | Actions 自动注入 |
+| `GITHUB_TOKEN` | 工作流内部使用（Pages 部署） | Actions 自动注入 |
+| `SUPABASE_DB_PASSWORD` | Actions 中采集行情、写入校验记录 | Repository Secrets |
+| `ALPHAVANTAGE_API_KEY` | Alpha Vantage 历史行情（需确认账户权限及公开展示授权） | Repository Secrets |
+| `EODHD_API_TOKEN` | EODHD 近期行情交叉校验 | Repository Secrets |
 | 本地 `output/_pat_token.txt` | 手动触发/查询运行 | 本机（已 gitignore） |
 
 > 细粒度 PAT 需勾选 **Issues: Read and write** 才能用 API 关闭 Issue；当前 token 只有 actions/repo 读权限。
@@ -80,18 +91,13 @@ gh run view <run_id> -R dear202606-star/trade
 - 部署被自检拦下 → Actions 里能看到具体失败项，修完重新触发即可。
 - Pages 偶发 503 → 等待 1–2 分钟重试，不影响数据。
 
-## 8. 行情数据源（2026-11 起）
+## 9. 行情补数（2026-11 起）
 
 | 项 | 内容 |
 |---|---|
-| 源 | Alpha Vantage TIME_SERIES_MONTHLY_ADJUSTED（拆股+分红复权，含退市票，最早 1999） |
-| 额度 | 免费 25 次/天 |
-| 回填 | etch_prices.py 每天补 22 只，约 40 天覆盖 1209 只 |
-| 产物 | static/prices/<TICKER>.json（提交入库，可离线复现） |
-| 工作流 | .github/workflows/backfill-prices.yml（每天 03:10 UTC） |
-| 验收 | alidate_prices.py：NVDA 2021 +125% / NVDA 2024 +171% / DUK 2012-07 ≈0 / AMCR 2026 合理 / 覆盖率 ≥95% / 连续性 |
-| 切换闸门 | 覆盖率 <95% 时整体回退旧快照，避免新旧混算 |
-| Secret | ALPHAVANTAGE_API_KEY |
-
-| 第二源 | EODHD（免费仅近 13 个月）：每日校验持仓与预览前 5 名的月度收益，偏差 >2% 自动覆盖并重接历史 |
-| Secret | ALPHAVANTAGE_API_KEY、EODHD_API_TOKEN |
+| 主通道 | `.github/workflows/daily-backfill.yml`，每日 10:00 UTC；直接写 Supabase `prices_monthly` |
+| 来源 | Alpha Vantage（历史全收益）、StockAnalysis、HF、Yahoo、Sina、EODHD（用途和口径见 `DATA_SOURCES.md`） |
+| 额度 | Alpha Vantage 滚动 24 小时最多预约 25 次；请求前写入 `sys_event`，额度读取或预约失败时跳过该源 |
+| 验收 | `python -m unittest test_data_pipeline test_nominal_prices` 回归；`db_validate.py --data-only` 验收实时数据库并写入 `sys_event`；完整发布仍由 `selftest.py` 验收，数据库失败会阻止后续自动锁定。名义股价修正尚未完成时，A/B 旧历史会被发布自检阻止 |
+| Secret | `SUPABASE_DB_PASSWORD`；Alpha Vantage 与 EODHD 密钥仅在已获授权时配置 |
+| 旧通道 | `.github/workflows/backfill-prices.yml` 已从本地版本移除；它写静态行情快照，与 Supabase 唯一数据源原则冲突 |

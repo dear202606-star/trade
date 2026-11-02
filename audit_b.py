@@ -4,17 +4,21 @@
 检查项：
   1. 每年持仓 3 只、权重和 = 1、权重形状为等权或 30/30/40
   2. 单行业 ≤60%，同行业 ≤2 只
-  3. 每只持仓在「上一年」整年都在成分股内（起点 ≤ 1/1、终点 ≥ 12/31）
+  3. 每只持仓对应证券在上一年连续在册，已核验同股更名使用年末代码
   4. 每只持仓确实是合格池里 ret12 的前列（不应有更靠前且行业允许的票被跳过）
   5. 年收益 = 各票 Dec(Y-1)→Dec(Y) 加权；累计 = 逐年复利
   6. 曲线末点 ≈ 1 + total；基准 = 逐年 bench 复利
 用法：python audit_b.py [--json]
 """
 import json
+import datetime as dt
 import os
 import sys
 
 import pandas as pd
+import nominal_prices
+import holding_paths
+import security_membership
 import sys as _sys
 try:                                    # Windows cp936 下避免 emoji 打印崩溃
     _sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -23,9 +27,6 @@ except Exception:
     pass
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-MEM = os.path.join(BASE, "static", "members_frozen.csv")
-BARS = os.path.join(BASE, "static", "bars_monthly.json")
-SECT = os.path.join(BASE, "static", "sector_frozen.json")
 HIST = os.path.join(BASE, "docs", "data", "b", "strategy_history.json")
 CURVE = os.path.join(BASE, "docs", "data", "b", "curve.json")
 
@@ -40,8 +41,30 @@ def ck(cond, name, detail=""):
     return cond
 
 
+def full_year_member(frame,aliases,ticker,year):
+    """Independent day-by-day check, separate from the production interval merge."""
+    relevant=[a for a in aliases if int(a['effective_date'][:4])==year
+              and ticker in (a['old'],a['current'])]
+    if len(relevant)>1:raise RuntimeError('Ambiguous same-year ticker chain')
+    periods=[(r.ticker,str(r.start_date)[:10],str(r.end_date)[:10]) for r in frame.itertuples()]
+    if relevant:
+        alias=relevant[0]
+        if ticker==alias['old']:return False
+        day=dt.date(year,1,1)
+        while day.year==year:
+            text=str(day);code=alias['old'] if text<alias['effective_date'] else alias['current']
+            if not any(s==code and a<=text<=b for s,a,b in periods):return False
+            day+=dt.timedelta(days=1)
+        return True
+    return any(s==ticker and a<='%d-01-01'%year and b>='%d-12-31'%year for s,a,b in periods)
+
+
 def main():
-    mem = pd.read_csv(MEM, dtype=str).fillna("2099-12-31")
+    import db_ref
+    members=db_ref.load_members()
+    mem=pd.DataFrame([{'ticker':s,'start_date':a,'end_date':b}
+                      for s,periods in members.items() for a,b in periods])
+    aliases=security_membership.load_aliases()
     # 必须与被审计对象同源：variant_b 读在线库，审计也读在线库（DB 或 REST）
     bars = None
     try:
@@ -52,18 +75,8 @@ def main():
             print("审计数据源：在线库 %d 只" % len(bars), flush=True)
     except Exception as e:
         print("⚠ 在线库不可用：%s" % str(e)[:70], flush=True)
-    if not bars:
-        uni = os.path.join(BASE, "static", "prices_unified")
-        if os.path.isdir(uni):
-            bars = {}
-            for f in os.listdir(uni):
-                if f.endswith(".json"):
-                    o = json.load(open(os.path.join(uni, f), encoding="utf-8"))
-                    bars[o["ticker"]] = [[r[0], r[1], r[1]] for r in o["bars"]]
-            print("审计数据源：本地统一数据集（回退）%d 只" % len(bars), flush=True)
-        else:
-            bars = json.load(open(BARS, encoding="utf-8"))
-    sect = json.load(open(SECT, encoding="utf-8"))
+    if not bars:raise RuntimeError('Online audit prices unavailable; local fallback is prohibited')
+    sect = db_ref.load_sectors()
     hist = json.load(open(HIST, encoding="utf-8"))
     curve = json.load(open(CURVE, encoding="utf-8"))
 
@@ -71,13 +84,12 @@ def main():
     years = hist["years"]
 
     def member_full(t, y0):
-        a, b = "%d-01-01" % y0, "%d-12-31" % y0
-        r = mem[(mem["ticker"] == t)]
-        return bool(((r["start_date"] <= a) & (r["end_date"] >= b)).any())
+        return full_year_member(mem,aliases,t,y0)
 
     def ret12(t, y0):
         b = bmap.get(t) or {}
         a_m, b_m = "%d-12" % (y0 - 1), "%d-12" % y0
+        b=holding_paths.momentum_bars(t,b,a_m,b_m)
         if a_m not in b or b_m not in b or not b[a_m][0]:
             return None
         return b[b_m][0] / b[a_m][0] - 1
@@ -110,13 +122,13 @@ def main():
 
         # 排名：合格池里不应有「行业允许但涨幅更高」的票被漏掉
         pool = []
-        for t in mem[(mem["start_date"] <= "%d-01-01" % y0) &
-                     (mem["end_date"] >= "%d-12-31" % y0)]["ticker"].unique():
+        for t in mem['ticker'].unique():
+            if not member_full(t,y0):continue
             rr = ret12(t, y0)
             if rr is None:
                 continue
             b = bmap.get(t) or {}
-            raw = b.get("%d-12" % y0, (None, None))[1]
+            raw = nominal_prices.price(t, "%d-12" % y0)
             if not raw or raw < 5:
                 continue
             if abs(rr) > 5.0:          # 价格异常（伪拆股/拼接）
@@ -143,14 +155,8 @@ def main():
         # 收益
         calc = 0.0
         for h in hs:
-            b = bmap.get(h["ticker"]) or {}
-            a_m = "%d-12" % y0
-            if a_m not in b or not b[a_m][0]:
-                continue
-            later = [k for k in sorted(b) if k <= "%d-12" % y]
-            if not later:
-                continue
-            calc += h["weight"] * (b[later[-1]][0] / b[a_m][0] - 1)
+            path=holding_paths.values(h['ticker'],y,lambda symbol:bmap.get(symbol) or {})
+            calc+=h['weight']*(path[-1]-1)
         ck(abs(calc - r["ret"]) < 0.005, "第 %d 年收益可复算" % y,
            "记录 %.4f / 复算 %.4f" % (r["ret"], calc))
         ck(r.get("dd") is not None and r["dd"] <= 0, "第 %d 年回撤非正" % y,

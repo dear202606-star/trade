@@ -1,0 +1,44 @@
+{
+  "audited_at": "2026-11-02T11:38:14.200871+00:00",
+  "selected_native_sources": [
+    {
+      "source": "alphavantage_native",
+      "rows": 2659,
+      "symbols": 16
+    },
+    {
+      "source": "eastmoney_native",
+      "rows": 9956,
+      "symbols": 193
+    },
+    {
+      "source": "kaggle_tech2026",
+      "rows": 528,
+      "symbols": 16
+    },
+    {
+      "source": "kaggle_yfinance2022",
+      "rows": 28033,
+      "symbols": 482
+    },
+    {
+      "source": "kaggle_yfinance2023",
+      "rows": 4768,
+      "symbols": 298
+    },
+    {
+      "source": "quandl_wiki",
+      "rows": 60946,
+      "symbols": 638
+    }
+  ],
+  "withdrawn_native_observations": [
+    {
+      "symbol": "LB",
+      "rows": 28
+    }
+  ],
+  "selected_post_security_window_rows": 0,
+  "selected_unproved_native_rows": 0,
+  "rolling_av_reserved_calls": 25
+}

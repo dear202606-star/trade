@@ -1,0 +1,22 @@
+{
+  "targets": 100,
+  "valid": 88,
+  "rows": 12201,
+  "candidate_cells": 620,
+  "available_cells": 556,
+  "rate_limited": false,
+  "errors": {
+    "ADT": "no missing target December in archive",
+    "ALTR": "no missing target December in archive",
+    "BEAM": "月份不足（2）",
+    "DELL": "no missing target December in archive",
+    "DOW": "no missing target December in archive",
+    "FOXA": "no missing target December in archive",
+    "GPS": "could not convert string to float: ''",
+    "LIFE": "no missing target December in archive",
+    "MMI": "no missing target December in archive",
+    "NLOK": "could not convert string to float: ''",
+    "PLL": "no missing target December in archive",
+    "SE": "no missing target December in archive"
+  }
+}

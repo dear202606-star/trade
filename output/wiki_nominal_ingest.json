@@ -1,0 +1,16 @@
+{
+  "write": true,
+  "prepared_observations": 62077,
+  "stored_wiki_observations": 62077,
+  "raw_unit_anchor": {
+    "symbol": "AAPL",
+    "date": "2014-06-09",
+    "split_ratio": 7.0,
+    "raw_before": 645.57,
+    "raw_after": 93.7,
+    "adjusted_ratio": 1.0160013631364486,
+    "raw_ratio_times_split": 1.016001363136453
+  },
+  "archive_sha256": "36c667bbecf42c43e5b9e8e4e5d9a1268522705bc40a4bac9671d62c1a20cbae",
+  "return_prices_locks_and_published_baselines_changed": false
+}

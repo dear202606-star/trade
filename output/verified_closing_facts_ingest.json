@@ -1,0 +1,44 @@
+{
+  "write": true,
+  "prepared": 2,
+  "inserted": 2,
+  "proofs": [
+    {
+      "issuer_fact": {
+        "symbol": "PLTR",
+        "date": "2024-12-31",
+        "close": 75.63,
+        "cik": "1321655",
+        "url": "https://www.sec.gov/Archives/edgar/data/1321655/000132165525000057/pltr-20250424.htm",
+        "location": "Outstanding Equity Awards at Fiscal Year-End, footnote 1; Class A closing price"
+      },
+      "provider_daily_sha256": "368bdc9d3046dba82b7ec39ecc399cda5db290037343876b077628ffed04952e",
+      "provider_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=105.PLTR&klt=101&fqt=0&beg=20240101&end=20241231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "independent_daily_sha256": "e7e4e0cc819cbbdc435e6e76b3143f3aa029c0c7efec970e9dd69a1412dfc533",
+      "return_pairs": 73,
+      "median_log_deviation": 2.4205904321086795e-08,
+      "p90_log_deviation": 6.299131881325035e-08,
+      "scope": "exact issuer-disclosed date only; other months not approved",
+      "evidence_sha256": "9a9bccb87b9d1f085f5e49ff3ffd09d1ad22264178bb72e55d6bbc390c8d2db1"
+    },
+    {
+      "issuer_fact": {
+        "symbol": "VST",
+        "date": "2024-12-31",
+        "close": 137.87,
+        "cik": "1692819",
+        "url": "https://www.sec.gov/Archives/edgar/data/1692819/000119312525057930/d880503ddef14a.htm",
+        "location": "Outstanding equity awards, footnote 1; common stock closing market price"
+      },
+      "provider_daily_sha256": "cb972fcfd8e319b15a42f361993dbe0b67363ccfa793d810c5d3332642f12be3",
+      "provider_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=106.VST&klt=101&fqt=0&beg=20240101&end=20241231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "independent_daily_sha256": "aae385d415942e2833f3973fec9ec1ab951880f3746a8bd2bc823bd1715c70e3",
+      "return_pairs": 113,
+      "median_log_deviation": 1.7594652595084706e-07,
+      "p90_log_deviation": 0.0071797464097606775,
+      "scope": "exact issuer-disclosed date only; other months not approved",
+      "evidence_sha256": "69d1e18c3bcb130ca4014de5bba3c27521e22caa4f9b9b94f3835e3110862298"
+    }
+  ],
+  "return_prices_sources_locks_and_published_outputs_changed": false
+}

@@ -1,0 +1,130 @@
+{
+  "scope": "NVDA only; other stocks uncorrected; not a new official backtest",
+  "snapshot_stamp": [
+    405481,
+    "2026-11-01 17:15:07.031119+00",
+    849,
+    143686,
+    837,
+    "16222237.349976179700181542"
+  ],
+  "snapshot_built_at": 1793554304.3088808,
+  "split_evidence": [
+    {
+      "month": "2021-07",
+      "ratio": 4,
+      "evidence": "https://investor.nvidia.com/files/doc_downloads/doc_faq/06/21/NVIDIA-2021-Stock-Split-FAQ.pdf"
+    },
+    {
+      "month": "2024-06",
+      "ratio": 10,
+      "evidence": "https://www.sec.gov/Archives/edgar/data/1045810/000104581024000144/nvda-20240607.htm"
+    }
+  ],
+  "current_B_vs_published_drift_years": [],
+  "examples": [
+    {
+      "month": "2015-12",
+      "current_filter_price": 0.8240000009536743,
+      "nominal_example_price": 32.96000003814697
+    },
+    {
+      "month": "2016-12",
+      "current_filter_price": 2.6684999465942383,
+      "nominal_example_price": 106.73999786376953
+    },
+    {
+      "month": "2020-12",
+      "current_filter_price": 13.055000305175781,
+      "nominal_example_price": 522.2000122070312
+    }
+  ],
+  "changes": [
+    {
+      "year": 2016,
+      "before": {
+        "year": 2016,
+        "holdings": [
+          [
+            "NFLX",
+            0.3333
+          ],
+          [
+            "AMZN",
+            0.3333
+          ],
+          [
+            "CVC",
+            0.3334
+          ]
+        ],
+        "return": 0.09497195921175883,
+        "drawdown": -0.115358208048425,
+        "pool": 437
+      },
+      "nvda_only_scenario": {
+        "year": 2016,
+        "holdings": [
+          [
+            "NFLX",
+            0.3333
+          ],
+          [
+            "AMZN",
+            0.3333
+          ],
+          [
+            "NVDA",
+            0.3334
+          ]
+        ],
+        "return": 0.8206169381746484,
+        "drawdown": -0.14663813361009892,
+        "pool": 438
+      }
+    },
+    {
+      "year": 2017,
+      "before": {
+        "year": 2017,
+        "holdings": [
+          [
+            "OKE",
+            0.4
+          ],
+          [
+            "FCX",
+            0.3
+          ],
+          [
+            "NEM",
+            0.3
+          ]
+        ],
+        "return": 0.15549004991479198,
+        "drawdown": -0.1564046717213784,
+        "pool": 455
+      },
+      "nvda_only_scenario": {
+        "year": 2017,
+        "holdings": [
+          [
+            "NVDA",
+            0.3333
+          ],
+          [
+            "OKE",
+            0.3333
+          ],
+          [
+            "FCX",
+            0.3334
+          ]
+        ],
+        "return": 0.41206220857614384,
+        "drawdown": -0.11476748164711004,
+        "pool": 456
+      }
+    }
+  ]
+}

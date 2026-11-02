@@ -1,0 +1,352 @@
+{
+  "audited_at": "2026-11-02T04:53:07.674205+00:00",
+  "write": true,
+  "mismatches_before": [
+    {
+      "symbol": "ALTR",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "CA",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "CAM",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "CSRA",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "CTRA",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "DAY",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "EP",
+      "source": "hf_ayushkhaire",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": true,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "EQ",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "FB",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "FOX",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "INFO",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "LB",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "LIFE",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "MI",
+      "source": "hf_ayushkhaire",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "MON",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "NE",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "ODP",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "PARA",
+      "source": "hf_ayushkhaire",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": true,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "PCL",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": true,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "PLL",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "PSKY",
+      "source": "hf_ayushkhaire",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "Q",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "QRVO",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "SBNY",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": true,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "SGP",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "SHLD",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "TGNA",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    },
+    {
+      "symbol": "WBD",
+      "source": "sina_repaired",
+      "decision_basis": "total_return",
+      "frozen": false,
+      "locked": false,
+      "quarantined": false,
+      "observed_bases": [
+        "price_only"
+      ]
+    }
+  ],
+  "corrected_symbols": [
+    "ALTR",
+    "CA",
+    "CAM",
+    "CSRA",
+    "CTRA",
+    "DAY",
+    "EP",
+    "EQ",
+    "FB",
+    "FOX",
+    "INFO",
+    "LB",
+    "LIFE",
+    "MI",
+    "MON",
+    "NE",
+    "ODP",
+    "PARA",
+    "PCL",
+    "PLL",
+    "PSKY",
+    "Q",
+    "QRVO",
+    "SBNY",
+    "SGP",
+    "SHLD",
+    "TGNA",
+    "WBD"
+  ],
+  "remaining": [],
+  "selected_price_fingerprint_unchanged": [
+    143649,
+    "16111566.971344811063187142",
+    "17157422.029272631957556832"
+  ],
+  "baseline_b_sha256": "20c0680276cf79cbb06d8aaab35c3e40cde010447f6e15e75abd95ff0ef33c90",
+  "price_rows_sources_locks_and_baselines_changed": false
+}

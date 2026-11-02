@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-31.1",
+  "version": "2026-11-02.3",
   "purpose": "标普500年度动量策略 2010-2026 历史回测的数据源能力矩阵与分配策略",
   "basis_policy": {
     "preferred": "total_return",
@@ -7,6 +7,19 @@
     "mixed_rule": "同一 (symbol,month) 只允许一个 basis 进入锁定数据集；total_return 优先"
   },
   "sources": [
+    {
+      "id": "eastmoney_native",
+      "name": "东方财富未复权行情",
+      "access": "证券目录确定 secid；kline/get klt=103、fqt=0",
+      "cost": "免费，无密钥",
+      "adjustment": "as_traded_screen_only",
+      "frequency": "月",
+      "role": "nominal_price_screen",
+      "strategy": "仅补原价筛选缺口；逐票至少 24 个独立原价锚点和 24 个收益重叠核验，遵守证券有效期与隔离",
+      "tested": "NVDA 2016-12=106.74；AAPL 2014-06=92.93；实库盘点及批次回执在 output/nominal_live_inventory.json 与 eastmoney_nominal_*",
+      "limitations": "qfq/hfq 不能冒充全收益；交易所迁移可能截断历史，PLTR 当前标识的 2024 日线仅 24 天，日均成交额接入尚未验收",
+      "credential_stored": false
+    },
     {
       "id": "alphavantage",
       "name": "Alpha Vantage",
@@ -147,8 +160,36 @@
       "frequency": "月",
       "tested": "2026-10-31 实测：Kaggle token 有效（可列数据集），但 vladosht 名下 0 个数据集，目标数据集已下架/私有 → 本路径关闭",
       "role": "bulk_candidate_closed",
-      "strategy": "验证通过后作为 2010-2025 的批量覆盖源；若含退市票则可大幅缩短 AV 回填周期",
-      "keep_reason": "唯一的免费月频全市场数据集，潜力最大"
+      "strategy": "目标数据集下架；不参与采集",
+      "keep_reason": "保留旧路径调查记录，避免与新发现的 CC0 档案混淆"
+    },
+    {
+      "id": "kaggle_cc0",
+      "name": "Kaggle borismarjanovic/price-volume-data-for-all-us-stocks-etfs v3",
+      "access": "Kaggle API；按 symbol 文件取日线 CSV，再汇总月末 Close",
+      "cost": "免费，CC0 Public Domain",
+      "depth": "按标的而异；数据止于 2017-11-10",
+      "delisted": "包含部分退市票；794 个历史 PIT 成分代码有文件",
+      "adjustment": "total_return（数据卡声明价格已按拆股与分红调整）",
+      "frequency": "日→月",
+      "tested": "2026-11-01 下载 ATVI 文件成功：2005-02-25 至 2017-11-10；月线写 raw_close=NULL；使用现有校验与冻结守卫",
+      "role": "history_archive",
+      "strategy": "一次性补 2010-2016 全收益年末缺口；不参与每日调度，2017-12 以后无数据",
+      "keep_reason": "CC0、覆盖历史退市票，适合作为有来源标记的历史补缺与独立校验"
+    },
+    {
+      "id": "kaggle_yahoo2020",
+      "name": "Kaggle jacksoncrow/stock-market-dataset v2",
+      "access": "官方 Kaggle 单文件 API；stocks/{symbol}.csv，含证券名称元数据",
+      "cost": "免费，CC0 Public Domain",
+      "depth": "完整月末止于 2020-03；排除仅有 2020-04-01 的不完整月",
+      "delisted": "2020 年仍在 Nasdaq 交易目录的证券，包含此后退市或改名者",
+      "adjustment": "Adj Close 为拆股+分红复权；Close 仅拆股复权，不是交易时名义原价",
+      "frequency": "日→月",
+      "tested": "2026-11-02：100 个候选，88 个通过；12,201 行经暂存提升，拒收 0；760 个成员代码有名称元数据",
+      "role": "history_archive",
+      "strategy": "数据库约束禁止自动选源；先核验发行人、有效期和覆盖损失",
+      "keep_reason": "比 2017 档案增加完整月覆盖，并保留独立 Close 字段及证券名称"
     },
     {
       "id": "marketparquet",
@@ -247,6 +288,50 @@
       "role": "micro_check",
       "strategy": "单票近 12 个月的第三源快查",
       "keep_reason": "零成本、零 key，适合临时抽检"
+    },
+    {
+      "id": "quandl_wiki",
+      "name": "Quandl WIKI fixed archive",
+      "access": "Kaggle marketneutral/quandl-wiki-prices-us-equites v1",
+      "cost": "免费",
+      "depth": "筛选完整月 2008-01～2018-02",
+      "adjustment": "Close 为名义原价，Adj Close 单列；拆股事件交叉核验",
+      "role": "nominal_screening_only",
+      "tested": "649 代码收益交叉通过，62,077 条原价观察入库；当前视图另受证券边界约束",
+      "strategy": "仅单位证据通过后进入 v_nominal_monthly，不改收益价、选源或锁"
+    },
+    {
+      "id": "kaggle_yfinance2022",
+      "name": "Yahoo event snapshot 2022",
+      "access": "Kaggle rprkh15/sp500-stock-prices v89",
+      "cost": "免费",
+      "depth": "筛选完整月 2008-01～2022-06",
+      "adjustment": "同版本 Close（全收益）与分红/拆股事件逆推名义价",
+      "role": "nominal_screening_only",
+      "tested": "80,948 条观察入库；另有旧 LB 163 条，经 122 月 WIKI 原价独立核对",
+      "strategy": "与原价锚点及收益序列分别核验；不可将重建名义价当跨拆股收益价"
+    },
+    {
+      "id": "kaggle_yfinance2023",
+      "name": "Yahoo event snapshot 2023",
+      "access": "Kaggle iveeaten3223times/massive-yahoo-finance-dataset v2",
+      "cost": "免费",
+      "depth": "筛选完整月 2018-12～2023-10",
+      "adjustment": "同版本全收益 Close、分红/拆股事件逆推，至少 24 个已证明名义价锚点",
+      "role": "nominal_screening_only",
+      "tested": "306 代码通过、40 待查；新增 4,768 条可用筛选价，含 298 个年末点",
+      "strategy": "排除自身作为核验锚点，仅填缺失观察，不改变现有已证明价格的优先级"
+    },
+    {
+      "id": "kaggle_tech2026",
+      "name": "Yahoo technology event archives 2026",
+      "access": "Kaggle ivanvaccari fixed versions; static/tech_actions2026_archives.json",
+      "cost": "免费",
+      "depth": "筛选完整月 2008-01～2026-07",
+      "adjustment": "Adj Close 及同版本现金/拆股事件逆推；末日调整因子为 1",
+      "role": "nominal_screening_only",
+      "tested": "18 个当前选中代码全部通过；初批 4 个超时已在续跑恢复；893 条入库，当前视图可用 528 条/16 代码；版本及 SHA256 固定后重跑无重复行",
+      "strategy": "至少 24 个月独立单位和收益核验；5 美元附近按实际最大偏差保留不确定性"
     },
     {
       "id": "excluded",

@@ -1,0 +1,66 @@
+{
+  "source": "https://push2his.eastmoney.com/api/qt/stock/kline/get",
+  "native_request": {
+    "klt": 103,
+    "fqt": 0,
+    "beg": 20080101,
+    "end": 20261031
+  },
+  "probes": [
+    {
+      "secid": "105.NVDA",
+      "mode": "fqt=0",
+      "rows": 226,
+      "payload_sha256": "c4dc607ec602a44e440badb3f4c58e690de779d1bba7b4372d9ce3aa0f0fa2a9",
+      "native_close_anchors": {
+        "2014-06": 18.54,
+        "2016-12": 106.74,
+        "2021-08": 223.85,
+        "2025-12": 186.5
+      }
+    },
+    {
+      "secid": "105.AAPL",
+      "mode": "fqt=0",
+      "rows": 226,
+      "payload_sha256": "39acf021ea2df8c85709988467a6b7a4f153b1d02f9596dc9f3fe9fe5d84e150",
+      "native_close_anchors": {
+        "2014-06": 92.93,
+        "2016-12": 115.82,
+        "2021-08": 151.83,
+        "2025-12": 271.86
+      }
+    },
+    {
+      "secid": "106.BK",
+      "mode": "fqt=0",
+      "rows": 0,
+      "payload_sha256": "ef7b621ec478b31ba7c9f0f157107372c75f6a2a8fa20f4c119d10dfc22077c9",
+      "native_close_anchors": {}
+    },
+    {
+      "secid": "106.EQR",
+      "mode": "fqt=0",
+      "rows": 0,
+      "payload_sha256": "1819ad6a44b594a66e2579439fc4d9e962e35b7cea20255d99db62996efff315",
+      "native_close_anchors": {}
+    },
+    {
+      "secid": "106.VSCO",
+      "mode": "fqt=0",
+      "rows": 0,
+      "payload_sha256": "aa3977fa8f1bbf974de9af4b42e9b7d7db7dda8ebefd8499b6980b6f41c8bb59",
+      "native_close_anchors": {}
+    }
+  ],
+  "forward_adjusted_mode_not_approved_for_total_return": true,
+  "forward_adjusted_negative_example": [
+    "2012-12-31,-0.429,-0.425,-0.412,-0.439,199157231,0.000,-6.24,1.85,0.008,31.87"
+  ],
+  "production_import_completed": false,
+  "notes": [
+    "raw mode preserves AAPL within-month split and NVDA historical nominal closes",
+    "market/symbol coverage needs live provider discovery; do not guess that null responses prove delisting",
+    "per-security unit, identity and completed-month crosschecks still required before import"
+  ]
+}

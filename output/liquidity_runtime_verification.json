@@ -1,0 +1,101 @@
+{
+  "policy": "daily_dollar_amount_per_actual_trading_day",
+  "windows": [
+    {
+      "symbol": "AAPL",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 12392153109.504
+    },
+    {
+      "symbol": "AAPL",
+      "base_month": "2025-10",
+      "rank_month": "2026-10",
+      "days": 250,
+      "average_daily_dollars": 13847316193.28
+    },
+    {
+      "symbol": "MU",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 3371315190.208
+    },
+    {
+      "symbol": "MU",
+      "base_month": "2025-10",
+      "rank_month": "2026-10",
+      "days": 250,
+      "average_daily_dollars": 25463202948.992
+    },
+    {
+      "symbol": "NEM",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 728003096.92
+    },
+    {
+      "symbol": "NEM",
+      "base_month": "2025-10",
+      "rank_month": "2026-10",
+      "days": 250,
+      "average_daily_dollars": 928741402.136
+    },
+    {
+      "symbol": "NVDA",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 32497129757.696
+    },
+    {
+      "symbol": "NVDA",
+      "base_month": "2025-10",
+      "rank_month": "2026-10",
+      "days": 250,
+      "average_daily_dollars": 30809221864.448
+    },
+    {
+      "symbol": "PLTR",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 9874263805.12
+    },
+    {
+      "symbol": "VST",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 996795795.812
+    },
+    {
+      "symbol": "VST",
+      "base_month": "2025-10",
+      "rank_month": "2026-10",
+      "days": 250,
+      "average_daily_dollars": 784357176.036
+    },
+    {
+      "symbol": "WDC",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 700225094.884
+    },
+    {
+      "symbol": "WDC",
+      "base_month": "2025-10",
+      "rank_month": "2026-10",
+      "days": 250,
+      "average_daily_dollars": 3163698906.56
+    }
+  ],
+  "input_sha": "21165b0e63044c9f30db8bd4cbdc44a8c30312f82ff5610b094e1f3c15aebfc7",
+  "immutable_guard_rejections": 3,
+  "pending_version_blocks_old_approval": true,
+  "all_probe_changes_rolled_back": true,
+  "published_outputs_changed": false
+}

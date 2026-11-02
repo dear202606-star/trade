@@ -18,6 +18,10 @@ on:
         required: false
         default: "120"
 
+concurrency:
+  group: trade-pipeline
+  cancel-in-progress: false
+
 jobs:
   collect:
     runs-on: ubuntu-latest
@@ -31,6 +35,9 @@ jobs:
 
       - name: 安装依赖
         run: pip install -q -r requirements.txt
+
+      - name: 补数与档案隔离回归
+        run: python -m unittest test_data_pipeline test_nominal_prices test_holding_consideration test_holding_paths test_eastmoney_nominal test_security_membership test_liquidity_prices
 
       - name: 写入数据库口令
         env:
@@ -50,7 +57,7 @@ jobs:
           if [ "$N" = "0" ]; then echo "跳过 stockanalysis"; exit 0; fi
           python fetch_stockanalysis.py --symbols "$N"
 
-      # Alpha Vantage 每天 25 次额度：交给 daily-backfill（每天 10:30 UTC）单独跑，
+      # Alpha Vantage 每天 25 次额度：交给 daily-backfill（每天 10:00 UTC）单独跑，
       # 这里不跑，否则每 6 小时跑一次会 4 倍超量、全部失败。
 
       - name: 给「选源非全收益」的标的补 Yahoo 全收益
@@ -61,8 +68,7 @@ jobs:
         run: python db_select.py
 
       - name: 校验入库（validations）
-        continue-on-error: true
-        run: python db_validate.py
+        run: python db_validate.py --data-only
 
       - name: 锁定新达标的标的
         continue-on-error: true

@@ -1,0 +1,6052 @@
+{
+  "dataset": "marketneutral/quandl-wiki-prices-us-equites",
+  "version": 1,
+  "source_url": "https://www.kaggle.com/datasets/marketneutral/quandl-wiki-prices-us-equites",
+  "archive_sha256": "36c667bbecf42c43e5b9e8e4e5d9a1268522705bc40a4bac9671d62c1a20cbae",
+  "license_metadata": "Unknown; dataset card describes public domain origin",
+  "symbols": 3199,
+  "parsed_daily_rows": 15389314,
+  "raw_unit_split_checks": [
+    {
+      "symbol": "AAL",
+      "date": "2013-12-09",
+      "split_ratio": 0.373,
+      "raw_before": 22.55,
+      "raw_after": 24.6,
+      "adjusted_ratio": 0.4069090909090983,
+      "raw_ratio_times_split": 0.4069090909090909
+    },
+    {
+      "symbol": "AAN",
+      "date": "2010-04-16",
+      "split_ratio": 1.5,
+      "raw_before": 28.5,
+      "raw_after": 18.68,
+      "adjusted_ratio": 0.9831578947368638,
+      "raw_ratio_times_split": 0.983157894736842
+    },
+    {
+      "symbol": "AAON",
+      "date": "2011-06-14",
+      "split_ratio": 1.5,
+      "raw_before": 31.31,
+      "raw_after": 21.25,
+      "adjusted_ratio": 1.0180453529223894,
+      "raw_ratio_times_split": 1.018045352922389
+    },
+    {
+      "symbol": "AAON",
+      "date": "2013-07-03",
+      "split_ratio": 1.5,
+      "raw_before": 33.98,
+      "raw_after": 22.61,
+      "adjusted_ratio": 0.9980871100647198,
+      "raw_ratio_times_split": 0.9980871100647439
+    },
+    {
+      "symbol": "AAON",
+      "date": "2014-07-17",
+      "split_ratio": 1.5,
+      "raw_before": 31.9,
+      "raw_after": 20.63,
+      "adjusted_ratio": 0.9700626959247649,
+      "raw_ratio_times_split": 0.9700626959247649
+    },
+    {
+      "symbol": "AAPL",
+      "date": "2014-06-09",
+      "split_ratio": 7.0,
+      "raw_before": 645.57,
+      "raw_after": 93.7,
+      "adjusted_ratio": 1.0160013631364486,
+      "raw_ratio_times_split": 1.016001363136453
+    },
+    {
+      "symbol": "ABC",
+      "date": "2009-06-16",
+      "split_ratio": 2.0,
+      "raw_before": 35.82,
+      "raw_after": 17.79,
+      "adjusted_ratio": 0.9932998324958494,
+      "raw_ratio_times_split": 0.9932998324958123
+    },
+    {
+      "symbol": "ABCO",
+      "date": "2012-06-19",
+      "split_ratio": 2.0,
+      "raw_before": 96.03,
+      "raw_after": 50.41,
+      "adjusted_ratio": 1.0498802457565344,
+      "raw_ratio_times_split": 1.0498802457565344
+    },
+    {
+      "symbol": "ACGL",
+      "date": "2011-05-12",
+      "split_ratio": 3.0,
+      "raw_before": 101.37,
+      "raw_after": 34.84,
+      "adjusted_ratio": 1.0310742823320511,
+      "raw_ratio_times_split": 1.031074282332051
+    },
+    {
+      "symbol": "ACHC",
+      "date": "2011-05-19",
+      "split_ratio": 1.01,
+      "raw_before": 3.04,
+      "raw_after": 3.03,
+      "adjusted_ratio": 0.9967105263157894,
+      "raw_ratio_times_split": 1.0066776315789472
+    },
+    {
+      "symbol": "ACHC",
+      "date": "2011-11-03",
+      "split_ratio": 0.5672149744753262,
+      "raw_before": 9.08,
+      "raw_after": 9.35,
+      "adjusted_ratio": 0.5840814990467291,
+      "raw_ratio_times_split": 0.584081499046729
+    },
+    {
+      "symbol": "ACI",
+      "date": "2015-08-04",
+      "split_ratio": 0.1,
+      "raw_before": 0.1802,
+      "raw_after": 1.51,
+      "adjusted_ratio": 0.8379578246392897,
+      "raw_ratio_times_split": 0.8379578246392898
+    },
+    {
+      "symbol": "ACIW",
+      "date": "2014-07-11",
+      "split_ratio": 3.0,
+      "raw_before": 55.47,
+      "raw_after": 18.36,
+      "adjusted_ratio": 0.9929691725256896,
+      "raw_ratio_times_split": 0.9929691725256896
+    },
+    {
+      "symbol": "ACLS",
+      "date": "2016-07-01",
+      "split_ratio": 0.25,
+      "raw_before": 2.69,
+      "raw_after": 10.93,
+      "adjusted_ratio": 1.0157992565055762,
+      "raw_ratio_times_split": 1.0157992565055762
+    },
+    {
+      "symbol": "ACW",
+      "date": "2010-11-19",
+      "split_ratio": 0.1,
+      "raw_before": 1.22,
+      "raw_after": 12.5,
+      "adjusted_ratio": 1.0245901639344264,
+      "raw_ratio_times_split": 1.0245901639344264
+    },
+    {
+      "symbol": "ADVS",
+      "date": "2011-01-19",
+      "split_ratio": 2.0,
+      "raw_before": 60.26,
+      "raw_after": 29.98,
+      "adjusted_ratio": 0.9950215731828742,
+      "raw_ratio_times_split": 0.9950215731828742
+    },
+    {
+      "symbol": "AEGR",
+      "date": "2010-10-25",
+      "split_ratio": 0.40950040950040945,
+      "raw_before": 10.8,
+      "raw_after": 10.28,
+      "adjusted_ratio": 0.9518518518518505,
+      "raw_ratio_times_split": 0.38978372311705634
+    },
+    {
+      "symbol": "AFOP",
+      "date": "2010-08-30",
+      "split_ratio": 0.2,
+      "raw_before": 1.66,
+      "raw_after": 7.915,
+      "adjusted_ratio": 0.9536144578313254,
+      "raw_ratio_times_split": 0.9536144578313254
+    },
+    {
+      "symbol": "AFOP",
+      "date": "2013-09-17",
+      "split_ratio": 2.0,
+      "raw_before": 38.19,
+      "raw_after": 20.24,
+      "adjusted_ratio": 1.0599633411887928,
+      "raw_ratio_times_split": 1.0599633411887928
+    },
+    {
+      "symbol": "AFSI",
+      "date": "2016-02-03",
+      "split_ratio": 2.0,
+      "raw_before": 56.95,
+      "raw_after": 27.81,
+      "adjusted_ratio": 0.9766461808603857,
+      "raw_ratio_times_split": 0.9766461808604038
+    },
+    {
+      "symbol": "AGEN",
+      "date": "2011-10-03",
+      "split_ratio": 0.16666666666666666,
+      "raw_before": 0.47,
+      "raw_after": 2.64,
+      "adjusted_ratio": 0.9361702127659576,
+      "raw_ratio_times_split": 0.9361702127659576
+    },
+    {
+      "symbol": "AGII",
+      "date": "2015-02-26",
+      "split_ratio": 1.1,
+      "raw_before": 52.67,
+      "raw_after": 47.98,
+      "adjusted_ratio": 1.006227453958607,
+      "raw_ratio_times_split": 1.0020505031327132
+    },
+    {
+      "symbol": "AGII",
+      "date": "2016-05-27",
+      "split_ratio": 1.1,
+      "raw_before": 57.96,
+      "raw_after": 52.86,
+      "adjusted_ratio": 1.0073844030365815,
+      "raw_ratio_times_split": 1.0032091097308489
+    },
+    {
+      "symbol": "AGII",
+      "date": "2018-03-06",
+      "split_ratio": 1.15,
+      "raw_before": 61.55,
+      "raw_after": 54.0,
+      "adjusted_ratio": 1.0089358245335558,
+      "raw_ratio_times_split": 1.0089358245329
+    },
+    {
+      "symbol": "AI",
+      "date": "2009-10-07",
+      "split_ratio": 0.05,
+      "raw_before": 0.5,
+      "raw_after": 10.56,
+      "adjusted_ratio": 1.0559999999999738,
+      "raw_ratio_times_split": 1.056
+    },
+    {
+      "symbol": "AIG",
+      "date": "2009-07-01",
+      "split_ratio": 0.05,
+      "raw_before": 1.16,
+      "raw_after": 18.08,
+      "adjusted_ratio": 0.7793103448275828,
+      "raw_ratio_times_split": 0.7793103448275862
+    },
+    {
+      "symbol": "AIN",
+      "date": "2012-03-19",
+      "split_ratio": 2.0,
+      "raw_before": 23.51,
+      "raw_after": 23.82,
+      "adjusted_ratio": 2.0263717566992123,
+      "raw_ratio_times_split": 2.0263717566992767
+    },
+    {
+      "symbol": "AIN",
+      "date": "2014-07-10",
+      "split_ratio": 2.0,
+      "raw_before": 37.5,
+      "raw_after": 37.16,
+      "adjusted_ratio": 1.9818666666666578,
+      "raw_ratio_times_split": 1.9818666666666664
+    },
+    {
+      "symbol": "AIQ",
+      "date": "2012-12-27",
+      "split_ratio": 0.2,
+      "raw_before": 1.3,
+      "raw_after": 6.44,
+      "adjusted_ratio": 0.9907692307692308,
+      "raw_ratio_times_split": 0.9907692307692308
+    },
+    {
+      "symbol": "AIRM",
+      "date": "2012-12-31",
+      "split_ratio": 3.0,
+      "raw_before": 111.99,
+      "raw_after": 36.91,
+      "adjusted_ratio": 0.9887489954460219,
+      "raw_ratio_times_split": 0.9887489954460218
+    },
+    {
+      "symbol": "ALK",
+      "date": "2012-03-19",
+      "split_ratio": 2.0,
+      "raw_before": 69.79,
+      "raw_after": 35.16,
+      "adjusted_ratio": 1.0075942112050522,
+      "raw_ratio_times_split": 1.0075942112050436
+    },
+    {
+      "symbol": "ALK",
+      "date": "2014-07-10",
+      "split_ratio": 2.0,
+      "raw_before": 96.86,
+      "raw_after": 49.01,
+      "adjusted_ratio": 1.0119760479041857,
+      "raw_ratio_times_split": 1.0119760479041915
+    },
+    {
+      "symbol": "ALXN",
+      "date": "2008-08-25",
+      "split_ratio": 2.0,
+      "raw_before": 87.79,
+      "raw_after": 43.64,
+      "adjusted_ratio": 0.994190682310058,
+      "raw_ratio_times_split": 0.994190682310058
+    },
+    {
+      "symbol": "ALXN",
+      "date": "2011-05-23",
+      "split_ratio": 2.0,
+      "raw_before": 95.58,
+      "raw_after": 47.33,
+      "adjusted_ratio": 0.9903745553463067,
+      "raw_ratio_times_split": 0.9903745553463067
+    },
+    {
+      "symbol": "AME",
+      "date": "2010-12-22",
+      "split_ratio": 1.5,
+      "raw_before": 59.85,
+      "raw_after": 39.3,
+      "adjusted_ratio": 0.9849624060150288,
+      "raw_ratio_times_split": 0.9849624060150375
+    },
+    {
+      "symbol": "AME",
+      "date": "2012-07-02",
+      "split_ratio": 1.5,
+      "raw_before": 49.91,
+      "raw_after": 33.51,
+      "adjusted_ratio": 1.0071128030454983,
+      "raw_ratio_times_split": 1.007112803045482
+    },
+    {
+      "symbol": "AMRC",
+      "date": "2010-07-26",
+      "split_ratio": 2.0,
+      "raw_before": 10.06,
+      "raw_after": 9.93,
+      "adjusted_ratio": 0.9870775347912524,
+      "raw_ratio_times_split": 1.9741550695825048
+    },
+    {
+      "symbol": "AMRS",
+      "date": "2017-06-06",
+      "split_ratio": 0.066666666666667,
+      "raw_before": 0.22,
+      "raw_after": 3.6,
+      "adjusted_ratio": 1.090909090909091,
+      "raw_ratio_times_split": 1.0909090909090964
+    },
+    {
+      "symbol": "AMSC",
+      "date": "2015-03-25",
+      "split_ratio": 0.1,
+      "raw_before": 0.701,
+      "raw_after": 7.2,
+      "adjusted_ratio": 1.0271041369472182,
+      "raw_ratio_times_split": 1.0271041369472182
+    },
+    {
+      "symbol": "AMZG",
+      "date": "2011-12-20",
+      "split_ratio": 0.2222222222222222,
+      "raw_before": 0.27,
+      "raw_after": 1.47,
+      "adjusted_ratio": 1.2098765432098764,
+      "raw_ratio_times_split": 1.2098765432098764
+    },
+    {
+      "symbol": "AMZG",
+      "date": "2014-03-19",
+      "split_ratio": 0.25,
+      "raw_before": 1.76,
+      "raw_after": 6.61,
+      "adjusted_ratio": 0.9389204545454546,
+      "raw_ratio_times_split": 0.9389204545454546
+    },
+    {
+      "symbol": "ANAC",
+      "date": "2010-11-26",
+      "split_ratio": 0.2,
+      "raw_before": 5.09,
+      "raw_after": 5.09,
+      "adjusted_ratio": 1.0,
+      "raw_ratio_times_split": 0.2
+    },
+    {
+      "symbol": "ANDE",
+      "date": "2014-02-19",
+      "split_ratio": 1.5,
+      "raw_before": 81.22,
+      "raw_after": 53.49,
+      "adjusted_ratio": 0.9878724452105322,
+      "raw_ratio_times_split": 0.9878724452105393
+    },
+    {
+      "symbol": "ANIP",
+      "date": "2012-06-04",
+      "split_ratio": 0.16666666666666666,
+      "raw_before": 0.385,
+      "raw_after": 2.73,
+      "adjusted_ratio": 1.1818181818181819,
+      "raw_ratio_times_split": 1.1818181818181817
+    },
+    {
+      "symbol": "ANIP",
+      "date": "2013-07-18",
+      "split_ratio": 0.16666666666666666,
+      "raw_before": 1.09,
+      "raw_after": 7.149,
+      "adjusted_ratio": 1.0931192660550457,
+      "raw_ratio_times_split": 1.0931192660550457
+    },
+    {
+      "symbol": "AOI",
+      "date": "2015-06-29",
+      "split_ratio": 0.1,
+      "raw_before": 2.32,
+      "raw_after": 21.41,
+      "adjusted_ratio": 0.9228448275862069,
+      "raw_ratio_times_split": 0.922844827586207
+    },
+    {
+      "symbol": "AOS",
+      "date": "2013-05-16",
+      "split_ratio": 2.0,
+      "raw_before": 79.9,
+      "raw_after": 39.62,
+      "adjusted_ratio": 0.9917396745932526,
+      "raw_ratio_times_split": 0.9917396745932414
+    },
+    {
+      "symbol": "AOS",
+      "date": "2016-10-06",
+      "split_ratio": 2.0,
+      "raw_before": 101.73,
+      "raw_after": 51.41,
+      "adjusted_ratio": 1.0107146367836346,
+      "raw_ratio_times_split": 1.0107146367836428
+    },
+    {
+      "symbol": "APH",
+      "date": "2014-10-10",
+      "split_ratio": 2.0,
+      "raw_before": 98.68,
+      "raw_after": 45.7,
+      "adjusted_ratio": 0.9262261856505873,
+      "raw_ratio_times_split": 0.9262261856505878
+    },
+    {
+      "symbol": "ARCW",
+      "date": "2012-08-09",
+      "split_ratio": 0.5128205128205129,
+      "raw_before": 3.31,
+      "raw_after": 5.3501,
+      "adjusted_ratio": 0.8288945696800684,
+      "raw_ratio_times_split": 0.8288945696800682
+    },
+    {
+      "symbol": "ARCW",
+      "date": "2014-05-02",
+      "split_ratio": 2.5,
+      "raw_before": 41.5,
+      "raw_after": 15.81,
+      "adjusted_ratio": 0.9524096385542168,
+      "raw_ratio_times_split": 0.9524096385542169
+    },
+    {
+      "symbol": "ARNA",
+      "date": "2017-06-19",
+      "split_ratio": 0.1,
+      "raw_before": 1.31,
+      "raw_after": 14.03,
+      "adjusted_ratio": 1.0709923664122136,
+      "raw_ratio_times_split": 1.0709923664122136
+    },
+    {
+      "symbol": "ARNC",
+      "date": "2016-10-06",
+      "split_ratio": 0.33333333333333,
+      "raw_before": 10.4,
+      "raw_after": 31.78,
+      "adjusted_ratio": 1.0185897435897266,
+      "raw_ratio_times_split": 1.0185897435897333
+    },
+    {
+      "symbol": "ARO",
+      "date": "2010-03-05",
+      "split_ratio": 1.5,
+      "raw_before": 37.51,
+      "raw_after": 25.56,
+      "adjusted_ratio": 1.0221274326846175,
+      "raw_ratio_times_split": 1.0221274326846175
+    },
+    {
+      "symbol": "AROW",
+      "date": "2015-09-17",
+      "split_ratio": 1.02,
+      "raw_before": 27.54,
+      "raw_after": 26.88,
+      "adjusted_ratio": 0.9955555555555335,
+      "raw_ratio_times_split": 0.9955555555555556
+    },
+    {
+      "symbol": "AROW",
+      "date": "2016-09-19",
+      "split_ratio": 1.03,
+      "raw_before": 33.08,
+      "raw_after": 32.22,
+      "adjusted_ratio": 1.0032224909310952,
+      "raw_ratio_times_split": 1.0032224909310763
+    },
+    {
+      "symbol": "AROW",
+      "date": "2017-09-19",
+      "split_ratio": 1.03,
+      "raw_before": 33.3,
+      "raw_after": 32.95,
+      "adjusted_ratio": 1.019174174174163,
+      "raw_ratio_times_split": 1.0191741741741744
+    },
+    {
+      "symbol": "ARR",
+      "date": "2015-08-03",
+      "split_ratio": 0.125,
+      "raw_before": 2.84,
+      "raw_after": 22.91,
+      "adjusted_ratio": 1.00836267605633,
+      "raw_ratio_times_split": 1.008362676056338
+    },
+    {
+      "symbol": "ARWR",
+      "date": "2011-11-17",
+      "split_ratio": 0.1,
+      "raw_before": 0.645,
+      "raw_after": 6.03,
+      "adjusted_ratio": 0.9348837209302325,
+      "raw_ratio_times_split": 0.9348837209302326
+    },
+    {
+      "symbol": "ASNA",
+      "date": "2012-04-04",
+      "split_ratio": 2.0,
+      "raw_before": 44.58,
+      "raw_after": 21.91,
+      "adjusted_ratio": 0.9829519964109467,
+      "raw_ratio_times_split": 0.9829519964109467
+    },
+    {
+      "symbol": "ATEC",
+      "date": "2016-08-25",
+      "split_ratio": 0.08333333333333333,
+      "raw_before": 0.3,
+      "raw_after": 3.6,
+      "adjusted_ratio": 1.0000000000000002,
+      "raw_ratio_times_split": 1.0
+    },
+    {
+      "symbol": "ATNY",
+      "date": "2008-09-22",
+      "split_ratio": 0.06666666666666667,
+      "raw_before": 0.07,
+      "raw_after": 1.07,
+      "adjusted_ratio": 1.019047619047619,
+      "raw_ratio_times_split": 1.019047619047619
+    },
+    {
+      "symbol": "ATNY",
+      "date": "2010-12-29",
+      "split_ratio": 0.25,
+      "raw_before": 1.12,
+      "raw_after": 4.51,
+      "adjusted_ratio": 1.0066964285714284,
+      "raw_ratio_times_split": 1.0066964285714284
+    },
+    {
+      "symbol": "ATVI",
+      "date": "2008-09-08",
+      "split_ratio": 2.0,
+      "raw_before": 33.74,
+      "raw_after": 16.79,
+      "adjusted_ratio": 0.9952578541790159,
+      "raw_ratio_times_split": 0.9952578541790159
+    },
+    {
+      "symbol": "ATW",
+      "date": "2008-07-14",
+      "split_ratio": 2.0,
+      "raw_before": 108.7,
+      "raw_after": 54.61,
+      "adjusted_ratio": 1.0047838086476542,
+      "raw_ratio_times_split": 1.0047838086476542
+    },
+    {
+      "symbol": "AVNW",
+      "date": "2016-06-14",
+      "split_ratio": 0.08333333333333333,
+      "raw_before": 0.55,
+      "raw_after": 6.75,
+      "adjusted_ratio": 1.0227272727272727,
+      "raw_ratio_times_split": 1.0227272727272725
+    },
+    {
+      "symbol": "AWH",
+      "date": "2014-05-23",
+      "split_ratio": 3.0,
+      "raw_before": 111.14,
+      "raw_after": 37.04,
+      "adjusted_ratio": 0.9998200467878352,
+      "raw_ratio_times_split": 0.9998200467878352
+    },
+    {
+      "symbol": "AWR",
+      "date": "2013-09-04",
+      "split_ratio": 2.0,
+      "raw_before": 51.69,
+      "raw_after": 26.11,
+      "adjusted_ratio": 1.0102534339330542,
+      "raw_ratio_times_split": 1.0102534339330624
+    },
+    {
+      "symbol": "AXLL",
+      "date": "2009-07-29",
+      "split_ratio": 0.04,
+      "raw_before": 0.35,
+      "raw_after": 7.22,
+      "adjusted_ratio": 0.8251428571428572,
+      "raw_ratio_times_split": 0.8251428571428572
+    },
+    {
+      "symbol": "AZZ",
+      "date": "2012-07-31",
+      "split_ratio": 2.0,
+      "raw_before": 62.65,
+      "raw_after": 30.71,
+      "adjusted_ratio": 0.9803671189146228,
+      "raw_ratio_times_split": 0.980367118914605
+    },
+    {
+      "symbol": "BANF",
+      "date": "2017-08-01",
+      "split_ratio": 2.0,
+      "raw_before": 106.75,
+      "raw_after": 53.7,
+      "adjusted_ratio": 1.0060889929742325,
+      "raw_ratio_times_split": 1.006088992974239
+    },
+    {
+      "symbol": "BANR",
+      "date": "2011-06-01",
+      "split_ratio": 0.14285714285714,
+      "raw_before": 2.8,
+      "raw_after": 19.18,
+      "adjusted_ratio": 0.9785714285714132,
+      "raw_ratio_times_split": 0.978571428571409
+    },
+    {
+      "symbol": "BAS",
+      "date": "2016-12-27",
+      "split_ratio": 0.00175,
+      "raw_before": 0.4501,
+      "raw_after": 36.0,
+      "adjusted_ratio": 0.13996889580093314,
+      "raw_ratio_times_split": 0.13996889580093314
+    },
+    {
+      "symbol": "BBX",
+      "date": "2008-09-29",
+      "split_ratio": 0.2,
+      "raw_before": 1.9,
+      "raw_after": 6.6,
+      "adjusted_ratio": 0.694736842105265,
+      "raw_ratio_times_split": 0.6947368421052632
+    },
+    {
+      "symbol": "BBX",
+      "date": "2011-10-17",
+      "split_ratio": 0.2,
+      "raw_before": 0.44,
+      "raw_after": 2.06,
+      "adjusted_ratio": 0.936363636363667,
+      "raw_ratio_times_split": 0.9363636363636364
+    },
+    {
+      "symbol": "BCPC",
+      "date": "2010-01-21",
+      "split_ratio": 1.5,
+      "raw_before": 32.43,
+      "raw_after": 22.51,
+      "adjusted_ratio": 1.0411655874190566,
+      "raw_ratio_times_split": 1.0411655874190566
+    },
+    {
+      "symbol": "BEBE",
+      "date": "2016-12-09",
+      "split_ratio": 0.1,
+      "raw_before": 0.5919,
+      "raw_after": 5.87,
+      "adjusted_ratio": 0.9917215745903025,
+      "raw_ratio_times_split": 0.9917215745903025
+    },
+    {
+      "symbol": "BEN",
+      "date": "2013-07-26",
+      "split_ratio": 3.0,
+      "raw_before": 143.95,
+      "raw_after": 48.66,
+      "adjusted_ratio": 1.0141021187912485,
+      "raw_ratio_times_split": 1.014102118791247
+    },
+    {
+      "symbol": "BF_B",
+      "date": "2008-10-28",
+      "split_ratio": 1.25,
+      "raw_before": 53.43,
+      "raw_after": 45.97,
+      "adjusted_ratio": 1.0754725809470798,
+      "raw_ratio_times_split": 1.0754725809470336
+    },
+    {
+      "symbol": "BF_B",
+      "date": "2012-08-13",
+      "split_ratio": 1.5,
+      "raw_before": 92.17,
+      "raw_after": 61.48,
+      "adjusted_ratio": 1.000542475859849,
+      "raw_ratio_times_split": 1.0005424758598243
+    },
+    {
+      "symbol": "BF_B",
+      "date": "2016-08-19",
+      "split_ratio": 2.0,
+      "raw_before": 99.65,
+      "raw_after": 50.4,
+      "adjusted_ratio": 1.0115403913697814,
+      "raw_ratio_times_split": 1.0115403913697942
+    },
+    {
+      "symbol": "BH",
+      "date": "2009-12-21",
+      "split_ratio": 0.05,
+      "raw_before": 14.55,
+      "raw_after": 293.0,
+      "adjusted_ratio": 1.006815735979909,
+      "raw_ratio_times_split": 1.006872852233677
+    },
+    {
+      "symbol": "BHB",
+      "date": "2014-05-20",
+      "split_ratio": 1.5,
+      "raw_before": 38.35,
+      "raw_after": 25.3,
+      "adjusted_ratio": 0.9895697522816167,
+      "raw_ratio_times_split": 0.9895697522816167
+    },
+    {
+      "symbol": "BHB",
+      "date": "2017-03-22",
+      "split_ratio": 1.5,
+      "raw_before": 45.24,
+      "raw_after": 29.88,
+      "adjusted_ratio": 0.9907161803713528,
+      "raw_ratio_times_split": 0.9907161803713527
+    },
+    {
+      "symbol": "BIDU",
+      "date": "2010-05-12",
+      "split_ratio": 10.0,
+      "raw_before": 714.17,
+      "raw_after": 78.206,
+      "adjusted_ratio": 1.0950613999467913,
+      "raw_ratio_times_split": 1.0950613999467915
+    },
+    {
+      "symbol": "BKE",
+      "date": "2008-10-31",
+      "split_ratio": 1.5,
+      "raw_before": 38.37,
+      "raw_after": 26.34,
+      "adjusted_ratio": 1.0297107114933888,
+      "raw_ratio_times_split": 1.0297107114933544
+    },
+    {
+      "symbol": "BLL",
+      "date": "2011-02-16",
+      "split_ratio": 2.0,
+      "raw_before": 73.73,
+      "raw_after": 36.83,
+      "adjusted_ratio": 0.9990505899904937,
+      "raw_ratio_times_split": 0.9990505899905058
+    },
+    {
+      "symbol": "BLL",
+      "date": "2017-05-17",
+      "split_ratio": 2.0,
+      "raw_before": 80.81,
+      "raw_after": 39.98,
+      "adjusted_ratio": 0.9894814998143727,
+      "raw_ratio_times_split": 0.9894814998143793
+    },
+    {
+      "symbol": "BMI",
+      "date": "2016-09-16",
+      "split_ratio": 2.0,
+      "raw_before": 65.6,
+      "raw_after": 32.89,
+      "adjusted_ratio": 1.0027439024390103,
+      "raw_ratio_times_split": 1.0027439024390246
+    },
+    {
+      "symbol": "BOFI",
+      "date": "2015-11-18",
+      "split_ratio": 4.0,
+      "raw_before": 83.29,
+      "raw_after": 19.89,
+      "adjusted_ratio": 0.955216712690599,
+      "raw_ratio_times_split": 0.955216712690599
+    },
+    {
+      "symbol": "BOLT",
+      "date": "2008-01-31",
+      "split_ratio": 1.5,
+      "raw_before": 27.67,
+      "raw_after": 19.3,
+      "adjusted_ratio": 1.0462594868088182,
+      "raw_ratio_times_split": 1.0462594868088182
+    },
+    {
+      "symbol": "BPOP",
+      "date": "2012-05-30",
+      "split_ratio": 0.1,
+      "raw_before": 1.62,
+      "raw_after": 15.56,
+      "adjusted_ratio": 0.9604938271605128,
+      "raw_ratio_times_split": 0.9604938271604939
+    },
+    {
+      "symbol": "BRK_B",
+      "date": "2010-01-21",
+      "split_ratio": 50.0,
+      "raw_before": 3476.0,
+      "raw_after": 72.72,
+      "adjusted_ratio": 1.046029919447641,
+      "raw_ratio_times_split": 1.046029919447641
+    },
+    {
+      "symbol": "BRLI",
+      "date": "2010-04-22",
+      "split_ratio": 2.0,
+      "raw_before": 47.98,
+      "raw_after": 24.63,
+      "adjusted_ratio": 1.0266777824093372,
+      "raw_ratio_times_split": 1.0266777824093372
+    },
+    {
+      "symbol": "BTH",
+      "date": "2009-02-02",
+      "split_ratio": 0.25,
+      "raw_before": 3.41,
+      "raw_after": 17.05,
+      "adjusted_ratio": 1.2499999999999998,
+      "raw_ratio_times_split": 1.25
+    },
+    {
+      "symbol": "BTH",
+      "date": "2012-06-18",
+      "split_ratio": 2.0,
+      "raw_before": 69.88,
+      "raw_after": 36.37,
+      "adjusted_ratio": 1.0409273039496278,
+      "raw_ratio_times_split": 1.0409273039496278
+    },
+    {
+      "symbol": "BTU",
+      "date": "2015-10-01",
+      "split_ratio": 0.06666666666666667,
+      "raw_before": 1.38,
+      "raw_after": 17.73,
+      "adjusted_ratio": 0.8565217391304348,
+      "raw_ratio_times_split": 0.8565217391304348
+    },
+    {
+      "symbol": "BUSE",
+      "date": "2015-09-08",
+      "split_ratio": 0.33333333333333,
+      "raw_before": 6.2,
+      "raw_after": 19.37,
+      "adjusted_ratio": 1.0413978494623464,
+      "raw_ratio_times_split": 1.0413978494623553
+    },
+    {
+      "symbol": "BWA",
+      "date": "2013-12-17",
+      "split_ratio": 2.0,
+      "raw_before": 109.39,
+      "raw_after": 55.39,
+      "adjusted_ratio": 1.0127068287777643,
+      "raw_ratio_times_split": 1.0127068287777676
+    },
+    {
+      "symbol": "BXC",
+      "date": "2016-06-14",
+      "split_ratio": 0.1,
+      "raw_before": 0.73,
+      "raw_after": 7.35,
+      "adjusted_ratio": 1.0068493150684932,
+      "raw_ratio_times_split": 1.0068493150684932
+    },
+    {
+      "symbol": "BZH",
+      "date": "2012-10-12",
+      "split_ratio": 0.2,
+      "raw_before": 3.53,
+      "raw_after": 16.9,
+      "adjusted_ratio": 0.9575070821529745,
+      "raw_ratio_times_split": 0.9575070821529744
+    },
+    {
+      "symbol": "C",
+      "date": "2011-05-09",
+      "split_ratio": 0.1,
+      "raw_before": 4.52,
+      "raw_after": 44.16,
+      "adjusted_ratio": 0.9769911504424816,
+      "raw_ratio_times_split": 0.976991150442478
+    },
+    {
+      "symbol": "CAC",
+      "date": "2016-10-03",
+      "split_ratio": 1.5,
+      "raw_before": 47.74,
+      "raw_after": 31.24,
+      "adjusted_ratio": 0.9815668202764858,
+      "raw_ratio_times_split": 0.9815668202764976
+    },
+    {
+      "symbol": "CACB",
+      "date": "2010-11-22",
+      "split_ratio": 0.1,
+      "raw_before": 0.75,
+      "raw_after": 6.44,
+      "adjusted_ratio": 0.8586666666666667,
+      "raw_ratio_times_split": 0.8586666666666668
+    },
+    {
+      "symbol": "CALL",
+      "date": "2010-07-19",
+      "split_ratio": 0.2,
+      "raw_before": 3.3,
+      "raw_after": 13.85,
+      "adjusted_ratio": 0.8393939393939394,
+      "raw_ratio_times_split": 0.8393939393939395
+    },
+    {
+      "symbol": "CALL",
+      "date": "2011-12-19",
+      "split_ratio": 2.0,
+      "raw_before": 23.94,
+      "raw_after": 12.85,
+      "adjusted_ratio": 1.073517126148705,
+      "raw_ratio_times_split": 1.073517126148705
+    },
+    {
+      "symbol": "CALM",
+      "date": "2014-11-03",
+      "split_ratio": 2.0,
+      "raw_before": 87.79,
+      "raw_after": 43.32,
+      "adjusted_ratio": 0.9869005581501309,
+      "raw_ratio_times_split": 0.9869005581501309
+    },
+    {
+      "symbol": "CBB",
+      "date": "2016-10-05",
+      "split_ratio": 0.2,
+      "raw_before": 4.07,
+      "raw_after": 19.71,
+      "adjusted_ratio": 0.9685503685503686,
+      "raw_ratio_times_split": 0.9685503685503685
+    },
+    {
+      "symbol": "CBSH",
+      "date": "2014-11-25",
+      "split_ratio": 1.05,
+      "raw_before": 45.67,
+      "raw_after": 43.32,
+      "adjusted_ratio": 1.0011440770746456,
+      "raw_ratio_times_split": 0.9959710970002189
+    },
+    {
+      "symbol": "CBSH",
+      "date": "2015-11-24",
+      "split_ratio": 1.05,
+      "raw_before": 47.77,
+      "raw_after": 45.55,
+      "adjusted_ratio": 1.0061492568557775,
+      "raw_ratio_times_split": 1.0012036843207033
+    },
+    {
+      "symbol": "CBSH",
+      "date": "2016-11-30",
+      "split_ratio": 1.05,
+      "raw_before": 57.5,
+      "raw_after": 54.81,
+      "adjusted_ratio": 1.0008782608695788,
+      "raw_ratio_times_split": 1.0008782608695654
+    },
+    {
+      "symbol": "CDE",
+      "date": "2009-05-27",
+      "split_ratio": 0.1,
+      "raw_before": 1.4,
+      "raw_after": 13.8,
+      "adjusted_ratio": 0.9857142857142858,
+      "raw_ratio_times_split": 0.9857142857142858
+    },
+    {
+      "symbol": "CELG",
+      "date": "2014-06-26",
+      "split_ratio": 2.0,
+      "raw_before": 172.92,
+      "raw_after": 86.62,
+      "adjusted_ratio": 1.001850566736063,
+      "raw_ratio_times_split": 1.001850566736063
+    },
+    {
+      "symbol": "CERN",
+      "date": "2011-06-27",
+      "split_ratio": 2.0,
+      "raw_before": 116.04,
+      "raw_after": 58.98,
+      "adjusted_ratio": 1.0165460186142707,
+      "raw_ratio_times_split": 1.0165460186142707
+    },
+    {
+      "symbol": "CERN",
+      "date": "2013-07-01",
+      "split_ratio": 2.0,
+      "raw_before": 96.09,
+      "raw_after": 48.75,
+      "adjusted_ratio": 1.0146737433655948,
+      "raw_ratio_times_split": 1.0146737433655948
+    },
+    {
+      "symbol": "CF",
+      "date": "2015-06-18",
+      "split_ratio": 5.0,
+      "raw_before": 316.68,
+      "raw_after": 64.25,
+      "adjusted_ratio": 1.0144309713275157,
+      "raw_ratio_times_split": 1.014430971327523
+    },
+    {
+      "symbol": "CFFN",
+      "date": "2010-12-22",
+      "split_ratio": 2.264,
+      "raw_before": 26.44,
+      "raw_after": 11.65,
+      "adjusted_ratio": 0.9975642965204236,
+      "raw_ratio_times_split": 0.9975642965204234
+    },
+    {
+      "symbol": "CGNX",
+      "date": "2013-09-17",
+      "split_ratio": 2.0,
+      "raw_before": 61.34,
+      "raw_after": 31.19,
+      "adjusted_ratio": 1.0169546788392512,
+      "raw_ratio_times_split": 1.0169546788392565
+    },
+    {
+      "symbol": "CHD",
+      "date": "2011-06-02",
+      "split_ratio": 2.0,
+      "raw_before": 82.0,
+      "raw_after": 40.75,
+      "adjusted_ratio": 0.9939024390244188,
+      "raw_ratio_times_split": 0.9939024390243902
+    },
+    {
+      "symbol": "CHD",
+      "date": "2016-09-02",
+      "split_ratio": 2.0,
+      "raw_before": 99.75,
+      "raw_after": 49.97,
+      "adjusted_ratio": 1.0019047619047554,
+      "raw_ratio_times_split": 1.0019047619047619
+    },
+    {
+      "symbol": "CHMT",
+      "date": "2010-11-10",
+      "split_ratio": 0.015,
+      "raw_before": 15.43,
+      "raw_after": 15.5,
+      "adjusted_ratio": 0.015068049254698637,
+      "raw_ratio_times_split": 0.015068049254698639
+    },
+    {
+      "symbol": "CIDM",
+      "date": "2016-05-10",
+      "split_ratio": 0.1,
+      "raw_before": 0.2,
+      "raw_after": 1.6,
+      "adjusted_ratio": 0.8,
+      "raw_ratio_times_split": 0.8
+    },
+    {
+      "symbol": "CIE",
+      "date": "2017-06-19",
+      "split_ratio": 0.066666666666667,
+      "raw_before": 0.2082,
+      "raw_after": 3.12,
+      "adjusted_ratio": 0.9990393852065321,
+      "raw_ratio_times_split": 0.9990393852065371
+    },
+    {
+      "symbol": "CIE",
+      "date": "2017-06-26",
+      "split_ratio": 0.066666666666667,
+      "raw_before": 2.38,
+      "raw_after": 2.42,
+      "adjusted_ratio": 0.06778711484593837,
+      "raw_ratio_times_split": 0.0677871148459387
+    },
+    {
+      "symbol": "CIFC",
+      "date": "2008-10-17",
+      "split_ratio": 0.1,
+      "raw_before": 0.47,
+      "raw_after": 4.6,
+      "adjusted_ratio": 0.9787234042553191,
+      "raw_ratio_times_split": 0.9787234042553191
+    },
+    {
+      "symbol": "CIM",
+      "date": "2015-04-07",
+      "split_ratio": 0.2,
+      "raw_before": 3.17,
+      "raw_after": 15.88,
+      "adjusted_ratio": 1.0018927444794457,
+      "raw_ratio_times_split": 1.0018927444794954
+    },
+    {
+      "symbol": "CL",
+      "date": "2013-05-16",
+      "split_ratio": 2.0,
+      "raw_before": 124.55,
+      "raw_after": 62.38,
+      "adjusted_ratio": 1.0016860698514647,
+      "raw_ratio_times_split": 1.0016860698514654
+    },
+    {
+      "symbol": "CLDX",
+      "date": "2008-03-10",
+      "split_ratio": 0.08333333333333333,
+      "raw_before": 0.63,
+      "raw_after": 7.63,
+      "adjusted_ratio": 1.009259259259259,
+      "raw_ratio_times_split": 1.009259259259259
+    },
+    {
+      "symbol": "CLF",
+      "date": "2008-05-16",
+      "split_ratio": 2.0,
+      "raw_before": 190.99,
+      "raw_after": 97.54,
+      "adjusted_ratio": 1.021414733755694,
+      "raw_ratio_times_split": 1.021414733755694
+    },
+    {
+      "symbol": "CLR",
+      "date": "2014-09-11",
+      "split_ratio": 2.0,
+      "raw_before": 149.25,
+      "raw_after": 75.79,
+      "adjusted_ratio": 1.0156113902847572,
+      "raw_ratio_times_split": 1.0156113902847572
+    },
+    {
+      "symbol": "CLW",
+      "date": "2011-08-29",
+      "split_ratio": 2.0,
+      "raw_before": 67.33,
+      "raw_after": 35.6,
+      "adjusted_ratio": 1.0574780929749,
+      "raw_ratio_times_split": 1.0574780929749
+    },
+    {
+      "symbol": "CMCSA",
+      "date": "2017-02-21",
+      "split_ratio": 2.0,
+      "raw_before": 75.32,
+      "raw_after": 37.89,
+      "adjusted_ratio": 1.0061072756239977,
+      "raw_ratio_times_split": 1.0061072756240044
+    },
+    {
+      "symbol": "CME",
+      "date": "2012-07-23",
+      "split_ratio": 5.0,
+      "raw_before": 257.0,
+      "raw_after": 51.12,
+      "adjusted_ratio": 0.9945525291828876,
+      "raw_ratio_times_split": 0.9945525291828794
+    },
+    {
+      "symbol": "CMI",
+      "date": "2008-01-03",
+      "split_ratio": 2.0,
+      "raw_before": 123.56,
+      "raw_after": 62.88,
+      "adjusted_ratio": 1.0178051149239253,
+      "raw_ratio_times_split": 1.0178051149239236
+    },
+    {
+      "symbol": "CMLS",
+      "date": "2016-10-13",
+      "split_ratio": 0.125,
+      "raw_before": 0.297,
+      "raw_after": 2.01,
+      "adjusted_ratio": 0.8459595959595959,
+      "raw_ratio_times_split": 0.8459595959595959
+    },
+    {
+      "symbol": "CMN",
+      "date": "2012-02-02",
+      "split_ratio": 1.5,
+      "raw_before": 32.29,
+      "raw_after": 22.27,
+      "adjusted_ratio": 1.0345308144936514,
+      "raw_ratio_times_split": 1.0345308144936514
+    },
+    {
+      "symbol": "CMN",
+      "date": "2013-07-15",
+      "split_ratio": 1.5,
+      "raw_before": 37.18,
+      "raw_after": 25.78,
+      "adjusted_ratio": 1.0400753093060786,
+      "raw_ratio_times_split": 1.0400753093060786
+    },
+    {
+      "symbol": "CNC",
+      "date": "2015-02-20",
+      "split_ratio": 2.0,
+      "raw_before": 120.67,
+      "raw_after": 59.85,
+      "adjusted_ratio": 0.9919615480235353,
+      "raw_ratio_times_split": 0.9919615480235353
+    },
+    {
+      "symbol": "COB",
+      "date": "2011-11-01",
+      "split_ratio": 0.01,
+      "raw_before": 0.23,
+      "raw_after": 20.4,
+      "adjusted_ratio": 0.8869565217391304,
+      "raw_ratio_times_split": 0.8869565217391303
+    },
+    {
+      "symbol": "COG",
+      "date": "2012-01-26",
+      "split_ratio": 2.0,
+      "raw_before": 66.62,
+      "raw_after": 32.44,
+      "adjusted_ratio": 0.9738817172020199,
+      "raw_ratio_times_split": 0.9738817172020413
+    },
+    {
+      "symbol": "COG",
+      "date": "2013-08-15",
+      "split_ratio": 2.0,
+      "raw_before": 74.78,
+      "raw_after": 37.73,
+      "adjusted_ratio": 1.0090933404653761,
+      "raw_ratio_times_split": 1.009093340465365
+    },
+    {
+      "symbol": "COLM",
+      "date": "2014-09-29",
+      "split_ratio": 2.0,
+      "raw_before": 74.27,
+      "raw_after": 35.62,
+      "adjusted_ratio": 0.9592029083075124,
+      "raw_ratio_times_split": 0.9592029083075265
+    },
+    {
+      "symbol": "CORE",
+      "date": "2014-06-27",
+      "split_ratio": 2.0,
+      "raw_before": 91.7,
+      "raw_after": 45.51,
+      "adjusted_ratio": 0.9925845147219561,
+      "raw_ratio_times_split": 0.9925845147219192
+    },
+    {
+      "symbol": "CORE",
+      "date": "2016-06-28",
+      "split_ratio": 2.0,
+      "raw_before": 90.49,
+      "raw_after": 44.82,
+      "adjusted_ratio": 0.990606696872599,
+      "raw_ratio_times_split": 0.9906066968725826
+    },
+    {
+      "symbol": "CORR",
+      "date": "2015-12-02",
+      "split_ratio": 0.2,
+      "raw_before": 4.99,
+      "raw_after": 24.03,
+      "adjusted_ratio": 0.9631262525050052,
+      "raw_ratio_times_split": 0.9631262525050102
+    },
+    {
+      "symbol": "COWN",
+      "date": "2016-12-05",
+      "split_ratio": 0.25,
+      "raw_before": 3.45,
+      "raw_after": 14.05,
+      "adjusted_ratio": 1.0181159420289856,
+      "raw_ratio_times_split": 1.0181159420289856
+    },
+    {
+      "symbol": "CPF",
+      "date": "2011-02-03",
+      "split_ratio": 0.05,
+      "raw_before": 1.51,
+      "raw_after": 26.16,
+      "adjusted_ratio": 0.8662251655629375,
+      "raw_ratio_times_split": 0.8662251655629141
+    },
+    {
+      "symbol": "CPK",
+      "date": "2014-09-09",
+      "split_ratio": 1.5,
+      "raw_before": 69.41,
+      "raw_after": 45.11,
+      "adjusted_ratio": 0.9748595303270313,
+      "raw_ratio_times_split": 0.9748595303270422
+    },
+    {
+      "symbol": "CPRT",
+      "date": "2012-03-29",
+      "split_ratio": 2.0,
+      "raw_before": 52.84,
+      "raw_after": 26.24,
+      "adjusted_ratio": 0.9931869795609386,
+      "raw_ratio_times_split": 0.9931869795609386
+    },
+    {
+      "symbol": "CPRT",
+      "date": "2017-04-11",
+      "split_ratio": 2.0,
+      "raw_before": 60.11,
+      "raw_after": 30.12,
+      "adjusted_ratio": 1.0021627017135253,
+      "raw_ratio_times_split": 1.0021627017135253
+    },
+    {
+      "symbol": "CPST",
+      "date": "2015-11-09",
+      "split_ratio": 0.05,
+      "raw_before": 0.1996,
+      "raw_after": 3.04,
+      "adjusted_ratio": 0.7615230460921844,
+      "raw_ratio_times_split": 0.7615230460921845
+    },
+    {
+      "symbol": "CRK",
+      "date": "2016-08-01",
+      "split_ratio": 0.2,
+      "raw_before": 0.8234,
+      "raw_after": 2.88,
+      "adjusted_ratio": 0.6995384989069711,
+      "raw_ratio_times_split": 0.6995384989069711
+    },
+    {
+      "symbol": "CRM",
+      "date": "2013-04-18",
+      "split_ratio": 4.0,
+      "raw_before": 167.35,
+      "raw_after": 41.03,
+      "adjusted_ratio": 0.9806991335524351,
+      "raw_ratio_times_split": 0.9806991335524351
+    },
+    {
+      "symbol": "CRVL",
+      "date": "2013-06-27",
+      "split_ratio": 2.0,
+      "raw_before": 58.09,
+      "raw_after": 29.14,
+      "adjusted_ratio": 1.003270786710277,
+      "raw_ratio_times_split": 1.003270786710277
+    },
+    {
+      "symbol": "CSII",
+      "date": "2009-02-26",
+      "split_ratio": 0.1,
+      "raw_before": 0.78,
+      "raw_after": 8.95,
+      "adjusted_ratio": 1.1474358974358971,
+      "raw_ratio_times_split": 1.1474358974358974
+    },
+    {
+      "symbol": "CSWC",
+      "date": "2013-08-16",
+      "split_ratio": 4.0,
+      "raw_before": 137.07,
+      "raw_after": 34.78,
+      "adjusted_ratio": 1.0149558619683412,
+      "raw_ratio_times_split": 1.0149558619683374
+    },
+    {
+      "symbol": "CSX",
+      "date": "2011-06-16",
+      "split_ratio": 3.0,
+      "raw_before": 72.98,
+      "raw_after": 24.3,
+      "adjusted_ratio": 0.9989038092628401,
+      "raw_ratio_times_split": 0.9989038092628117
+    },
+    {
+      "symbol": "CTIC",
+      "date": "2008-09-02",
+      "split_ratio": 0.1,
+      "raw_before": 0.23,
+      "raw_after": 2.32,
+      "adjusted_ratio": 1.008695652173913,
+      "raw_ratio_times_split": 1.008695652173913
+    },
+    {
+      "symbol": "CTIC",
+      "date": "2011-05-16",
+      "split_ratio": 0.16666666666666666,
+      "raw_before": 0.2654,
+      "raw_after": 1.59,
+      "adjusted_ratio": 0.9984928409947249,
+      "raw_ratio_times_split": 0.9984928409947248
+    },
+    {
+      "symbol": "CTIC",
+      "date": "2012-09-04",
+      "split_ratio": 0.2,
+      "raw_before": 0.435,
+      "raw_after": 1.97,
+      "adjusted_ratio": 0.9057471264367816,
+      "raw_ratio_times_split": 0.9057471264367817
+    },
+    {
+      "symbol": "CTIC",
+      "date": "2017-01-03",
+      "split_ratio": 0.1,
+      "raw_before": 0.4076,
+      "raw_after": 3.93,
+      "adjusted_ratio": 0.9641805691854759,
+      "raw_ratio_times_split": 0.964180569185476
+    },
+    {
+      "symbol": "CTRX",
+      "date": "2010-09-20",
+      "split_ratio": 2.0,
+      "raw_before": 77.36,
+      "raw_after": 38.48,
+      "adjusted_ratio": 0.9948293691830402,
+      "raw_ratio_times_split": 0.9948293691830402
+    },
+    {
+      "symbol": "CTRX",
+      "date": "2012-10-02",
+      "split_ratio": 2.0,
+      "raw_before": 99.12,
+      "raw_after": 49.49,
+      "adjusted_ratio": 0.998587570621469,
+      "raw_ratio_times_split": 0.998587570621469
+    },
+    {
+      "symbol": "CTSH",
+      "date": "2014-03-10",
+      "split_ratio": 2.0,
+      "raw_before": 107.22,
+      "raw_after": 52.9,
+      "adjusted_ratio": 0.9867562022010778,
+      "raw_ratio_times_split": 0.9867562022010818
+    },
+    {
+      "symbol": "CUI",
+      "date": "2012-02-17",
+      "split_ratio": 0.03333333333333333,
+      "raw_before": 0.2,
+      "raw_after": 6.25,
+      "adjusted_ratio": 1.0416666666666667,
+      "raw_ratio_times_split": 1.0416666666666667
+    },
+    {
+      "symbol": "CUR",
+      "date": "2017-01-09",
+      "split_ratio": 0.07692307692307693,
+      "raw_before": 0.3079,
+      "raw_after": 3.81,
+      "adjusted_ratio": 0.9518574961900718,
+      "raw_ratio_times_split": 0.9518574961900718
+    },
+    {
+      "symbol": "CVO",
+      "date": "2016-07-14",
+      "split_ratio": 0.125,
+      "raw_before": 0.7316,
+      "raw_after": 6.48,
+      "adjusted_ratio": 1.1071623838162932,
+      "raw_ratio_times_split": 1.1071623838162932
+    },
+    {
+      "symbol": "CWT",
+      "date": "2011-06-13",
+      "split_ratio": 2.0,
+      "raw_before": 35.59,
+      "raw_after": 17.91,
+      "adjusted_ratio": 1.0064624894633403,
+      "raw_ratio_times_split": 1.0064624894633323
+    },
+    {
+      "symbol": "CYT",
+      "date": "2014-09-18",
+      "split_ratio": 2.0,
+      "raw_before": 100.87,
+      "raw_after": 50.17,
+      "adjusted_ratio": 0.9947457123029642,
+      "raw_ratio_times_split": 0.9947457123029642
+    },
+    {
+      "symbol": "CYTK",
+      "date": "2013-06-25",
+      "split_ratio": 0.16666666666666666,
+      "raw_before": 2.05,
+      "raw_after": 12.05,
+      "adjusted_ratio": 0.9796747967479676,
+      "raw_ratio_times_split": 0.9796747967479675
+    },
+    {
+      "symbol": "CYTR",
+      "date": "2012-05-16",
+      "split_ratio": 0.14285714285714,
+      "raw_before": 0.37,
+      "raw_after": 2.8,
+      "adjusted_ratio": 1.0810810810810811,
+      "raw_ratio_times_split": 1.0810810810810594
+    },
+    {
+      "symbol": "CYTR",
+      "date": "2017-11-01",
+      "split_ratio": 0.16666666666667,
+      "raw_before": 0.363,
+      "raw_after": 2.1,
+      "adjusted_ratio": 0.9641873278236915,
+      "raw_ratio_times_split": 0.9641873278237107
+    },
+    {
+      "symbol": "CYTX",
+      "date": "2016-05-12",
+      "split_ratio": 0.06666666666666667,
+      "raw_before": 0.225,
+      "raw_after": 2.71,
+      "adjusted_ratio": 0.802962962962963,
+      "raw_ratio_times_split": 0.802962962962963
+    },
+    {
+      "symbol": "CZR",
+      "date": "2012-02-13",
+      "split_ratio": 1.742,
+      "raw_before": 14.24,
+      "raw_after": 13.16,
+      "adjusted_ratio": 0.9241573033707866,
+      "raw_ratio_times_split": 1.6098820224719101
+    },
+    {
+      "symbol": "DCI",
+      "date": "2012-03-26",
+      "split_ratio": 2.0,
+      "raw_before": 70.24,
+      "raw_after": 35.53,
+      "adjusted_ratio": 1.011674259681093,
+      "raw_ratio_times_split": 1.0116742596810935
+    },
+    {
+      "symbol": "DCT",
+      "date": "2014-11-18",
+      "split_ratio": 0.25,
+      "raw_before": 8.37,
+      "raw_after": 33.8,
+      "adjusted_ratio": 1.0095579450418148,
+      "raw_ratio_times_split": 1.009557945041816
+    },
+    {
+      "symbol": "DDD",
+      "date": "2011-05-19",
+      "split_ratio": 2.0,
+      "raw_before": 37.08,
+      "raw_after": 17.87,
+      "adjusted_ratio": 0.9638619201725999,
+      "raw_ratio_times_split": 0.9638619201725999
+    },
+    {
+      "symbol": "DDD",
+      "date": "2013-02-25",
+      "split_ratio": 1.5,
+      "raw_before": 56.95,
+      "raw_after": 34.55,
+      "adjusted_ratio": 0.9100087796312554,
+      "raw_ratio_times_split": 0.9100087796312554
+    },
+    {
+      "symbol": "DECK",
+      "date": "2010-07-06",
+      "split_ratio": 3.0,
+      "raw_before": 141.8,
+      "raw_after": 44.43,
+      "adjusted_ratio": 0.9399858956276446,
+      "raw_ratio_times_split": 0.9399858956276446
+    },
+    {
+      "symbol": "DEST",
+      "date": "2011-03-02",
+      "split_ratio": 2.0,
+      "raw_before": 44.42,
+      "raw_after": 22.13,
+      "adjusted_ratio": 0.9963980189104007,
+      "raw_ratio_times_split": 0.9963980189104006
+    },
+    {
+      "symbol": "DF",
+      "date": "2013-08-27",
+      "split_ratio": 0.5,
+      "raw_before": 9.67,
+      "raw_after": 18.8,
+      "adjusted_ratio": 0.9720785935884579,
+      "raw_ratio_times_split": 0.9720785935884179
+    },
+    {
+      "symbol": "DGAS",
+      "date": "2012-05-02",
+      "split_ratio": 2.0,
+      "raw_before": 42.6,
+      "raw_after": 20.71,
+      "adjusted_ratio": 0.9723004694835777,
+      "raw_ratio_times_split": 0.9723004694835681
+    },
+    {
+      "symbol": "DHR",
+      "date": "2010-06-14",
+      "split_ratio": 2.0,
+      "raw_before": 78.67,
+      "raw_after": 39.66,
+      "adjusted_ratio": 1.008262361764357,
+      "raw_ratio_times_split": 1.0082623617643318
+    },
+    {
+      "symbol": "DHT",
+      "date": "2012-07-17",
+      "split_ratio": 0.083333333333333,
+      "raw_before": 0.61,
+      "raw_after": 7.6,
+      "adjusted_ratio": 1.0382513661202024,
+      "raw_ratio_times_split": 1.0382513661202144
+    },
+    {
+      "symbol": "DLLR",
+      "date": "2011-02-07",
+      "split_ratio": 1.5,
+      "raw_before": 29.67,
+      "raw_after": 19.86,
+      "adjusted_ratio": 1.0040444893832152,
+      "raw_ratio_times_split": 1.0040444893832152
+    },
+    {
+      "symbol": "DLTR",
+      "date": "2010-06-25",
+      "split_ratio": 1.5,
+      "raw_before": 62.69,
+      "raw_after": 42.01,
+      "adjusted_ratio": 1.0051842399106716,
+      "raw_ratio_times_split": 1.0051842399106716
+    },
+    {
+      "symbol": "DLTR",
+      "date": "2012-06-27",
+      "split_ratio": 2.0,
+      "raw_before": 110.98,
+      "raw_after": 53.48,
+      "adjusted_ratio": 0.9637772571634527,
+      "raw_ratio_times_split": 0.9637772571634527
+    },
+    {
+      "symbol": "DMD",
+      "date": "2014-08-04",
+      "split_ratio": 0.2,
+      "raw_before": 5.25,
+      "raw_after": 9.94,
+      "adjusted_ratio": 0.37866666666666665,
+      "raw_ratio_times_split": 0.3786666666666667
+    },
+    {
+      "symbol": "DORM",
+      "date": "2012-06-18",
+      "split_ratio": 2.0,
+      "raw_before": 45.66,
+      "raw_after": 22.28,
+      "adjusted_ratio": 0.9759088918090233,
+      "raw_ratio_times_split": 0.9759088918090233
+    },
+    {
+      "symbol": "DRL",
+      "date": "2013-07-01",
+      "split_ratio": 0.05,
+      "raw_before": 0.83,
+      "raw_after": 17.91,
+      "adjusted_ratio": 1.0789156626506025,
+      "raw_ratio_times_split": 1.0789156626506025
+    },
+    {
+      "symbol": "DSCI",
+      "date": "2010-02-03",
+      "split_ratio": 0.125,
+      "raw_before": 0.76,
+      "raw_after": 5.8,
+      "adjusted_ratio": 0.9539473684210525,
+      "raw_ratio_times_split": 0.9539473684210525
+    },
+    {
+      "symbol": "DST",
+      "date": "2017-06-09",
+      "split_ratio": 2.0,
+      "raw_before": 121.44,
+      "raw_after": 60.63,
+      "adjusted_ratio": 0.998517786561267,
+      "raw_ratio_times_split": 0.9985177865612649
+    },
+    {
+      "symbol": "DSW",
+      "date": "2013-11-04",
+      "split_ratio": 2.0,
+      "raw_before": 87.44,
+      "raw_after": 44.04,
+      "adjusted_ratio": 1.0073193046660494,
+      "raw_ratio_times_split": 1.0073193046660567
+    },
+    {
+      "symbol": "DUK",
+      "date": "2012-07-03",
+      "split_ratio": 0.33333333333333,
+      "raw_before": 23.28,
+      "raw_after": 68.69,
+      "adjusted_ratio": 0.9835337915234814,
+      "raw_ratio_times_split": 0.9835337915234723
+    },
+    {
+      "symbol": "DVA",
+      "date": "2013-09-09",
+      "split_ratio": 2.0,
+      "raw_before": 110.59,
+      "raw_after": 56.04,
+      "adjusted_ratio": 1.013473189257618,
+      "raw_ratio_times_split": 1.013473189257618
+    },
+    {
+      "symbol": "DVAX",
+      "date": "2014-11-10",
+      "split_ratio": 0.1,
+      "raw_before": 1.59,
+      "raw_after": 15.98,
+      "adjusted_ratio": 1.0050314465408805,
+      "raw_ratio_times_split": 1.0050314465408805
+    },
+    {
+      "symbol": "DWSN",
+      "date": "2015-02-12",
+      "split_ratio": 0.3333333333333333,
+      "raw_before": 1.95,
+      "raw_after": 7.31,
+      "adjusted_ratio": 1.2495726495726496,
+      "raw_ratio_times_split": 1.2495726495726496
+    },
+    {
+      "symbol": "DXPE",
+      "date": "2008-10-01",
+      "split_ratio": 2.0,
+      "raw_before": 53.31,
+      "raw_after": 26.0,
+      "adjusted_ratio": 0.9754267492027762,
+      "raw_ratio_times_split": 0.9754267492027762
+    },
+    {
+      "symbol": "EBIX",
+      "date": "2008-10-09",
+      "split_ratio": 3.0,
+      "raw_before": 74.99,
+      "raw_after": 22.33,
+      "adjusted_ratio": 0.8933191092145694,
+      "raw_ratio_times_split": 0.8933191092145619
+    },
+    {
+      "symbol": "EBIX",
+      "date": "2010-01-05",
+      "split_ratio": 3.0,
+      "raw_before": 51.08,
+      "raw_after": 17.93,
+      "adjusted_ratio": 1.0530540328896119,
+      "raw_ratio_times_split": 1.053054032889585
+    },
+    {
+      "symbol": "EBSB",
+      "date": "2014-07-29",
+      "split_ratio": 2.448,
+      "raw_before": 25.42,
+      "raw_after": 10.6,
+      "adjusted_ratio": 1.0208025177025832,
+      "raw_ratio_times_split": 1.0208025177025961
+    },
+    {
+      "symbol": "EDR",
+      "date": "2014-12-01",
+      "split_ratio": 0.33333333333333,
+      "raw_before": 11.64,
+      "raw_after": 34.71,
+      "adjusted_ratio": 0.9939862542955411,
+      "raw_ratio_times_split": 0.9939862542955227
+    },
+    {
+      "symbol": "EL",
+      "date": "2012-01-23",
+      "split_ratio": 2.0,
+      "raw_before": 116.03,
+      "raw_after": 57.48,
+      "adjusted_ratio": 0.9907782470050923,
+      "raw_ratio_times_split": 0.9907782470050849
+    },
+    {
+      "symbol": "ELS",
+      "date": "2013-07-16",
+      "split_ratio": 2.0,
+      "raw_before": 81.44,
+      "raw_after": 40.72,
+      "adjusted_ratio": 1.0,
+      "raw_ratio_times_split": 1.0
+    },
+    {
+      "symbol": "EMCI",
+      "date": "2015-06-24",
+      "split_ratio": 1.5,
+      "raw_before": 37.18,
+      "raw_after": 24.77,
+      "adjusted_ratio": 0.9993275954814403,
+      "raw_ratio_times_split": 0.9993275954814416
+    },
+    {
+      "symbol": "EMN",
+      "date": "2011-10-04",
+      "split_ratio": 2.0,
+      "raw_before": 68.46,
+      "raw_after": 35.8,
+      "adjusted_ratio": 1.0458661992404144,
+      "raw_ratio_times_split": 1.0458661992404323
+    },
+    {
+      "symbol": "ENSG",
+      "date": "2015-12-24",
+      "split_ratio": 2.0,
+      "raw_before": 45.82,
+      "raw_after": 22.02,
+      "adjusted_ratio": 0.9611523352247782,
+      "raw_ratio_times_split": 0.9611523352247926
+    },
+    {
+      "symbol": "EOG",
+      "date": "2014-04-01",
+      "split_ratio": 2.0,
+      "raw_before": 196.17,
+      "raw_after": 98.98,
+      "adjusted_ratio": 1.0091247387470068,
+      "raw_ratio_times_split": 1.0091247387470053
+    },
+    {
+      "symbol": "EOX",
+      "date": "2012-10-23",
+      "split_ratio": 0.14285714285714285,
+      "raw_before": 0.775,
+      "raw_after": 5.74,
+      "adjusted_ratio": 1.0580645161290323,
+      "raw_ratio_times_split": 1.058064516129032
+    },
+    {
+      "symbol": "EOX",
+      "date": "2015-05-21",
+      "split_ratio": 0.05,
+      "raw_before": 0.54,
+      "raw_after": 6.51,
+      "adjusted_ratio": 0.6027777777777777,
+      "raw_ratio_times_split": 0.6027777777777777
+    },
+    {
+      "symbol": "EQU",
+      "date": "2010-06-01",
+      "split_ratio": 0.3333333333333333,
+      "raw_before": 2.22,
+      "raw_after": 6.76,
+      "adjusted_ratio": 1.0150150150150075,
+      "raw_ratio_times_split": 1.0150150150150148
+    },
+    {
+      "symbol": "ESBF",
+      "date": "2011-05-03",
+      "split_ratio": 1.2,
+      "raw_before": 16.42,
+      "raw_after": 13.49,
+      "adjusted_ratio": 0.9858708891595613,
+      "raw_ratio_times_split": 0.9858708891595613
+    },
+    {
+      "symbol": "ESBF",
+      "date": "2013-05-01",
+      "split_ratio": 1.2,
+      "raw_before": 14.0,
+      "raw_after": 11.43,
+      "adjusted_ratio": 0.9797142857142858,
+      "raw_ratio_times_split": 0.9797142857142856
+    },
+    {
+      "symbol": "ESRX",
+      "date": "2010-06-08",
+      "split_ratio": 2.0,
+      "raw_before": 103.37,
+      "raw_after": 50.92,
+      "adjusted_ratio": 0.9851988004256554,
+      "raw_ratio_times_split": 0.9851988004256554
+    },
+    {
+      "symbol": "ETFC",
+      "date": "2010-06-02",
+      "split_ratio": 0.1,
+      "raw_before": 1.42,
+      "raw_after": 14.99,
+      "adjusted_ratio": 1.0556338028169014,
+      "raw_ratio_times_split": 1.0556338028169014
+    },
+    {
+      "symbol": "ETN",
+      "date": "2011-03-01",
+      "split_ratio": 2.0,
+      "raw_before": 110.78,
+      "raw_after": 53.55,
+      "adjusted_ratio": 0.9667810074020591,
+      "raw_ratio_times_split": 0.9667810074020581
+    },
+    {
+      "symbol": "EW",
+      "date": "2010-05-28",
+      "split_ratio": 2.0,
+      "raw_before": 103.85,
+      "raw_after": 50.53,
+      "adjusted_ratio": 0.973134328358209,
+      "raw_ratio_times_split": 0.973134328358209
+    },
+    {
+      "symbol": "EW",
+      "date": "2015-12-14",
+      "split_ratio": 2.0,
+      "raw_before": 159.71,
+      "raw_after": 80.53,
+      "adjusted_ratio": 1.008452820737587,
+      "raw_ratio_times_split": 1.008452820737587
+    },
+    {
+      "symbol": "EXPE",
+      "date": "2011-12-22",
+      "split_ratio": 0.5,
+      "raw_before": 27.89,
+      "raw_after": 29.15,
+      "adjusted_ratio": 0.5225887414844014,
+      "raw_ratio_times_split": 0.5225887414844029
+    },
+    {
+      "symbol": "EXPO",
+      "date": "2015-06-05",
+      "split_ratio": 2.0,
+      "raw_before": 84.7,
+      "raw_after": 43.42,
+      "adjusted_ratio": 1.0252656434474519,
+      "raw_ratio_times_split": 1.0252656434474616
+    },
+    {
+      "symbol": "EXXI",
+      "date": "2010-01-29",
+      "split_ratio": 0.2,
+      "raw_before": 3.52,
+      "raw_after": 18.13,
+      "adjusted_ratio": 1.0301136363636365,
+      "raw_ratio_times_split": 1.0301136363636363
+    },
+    {
+      "symbol": "FAST",
+      "date": "2011-05-23",
+      "split_ratio": 2.0,
+      "raw_before": 65.71,
+      "raw_after": 32.4,
+      "adjusted_ratio": 0.9861512707350455,
+      "raw_ratio_times_split": 0.9861512707350479
+    },
+    {
+      "symbol": "FBC",
+      "date": "2010-05-28",
+      "split_ratio": 0.1,
+      "raw_before": 0.47,
+      "raw_after": 5.08,
+      "adjusted_ratio": 1.0808510638297872,
+      "raw_ratio_times_split": 1.0808510638297875
+    },
+    {
+      "symbol": "FBC",
+      "date": "2012-10-11",
+      "split_ratio": 0.1,
+      "raw_before": 1.19,
+      "raw_after": 12.8,
+      "adjusted_ratio": 1.0756302521008405,
+      "raw_ratio_times_split": 1.0756302521008405
+    },
+    {
+      "symbol": "FBIZ",
+      "date": "2015-08-31",
+      "split_ratio": 2.0,
+      "raw_before": 44.1,
+      "raw_after": 22.43,
+      "adjusted_ratio": 1.017233560090705,
+      "raw_ratio_times_split": 1.017233560090703
+    },
+    {
+      "symbol": "FBP",
+      "date": "2011-01-07",
+      "split_ratio": 0.06666666666666667,
+      "raw_before": 0.3598,
+      "raw_after": 5.41,
+      "adjusted_ratio": 1.002408745599407,
+      "raw_ratio_times_split": 1.002408745599407
+    },
+    {
+      "symbol": "FBRC",
+      "date": "2013-02-28",
+      "split_ratio": 0.25,
+      "raw_before": 4.38,
+      "raw_after": 17.66,
+      "adjusted_ratio": 1.0079908675799087,
+      "raw_ratio_times_split": 1.0079908675799087
+    },
+    {
+      "symbol": "FCEL",
+      "date": "2015-12-04",
+      "split_ratio": 0.08333333333333333,
+      "raw_before": 0.816,
+      "raw_after": 8.05,
+      "adjusted_ratio": 0.8220996732026145,
+      "raw_ratio_times_split": 0.8220996732026145
+    },
+    {
+      "symbol": "FCSC",
+      "date": "2013-04-30",
+      "split_ratio": 0.04,
+      "raw_before": 0.17,
+      "raw_after": 3.99,
+      "adjusted_ratio": 0.9388235294117648,
+      "raw_ratio_times_split": 0.9388235294117646
+    },
+    {
+      "symbol": "FCSC",
+      "date": "2017-03-10",
+      "split_ratio": 0.3333333333333333,
+      "raw_before": 0.8201,
+      "raw_after": 0.8104,
+      "adjusted_ratio": 0.3293907247083689,
+      "raw_ratio_times_split": 0.32939072470836883
+    },
+    {
+      "symbol": "FCSC",
+      "date": "2017-03-13",
+      "split_ratio": 0.3333333333333333,
+      "raw_before": 0.8104,
+      "raw_after": 2.28,
+      "adjusted_ratio": 0.9378084896347482,
+      "raw_ratio_times_split": 0.937808489634748
+    },
+    {
+      "symbol": "FCX",
+      "date": "2011-02-02",
+      "split_ratio": 2.0,
+      "raw_before": 114.07,
+      "raw_after": 56.26,
+      "adjusted_ratio": 0.9864118523713509,
+      "raw_ratio_times_split": 0.986411852371351
+    },
+    {
+      "symbol": "FELE",
+      "date": "2013-03-19",
+      "split_ratio": 2.0,
+      "raw_before": 67.45,
+      "raw_after": 33.46,
+      "adjusted_ratio": 0.9921423276501246,
+      "raw_ratio_times_split": 0.9921423276501111
+    },
+    {
+      "symbol": "FFBH",
+      "date": "2011-05-04",
+      "split_ratio": 0.2,
+      "raw_before": 2.63,
+      "raw_after": 11.99,
+      "adjusted_ratio": 0.911787072243346,
+      "raw_ratio_times_split": 0.9117870722433461
+    },
+    {
+      "symbol": "FFIN",
+      "date": "2011-06-02",
+      "split_ratio": 1.5,
+      "raw_before": 50.96,
+      "raw_after": 33.69,
+      "adjusted_ratio": 0.9916601255886547,
+      "raw_ratio_times_split": 0.9916601255886969
+    },
+    {
+      "symbol": "FFIN",
+      "date": "2014-06-03",
+      "split_ratio": 2.0,
+      "raw_before": 59.76,
+      "raw_after": 30.2,
+      "adjusted_ratio": 1.0107095046854127,
+      "raw_ratio_times_split": 1.0107095046854082
+    },
+    {
+      "symbol": "FISV",
+      "date": "2013-12-17",
+      "split_ratio": 2.0,
+      "raw_before": 113.38,
+      "raw_after": 56.61,
+      "adjusted_ratio": 0.9985888163697302,
+      "raw_ratio_times_split": 0.9985888163697302
+    },
+    {
+      "symbol": "FLIC",
+      "date": "2014-10-16",
+      "split_ratio": 1.5,
+      "raw_before": 36.75,
+      "raw_after": 24.48,
+      "adjusted_ratio": 0.9991836734694012,
+      "raw_ratio_times_split": 0.9991836734693877
+    },
+    {
+      "symbol": "FLIC",
+      "date": "2016-10-28",
+      "split_ratio": 1.5,
+      "raw_before": 32.7,
+      "raw_after": 32.1,
+      "adjusted_ratio": 1.4724770642202314,
+      "raw_ratio_times_split": 1.4724770642201834
+    },
+    {
+      "symbol": "FLIC",
+      "date": "2016-11-29",
+      "split_ratio": 1.5,
+      "raw_before": 38.8,
+      "raw_after": 25.75,
+      "adjusted_ratio": 0.9954896907216632,
+      "raw_ratio_times_split": 0.9954896907216496
+    },
+    {
+      "symbol": "FLO",
+      "date": "2011-06-27",
+      "split_ratio": 1.5,
+      "raw_before": 32.53,
+      "raw_after": 21.74,
+      "adjusted_ratio": 1.0024592683677065,
+      "raw_ratio_times_split": 1.0024592683676605
+    },
+    {
+      "symbol": "FLO",
+      "date": "2013-06-20",
+      "split_ratio": 1.5,
+      "raw_before": 34.25,
+      "raw_after": 22.02,
+      "adjusted_ratio": 0.9643795620437885,
+      "raw_ratio_times_split": 0.9643795620437956
+    },
+    {
+      "symbol": "FLR",
+      "date": "2008-07-17",
+      "split_ratio": 2.0,
+      "raw_before": 171.14,
+      "raw_after": 86.68,
+      "adjusted_ratio": 1.01297183592381,
+      "raw_ratio_times_split": 1.0129718359238051
+    },
+    {
+      "symbol": "FLS",
+      "date": "2013-06-24",
+      "split_ratio": 3.0,
+      "raw_before": 159.31,
+      "raw_after": 52.05,
+      "adjusted_ratio": 0.9801644592304306,
+      "raw_ratio_times_split": 0.980164459230431
+    },
+    {
+      "symbol": "FMC",
+      "date": "2012-05-25",
+      "split_ratio": 2.0,
+      "raw_before": 103.96,
+      "raw_after": 51.39,
+      "adjusted_ratio": 0.9886494805694545,
+      "raw_ratio_times_split": 0.9886494805694499
+    },
+    {
+      "symbol": "FMD",
+      "date": "2013-12-03",
+      "split_ratio": 0.1,
+      "raw_before": 0.8,
+      "raw_after": 7.49,
+      "adjusted_ratio": 0.93625,
+      "raw_ratio_times_split": 0.9362499999999999
+    },
+    {
+      "symbol": "FNSR",
+      "date": "2009-09-28",
+      "split_ratio": 0.125,
+      "raw_before": 1.23,
+      "raw_after": 10.35,
+      "adjusted_ratio": 1.0518292682926829,
+      "raw_ratio_times_split": 1.0518292682926829
+    },
+    {
+      "symbol": "FRO",
+      "date": "2016-02-03",
+      "split_ratio": 0.2,
+      "raw_before": 1.93,
+      "raw_after": 10.0,
+      "adjusted_ratio": 1.036269430051813,
+      "raw_ratio_times_split": 1.0362694300518134
+    },
+    {
+      "symbol": "FSGI",
+      "date": "2011-09-19",
+      "split_ratio": 0.1,
+      "raw_before": 0.3553,
+      "raw_after": 3.07,
+      "adjusted_ratio": 0.8640585420771179,
+      "raw_ratio_times_split": 0.864058542077118
+    },
+    {
+      "symbol": "FTI",
+      "date": "2011-04-01",
+      "split_ratio": 2.0,
+      "raw_before": 94.48,
+      "raw_after": 48.9,
+      "adjusted_ratio": 1.0351397121083923,
+      "raw_ratio_times_split": 1.0351397121083827
+    },
+    {
+      "symbol": "FTNT",
+      "date": "2011-06-02",
+      "split_ratio": 2.0,
+      "raw_before": 49.7,
+      "raw_after": 23.51,
+      "adjusted_ratio": 0.9460764587525151,
+      "raw_ratio_times_split": 0.9460764587525151
+    },
+    {
+      "symbol": "FUR",
+      "date": "2008-12-01",
+      "split_ratio": 0.2,
+      "raw_before": 2.34,
+      "raw_after": 9.8,
+      "adjusted_ratio": 0.8376068376068377,
+      "raw_ratio_times_split": 0.8376068376068377
+    },
+    {
+      "symbol": "FXCM",
+      "date": "2015-10-01",
+      "split_ratio": 0.1,
+      "raw_before": 0.87,
+      "raw_after": 8.01,
+      "adjusted_ratio": 0.9206896551724139,
+      "raw_ratio_times_split": 0.9206896551724137
+    },
+    {
+      "symbol": "GABC",
+      "date": "2017-04-24",
+      "split_ratio": 1.5,
+      "raw_before": 49.19,
+      "raw_after": 33.49,
+      "adjusted_ratio": 1.0212441553161034,
+      "raw_ratio_times_split": 1.0212441553161211
+    },
+    {
+      "symbol": "GALE",
+      "date": "2016-11-14",
+      "split_ratio": 0.05,
+      "raw_before": 0.21,
+      "raw_after": 3.54,
+      "adjusted_ratio": 0.8428571428571429,
+      "raw_ratio_times_split": 0.842857142857143
+    },
+    {
+      "symbol": "GALT",
+      "date": "2012-03-23",
+      "split_ratio": 0.16666666666666666,
+      "raw_before": 0.99,
+      "raw_after": 4.45,
+      "adjusted_ratio": 0.7491582491582492,
+      "raw_ratio_times_split": 0.7491582491582491
+    },
+    {
+      "symbol": "GBLI",
+      "date": "2010-07-06",
+      "split_ratio": 0.5,
+      "raw_before": 7.23,
+      "raw_after": 14.92,
+      "adjusted_ratio": 1.0318118948824342,
+      "raw_ratio_times_split": 1.0318118948824342
+    },
+    {
+      "symbol": "GBNK",
+      "date": "2013-05-21",
+      "split_ratio": 0.2,
+      "raw_before": 2.13,
+      "raw_after": 11.46,
+      "adjusted_ratio": 1.0760563380281647,
+      "raw_ratio_times_split": 1.0760563380281691
+    },
+    {
+      "symbol": "GEO",
+      "date": "2017-04-25",
+      "split_ratio": 1.5,
+      "raw_before": 49.2,
+      "raw_after": 33.64,
+      "adjusted_ratio": 1.025609756097573,
+      "raw_ratio_times_split": 1.025609756097561
+    },
+    {
+      "symbol": "GEOS",
+      "date": "2012-10-19",
+      "split_ratio": 2.0,
+      "raw_before": 139.74,
+      "raw_after": 66.57,
+      "adjusted_ratio": 0.9527694289394588,
+      "raw_ratio_times_split": 0.9527694289394588
+    },
+    {
+      "symbol": "GEVA",
+      "date": "2011-11-09",
+      "split_ratio": 0.2,
+      "raw_before": 13.59,
+      "raw_after": 14.74,
+      "adjusted_ratio": 1.0846210448859457,
+      "raw_ratio_times_split": 0.21692420897718914
+    },
+    {
+      "symbol": "GFIG",
+      "date": "2008-04-01",
+      "split_ratio": 4.0,
+      "raw_before": 57.3,
+      "raw_after": 14.99,
+      "adjusted_ratio": 1.0464223385689355,
+      "raw_ratio_times_split": 1.0464223385689355
+    },
+    {
+      "symbol": "GHM",
+      "date": "2008-01-03",
+      "split_ratio": 1.25,
+      "raw_before": 56.0,
+      "raw_after": 49.8,
+      "adjusted_ratio": 1.1116071428571226,
+      "raw_ratio_times_split": 1.1116071428571428
+    },
+    {
+      "symbol": "GHM",
+      "date": "2008-10-07",
+      "split_ratio": 2.0,
+      "raw_before": 35.46,
+      "raw_after": 15.35,
+      "adjusted_ratio": 0.8657642413987392,
+      "raw_ratio_times_split": 0.8657642413987591
+    },
+    {
+      "symbol": "GIII",
+      "date": "2015-05-04",
+      "split_ratio": 2.0,
+      "raw_before": 113.21,
+      "raw_after": 56.57,
+      "adjusted_ratio": 0.9993816800635987,
+      "raw_ratio_times_split": 0.9993816800635987
+    },
+    {
+      "symbol": "GILD",
+      "date": "2013-01-28",
+      "split_ratio": 2.0,
+      "raw_before": 79.36,
+      "raw_after": 39.44,
+      "adjusted_ratio": 0.9939516129032068,
+      "raw_ratio_times_split": 0.9939516129032258
+    },
+    {
+      "symbol": "GIS",
+      "date": "2010-06-09",
+      "split_ratio": 2.0,
+      "raw_before": 75.14,
+      "raw_after": 37.5,
+      "adjusted_ratio": 0.9981368112855905,
+      "raw_ratio_times_split": 0.9981368112856002
+    },
+    {
+      "symbol": "GLPW",
+      "date": "2010-07-01",
+      "split_ratio": 0.1111111111111111,
+      "raw_before": 1.8,
+      "raw_after": 16.2,
+      "adjusted_ratio": 0.9999999999999999,
+      "raw_ratio_times_split": 1.0
+    },
+    {
+      "symbol": "GMCR",
+      "date": "2009-06-09",
+      "split_ratio": 1.5,
+      "raw_before": 93.54,
+      "raw_after": 62.57,
+      "adjusted_ratio": 1.003367543296985,
+      "raw_ratio_times_split": 1.003367543296985
+    },
+    {
+      "symbol": "GMCR",
+      "date": "2010-05-18",
+      "split_ratio": 3.0,
+      "raw_before": 70.52,
+      "raw_after": 23.7,
+      "adjusted_ratio": 1.0082246171298923,
+      "raw_ratio_times_split": 1.0082246171298923
+    },
+    {
+      "symbol": "GNRC",
+      "date": "2010-02-12",
+      "split_ratio": 0.3035822707953855,
+      "raw_before": 12.84,
+      "raw_after": 13.41,
+      "adjusted_ratio": 1.0449172576832149,
+      "raw_ratio_times_split": 0.3170590538447134
+    },
+    {
+      "symbol": "GNTX",
+      "date": "2015-01-02",
+      "split_ratio": 2.0,
+      "raw_before": 36.13,
+      "raw_after": 17.93,
+      "adjusted_ratio": 0.992526985884315,
+      "raw_ratio_times_split": 0.9925269858843065
+    },
+    {
+      "symbol": "GPN",
+      "date": "2015-11-03",
+      "split_ratio": 2.0,
+      "raw_before": 136.23,
+      "raw_after": 67.56,
+      "adjusted_ratio": 0.9918520149746749,
+      "raw_ratio_times_split": 0.9918520149746753
+    },
+    {
+      "symbol": "GPT",
+      "date": "2017-01-03",
+      "split_ratio": 0.33333333333333,
+      "raw_before": 9.18,
+      "raw_after": 28.14,
+      "adjusted_ratio": 1.0217864923747,
+      "raw_ratio_times_split": 1.0217864923747175
+    },
+    {
+      "symbol": "GRC",
+      "date": "2011-06-13",
+      "split_ratio": 1.25,
+      "raw_before": 38.22,
+      "raw_after": 29.94,
+      "adjusted_ratio": 0.9791993720565455,
+      "raw_ratio_times_split": 0.979199372056515
+    },
+    {
+      "symbol": "GRC",
+      "date": "2013-12-11",
+      "split_ratio": 1.25,
+      "raw_before": 40.32,
+      "raw_after": 30.78,
+      "adjusted_ratio": 0.9542410714285703,
+      "raw_ratio_times_split": 0.9542410714285715
+    },
+    {
+      "symbol": "GSIG",
+      "date": "2010-12-29",
+      "split_ratio": 0.3333333333333333,
+      "raw_before": 3.38,
+      "raw_after": 10.45,
+      "adjusted_ratio": 1.0305719921104535,
+      "raw_ratio_times_split": 1.0305719921104535
+    },
+    {
+      "symbol": "GST",
+      "date": "2009-08-03",
+      "split_ratio": 0.2,
+      "raw_before": 0.6,
+      "raw_after": 3.17,
+      "adjusted_ratio": 1.0566666666666666,
+      "raw_ratio_times_split": 1.0566666666666666
+    },
+    {
+      "symbol": "GTXI",
+      "date": "2016-12-06",
+      "split_ratio": 0.1,
+      "raw_before": 0.67,
+      "raw_after": 6.83,
+      "adjusted_ratio": 1.019402985074627,
+      "raw_ratio_times_split": 1.019402985074627
+    },
+    {
+      "symbol": "HAE",
+      "date": "2012-12-03",
+      "split_ratio": 2.0,
+      "raw_before": 81.03,
+      "raw_after": 41.38,
+      "adjusted_ratio": 1.0213501172405282,
+      "raw_ratio_times_split": 1.0213501172405282
+    },
+    {
+      "symbol": "HAFC",
+      "date": "2011-12-19",
+      "split_ratio": 0.125,
+      "raw_before": 0.94,
+      "raw_after": 7.12,
+      "adjusted_ratio": 0.9468085106383006,
+      "raw_ratio_times_split": 0.946808510638298
+    },
+    {
+      "symbol": "HAIN",
+      "date": "2014-12-30",
+      "split_ratio": 2.0,
+      "raw_before": 119.35,
+      "raw_after": 59.07,
+      "adjusted_ratio": 0.9898617511520738,
+      "raw_ratio_times_split": 0.9898617511520738
+    },
+    {
+      "symbol": "HBI",
+      "date": "2015-03-04",
+      "split_ratio": 4.0,
+      "raw_before": 127.95,
+      "raw_after": 32.32,
+      "adjusted_ratio": 1.0103946854239652,
+      "raw_ratio_times_split": 1.0103946854239938
+    },
+    {
+      "symbol": "HBNC",
+      "date": "2011-12-12",
+      "split_ratio": 1.5,
+      "raw_before": 25.41,
+      "raw_after": 17.09,
+      "adjusted_ratio": 1.0088547815820463,
+      "raw_ratio_times_split": 1.0088547815820543
+    },
+    {
+      "symbol": "HBNC",
+      "date": "2012-11-13",
+      "split_ratio": 1.5,
+      "raw_before": 26.12,
+      "raw_after": 18.17,
+      "adjusted_ratio": 1.0434532924961795,
+      "raw_ratio_times_split": 1.0434532924961715
+    },
+    {
+      "symbol": "HBNC",
+      "date": "2016-11-15",
+      "split_ratio": 1.5,
+      "raw_before": 31.67,
+      "raw_after": 21.48,
+      "adjusted_ratio": 1.017366592990215,
+      "raw_ratio_times_split": 1.0173665929902116
+    },
+    {
+      "symbol": "HCSG",
+      "date": "2010-11-15",
+      "split_ratio": 1.5,
+      "raw_before": 24.08,
+      "raw_after": 16.06,
+      "adjusted_ratio": 1.000415282391978,
+      "raw_ratio_times_split": 1.0004152823920265
+    },
+    {
+      "symbol": "HEAR",
+      "date": "2012-03-22",
+      "split_ratio": 0.2,
+      "raw_before": 0.95,
+      "raw_after": 4.45,
+      "adjusted_ratio": 0.9368421052631579,
+      "raw_ratio_times_split": 0.9368421052631581
+    },
+    {
+      "symbol": "HEI",
+      "date": "2010-04-27",
+      "split_ratio": 1.25,
+      "raw_before": 55.88,
+      "raw_after": 43.8,
+      "adjusted_ratio": 0.9797780959198689,
+      "raw_ratio_times_split": 0.9797780959198281
+    },
+    {
+      "symbol": "HEI",
+      "date": "2011-04-26",
+      "split_ratio": 1.25,
+      "raw_before": 59.08,
+      "raw_after": 47.43,
+      "adjusted_ratio": 1.0035121868652406,
+      "raw_ratio_times_split": 1.0035121868652674
+    },
+    {
+      "symbol": "HEI",
+      "date": "2012-04-25",
+      "split_ratio": 1.25,
+      "raw_before": 50.81,
+      "raw_after": 40.88,
+      "adjusted_ratio": 1.005707537886228,
+      "raw_ratio_times_split": 1.0057075378862428
+    },
+    {
+      "symbol": "HEI",
+      "date": "2013-10-23",
+      "split_ratio": 1.25,
+      "raw_before": 68.39,
+      "raw_after": 54.55,
+      "adjusted_ratio": 0.9970390407954319,
+      "raw_ratio_times_split": 0.9970390407954378
+    },
+    {
+      "symbol": "HEI",
+      "date": "2017-04-18",
+      "split_ratio": 1.25,
+      "raw_before": 85.14,
+      "raw_after": 85.36,
+      "adjusted_ratio": 1.2532299741602104,
+      "raw_ratio_times_split": 1.2532299741602069
+    },
+    {
+      "symbol": "HEI",
+      "date": "2017-04-19",
+      "split_ratio": 1.25,
+      "raw_before": 85.36,
+      "raw_after": 69.03,
+      "adjusted_ratio": 1.0108657450796594,
+      "raw_ratio_times_split": 1.0108657450796628
+    },
+    {
+      "symbol": "HELI",
+      "date": "2015-12-11",
+      "split_ratio": 0.03333333333333333,
+      "raw_before": 0.2336,
+      "raw_after": 6.55,
+      "adjusted_ratio": 0.9346461187214612,
+      "raw_ratio_times_split": 0.9346461187214611
+    },
+    {
+      "symbol": "HFC",
+      "date": "2011-09-01",
+      "split_ratio": 2.0,
+      "raw_before": 71.76,
+      "raw_after": 34.71,
+      "adjusted_ratio": 0.9673913043478226,
+      "raw_ratio_times_split": 0.967391304347826
+    },
+    {
+      "symbol": "HK",
+      "date": "2012-02-10",
+      "split_ratio": 0.3333333333333333,
+      "raw_before": 4.15,
+      "raw_after": 11.97,
+      "adjusted_ratio": 0.96144578313253,
+      "raw_ratio_times_split": 0.96144578313253
+    },
+    {
+      "symbol": "HK",
+      "date": "2015-12-28",
+      "split_ratio": 0.2,
+      "raw_before": 0.2876,
+      "raw_after": 1.37,
+      "adjusted_ratio": 0.9527121001390819,
+      "raw_ratio_times_split": 0.9527121001390821
+    },
+    {
+      "symbol": "HK",
+      "date": "2016-09-12",
+      "split_ratio": 0.029154518950437316,
+      "raw_before": 0.3032,
+      "raw_after": 10.85,
+      "adjusted_ratio": 1.0432933067686174,
+      "raw_ratio_times_split": 1.0432933067686176
+    },
+    {
+      "symbol": "HLF",
+      "date": "2011-05-18",
+      "split_ratio": 2.0,
+      "raw_before": 103.86,
+      "raw_after": 53.29,
+      "adjusted_ratio": 1.0261891007124975,
+      "raw_ratio_times_split": 1.0261891007124977
+    },
+    {
+      "symbol": "HMPR",
+      "date": "2011-04-28",
+      "split_ratio": 0.04,
+      "raw_before": 0.61,
+      "raw_after": 14.85,
+      "adjusted_ratio": 0.9737704918032787,
+      "raw_ratio_times_split": 0.9737704918032788
+    },
+    {
+      "symbol": "HMST",
+      "date": "2012-03-09",
+      "split_ratio": 2.0,
+      "raw_before": 52.23,
+      "raw_after": 26.655,
+      "adjusted_ratio": 1.0206777713957496,
+      "raw_ratio_times_split": 1.0206777713957498
+    },
+    {
+      "symbol": "HMST",
+      "date": "2012-11-08",
+      "split_ratio": 2.0,
+      "raw_before": 46.0,
+      "raw_after": 22.66,
+      "adjusted_ratio": 0.9852173913043478,
+      "raw_ratio_times_split": 0.9852173913043478
+    },
+    {
+      "symbol": "HNH",
+      "date": "2008-11-25",
+      "split_ratio": 0.1,
+      "raw_before": 0.7,
+      "raw_after": 7.0,
+      "adjusted_ratio": 1.0,
+      "raw_ratio_times_split": 1.0
+    },
+    {
+      "symbol": "HNR",
+      "date": "2016-11-04",
+      "split_ratio": 0.25,
+      "raw_before": 0.9603,
+      "raw_after": 4.45,
+      "adjusted_ratio": 1.158492137873581,
+      "raw_ratio_times_split": 1.158492137873581
+    },
+    {
+      "symbol": "HOLX",
+      "date": "2008-04-03",
+      "split_ratio": 2.0,
+      "raw_before": 58.99,
+      "raw_after": 30.03,
+      "adjusted_ratio": 1.0181386675707746,
+      "raw_ratio_times_split": 1.0181386675707746
+    },
+    {
+      "symbol": "HOMB",
+      "date": "2013-06-13",
+      "split_ratio": 2.0,
+      "raw_before": 41.18,
+      "raw_after": 20.93,
+      "adjusted_ratio": 1.0165128703254014,
+      "raw_ratio_times_split": 1.0165128703254007
+    },
+    {
+      "symbol": "HOMB",
+      "date": "2016-06-09",
+      "split_ratio": 2.0,
+      "raw_before": 44.59,
+      "raw_after": 22.26,
+      "adjusted_ratio": 0.9984301412873091,
+      "raw_ratio_times_split": 0.9984301412872841
+    },
+    {
+      "symbol": "HRL",
+      "date": "2011-02-15",
+      "split_ratio": 2.0,
+      "raw_before": 51.64,
+      "raw_after": 25.86,
+      "adjusted_ratio": 1.001549186676981,
+      "raw_ratio_times_split": 1.0015491866769946
+    },
+    {
+      "symbol": "HRL",
+      "date": "2016-02-10",
+      "split_ratio": 2.0,
+      "raw_before": 82.86,
+      "raw_after": 41.67,
+      "adjusted_ratio": 1.0057929036929882,
+      "raw_ratio_times_split": 1.0057929036929762
+    },
+    {
+      "symbol": "HRTX",
+      "date": "2014-01-13",
+      "split_ratio": 0.05,
+      "raw_before": 0.4403,
+      "raw_after": 10.0,
+      "adjusted_ratio": 1.1355893708834883,
+      "raw_ratio_times_split": 1.1355893708834885
+    },
+    {
+      "symbol": "HSH",
+      "date": "2012-06-29",
+      "split_ratio": 0.2,
+      "raw_before": 18.5,
+      "raw_after": 28.99,
+      "adjusted_ratio": 0.34583783783783134,
+      "raw_ratio_times_split": 0.3134054054054054
+    },
+    {
+      "symbol": "HSIC",
+      "date": "2017-09-15",
+      "split_ratio": 2.0,
+      "raw_before": 161.15,
+      "raw_after": 82.88,
+      "adjusted_ratio": 1.0286068879925534,
+      "raw_ratio_times_split": 1.0286068879925534
+    },
+    {
+      "symbol": "HT",
+      "date": "2015-06-23",
+      "split_ratio": 0.25,
+      "raw_before": 6.52,
+      "raw_after": 26.2,
+      "adjusted_ratio": 1.0046012269938898,
+      "raw_ratio_times_split": 1.0046012269938651
+    },
+    {
+      "symbol": "HTA",
+      "date": "2014-12-16",
+      "split_ratio": 0.5,
+      "raw_before": 12.67,
+      "raw_after": 25.31,
+      "adjusted_ratio": 0.9988161010260715,
+      "raw_ratio_times_split": 0.9988161010260457
+    },
+    {
+      "symbol": "HTWR",
+      "date": "2008-11-14",
+      "split_ratio": 0.02857142857142857,
+      "raw_before": 0.36,
+      "raw_after": 0.39,
+      "adjusted_ratio": 1.0833333333333324,
+      "raw_ratio_times_split": 0.030952380952380957
+    },
+    {
+      "symbol": "HTZ",
+      "date": "2016-07-01",
+      "split_ratio": 0.2,
+      "raw_before": 11.07,
+      "raw_after": 43.87,
+      "adjusted_ratio": 0.7925925925925925,
+      "raw_ratio_times_split": 0.7925925925925926
+    },
+    {
+      "symbol": "IACI",
+      "date": "2008-08-21",
+      "split_ratio": 0.5,
+      "raw_before": 17.6,
+      "raw_after": 16.63,
+      "adjusted_ratio": 0.7542613636363699,
+      "raw_ratio_times_split": 0.47244318181818173
+    },
+    {
+      "symbol": "IART",
+      "date": "2017-01-04",
+      "split_ratio": 2.0,
+      "raw_before": 85.18,
+      "raw_after": 43.28,
+      "adjusted_ratio": 1.0162009861469827,
+      "raw_ratio_times_split": 1.0162009861469827
+    },
+    {
+      "symbol": "IBCP",
+      "date": "2010-09-02",
+      "split_ratio": 0.1,
+      "raw_before": 1.98,
+      "raw_after": 2.43,
+      "adjusted_ratio": 0.12272727272727346,
+      "raw_ratio_times_split": 0.12272727272727274
+    },
+    {
+      "symbol": "ICE",
+      "date": "2016-11-04",
+      "split_ratio": 5.0,
+      "raw_before": 269.47,
+      "raw_after": 53.37,
+      "adjusted_ratio": 0.9902772108212563,
+      "raw_ratio_times_split": 0.9902772108212415
+    },
+    {
+      "symbol": "IDT",
+      "date": "2009-02-25",
+      "split_ratio": 0.33333333333333,
+      "raw_before": 0.35,
+      "raw_after": 0.91,
+      "adjusted_ratio": 0.8666666666666646,
+      "raw_ratio_times_split": 0.866666666666658
+    },
+    {
+      "symbol": "IDXX",
+      "date": "2015-06-16",
+      "split_ratio": 2.0,
+      "raw_before": 132.44,
+      "raw_after": 66.435,
+      "adjusted_ratio": 1.0032467532467533,
+      "raw_ratio_times_split": 1.0032467532467533
+    },
+    {
+      "symbol": "IIVI",
+      "date": "2011-06-27",
+      "split_ratio": 2.0,
+      "raw_before": 48.76,
+      "raw_after": 24.78,
+      "adjusted_ratio": 1.0164068908941757,
+      "raw_ratio_times_split": 1.0164068908941757
+    },
+    {
+      "symbol": "ILMN",
+      "date": "2008-09-23",
+      "split_ratio": 2.0,
+      "raw_before": 83.02,
+      "raw_after": 40.69,
+      "adjusted_ratio": 0.9802457239219465,
+      "raw_ratio_times_split": 0.9802457239219465
+    },
+    {
+      "symbol": "INAP",
+      "date": "2017-11-21",
+      "split_ratio": 0.25,
+      "raw_before": 4.15,
+      "raw_after": 17.47,
+      "adjusted_ratio": 1.0524096385542168,
+      "raw_ratio_times_split": 1.0524096385542168
+    },
+    {
+      "symbol": "INO",
+      "date": "2014-06-06",
+      "split_ratio": 0.25,
+      "raw_before": 2.31,
+      "raw_after": 9.85,
+      "adjusted_ratio": 1.0660173160173159,
+      "raw_ratio_times_split": 1.0660173160173159
+    },
+    {
+      "symbol": "INSM",
+      "date": "2011-03-03",
+      "split_ratio": 0.1,
+      "raw_before": 0.5001,
+      "raw_after": 5.35,
+      "adjusted_ratio": 1.0697860427914418,
+      "raw_ratio_times_split": 1.0697860427914418
+    },
+    {
+      "symbol": "INSY",
+      "date": "2011-07-18",
+      "split_ratio": 0.01639344262295082,
+      "raw_before": 0.33,
+      "raw_after": 14.1,
+      "adjusted_ratio": 0.7004470938897167,
+      "raw_ratio_times_split": 0.7004470938897168
+    },
+    {
+      "symbol": "INSY",
+      "date": "2014-03-31",
+      "split_ratio": 1.5,
+      "raw_before": 61.19,
+      "raw_after": 41.43,
+      "adjusted_ratio": 1.0156071253472791,
+      "raw_ratio_times_split": 1.015607125347279
+    },
+    {
+      "symbol": "INSY",
+      "date": "2015-06-08",
+      "split_ratio": 2.0,
+      "raw_before": 64.29,
+      "raw_after": 32.61,
+      "adjusted_ratio": 1.0144657022865142,
+      "raw_ratio_times_split": 1.0144657022865142
+    },
+    {
+      "symbol": "INT",
+      "date": "2009-12-08",
+      "split_ratio": 2.0,
+      "raw_before": 52.61,
+      "raw_after": 26.32,
+      "adjusted_ratio": 1.0005702337958706,
+      "raw_ratio_times_split": 1.0005702337958564
+    },
+    {
+      "symbol": "IO",
+      "date": "2016-02-05",
+      "split_ratio": 0.06666666666666667,
+      "raw_before": 0.3759,
+      "raw_after": 6.21,
+      "adjusted_ratio": 1.1013567438148442,
+      "raw_ratio_times_split": 1.1013567438148444
+    },
+    {
+      "symbol": "IPAR",
+      "date": "2008-06-02",
+      "split_ratio": 1.5,
+      "raw_before": 25.17,
+      "raw_after": 16.69,
+      "adjusted_ratio": 0.9946364719904321,
+      "raw_ratio_times_split": 0.9946364719904648
+    },
+    {
+      "symbol": "ISBC",
+      "date": "2014-05-08",
+      "split_ratio": 2.55,
+      "raw_before": 26.83,
+      "raw_after": 10.42,
+      "adjusted_ratio": 0.9903466269101745,
+      "raw_ratio_times_split": 0.9903466269101752
+    },
+    {
+      "symbol": "ISRG",
+      "date": "2017-10-06",
+      "split_ratio": 3.0,
+      "raw_before": 1089.68,
+      "raw_after": 361.47,
+      "adjusted_ratio": 0.9951637177886996,
+      "raw_ratio_times_split": 0.9951637177887086
+    },
+    {
+      "symbol": "ITC",
+      "date": "2014-03-03",
+      "split_ratio": 3.0,
+      "raw_before": 102.6,
+      "raw_after": 34.17,
+      "adjusted_ratio": 0.9991228070175441,
+      "raw_ratio_times_split": 0.999122807017544
+    },
+    {
+      "symbol": "ITT",
+      "date": "2011-11-01",
+      "split_ratio": 0.5,
+      "raw_before": 45.6,
+      "raw_after": 18.8,
+      "adjusted_ratio": 0.20614035087719468,
+      "raw_ratio_times_split": 0.20614035087719298
+    },
+    {
+      "symbol": "JAH",
+      "date": "2013-03-19",
+      "split_ratio": 1.5,
+      "raw_before": 63.24,
+      "raw_after": 42.48,
+      "adjusted_ratio": 1.0075901328273245,
+      "raw_ratio_times_split": 1.0075901328273242
+    },
+    {
+      "symbol": "JAH",
+      "date": "2014-11-25",
+      "split_ratio": 1.5,
+      "raw_before": 66.78,
+      "raw_after": 43.69,
+      "adjusted_ratio": 0.9813566936208447,
+      "raw_ratio_times_split": 0.9813566936208444
+    },
+    {
+      "symbol": "JMBA",
+      "date": "2013-06-03",
+      "split_ratio": 0.2,
+      "raw_before": 2.99,
+      "raw_after": 15.22,
+      "adjusted_ratio": 1.0180602006688964,
+      "raw_ratio_times_split": 1.0180602006688964
+    },
+    {
+      "symbol": "JONE",
+      "date": "2017-03-13",
+      "split_ratio": 1.08742,
+      "raw_before": 2.85,
+      "raw_after": 2.65,
+      "adjusted_ratio": 1.0111098245614034,
+      "raw_ratio_times_split": 1.0111098245614034
+    },
+    {
+      "symbol": "KEG",
+      "date": "2016-12-16",
+      "split_ratio": 0.005,
+      "raw_before": 0.1648,
+      "raw_after": 26.95,
+      "adjusted_ratio": 0.8176577669902912,
+      "raw_ratio_times_split": 0.8176577669902912
+    },
+    {
+      "symbol": "KEM",
+      "date": "2010-11-08",
+      "split_ratio": 0.3333333333333333,
+      "raw_before": 4.3,
+      "raw_after": 13.88,
+      "adjusted_ratio": 1.0759689922480622,
+      "raw_ratio_times_split": 1.075968992248062
+    },
+    {
+      "symbol": "KO",
+      "date": "2012-08-13",
+      "split_ratio": 2.0,
+      "raw_before": 78.79,
+      "raw_after": 39.3,
+      "adjusted_ratio": 0.9975885264627686,
+      "raw_ratio_times_split": 0.997588526462749
+    },
+    {
+      "symbol": "KR",
+      "date": "2015-07-14",
+      "split_ratio": 2.0,
+      "raw_before": 76.95,
+      "raw_after": 38.2,
+      "adjusted_ratio": 0.9928525016244342,
+      "raw_ratio_times_split": 0.9928525016244315
+    },
+    {
+      "symbol": "KRG",
+      "date": "2014-08-12",
+      "split_ratio": 0.25,
+      "raw_before": 6.12,
+      "raw_after": 25.14,
+      "adjusted_ratio": 1.0269607843137483,
+      "raw_ratio_times_split": 1.0269607843137254
+    },
+    {
+      "symbol": "KRNY",
+      "date": "2015-05-19",
+      "split_ratio": 1.38,
+      "raw_before": 14.59,
+      "raw_after": 10.72,
+      "adjusted_ratio": 1.0139547635366435,
+      "raw_ratio_times_split": 1.0139547635366688
+    },
+    {
+      "symbol": "KRO",
+      "date": "2011-05-23",
+      "split_ratio": 2.0,
+      "raw_before": 58.39,
+      "raw_after": 27.84,
+      "adjusted_ratio": 0.9535879431409375,
+      "raw_ratio_times_split": 0.9535879431409487
+    },
+    {
+      "symbol": "KS",
+      "date": "2014-01-08",
+      "split_ratio": 2.0,
+      "raw_before": 54.33,
+      "raw_after": 27.19,
+      "adjusted_ratio": 1.000920301859021,
+      "raw_ratio_times_split": 1.0009203018590098
+    },
+    {
+      "symbol": "KTOS",
+      "date": "2009-09-11",
+      "split_ratio": 0.1,
+      "raw_before": 0.84,
+      "raw_after": 8.2,
+      "adjusted_ratio": 0.976190476190476,
+      "raw_ratio_times_split": 0.9761904761904762
+    },
+    {
+      "symbol": "KWK",
+      "date": "2008-02-01",
+      "split_ratio": 2.0,
+      "raw_before": 56.78,
+      "raw_after": 28.62,
+      "adjusted_ratio": 1.0081014441704825,
+      "raw_ratio_times_split": 1.0081014441704825
+    },
+    {
+      "symbol": "LDOS",
+      "date": "2013-09-30",
+      "split_ratio": 0.25,
+      "raw_before": 16.03,
+      "raw_after": 45.52,
+      "adjusted_ratio": 1.042964420535402,
+      "raw_ratio_times_split": 0.7099189020586401
+    },
+    {
+      "symbol": "LEA",
+      "date": "2011-03-18",
+      "split_ratio": 2.0,
+      "raw_before": 94.99,
+      "raw_after": 49.28,
+      "adjusted_ratio": 1.0375829034635136,
+      "raw_ratio_times_split": 1.0375829034635227
+    },
+    {
+      "symbol": "LECO",
+      "date": "2011-06-01",
+      "split_ratio": 2.0,
+      "raw_before": 74.65,
+      "raw_after": 36.27,
+      "adjusted_ratio": 0.9717347622237122,
+      "raw_ratio_times_split": 0.9717347622237107
+    },
+    {
+      "symbol": "LFVN",
+      "date": "2015-10-19",
+      "split_ratio": 0.14285714285714285,
+      "raw_before": 0.8,
+      "raw_after": 5.6999,
+      "adjusted_ratio": 1.0178392857142857,
+      "raw_ratio_times_split": 1.0178392857142857
+    },
+    {
+      "symbol": "LGND",
+      "date": "2010-11-19",
+      "split_ratio": 0.16666666666666666,
+      "raw_before": 1.52,
+      "raw_after": 9.07,
+      "adjusted_ratio": 0.9945175438596491,
+      "raw_ratio_times_split": 0.9945175438596491
+    },
+    {
+      "symbol": "LKFN",
+      "date": "2016-08-08",
+      "split_ratio": 1.5,
+      "raw_before": 53.27,
+      "raw_after": 35.72,
+      "adjusted_ratio": 1.0058194105500275,
+      "raw_ratio_times_split": 1.005819410550028
+    },
+    {
+      "symbol": "LKQ",
+      "date": "2012-09-19",
+      "split_ratio": 2.0,
+      "raw_before": 37.63,
+      "raw_after": 18.74,
+      "adjusted_ratio": 0.9960138187616262,
+      "raw_ratio_times_split": 0.9960138187616262
+    },
+    {
+      "symbol": "LMNR",
+      "date": "2010-04-08",
+      "split_ratio": 10.0,
+      "raw_before": 165.0,
+      "raw_after": 17.0,
+      "adjusted_ratio": 1.0303030303030576,
+      "raw_ratio_times_split": 1.0303030303030303
+    },
+    {
+      "symbol": "LNT",
+      "date": "2016-05-20",
+      "split_ratio": 2.0,
+      "raw_before": 71.48,
+      "raw_after": 35.91,
+      "adjusted_ratio": 1.004756575265815,
+      "raw_ratio_times_split": 1.0047565752658085
+    },
+    {
+      "symbol": "LO",
+      "date": "2013-01-16",
+      "split_ratio": 3.0,
+      "raw_before": 117.38,
+      "raw_after": 38.82,
+      "adjusted_ratio": 0.992162208212643,
+      "raw_ratio_times_split": 0.9921622082126428
+    },
+    {
+      "symbol": "LTXC",
+      "date": "2010-10-01",
+      "split_ratio": 0.3333333333333333,
+      "raw_before": 2.09,
+      "raw_after": 6.41,
+      "adjusted_ratio": 1.0223285486443383,
+      "raw_ratio_times_split": 1.022328548644338
+    },
+    {
+      "symbol": "LVLT",
+      "date": "2011-10-20",
+      "split_ratio": 0.06666666666666667,
+      "raw_before": 1.55,
+      "raw_after": 23.1,
+      "adjusted_ratio": 0.9935483870967743,
+      "raw_ratio_times_split": 0.9935483870967743
+    },
+    {
+      "symbol": "LVNTA",
+      "date": "2014-04-14",
+      "split_ratio": 2.0,
+      "raw_before": 113.61,
+      "raw_after": 57.05,
+      "adjusted_ratio": 1.004313000616143,
+      "raw_ratio_times_split": 1.004313000616143
+    },
+    {
+      "symbol": "LXRX",
+      "date": "2015-05-21",
+      "split_ratio": 0.14285714285714285,
+      "raw_before": 1.01,
+      "raw_after": 7.14,
+      "adjusted_ratio": 1.00990099009901,
+      "raw_ratio_times_split": 1.00990099009901
+    },
+    {
+      "symbol": "MA",
+      "date": "2014-01-22",
+      "split_ratio": 10.0,
+      "raw_before": 818.48,
+      "raw_after": 83.3,
+      "adjusted_ratio": 1.0177402013488426,
+      "raw_ratio_times_split": 1.0177402013488417
+    },
+    {
+      "symbol": "MACK",
+      "date": "2017-09-06",
+      "split_ratio": 0.1,
+      "raw_before": 1.25,
+      "raw_after": 11.78,
+      "adjusted_ratio": 0.9423999999999999,
+      "raw_ratio_times_split": 0.9424
+    },
+    {
+      "symbol": "MANH",
+      "date": "2014-01-13",
+      "split_ratio": 4.0,
+      "raw_before": 121.81,
+      "raw_after": 31.26,
+      "adjusted_ratio": 1.0265167063459486,
+      "raw_ratio_times_split": 1.0265167063459486
+    },
+    {
+      "symbol": "MCRS",
+      "date": "2008-02-06",
+      "split_ratio": 2.0,
+      "raw_before": 65.39,
+      "raw_after": 33.12,
+      "adjusted_ratio": 1.0129989294999235,
+      "raw_ratio_times_split": 1.0129989294999235
+    },
+    {
+      "symbol": "MD",
+      "date": "2013-12-20",
+      "split_ratio": 2.0,
+      "raw_before": 104.65,
+      "raw_after": 52.82,
+      "adjusted_ratio": 1.009460105112279,
+      "raw_ratio_times_split": 1.009460105112279
+    },
+    {
+      "symbol": "MDC",
+      "date": "2016-12-02",
+      "split_ratio": 1.05,
+      "raw_before": 26.59,
+      "raw_after": 25.45,
+      "adjusted_ratio": 1.0049830763444838,
+      "raw_ratio_times_split": 1.0049830763444905
+    },
+    {
+      "symbol": "MDCA",
+      "date": "2013-11-29",
+      "split_ratio": 1.5,
+      "raw_before": 33.62,
+      "raw_after": 22.76,
+      "adjusted_ratio": 1.015466983938132,
+      "raw_ratio_times_split": 1.0154669839381323
+    },
+    {
+      "symbol": "MDSO",
+      "date": "2013-12-17",
+      "split_ratio": 2.0,
+      "raw_before": 114.19,
+      "raw_after": 57.64,
+      "adjusted_ratio": 1.0095454943515194,
+      "raw_ratio_times_split": 1.0095454943515194
+    },
+    {
+      "symbol": "MDVN",
+      "date": "2012-09-24",
+      "split_ratio": 2.0,
+      "raw_before": 105.09,
+      "raw_after": 53.19,
+      "adjusted_ratio": 1.0122751926919782,
+      "raw_ratio_times_split": 1.0122751926919782
+    },
+    {
+      "symbol": "MDVN",
+      "date": "2015-09-16",
+      "split_ratio": 2.0,
+      "raw_before": 97.93,
+      "raw_after": 49.87,
+      "adjusted_ratio": 1.0184825896048197,
+      "raw_ratio_times_split": 1.0184825896048197
+    },
+    {
+      "symbol": "MDXG",
+      "date": "2008-04-02",
+      "split_ratio": 0.324,
+      "raw_before": 1.85,
+      "raw_after": 6.35,
+      "adjusted_ratio": 1.1121081081081081,
+      "raw_ratio_times_split": 1.1121081081081081
+    },
+    {
+      "symbol": "MEIP",
+      "date": "2010-03-31",
+      "split_ratio": 0.1,
+      "raw_before": 0.55,
+      "raw_after": 5.05,
+      "adjusted_ratio": 0.9181818181818181,
+      "raw_ratio_times_split": 0.918181818181818
+    },
+    {
+      "symbol": "MEIP",
+      "date": "2012-12-19",
+      "split_ratio": 0.16666666666666666,
+      "raw_before": 1.42,
+      "raw_after": 8.36,
+      "adjusted_ratio": 0.9812206572769953,
+      "raw_ratio_times_split": 0.9812206572769953
+    },
+    {
+      "symbol": "MGEE",
+      "date": "2014-02-10",
+      "split_ratio": 1.5,
+      "raw_before": 55.46,
+      "raw_after": 36.81,
+      "adjusted_ratio": 0.9955824017309912,
+      "raw_ratio_times_split": 0.9955824017309773
+    },
+    {
+      "symbol": "MGI",
+      "date": "2011-11-15",
+      "split_ratio": 0.125,
+      "raw_before": 2.61,
+      "raw_after": 18.39,
+      "adjusted_ratio": 0.8807471264367817,
+      "raw_ratio_times_split": 0.8807471264367817
+    },
+    {
+      "symbol": "MIDD",
+      "date": "2014-06-27",
+      "split_ratio": 3.0,
+      "raw_before": 244.09,
+      "raw_after": 80.24,
+      "adjusted_ratio": 0.9861936171084436,
+      "raw_ratio_times_split": 0.9861936171084436
+    },
+    {
+      "symbol": "MLI",
+      "date": "2014-03-31",
+      "split_ratio": 2.0,
+      "raw_before": 58.67,
+      "raw_after": 29.99,
+      "adjusted_ratio": 1.0223282768024662,
+      "raw_ratio_times_split": 1.0223282768024544
+    },
+    {
+      "symbol": "MMS",
+      "date": "2011-07-01",
+      "split_ratio": 2.0,
+      "raw_before": 82.73,
+      "raw_after": 41.68,
+      "adjusted_ratio": 1.0076151335670431,
+      "raw_ratio_times_split": 1.0076151335670251
+    },
+    {
+      "symbol": "MMS",
+      "date": "2013-07-01",
+      "split_ratio": 2.0,
+      "raw_before": 74.48,
+      "raw_after": 37.64,
+      "adjusted_ratio": 1.0107411385606646,
+      "raw_ratio_times_split": 1.0107411385606875
+    },
+    {
+      "symbol": "MMSI",
+      "date": "2011-05-06",
+      "split_ratio": 1.25,
+      "raw_before": 23.14,
+      "raw_after": 18.72,
+      "adjusted_ratio": 1.0112359550561796,
+      "raw_ratio_times_split": 1.0112359550561798
+    },
+    {
+      "symbol": "MNI",
+      "date": "2016-06-07",
+      "split_ratio": 0.1,
+      "raw_before": 1.15,
+      "raw_after": 11.69,
+      "adjusted_ratio": 1.0165217391304346,
+      "raw_ratio_times_split": 1.0165217391304349
+    },
+    {
+      "symbol": "MNKD",
+      "date": "2017-03-03",
+      "split_ratio": 0.2,
+      "raw_before": 0.4873,
+      "raw_after": 2.125,
+      "adjusted_ratio": 0.8721526780217524,
+      "raw_ratio_times_split": 0.8721526780217526
+    },
+    {
+      "symbol": "MNRO",
+      "date": "2010-12-27",
+      "split_ratio": 1.5,
+      "raw_before": 53.04,
+      "raw_after": 35.3,
+      "adjusted_ratio": 0.9983031674208145,
+      "raw_ratio_times_split": 0.9983031674208145
+    },
+    {
+      "symbol": "MNST",
+      "date": "2012-02-16",
+      "split_ratio": 2.0,
+      "raw_before": 106.51,
+      "raw_after": 52.99,
+      "adjusted_ratio": 0.9950239414139519,
+      "raw_ratio_times_split": 0.9950239414139518
+    },
+    {
+      "symbol": "MNST",
+      "date": "2016-11-10",
+      "split_ratio": 3.0,
+      "raw_before": 132.59,
+      "raw_after": 42.33,
+      "adjusted_ratio": 0.957764537295422,
+      "raw_ratio_times_split": 0.9577645372954219
+    },
+    {
+      "symbol": "MOH",
+      "date": "2011-05-23",
+      "split_ratio": 1.5,
+      "raw_before": 40.22,
+      "raw_after": 26.04,
+      "adjusted_ratio": 0.9711586275484834,
+      "raw_ratio_times_split": 0.9711586275484833
+    },
+    {
+      "symbol": "MOSY",
+      "date": "2017-02-16",
+      "split_ratio": 0.1,
+      "raw_before": 0.2509,
+      "raw_after": 2.27,
+      "adjusted_ratio": 0.9047429254683139,
+      "raw_ratio_times_split": 0.904742925468314
+    },
+    {
+      "symbol": "MOVE",
+      "date": "2011-11-21",
+      "split_ratio": 0.25,
+      "raw_before": 1.54,
+      "raw_after": 6.78,
+      "adjusted_ratio": 1.1006493506493507,
+      "raw_ratio_times_split": 1.1006493506493507
+    },
+    {
+      "symbol": "MPC",
+      "date": "2015-06-11",
+      "split_ratio": 2.0,
+      "raw_before": 101.79,
+      "raw_after": 52.03,
+      "adjusted_ratio": 1.0223008154042483,
+      "raw_ratio_times_split": 1.0223008154042637
+    },
+    {
+      "symbol": "MPO",
+      "date": "2015-08-04",
+      "split_ratio": 0.1,
+      "raw_before": 0.46,
+      "raw_after": 2.67,
+      "adjusted_ratio": 0.5804347826086955,
+      "raw_ratio_times_split": 0.5804347826086956
+    },
+    {
+      "symbol": "MRIN",
+      "date": "2017-10-06",
+      "split_ratio": 0.14285714285714,
+      "raw_before": 2.05,
+      "raw_after": 14.8,
+      "adjusted_ratio": 1.0313588850174216,
+      "raw_ratio_times_split": 1.0313588850174011
+    },
+    {
+      "symbol": "MRTN",
+      "date": "2013-06-17",
+      "split_ratio": 1.5,
+      "raw_before": 23.17,
+      "raw_after": 15.27,
+      "adjusted_ratio": 0.988562796719892,
+      "raw_ratio_times_split": 0.9885627967198962
+    },
+    {
+      "symbol": "MRTN",
+      "date": "2017-07-10",
+      "split_ratio": 1.6666666666667,
+      "raw_before": 27.3,
+      "raw_after": 16.25,
+      "adjusted_ratio": 0.9920634920634673,
+      "raw_ratio_times_split": 0.992063492063512
+    },
+    {
+      "symbol": "MSI",
+      "date": "2011-01-04",
+      "split_ratio": 0.14285714285714,
+      "raw_before": 9.11,
+      "raw_after": 39.77,
+      "adjusted_ratio": 0.6236474831425325,
+      "raw_ratio_times_split": 0.623647483142531
+    },
+    {
+      "symbol": "MTW",
+      "date": "2017-11-17",
+      "split_ratio": 0.25,
+      "raw_before": 9.72,
+      "raw_after": 9.79,
+      "adjusted_ratio": 0.2518004115226337,
+      "raw_ratio_times_split": 0.2518004115226337
+    },
+    {
+      "symbol": "MTW",
+      "date": "2017-11-20",
+      "split_ratio": 0.25,
+      "raw_before": 9.79,
+      "raw_after": 40.34,
+      "adjusted_ratio": 1.030132788559755,
+      "raw_ratio_times_split": 1.030132788559755
+    },
+    {
+      "symbol": "MTX",
+      "date": "2012-12-12",
+      "split_ratio": 2.0,
+      "raw_before": 76.71,
+      "raw_after": 37.93,
+      "adjusted_ratio": 0.9889193064789353,
+      "raw_ratio_times_split": 0.9889193064789468
+    },
+    {
+      "symbol": "MYGN",
+      "date": "2009-03-26",
+      "split_ratio": 2.0,
+      "raw_before": 89.09,
+      "raw_after": 45.42,
+      "adjusted_ratio": 1.0198068828918045,
+      "raw_ratio_times_split": 1.0196430575822202
+    },
+    {
+      "symbol": "NADL",
+      "date": "2015-12-31",
+      "split_ratio": 0.1,
+      "raw_before": 0.2301,
+      "raw_after": 2.46,
+      "adjusted_ratio": 1.0691003911342893,
+      "raw_ratio_times_split": 1.0691003911342896
+    },
+    {
+      "symbol": "NATI",
+      "date": "2011-02-23",
+      "split_ratio": 1.5,
+      "raw_before": 46.37,
+      "raw_after": 30.61,
+      "adjusted_ratio": 0.9901876213068959,
+      "raw_ratio_times_split": 0.9901876213068794
+    },
+    {
+      "symbol": "NAVG",
+      "date": "2017-01-23",
+      "split_ratio": 2.0,
+      "raw_before": 113.3,
+      "raw_after": 56.9,
+      "adjusted_ratio": 1.0044130626654784,
+      "raw_ratio_times_split": 1.00441306266549
+    },
+    {
+      "symbol": "NBL",
+      "date": "2013-05-29",
+      "split_ratio": 2.0,
+      "raw_before": 118.26,
+      "raw_after": 59.12,
+      "adjusted_ratio": 0.9998308811094218,
+      "raw_ratio_times_split": 0.9998308811094199
+    },
+    {
+      "symbol": "NBS",
+      "date": "2013-07-16",
+      "split_ratio": 0.1,
+      "raw_before": 0.58,
+      "raw_after": 5.63,
+      "adjusted_ratio": 0.9706896551724138,
+      "raw_ratio_times_split": 0.9706896551724139
+    },
+    {
+      "symbol": "NCS",
+      "date": "2010-03-08",
+      "split_ratio": 0.2,
+      "raw_before": 1.9,
+      "raw_after": 10.5,
+      "adjusted_ratio": 1.105263157894737,
+      "raw_ratio_times_split": 1.105263157894737
+    },
+    {
+      "symbol": "NDSN",
+      "date": "2011-04-13",
+      "split_ratio": 2.0,
+      "raw_before": 111.11,
+      "raw_after": 55.4,
+      "adjusted_ratio": 0.9972099720997145,
+      "raw_ratio_times_split": 0.997209972099721
+    },
+    {
+      "symbol": "NEOG",
+      "date": "2009-12-16",
+      "split_ratio": 1.5,
+      "raw_before": 35.07,
+      "raw_after": 24.34,
+      "adjusted_ratio": 1.0410607356715142,
+      "raw_ratio_times_split": 1.041060735671514
+    },
+    {
+      "symbol": "NEOG",
+      "date": "2013-10-31",
+      "split_ratio": 1.5,
+      "raw_before": 69.968,
+      "raw_after": 46.22,
+      "adjusted_ratio": 0.9908815458495311,
+      "raw_ratio_times_split": 0.9908815458495313
+    },
+    {
+      "symbol": "NEON",
+      "date": "2011-03-28",
+      "split_ratio": 0.04,
+      "raw_before": 0.12,
+      "raw_after": 2.8,
+      "adjusted_ratio": 0.9333333333333332,
+      "raw_ratio_times_split": 0.9333333333333333
+    },
+    {
+      "symbol": "NES",
+      "date": "2013-12-03",
+      "split_ratio": 0.1,
+      "raw_before": 1.75,
+      "raw_after": 16.11,
+      "adjusted_ratio": 0.9205714285714285,
+      "raw_ratio_times_split": 0.9205714285714285
+    },
+    {
+      "symbol": "NETE",
+      "date": "2016-05-25",
+      "split_ratio": 0.1,
+      "raw_before": 0.275,
+      "raw_after": 2.75,
+      "adjusted_ratio": 1.0,
+      "raw_ratio_times_split": 1.0
+    },
+    {
+      "symbol": "NETE",
+      "date": "2017-10-05",
+      "split_ratio": 0.1,
+      "raw_before": 0.63,
+      "raw_after": 7.6249,
+      "adjusted_ratio": 1.2103015873015874,
+      "raw_ratio_times_split": 1.2103015873015874
+    },
+    {
+      "symbol": "NFLX",
+      "date": "2015-07-15",
+      "split_ratio": 7.0,
+      "raw_before": 702.6,
+      "raw_after": 98.13,
+      "adjusted_ratio": 0.977668659265585,
+      "raw_ratio_times_split": 0.9776686592655848
+    },
+    {
+      "symbol": "NJR",
+      "date": "2008-03-04",
+      "split_ratio": 1.5,
+      "raw_before": 46.65,
+      "raw_after": 31.27,
+      "adjusted_ratio": 1.0054662379421064,
+      "raw_ratio_times_split": 1.0054662379421222
+    },
+    {
+      "symbol": "NJR",
+      "date": "2015-03-04",
+      "split_ratio": 2.0,
+      "raw_before": 61.53,
+      "raw_after": 29.95,
+      "adjusted_ratio": 0.9735088574679042,
+      "raw_ratio_times_split": 0.9735088574679018
+    },
+    {
+      "symbol": "NKE",
+      "date": "2012-12-26",
+      "split_ratio": 2.0,
+      "raw_before": 105.6,
+      "raw_after": 51.33,
+      "adjusted_ratio": 0.9721590909090846,
+      "raw_ratio_times_split": 0.9721590909090909
+    },
+    {
+      "symbol": "NKE",
+      "date": "2015-12-24",
+      "split_ratio": 2.0,
+      "raw_before": 128.71,
+      "raw_after": 63.18,
+      "adjusted_ratio": 0.9817419003962424,
+      "raw_ratio_times_split": 0.9817419003962395
+    },
+    {
+      "symbol": "NNVC",
+      "date": "2013-09-10",
+      "split_ratio": 0.2857142857142857,
+      "raw_before": 1.36,
+      "raw_after": 3.45,
+      "adjusted_ratio": 0.7247899159663865,
+      "raw_ratio_times_split": 0.7247899159663864
+    },
+    {
+      "symbol": "NOR",
+      "date": "2015-08-26",
+      "split_ratio": 0.14285714285714285,
+      "raw_before": 0.37,
+      "raw_after": 2.23,
+      "adjusted_ratio": 0.8610038610038611,
+      "raw_ratio_times_split": 0.861003861003861
+    },
+    {
+      "symbol": "NRZ",
+      "date": "2014-10-20",
+      "split_ratio": 0.5,
+      "raw_before": 6.07,
+      "raw_after": 12.36,
+      "adjusted_ratio": 1.0181219110378943,
+      "raw_ratio_times_split": 1.0181219110378912
+    },
+    {
+      "symbol": "NSPH",
+      "date": "2015-04-09",
+      "split_ratio": 0.05,
+      "raw_before": 0.2408,
+      "raw_after": 4.48,
+      "adjusted_ratio": 0.930232558139535,
+      "raw_ratio_times_split": 0.930232558139535
+    },
+    {
+      "symbol": "NTLS",
+      "date": "2011-11-01",
+      "split_ratio": 0.5,
+      "raw_before": 19.02,
+      "raw_after": 25.07,
+      "adjusted_ratio": 0.7581076058779939,
+      "raw_ratio_times_split": 0.6590431125131441
+    },
+    {
+      "symbol": "NWBI",
+      "date": "2009-12-18",
+      "split_ratio": 2.25,
+      "raw_before": 25.21,
+      "raw_after": 11.35,
+      "adjusted_ratio": 1.0129908766362585,
+      "raw_ratio_times_split": 1.0129908766362554
+    },
+    {
+      "symbol": "NWBO",
+      "date": "2012-09-26",
+      "split_ratio": 0.0625,
+      "raw_before": 0.2855,
+      "raw_after": 5.5,
+      "adjusted_ratio": 1.204028021015762,
+      "raw_ratio_times_split": 1.204028021015762
+    },
+    {
+      "symbol": "NYMT",
+      "date": "2008-05-29",
+      "split_ratio": 0.5,
+      "raw_before": 2.69,
+      "raw_after": 5.1,
+      "adjusted_ratio": 0.9479553903345516,
+      "raw_ratio_times_split": 0.9479553903345724
+    },
+    {
+      "symbol": "NYNY",
+      "date": "2011-12-14",
+      "split_ratio": 0.3333333333333333,
+      "raw_before": 0.62,
+      "raw_after": 1.98,
+      "adjusted_ratio": 1.064516129032258,
+      "raw_ratio_times_split": 1.064516129032258
+    },
+    {
+      "symbol": "NYNY",
+      "date": "2015-12-23",
+      "split_ratio": 0.2,
+      "raw_before": 4.33,
+      "raw_after": 21.25,
+      "adjusted_ratio": 0.9815242494226328,
+      "raw_ratio_times_split": 0.9815242494226327
+    },
+    {
+      "symbol": "OCLR",
+      "date": "2010-04-30",
+      "split_ratio": 0.2,
+      "raw_before": 2.81,
+      "raw_after": 15.45,
+      "adjusted_ratio": 1.099644128113879,
+      "raw_ratio_times_split": 1.099644128113879
+    },
+    {
+      "symbol": "ODFL",
+      "date": "2010-08-24",
+      "split_ratio": 1.5,
+      "raw_before": 36.81,
+      "raw_after": 23.76,
+      "adjusted_ratio": 0.9682151589242185,
+      "raw_ratio_times_split": 0.9682151589242054
+    },
+    {
+      "symbol": "ODFL",
+      "date": "2012-09-10",
+      "split_ratio": 1.5,
+      "raw_before": 45.79,
+      "raw_after": 30.85,
+      "adjusted_ratio": 1.0105918322777794,
+      "raw_ratio_times_split": 1.01059183227779
+    },
+    {
+      "symbol": "OGE",
+      "date": "2013-07-02",
+      "split_ratio": 2.0,
+      "raw_before": 68.06,
+      "raw_after": 34.2,
+      "adjusted_ratio": 1.0049955921246163,
+      "raw_ratio_times_split": 1.004995592124596
+    },
+    {
+      "symbol": "OGXI",
+      "date": "2008-08-21",
+      "split_ratio": 0.05555555555555555,
+      "raw_before": 0.28,
+      "raw_after": 4.82,
+      "adjusted_ratio": 0.9563492063492063,
+      "raw_ratio_times_split": 0.9563492063492064
+    },
+    {
+      "symbol": "OHRP",
+      "date": "2013-06-03",
+      "split_ratio": 0.3333333333333333,
+      "raw_before": 1.998,
+      "raw_after": 6.57,
+      "adjusted_ratio": 1.0960960960960962,
+      "raw_ratio_times_split": 1.0960960960960962
+    },
+    {
+      "symbol": "OII",
+      "date": "2011-06-13",
+      "split_ratio": 2.0,
+      "raw_before": 74.38,
+      "raw_after": 35.91,
+      "adjusted_ratio": 0.96558214573809,
+      "raw_ratio_times_split": 0.9655821457381016
+    },
+    {
+      "symbol": "OKE",
+      "date": "2012-06-04",
+      "split_ratio": 2.0,
+      "raw_before": 79.8,
+      "raw_after": 39.49,
+      "adjusted_ratio": 0.989724310776933,
+      "raw_ratio_times_split": 0.9897243107769425
+    },
+    {
+      "symbol": "OMEX",
+      "date": "2016-02-22",
+      "split_ratio": 0.08333333333333333,
+      "raw_before": 0.21,
+      "raw_after": 3.07,
+      "adjusted_ratio": 1.2182539682539681,
+      "raw_ratio_times_split": 1.2182539682539681
+    },
+    {
+      "symbol": "OMI",
+      "date": "2010-04-01",
+      "split_ratio": 1.5,
+      "raw_before": 46.39,
+      "raw_after": 30.59,
+      "adjusted_ratio": 0.9948372494071825,
+      "raw_ratio_times_split": 0.9891140331968096
+    },
+    {
+      "symbol": "OREX",
+      "date": "2016-07-12",
+      "split_ratio": 0.1,
+      "raw_before": 0.4,
+      "raw_after": 4.02,
+      "adjusted_ratio": 1.005,
+      "raw_ratio_times_split": 1.005
+    },
+    {
+      "symbol": "OZRK",
+      "date": "2011-08-17",
+      "split_ratio": 2.0,
+      "raw_before": 44.81,
+      "raw_after": 22.75,
+      "adjusted_ratio": 1.0153983485829106,
+      "raw_ratio_times_split": 1.0153983485829055
+    },
+    {
+      "symbol": "OZRK",
+      "date": "2014-06-24",
+      "split_ratio": 2.0,
+      "raw_before": 67.04,
+      "raw_after": 32.93,
+      "adjusted_ratio": 0.9823985680190878,
+      "raw_ratio_times_split": 0.982398568019093
+    },
+    {
+      "symbol": "PATK",
+      "date": "2015-06-01",
+      "split_ratio": 1.5,
+      "raw_before": 59.8,
+      "raw_after": 39.88,
+      "adjusted_ratio": 1.0003344481605354,
+      "raw_ratio_times_split": 1.0003344481605352
+    },
+    {
+      "symbol": "PATR",
+      "date": "2011-01-18",
+      "split_ratio": 3.0,
+      "raw_before": 94.0,
+      "raw_after": 31.72,
+      "adjusted_ratio": 1.0123404255319255,
+      "raw_ratio_times_split": 1.0123404255319148
+    },
+    {
+      "symbol": "PCO",
+      "date": "2016-10-03",
+      "split_ratio": 0.1,
+      "raw_before": 0.6851,
+      "raw_after": 6.91,
+      "adjusted_ratio": 1.0086118814771565,
+      "raw_ratio_times_split": 1.0086118814771567
+    },
+    {
+      "symbol": "PEG",
+      "date": "2008-02-05",
+      "split_ratio": 2.0,
+      "raw_before": 96.0,
+      "raw_after": 45.71,
+      "adjusted_ratio": 0.9522916666666692,
+      "raw_ratio_times_split": 0.9522916666666666
+    },
+    {
+      "symbol": "PEGA",
+      "date": "2014-04-02",
+      "split_ratio": 2.0,
+      "raw_before": 36.29,
+      "raw_after": 18.65,
+      "adjusted_ratio": 1.0278313585009209,
+      "raw_ratio_times_split": 1.0278313585009644
+    },
+    {
+      "symbol": "PEIX",
+      "date": "2011-06-08",
+      "split_ratio": 0.14285714285714285,
+      "raw_before": 0.245,
+      "raw_after": 1.55,
+      "adjusted_ratio": 0.9037900874635569,
+      "raw_ratio_times_split": 0.9037900874635568
+    },
+    {
+      "symbol": "PEIX",
+      "date": "2013-05-14",
+      "split_ratio": 0.06666666666666667,
+      "raw_before": 0.275,
+      "raw_after": 3.8601,
+      "adjusted_ratio": 0.9357818181818182,
+      "raw_ratio_times_split": 0.9357818181818182
+    },
+    {
+      "symbol": "PFBC",
+      "date": "2011-06-20",
+      "split_ratio": 0.2,
+      "raw_before": 1.45,
+      "raw_after": 7.482,
+      "adjusted_ratio": 1.0319999999999976,
+      "raw_ratio_times_split": 1.032
+    },
+    {
+      "symbol": "PHMD",
+      "date": "2009-01-27",
+      "split_ratio": 0.14285714285714285,
+      "raw_before": 0.33,
+      "raw_after": 3.77,
+      "adjusted_ratio": 1.632034632034632,
+      "raw_ratio_times_split": 1.632034632034632
+    },
+    {
+      "symbol": "PHMD",
+      "date": "2010-02-04",
+      "split_ratio": 0.16666666666666666,
+      "raw_before": 1.79,
+      "raw_after": 9.7501,
+      "adjusted_ratio": 0.907830540037244,
+      "raw_ratio_times_split": 0.907830540037244
+    },
+    {
+      "symbol": "PHMD",
+      "date": "2016-09-23",
+      "split_ratio": 0.2,
+      "raw_before": 0.2375,
+      "raw_after": 1.3,
+      "adjusted_ratio": 1.0947368421052632,
+      "raw_ratio_times_split": 1.0947368421052632
+    },
+    {
+      "symbol": "PHX",
+      "date": "2014-10-09",
+      "split_ratio": 2.0,
+      "raw_before": 54.9,
+      "raw_after": 25.99,
+      "adjusted_ratio": 0.9468123861566775,
+      "raw_ratio_times_split": 0.9468123861566484
+    },
+    {
+      "symbol": "PII",
+      "date": "2011-09-13",
+      "split_ratio": 2.0,
+      "raw_before": 105.26,
+      "raw_after": 54.62,
+      "adjusted_ratio": 1.037811134334029,
+      "raw_ratio_times_split": 1.03781113433403
+    },
+    {
+      "symbol": "PKT",
+      "date": "2011-02-07",
+      "split_ratio": 0.1,
+      "raw_before": 0.67,
+      "raw_after": 7.4,
+      "adjusted_ratio": 1.1044776119402986,
+      "raw_ratio_times_split": 1.1044776119402984
+    },
+    {
+      "symbol": "PLCM",
+      "date": "2011-07-05",
+      "split_ratio": 2.0,
+      "raw_before": 64.7,
+      "raw_after": 32.63,
+      "adjusted_ratio": 1.0086553323029366,
+      "raw_ratio_times_split": 1.0086553323029366
+    },
+    {
+      "symbol": "PLUG",
+      "date": "2011-05-20",
+      "split_ratio": 0.1,
+      "raw_before": 0.458,
+      "raw_after": 3.82,
+      "adjusted_ratio": 0.834061135371179,
+      "raw_ratio_times_split": 0.834061135371179
+    },
+    {
+      "symbol": "PLUS",
+      "date": "2017-04-03",
+      "split_ratio": 2.0,
+      "raw_before": 135.05,
+      "raw_after": 66.35,
+      "adjusted_ratio": 0.9825990373935578,
+      "raw_ratio_times_split": 0.9825990373935578
+    },
+    {
+      "symbol": "PMFG",
+      "date": "2008-08-18",
+      "split_ratio": 2.0,
+      "raw_before": 55.0,
+      "raw_after": 29.0,
+      "adjusted_ratio": 1.0545454545454545,
+      "raw_ratio_times_split": 1.0545454545454545
+    },
+    {
+      "symbol": "PNX",
+      "date": "2012-08-13",
+      "split_ratio": 0.05,
+      "raw_before": 1.49,
+      "raw_after": 29.55,
+      "adjusted_ratio": 0.9916107382550335,
+      "raw_ratio_times_split": 0.9916107382550337
+    },
+    {
+      "symbol": "PPG",
+      "date": "2015-06-15",
+      "split_ratio": 2.0,
+      "raw_before": 233.25,
+      "raw_after": 115.43,
+      "adjusted_ratio": 0.989753483386924,
+      "raw_ratio_times_split": 0.9897534833869239
+    },
+    {
+      "symbol": "PPHM",
+      "date": "2009-10-19",
+      "split_ratio": 0.2,
+      "raw_before": 0.64,
+      "raw_after": 3.4,
+      "adjusted_ratio": 1.0625,
+      "raw_ratio_times_split": 1.0625
+    },
+    {
+      "symbol": "PPHM",
+      "date": "2017-07-10",
+      "split_ratio": 0.14285714285714,
+      "raw_before": 0.606,
+      "raw_after": 4.6,
+      "adjusted_ratio": 1.0843941537010844,
+      "raw_ratio_times_split": 1.0843941537010626
+    },
+    {
+      "symbol": "PQ",
+      "date": "2016-05-19",
+      "split_ratio": 0.25,
+      "raw_before": 0.7301,
+      "raw_after": 2.33,
+      "adjusted_ratio": 0.7978359128886454,
+      "raw_ratio_times_split": 0.7978359128886454
+    },
+    {
+      "symbol": "PRA",
+      "date": "2012-12-28",
+      "split_ratio": 2.0,
+      "raw_before": 84.68,
+      "raw_after": 42.27,
+      "adjusted_ratio": 0.998346717052418,
+      "raw_ratio_times_split": 0.9983467170524327
+    },
+    {
+      "symbol": "PRAA",
+      "date": "2013-08-02",
+      "split_ratio": 3.0,
+      "raw_before": 154.28,
+      "raw_after": 52.08,
+      "adjusted_ratio": 1.012704174228675,
+      "raw_ratio_times_split": 1.012704174228675
+    },
+    {
+      "symbol": "PRGS",
+      "date": "2011-01-31",
+      "split_ratio": 1.5,
+      "raw_before": 42.68,
+      "raw_after": 28.64,
+      "adjusted_ratio": 1.006560449859416,
+      "raw_ratio_times_split": 1.006560449859419
+    },
+    {
+      "symbol": "PRKR",
+      "date": "2016-03-30",
+      "split_ratio": 0.1,
+      "raw_before": 0.28,
+      "raw_after": 2.85,
+      "adjusted_ratio": 1.0178571428571428,
+      "raw_ratio_times_split": 1.0178571428571428
+    },
+    {
+      "symbol": "PRXL",
+      "date": "2008-03-04",
+      "split_ratio": 2.0,
+      "raw_before": 54.97,
+      "raw_after": 27.01,
+      "adjusted_ratio": 0.9827178460978716,
+      "raw_ratio_times_split": 0.9827178460978716
+    },
+    {
+      "symbol": "PTIE",
+      "date": "2017-05-10",
+      "split_ratio": 0.14285714285714,
+      "raw_before": 0.6756,
+      "raw_after": 4.645,
+      "adjusted_ratio": 0.9821957202063774,
+      "raw_ratio_times_split": 0.9821957202063577
+    },
+    {
+      "symbol": "PTX",
+      "date": "2010-03-10",
+      "split_ratio": 0.5,
+      "raw_before": 1.99,
+      "raw_after": 5.0,
+      "adjusted_ratio": 1.256281407035176,
+      "raw_ratio_times_split": 1.256281407035176
+    },
+    {
+      "symbol": "PTX",
+      "date": "2016-10-14",
+      "split_ratio": 0.1,
+      "raw_before": 0.4167,
+      "raw_after": 4.29,
+      "adjusted_ratio": 1.0295176385889129,
+      "raw_ratio_times_split": 1.0295176385889129
+    },
+    {
+      "symbol": "QGEN",
+      "date": "2017-01-25",
+      "split_ratio": 0.9629629629629629,
+      "raw_before": 27.43,
+      "raw_after": 27.81,
+      "adjusted_ratio": 0.9763033175355449,
+      "raw_ratio_times_split": 0.9763033175355449
+    },
+    {
+      "symbol": "QRHC",
+      "date": "2012-11-13",
+      "split_ratio": 0.2,
+      "raw_before": 0.39,
+      "raw_after": 2.0,
+      "adjusted_ratio": 1.0256410256410255,
+      "raw_ratio_times_split": 1.0256410256410255
+    },
+    {
+      "symbol": "QRHC",
+      "date": "2016-08-11",
+      "split_ratio": 0.125,
+      "raw_before": 0.32,
+      "raw_after": 2.76,
+      "adjusted_ratio": 1.078125,
+      "raw_ratio_times_split": 1.078125
+    },
+    {
+      "symbol": "QSII",
+      "date": "2011-10-27",
+      "split_ratio": 2.0,
+      "raw_before": 86.7,
+      "raw_after": 41.82,
+      "adjusted_ratio": 0.9647058823529412,
+      "raw_ratio_times_split": 0.9647058823529412
+    },
+    {
+      "symbol": "QTM",
+      "date": "2017-04-19",
+      "split_ratio": 0.125,
+      "raw_before": 0.855,
+      "raw_after": 7.09,
+      "adjusted_ratio": 1.036549707602339,
+      "raw_ratio_times_split": 1.036549707602339
+    },
+    {
+      "symbol": "RAI",
+      "date": "2010-11-16",
+      "split_ratio": 2.0,
+      "raw_before": 64.86,
+      "raw_after": 32.04,
+      "adjusted_ratio": 0.9879740980573131,
+      "raw_ratio_times_split": 0.9879740980573543
+    },
+    {
+      "symbol": "RAI",
+      "date": "2015-09-01",
+      "split_ratio": 2.0,
+      "raw_before": 83.75,
+      "raw_after": 40.83,
+      "adjusted_ratio": 0.9750447761194074,
+      "raw_ratio_times_split": 0.975044776119403
+    },
+    {
+      "symbol": "RAS",
+      "date": "2011-07-01",
+      "split_ratio": 0.33333333333333,
+      "raw_before": 2.1,
+      "raw_after": 6.86,
+      "adjusted_ratio": 1.0888888888888686,
+      "raw_ratio_times_split": 1.088888888888878
+    },
+    {
+      "symbol": "RAVN",
+      "date": "2012-07-26",
+      "split_ratio": 2.0,
+      "raw_before": 66.47,
+      "raw_after": 32.01,
+      "adjusted_ratio": 0.9631412667368733,
+      "raw_ratio_times_split": 0.9631412667368737
+    },
+    {
+      "symbol": "RBCN",
+      "date": "2017-05-05",
+      "split_ratio": 0.1,
+      "raw_before": 0.73,
+      "raw_after": 7.41,
+      "adjusted_ratio": 1.015068493150685,
+      "raw_ratio_times_split": 1.015068493150685
+    },
+    {
+      "symbol": "RCKB",
+      "date": "2011-03-04",
+      "split_ratio": 3.9375,
+      "raw_before": 16.34,
+      "raw_after": 10.6,
+      "adjusted_ratio": 2.554314565483475,
+      "raw_ratio_times_split": 2.5543145654834762
+    },
+    {
+      "symbol": "REI",
+      "date": "2008-06-02",
+      "split_ratio": 0.05555555555555555,
+      "raw_before": 0.15,
+      "raw_after": 2.7,
+      "adjusted_ratio": 1.0000000000000002,
+      "raw_ratio_times_split": 1.0000000000000002
+    },
+    {
+      "symbol": "REN",
+      "date": "2016-06-08",
+      "split_ratio": 0.2,
+      "raw_before": 0.65,
+      "raw_after": 3.59,
+      "adjusted_ratio": 1.1046153846153846,
+      "raw_ratio_times_split": 1.1046153846153846
+    },
+    {
+      "symbol": "RES",
+      "date": "2010-12-13",
+      "split_ratio": 1.5,
+      "raw_before": 31.63,
+      "raw_after": 20.91,
+      "adjusted_ratio": 0.9916218779639108,
+      "raw_ratio_times_split": 0.9916218779639583
+    },
+    {
+      "symbol": "RES",
+      "date": "2012-03-12",
+      "split_ratio": 1.5,
+      "raw_before": 15.71,
+      "raw_after": 10.17,
+      "adjusted_ratio": 0.9710375556970113,
+      "raw_ratio_times_split": 0.9710375556970082
+    },
+    {
+      "symbol": "REV",
+      "date": "2008-09-16",
+      "split_ratio": 0.1,
+      "raw_before": 1.25,
+      "raw_after": 12.91,
+      "adjusted_ratio": 1.0328,
+      "raw_ratio_times_split": 1.0328
+    },
+    {
+      "symbol": "REXX",
+      "date": "2017-05-15",
+      "split_ratio": 0.1,
+      "raw_before": 0.4125,
+      "raw_after": 3.98,
+      "adjusted_ratio": 0.9648484848484848,
+      "raw_ratio_times_split": 0.9648484848484848
+    },
+    {
+      "symbol": "RKT",
+      "date": "2014-08-28",
+      "split_ratio": 2.0,
+      "raw_before": 95.99,
+      "raw_after": 48.26,
+      "adjusted_ratio": 1.00552140848005,
+      "raw_ratio_times_split": 1.0055214084800501
+    },
+    {
+      "symbol": "RLI",
+      "date": "2014-01-16",
+      "split_ratio": 2.0,
+      "raw_before": 91.5,
+      "raw_after": 45.2,
+      "adjusted_ratio": 0.9879781420765132,
+      "raw_ratio_times_split": 0.9879781420765028
+    },
+    {
+      "symbol": "RMD",
+      "date": "2010-08-31",
+      "split_ratio": 2.0,
+      "raw_before": 60.38,
+      "raw_after": 30.14,
+      "adjusted_ratio": 0.9983438224577409,
+      "raw_ratio_times_split": 0.9983438224577674
+    },
+    {
+      "symbol": "RNWK",
+      "date": "2011-08-31",
+      "split_ratio": 0.25,
+      "raw_before": 2.2,
+      "raw_after": 9.25,
+      "adjusted_ratio": 1.0511363636363635,
+      "raw_ratio_times_split": 1.0511363636363635
+    },
+    {
+      "symbol": "ROL",
+      "date": "2010-12-13",
+      "split_ratio": 1.5,
+      "raw_before": 28.91,
+      "raw_after": 19.37,
+      "adjusted_ratio": 1.0050155655482262,
+      "raw_ratio_times_split": 1.0050155655482533
+    },
+    {
+      "symbol": "ROL",
+      "date": "2015-03-11",
+      "split_ratio": 1.5,
+      "raw_before": 33.15,
+      "raw_after": 22.44,
+      "adjusted_ratio": 1.0153846153846162,
+      "raw_ratio_times_split": 1.0153846153846153
+    },
+    {
+      "symbol": "ROST",
+      "date": "2011-12-16",
+      "split_ratio": 2.0,
+      "raw_before": 92.82,
+      "raw_after": 47.0,
+      "adjusted_ratio": 1.0127127774186682,
+      "raw_ratio_times_split": 1.01271277741866
+    },
+    {
+      "symbol": "ROST",
+      "date": "2015-06-12",
+      "split_ratio": 2.0,
+      "raw_before": 97.86,
+      "raw_after": 48.53,
+      "adjusted_ratio": 0.9918250562027275,
+      "raw_ratio_times_split": 0.9918250562027386
+    },
+    {
+      "symbol": "RPRX",
+      "date": "2010-10-15",
+      "split_ratio": 0.25,
+      "raw_before": 0.3725,
+      "raw_after": 1.33,
+      "adjusted_ratio": 0.8926174496644296,
+      "raw_ratio_times_split": 0.8926174496644296
+    },
+    {
+      "symbol": "RPTP",
+      "date": "2009-09-30",
+      "split_ratio": 0.058823529411764705,
+      "raw_before": 0.25,
+      "raw_after": 3.3,
+      "adjusted_ratio": 0.776470588235294,
+      "raw_ratio_times_split": 0.776470588235294
+    },
+    {
+      "symbol": "RRD",
+      "date": "2016-10-03",
+      "split_ratio": 0.3333333333333333,
+      "raw_before": 15.72,
+      "raw_after": 23.81,
+      "adjusted_ratio": 1.047953774385072,
+      "raw_ratio_times_split": 0.5048770144189991
+    },
+    {
+      "symbol": "RSO",
+      "date": "2015-09-01",
+      "split_ratio": 0.25,
+      "raw_before": 3.24,
+      "raw_after": 12.33,
+      "adjusted_ratio": 0.9513888888888369,
+      "raw_ratio_times_split": 0.9513888888888888
+    },
+    {
+      "symbol": "RTK",
+      "date": "2015-08-20",
+      "split_ratio": 0.1,
+      "raw_before": 0.7201,
+      "raw_after": 6.15,
+      "adjusted_ratio": 0.8540480488820998,
+      "raw_ratio_times_split": 0.8540480488820998
+    },
+    {
+      "symbol": "RVBD",
+      "date": "2010-11-09",
+      "split_ratio": 2.0,
+      "raw_before": 59.25,
+      "raw_after": 28.88,
+      "adjusted_ratio": 0.9748523206751054,
+      "raw_ratio_times_split": 0.9748523206751054
+    },
+    {
+      "symbol": "RVLT",
+      "date": "2016-03-11",
+      "split_ratio": 0.1,
+      "raw_before": 0.702,
+      "raw_after": 7.38,
+      "adjusted_ratio": 1.0512820512820513,
+      "raw_ratio_times_split": 1.0512820512820513
+    },
+    {
+      "symbol": "RYN",
+      "date": "2011-08-25",
+      "split_ratio": 1.5,
+      "raw_before": 60.78,
+      "raw_after": 39.32,
+      "adjusted_ratio": 0.9703849950641422,
+      "raw_ratio_times_split": 0.9703849950641659
+    },
+    {
+      "symbol": "SAIA",
+      "date": "2013-06-14",
+      "split_ratio": 1.5,
+      "raw_before": 46.99,
+      "raw_after": 30.88,
+      "adjusted_ratio": 0.98574164715897,
+      "raw_ratio_times_split": 0.98574164715897
+    },
+    {
+      "symbol": "SALT",
+      "date": "2015-12-31",
+      "split_ratio": 0.08333333333333333,
+      "raw_before": 0.705,
+      "raw_after": 9.89,
+      "adjusted_ratio": 1.1690307328605203,
+      "raw_ratio_times_split": 1.16903073286052
+    },
+    {
+      "symbol": "SANM",
+      "date": "2009-08-17",
+      "split_ratio": 0.16666666666666666,
+      "raw_before": 0.8,
+      "raw_after": 4.45,
+      "adjusted_ratio": 0.9270833333333333,
+      "raw_ratio_times_split": 0.9270833333333333
+    },
+    {
+      "symbol": "SBCF",
+      "date": "2013-12-13",
+      "split_ratio": 0.2,
+      "raw_before": 2.32,
+      "raw_after": 11.15,
+      "adjusted_ratio": 0.9612068965517242,
+      "raw_ratio_times_split": 0.9612068965517242
+    },
+    {
+      "symbol": "SBRA",
+      "date": "2010-11-16",
+      "split_ratio": 0.33333333333333,
+      "raw_before": 9.44,
+      "raw_after": 19.1,
+      "adjusted_ratio": 0.8126059322033823,
+      "raw_ratio_times_split": 0.6744350282485809
+    },
+    {
+      "symbol": "SBSI",
+      "date": "2015-04-23",
+      "split_ratio": 1.05,
+      "raw_before": 29.68,
+      "raw_after": 27.94,
+      "adjusted_ratio": 0.9884433962264095,
+      "raw_ratio_times_split": 0.9884433962264152
+    },
+    {
+      "symbol": "SBSI",
+      "date": "2016-05-26",
+      "split_ratio": 1.05,
+      "raw_before": 31.09,
+      "raw_after": 29.12,
+      "adjusted_ratio": 0.9834673528465993,
+      "raw_ratio_times_split": 0.9834673528465745
+    },
+    {
+      "symbol": "SBSI",
+      "date": "2017-05-25",
+      "split_ratio": 1.025,
+      "raw_before": 33.54,
+      "raw_after": 33.45,
+      "adjusted_ratio": 1.0222495527727913,
+      "raw_ratio_times_split": 1.0222495527728086
+    },
+    {
+      "symbol": "SBUX",
+      "date": "2015-04-09",
+      "split_ratio": 2.0,
+      "raw_before": 95.23,
+      "raw_after": 47.96,
+      "adjusted_ratio": 1.0072456158773484,
+      "raw_ratio_times_split": 1.0072456158773495
+    },
+    {
+      "symbol": "SCCO",
+      "date": "2008-07-10",
+      "split_ratio": 3.0,
+      "raw_before": 99.09,
+      "raw_after": 33.46,
+      "adjusted_ratio": 1.0130184680593475,
+      "raw_ratio_times_split": 1.01301846805934
+    },
+    {
+      "symbol": "SCL",
+      "date": "2012-12-17",
+      "split_ratio": 2.0,
+      "raw_before": 100.84,
+      "raw_after": 52.22,
+      "adjusted_ratio": 1.035700119000389,
+      "raw_ratio_times_split": 1.0357001190003967
+    },
+    {
+      "symbol": "SCVL",
+      "date": "2012-04-30",
+      "split_ratio": 1.5,
+      "raw_before": 30.08,
+      "raw_after": 19.44,
+      "adjusted_ratio": 0.9694148936169967,
+      "raw_ratio_times_split": 0.9694148936170213
+    },
+    {
+      "symbol": "SF",
+      "date": "2008-06-13",
+      "split_ratio": 1.5,
+      "raw_before": 55.77,
+      "raw_after": 38.6,
+      "adjusted_ratio": 1.0381925766541111,
+      "raw_ratio_times_split": 1.0381925766541151
+    },
+    {
+      "symbol": "SF",
+      "date": "2011-04-06",
+      "split_ratio": 1.5,
+      "raw_before": 72.2,
+      "raw_after": 48.37,
+      "adjusted_ratio": 1.0049168975069194,
+      "raw_ratio_times_split": 1.0049168975069251
+    },
+    {
+      "symbol": "SFBS",
+      "date": "2014-07-17",
+      "split_ratio": 3.0,
+      "raw_before": 84.27,
+      "raw_after": 28.3,
+      "adjusted_ratio": 1.0074759700961373,
+      "raw_ratio_times_split": 1.0074759700961198
+    },
+    {
+      "symbol": "SFBS",
+      "date": "2016-12-21",
+      "split_ratio": 2.0,
+      "raw_before": 74.0,
+      "raw_after": 37.96,
+      "adjusted_ratio": 1.025945945945962,
+      "raw_ratio_times_split": 1.025945945945946
+    },
+    {
+      "symbol": "SFE",
+      "date": "2009-08-27",
+      "split_ratio": 0.16666666666666666,
+      "raw_before": 1.74,
+      "raw_after": 10.76,
+      "adjusted_ratio": 1.0306513409961686,
+      "raw_ratio_times_split": 1.0306513409961684
+    },
+    {
+      "symbol": "SGA",
+      "date": "2009-01-29",
+      "split_ratio": 0.25,
+      "raw_before": 1.0301,
+      "raw_after": 3.93,
+      "adjusted_ratio": 0.9537908940879526,
+      "raw_ratio_times_split": 0.9537908940879527
+    },
+    {
+      "symbol": "SGA",
+      "date": "2013-01-17",
+      "split_ratio": 1.3333333333333333,
+      "raw_before": 54.1,
+      "raw_after": 43.38,
+      "adjusted_ratio": 1.06913123844732,
+      "raw_ratio_times_split": 1.0691312384473197
+    },
+    {
+      "symbol": "SGY",
+      "date": "2016-06-13",
+      "split_ratio": 0.1,
+      "raw_before": 0.5239,
+      "raw_after": 4.77,
+      "adjusted_ratio": 0.9104790990647068,
+      "raw_ratio_times_split": 0.9104790990647068
+    },
+    {
+      "symbol": "SGY",
+      "date": "2017-03-01",
+      "split_ratio": 0.25,
+      "raw_before": 6.95,
+      "raw_after": 26.01,
+      "adjusted_ratio": 0.935611510791367,
+      "raw_ratio_times_split": 0.935611510791367
+    },
+    {
+      "symbol": "SGYP",
+      "date": "2011-12-01",
+      "split_ratio": 0.5,
+      "raw_before": 2.1,
+      "raw_after": 4.01,
+      "adjusted_ratio": 0.9547619047619047,
+      "raw_ratio_times_split": 0.9547619047619047
+    },
+    {
+      "symbol": "SHEN",
+      "date": "2016-01-05",
+      "split_ratio": 2.0,
+      "raw_before": 41.28,
+      "raw_after": 20.62,
+      "adjusted_ratio": 0.9990310077519318,
+      "raw_ratio_times_split": 0.999031007751938
+    },
+    {
+      "symbol": "SHOO",
+      "date": "2010-05-03",
+      "split_ratio": 1.5,
+      "raw_before": 57.98,
+      "raw_after": 40.08,
+      "adjusted_ratio": 1.0369092790617456,
+      "raw_ratio_times_split": 1.0369092790617456
+    },
+    {
+      "symbol": "SHOO",
+      "date": "2011-06-01",
+      "split_ratio": 1.5,
+      "raw_before": 55.74,
+      "raw_after": 35.62,
+      "adjusted_ratio": 0.9585575888051667,
+      "raw_ratio_times_split": 0.9585575888051667
+    },
+    {
+      "symbol": "SHOO",
+      "date": "2013-10-02",
+      "split_ratio": 1.5,
+      "raw_before": 53.93,
+      "raw_after": 35.93,
+      "adjusted_ratio": 0.9993510105692565,
+      "raw_ratio_times_split": 0.9993510105692565
+    },
+    {
+      "symbol": "SIG",
+      "date": "2008-09-11",
+      "split_ratio": 0.5,
+      "raw_before": 11.25,
+      "raw_after": 23.12,
+      "adjusted_ratio": 1.0275555555555507,
+      "raw_ratio_times_split": 1.0275555555555556
+    },
+    {
+      "symbol": "SIX",
+      "date": "2011-06-28",
+      "split_ratio": 2.0,
+      "raw_before": 72.82,
+      "raw_after": 37.85,
+      "adjusted_ratio": 1.0395495742927618,
+      "raw_ratio_times_split": 1.039549574292777
+    },
+    {
+      "symbol": "SIX",
+      "date": "2013-06-27",
+      "split_ratio": 2.0,
+      "raw_before": 71.7,
+      "raw_after": 35.48,
+      "adjusted_ratio": 0.9896792189679328,
+      "raw_ratio_times_split": 0.9896792189679218
+    },
+    {
+      "symbol": "SJI",
+      "date": "2015-05-08",
+      "split_ratio": 2.0,
+      "raw_before": 52.17,
+      "raw_after": 25.92,
+      "adjusted_ratio": 0.9936745255893997,
+      "raw_ratio_times_split": 0.9936745255894193
+    },
+    {
+      "symbol": "SKT",
+      "date": "2011-01-25",
+      "split_ratio": 2.0,
+      "raw_before": 50.28,
+      "raw_after": 25.68,
+      "adjusted_ratio": 1.021479713603792,
+      "raw_ratio_times_split": 1.0214797136038185
+    },
+    {
+      "symbol": "SKX",
+      "date": "2015-10-16",
+      "split_ratio": 3.0,
+      "raw_before": 132.67,
+      "raw_after": 45.15,
+      "adjusted_ratio": 1.0209542473807192,
+      "raw_ratio_times_split": 1.0209542473807192
+    },
+    {
+      "symbol": "SLGN",
+      "date": "2010-05-04",
+      "split_ratio": 2.0,
+      "raw_before": 60.91,
+      "raw_after": 29.6,
+      "adjusted_ratio": 0.971925792152321,
+      "raw_ratio_times_split": 0.9719257921523561
+    },
+    {
+      "symbol": "SLGN",
+      "date": "2017-05-30",
+      "split_ratio": 2.0,
+      "raw_before": 62.79,
+      "raw_after": 31.47,
+      "adjusted_ratio": 1.0052556139512547,
+      "raw_ratio_times_split": 1.0023889154323937
+    },
+    {
+      "symbol": "SNBC",
+      "date": "2014-08-11",
+      "split_ratio": 0.2,
+      "raw_before": 3.81,
+      "raw_after": 18.62,
+      "adjusted_ratio": 0.9774278215223282,
+      "raw_ratio_times_split": 0.9774278215223098
+    },
+    {
+      "symbol": "SNSS",
+      "date": "2011-02-15",
+      "split_ratio": 0.16666666666666666,
+      "raw_before": 0.3623,
+      "raw_after": 2.22,
+      "adjusted_ratio": 1.0212531051614684,
+      "raw_ratio_times_split": 1.0212531051614684
+    },
+    {
+      "symbol": "SNSS",
+      "date": "2016-09-08",
+      "split_ratio": 0.16666666666666666,
+      "raw_before": 0.7241,
+      "raw_after": 4.45,
+      "adjusted_ratio": 1.0242600009206833,
+      "raw_ratio_times_split": 1.024260000920683
+    },
+    {
+      "symbol": "SNV",
+      "date": "2014-05-19",
+      "split_ratio": 0.14285714285714,
+      "raw_before": 3.12,
+      "raw_after": 21.98,
+      "adjusted_ratio": 1.0064102564102293,
+      "raw_ratio_times_split": 1.0064102564102362
+    },
+    {
+      "symbol": "SONS",
+      "date": "2015-01-30",
+      "split_ratio": 0.2,
+      "raw_before": 3.795,
+      "raw_after": 19.08,
+      "adjusted_ratio": 1.0055335968379444,
+      "raw_ratio_times_split": 1.0055335968379446
+    },
+    {
+      "symbol": "SP",
+      "date": "2008-01-18",
+      "split_ratio": 2.0,
+      "raw_before": 39.9,
+      "raw_after": 18.79,
+      "adjusted_ratio": 0.9418546365914787,
+      "raw_ratio_times_split": 0.9418546365914787
+    },
+    {
+      "symbol": "SPRT",
+      "date": "2017-01-20",
+      "split_ratio": 0.3333333333333333,
+      "raw_before": 0.7704,
+      "raw_after": 2.4,
+      "adjusted_ratio": 1.0384215991692627,
+      "raw_ratio_times_split": 1.0384215991692627
+    },
+    {
+      "symbol": "SQBG",
+      "date": "2012-09-11",
+      "split_ratio": 0.06666666666666667,
+      "raw_before": 0.3,
+      "raw_after": 4.5,
+      "adjusted_ratio": 1.0,
+      "raw_ratio_times_split": 1.0
+    },
+    {
+      "symbol": "SRCE",
+      "date": "2015-08-03",
+      "split_ratio": 1.1,
+      "raw_before": 33.99,
+      "raw_after": 30.94,
+      "adjusted_ratio": 1.0012944983818908,
+      "raw_ratio_times_split": 1.001294498381877
+    },
+    {
+      "symbol": "SRPT",
+      "date": "2012-07-12",
+      "split_ratio": 0.16666666666666666,
+      "raw_before": 0.655,
+      "raw_after": 4.13,
+      "adjusted_ratio": 1.0508905852417303,
+      "raw_ratio_times_split": 1.05089058524173
+    },
+    {
+      "symbol": "SSNC",
+      "date": "2016-06-27",
+      "split_ratio": 2.0,
+      "raw_before": 54.94,
+      "raw_after": 26.45,
+      "adjusted_ratio": 0.9628685839096914,
+      "raw_ratio_times_split": 0.9628685839097197
+    },
+    {
+      "symbol": "SSP",
+      "date": "2008-07-16",
+      "split_ratio": 0.3333333333333333,
+      "raw_before": 3.2,
+      "raw_after": 9.31,
+      "adjusted_ratio": 0.9697916666666665,
+      "raw_ratio_times_split": 0.9697916666666666
+    },
+    {
+      "symbol": "STLD",
+      "date": "2008-03-31",
+      "split_ratio": 2.0,
+      "raw_before": 67.44,
+      "raw_after": 33.04,
+      "adjusted_ratio": 0.9798339264531487,
+      "raw_ratio_times_split": 0.9798339264531435
+    },
+    {
+      "symbol": "STRZA",
+      "date": "2008-03-04",
+      "split_ratio": 5.0,
+      "raw_before": 116.3,
+      "raw_after": 17.46,
+      "adjusted_ratio": 0.7518796992481235,
+      "raw_ratio_times_split": 0.7506448839208943
+    },
+    {
+      "symbol": "STSA",
+      "date": "2010-11-19",
+      "split_ratio": 0.01,
+      "raw_before": 0.24,
+      "raw_after": 16.5,
+      "adjusted_ratio": 0.6874999999999971,
+      "raw_ratio_times_split": 0.6875
+    },
+    {
+      "symbol": "SVU",
+      "date": "2017-08-02",
+      "split_ratio": 0.14285714285714,
+      "raw_before": 3.56,
+      "raw_after": 24.83,
+      "adjusted_ratio": 0.9963884430176564,
+      "raw_ratio_times_split": 0.9963884430176364
+    },
+    {
+      "symbol": "SWM",
+      "date": "2012-08-22",
+      "split_ratio": 2.0,
+      "raw_before": 65.59,
+      "raw_after": 32.37,
+      "adjusted_ratio": 0.9870407074249027,
+      "raw_ratio_times_split": 0.9870407074249122
+    },
+    {
+      "symbol": "SWN",
+      "date": "2008-03-26",
+      "split_ratio": 2.0,
+      "raw_before": 64.15,
+      "raw_after": 33.52,
+      "adjusted_ratio": 1.0450506625097429,
+      "raw_ratio_times_split": 1.0450506625097429
+    },
+    {
+      "symbol": "SWSH",
+      "date": "2014-06-03",
+      "split_ratio": 0.1,
+      "raw_before": 0.364,
+      "raw_after": 3.68,
+      "adjusted_ratio": 1.0109890109890112,
+      "raw_ratio_times_split": 1.0109890109890112
+    },
+    {
+      "symbol": "SYBT",
+      "date": "2016-05-31",
+      "split_ratio": 1.5,
+      "raw_before": 43.25,
+      "raw_after": 29.03,
+      "adjusted_ratio": 1.00682080924857,
+      "raw_ratio_times_split": 1.006820809248555
+    },
+    {
+      "symbol": "SYNA",
+      "date": "2008-09-02",
+      "split_ratio": 1.5,
+      "raw_before": 52.34,
+      "raw_after": 33.97,
+      "adjusted_ratio": 0.9735384027512419,
+      "raw_ratio_times_split": 0.9735384027512417
+    },
+    {
+      "symbol": "SYNT",
+      "date": "2014-11-04",
+      "split_ratio": 2.0,
+      "raw_before": 85.55,
+      "raw_after": 42.41,
+      "adjusted_ratio": 0.991466978375219,
+      "raw_ratio_times_split": 0.9914669783752191
+    },
+    {
+      "symbol": "SYRG",
+      "date": "2008-09-22",
+      "split_ratio": 0.1,
+      "raw_before": 0.35,
+      "raw_after": 3.5,
+      "adjusted_ratio": 1.0,
+      "raw_ratio_times_split": 1.0
+    },
+    {
+      "symbol": "TAL",
+      "date": "2017-08-16",
+      "split_ratio": 6.0,
+      "raw_before": 174.76,
+      "raw_after": 28.97,
+      "adjusted_ratio": 0.9946211947814031,
+      "raw_ratio_times_split": 0.9946211947814145
+    },
+    {
+      "symbol": "TAT",
+      "date": "2014-03-07",
+      "split_ratio": 0.1,
+      "raw_before": 0.795,
+      "raw_after": 7.6,
+      "adjusted_ratio": 0.9559748427672955,
+      "raw_ratio_times_split": 0.9559748427672956
+    },
+    {
+      "symbol": "TDS",
+      "date": "2012-01-26",
+      "split_ratio": 1.087,
+      "raw_before": 28.26,
+      "raw_after": 27.12,
+      "adjusted_ratio": 1.0431507430997984,
+      "raw_ratio_times_split": 1.0431507430997877
+    },
+    {
+      "symbol": "TEAR",
+      "date": "2008-10-09",
+      "split_ratio": 0.04,
+      "raw_before": 0.09,
+      "raw_after": 1.61,
+      "adjusted_ratio": 0.7155555555555556,
+      "raw_ratio_times_split": 0.7155555555555556
+    },
+    {
+      "symbol": "TEAR",
+      "date": "2017-02-27",
+      "split_ratio": 0.1,
+      "raw_before": 0.5253,
+      "raw_after": 5.74,
+      "adjusted_ratio": 1.0927089282314868,
+      "raw_ratio_times_split": 1.092708928231487
+    },
+    {
+      "symbol": "TESS",
+      "date": "2010-05-27",
+      "split_ratio": 1.5,
+      "raw_before": 26.39,
+      "raw_after": 18.18,
+      "adjusted_ratio": 1.0333459643804315,
+      "raw_ratio_times_split": 1.033345964380447
+    },
+    {
+      "symbol": "TGI",
+      "date": "2011-07-15",
+      "split_ratio": 2.0,
+      "raw_before": 101.09,
+      "raw_after": 50.49,
+      "adjusted_ratio": 0.9989118607181798,
+      "raw_ratio_times_split": 0.998911860718172
+    },
+    {
+      "symbol": "TGTX",
+      "date": "2011-07-14",
+      "split_ratio": 0.02,
+      "raw_before": 0.01,
+      "raw_after": 0.35,
+      "adjusted_ratio": 0.7,
+      "raw_ratio_times_split": 0.7000000000000001
+    },
+    {
+      "symbol": "TGTX",
+      "date": "2012-04-30",
+      "split_ratio": 0.017777777777777778,
+      "raw_before": 0.1,
+      "raw_after": 6.2,
+      "adjusted_ratio": 1.1022222222222222,
+      "raw_ratio_times_split": 1.1022222222222222
+    },
+    {
+      "symbol": "THC",
+      "date": "2012-10-11",
+      "split_ratio": 0.25,
+      "raw_before": 5.97,
+      "raw_after": 24.09,
+      "adjusted_ratio": 1.0087939698492463,
+      "raw_ratio_times_split": 1.0087939698492463
+    },
+    {
+      "symbol": "THLD",
+      "date": "2008-08-20",
+      "split_ratio": 0.16666666666666666,
+      "raw_before": 0.31,
+      "raw_after": 1.85,
+      "adjusted_ratio": 0.9946236559139786,
+      "raw_ratio_times_split": 0.9946236559139785
+    },
+    {
+      "symbol": "TJX",
+      "date": "2012-02-03",
+      "split_ratio": 2.0,
+      "raw_before": 68.12,
+      "raw_after": 34.53,
+      "adjusted_ratio": 1.0137991779213147,
+      "raw_ratio_times_split": 1.0137991779213154
+    },
+    {
+      "symbol": "TMK",
+      "date": "2011-07-05",
+      "split_ratio": 1.5,
+      "raw_before": 64.53,
+      "raw_after": 42.93,
+      "adjusted_ratio": 0.9979079497907919,
+      "raw_ratio_times_split": 0.997907949790795
+    },
+    {
+      "symbol": "TMK",
+      "date": "2014-07-02",
+      "split_ratio": 1.5,
+      "raw_before": 82.6189,
+      "raw_after": 54.83,
+      "adjusted_ratio": 0.9954744011358146,
+      "raw_ratio_times_split": 0.9954744011358175
+    },
+    {
+      "symbol": "TMUS",
+      "date": "2013-05-01",
+      "split_ratio": 0.5,
+      "raw_before": 11.84,
+      "raw_after": 16.52,
+      "adjusted_ratio": 1.0396959459459458,
+      "raw_ratio_times_split": 0.6976351351351351
+    },
+    {
+      "symbol": "TNDM",
+      "date": "2017-10-10",
+      "split_ratio": 0.1,
+      "raw_before": 0.5811,
+      "raw_after": 5.305,
+      "adjusted_ratio": 0.9129237652727585,
+      "raw_ratio_times_split": 0.9129237652727586
+    },
+    {
+      "symbol": "TPLM",
+      "date": "2010-11-05",
+      "split_ratio": 0.1,
+      "raw_before": 0.69,
+      "raw_after": 5.77,
+      "adjusted_ratio": 0.836231884057971,
+      "raw_ratio_times_split": 0.8362318840579711
+    },
+    {
+      "symbol": "TR",
+      "date": "2015-03-06",
+      "split_ratio": 1.03,
+      "raw_before": 33.24,
+      "raw_after": 31.45,
+      "adjusted_ratio": 0.977012635379082,
+      "raw_ratio_times_split": 0.9745336943441637
+    },
+    {
+      "symbol": "TR",
+      "date": "2016-03-04",
+      "split_ratio": 1.03,
+      "raw_before": 34.0,
+      "raw_after": 33.45,
+      "adjusted_ratio": 1.0460558823529447,
+      "raw_ratio_times_split": 1.0133382352941178
+    },
+    {
+      "symbol": "TR",
+      "date": "2017-03-03",
+      "split_ratio": 1.03,
+      "raw_before": 39.65,
+      "raw_after": 38.05,
+      "adjusted_ratio": 0.9907742749054248,
+      "raw_ratio_times_split": 0.98843631778058
+    },
+    {
+      "symbol": "TR",
+      "date": "2018-03-05",
+      "split_ratio": 1.03,
+      "raw_before": 33.85,
+      "raw_after": 32.15,
+      "adjusted_ratio": 0.9782717872969848,
+      "raw_ratio_times_split": 0.978271787296898
+    },
+    {
+      "symbol": "TREX",
+      "date": "2014-05-08",
+      "split_ratio": 2.0,
+      "raw_before": 68.59,
+      "raw_after": 33.46,
+      "adjusted_ratio": 0.9756524274675609,
+      "raw_ratio_times_split": 0.9756524274675609
+    },
+    {
+      "symbol": "TRMB",
+      "date": "2013-03-21",
+      "split_ratio": 2.0,
+      "raw_before": 60.28,
+      "raw_after": 29.44,
+      "adjusted_ratio": 0.9767750497677505,
+      "raw_ratio_times_split": 0.9767750497677505
+    },
+    {
+      "symbol": "TRN",
+      "date": "2014-06-20",
+      "split_ratio": 2.0,
+      "raw_before": 85.16,
+      "raw_after": 42.23,
+      "adjusted_ratio": 0.9917801784875552,
+      "raw_ratio_times_split": 0.9917801784875528
+    },
+    {
+      "symbol": "TROX",
+      "date": "2012-07-26",
+      "split_ratio": 5.0,
+      "raw_before": 114.97,
+      "raw_after": 23.72,
+      "adjusted_ratio": 1.0315734539445482,
+      "raw_ratio_times_split": 1.0315734539445072
+    },
+    {
+      "symbol": "TRXC",
+      "date": "2014-04-02",
+      "split_ratio": 0.2,
+      "raw_before": 1.94,
+      "raw_after": 10.5,
+      "adjusted_ratio": 1.0824742268041239,
+      "raw_ratio_times_split": 1.0824742268041239
+    },
+    {
+      "symbol": "TSCO",
+      "date": "2010-09-03",
+      "split_ratio": 2.0,
+      "raw_before": 71.41,
+      "raw_after": 36.31,
+      "adjusted_ratio": 1.016944405545421,
+      "raw_ratio_times_split": 1.016944405545442
+    },
+    {
+      "symbol": "TSCO",
+      "date": "2013-09-27",
+      "split_ratio": 2.0,
+      "raw_before": 132.33,
+      "raw_after": 66.4,
+      "adjusted_ratio": 1.003551726743757,
+      "raw_ratio_times_split": 1.0035517267437466
+    },
+    {
+      "symbol": "TSRE",
+      "date": "2013-01-28",
+      "split_ratio": 0.006666666666666667,
+      "raw_before": 0.11,
+      "raw_after": 16.5,
+      "adjusted_ratio": 156.75,
+      "raw_ratio_times_split": 1.0
+    },
+    {
+      "symbol": "TTC",
+      "date": "2012-07-02",
+      "split_ratio": 2.0,
+      "raw_before": 73.29,
+      "raw_after": 36.76,
+      "adjusted_ratio": 1.003138218037983,
+      "raw_ratio_times_split": 1.0031382180379314
+    },
+    {
+      "symbol": "TTC",
+      "date": "2016-09-19",
+      "split_ratio": 2.0,
+      "raw_before": 94.08,
+      "raw_after": 47.16,
+      "adjusted_ratio": 1.0025510204081676,
+      "raw_ratio_times_split": 1.0025510204081631
+    },
+    {
+      "symbol": "TWC",
+      "date": "2009-03-13",
+      "split_ratio": 0.33333333333333,
+      "raw_before": 8.33,
+      "raw_after": 25.52,
+      "adjusted_ratio": 1.0212084833933575,
+      "raw_ratio_times_split": 1.021208483393347
+    },
+    {
+      "symbol": "TWER",
+      "date": "2016-07-07",
+      "split_ratio": 0.05,
+      "raw_before": 0.136,
+      "raw_after": 2.39,
+      "adjusted_ratio": 0.8786764705882353,
+      "raw_ratio_times_split": 0.8786764705882354
+    },
+    {
+      "symbol": "TWI",
+      "date": "2008-08-18",
+      "split_ratio": 1.25,
+      "raw_before": 39.56,
+      "raw_after": 31.06,
+      "adjusted_ratio": 0.9814206268958386,
+      "raw_ratio_times_split": 0.9814206268958543
+    },
+    {
+      "symbol": "TWO",
+      "date": "2017-11-01",
+      "split_ratio": 0.5,
+      "raw_before": 9.8,
+      "raw_after": 9.84,
+      "adjusted_ratio": 0.5020408163265305,
+      "raw_ratio_times_split": 0.5020408163265305
+    },
+    {
+      "symbol": "TWO",
+      "date": "2017-11-02",
+      "split_ratio": 0.5,
+      "raw_before": 9.84,
+      "raw_after": 15.68,
+      "adjusted_ratio": 0.7967479674796748,
+      "raw_ratio_times_split": 0.7967479674796748
+    },
+    {
+      "symbol": "TWX",
+      "date": "2009-03-30",
+      "split_ratio": 0.33333333333333,
+      "raw_before": 8.43,
+      "raw_after": 18.23,
+      "adjusted_ratio": 0.7208382759984275,
+      "raw_ratio_times_split": 0.7208382759984112
+    },
+    {
+      "symbol": "TXMD",
+      "date": "2009-07-27",
+      "split_ratio": 3.0,
+      "raw_before": 4.5,
+      "raw_after": 1.5,
+      "adjusted_ratio": 1.0000000000000002,
+      "raw_ratio_times_split": 1.0
+    },
+    {
+      "symbol": "TXMD",
+      "date": "2011-09-29",
+      "split_ratio": 0.01,
+      "raw_before": 0.02,
+      "raw_after": 0.02,
+      "adjusted_ratio": 0.01,
+      "raw_ratio_times_split": 0.01
+    },
+    {
+      "symbol": "UAA",
+      "date": "2012-07-10",
+      "split_ratio": 2.0,
+      "raw_before": 92.29,
+      "raw_after": 46.93,
+      "adjusted_ratio": 1.0170115938888287,
+      "raw_ratio_times_split": 1.0170115938888287
+    },
+    {
+      "symbol": "UAA",
+      "date": "2014-04-15",
+      "split_ratio": 2.0,
+      "raw_before": 102.16,
+      "raw_after": 52.45,
+      "adjusted_ratio": 1.0268206734534064,
+      "raw_ratio_times_split": 1.0268206734534064
+    },
+    {
+      "symbol": "UAA",
+      "date": "2016-04-08",
+      "split_ratio": 2.0,
+      "raw_before": 85.97,
+      "raw_after": 43.54,
+      "adjusted_ratio": 1.0129114807490984,
+      "raw_ratio_times_split": 1.0129114807490984
+    },
+    {
+      "symbol": "UCBI",
+      "date": "2011-06-20",
+      "split_ratio": 0.2,
+      "raw_before": 2.04,
+      "raw_after": 10.25,
+      "adjusted_ratio": 1.0049019607843082,
+      "raw_ratio_times_split": 1.0049019607843137
+    },
+    {
+      "symbol": "UFI",
+      "date": "2010-11-04",
+      "split_ratio": 0.3333333333333333,
+      "raw_before": 4.79,
+      "raw_after": 14.95,
+      "adjusted_ratio": 1.0403618649965205,
+      "raw_ratio_times_split": 1.0403618649965205
+    },
+    {
+      "symbol": "UFPI",
+      "date": "2017-11-15",
+      "split_ratio": 3.0,
+      "raw_before": 110.01,
+      "raw_after": 36.88,
+      "adjusted_ratio": 1.0057267521134443,
+      "raw_ratio_times_split": 1.0057267521134443
+    },
+    {
+      "symbol": "UFS",
+      "date": "2009-06-11",
+      "split_ratio": 0.083333333333333,
+      "raw_before": 1.48,
+      "raw_after": 18.25,
+      "adjusted_ratio": 1.0275900900900865,
+      "raw_ratio_times_split": 1.0275900900900858
+    },
+    {
+      "symbol": "UFS",
+      "date": "2014-06-18",
+      "split_ratio": 2.0,
+      "raw_before": 86.93,
+      "raw_after": 43.88,
+      "adjusted_ratio": 1.0095479121131983,
+      "raw_ratio_times_split": 1.0095479121131945
+    },
+    {
+      "symbol": "UGI",
+      "date": "2014-09-08",
+      "split_ratio": 1.5,
+      "raw_before": 53.86,
+      "raw_after": 36.33,
+      "adjusted_ratio": 1.0117898254734639,
+      "raw_ratio_times_split": 1.0117898254734496
+    },
+    {
+      "symbol": "UHS",
+      "date": "2009-12-16",
+      "split_ratio": 2.0,
+      "raw_before": 60.18,
+      "raw_after": 31.18,
+      "adjusted_ratio": 1.036224659355243,
+      "raw_ratio_times_split": 1.0362246593552675
+    },
+    {
+      "symbol": "UIS",
+      "date": "2009-10-26",
+      "split_ratio": 0.1,
+      "raw_before": 2.62,
+      "raw_after": 27.17,
+      "adjusted_ratio": 1.0370229007633587,
+      "raw_ratio_times_split": 1.037022900763359
+    },
+    {
+      "symbol": "UNIS",
+      "date": "2016-05-13",
+      "split_ratio": 0.1,
+      "raw_before": 0.34,
+      "raw_after": 3.12,
+      "adjusted_ratio": 0.9176470588235294,
+      "raw_ratio_times_split": 0.9176470588235294
+    },
+    {
+      "symbol": "UNP",
+      "date": "2008-05-29",
+      "split_ratio": 2.0,
+      "raw_before": 157.58,
+      "raw_after": 80.35,
+      "adjusted_ratio": 1.0197994669374197,
+      "raw_ratio_times_split": 1.0197994669374284
+    },
+    {
+      "symbol": "UNP",
+      "date": "2014-06-09",
+      "split_ratio": 2.0,
+      "raw_before": 201.86,
+      "raw_after": 102.14,
+      "adjusted_ratio": 1.0119885068859698,
+      "raw_ratio_times_split": 1.0119885068859604
+    },
+    {
+      "symbol": "UNTD",
+      "date": "2013-11-01",
+      "split_ratio": 0.14285714285714285,
+      "raw_before": 8.65,
+      "raw_after": 12.991,
+      "adjusted_ratio": 1.1413647548181207,
+      "raw_ratio_times_split": 0.2145499587118084
+    },
+    {
+      "symbol": "UNXL",
+      "date": "2010-12-10",
+      "split_ratio": 0.06666666666666667,
+      "raw_before": 0.36,
+      "raw_after": 5.25,
+      "adjusted_ratio": 0.9722222222222223,
+      "raw_ratio_times_split": 0.9722222222222222
+    },
+    {
+      "symbol": "UPIP",
+      "date": "2016-01-06",
+      "split_ratio": 0.083333333333333,
+      "raw_before": 0.9,
+      "raw_after": 11.14,
+      "adjusted_ratio": 1.0314814814814814,
+      "raw_ratio_times_split": 1.0314814814814774
+    },
+    {
+      "symbol": "USNA",
+      "date": "2016-11-23",
+      "split_ratio": 2.0,
+      "raw_before": 125.45,
+      "raw_after": 62.9,
+      "adjusted_ratio": 1.0027899561578317,
+      "raw_ratio_times_split": 1.0027899561578317
+    },
+    {
+      "symbol": "USTR",
+      "date": "2011-06-01",
+      "split_ratio": 2.0,
+      "raw_before": 74.02,
+      "raw_after": 36.05,
+      "adjusted_ratio": 0.9740610645771413,
+      "raw_ratio_times_split": 0.9740610645771413
+    },
+    {
+      "symbol": "UTHR",
+      "date": "2009-09-23",
+      "split_ratio": 2.0,
+      "raw_before": 97.62,
+      "raw_after": 47.75,
+      "adjusted_ratio": 0.9782831387010859,
+      "raw_ratio_times_split": 0.9782831387010859
+    },
+    {
+      "symbol": "V",
+      "date": "2015-03-19",
+      "split_ratio": 4.0,
+      "raw_before": 267.67,
+      "raw_after": 66.81,
+      "adjusted_ratio": 0.9983935442896033,
+      "raw_ratio_times_split": 0.9983935442896104
+    },
+    {
+      "symbol": "VFC",
+      "date": "2013-12-23",
+      "split_ratio": 4.0,
+      "raw_before": 245.79,
+      "raw_after": 60.96,
+      "adjusted_ratio": 0.9920663981447555,
+      "raw_ratio_times_split": 0.9920663981447577
+    },
+    {
+      "symbol": "VGR",
+      "date": "2015-09-14",
+      "split_ratio": 1.05,
+      "raw_before": 23.96,
+      "raw_after": 22.53,
+      "adjusted_ratio": 1.0048622704507604,
+      "raw_ratio_times_split": 0.9873330550918198
+    },
+    {
+      "symbol": "VGR",
+      "date": "2016-09-19",
+      "split_ratio": 1.05,
+      "raw_before": 22.98,
+      "raw_after": 21.68,
+      "adjusted_ratio": 1.0088772845952716,
+      "raw_ratio_times_split": 0.9906005221932116
+    },
+    {
+      "symbol": "VGR",
+      "date": "2017-09-19",
+      "split_ratio": 1.05,
+      "raw_before": 22.01,
+      "raw_after": 20.47,
+      "adjusted_ratio": 0.9956156292594066,
+      "raw_ratio_times_split": 0.9765333939118581
+    },
+    {
+      "symbol": "VIAS",
+      "date": "2010-02-17",
+      "split_ratio": 0.084,
+      "raw_before": 2.19,
+      "raw_after": 21.99,
+      "adjusted_ratio": 1.10447011551984,
+      "raw_ratio_times_split": 0.8434520547945205
+    },
+    {
+      "symbol": "VICL",
+      "date": "2016-05-27",
+      "split_ratio": 0.1,
+      "raw_before": 0.38,
+      "raw_after": 4.02,
+      "adjusted_ratio": 1.0578947368421052,
+      "raw_ratio_times_split": 1.0578947368421052
+    },
+    {
+      "symbol": "VLGEA",
+      "date": "2009-01-23",
+      "split_ratio": 2.0,
+      "raw_before": 53.91,
+      "raw_after": 27.45,
+      "adjusted_ratio": 1.0183639398998416,
+      "raw_ratio_times_split": 1.0183639398998332
+    },
+    {
+      "symbol": "VMEM",
+      "date": "2016-07-06",
+      "split_ratio": 0.25,
+      "raw_before": 0.8474,
+      "raw_after": 2.95,
+      "adjusted_ratio": 0.8703091810243097,
+      "raw_ratio_times_split": 0.8703091810243097
+    },
+    {
+      "symbol": "VNCE",
+      "date": "2017-10-24",
+      "split_ratio": 0.1,
+      "raw_before": 0.45,
+      "raw_after": 4.4099,
+      "adjusted_ratio": 0.9799777777777778,
+      "raw_ratio_times_split": 0.979977777777778
+    },
+    {
+      "symbol": "VOD",
+      "date": "2014-02-24",
+      "split_ratio": 0.54545454545455,
+      "raw_before": 39.0,
+      "raw_after": 41.2,
+      "adjusted_ratio": 0.8190223776223781,
+      "raw_ratio_times_split": 0.576223776223781
+    },
+    {
+      "symbol": "VPFG",
+      "date": "2010-07-07",
+      "split_ratio": 1.4,
+      "raw_before": 13.39,
+      "raw_after": 9.5,
+      "adjusted_ratio": 0.9932785660940929,
+      "raw_ratio_times_split": 0.9932785660940999
+    },
+    {
+      "symbol": "VRNG",
+      "date": "2015-11-30",
+      "split_ratio": 0.1,
+      "raw_before": 0.3122,
+      "raw_after": 3.36,
+      "adjusted_ratio": 1.0762331838565022,
+      "raw_ratio_times_split": 1.0762331838565025
+    },
+    {
+      "symbol": "VSEC",
+      "date": "2016-08-04",
+      "split_ratio": 2.0,
+      "raw_before": 64.4,
+      "raw_after": 33.04,
+      "adjusted_ratio": 1.0260869565217403,
+      "raw_ratio_times_split": 1.026086956521739
+    },
+    {
+      "symbol": "VTNR",
+      "date": "2009-05-04",
+      "split_ratio": 0.1,
+      "raw_before": 0.05,
+      "raw_after": 0.51,
+      "adjusted_ratio": 1.02,
+      "raw_ratio_times_split": 1.02
+    },
+    {
+      "symbol": "VTSS",
+      "date": "2010-07-02",
+      "split_ratio": 0.05,
+      "raw_before": 0.25,
+      "raw_after": 5.0,
+      "adjusted_ratio": 1.0,
+      "raw_ratio_times_split": 1.0
+    },
+    {
+      "symbol": "WAB",
+      "date": "2013-06-12",
+      "split_ratio": 2.0,
+      "raw_before": 109.91,
+      "raw_after": 53.42,
+      "adjusted_ratio": 0.9720680556819212,
+      "raw_ratio_times_split": 0.9720680556819217
+    },
+    {
+      "symbol": "WAC",
+      "date": "2009-04-23",
+      "split_ratio": 0.02,
+      "raw_before": 0.14,
+      "raw_after": 5.9,
+      "adjusted_ratio": 0.842857142857143,
+      "raw_ratio_times_split": 0.8428571428571427
+    },
+    {
+      "symbol": "WCN",
+      "date": "2010-11-15",
+      "split_ratio": 1.5,
+      "raw_before": 39.27,
+      "raw_after": 25.98,
+      "adjusted_ratio": 0.9923605805958934,
+      "raw_ratio_times_split": 0.9923605805958747
+    },
+    {
+      "symbol": "WCN",
+      "date": "2016-06-01",
+      "split_ratio": 0.48148148148148,
+      "raw_before": 65.47,
+      "raw_after": 67.18,
+      "adjusted_ratio": 0.4940572159145571,
+      "raw_ratio_times_split": 0.49405721591455376
+    },
+    {
+      "symbol": "WCN",
+      "date": "2017-06-19",
+      "split_ratio": 1.5,
+      "raw_before": 100.17,
+      "raw_after": 65.71,
+      "adjusted_ratio": 0.9839772386942192,
+      "raw_ratio_times_split": 0.9839772386942197
+    },
+    {
+      "symbol": "WEC",
+      "date": "2011-03-02",
+      "split_ratio": 2.0,
+      "raw_before": 58.64,
+      "raw_after": 29.08,
+      "adjusted_ratio": 0.9918144611186728,
+      "raw_ratio_times_split": 0.9918144611186902
+    },
+    {
+      "symbol": "WFM",
+      "date": "2013-05-30",
+      "split_ratio": 2.0,
+      "raw_before": 105.41,
+      "raw_after": 53.17,
+      "adjusted_ratio": 1.0088226923441894,
+      "raw_ratio_times_split": 1.0088226923441799
+    },
+    {
+      "symbol": "WIN",
+      "date": "2015-04-27",
+      "split_ratio": 0.16666666666666666,
+      "raw_before": 7.83,
+      "raw_after": 10.61,
+      "adjusted_ratio": 0.9163927762449201,
+      "raw_ratio_times_split": 0.22584078331204765
+    },
+    {
+      "symbol": "WLK",
+      "date": "2014-03-19",
+      "split_ratio": 2.0,
+      "raw_before": 135.16,
+      "raw_after": 66.88,
+      "adjusted_ratio": 0.9896419058893177,
+      "raw_ratio_times_split": 0.9896419058893163
+    },
+    {
+      "symbol": "WLL",
+      "date": "2011-02-23",
+      "split_ratio": 2.0,
+      "raw_before": 123.91,
+      "raw_after": 63.51,
+      "adjusted_ratio": 1.0250988620773143,
+      "raw_ratio_times_split": 1.0250988620773143
+    },
+    {
+      "symbol": "WLL",
+      "date": "2017-11-09",
+      "split_ratio": 0.25,
+      "raw_before": 7.0,
+      "raw_after": 27.9,
+      "adjusted_ratio": 0.9964285714285713,
+      "raw_ratio_times_split": 0.9964285714285713
+    },
+    {
+      "symbol": "WSBF",
+      "date": "2014-01-23",
+      "split_ratio": 1.097,
+      "raw_before": 11.73,
+      "raw_after": 10.66,
+      "adjusted_ratio": 0.9969326513213903,
+      "raw_ratio_times_split": 0.9969326513213981
+    },
+    {
+      "symbol": "WSFS",
+      "date": "2015-05-19",
+      "split_ratio": 3.0,
+      "raw_before": 75.59,
+      "raw_after": 25.23,
+      "adjusted_ratio": 1.0013229263130008,
+      "raw_ratio_times_split": 1.0013229263130043
+    },
+    {
+      "symbol": "WST",
+      "date": "2013-09-27",
+      "split_ratio": 2.0,
+      "raw_before": 81.2,
+      "raw_after": 40.93,
+      "adjusted_ratio": 1.008128078817727,
+      "raw_ratio_times_split": 1.008128078817734
+    },
+    {
+      "symbol": "WSTL",
+      "date": "2017-06-08",
+      "split_ratio": 0.25,
+      "raw_before": 0.7299,
+      "raw_after": 2.93,
+      "adjusted_ratio": 1.0035621317988765,
+      "raw_ratio_times_split": 1.0035621317988765
+    },
+    {
+      "symbol": "WTM",
+      "date": "2017-04-19",
+      "split_ratio": 0.125,
+      "raw_before": 869.69,
+      "raw_after": 864.53,
+      "adjusted_ratio": 0.12425835642585288,
+      "raw_ratio_times_split": 0.12425835642585288
+    },
+    {
+      "symbol": "WTR",
+      "date": "2013-09-03",
+      "split_ratio": 1.25,
+      "raw_before": 30.37,
+      "raw_after": 24.5,
+      "adjusted_ratio": 1.0083964438590831,
+      "raw_ratio_times_split": 1.0083964438590716
+    },
+    {
+      "symbol": "WWD",
+      "date": "2008-02-15",
+      "split_ratio": 2.0,
+      "raw_before": 63.07,
+      "raw_after": 31.84,
+      "adjusted_ratio": 1.0096717932456,
+      "raw_ratio_times_split": 1.0096717932456
+    },
+    {
+      "symbol": "WWW",
+      "date": "2013-11-04",
+      "split_ratio": 2.0,
+      "raw_before": 58.6,
+      "raw_after": 29.64,
+      "adjusted_ratio": 1.0116040955631165,
+      "raw_ratio_times_split": 1.01160409556314
+    },
+    {
+      "symbol": "XCO",
+      "date": "2017-06-13",
+      "split_ratio": 0.066666666666667,
+      "raw_before": 0.3233,
+      "raw_after": 4.77,
+      "adjusted_ratio": 0.9836065573770492,
+      "raw_ratio_times_split": 0.983606557377054
+    },
+    {
+      "symbol": "XCRA",
+      "date": "2010-10-01",
+      "split_ratio": 0.3333333333333333,
+      "raw_before": 2.09,
+      "raw_after": 6.41,
+      "adjusted_ratio": 1.0223285486443383,
+      "raw_ratio_times_split": 1.022328548644338
+    },
+    {
+      "symbol": "XOMA",
+      "date": "2010-08-18",
+      "split_ratio": 0.06666666666666667,
+      "raw_before": 0.2814,
+      "raw_after": 3.65,
+      "adjusted_ratio": 0.8647239990523572,
+      "raw_ratio_times_split": 0.8647239990523573
+    },
+    {
+      "symbol": "XOMA",
+      "date": "2016-10-18",
+      "split_ratio": 0.05,
+      "raw_before": 0.3518,
+      "raw_after": 6.24,
+      "adjusted_ratio": 0.8868675383740763,
+      "raw_ratio_times_split": 0.8868675383740762
+    },
+    {
+      "symbol": "XPO",
+      "date": "2011-09-02",
+      "split_ratio": 0.25,
+      "raw_before": 3.09,
+      "raw_after": 12.1,
+      "adjusted_ratio": 0.9789644012944984,
+      "raw_ratio_times_split": 0.9789644012944984
+    },
+    {
+      "symbol": "XRM",
+      "date": "2010-05-26",
+      "split_ratio": 0.05,
+      "raw_before": 1.0,
+      "raw_after": 15.85,
+      "adjusted_ratio": 0.7925,
+      "raw_ratio_times_split": 0.7925
+    },
+    {
+      "symbol": "XRX",
+      "date": "2017-06-15",
+      "split_ratio": 0.25,
+      "raw_before": 6.93,
+      "raw_after": 27.79,
+      "adjusted_ratio": 1.0025252525252801,
+      "raw_ratio_times_split": 1.0025252525252526
+    },
+    {
+      "symbol": "YRCW",
+      "date": "2010-10-01",
+      "split_ratio": 0.04,
+      "raw_before": 0.25,
+      "raw_after": 5.39,
+      "adjusted_ratio": 0.8624,
+      "raw_ratio_times_split": 0.8623999999999999
+    },
+    {
+      "symbol": "YRCW",
+      "date": "2011-12-02",
+      "split_ratio": 0.0033333333333333335,
+      "raw_before": 0.0324,
+      "raw_after": 12.78,
+      "adjusted_ratio": 1.3148148148148149,
+      "raw_ratio_times_split": 1.3148148148148149
+    },
+    {
+      "symbol": "ZAZA",
+      "date": "2014-08-20",
+      "split_ratio": 0.1,
+      "raw_before": 0.73,
+      "raw_after": 6.74,
+      "adjusted_ratio": 0.9232876712328768,
+      "raw_ratio_times_split": 0.9232876712328768
+    },
+    {
+      "symbol": "ZGNX",
+      "date": "2015-07-01",
+      "split_ratio": 0.125,
+      "raw_before": 1.68,
+      "raw_after": 13.96,
+      "adjusted_ratio": 1.0386904761904763,
+      "raw_ratio_times_split": 1.0386904761904763
+    }
+  ],
+  "corporate_action_rows": 55444,
+  "raw_unit_evidence": "https://investor.apple.com/investor-relations/faq/default.aspx"
+}

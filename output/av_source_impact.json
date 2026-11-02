@@ -1,0 +1,803 @@
+{
+  "scope": "B source/return changes only; both scenarios use identical legacy floor predicate",
+  "snapshot_stamp": [
+    406511,
+    "2026-11-02 03:40:00.337201+00",
+    849,
+    143629,
+    837,
+    "16202398.350944811063187142"
+  ],
+  "proposed": [
+    [
+      "ALXN",
+      "alphavantage",
+      "total_return"
+    ],
+    [
+      "HES",
+      "alphavantage",
+      "total_return"
+    ],
+    [
+      "XLNX",
+      "alphavantage",
+      "total_return"
+    ]
+  ],
+  "issuer_evidence": {
+    "HES": "https://www.sec.gov/Archives/edgar/data/93410/000095014225001949/eh250652625_8k.htm",
+    "ALXN": "https://www.astrazeneca.com/media-centre/press-releases/2021/acquisition-of-alexion-completed.html",
+    "XLNX": "https://www.amd.com/en/newsroom/press-releases/2022-2-14-amd-completes-acquisition-of-xilinx.html"
+  },
+  "old_sources_retained": true,
+  "locks_and_published_baseline_changed": false,
+  "replacement_ranges": {
+    "ALXN": [
+      "2008-01",
+      "2021-07",
+      163
+    ],
+    "HES": [
+      "2008-01",
+      "2025-06",
+      210
+    ],
+    "XLNX": [
+      "2008-01",
+      "2022-01",
+      169
+    ]
+  },
+  "before": [
+    {
+      "year": 2010,
+      "holdings": [
+        [
+          "XL",
+          0.3333
+        ],
+        [
+          "PXD",
+          0.3333
+        ],
+        [
+          "COG",
+          0.3334
+        ]
+      ],
+      "return": 0.29481784067032324,
+      "drawdown": -0.09785648423878934
+    },
+    {
+      "year": 2011,
+      "holdings": [
+        [
+          "WFM",
+          0.3333
+        ],
+        [
+          "HES",
+          0.3333
+        ],
+        [
+          "XL",
+          0.3334
+        ]
+      ],
+      "return": 0.008177119641534114,
+      "drawdown": -0.19907000817196696
+    },
+    {
+      "year": 2012,
+      "holdings": [
+        [
+          "COG",
+          0.3333
+        ],
+        [
+          "ISRG",
+          0.3333
+        ],
+        [
+          "MA",
+          0.3334
+        ]
+      ],
+      "return": 0.23012509452370233,
+      "drawdown": -0.09158520977923934
+    },
+    {
+      "year": 2013,
+      "holdings": [
+        [
+          "PHM",
+          0.3
+        ],
+        [
+          "WHR",
+          0.3
+        ],
+        [
+          "BAC",
+          0.4
+        ]
+      ],
+      "return": 0.3486620979277808,
+      "drawdown": -0.09140922760376524
+    },
+    {
+      "year": 2014,
+      "holdings": [
+        [
+          "NFLX",
+          0.3333
+        ],
+        [
+          "BBY",
+          0.3333
+        ],
+        [
+          "MU",
+          0.3334
+        ]
+      ],
+      "return": 0.17946535361192595,
+      "drawdown": -0.09645779674175547
+    },
+    {
+      "year": 2015,
+      "holdings": [
+        [
+          "LUV",
+          0.3
+        ],
+        [
+          "EW",
+          0.4
+        ],
+        [
+          "DAL",
+          0.3
+        ]
+      ],
+      "return": 0.1154824357369082,
+      "drawdown": -0.09877473383555091
+    },
+    {
+      "year": 2016,
+      "holdings": [
+        [
+          "NFLX",
+          0.3333
+        ],
+        [
+          "AMZN",
+          0.3333
+        ],
+        [
+          "CVC",
+          0.3334
+        ]
+      ],
+      "return_status": "missing_actual_holding_months",
+      "missing_holding_months": [
+        {
+          "symbol": "CVC",
+          "month": "2016-07"
+        },
+        {
+          "symbol": "CVC",
+          "month": "2016-08"
+        },
+        {
+          "symbol": "CVC",
+          "month": "2016-09"
+        },
+        {
+          "symbol": "CVC",
+          "month": "2016-10"
+        },
+        {
+          "symbol": "CVC",
+          "month": "2016-11"
+        },
+        {
+          "symbol": "CVC",
+          "month": "2016-12"
+        }
+      ]
+    },
+    {
+      "year": 2017,
+      "holdings": [
+        [
+          "OKE",
+          0.4
+        ],
+        [
+          "FCX",
+          0.3
+        ],
+        [
+          "NEM",
+          0.3
+        ]
+      ],
+      "return": 0.15549004991479198,
+      "drawdown": -0.1564046717213784
+    },
+    {
+      "year": 2018,
+      "holdings": [
+        [
+          "NRG",
+          0.3333
+        ],
+        [
+          "VRTX",
+          0.3333
+        ],
+        [
+          "WYNN",
+          0.3334
+        ]
+      ],
+      "return": 0.03324283142631468,
+      "drawdown": -0.11532806992804456
+    },
+    {
+      "year": 2019,
+      "holdings": [
+        [
+          "AMD",
+          0.3333
+        ],
+        [
+          "AAP",
+          0.3333
+        ],
+        [
+          "CMG",
+          0.3334
+        ]
+      ],
+      "return": 0.8139086017720873,
+      "drawdown": -0.035893613294794124
+    },
+    {
+      "year": 2020,
+      "holdings": [
+        [
+          "AMD",
+          0.3
+        ],
+        [
+          "LRCX",
+          0.3
+        ],
+        [
+          "TGT",
+          0.4
+        ]
+      ],
+      "return": 0.6543638213025473,
+      "drawdown": -0.16306452069459954
+    },
+    {
+      "year": 2021,
+      "holdings": [
+        [
+          "LB",
+          0.3333
+        ],
+        [
+          "NVDA",
+          0.3333
+        ],
+        [
+          "PYPL",
+          0.3334
+        ]
+      ],
+      "return_status": "missing_actual_holding_months",
+      "missing_holding_months": [
+        {
+          "symbol": "LB",
+          "month": "2021-08"
+        },
+        {
+          "symbol": "LB",
+          "month": "2021-09"
+        },
+        {
+          "symbol": "LB",
+          "month": "2021-10"
+        },
+        {
+          "symbol": "LB",
+          "month": "2021-11"
+        },
+        {
+          "symbol": "LB",
+          "month": "2021-12"
+        }
+      ]
+    },
+    {
+      "year": 2022,
+      "holdings": [
+        [
+          "DVN",
+          0.3333
+        ],
+        [
+          "FTNT",
+          0.3333
+        ],
+        [
+          "F",
+          0.3334
+        ]
+      ],
+      "return": -0.07770110579758194,
+      "drawdown": -0.18396290129030035
+    },
+    {
+      "year": 2023,
+      "holdings": [
+        [
+          "OXY",
+          0.3
+        ],
+        [
+          "HES",
+          0.3
+        ],
+        [
+          "CAH",
+          0.4
+        ]
+      ],
+      "return": 0.12930740669793117,
+      "drawdown": -0.06845833529944423
+    },
+    {
+      "year": 2024,
+      "holdings": [
+        [
+          "NVDA",
+          0.3333
+        ],
+        [
+          "META",
+          0.3333
+        ],
+        [
+          "RCL",
+          0.3334
+        ]
+      ],
+      "return": 1.0542444734784642,
+      "drawdown": -0.05425505862156599
+    },
+    {
+      "year": 2025,
+      "holdings": [
+        [
+          "NVDA",
+          0.4
+        ],
+        [
+          "UAL",
+          0.3
+        ],
+        [
+          "AXON",
+          0.3
+        ]
+      ],
+      "return": 0.1878239403632933,
+      "drawdown": -0.20927578056234875
+    },
+    {
+      "year": 2026,
+      "holdings": [
+        [
+          "WDC",
+          0.3
+        ],
+        [
+          "MU",
+          0.3
+        ],
+        [
+          "NEM",
+          0.4
+        ]
+      ]
+    }
+  ],
+  "after": [
+    {
+      "year": 2010,
+      "holdings": [
+        [
+          "XL",
+          0.3333
+        ],
+        [
+          "PXD",
+          0.3333
+        ],
+        [
+          "COG",
+          0.3334
+        ]
+      ],
+      "return": 0.29481784067032324,
+      "drawdown": -0.09785648423878934
+    },
+    {
+      "year": 2011,
+      "holdings": [
+        [
+          "WFM",
+          0.3333
+        ],
+        [
+          "HES",
+          0.3333
+        ],
+        [
+          "XL",
+          0.3334
+        ]
+      ],
+      "return": 0.009342411168774767,
+      "drawdown": -0.19856353800676974
+    },
+    {
+      "year": 2012,
+      "holdings": [
+        [
+          "COG",
+          0.3333
+        ],
+        [
+          "ISRG",
+          0.3333
+        ],
+        [
+          "MA",
+          0.3334
+        ]
+      ],
+      "return": 0.23012509452370233,
+      "drawdown": -0.09158520977923934
+    },
+    {
+      "year": 2013,
+      "holdings": [
+        [
+          "PHM",
+          0.3
+        ],
+        [
+          "WHR",
+          0.3
+        ],
+        [
+          "BAC",
+          0.4
+        ]
+      ],
+      "return": 0.3486620979277808,
+      "drawdown": -0.09140922760376524
+    },
+    {
+      "year": 2014,
+      "holdings": [
+        [
+          "NFLX",
+          0.3333
+        ],
+        [
+          "BBY",
+          0.3333
+        ],
+        [
+          "MU",
+          0.3334
+        ]
+      ],
+      "return": 0.17946535361192595,
+      "drawdown": -0.09645779674175547
+    },
+    {
+      "year": 2015,
+      "holdings": [
+        [
+          "LUV",
+          0.3
+        ],
+        [
+          "EW",
+          0.4
+        ],
+        [
+          "DAL",
+          0.3
+        ]
+      ],
+      "return": 0.1154824357369082,
+      "drawdown": -0.09877473383555091
+    },
+    {
+      "year": 2016,
+      "holdings": [
+        [
+          "NFLX",
+          0.3333
+        ],
+        [
+          "AMZN",
+          0.3333
+        ],
+        [
+          "CVC",
+          0.3334
+        ]
+      ],
+      "return_status": "missing_actual_holding_months",
+      "missing_holding_months": [
+        {
+          "symbol": "CVC",
+          "month": "2016-07"
+        },
+        {
+          "symbol": "CVC",
+          "month": "2016-08"
+        },
+        {
+          "symbol": "CVC",
+          "month": "2016-09"
+        },
+        {
+          "symbol": "CVC",
+          "month": "2016-10"
+        },
+        {
+          "symbol": "CVC",
+          "month": "2016-11"
+        },
+        {
+          "symbol": "CVC",
+          "month": "2016-12"
+        }
+      ]
+    },
+    {
+      "year": 2017,
+      "holdings": [
+        [
+          "OKE",
+          0.4
+        ],
+        [
+          "FCX",
+          0.3
+        ],
+        [
+          "NEM",
+          0.3
+        ]
+      ],
+      "return": 0.15549004991479198,
+      "drawdown": -0.1564046717213784
+    },
+    {
+      "year": 2018,
+      "holdings": [
+        [
+          "NRG",
+          0.3333
+        ],
+        [
+          "VRTX",
+          0.3333
+        ],
+        [
+          "WYNN",
+          0.3334
+        ]
+      ],
+      "return": 0.03324283142631468,
+      "drawdown": -0.11532806992804456
+    },
+    {
+      "year": 2019,
+      "holdings": [
+        [
+          "AMD",
+          0.3333
+        ],
+        [
+          "AAP",
+          0.3333
+        ],
+        [
+          "CMG",
+          0.3334
+        ]
+      ],
+      "return": 0.8139086017720873,
+      "drawdown": -0.035893613294794124
+    },
+    {
+      "year": 2020,
+      "holdings": [
+        [
+          "AMD",
+          0.3
+        ],
+        [
+          "LRCX",
+          0.3
+        ],
+        [
+          "TGT",
+          0.4
+        ]
+      ],
+      "return": 0.6543638213025473,
+      "drawdown": -0.16306452069459954
+    },
+    {
+      "year": 2021,
+      "holdings": [
+        [
+          "LB",
+          0.3333
+        ],
+        [
+          "NVDA",
+          0.3333
+        ],
+        [
+          "PYPL",
+          0.3334
+        ]
+      ],
+      "return_status": "missing_actual_holding_months",
+      "missing_holding_months": [
+        {
+          "symbol": "LB",
+          "month": "2021-08"
+        },
+        {
+          "symbol": "LB",
+          "month": "2021-09"
+        },
+        {
+          "symbol": "LB",
+          "month": "2021-10"
+        },
+        {
+          "symbol": "LB",
+          "month": "2021-11"
+        },
+        {
+          "symbol": "LB",
+          "month": "2021-12"
+        }
+      ]
+    },
+    {
+      "year": 2022,
+      "holdings": [
+        [
+          "DVN",
+          0.3333
+        ],
+        [
+          "FTNT",
+          0.3333
+        ],
+        [
+          "F",
+          0.3334
+        ]
+      ],
+      "return": -0.07770110579758194,
+      "drawdown": -0.18396290129030035
+    },
+    {
+      "year": 2023,
+      "holdings": [
+        [
+          "OXY",
+          0.3
+        ],
+        [
+          "HES",
+          0.3
+        ],
+        [
+          "CAH",
+          0.4
+        ]
+      ],
+      "return": 0.1331041200234342,
+      "drawdown": -0.06845835620689644
+    },
+    {
+      "year": 2024,
+      "holdings": [
+        [
+          "NVDA",
+          0.3333
+        ],
+        [
+          "META",
+          0.3333
+        ],
+        [
+          "RCL",
+          0.3334
+        ]
+      ],
+      "return": 1.0542444734784642,
+      "drawdown": -0.05425505862156599
+    },
+    {
+      "year": 2025,
+      "holdings": [
+        [
+          "NVDA",
+          0.4
+        ],
+        [
+          "UAL",
+          0.3
+        ],
+        [
+          "AXON",
+          0.3
+        ]
+      ],
+      "return": 0.1878239403632933,
+      "drawdown": -0.20927578056234875
+    },
+    {
+      "year": 2026,
+      "holdings": [
+        [
+          "WDC",
+          0.3
+        ],
+        [
+          "MU",
+          0.3
+        ],
+        [
+          "NEM",
+          0.4
+        ]
+      ]
+    }
+  ],
+  "holding_changes": [],
+  "return_changes": [
+    {
+      "year": 2011,
+      "before": 0.008177119641534114,
+      "after": 0.009342411168774767
+    },
+    {
+      "year": 2023,
+      "before": 0.12930740669793117,
+      "after": 0.1331041200234342
+    }
+  ]
+}

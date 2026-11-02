@@ -1,0 +1,14 @@
+{
+  "audited_at": "2026-11-02T04:55:07.822885+00:00",
+  "write": false,
+  "mismatches_before": [],
+  "corrected_symbols": [],
+  "remaining": [],
+  "selected_price_fingerprint_unchanged": [
+    143649,
+    "16111566.971344811063187142",
+    "17157422.029272631957556832"
+  ],
+  "baseline_b_sha256": "20c0680276cf79cbb06d8aaab35c3e40cde010447f6e15e75abd95ff0ef33c90",
+  "price_rows_sources_locks_and_baselines_changed": false
+}

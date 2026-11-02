@@ -60,13 +60,15 @@ def _reason_text(ratio, cov):
         if dl is not None and miss:
             share = 100.0 * dl / miss
             if share >= 50:
-                tail += "（%.0f%% 为退市票，仅 Alpha Vantage 有数据）" % share
+                tail += "（%.0f%% 为退市票，历史数据仍待核验）" % share
     return head + " · " + tail
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dataset", default="")
+    ap.add_argument("--data-only", action="store_true",
+                    help="只验收实时数据库；发布产物由完整模式验收")
     a = ap.parse_args()
     # DB 仅用于写台账；CI 无口令时仍可完成校验（数据走 db_prices）
     try:
@@ -78,7 +80,7 @@ def main():
 
     # ---------- A 覆盖（数据来源：db_prices，DB 或 REST 均可）----------
     import db_prices as _dbp
-    _all = _dbp.load_all()
+    _all = _dbp.load_all(use_cache=False)
     nrows = sum(len(d) for d in _all.values())
     syms = len(_all)
     # 全收益行数：用 series_selected 的口径近似——按 basis 无法从 load_all 得到，
@@ -96,9 +98,10 @@ def main():
             _tr_ratio = _t / max(1, _n)
         _c.close()
     except Exception:
-        _tr_ratio = 0.775      # CI 无写权限时的已知值（由采集侧维护）
-    rec("全收益行占比", "pass" if _tr_ratio >= 0.999 else "warn",
-        "%.1f%%（目标 100%%）" % (100 * _tr_ratio))
+        rec("全收益口径读取", "fail", "无法读取实时口径，禁止使用固定覆盖率")
+    if _tr_ratio is not None:
+        rec("全收益行占比", "pass" if _tr_ratio >= 0.999 else "warn",
+            "%.1f%%（目标 100%%）" % (100 * _tr_ratio))
     for y in YEARS:
         have = dec_counts.get(y, 0)
         rec("%d-12 有数据标的" % y, "pass" if have >= 480 else "warn", "%d 只" % have)
@@ -133,29 +136,31 @@ def main():
             rec("抽查 %s %s→%s" % (ticker, m0, m1), "fail", "缺数据")
 
     # ---------- C 产物一致 ----------
-    try:
-        e = json.load(open(os.path.join(BASE, "docs/data/b/equity.json"), encoding="utf-8"))
-        s = json.load(open(os.path.join(BASE, "docs/data/b/signal.json"), encoding="utf-8"))
-        same = sorted(p["ticker"] for p in e["position"]) == sorted(
-            x["ticker"] for x in s["official"])
-        rec("signal 与 equity 持仓一致", "pass" if same else "fail", str(
-            [p["ticker"] for p in e["position"]]))
-        h = json.load(open(os.path.join(BASE, "docs/data/b/strategy_history.json"), encoding="utf-8"))
-        cv = json.load(open(os.path.join(BASE, "docs/data/b/curve.json"), encoding="utf-8"))
-        comp = 1.0
-        for r in h["years"]:
-            comp *= (1 + r["ret"])
-        rec("逐年复利 == 累计", "pass" if abs(comp - (1 + h["summary"]["total"])) < 0.02 else "fail",
-            "%.4f vs %.4f" % (comp, 1 + h["summary"]["total"]))
-        rec("曲线末点 == 累计", "pass" if abs(cv["points"][-1]["s"] - comp) < 0.05 else "fail",
-            "%.4f vs %.4f" % (cv["points"][-1]["s"], comp))
-    except Exception as ex:
-        rec("产物读取", "fail", str(ex)[:80])
+    if not a.data_only:
+        try:
+            e = json.load(open(os.path.join(BASE, "docs/data/b/equity.json"), encoding="utf-8"))
+            s = json.load(open(os.path.join(BASE, "docs/data/b/signal.json"), encoding="utf-8"))
+            same = sorted(p["ticker"] for p in e["position"]) == sorted(
+                x["ticker"] for x in s["official"])
+            rec("signal 与 equity 持仓一致", "pass" if same else "fail", str(
+                [p["ticker"] for p in e["position"]]))
+            h = json.load(open(os.path.join(BASE, "docs/data/b/strategy_history.json"), encoding="utf-8"))
+            cv = json.load(open(os.path.join(BASE, "docs/data/b/curve.json"), encoding="utf-8"))
+            comp = 1.0
+            for r in h["years"]:
+                comp *= (1 + r["ret"])
+            rec("逐年复利 == 累计", "pass" if abs(comp - (1 + h["summary"]["total"])) < 0.02 else "fail",
+                "%.4f vs %.4f" % (comp, 1 + h["summary"]["total"]))
+            rec("曲线末点 == 累计", "pass" if abs(cv["points"][-1]["s"] - comp) < 0.05 else "fail",
+                "%.4f vs %.4f" % (cv["points"][-1]["s"], comp))
+        except Exception as ex:
+            rec("产物读取", "fail", str(ex)[:80])
 
     # ---------- D 锁定就绪 ----------
-    ready = all(r[1] == "pass" for r in ROWS) and (_tr_ratio or 0) >= 1.0
-    rec("锁定就绪（100% 全收益 + 全检查通过）", "pass" if ready else "warn",
-        "全收益 %.1f%%" % (100.0 * (_tr_ratio or 0)))
+    if not a.data_only:
+        ready = all(r[1] == "pass" for r in ROWS) and (_tr_ratio or 0) >= 1.0
+        rec("锁定就绪（100% 全收益 + 全检查通过）", "pass" if ready else "warn",
+            "全收益 %.1f%%" % (100.0 * (_tr_ratio or 0)))
 
     # ---------- 覆盖率明细（供页面显示进度）----------
     coverage_detail = {}
@@ -199,7 +204,7 @@ def main():
         import json as _json
         _q = {
             "generated_at": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "total_return_ratio": round(_tr_ratio or 0, 4),
+            "total_return_ratio": round(_tr_ratio, 4) if _tr_ratio is not None else None,
             "degraded": (_tr_ratio or 0) < 0.999,
             "reason": _reason_text(_tr_ratio or 0, coverage_detail),
             "checks": [{"name": n, "status": st, "detail": d} for n, st, d in ROWS],

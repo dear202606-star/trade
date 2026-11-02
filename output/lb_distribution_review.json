@@ -1,0 +1,61 @@
+{
+  "scope": "old LB native-price proof plus sensitivity; no return-price or baseline writes",
+  "producer": "lb_distribution",
+  "symbol": "LB",
+  "hold_year": 2021,
+  "event_date": "2021-08-03",
+  "same_common_equity_tickers": [
+    "LB",
+    "BBWI"
+  ],
+  "consideration": {
+    "cash_per_old_share": 0,
+    "successor_shares": {
+      "BBWI": 1,
+      "VSCO": 0.3333333333333333
+    }
+  },
+  "issuer_terms": "https://www.sec.gov/Archives/edgar/data/701985/000114036121026658/nt10026698x7_8k.htm",
+  "native_open_anchors_source": "https://bbwinc.gcs-web.com/static-files/b771f363-3863-4b55-b2ef-2d1e6dee794e",
+  "child_no_cash_dividends_source": "https://www.sec.gov/Archives/edgar/data/1856437/000185643726000004/vsco-20260131.htm",
+  "archive_sha256": "c8a562dfe260afa595c5e9fdb570e79350125204c6bfa3217d7bb9b6280f38d6",
+  "child_daily_sha256": "1e07fde0101efb3f9eeb2509bbf6d5dc42d1ea0789a392838166b5f9bc4cf304",
+  "child_independent_source": "https://www.digrin.com/stocks/detail/VSCO/price",
+  "child_independent_html_sha256": "4f397818408e71729638da2c499a0122a3bfb1d5380f0d188013049463023578",
+  "child_independently_matched_holding_months": {
+    "2021-12": 55.54,
+    "2021-11": 54.28,
+    "2021-10": 50.47,
+    "2021-09": 55.26,
+    "2021-08": 66.3
+  },
+  "native_overlap_months": 122,
+  "native_median_relative_deviation": 1.6347691311757728e-07,
+  "native_max_relative_deviation": 6.088105866108862e-07,
+  "native_2020_12": 37.190001859731375,
+  "parent_provider_adjusted_2021_return": 1.3370328921978878,
+  "holding_event_policy": "cash_and_all_successor_shares",
+  "retained_monthly_values": {
+    "2021-01": 1.0959935727074583,
+    "2021-02": 1.4697497827180823,
+    "2021-03": 1.6633503228786746,
+    "2021-04": 1.7719818752412007,
+    "2021-05": 1.8787308545477153,
+    "2021-06": 1.9418904718738301,
+    "2021-07": 2.157746221163033,
+    "2021-08": 2.418624337020094,
+    "2021-09": 2.1992314330344014,
+    "2021-10": 2.319923585124097,
+    "2021-11": 2.5214165612994988,
+    "2021-12": 2.388176489076337
+  },
+  "retain_both_components_2021_illustration": 1.3881764890763368,
+  "illustration_limits": [
+    "continuous fractional holdings, zero fees/tax as in existing theoretical weights",
+    "ordinary dividends follow component provider-adjusted-return convention",
+    "child proof restricted to 2021-08 through 2021-12; pre-IPO and later renamed-ticker quotes excluded",
+    "event value is a holding value, not a tradable original-ticker quote"
+  ],
+  "native_write": false,
+  "native_stored_rows": 0
+}

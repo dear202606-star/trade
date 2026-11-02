@@ -3,7 +3,7 @@
 
 对比：
   口径 A（现有）排名日时点成分  —— 含年中新纳入的票（如 LITE 2026-03 才入指）
-  口径 B（本脚本）全年成分       —— 要求 start_date ≤ 上年 1/1 且 end_date ≥ 上年 12/31
+  口径 B（本脚本）全年成分       —— 同一证券连续覆盖上一整年，已核验同股更名使用年末代码
 
 产出（与 A 同结构，前端可原样渲染）：
   docs/data/b/strategy_history.json   逐年回测
@@ -19,6 +19,10 @@ import sys
 
 import datafeed
 import db_prices
+import nominal_prices
+import holding_paths
+import security_membership
+from holding_consideration import POLICY
 import sys as _sys
 try:                                    # Windows cp936 下避免 emoji 打印崩溃
     _sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -33,6 +37,7 @@ TOPN = 3
 SECTOR_CAP = 0.60
 MIN_PRICE = 5.0
 MAX_ABS_RET12 = 5.0    # |12 个月涨幅| > 500% 视为价格异常
+_REFERENCE_INPUT = None
 
 
 def _db_sha():
@@ -59,20 +64,22 @@ def _db_sha():
 
 
 def _input_sha():
-    """冻结输入 + 数据库价格版本戳 的联合哈希（真正覆盖价格输入）"""
+    """实际在线成分/行业快照、价格、原价和事件证据的联合哈希。"""
     import hashlib
+    global _REFERENCE_INPUT
     h = hashlib.sha256()
-    for f in ("members_frozen.csv", "sector_frozen.json"):
-        p = os.path.join(BASE, "static", f)
-        if os.path.exists(p):
-            with open(p, "rb") as fh:
-                while True:
-                    chunk = fh.read(1 << 20)
-                    if not chunk:
-                        break
-                    h.update(chunk)
+    if _REFERENCE_INPUT is None:
+        import db_ref
+        _REFERENCE_INPUT={'members':db_ref.load_members(),'sectors':db_ref.load_sectors()}
+    h.update(json.dumps(_REFERENCE_INPUT,sort_keys=True,separators=(',',':')).encode())
     for part in _db_sha():
         h.update(part.encode())
+    h.update(b'as-traded-screen-v1')
+    h.update(json.dumps(sorted(nominal_prices.load_all().items()),
+                        separators=(',', ':')).encode())
+    h.update(holding_paths.input_sha().encode())
+    h.update(security_membership.POLICY.encode())
+    h.update(security_membership.input_sha().encode())
     return h.hexdigest()[:16]
 
 
@@ -105,6 +112,12 @@ def _meta():
         "run_id": os.environ.get("GITHUB_RUN_ID", "local"),
         "input_sha": _input_sha(),
         "variant": "B",
+        "price_screen_basis": "as_traded",
+        "holding_event_policy": POLICY,
+        "momentum_event_policy": POLICY,
+        "holding_event_input_sha": holding_paths.input_sha(),
+        "membership_policy": security_membership.POLICY,
+        "membership_alias_input_sha": security_membership.input_sha(),
     }
 
 
@@ -224,10 +237,8 @@ def _series_ok(bars, start_ym, end_ym):
 
 
 def members_full_year(m, year):
-    """该年整年都在成分股里的股票集合"""
-    a = "%d-01-01" % year
-    b = "%d-12-31" % year
-    return set(m[(m.start_date <= a) & (m.end_date >= b)]["ticker"].unique())
+    """同一证券全年连续在成分股中；仅合并已核验的同股更名。"""
+    return security_membership.members_full_year(m,year)
 
 
 def ret12(bars, rank_month, base_month):
@@ -240,7 +251,7 @@ def ret12(bars, rank_month, base_month):
     return a1 / a0 - 1
 
 
-def pick_year(m, sector, year):
+def pick_year(m, sector, year, price_lookup=None):
     """选出「hold_year = year」的一年前三（口径 B）"""
     y0 = year - 1
     pool = members_full_year(m, y0)
@@ -249,6 +260,9 @@ def pick_year(m, sector, year):
     _dropped = []
     for t in pool:
         bars = load_bars(t)
+        if not bars or rank_m not in bars:
+            continue  # Ranking requires a tradable original security at the ranking date.
+        bars=holding_paths.momentum_bars(t,bars,base_m,rank_m)
         if not _series_ok(bars, "%d-12" % (y0 - 1), "%d-12" % y0):
             continue
         r = ret12(bars, rank_m, base_m)
@@ -257,8 +271,8 @@ def pick_year(m, sector, year):
         if abs(r) > MAX_ABS_RET12:
             _dropped.append((t, round(r, 2)))
             continue
-        raw = bars.get(rank_m, (None, None))[1]
-        if not raw or raw < MIN_PRICE:
+        raw = (price_lookup or nominal_prices.price)(t, rank_m)
+        if raw < MIN_PRICE:
             continue
         rows.append({"ticker": t, "ret12": r,
                      "sector": sector.get(t) or "Unknown",
@@ -281,6 +295,8 @@ def pick_year(m, sector, year):
         picks.append(r)
         cnt[sec] = cnt.get(sec, 0) + 1
 
+    if not picks:
+        return [], len(rows)
     dup = [s for s, c in cnt.items() if c >= 2]
     if dup:
         w = [(SECTOR_CAP / 2) if p["sector"] in dup else
@@ -298,40 +314,21 @@ def pick_year(m, sector, year):
 
 def year_return(picks, year):
     """该年持仓的收益（用月线复权，年末比年初）"""
-    y0, y1 = "%d-12" % (year - 1), "%d-12" % year
-    ret, covered = 0.0, 0.0
-    for p in picks:
-        bars = load_bars(p["ticker"])
-        r = ret12(bars, y1, y0)
-        if r is None:
-            continue
-        ret += p["weight"] * r
-        covered += p["weight"]
-    return (ret / covered) if covered > 0 else 0.0
+    return year_perf(picks, year)[0]
 
 
 def year_perf(picks, year):
     """年内收益与最大回撤（月末口径，与口径 A 一致）"""
-    prev_ym = "%d-12" % (year - 1)
-    seq = ["%d-%02d" % (year, m) for m in range(1, 13)]
     bars_cache = {}
     if not picks:
         raise RuntimeError("year_perf(%d)：没有持仓" % year)
     for p in picks:
-        bars = load_bars(p["ticker"])
-        if not bars or prev_ym not in bars or not bars[prev_ym][0]:
-            raise RuntimeError("year_perf(%d)：%s 缺 %s 价格" % (year, p["ticker"], prev_ym))
-        bars_cache[p["ticker"]] = bars
+        bars_cache[p["ticker"]] = holding_paths.values(p["ticker"],year,load_bars)
     vals = []
-    for mm in seq:
+    for index in range(12):
         v = 0.0
         for p in picks:
-            bars = bars_cache[p["ticker"]]
-            keys = [k for k in sorted(bars) if k <= mm]
-            if not keys:
-                raise RuntimeError("year_perf(%d)：%s 缺 %s 价格" % (year, p["ticker"], mm))
-            px = bars[keys[-1]][0]
-            v += p["weight"] * (px / bars[prev_ym][0])
+            v += p["weight"] * bars_cache[p["ticker"]][index]
         vals.append(v)
     ret = vals[-1] - 1
     peak, mdd = 0.0, 0.0
@@ -367,7 +364,7 @@ def market_switch():
 def main():
     os.makedirs(OUT, exist_ok=True)
     # 覆盖率闸门：新源未满 95% 前只用旧快照，避免新旧混算
-    global PRICE_SOURCE
+    global PRICE_SOURCE, _REFERENCE_INPUT
     try:
         _need = len([f for f in os.listdir(os.path.join(BASE, "static"))
                      if False]) or 0
@@ -390,6 +387,7 @@ def main():
                  for k, segs in _mem_db.items() for a, b in segs]
         m = _pd.DataFrame(_rows)
         sector = _ref.load_sectors()
+        _REFERENCE_INPUT={'members':_mem_db,'sectors':sector}
         print("口径来自在线库：成分 %d 行 / 行业 %d 只" % (len(m), len(sector)), flush=True)
     except Exception as _e:
         raise RuntimeError("在线库不可用，禁止退回线下文件：%s" % str(_e)[:120])
@@ -599,7 +597,7 @@ def main():
             _b0 = bars[base_m][0]
             _last = [k for k in sorted(bars)][-1]
             _cur_adj = bars[_last][0]
-            if not _b0 or _b0 <= 0 or not _cur_adj or _cur_adj < MIN_PRICE:
+            if not _b0 or _b0 <= 0 or not _cur_adj or cur < MIN_PRICE:
                 continue
             rows2.append({"ticker": t, "sector": sector.get(t) or "Unknown",
                           "ytd": _cur_adj / _b0 - 1})
