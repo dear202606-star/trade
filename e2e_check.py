@@ -130,7 +130,7 @@ def data(name):
 
 def main():
     # 1. 单页结构
-    page("", ["今天该做什么", "策略收益", "逐年回测明细", "次年策略预览", "LEADER"])
+    page("", ["本期策略", "策略收益", "逐年回测明细", "次年策略预览", "LEADER"])
 
     # 2. 数据
     sig = data("signal.json")
