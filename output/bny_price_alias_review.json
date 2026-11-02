@@ -1,0 +1,19 @@
+{
+  "old": "BK",
+  "current": "BNY",
+  "through": "2026-12",
+  "months": 202,
+  "independent_return_pairs": 93,
+  "median_return_deviation": 2.8750576958058716e-05,
+  "max_return_deviation": 0.0036348658581091264,
+  "old_selected_source": [
+    "sina_repaired",
+    "price_only",
+    false
+  ],
+  "protected_or_quarantined": [
+    false,
+    false
+  ],
+  "write": false
+}

@@ -12,6 +12,13 @@ import audit_b
 class SecurityMembershipTests(unittest.TestCase):
     alias={'old':'OLD','current':'NEW','effective_date':'2022-06-09'}
 
+    def test_price_repair_rejects_unreviewed_exchange_and_wrong_rename_year(self):
+        from research import audit_fb_rename_impact as repair
+        with patch.object(repair.db_prices,'load_all',side_effect=AssertionError('must reject before reading prices')):
+            for old,current,through in [('AVB','VMRK','2026-12'),('CTRA','DVN','2026-12'),('BK','BNY','2025-12')]:
+                with self.subTest(old=old),self.assertRaisesRegex(RuntimeError,'reviewed same-equity rename'):
+                    repair.run(old,current,through)
+
     def test_fingerprint_uses_actual_online_reference_and_alias_inputs(self):
         refs={'members':{'NEW':[('2022-06-09','2099-12-31')]},'sectors':{'NEW':'Tech'}}
         with patch.object(variant_b,'_REFERENCE_INPUT',refs), \

@@ -1080,6 +1080,986 @@
       "average_daily_dollars": 931361706.356
     },
     {
+      "symbol": "ETR",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 277639293.172
+    },
+    {
+      "symbol": "EVRG",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 156746739.692
+    },
+    {
+      "symbol": "EW",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 333168156.812
+    },
+    {
+      "symbol": "EXC",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 315395210.684
+    },
+    {
+      "symbol": "EXE",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 381471653.472
+    },
+    {
+      "symbol": "EXPD",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 162407150.16
+    },
+    {
+      "symbol": "EXPE",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 399871636.028
+    },
+    {
+      "symbol": "EXR",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 168137128.264
+    },
+    {
+      "symbol": "F",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 993042263.54
+    },
+    {
+      "symbol": "FANG",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 323386269.868
+    },
+    {
+      "symbol": "FAST",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 275566483.872
+    },
+    {
+      "symbol": "FCX",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 659040566.636
+    },
+    {
+      "symbol": "FDS",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 177984269.18
+    },
+    {
+      "symbol": "FDX",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 461678131.96
+    },
+    {
+      "symbol": "FE",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 199726241.312
+    },
+    {
+      "symbol": "FFIV",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 192911589.688
+    },
+    {
+      "symbol": "FICO",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 461237630.232
+    },
+    {
+      "symbol": "FIS",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 262897697.424
+    },
+    {
+      "symbol": "FIX",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 301268569.92
+    },
+    {
+      "symbol": "FOX",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 74877338.928
+    },
+    {
+      "symbol": "FOXA",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 215872390.664
+    },
+    {
+      "symbol": "FRT",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 71294289.596
+    },
+    {
+      "symbol": "FSLR",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 576838753.736
+    },
+    {
+      "symbol": "FTV",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 197818329.812
+    },
+    {
+      "symbol": "GD",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 382509477.312
+    },
+    {
+      "symbol": "GDDY",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 249236836.04
+    },
+    {
+      "symbol": "GE",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1290477320.384
+    },
+    {
+      "symbol": "GEHC",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 287506887.196
+    },
+    {
+      "symbol": "GEN",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 116143733.404
+    },
+    {
+      "symbol": "GEV",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1619708368.448
+    },
+    {
+      "symbol": "GILD",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 868131487.208
+    },
+    {
+      "symbol": "GIS",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 308459054.972
+    },
+    {
+      "symbol": "GL",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 78676229.32
+    },
+    {
+      "symbol": "GLW",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 399683139.164
+    },
+    {
+      "symbol": "GM",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 584687578.728
+    },
+    {
+      "symbol": "GNRC",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 151478945.148
+    },
+    {
+      "symbol": "GOOG",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 4956180805.056
+    },
+    {
+      "symbol": "GOOGL",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 7609261871.488
+    },
+    {
+      "symbol": "GPC",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 164764422.86
+    },
+    {
+      "symbol": "GPN",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 222467331.176
+    },
+    {
+      "symbol": "GRMN",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 201314619.292
+    },
+    {
+      "symbol": "GS",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1551686647.872
+    },
+    {
+      "symbol": "GWW",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 292757552.648
+    },
+    {
+      "symbol": "HAL",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 306798330.008
+    },
+    {
+      "symbol": "HBAN",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 432901726.224
+    },
+    {
+      "symbol": "HCA",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 556425734.952
+    },
+    {
+      "symbol": "HD",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1381974904.832
+    },
+    {
+      "symbol": "HIG",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 197164116.932
+    },
+    {
+      "symbol": "HII",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 135315839.9
+    },
+    {
+      "symbol": "HLT",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 480390543.264
+    },
+    {
+      "symbol": "HON",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 866955305.792
+    },
+    {
+      "symbol": "HOOD",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 3227556569.728
+    },
+    {
+      "symbol": "HPE",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 470132302.92
+    },
+    {
+      "symbol": "HPQ",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 256091784.94
+    },
+    {
+      "symbol": "HRL",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 101909662.932
+    },
+    {
+      "symbol": "HSIC",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 116628550.352
+    },
+    {
+      "symbol": "HST",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 147254543.896
+    },
+    {
+      "symbol": "HSY",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 299341688.604
+    },
+    {
+      "symbol": "HUM",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 448652531.872
+    },
+    {
+      "symbol": "HWM",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 439474215.668
+    },
+    {
+      "symbol": "IBKR",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 358635100.476
+    },
+    {
+      "symbol": "IBM",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1263453689.472
+    },
+    {
+      "symbol": "ICE",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 527209111.3
+    },
+    {
+      "symbol": "IDXX",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 343395508.068
+    },
+    {
+      "symbol": "IEX",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 117889007.844
+    },
+    {
+      "symbol": "IFF",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 141066246.436
+    },
+    {
+      "symbol": "INCY",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 151976163.572
+    },
+    {
+      "symbol": "INTC",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 2657454505.728
+    },
+    {
+      "symbol": "INTU",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1204304901.292
+    },
+    {
+      "symbol": "INVH",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 118154362.764
+    },
+    {
+      "symbol": "IP",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 283384363.24
+    },
+    {
+      "symbol": "IQV",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 320047622.384
+    },
+    {
+      "symbol": "IR",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 243584180.556
+    },
+    {
+      "symbol": "IRM",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 170460442.52
+    },
+    {
+      "symbol": "IT",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 309069298.824
+    },
+    {
+      "symbol": "ITW",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 272318595.52
+    },
+    {
+      "symbol": "IVZ",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 101575974.32
+    },
+    {
+      "symbol": "J",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 121160748.536
+    },
+    {
+      "symbol": "JBHT",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 183443204.952
+    },
+    {
+      "symbol": "JBL",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 260654272.496
+    },
+    {
+      "symbol": "JCI",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 462947594.144
+    },
+    {
+      "symbol": "JKHY",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 126316128.732
+    },
+    {
+      "symbol": "JNJ",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1498185245.248
+    },
+    {
+      "symbol": "JPM",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 2576993055.232
+    },
+    {
+      "symbol": "KDP",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 446204209.16
+    },
+    {
+      "symbol": "KEY",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 330943423.4
+    },
+    {
+      "symbol": "KEYS",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 176367310.14
+    },
+    {
+      "symbol": "KIM",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 98953302.564
+    },
+    {
+      "symbol": "KKR",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 587116722.732
+    },
+    {
+      "symbol": "KLAC",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 955772316.068
+    },
+    {
+      "symbol": "KMI",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 384872877.256
+    },
+    {
+      "symbol": "KO",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1153840087.232
+    },
+    {
+      "symbol": "KR",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 470010040.108
+    },
+    {
+      "symbol": "KVUE",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 478130488.256
+    },
+    {
+      "symbol": "L",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 73132441.64
+    },
+    {
+      "symbol": "LDOS",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 181089258.58
+    },
+    {
+      "symbol": "LEN",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 474619565.776
+    },
+    {
+      "symbol": "LH",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 180468502.868
+    },
+    {
+      "symbol": "LHX",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 321461852.656
+    },
+    {
+      "symbol": "LII",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 233857585.096
+    },
+    {
+      "symbol": "LIN",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 980117314.304
+    },
+    {
+      "symbol": "LLY",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 3228567532.16
+    },
+    {
+      "symbol": "LMT",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 713929347.968
+    },
+    {
+      "symbol": "LNT",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 125307232.116
+    },
+    {
+      "symbol": "LOW",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 657674642.504
+    },
+    {
+      "symbol": "LRCX",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1208439625.216
+    },
+    {
+      "symbol": "LUV",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 349117197.192
+    },
+    {
+      "symbol": "LVS",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 268620079.104
+    },
+    {
+      "symbol": "LW",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 124056705.968
+    },
+    {
+      "symbol": "LYB",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 243716835.536
+    },
+    {
+      "symbol": "LYV",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 371765187.704
+    },
+    {
+      "symbol": "MA",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1531543649.6
+    },
+    {
+      "symbol": "MAA",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 134891396.04
+    },
+    {
+      "symbol": "MAR",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 432186983.02
+    },
+    {
+      "symbol": "MAS",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 149922548.304
+    },
+    {
+      "symbol": "MCD",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1039063458.752
+    },
+    {
+      "symbol": "MCHP",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 559393069.596
+    },
+    {
+      "symbol": "MCK",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 588980911.924
+    },
+    {
+      "symbol": "MCO",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 382149714.124
+    },
+    {
+      "symbol": "MDLZ",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 555195758.764
+    },
+    {
+      "symbol": "MDT",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 670264410.516
+    },
+    {
+      "symbol": "MET",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 269926870.608
+    },
+    {
+      "symbol": "MGM",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 170277476.26
+    },
+    {
+      "symbol": "MKC",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 174691295.728
+    },
+    {
+      "symbol": "MLM",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 245922711.668
+    },
+    {
+      "symbol": "MMM",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 524168937.152
+    },
+    {
+      "symbol": "MNST",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 359573006.972
+    },
+    {
+      "symbol": "MO",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 526325558.292
+    },
+    {
+      "symbol": "MOS",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 167134362.78
+    },
+    {
+      "symbol": "MPC",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 389297737.276
+    },
+    {
+      "symbol": "MPWR",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 544631890.144
+    },
+    {
+      "symbol": "MRK",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1272555760.448
+    },
+    {
+      "symbol": "MRNA",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 316926788.264
+    },
+    {
+      "symbol": "MS",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 860257082.368
+    },
+    {
+      "symbol": "MSCI",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 349608127.308
+    },
+    {
+      "symbol": "MSFT",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 10227457690.88
+    },
+    {
+      "symbol": "MSI",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 427022107.372
+    },
+    {
+      "symbol": "MTB",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 220916832.72
+    },
+    {
+      "symbol": "MTCH",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 143362262.7
+    },
+    {
+      "symbol": "MTD",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 200747327.812
+    },
+    {
       "symbol": "MU",
       "base_month": "2024-12",
       "rank_month": "2025-12",
@@ -1092,6 +2072,34 @@
       "rank_month": "2026-10",
       "days": 250,
       "average_daily_dollars": 25463202948.992
+    },
+    {
+      "symbol": "NCLH",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 318153497.772
+    },
+    {
+      "symbol": "NDAQ",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 283157476.916
+    },
+    {
+      "symbol": "NDSN",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 80792038.832
+    },
+    {
+      "symbol": "NEE",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 819976662.516
     },
     {
       "symbol": "NEM",
@@ -1108,6 +2116,76 @@
       "average_daily_dollars": 928741402.136
     },
     {
+      "symbol": "NFLX",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 4345084551.296
+    },
+    {
+      "symbol": "NI",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 175067755.504
+    },
+    {
+      "symbol": "NKE",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1114445783.68
+    },
+    {
+      "symbol": "NOC",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 464039369.396
+    },
+    {
+      "symbol": "NOW",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1515777022.656
+    },
+    {
+      "symbol": "NRG",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 381545972.612
+    },
+    {
+      "symbol": "NSC",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 406837371.148
+    },
+    {
+      "symbol": "NTAP",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 216590145.028
+    },
+    {
+      "symbol": "NTRS",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 161724756.852
+    },
+    {
+      "symbol": "NUE",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 279622747.224
+    },
+    {
       "symbol": "NVDA",
       "base_month": "2024-12",
       "rank_month": "2025-12",
@@ -1122,11 +2200,858 @@
       "average_daily_dollars": 30809221864.448
     },
     {
+      "symbol": "NVR",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 166100177.756
+    },
+    {
+      "symbol": "NWS",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 28936818.608
+    },
+    {
+      "symbol": "NWSA",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 98632766.456
+    },
+    {
+      "symbol": "NXPI",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 602898379.324
+    },
+    {
+      "symbol": "O",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 320921021.772
+    },
+    {
+      "symbol": "ODFL",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 308888741.292
+    },
+    {
+      "symbol": "OKE",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 323146850.968
+    },
+    {
+      "symbol": "OMC",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 298254743.088
+    },
+    {
+      "symbol": "ON",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 464952060.008
+    },
+    {
+      "symbol": "ORLY",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 507188849.484
+    },
+    {
+      "symbol": "OTIS",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 252917776.384
+    },
+    {
+      "symbol": "OXY",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 493056438.748
+    },
+    {
+      "symbol": "PANW",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1158390536.704
+    },
+    {
+      "symbol": "PAYC",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 139619990.444
+    },
+    {
+      "symbol": "PAYX",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 336809259.368
+    },
+    {
+      "symbol": "PCAR",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 291677435.436
+    },
+    {
+      "symbol": "PCG",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 368846871.768
+    },
+    {
+      "symbol": "PEG",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 231413286.108
+    },
+    {
+      "symbol": "PEP",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1164903399.424
+    },
+    {
+      "symbol": "PFE",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1266288199.936
+    },
+    {
+      "symbol": "PFG",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 108540579.56
+    },
+    {
+      "symbol": "PG",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1303702429.184
+    },
+    {
+      "symbol": "PGR",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 813527485.664
+    },
+    {
+      "symbol": "PH",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 488422062.868
+    },
+    {
+      "symbol": "PHM",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 240980640.256
+    },
+    {
+      "symbol": "PKG",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 166401774.992
+    },
+    {
+      "symbol": "PLD",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 458291533.728
+    },
+    {
       "symbol": "PLTR",
       "base_month": "2024-12",
       "rank_month": "2025-12",
       "days": 250,
       "average_daily_dollars": 9874263805.12
+    },
+    {
+      "symbol": "PM",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 972668843.136
+    },
+    {
+      "symbol": "PNC",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 398803267.668
+    },
+    {
+      "symbol": "PNR",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 140026336.172
+    },
+    {
+      "symbol": "PNW",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 105293028.044
+    },
+    {
+      "symbol": "PODD",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 212478682.456
+    },
+    {
+      "symbol": "POOL",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 171634378.608
+    },
+    {
+      "symbol": "PPG",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 216068624.744
+    },
+    {
+      "symbol": "PPL",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 199426816.452
+    },
+    {
+      "symbol": "PRU",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 183564673.356
+    },
+    {
+      "symbol": "PSA",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 250452757.58
+    },
+    {
+      "symbol": "PSX",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 369906864.768
+    },
+    {
+      "symbol": "PTC",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 177411525.884
+    },
+    {
+      "symbol": "PWR",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 434953616.484
+    },
+    {
+      "symbol": "PYPL",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 882189047.36
+    },
+    {
+      "symbol": "QCOM",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1392254806.208
+    },
+    {
+      "symbol": "RCL",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 638501955.164
+    },
+    {
+      "symbol": "REG",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 79517642.824
+    },
+    {
+      "symbol": "REGN",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 664641681.14
+    },
+    {
+      "symbol": "RF",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 346074911.084
+    },
+    {
+      "symbol": "RJF",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 196974456.856
+    },
+    {
+      "symbol": "RL",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 213570202.424
+    },
+    {
+      "symbol": "RMD",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 251497725.432
+    },
+    {
+      "symbol": "ROK",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 289045458.028
+    },
+    {
+      "symbol": "ROL",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 111978673.28
+    },
+    {
+      "symbol": "ROP",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 393138968.408
+    },
+    {
+      "symbol": "ROST",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 425949080.852
+    },
+    {
+      "symbol": "RSG",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 304600149.572
+    },
+    {
+      "symbol": "RTX",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 725932870.868
+    },
+    {
+      "symbol": "RVTY",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 121763427.016
+    },
+    {
+      "symbol": "SBAC",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 197316008.62
+    },
+    {
+      "symbol": "SBUX",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 916543808.448
+    },
+    {
+      "symbol": "SCHW",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 836355400.896
+    },
+    {
+      "symbol": "SHW",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 631992488.544
+    },
+    {
+      "symbol": "SJM",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 179010966.868
+    },
+    {
+      "symbol": "SLB",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 584911225.74
+    },
+    {
+      "symbol": "SO",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 476664799.576
+    },
+    {
+      "symbol": "SOLV",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 79801262.292
+    },
+    {
+      "symbol": "SPG",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 270468436.028
+    },
+    {
+      "symbol": "SPGI",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 701189314.9
+    },
+    {
+      "symbol": "SRE",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 339473506.48
+    },
+    {
+      "symbol": "STE",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 142829511.136
+    },
+    {
+      "symbol": "STLD",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 200106003.44
+    },
+    {
+      "symbol": "STT",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 209409286.572
+    },
+    {
+      "symbol": "STX",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 652635451.92
+    },
+    {
+      "symbol": "STZ",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 405865636.344
+    },
+    {
+      "symbol": "SW",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 180609123.548
+    },
+    {
+      "symbol": "SWK",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 157860311.852
+    },
+    {
+      "symbol": "SWKS",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 226390493.884
+    },
+    {
+      "symbol": "SYF",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 245577460.18
+    },
+    {
+      "symbol": "SYK",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 546878681.028
+    },
+    {
+      "symbol": "SYY",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 240619767.696
+    },
+    {
+      "symbol": "T",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1043349353.728
+    },
+    {
+      "symbol": "TAP",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 135678147.972
+    },
+    {
+      "symbol": "TDG",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 409611486.004
+    },
+    {
+      "symbol": "TDY",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 165419228.2
+    },
+    {
+      "symbol": "TECH",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 116945889.844
+    },
+    {
+      "symbol": "TEL",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 337775024.704
+    },
+    {
+      "symbol": "TER",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 407621695.936
+    },
+    {
+      "symbol": "TFC",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 359163627.436
+    },
+    {
+      "symbol": "TGT",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 740588638.208
+    },
+    {
+      "symbol": "TJX",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 690425507.812
+    },
+    {
+      "symbol": "TKO",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 215133398.112
+    },
+    {
+      "symbol": "TMO",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1097918758.2
+    },
+    {
+      "symbol": "TMUS",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1053300590.852
+    },
+    {
+      "symbol": "TPL",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 149553292.544
+    },
+    {
+      "symbol": "TPR",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 380446817.988
+    },
+    {
+      "symbol": "TRGP",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 302125789.076
+    },
+    {
+      "symbol": "TRMB",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 110914591.496
+    },
+    {
+      "symbol": "TROW",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 174456087.44
+    },
+    {
+      "symbol": "TRV",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 347052831.208
+    },
+    {
+      "symbol": "TSCO",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 291211847.388
+    },
+    {
+      "symbol": "TSLA",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 33752530043.904
+    },
+    {
+      "symbol": "TSN",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 157373799.62
+    },
+    {
+      "symbol": "TT",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 549676352.656
+    },
+    {
+      "symbol": "TXN",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1320415146.072
+    },
+    {
+      "symbol": "TXT",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 114789579.196
+    },
+    {
+      "symbol": "TYL",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 173878676.244
+    },
+    {
+      "symbol": "UAL",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 631008036.368
+    },
+    {
+      "symbol": "UBER",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1705406285.504
+    },
+    {
+      "symbol": "UDR",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 94316496.416
+    },
+    {
+      "symbol": "UHS",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 147843438.596
+    },
+    {
+      "symbol": "ULTA",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 366744345.06
+    },
+    {
+      "symbol": "UNP",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 789720370.936
+    },
+    {
+      "symbol": "UPS",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 668075751.172
+    },
+    {
+      "symbol": "URI",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 474204036.144
+    },
+    {
+      "symbol": "USB",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 458308549.792
+    },
+    {
+      "symbol": "V",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 2191679097.408
+    },
+    {
+      "symbol": "VICI",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 255832134.764
+    },
+    {
+      "symbol": "VLO",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 436451335.736
+    },
+    {
+      "symbol": "VLTO",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 143595193.776
+    },
+    {
+      "symbol": "VMC",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 267930387.852
+    },
+    {
+      "symbol": "VRSK",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 284289819.304
+    },
+    {
+      "symbol": "VRSN",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 223284317.848
+    },
+    {
+      "symbol": "VRTX",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 692065278.644
     },
     {
       "symbol": "VST",
@@ -1143,6 +3068,55 @@
       "average_daily_dollars": 784357176.036
     },
     {
+      "symbol": "VTR",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 205199764.26
+    },
+    {
+      "symbol": "VTRS",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 110434078.212
+    },
+    {
+      "symbol": "VZ",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 952071755.008
+    },
+    {
+      "symbol": "WAB",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 200726803.164
+    },
+    {
+      "symbol": "WAT",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 212075697.588
+    },
+    {
+      "symbol": "WBD",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 731796553.136
+    },
+    {
+      "symbol": "WDAY",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 622759255.196
+    },
+    {
       "symbol": "WDC",
       "base_month": "2024-12",
       "rank_month": "2025-12",
@@ -1155,9 +3129,135 @@
       "rank_month": "2026-10",
       "days": 250,
       "average_daily_dollars": 3163698906.56
+    },
+    {
+      "symbol": "WEC",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 233233792.644
+    },
+    {
+      "symbol": "WELL",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 498016899.184
+    },
+    {
+      "symbol": "WFC",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1260577773.056
+    },
+    {
+      "symbol": "WM",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 389638440.196
+    },
+    {
+      "symbol": "WMB",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 436136219.22
+    },
+    {
+      "symbol": "WRB",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 154469044.088
+    },
+    {
+      "symbol": "WSM",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 292390785.42
+    },
+    {
+      "symbol": "WST",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 190546336.504
+    },
+    {
+      "symbol": "WTW",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 203379357.436
+    },
+    {
+      "symbol": "WY",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 118748707.148
+    },
+    {
+      "symbol": "WYNN",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 214667163.1
+    },
+    {
+      "symbol": "XEL",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 303088616.624
+    },
+    {
+      "symbol": "XOM",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 1781395499.008
+    },
+    {
+      "symbol": "XYL",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 181008959.736
+    },
+    {
+      "symbol": "YUM",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 306876322.892
+    },
+    {
+      "symbol": "ZBH",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 192123398.756
+    },
+    {
+      "symbol": "ZBRA",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 176355919.68
+    },
+    {
+      "symbol": "ZTS",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "days": 250,
+      "average_daily_dollars": 511198875.02
     }
   ],
-  "input_sha": "13ae3a57edd16eb19eaf091bbe7e8fc57606c1f3a2f57b6c97c62f8c7fc9f774",
+  "input_sha": "ee746508e641c00091d39305d130d9284ebdb721931e104e23f94238f3b75ded",
   "immutable_guard_rejections": 3,
   "pending_version_blocks_old_approval": true,
   "inconsistent_totals_rejected": true,
