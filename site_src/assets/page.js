@@ -136,7 +136,7 @@
     if (!box || !EQ || !EQ.points || EQ.points.length < 3) return;
     try {
       box.innerHTML = DSH.spark(EQ.points.map(function (p) { return { y: p.s }; }),
-        { h: 118, color: "#F2C46B" });
+        { h: box.clientHeight || 176, w: Math.max(240, Math.round(box.clientWidth)), color: "#009c80" });
     } catch (e) { box.innerHTML = ""; }
   }
 
@@ -198,8 +198,8 @@
       var wpx = Math.max(300, Math.round(box.clientWidth));
       var _cv = (typeof CV_VIEW !== "undefined" && CV_VIEW && CV_VIEW.length) ? CV_VIEW : CV.points;
       box.innerHTML = DSH.lineChart([
-        { name: "策略", color: "#FF6B72", pts: _cv.map(function (p) { return { d: ymd(p.d), y: p.s, label: yearLab(p.d) }; }) },
-        { name: "标普500", color: "#6F7D92", pts: _cv.map(function (p) { return { d: ymd(p.d), y: p.b || 1, label: yearLab(p.d) }; }) }
+        { name: "策略", color: "#009c80", pts: _cv.map(function (p) { return { d: ymd(p.d), y: p.s, label: yearLab(p.d) }; }) },
+        { name: "标普500", color: "#82958d", pts: _cv.map(function (p) { return { d: ymd(p.d), y: p.b || 1, label: yearLab(p.d) }; }) }
       ], { h: 200, w: wpx, fs: 11, l: 42, b: 30, sw: 2, log: true, xOnly: true,
         fmt: function (v) { return v >= 10 ? Math.round(v) + "×" : v.toFixed(1) + "×"; } });
     } catch (e) { box.innerHTML = ""; }
@@ -322,13 +322,16 @@
   /* ---------- 本金切换 ---------- */
   function initPills() {
     document.querySelectorAll(".pill-btn").forEach(function (b) {
-      if (+b.dataset.amt === amt) b.classList.add("on");
+      b.classList.toggle("on", +b.dataset.amt === amt);
+      b.setAttribute("aria-pressed", String(+b.dataset.amt === amt));
       b.addEventListener("click", function () {
         amt = +b.dataset.amt;
         localStorage.setItem("dsh.amt", String(amt));
         document.querySelectorAll(".pill-btn").forEach(function (x) {
           x.classList.toggle("on", +x.dataset.amt === amt);
+          x.setAttribute("aria-pressed", String(+x.dataset.amt === amt));
         });
+        renderNow();
         renderYear();
       });
     });
@@ -400,6 +403,7 @@
   function applyVariantUI() {
     document.querySelectorAll(".vtab").forEach(function (b) {
       b.classList.toggle("on", b.dataset.variant === VARIANT);
+      b.setAttribute("aria-pressed", String(b.dataset.variant === VARIANT));
     });
   }
 
@@ -523,3 +527,28 @@ function renderQuality() {
     })
     .catch(function () { el.hidden = true; });
 }
+
+/* Section navigation reflects the reading position and keyboard activation. */
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('.section-nav a'));
+  function activate(id) {
+    links.forEach(function (link) {
+      var selected = link.getAttribute('href') === '#' + id;
+      link.classList.toggle('active', selected);
+      if (selected) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    });
+  }
+  links.forEach(function (link) {
+    link.addEventListener('click', function () { activate(link.hash.slice(1)); });
+  });
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) { if (entry.isIntersecting) activate(entry.target.id); });
+    }, { rootMargin: '-90px 0px -55% 0px', threshold: 0 });
+    links.forEach(function (link) {
+      var target = document.querySelector(link.getAttribute('href'));
+      if (target) observer.observe(target);
+    });
+  }
+})();

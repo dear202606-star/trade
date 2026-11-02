@@ -1,144 +1,45 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#080A0F">
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
-<title>LEADER QUANT</title>
-<link rel="stylesheet" href="assets/app.css">
-<link rel="stylesheet" href="assets/page.css">
-<link rel="stylesheet" href="assets/theme.css">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f8f6"><link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>LEADER QUANT · 趋势与纪律</title>
+<link rel="stylesheet" href="assets/dashboard.css?v=3">
 </head>
 <body>
-
-<header class="top">
-  <div class="top-in">
-    <div class="logo"><span class="en">LEADER<i>·</i>QUANT</span></div>
-    <div class="tick">
-      <span id="tickPx">—</span>
-      <span id="tickChg" class="sub"></span>
-    </div>
-  </div>
-</header>
-
-  <nav class="vtabs" id="vtabs">
-    <button class="vtab on" data-variant="B">全年成分</button>
-    <button class="vtab" data-variant="A">时点成分</button>
-  </nav>
-
+<a class="skip-link" href="#overview">跳转到投资总览</a>
+<header class="top"><div class="top-in">
+<a class="logo" href="./" aria-label="Leader Quant 首页">LEADER<span> / </span>QUANT<span class="brand-dot"></span></a>
+<nav class="section-nav" aria-label="页面导航"><a href="#overview" class="active">总览</a><a href="#positions">持仓</a><a href="#history">历史表现</a></nav>
+<div class="tick" aria-label="标普500行情"><span class="market-dot"></span><span id="tickPx">SPY —</span><span id="tickChg">—</span></div>
+</div></header>
 <main class="wrap">
-
-  <!-- ① 今天该做什么 -->
-  <section class="card hero">
-    <div class="label">今天该做什么</div>
-    <h1 class="verdict" id="verdict">—</h1>
-    <div class="sub" id="verdictSub"></div>
-
-    <div class="now-grid">
-      <div class="cell">
-        <div class="label" id="todayLabel">策略今日表现</div>
-        <div class="num num-lg" id="todayPct">—</div>
-        <div class="sub" id="todayAmt"></div>
-      </div>
-      <div class="cell">
-        <div class="label">仓位建议</div>
-        <div class="num num-md" id="switchTxt">—</div>
-        <div class="sub" id="switchSub"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ② 当期策略累计表现 -->
-  <section class="card">
-    <div class="row-split">
-      <h2 class="card-title" id="yearTitle">当期策略收益</h2>
-    </div>
-    <div class="num num-xl" id="yearRet">—</div>
-    <div class="sub" id="yearVs"></div>
-    <div id="yearSpark" class="spark-box"></div>
-
-    <div class="amt-row">
-      <span class="label" style="margin:0">本金</span>
-      <div class="pills" id="amtPills">
-        <button class="pill-btn" data-amt="10000">1 万</button>
-        <button class="pill-btn on" data-amt="100000">10 万</button>
-        <button class="pill-btn" data-amt="1000000">100 万</button>
-      </div>
-    </div>
-
-    <div class="grid g4 mini">
-      <div class="card flat"><div class="label">总市值</div><div class="num num-md" id="tMv">—</div></div>
-      <div class="card flat"><div class="label">累计盈亏</div><div class="num num-md" id="tPnl">—</div></div>
-      <div class="card flat"><div class="label">建仓成本</div><div class="num num-md" id="tCost">—</div></div>
-      <div class="card flat"><div class="label">仓位</div><div class="num num-md" id="tExp">—</div></div>
-    </div>
-  </section>
-
-  <!-- ③ 持仓 -->
-  <section class="card flat">
-    <div class="row-split">
-      <h2 class="card-title" id="posTitle">当年策略明细</h2>
-    </div>
-    <div class="pr">
-      <div class="pr-head">
-        <div>代码</div><div class="r">权重</div><div class="r">建仓价</div>
-        <div class="r">现价</div><div class="r">市值</div><div class="r">涨跌</div><div class="r">盈亏</div>
-      </div>
-      <div id="posRows"></div>
-    </div>
-    <div class="card-foot right" id="posMeta"></div>
-  </section>
-
-
-  <!-- 明年预览：年初至今涨幅前 3 -->
-  <section class="card flat">
-    <div class="row-split">
-      <h2 class="card-title" id="nextYearTitle">次年策略预览</h2>
-    </div>
-    <div id="previewRows" class="pv-list"></div>
-    <div class="card-foot right" id="previewNote"></div>
-  </section>
-
-  <!-- ⑤ 总体策略至今表现 -->
-  <section class="card">
-    <div class="row-split">
-      <h2 class="card-title">历史收益回测</h2>
-      <div class="sub" id="allRange"></div>
-    </div>
-    <div class="num num-xl" id="bTotal">—</div>
-    <div class="grid g4 mini" style="margin-top:16px">
-      <div class="card flat"><div class="label">年化</div><div class="num num-md" id="bCagr">—</div></div>
-      <div class="card flat"><div class="label">最大回撤</div><div class="num num-md" id="bMdd">—</div></div>
-      <div class="card flat"><div class="label">胜率</div><div class="num num-md" id="bWin">—</div></div>
-      <div class="card flat"><div class="label">同期标普</div><div class="num num-md" id="bBench">—</div></div>
-    </div>
-    <div id="allChart" class="chart-box"></div>
-    <div class="foot" id="dataQuality" hidden></div>
-      <div class="legend"><span><i class="dot red"></i>策略</span><span><i class="dot grey"></i>标普 500</span></div>
-  </section>
-
-  <!-- ⑥ 历史与回测 -->
-  <section class="card flat">
-    <div class="row-split">
-      <h2 class="card-title">逐年回测明细</h2>
-    </div>
-    <div class="yr">
-      <div class="yr-head">
-        <div>持有年度</div><div>持仓（上一年 12 月选出）</div><div class="r">收益</div><div class="r">回撤</div>
-      </div>
-      <div id="yearRows"></div>
-    </div>
-  </section>
-
+<div class="page-heading"><div><div class="eyebrow">THE MOMENTUM PERSPECTIVE</div><h1>看见趋势，<span>坚守节奏。</span></h1><p>专注领先资产，让每一次决策更有章法。</p></div>
+<nav class="vtabs" id="vtabs" aria-label="选择策略口径"><button class="vtab on" data-variant="B" aria-pressed="true">全年成分</button><button class="vtab" data-variant="A" aria-pressed="false">时点成分</button></nav></div>
+<div class="dashboard-grid">
+<section class="panel signal hero" aria-labelledby="verdict">
+<div class="signal-top"><span class="eyebrow">YOUR NEXT MOVE</span><span class="signal-badge">年度调仓</span></div>
+<div class="label">本期策略</div><h2 class="verdict" id="verdict">—</h2><div class="sub" id="verdictSub"></div>
+<div class="signal-rule"></div><div class="now-grid"><div class="cell"><div class="label" id="todayLabel">策略今日表现</div><div class="num num-lg" id="todayPct">—</div><div class="sub" id="todayAmt"></div></div><div class="cell"><div class="label">仓位建议</div><div class="num num-md" id="switchTxt">—</div><div class="sub" id="switchSub"></div></div></div>
+<div class="signal-bottom"><span class="small-dot"></span>跟随趋势，执行纪律。</div>
+</section>
+<section class="panel performance" id="overview" aria-labelledby="yearTitle">
+<div class="row-split"><h2 class="card-title" id="yearTitle">当期策略收益</h2><span class="quiet-tag">策略组合</span></div>
+<div class="return-row"><div class="num num-xl" id="yearRet">—</div><div class="sub" id="yearVs"></div></div>
+<div id="yearSpark" class="spark-box" role="img" aria-label="本期策略收益走势"></div>
+<div class="amt-row"><span class="label">以本金查看收益</span><div class="pills" id="amtPills" aria-label="模拟本金"><button class="pill-btn" data-amt="10000" aria-pressed="false">1 万</button><button class="pill-btn on" data-amt="100000" aria-pressed="true">10 万</button><button class="pill-btn" data-amt="1000000" aria-pressed="false">100 万</button></div></div>
+<div class="metrics-grid"><div><div class="label">总市值</div><div class="num num-md" id="tMv">—</div></div><div><div class="label">累计盈亏</div><div class="num num-md" id="tPnl">—</div></div><div><div class="label">建仓成本</div><div class="num num-md" id="tCost">—</div></div><div><div class="label">当前仓位</div><div class="num num-md" id="tExp">—</div></div></div>
+</section>
+<section class="panel positions" id="positions" aria-labelledby="posTitle"><div class="row-split"><div><div class="eyebrow">THE PORTFOLIO</div><h2 class="card-title" id="posTitle">当年策略明细</h2></div><span class="quiet-tag">精选持仓</span></div>
+<div class="table-scroll" tabindex="0" role="region" aria-label="持仓明细，可横向滚动"><div class="pr"><div class="pr-head"><div>资产</div><div class="r">权重</div><div class="r">建仓价</div><div class="r">现价</div><div class="r">市值</div><div class="r">涨跌</div><div class="r">盈亏</div></div><div id="posRows"></div></div></div><div class="card-foot" id="posMeta"></div>
+</section>
+<section class="panel watchlist" aria-labelledby="nextYearTitle"><div class="eyebrow">ON THE RADAR</div><div class="row-split"><h2 class="card-title" id="nextYearTitle">次年策略预览</h2><span class="radar-dot"></span></div><div id="previewRows" class="pv-list"></div><div class="card-foot" id="previewNote"></div></section>
+<section class="panel history" id="history" aria-labelledby="historyTitle"><div class="row-split"><div><div class="eyebrow">THE LONG VIEW</div><h2 class="card-title" id="historyTitle">让时间，展现策略的力量。</h2></div><div class="sub" id="allRange"></div></div>
+<div class="history-summary"><div><div class="label">历史累计收益</div><div class="num num-xl" id="bTotal">—</div></div><div class="history-metrics"><div><div class="label">年化收益</div><div class="num num-md" id="bCagr">—</div></div><div><div class="label">最大回撤</div><div class="num num-md" id="bMdd">—</div></div><div><div class="label">盈利年份</div><div class="num num-md" id="bWin">—</div></div><div><div class="label">同期标普</div><div class="num num-md" id="bBench">—</div></div></div></div>
+<div id="allChart" class="chart-box" role="img" aria-label="策略与标普500的历史收益比较，年度数值见下方明细"></div><div class="chart-footer"><div class="legend"><span><i class="dot strategy-dot"></i>策略组合</span><span><i class="dot benchmark-dot"></i>标普 500</span></div><span>历史表现不代表未来收益</span></div></section>
+<section class="panel annual" aria-labelledby="annualTitle"><details open><summary><div><span class="eyebrow">YEAR BY YEAR</span><h2 class="card-title" id="annualTitle">每一年的进阶与回撤</h2></div><span class="details-toggle" aria-hidden="true">年度明细 <span>⌄</span></span></summary><div class="table-scroll" tabindex="0" role="region" aria-label="逐年回测明细，可横向滚动"><div class="yr"><div class="yr-head"><div>持有年度</div><div>持仓 · 上年末选出</div><div class="r">收益</div><div class="r">回撤</div></div><div id="yearRows"></div></div></div></details></section>
+</div>
 </main>
-
-<footer class="foot">
-  <div id="footStamp">—</div>
-  <div>仅供研究，不构成投资建议</div>
-</footer>
-
-<script src="assets/app.js"></script>
-<script src="assets/page.js"></script>
-</body>
-</html>
+<footer class="foot"><a class="logo" href="./">LEADER<span> / </span>QUANT</a><p>用趋势发现机会，用纪律保持清醒。</p><span id="footStamp" hidden></span><div>仅供研究，不构成投资建议</div></footer>
+<script src="assets/app.js"></script><script src="assets/page.js?v=3"></script>
+</body></html>
