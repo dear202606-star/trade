@@ -96,6 +96,8 @@
   "input_sha": "21165b0e63044c9f30db8bd4cbdc44a8c30312f82ff5610b094e1f3c15aebfc7",
   "immutable_guard_rejections": 3,
   "pending_version_blocks_old_approval": true,
+  "inconsistent_totals_rejected": true,
+  "forced_rest_fallback_exact_match": true,
   "all_probe_changes_rolled_back": true,
   "published_outputs_changed": false
 }

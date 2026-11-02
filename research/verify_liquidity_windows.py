@@ -2,6 +2,7 @@
 import json
 import sys
 from pathlib import Path
+from unittest.mock import patch
 
 import psycopg2.extras
 
@@ -32,10 +33,17 @@ def run():
             raise RuntimeError('Runtime differs from independently summed daily amounts')
         verified.append({'symbol':symbol,'base_month':base,'rank_month':rank,
                          'days':len(daily),'average_daily_dollars':average})
+    direct_sha=liquidity.input_sha()
+    liquidity._WINDOWS=None
+    with patch.object(db_select,'db',side_effect=RuntimeError('forced direct-read failure probe')):
+        fallback=liquidity.load_all()
+        if fallback!=windows or liquidity.input_sha()!=direct_sha:
+            raise RuntimeError('REST differs from exact direct-read evidence')
     connection=db_select.db();connection.autocommit=False
     rejected=0
     try:
         with connection.cursor() as cursor:
+            cursor.execute('set local extra_float_digits=3')
             cursor.execute('select id from v_liquidity_windows order by symbol,rank_month limit 1')
             target=cursor.fetchone()[0]
             for sql,args in [('update liquidity_windows set verified=false where id=%s',(target,)),
@@ -51,6 +59,18 @@ def run():
                  independent_lower,independent_upper,calculator_sha256,evidence
                  from liquidity_windows where id=%s''',(target,))
             symbol,base,rank,days,amount,low,high,calculator,evidence=cursor.fetchone()
+            changed=dict(evidence,review_status='rollback-only inconsistent totals probe')
+            cursor.execute('savepoint totals_probe')
+            try:
+                cursor.execute('''insert into liquidity_windows
+                 (symbol,base_month,rank_month,trading_days,primary_amount,independent_lower,independent_upper,
+                  calculator_sha256,evidence,evidence_sha256,verified)
+                 values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,true)''',
+                 (symbol,base,rank,days,amount+1,low,high,calculator,psycopg2.extras.Json(changed),liquidity.evidence_sha(changed)))
+            except Exception as exc:
+                if getattr(exc,'pgcode',None)!='23514':raise
+                cursor.execute('rollback to savepoint totals_probe')
+            else:raise AssertionError('Inconsistent amount/evidence was accepted')
             evidence=dict(evidence,review_status='rollback-only pending verification')
             cursor.execute('''insert into liquidity_windows
              (symbol,base_month,rank_month,trading_days,primary_amount,independent_lower,independent_upper,
@@ -69,6 +89,8 @@ def run():
     if baseline!=(BASE/'output/baseline_b.json').read_bytes():raise RuntimeError('Published baseline changed')
     result={'policy':liquidity.POLICY,'windows':verified,'input_sha':liquidity.input_sha(),
             'immutable_guard_rejections':rejected,'pending_version_blocks_old_approval':True,
+            'inconsistent_totals_rejected':True,
+            'forced_rest_fallback_exact_match':True,
             'all_probe_changes_rolled_back':True,'published_outputs_changed':False}
     (BASE/'output/liquidity_runtime_verification.json').write_text(json.dumps(result,indent=2)+'\n')
     print('PASS: %d real runtime windows; independent daily sums; 3 immutable guards; pending version; rolled back'%len(verified))
