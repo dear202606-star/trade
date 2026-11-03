@@ -13,6 +13,7 @@
 """
 import json
 import math
+import tempfile
 import os
 import re
 import sys
@@ -185,8 +186,19 @@ def main():
         "quotes": quotes,
     }
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
-    with open(OUT, "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, separators=(",", ":"))
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8",
+                                         dir=os.path.dirname(OUT), delete=False) as f:
+            temporary = f.name
+            json.dump(payload, f, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(temporary, OUT)
+        temporary = None
+    finally:
+        if temporary is not None:
+            os.unlink(temporary)
     print(f"行情 {len(quotes)} / {len(tickers)}，汇率 {fx}，缺失 {len(stale)}")
 
 

@@ -7,6 +7,7 @@ import json
 import time
 import io
 import zipfile
+from contextlib import ExitStack
 from pathlib import Path
 
 import db_select
@@ -27,6 +28,23 @@ import quotes as quote_snapshot
 
 
 class PipelineTests(unittest.TestCase):
+    def test_quote_write_failures_preserve_last_snapshot_and_remove_temporary_files(self):
+        def partial_write(payload,stream,**kwargs):
+            stream.write('{partial')
+            raise OSError('serialization interrupted')
+        for stage in ('serialize','replace','nonfinite'):
+            with self.subTest(stage=stage),tempfile.TemporaryDirectory() as directory,ExitStack() as stack:
+                output=Path(directory)/'quotes.json';output.write_bytes(b'accepted bytes')
+                stack.enter_context(patch.object(quote_snapshot,'OUT',str(output)))
+                stack.enter_context(patch.object(quote_snapshot,'universe',return_value=['SPY']))
+                stack.enter_context(patch.object(quote_snapshot,'fetch_quotes',return_value=({'SPY':{'p':100}},[])))
+                stack.enter_context(patch.object(quote_snapshot,'fetch_fx',return_value=float('nan') if stage=='nonfinite' else 7))
+                if stage=='serialize':stack.enter_context(patch.object(quote_snapshot.json,'dump',side_effect=partial_write))
+                if stage=='replace':stack.enter_context(patch.object(quote_snapshot.os,'replace',side_effect=OSError('replace failed')))
+                with self.assertRaises((OSError,ValueError)):quote_snapshot.main()
+                self.assertEqual(output.read_bytes(),b'accepted bytes')
+                self.assertEqual(list(Path(directory).iterdir()),[output])
+
     def test_incomplete_quote_snapshot_preserves_previous_file_and_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             output=Path(directory)/'quotes.json';output.write_text('previous accepted snapshot')
