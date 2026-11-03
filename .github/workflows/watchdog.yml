@@ -25,10 +25,14 @@ jobs:
           python-version: "3.12"
 
       - name: 实时层健康（5 分钟级）
-        continue-on-error: true
-        run: python realtime_check.py
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          pip install psycopg2-binary
+          python realtime_check.py
 
       - name: 检查线上健康与部署新鲜度
+        if: always()
         id: check
         run: |
           python - <<'PY'
