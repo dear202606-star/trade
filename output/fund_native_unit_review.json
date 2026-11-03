@@ -1,0 +1,50 @@
+{
+  "source_url": "https://www.ishares.com/us/literature/third-quarter-report/tqr-ishares-trust-equity-jpm-12-31.pdf",
+  "source_sha256": "be504252b271284ab1d56705cf5e390f4e863811a3adc94d732a24e40b62e0fd",
+  "fund": "iShares\u00ae Core S&P 500 ETF",
+  "report_date": "2025-12-31",
+  "parsed_candidate_rows": 494,
+  "reviewed_unit_proofs": [
+    {
+      "symbol": "ABNB",
+      "date": "2025-12-31",
+      "independent_close": "135.72",
+      "fund_row": {
+        "page": 9,
+        "name": "Airbnb, Inc., Class A(a)(b)",
+        "shares": 5529473,
+        "reported_usd_value": 750460076
+      },
+      "implied_price": "135.7200000795735868499583957",
+      "unit_interval_low": "135.7199998987245258273256782",
+      "unit_interval_high": "135.7200002604226478725911131",
+      "usd_value_difference": "0.44",
+      "independent_cache_sha256": "2b424e78b6f616f7a52f688248d0ca088a16c6a30271c7db093f93ce368d895c"
+    },
+    {
+      "symbol": "CRWD",
+      "date": "2025-12-31",
+      "independent_close": "468.76",
+      "fund_row": {
+        "page": 11,
+        "name": "Crowdstrike Holdings, Inc., Class A(a)(b)",
+        "shares": 3262803,
+        "reported_usd_value": 1529471534
+      },
+      "implied_price": "468.7599999141842152284400866",
+      "unit_interval_low": "468.7599996076992696157261103",
+      "unit_interval_high": "468.7600002206691608411540629",
+      "usd_value_difference": "0.28",
+      "independent_cache_sha256": "6787b48013c272f3a36bce9d5ffed014e5841702f53aa89d22d1eac090dff983"
+    }
+  ],
+  "scope": "Two explicitly reviewed names/classes only. Candidate extraction is incomplete; no fuzzy identity matching, no wholesale price approval.",
+  "database_and_published_outputs_changed": false,
+  "rejected_csv_probe": {
+    "sha256": "f87992fb55584a7f2d0dfa31765da5d4598de83c18f24f25282ade1834caaf6b",
+    "source_url": "https://www.ishares.com/us/products/239726/ishares-core-s-p-500-etf/latest-holdings.csv?asOfDate=20251231",
+    "requested_date": "2025-12-31",
+    "reason": "Requested historical date differs from actual holdings date: 2026-11-02",
+    "used_as_historical_price_data": false
+  }
+}
