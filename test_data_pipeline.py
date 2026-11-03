@@ -29,10 +29,22 @@ class PipelineTests(unittest.TestCase):
     def test_failed_history_validation_cannot_be_forced_into_a_lock(self):
         with patch.object(lock_stage,'check',return_value=(1,{})), \
              patch.object(lock_stage,'db') as database:
+            cursor=database.return_value.__enter__.return_value.cursor.return_value.__enter__.return_value
+            cursor.fetchone.return_value=None
             for force in (False,True):
                 with self.subTest(force=force):
                     self.assertEqual(lock_stage.lock(2010,2025,force=force),1)
-            database.assert_not_called()
+            self.assertEqual(cursor.execute.call_count,2)
+            self.assertTrue(all(call.args[0].lstrip().startswith('select') for call in cursor.execute.call_args_list))
+
+    def test_existing_history_lock_skips_measurement_and_writes(self):
+        with patch.object(lock_stage,'db') as database,patch.object(lock_stage,'check') as check:
+            cursor=database.return_value.__enter__.return_value.cursor.return_value.__enter__.return_value
+            cursor.fetchone.return_value=('accepted-original-hash',)
+            self.assertEqual(lock_stage.lock(2010,2025),0)
+            check.assert_not_called()
+            cursor.execute.assert_called_once()
+            self.assertTrue(cursor.execute.call_args.args[0].lstrip().startswith('select'))
 
     def test_monthly_signal_reads_prices_members_and_sectors_from_database(self):
         with patch.object(db_prices,'load_all',return_value={'TEST':{'2025-12':(12,13)}}), \

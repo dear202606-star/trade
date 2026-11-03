@@ -120,6 +120,14 @@ def check(y0, y1):
 
 
 def lock(y0, y1, force=False):
+    scope=("%d-01" % y0,"%d-12" % y1)
+    with db() as c, c.cursor() as cur:
+        cur.execute("""select hash from locks where kind='monthly_prices'
+                       and scope_from=%s and scope_to=%s and status='locked'""",scope)
+        existing=cur.fetchone()
+    if existing is not None:
+        print("✅ 历史区间已锁定，直接保留，不重新加工（hash %s）" % existing[0])
+        return 0
     _rc, m = check(y0, y1)
     problems = [] if _rc == 0 else ["校验未通过（见上）"]
     if problems:
@@ -134,9 +142,13 @@ def lock(y0, y1, force=False):
                        values ('monthly_prices', %s, %s, 'locked', %s, %s, %s, now(), %s)
                        on conflict (kind, scope_from, scope_to) do update
                        set status='locked', rows=excluded.rows, symbols=excluded.symbols,
-                           hash=excluded.hash, locked_at=now()""",
+                           hash=excluded.hash, locked_at=now()
+                       where locks.status is distinct from 'locked'""",
                     ("%d-01" % y0, "%d-12" % y1, m["rows"], m["symbols"], m["hash"],
                      "锁定后不可写；修复需新建版本"))
+        if cur.rowcount==0:
+            print("✅ 历史区间已被锁定，保留原验收记录")
+            return 0
     print("✅ 已锁定 %d-%d（hash %s）" % (y0, y1, m["hash"]))
     return 0
 
