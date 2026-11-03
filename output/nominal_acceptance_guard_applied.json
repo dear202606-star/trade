@@ -1,0 +1,11 @@
+{
+  "shadow_probe": {
+    "blocked_mutations": 8,
+    "higher_priority_cannot_replace_accepted": true,
+    "ordinary_validation_logs_unaffected": true,
+    "temporary_changes_rolled_back": true
+  },
+  "applied": true,
+  "selected_rows_changed": 0,
+  "explicitly_accepted_points": 3
+}

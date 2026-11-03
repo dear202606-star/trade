@@ -1,0 +1,8 @@
+{
+  "explicitly_accepted_points": 3,
+  "live_price_mutation_blocked": true,
+  "live_evidence_deletion_blocked": true,
+  "higher_priority_observation_cannot_change_selected_price": true,
+  "uncommitted_probe_rolled_back": true,
+  "readonly_rest_preserved": true
+}
