@@ -1,0 +1,54 @@
+{
+  "verified_at": "2026-11-03T12:16:21.894793+00:00",
+  "facts": [
+    {
+      "symbol": "BKNG",
+      "month": "2018-02",
+      "date": "2018-02-28",
+      "close": 2034.04,
+      "evidence_sha256": "21a0ec4c0d96ccbce2fbc42143429db84cf30a74f1b7c6f963d6b71600b8d11e"
+    },
+    {
+      "symbol": "MMM",
+      "month": "2017-11",
+      "date": "2017-11-30",
+      "close": 243.14,
+      "evidence_sha256": "09a8be2a30e889c4901823f35214540fa961b7d7f11d66ebe988f25389b917dd"
+    },
+    {
+      "symbol": "MMM",
+      "month": "2017-12",
+      "date": "2017-12-29",
+      "close": 235.37,
+      "evidence_sha256": "e5008bb5bf06beb89dc737fc6ec25bffc60566c65fd8a20a9245b1096a2fdbaa"
+    },
+    {
+      "symbol": "TRV",
+      "month": "2010-08",
+      "date": "2010-08-31",
+      "close": 48.99,
+      "evidence_sha256": "ee53c5e46f824fd6d9f9adf6dd0523c407c7a87882aa06034538e329912d4c05"
+    },
+    {
+      "symbol": "TRV",
+      "month": "2011-08",
+      "date": "2011-08-31",
+      "close": 50.46,
+      "evidence_sha256": "ea66397ac2f535f432b14cd3778aa5c81d491b6c6b36acce324384b5e67d5635"
+    }
+  ],
+  "anonymous_rest_exact_matches": 5,
+  "online_proof_digest_matches": 5,
+  "blocked_live_mutations": 10,
+  "mutation_probes_rolled_back": true,
+  "accepted_repeat_skipped_reprocessing": true,
+  "source_and_observation_share_lock_probe": {
+    "symbols": [
+      "BKNG",
+      "MMM",
+      "TRV"
+    ],
+    "observations": 1412,
+    "rolled_back": true
+  }
+}

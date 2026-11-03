@@ -1,0 +1,209 @@
+{
+  "mode": "write",
+  "proofs": [
+    {
+      "symbol": "BKNG",
+      "month": "2018-02",
+      "date": "2018-02-28",
+      "close": 2034.04,
+      "old_date": "2018-02-26",
+      "old_close": 1905.64,
+      "old_source": "quandl_wiki",
+      "five_dollar_eligibility_changed": false,
+      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=105.BKNG&klt=103&fqt=0&beg=20180201&end=20180228&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "primary_cache_sha256": "af998e55bbdd22300324df48e875edcf22d61932a8f2ddc7d2a1e009d3bbbf7f",
+      "independent_daily": {
+        "date": "2018-02-28",
+        "close": 2034.04,
+        "cache_sha256": "b62f264b09dd617265cd95e137e88f955f690cbed1c8d3b08facac9f4176fa61"
+      },
+      "benchmark_calendar": {
+        "date": "2018-02-28",
+        "close": 271.65,
+        "cache_sha256": "460cc2428153dc6dbb8cefd4a8598b9633676349871b63e5796b313ae887de1d"
+      },
+      "native_unit_source": "kaggle_yfinance2022",
+      "native_unit_close": 2034.0400390625,
+      "native_unit_evidence": "Same-vintage inverse dividend/split events; terminal quote 2022-07-12; AAPL/NVDA/MSFT native-price anchors; https://investor.apple.com/investor-relations/faq/default.aspx ; archive c8a562dfe260afa595c5e9fdb570e79350125204c6bfa3217d7bb9b6280f38d6",
+      "native_unit_sha256": "c8a562dfe260afa595c5e9fdb570e79350125204c6bfa3217d7bb9b6280f38d6",
+      "return_pairs": 104,
+      "median_log_deviation": 9.071772519252421e-08,
+      "p90_log_deviation": 0.0016561693458580808,
+      "identity_crosscheck_period": [
+        "2018-02",
+        "2026-10"
+      ],
+      "identity_crosscheck_is_not_a_strategy_ranking_input": true,
+      "scope": "Only this month-end screening fact; no return-price correction or other date approved"
+    },
+    {
+      "symbol": "MMM",
+      "month": "2017-11",
+      "date": "2017-11-30",
+      "close": 243.14,
+      "old_date": "2017-11-28",
+      "old_close": 235.63,
+      "old_source": "quandl_wiki",
+      "five_dollar_eligibility_changed": false,
+      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=106.MMM&klt=103&fqt=0&beg=20171101&end=20171231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "primary_cache_sha256": "405f5d7a10f35171dfc051346fa4c3eeab46b236874dc45429df8b2fd2ade519",
+      "independent_daily": {
+        "date": "2017-11-30",
+        "close": 243.14,
+        "cache_sha256": "1e989a84cc7f25cdce287e74a547341f041fb7c4e6a74093ff1562ed0682f961"
+      },
+      "benchmark_calendar": {
+        "date": "2017-11-30",
+        "close": 265.01,
+        "cache_sha256": "460cc2428153dc6dbb8cefd4a8598b9633676349871b63e5796b313ae887de1d"
+      },
+      "native_unit_source": "kaggle_yfinance2022",
+      "native_unit_close": 243.13998333615473,
+      "native_unit_evidence": "Same-vintage inverse dividend/split events; terminal quote 2022-07-12; AAPL/NVDA/MSFT native-price anchors; https://investor.apple.com/investor-relations/faq/default.aspx ; archive c8a562dfe260afa595c5e9fdb570e79350125204c6bfa3217d7bb9b6280f38d6",
+      "native_unit_sha256": "c8a562dfe260afa595c5e9fdb570e79350125204c6bfa3217d7bb9b6280f38d6",
+      "return_pairs": 201,
+      "median_log_deviation": 2.3550311458982036e-07,
+      "p90_log_deviation": 0.008104834168036208,
+      "identity_crosscheck_period": [
+        "2010-01",
+        "2026-10"
+      ],
+      "identity_crosscheck_is_not_a_strategy_ranking_input": true,
+      "scope": "Only this month-end screening fact; no return-price correction or other date approved"
+    },
+    {
+      "symbol": "MMM",
+      "month": "2017-12",
+      "date": "2017-12-29",
+      "close": 235.37,
+      "old_date": "2017-12-05",
+      "old_close": 238.26,
+      "old_source": "quandl_wiki",
+      "five_dollar_eligibility_changed": false,
+      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=106.MMM&klt=103&fqt=0&beg=20171101&end=20171231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "primary_cache_sha256": "405f5d7a10f35171dfc051346fa4c3eeab46b236874dc45429df8b2fd2ade519",
+      "independent_daily": {
+        "date": "2017-12-29",
+        "close": 235.37,
+        "cache_sha256": "1e989a84cc7f25cdce287e74a547341f041fb7c4e6a74093ff1562ed0682f961"
+      },
+      "benchmark_calendar": {
+        "date": "2017-12-29",
+        "close": 266.86,
+        "cache_sha256": "460cc2428153dc6dbb8cefd4a8598b9633676349871b63e5796b313ae887de1d"
+      },
+      "native_unit_source": "kaggle_yfinance2022",
+      "native_unit_close": 235.37001366051115,
+      "native_unit_evidence": "Same-vintage inverse dividend/split events; terminal quote 2022-07-12; AAPL/NVDA/MSFT native-price anchors; https://investor.apple.com/investor-relations/faq/default.aspx ; archive c8a562dfe260afa595c5e9fdb570e79350125204c6bfa3217d7bb9b6280f38d6",
+      "native_unit_sha256": "c8a562dfe260afa595c5e9fdb570e79350125204c6bfa3217d7bb9b6280f38d6",
+      "return_pairs": 201,
+      "median_log_deviation": 2.3550311458982036e-07,
+      "p90_log_deviation": 0.008104834168036208,
+      "identity_crosscheck_period": [
+        "2010-01",
+        "2026-10"
+      ],
+      "identity_crosscheck_is_not_a_strategy_ranking_input": true,
+      "scope": "Only this month-end screening fact; no return-price correction or other date approved"
+    },
+    {
+      "symbol": "TRV",
+      "month": "2010-08",
+      "date": "2010-08-31",
+      "close": 48.99,
+      "old_date": "2010-08-27",
+      "old_close": 49.87,
+      "old_source": "quandl_wiki",
+      "five_dollar_eligibility_changed": false,
+      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=106.TRV&klt=103&fqt=0&beg=20100801&end=20110831&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "primary_cache_sha256": "f3c40b21f3143f626e4092f0b0b00babcf5f486ae576c89e9230ebf29bce7577",
+      "independent_daily": {
+        "date": "2010-08-31",
+        "close": 48.99,
+        "cache_sha256": "3134381a621cc8afcd13dc89644a9a285571f68b398565100ee60b61c3f55eb0"
+      },
+      "benchmark_calendar": {
+        "date": "2010-08-31",
+        "close": 105.31,
+        "cache_sha256": "460cc2428153dc6dbb8cefd4a8598b9633676349871b63e5796b313ae887de1d"
+      },
+      "native_unit_source": "kaggle_yfinance2022",
+      "native_unit_close": 48.98999018880883,
+      "native_unit_evidence": "Same-vintage inverse dividend/split events; terminal quote 2022-07-12; AAPL/NVDA/MSFT native-price anchors; https://investor.apple.com/investor-relations/faq/default.aspx ; archive c8a562dfe260afa595c5e9fdb570e79350125204c6bfa3217d7bb9b6280f38d6",
+      "native_unit_sha256": "c8a562dfe260afa595c5e9fdb570e79350125204c6bfa3217d7bb9b6280f38d6",
+      "return_pairs": 201,
+      "median_log_deviation": 2.507226505415538e-07,
+      "p90_log_deviation": 0.006134362797096084,
+      "identity_crosscheck_period": [
+        "2010-01",
+        "2026-10"
+      ],
+      "identity_crosscheck_is_not_a_strategy_ranking_input": true,
+      "scope": "Only this month-end screening fact; no return-price correction or other date approved"
+    },
+    {
+      "symbol": "TRV",
+      "month": "2011-08",
+      "date": "2011-08-31",
+      "close": 50.46,
+      "old_date": "2011-08-25",
+      "old_close": 47.99,
+      "old_source": "quandl_wiki",
+      "five_dollar_eligibility_changed": false,
+      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=106.TRV&klt=103&fqt=0&beg=20100801&end=20110831&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "primary_cache_sha256": "f3c40b21f3143f626e4092f0b0b00babcf5f486ae576c89e9230ebf29bce7577",
+      "independent_daily": {
+        "date": "2011-08-31",
+        "close": 50.46,
+        "cache_sha256": "3134381a621cc8afcd13dc89644a9a285571f68b398565100ee60b61c3f55eb0"
+      },
+      "benchmark_calendar": {
+        "date": "2011-08-31",
+        "close": 122.22,
+        "cache_sha256": "460cc2428153dc6dbb8cefd4a8598b9633676349871b63e5796b313ae887de1d"
+      },
+      "native_unit_source": "kaggle_yfinance2022",
+      "native_unit_close": 50.46000542616247,
+      "native_unit_evidence": "Same-vintage inverse dividend/split events; terminal quote 2022-07-12; AAPL/NVDA/MSFT native-price anchors; https://investor.apple.com/investor-relations/faq/default.aspx ; archive c8a562dfe260afa595c5e9fdb570e79350125204c6bfa3217d7bb9b6280f38d6",
+      "native_unit_sha256": "c8a562dfe260afa595c5e9fdb570e79350125204c6bfa3217d7bb9b6280f38d6",
+      "return_pairs": 201,
+      "median_log_deviation": 2.507226505415538e-07,
+      "p90_log_deviation": 0.006134362797096084,
+      "identity_crosscheck_period": [
+        "2010-01",
+        "2026-10"
+      ],
+      "identity_crosscheck_is_not_a_strategy_ranking_input": true,
+      "scope": "Only this month-end screening fact; no return-price correction or other date approved"
+    }
+  ],
+  "selected_keys_changed": [
+    [
+      "BKNG",
+      "2018-02"
+    ],
+    [
+      "MMM",
+      "2017-11"
+    ],
+    [
+      "MMM",
+      "2017-12"
+    ],
+    [
+      "TRV",
+      "2010-08"
+    ],
+    [
+      "TRV",
+      "2011-08"
+    ]
+  ],
+  "preserved_snapshot_sha256": {
+    "returns": "8792540652f8a7dc6f4c5e711d77999642b625b60d329b118538d6079e4a691e",
+    "picks": "8ef7549c17d28b1cabb17ebd7c7b3fedebc2990a0261940ed141490d43eed044",
+    "locks": "b9e2118aab1d0182908f578f3b43caaacb47633a8554aa845883b94de54ecb35",
+    "observations": "b77bd0318969de9cfcc46a9c65ac4efeaa7fae339c631e998d84206cd2ca6da6"
+  },
+  "return_prices_picks_locks_original_observations_changed": false
+}

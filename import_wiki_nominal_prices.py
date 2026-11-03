@@ -7,6 +7,7 @@ from pathlib import Path
 import psycopg2.extras
 import db_prices
 import db_select
+from research.audit_nominal_month_ends import daily_month_ends
 
 BASE = Path(__file__).resolve().parent
 
@@ -26,7 +27,9 @@ def run(write=False):
         apple[0]['raw_before']>600 and 80<apple[0]['raw_after']<100
         and abs(apple[0]['raw_ratio_times_split']/apple[0]['adjusted_ratio']-1)<.001):
         raise RuntimeError('Raw price-unit split anchor missing or inconsistent')
+    calendar = daily_month_ends(BASE/'output/_nominal_daily/SPY.json', 'SPY')
     rows = []
+    rejected_dates = []
     for symbol, record in review['results'].items():
         if record['status']!='crosscheck_pass':
             continue
@@ -35,6 +38,12 @@ def run(write=False):
             source_bar = original[month]
             if source_bar['date']!=bar['date'] or source_bar['close']!=bar['close']:
                 raise RuntimeError('Monthly close differs from archive')
+            if month not in calendar:
+                raise RuntimeError('Independent benchmark calendar month missing')
+            if bar['date'] != calendar[month]['date']:
+                rejected_dates.append({'symbol':symbol,'month':month,'archive_date':bar['date'],
+                                       'benchmark_date':calendar[month]['date']})
+                continue
             rows.append((symbol,month,bar['close'],bar['date'],'quandl_wiki',review['source_url'],
                          dt.datetime.now(dt.timezone.utc),archive['archive_sha256'],
                          record['overlap_returns'],record['median_log_deviation'],
@@ -57,6 +66,8 @@ def run(write=False):
         finally:
             connection.close()
     receipt = {'write':write,'prepared_observations':len(rows),'stored_wiki_observations':inserted,
+               'rejected_incomplete_months':rejected_dates,
+               'calendar_cache_sha256':next(iter(calendar.values()))['cache_sha256'],
                'raw_unit_anchor':apple[0],'archive_sha256':archive['archive_sha256'],
                'return_prices_locks_and_published_baselines_changed':False}
     (BASE/'output/wiki_nominal_ingest.json').write_text(json.dumps(receipt,indent=2)+'\n')

@@ -11,23 +11,33 @@ sys.path.insert(0, str(BASE))
 import db_sources
 
 
-def daily_month_end(path, symbol, month):
+def daily_month_ends(path, symbol):
     content = path.read_bytes()
     record = json.loads(content)
     expected = ('https://stock.finance.sina.com.cn/usstock/api/jsonp_v2.php/'
                 'x/US_MinKService.getDailyK?symbol=' + symbol)
     if record.get('endpoint') != expected:
         raise ValueError('Unexpected daily security identity')
-    rows = [r for r in record['rows'] if r['d'].startswith(month + '-')]
+    rows = record['rows']
     if not rows or len({r['d'] for r in rows}) != len(rows):
         raise ValueError('Missing or duplicate daily dates')
     for row in rows:
         dt.date.fromisoformat(row['d'])
         if not math.isfinite(float(row['c'])) or float(row['c']) <= 0:
             raise ValueError('Invalid daily closing price')
-    last = max(rows, key=lambda r: r['d'])
-    return {'date': last['d'], 'close': float(last['c']),
-            'cache_sha256': hashlib.sha256(content).hexdigest()}
+    fingerprint = hashlib.sha256(content).hexdigest()
+    monthly = {}
+    for row in sorted(rows, key=lambda r:r['d']):
+        monthly[row['d'][:7]] = {'date':row['d'],'close':float(row['c']),
+                                'cache_sha256':fingerprint}
+    return monthly
+
+
+def daily_month_end(path, symbol, month):
+    monthly = daily_month_ends(path, symbol)
+    if month not in monthly:
+        raise ValueError('Missing daily month')
+    return monthly[month]
 
 
 def run():
@@ -73,7 +83,10 @@ def run():
                               'selected': selected.get((symbol, month)),
                               'independent_daily': stock, 'benchmark_calendar': calendar,
                               'later_observation_corroborated': corroborated,
-                              'status': 'pending_explicit_acceptance'})
+                              'status': ('selection_matches_corroborated_month_end'
+                                  if selected.get((symbol,month),{}).get('date') == stock['date']
+                                  and abs(selected[(symbol,month)]['close']-stock['close']) < .001
+                                  else 'pending_explicit_acceptance')})
         result = {'generated_at': dt.datetime.now(dt.timezone.utc).isoformat(),
                   'scope': 'Online eligible nominal observations with unit evidence; read only',
                   'counts': counts, 'date_conflicts': cases,

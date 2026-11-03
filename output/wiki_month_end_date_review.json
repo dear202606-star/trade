@@ -1,0 +1,881 @@
+{
+  "generated_at": "2026-11-03T12:14:28.131463+00:00",
+  "scope": "Cached WIKI review, not live selected-view acceptance",
+  "review_sha256": "df8590e0a16ee20193e5da530dfc8690332065ff0083688db1d363f73d19cdb3",
+  "archive_sha256": "36c667bbecf42c43e5b9e8e4e5d9a1268522705bc40a4bac9671d62c1a20cbae",
+  "benchmark_sha256": "460cc2428153dc6dbb8cefd4a8598b9633676349871b63e5796b313ae887de1d",
+  "count": 62,
+  "cases": [
+    {
+      "symbol": "AVP",
+      "month": "2017-04",
+      "archive_date": "2017-04-25",
+      "benchmark_date": "2017-04-28",
+      "close": 4.82,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 4.82,
+        "date": "2017-04-25"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "BBBY",
+      "month": "2017-07",
+      "archive_date": "2017-07-25",
+      "benchmark_date": "2017-07-31",
+      "close": 28.31,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 28.31,
+        "date": "2017-07-25"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "BCR",
+      "month": "2017-12",
+      "archive_date": "2017-12-28",
+      "benchmark_date": "2017-12-29",
+      "close": 331.24,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 331.24,
+        "date": "2017-12-28"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "CAM",
+      "month": "2016-04",
+      "archive_date": "2016-04-01",
+      "benchmark_date": "2016-04-29",
+      "close": 66.01,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 66.01,
+        "date": "2016-04-01"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "FSLR",
+      "month": "2017-04",
+      "archive_date": "2017-04-25",
+      "benchmark_date": "2017-04-28",
+      "close": 27.54,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 27.54,
+        "date": "2017-04-25"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "CPWR",
+      "month": "2014-12",
+      "archive_date": "2014-12-15",
+      "benchmark_date": "2014-12-31",
+      "close": 10.35,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 10.35,
+        "date": "2014-12-15"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "ESV",
+      "month": "2017-04",
+      "archive_date": "2017-04-25",
+      "benchmark_date": "2017-04-28",
+      "close": 8.35,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 8.35,
+        "date": "2017-04-25"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "OI",
+      "month": "2017-04",
+      "archive_date": "2017-04-25",
+      "benchmark_date": "2017-04-28",
+      "close": 21.99,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 21.99,
+        "date": "2017-04-25"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "JNS",
+      "month": "2017-05",
+      "archive_date": "2017-05-26",
+      "benchmark_date": "2017-05-31",
+      "close": 14.17,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 14.17,
+        "date": "2017-05-26"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "JNY",
+      "month": "2014-04",
+      "archive_date": "2014-04-08",
+      "benchmark_date": "2014-04-30",
+      "close": 14.99,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 14.99,
+        "date": "2014-04-08"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "LLTC",
+      "month": "2017-03",
+      "archive_date": "2017-03-10",
+      "benchmark_date": "2017-03-31",
+      "close": 65.0,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 65.0,
+        "date": "2017-03-10"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "LXK",
+      "month": "2016-11",
+      "archive_date": "2016-11-28",
+      "benchmark_date": "2016-11-30",
+      "close": 40.49,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 40.49,
+        "date": "2016-11-28"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "MJN",
+      "month": "2017-06",
+      "archive_date": "2017-06-14",
+      "benchmark_date": "2017-06-30",
+      "close": 89.98,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 89.98,
+        "date": "2017-06-14"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "NE",
+      "month": "2017-04",
+      "archive_date": "2017-04-25",
+      "benchmark_date": "2017-04-28",
+      "close": 4.94,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 4.94,
+        "date": "2017-04-25"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "Q",
+      "month": "2017-11",
+      "archive_date": "2017-11-14",
+      "benchmark_date": "2017-11-30",
+      "close": 103.48,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 103.48,
+        "date": "2017-11-14"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "QEP",
+      "month": "2017-04",
+      "archive_date": "2017-04-25",
+      "benchmark_date": "2017-04-28",
+      "close": 11.79,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 11.79,
+        "date": "2017-04-25"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "RAI",
+      "month": "2017-07",
+      "archive_date": "2017-07-24",
+      "benchmark_date": "2017-07-31",
+      "close": 65.4,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 65.4,
+        "date": "2017-07-24"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "RDC",
+      "month": "2017-04",
+      "archive_date": "2017-04-25",
+      "benchmark_date": "2017-04-28",
+      "close": 14.52,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 14.52,
+        "date": "2017-04-25"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "SPLS",
+      "month": "2017-09",
+      "archive_date": "2017-09-12",
+      "benchmark_date": "2017-09-29",
+      "close": 10.25,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 10.25,
+        "date": "2017-09-12"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "STJ",
+      "month": "2017-01",
+      "archive_date": "2017-01-04",
+      "benchmark_date": "2017-01-31",
+      "close": 80.82,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 80.82,
+        "date": "2017-01-04"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "SWN",
+      "month": "2017-04",
+      "archive_date": "2017-04-25",
+      "benchmark_date": "2017-04-28",
+      "close": 7.71,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 7.71,
+        "date": "2017-04-25"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "TEG",
+      "month": "2015-06",
+      "archive_date": "2015-06-29",
+      "benchmark_date": "2015-06-30",
+      "close": 69.66,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 69.66,
+        "date": "2015-06-29"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "TGNA",
+      "month": "2017-06",
+      "archive_date": "2017-06-01",
+      "benchmark_date": "2017-06-30",
+      "close": 15.35,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 15.35,
+        "date": "2017-06-01"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "WFM",
+      "month": "2017-08",
+      "archive_date": "2017-08-28",
+      "benchmark_date": "2017-08-31",
+      "close": 41.99,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 41.99,
+        "date": "2017-08-28"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "ATI",
+      "month": "2017-04",
+      "archive_date": "2017-04-25",
+      "benchmark_date": "2017-04-28",
+      "close": 19.88,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 19.88,
+        "date": "2017-04-25"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "HSH",
+      "month": "2014-07",
+      "archive_date": "2014-07-30",
+      "benchmark_date": "2014-07-31",
+      "close": 62.79,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 62.79,
+        "date": "2014-07-30"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "KRFT",
+      "month": "2015-07",
+      "archive_date": "2015-07-02",
+      "benchmark_date": "2015-07-31",
+      "close": 88.19,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 88.19,
+        "date": "2015-07-02"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "CNX",
+      "month": "2017-04",
+      "archive_date": "2017-04-25",
+      "benchmark_date": "2017-04-28",
+      "close": 15.92,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 15.92,
+        "date": "2017-04-25"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "JOY",
+      "month": "2017-04",
+      "archive_date": "2017-04-05",
+      "benchmark_date": "2017-04-28",
+      "close": 28.3,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 28.3,
+        "date": "2017-04-05"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "MIL",
+      "month": "2016-02",
+      "archive_date": "2016-02-12",
+      "benchmark_date": "2016-02-29",
+      "close": 1.93,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 1.93,
+        "date": "2016-02-12"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "PETM",
+      "month": "2015-03",
+      "archive_date": "2015-03-11",
+      "benchmark_date": "2015-03-31",
+      "close": 82.98,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 82.98,
+        "date": "2015-03-11"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "SIAL",
+      "month": "2015-11",
+      "archive_date": "2015-11-18",
+      "benchmark_date": "2015-11-30",
+      "close": 139.76,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 139.76,
+        "date": "2015-11-18"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "SWY",
+      "month": "2015-01",
+      "archive_date": "2015-01-29",
+      "benchmark_date": "2015-01-30",
+      "close": 35.1,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 35.1,
+        "date": "2015-01-29"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "ARG",
+      "month": "2016-05",
+      "archive_date": "2016-05-20",
+      "benchmark_date": "2016-05-31",
+      "close": 142.95,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 142.95,
+        "date": "2016-05-20"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "CMCSK",
+      "month": "2015-12",
+      "archive_date": "2015-12-11",
+      "benchmark_date": "2015-12-31",
+      "close": 58.0,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 58.0,
+        "date": "2015-12-11"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "CVC",
+      "month": "2016-06",
+      "archive_date": "2016-06-20",
+      "benchmark_date": "2016-06-30",
+      "close": 34.87,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": null,
+      "live_status": "not_in_selected_nominal_view"
+    },
+    {
+      "symbol": "GMCR",
+      "month": "2016-03",
+      "archive_date": "2016-03-02",
+      "benchmark_date": "2016-03-31",
+      "close": 91.67,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 91.67,
+        "date": "2016-03-02"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "HOT",
+      "month": "2016-09",
+      "archive_date": "2016-09-22",
+      "benchmark_date": "2016-09-30",
+      "close": 77.05,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 77.05,
+        "date": "2016-09-22"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "QLGC",
+      "month": "2016-08",
+      "archive_date": "2016-08-16",
+      "benchmark_date": "2016-08-31",
+      "close": 16.07,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 16.07,
+        "date": "2016-08-16"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "ACAS",
+      "month": "2017-01",
+      "archive_date": "2017-01-03",
+      "benchmark_date": "2017-01-31",
+      "close": 17.99,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 17.99,
+        "date": "2017-01-03"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "APOL",
+      "month": "2017-02",
+      "archive_date": "2017-02-01",
+      "benchmark_date": "2017-02-28",
+      "close": 9.995,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 9.995,
+        "date": "2017-02-01"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "CFN",
+      "month": "2015-03",
+      "archive_date": "2015-03-16",
+      "benchmark_date": "2015-03-31",
+      "close": 59.91,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 59.91,
+        "date": "2015-03-16"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "TWC",
+      "month": "2016-05",
+      "archive_date": "2016-05-17",
+      "benchmark_date": "2016-05-31",
+      "close": 209.56,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 209.56,
+        "date": "2016-05-17"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "DTV",
+      "month": "2017-04",
+      "archive_date": "2017-04-25",
+      "benchmark_date": "2017-04-28",
+      "close": 53.75,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 53.75,
+        "date": "2017-04-25"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "LSI",
+      "month": "2017-04",
+      "archive_date": "2017-04-25",
+      "benchmark_date": "2017-04-28",
+      "close": 82.85,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 82.85,
+        "date": "2017-04-25"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "FOSL",
+      "month": "2017-04",
+      "archive_date": "2017-04-25",
+      "benchmark_date": "2017-04-28",
+      "close": 17.15,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 17.15,
+        "date": "2017-04-25"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "R",
+      "month": "2017-06",
+      "archive_date": "2017-06-16",
+      "benchmark_date": "2017-06-30",
+      "close": 67.15,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 67.15,
+        "date": "2017-06-16"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "RIG",
+      "month": "2017-07",
+      "archive_date": "2017-07-25",
+      "benchmark_date": "2017-07-31",
+      "close": 8.77,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 8.77,
+        "date": "2017-07-25"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "NBR",
+      "month": "2017-04",
+      "archive_date": "2017-04-25",
+      "benchmark_date": "2017-04-28",
+      "close": 11.77,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 11.77,
+        "date": "2017-04-25"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "SLM",
+      "month": "2017-04",
+      "archive_date": "2017-04-25",
+      "benchmark_date": "2017-04-28",
+      "close": 12.71,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 12.71,
+        "date": "2017-04-25"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "MUR",
+      "month": "2017-07",
+      "archive_date": "2017-07-25",
+      "benchmark_date": "2017-07-31",
+      "close": 25.72,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 25.72,
+        "date": "2017-07-25"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "TDC",
+      "month": "2017-06",
+      "archive_date": "2017-06-16",
+      "benchmark_date": "2017-06-30",
+      "close": 28.3,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 28.3,
+        "date": "2017-06-16"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "THC",
+      "month": "2017-04",
+      "archive_date": "2017-04-25",
+      "benchmark_date": "2017-04-28",
+      "close": 15.61,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 15.61,
+        "date": "2017-04-25"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "TRV",
+      "month": "2010-08",
+      "archive_date": "2010-08-27",
+      "benchmark_date": "2010-08-31",
+      "close": 49.87,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "eastmoney_native",
+        "close": 48.99,
+        "date": "2010-08-31"
+      },
+      "live_status": "selected_date_matches_benchmark"
+    },
+    {
+      "symbol": "TRV",
+      "month": "2011-08",
+      "archive_date": "2011-08-25",
+      "benchmark_date": "2011-08-31",
+      "close": 47.99,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "eastmoney_native",
+        "close": 50.46,
+        "date": "2011-08-31"
+      },
+      "live_status": "selected_date_matches_benchmark"
+    },
+    {
+      "symbol": "URBN",
+      "month": "2017-04",
+      "archive_date": "2017-04-25",
+      "benchmark_date": "2017-04-28",
+      "close": 23.31,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 23.31,
+        "date": "2017-04-25"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "MMM",
+      "month": "2017-11",
+      "archive_date": "2017-11-28",
+      "benchmark_date": "2017-11-30",
+      "close": 235.63,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "eastmoney_native",
+        "close": 243.14,
+        "date": "2017-11-30"
+      },
+      "live_status": "selected_date_matches_benchmark"
+    },
+    {
+      "symbol": "MMM",
+      "month": "2017-12",
+      "archive_date": "2017-12-05",
+      "benchmark_date": "2017-12-29",
+      "close": 238.26,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "eastmoney_native",
+        "close": 235.37,
+        "date": "2017-12-29"
+      },
+      "live_status": "selected_date_matches_benchmark"
+    },
+    {
+      "symbol": "AN",
+      "month": "2017-08",
+      "archive_date": "2017-08-07",
+      "benchmark_date": "2017-08-31",
+      "close": 40.34,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 40.34,
+        "date": "2017-08-07"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "GNW",
+      "month": "2017-04",
+      "archive_date": "2017-04-25",
+      "benchmark_date": "2017-04-28",
+      "close": 4.11,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 4.11,
+        "date": "2017-04-25"
+      },
+      "live_status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "BKNG",
+      "month": "2018-02",
+      "archive_date": "2018-02-26",
+      "benchmark_date": "2018-02-28",
+      "close": 1905.64,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "eastmoney_native",
+        "close": 2034.04,
+        "date": "2018-02-28"
+      },
+      "live_status": "selected_date_matches_benchmark"
+    },
+    {
+      "symbol": "PBI",
+      "month": "2017-04",
+      "archive_date": "2017-04-25",
+      "benchmark_date": "2017-04-28",
+      "close": 13.41,
+      "status": "requires_coverage_or_corporate_action_review",
+      "live_selected": {
+        "source": "quandl_wiki",
+        "close": 13.41,
+        "date": "2017-04-25"
+      },
+      "live_status": "selected_date_requires_review"
+    }
+  ],
+  "automatic_database_mutations": false,
+  "live_reviewed_at": "2026-11-03T12:17:03.072848+00:00",
+  "live_status_counts": {
+    "selected_date_requires_review": 56,
+    "not_in_selected_nominal_view": 1,
+    "selected_date_matches_benchmark": 5
+  }
+}
