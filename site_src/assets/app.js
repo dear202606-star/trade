@@ -448,9 +448,9 @@
     const qs = (quotes && quotes.quotes) || {};
     const pos = (equity && equity.position) || [];
     const amt = +(localStorage.getItem("dsh.amt") || 100000);
-    const exp = (equity && equity.exposure != null) ? equity.exposure : 1;
-    if (!Array.isArray(pos) || !pos.length || !Number.isFinite(amt) || amt <= 0 ||
-        !Number.isFinite(exp) || exp < 0 || exp > 1) return null;
+    // Strategy performance stays fully invested; exposure is advice only.
+    const exp = 1;
+    if (!Array.isArray(pos) || !pos.length || !Number.isFinite(amt) || amt <= 0) return null;
     if (pos.some(function (p) {
       if (!p || typeof p !== 'object') return true;
       const q = qs[p.ticker];

@@ -25,7 +25,7 @@
     var trend = (SIG && SIG.trend) || "—";
     var hold = trend === "满仓";
 
-    $("verdict").textContent = hold ? "持有不动" : "仓位减半";
+    $("verdict").textContent = hold ? "持有不动" : "建议减仓";
     $("verdictSub").textContent = hold
       ? "下次换仓 " + ((SIG && SIG.rebalance_hint) || "12 月末")
       : "大盘跌破均线 · 建议减仓";
@@ -54,7 +54,8 @@
   /* ---------- ② 当期账户 ---------- */
   function account() {
     var pos = (EQ && EQ.position) || [];
-    var exposure = (EQ && EQ.exposure != null) ? EQ.exposure : 1;
+    // Match the full-holding equity curve; advice does not trade this account.
+    var exposure = 1;
     var rows = [], mv = 0, cost = 0;
     pos.forEach(function (p) {
       var shares = p.entry > 0 ? (amt * p.weight * exposure) / p.entry : 0;

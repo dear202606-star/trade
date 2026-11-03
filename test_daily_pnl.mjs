@@ -24,6 +24,16 @@ test('all holdings contribute shares times actual price change', () => {
   assert.equal(result.pct, 0.04);
 });
 
+test('exposure advice never scales strategy shares, amount or daily return', () => {
+  const today = calculator();
+  const expected = today(null, quotes, equity);
+  for (const exposure of [0.5, 0, undefined]) {
+    const result = today(null, quotes, { ...equity, exposure });
+    assert.equal(result.amount, expected.amount);
+    assert.equal(result.pct, expected.pct);
+  }
+});
+
 test('missing price or previous close cannot produce a partial portfolio return', () => {
   for (const bad of [undefined, { p: 190 }, { p: 190, pc: 0 },
     { p: NaN, pc: 200 }, { p: 190, pc: Infinity }, { p: '190', pc: 200 }]) {
