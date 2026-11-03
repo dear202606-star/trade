@@ -1,0 +1,180 @@
+{
+  "generated_at": "2026-11-03T12:10:09.676807+00:00",
+  "scope": "Online eligible nominal observations with unit evidence; read only",
+  "counts": {
+    "eligible_disagreements": 41845,
+    "within_one_cent": 41755,
+    "five_dollar_crossings": 0,
+    "over_one_percent": 5,
+    "different_dates": 5
+  },
+  "date_conflicts": [
+    {
+      "symbol": "BKNG",
+      "month": "2018-02",
+      "observations": [
+        {
+          "date": "2018-02-28",
+          "close": 2034.0400390625,
+          "source": "kaggle_yfinance2022"
+        },
+        {
+          "date": "2018-02-26",
+          "close": 1905.64,
+          "source": "quandl_wiki"
+        }
+      ],
+      "selected": {
+        "source": "quandl_wiki",
+        "close": 1905.64,
+        "date": "2018-02-26"
+      },
+      "independent_daily": {
+        "date": "2018-02-28",
+        "close": 2034.04,
+        "cache_sha256": "b62f264b09dd617265cd95e137e88f955f690cbed1c8d3b08facac9f4176fa61"
+      },
+      "benchmark_calendar": {
+        "date": "2018-02-28",
+        "close": 271.65,
+        "cache_sha256": "460cc2428153dc6dbb8cefd4a8598b9633676349871b63e5796b313ae887de1d"
+      },
+      "later_observation_corroborated": true,
+      "status": "pending_explicit_acceptance"
+    },
+    {
+      "symbol": "MMM",
+      "month": "2017-11",
+      "observations": [
+        {
+          "date": "2017-11-30",
+          "close": 243.13998333615473,
+          "source": "kaggle_yfinance2022"
+        },
+        {
+          "date": "2017-11-28",
+          "close": 235.63,
+          "source": "quandl_wiki"
+        }
+      ],
+      "selected": {
+        "source": "quandl_wiki",
+        "close": 235.63,
+        "date": "2017-11-28"
+      },
+      "independent_daily": {
+        "date": "2017-11-30",
+        "close": 243.14,
+        "cache_sha256": "1e989a84cc7f25cdce287e74a547341f041fb7c4e6a74093ff1562ed0682f961"
+      },
+      "benchmark_calendar": {
+        "date": "2017-11-30",
+        "close": 265.01,
+        "cache_sha256": "460cc2428153dc6dbb8cefd4a8598b9633676349871b63e5796b313ae887de1d"
+      },
+      "later_observation_corroborated": true,
+      "status": "pending_explicit_acceptance"
+    },
+    {
+      "symbol": "MMM",
+      "month": "2017-12",
+      "observations": [
+        {
+          "date": "2017-12-29",
+          "close": 235.37001366051115,
+          "source": "kaggle_yfinance2022"
+        },
+        {
+          "date": "2017-12-05",
+          "close": 238.26,
+          "source": "quandl_wiki"
+        }
+      ],
+      "selected": {
+        "source": "quandl_wiki",
+        "close": 238.26,
+        "date": "2017-12-05"
+      },
+      "independent_daily": {
+        "date": "2017-12-29",
+        "close": 235.37,
+        "cache_sha256": "1e989a84cc7f25cdce287e74a547341f041fb7c4e6a74093ff1562ed0682f961"
+      },
+      "benchmark_calendar": {
+        "date": "2017-12-29",
+        "close": 266.86,
+        "cache_sha256": "460cc2428153dc6dbb8cefd4a8598b9633676349871b63e5796b313ae887de1d"
+      },
+      "later_observation_corroborated": true,
+      "status": "pending_explicit_acceptance"
+    },
+    {
+      "symbol": "TRV",
+      "month": "2010-08",
+      "observations": [
+        {
+          "date": "2010-08-31",
+          "close": 48.98999018880883,
+          "source": "kaggle_yfinance2022"
+        },
+        {
+          "date": "2010-08-27",
+          "close": 49.87,
+          "source": "quandl_wiki"
+        }
+      ],
+      "selected": {
+        "source": "quandl_wiki",
+        "close": 49.87,
+        "date": "2010-08-27"
+      },
+      "independent_daily": {
+        "date": "2010-08-31",
+        "close": 48.99,
+        "cache_sha256": "3134381a621cc8afcd13dc89644a9a285571f68b398565100ee60b61c3f55eb0"
+      },
+      "benchmark_calendar": {
+        "date": "2010-08-31",
+        "close": 105.31,
+        "cache_sha256": "460cc2428153dc6dbb8cefd4a8598b9633676349871b63e5796b313ae887de1d"
+      },
+      "later_observation_corroborated": true,
+      "status": "pending_explicit_acceptance"
+    },
+    {
+      "symbol": "TRV",
+      "month": "2011-08",
+      "observations": [
+        {
+          "date": "2011-08-31",
+          "close": 50.46000542616247,
+          "source": "kaggle_yfinance2022"
+        },
+        {
+          "date": "2011-08-25",
+          "close": 47.99,
+          "source": "quandl_wiki"
+        }
+      ],
+      "selected": {
+        "source": "quandl_wiki",
+        "close": 47.99,
+        "date": "2011-08-25"
+      },
+      "independent_daily": {
+        "date": "2011-08-31",
+        "close": 50.46,
+        "cache_sha256": "3134381a621cc8afcd13dc89644a9a285571f68b398565100ee60b61c3f55eb0"
+      },
+      "benchmark_calendar": {
+        "date": "2011-08-31",
+        "close": 122.22,
+        "cache_sha256": "460cc2428153dc6dbb8cefd4a8598b9633676349871b63e5796b313ae887de1d"
+      },
+      "later_observation_corroborated": true,
+      "status": "pending_explicit_acceptance"
+    }
+  ],
+  "database_and_published_outputs_changed": false,
+  "limitation": "Agreement does not establish complete historical acceptance; no prices rounded, replaced or locked by this audit"
+}
