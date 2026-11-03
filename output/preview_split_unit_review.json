@@ -1,0 +1,54 @@
+{
+  "base_month": "2025-12",
+  "write_to_database_or_published_outputs": false,
+  "rows": [
+    {
+      "symbol": "BKNG",
+      "selected_base": 214.21319580078125,
+      "selected_source": "yahoo_relay",
+      "split_multiplier": 25.0,
+      "quote": 148.13,
+      "quote_session": "2026-10-30",
+      "cached_sina_date_close": 5355.33,
+      "cached_sina_payload_sha256": "b62f264b09dd617265cd95e137e88f955f690cbed1c8d3b08facac9f4176fa61",
+      "old_ratio": 17.287683824315057,
+      "native_basis_candidate_ratio": 0.691507339416992,
+      "selected_base_times_split_matches_native_close": true,
+      "online_approved_nominal_base": 5355.33
+    },
+    {
+      "symbol": "CRWD",
+      "selected_base": 117.19000244140625,
+      "selected_source": "yahoo_relay",
+      "split_multiplier": 4.0,
+      "quote": 250.43,
+      "quote_session": "2026-10-30",
+      "cached_sina_date_close": 468.76,
+      "cached_sina_payload_sha256": "6787b48013c272f3a36bce9d5ffed014e5841702f53aa89d22d1eac090dff983",
+      "old_ratio": 8.547828134920035,
+      "native_basis_candidate_ratio": 2.1369570782489973,
+      "selected_base_times_split_matches_native_close": true,
+      "online_approved_nominal_base": null
+    },
+    {
+      "symbol": "KLAC",
+      "selected_base": 121.50800323486328,
+      "selected_source": "yahoo_relay",
+      "split_multiplier": 10.0,
+      "quote": 157.91,
+      "quote_session": "2026-10-30",
+      "cached_sina_date_close": 1215.08,
+      "cached_sina_payload_sha256": "f97475b73888e369b8360102f5deacd536bea87ed72342d8c0f3e4f54997fb5a",
+      "old_ratio": 12.99585177897913,
+      "native_basis_candidate_ratio": 1.2995852124962965,
+      "selected_base_times_split_matches_native_close": true,
+      "online_approved_nominal_base": null
+    }
+  ],
+  "scope": "Unit-mismatch diagnosis. Cached Sina and source-adjusted values do not themselves approve missing nominal rows or the complete preview pool.",
+  "primary_evidence": {
+    "CRWD_split": "https://ir.crowdstrike.com/news-releases/news-release-details/crowdstrike-reports-first-quarter-fiscal-year-2027-financial/",
+    "KLAC_split": "https://ir.kla.com/sec-filings/all-sec-filings/content/0001193125-26-212093/d116682dex991.htm",
+    "KLAC_2025_close": "https://www.sec.gov/Archives/edgar/data/312070/000191870426000169/form424b2.htm"
+  }
+}

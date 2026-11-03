@@ -12,8 +12,10 @@
 import datetime as dt
 import json
 import os
+import math
 
 import datafeed
+import nominal_prices
 
 _NOW = dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=8)
 BASE_YM = "%d-12" % (_NOW.year - 1)   # 建仓基准：上一年 12 月末（自动跨年）
@@ -22,18 +24,34 @@ TOPN = 3
 OUT = os.path.join("docs", "data", "preview.json")
 
 
-def split_factor_after(ticker, base_ym):
-    """base_ym 之后发生的拆股累计比例（用于把现价换算到基准口径）"""
+def split_factor_after(ticker, base_ym, as_of):
+    """Share multiplier after the base month, through the quote session only."""
+    end = dt.date.fromisoformat(as_of)
+    if end.isoformat()[:7] <= base_ym:
+        raise ValueError('Preview session must be after its base month')
     sp = datafeed._splits().get(ticker) or []
     f = 1.0
     for ts, ratio in sp:
-        try:
-            ym = dt.datetime.utcfromtimestamp(int(ts)).strftime("%Y-%m")
-        except Exception:
-            continue
-        if ym > base_ym:
-            f *= float(ratio)
+        date = dt.datetime.fromtimestamp(int(ts), dt.timezone.utc).date()
+        if date.isoformat()[:7] > base_ym and date <= end:
+            ratio = float(ratio)
+            if not math.isfinite(ratio) or ratio <= 0:
+                raise ValueError('Invalid split multiplier')
+            f *= ratio
+    if not math.isfinite(f) or f <= 0:
+        raise ValueError('Invalid cumulative split multiplier')
     return f
+
+
+def price_ratio(ticker, current, base_ym, session):
+    """Value all successor split shares against the verified as-traded cost."""
+    base = nominal_prices.price(ticker, base_ym)
+    if not all(math.isfinite(x) and x > 0 for x in (current, base)):
+        raise ValueError('Invalid preview price')
+    ratio = current * split_factor_after(ticker, base_ym, session) / base
+    if not math.isfinite(ratio) or ratio <= 0:
+        raise ValueError('Invalid preview price return')
+    return ratio
 
 
 def resolve_final(sig, official_month, picks):
@@ -86,18 +104,10 @@ def main():
         bars = datafeed.load_bars(t)
         if not bars or BASE_YM not in bars:
             continue
-        base_raw = bars[BASE_YM][1] if len(bars[BASE_YM]) > 1 else bars[BASE_YM][0]
-        if not base_raw or base_raw <= 0:
-            continue
-        cur_adj = cur * split_factor_after(t, BASE_YM)
-        # 异常过滤：单月涨跌超过 8 倍且无拆股登记 → 源数据异常，剔除
-        ratio = cur_adj / base_raw
+        ratio = price_ratio(t, cur, BASE_YM, q['session'])
+        # An unresolved outlier must stop publication, not shrink the pool.
         if ratio > 8 or ratio < 1 / 8:
-            bad.append(t)
-            continue
-        if abs(ratio - 1) > 8:      # 十个月累计超过 800% 也视为异常
-            bad.append(t)
-            continue
+            raise RuntimeError('Preview return outside reviewed range: '+t)
         rows.append({
             "ticker": t,
             "name": name_map.get(t, t),
