@@ -73,6 +73,13 @@ class PipelineTests(unittest.TestCase):
             fields=['name',price,change,'time','0','0','0','0','0','0',volume]
             self.assertIsNone(quote_snapshot.parse_us(fields))
 
+    def test_derived_previous_close_cannot_overflow_or_round_to_zero(self):
+        for price,change in [('1e308','-99'),('0.00000001','0'),('1','1e308')]:
+            with self.subTest(price=price,change=change):
+                self.assertIsNone(quote_snapshot.parse_us(['name',price,change,'time','0','0','0','0','0','0','10']))
+        result=quote_snapshot.parse_us(['name','10','25','time','0','0','0','0','0','0','10'])
+        self.assertEqual((result['p'],result['pc'],result['chg']),(10,8,.25))
+
     def test_failed_history_validation_cannot_be_forced_into_a_lock(self):
         with patch.object(lock_stage,'check',return_value=(1,{})), \
              patch.object(lock_stage,'db') as database:

@@ -58,10 +58,15 @@ def parse_us(f):
         vol = float(f[10]) if len(f) > 10 and f[10] else 0
         if not all(math.isfinite(v) for v in (price,chg,vol)) or vol<0 or chg<=-100:
             return None
-        prev = price / (1 + chg / 100) if chg != -100 else price
-        return {"p": round(price, 4), "pc": round(prev, 4),
+        prev = price / (1 + chg / 100)
+        if not math.isfinite(prev) or prev<=0:
+            return None
+        price,prev=round(price,4),round(prev,4)
+        if price<=0 or prev<=0:
+            return None
+        return {"p": price, "pc": prev,
                 "chg": round(chg / 100, 6), "vol": vol, "name": f[0]}
-    except Exception:
+    except (ValueError,TypeError,IndexError,OverflowError,ZeroDivisionError):
         return None
 
 
