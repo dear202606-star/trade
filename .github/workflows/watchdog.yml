@@ -2,7 +2,7 @@ name: 看门狗（停更告警）
 
 # 覆盖「压根没跑」这个盲区：定时检查线上数据新鲜度与关键表活跃度，
 # 超时就在 Issue 里喊，不再依赖「失败才告警」。
-# 无需任何 Secret：只读线上 health.json 与代码仓库状态。
+# 线上产物只读检查；实时层数据库检查使用 SUPABASE_DB_PASSWORD。
 
 on:
   schedule:
@@ -37,6 +37,7 @@ jobs:
         run: |
           python - <<'PY'
           import json, time, urllib.request, datetime as dt
+          from watchdog_checks import quality_problems
           problems = []
           base = "https://dear202606-star.github.io/trade/data/"
           # 1) health.json
@@ -64,22 +65,12 @@ jobs:
                       problems.append("构建产物 %.1f 小时未更新（>6）" % lag)
           except Exception as e:
               problems.append("产物读取失败: %s" % str(e)[:60])
-          # 3b) 质量快照校验失败
-          try:
-              _q = json.load(open('docs/data/quality.json', encoding='utf-8'))
-              _f = _q.get('summary', {}).get('fail', 0)
-              if _f:
-                  problems.append('质量快照有 %d 项校验失败' % _f)
-          except Exception:
-              pass
-
-          # 3) 数据质量标注是否已消失
+          # 3) 校验实际发布的质量报告，缺失证据也必须告警
           try:
               q = json.load(urllib.request.urlopen(base + "quality.json?nocache=" + str(time.time()), timeout=20))
-              if q.get("degraded"):
-                  problems.append("数据仍为降级态：%s" % q.get("reason", ""))
-          except Exception:
-              pass
+              problems.extend(quality_problems(q))
+          except Exception as e:
+              problems.append("线上质量报告读取或校验失败: %s" % str(e)[:100])
           with open("problems.txt", "w", encoding="utf-8") as f:
               f.write("\n".join(problems))
           print("PROBLEMS=%d" % len(problems))
