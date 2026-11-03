@@ -34,6 +34,10 @@ Walmart 的发行人 8-K 明确 2025-12-08 收盘后结束 NYSE 交易，12-09 �
 实际有界探测：当前 Eastmoney 105.WMT 返回 2025-12-09 至 12-31 的 16 日；旧 106.WMT 返回 rc=100、无数据。因此切换交易所参数不能补齐该源的旧历史。回执为 output/wmt_exchange_history_probe.json；仍需其他完整历史成交额来源，不拼接猜测数据，不删除缺失交易日，不触碰 910 个已核验窗口。
 # BK→BNY 精确暂存复核（2026-11-03）
 
+后续状态：已使用 research/apply_bk_rename.py 完成定向提升与选源切换，下面“仍未完成”段落保留为暂存阶段记录。操作前重新执行 34 个 A/B 年度、每年两种未知价格门槛边界的对比，0 项变化。真实数据库事务先执行并整体回滚，另开连接确认原选源、202 条待处理行、目标价格缺失及历史窗口缺失全部恢复后，才执行提交。
+
+提交仅提升本批 202 个暂存 ID，BK 改为 yahoo_relay / total_return；2026-12 截止窗口防止未来旧代码观测进入历史别名。741 条原观测逐值保留。提交后数据库精确数值哈希匹配原审查，另用只读 REST 核对 202 行浮点读取值完全一致，旧 B 基线 SHA256 仍为 20c0680276cf79cbb06d8aaab35c3e40cde010447f6e15e75abd95ff0ef33c90。见 output/bk_rename_rollback_probe.json、bk_rename_applied.json、bk_applied_verification.json。该源修复不是全历史收益和新策略发布验收，未新增历史锁。
+
 在线 REPEATABLE READ 只读复核得到 202 个 canonical 月份，93 对独立收益比较仍通过；同股更名事实仍存在，原 BK 选源仍为 sina_repaired / price_only / 未冻结，目标 Yahoo 行和同源暂存行此前均为零。完整精确数值与哈希见 output/bk_exact_repair_review.json。
 
 research/stage_bk_rename.py 在复核哈希、在线身份、原选源与保护状态后，以数据库精确数值复制 202 行到 ingest_staging；不调用全局 promote_staging，不修改选源或价格。提交后另开连接验证 202 行全部待处理、0 行已提升，与 BNY 原始 canonical 数值逐行比较无差异，BK 正式选源未变，见 output/bk_staging_verification.json。重复写入被显式拒绝，不能用重跑覆盖已有暂存证据。

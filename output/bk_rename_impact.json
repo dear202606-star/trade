@@ -11,8 +11,8 @@
   "issuer_evidence": "https://www.sec.gov/Archives/edgar/data/1390777/000119312526281160/d137058d8k.htm",
   "comparison_scope": "BK source change only; same actual-consideration and verified-continuity policies; fixed nominal-floor snapshot with both missing-price predicate bounds",
   "selected_input_stamp": [
-    406639,
-    "2026-11-02 12:22:11.753983+00",
+    406642,
+    "2026-11-02 22:00:00.06439+00",
     849,
     143637,
     837,

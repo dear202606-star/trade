@@ -1,0 +1,18 @@
+{
+  "db_selected_rows": 202,
+  "readonly_rest_rows": 202,
+  "db_and_rest_float_values_match": true,
+  "db_exact_canonical_sha256": "56be42ab4d062faa13e0a0159d86dfcda88807e849756bc522ad93f975e78b50",
+  "source_decision": [
+    "yahoo_relay",
+    "total_return",
+    false
+  ],
+  "preserved_old_rows": 741,
+  "staging_total_and_promoted": [
+    202,
+    202
+  ],
+  "baseline_b_sha256": "20c0680276cf79cbb06d8aaab35c3e40cde010447f6e15e75abd95ff0ef33c90",
+  "passed": true
+}
