@@ -37,6 +37,12 @@
       $("todayAmt").textContent = yuan(t.amount);
       $("todayAmt").className = "sub " + cls(t.amount);
       $("todayLabel").textContent = "策略今日表现";
+    } else {
+      $("todayPct").textContent = "—";
+      $("todayPct").className = "num num-lg";
+      $("todayAmt").textContent = "—";
+      $("todayAmt").className = "sub";
+      $("todayLabel").textContent = "行情待更新";
     }
 
     $("switchTxt").textContent = trend;

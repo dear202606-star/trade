@@ -449,11 +449,20 @@
     const pos = (equity && equity.position) || [];
     const amt = +(localStorage.getItem("dsh.amt") || 100000);
     const exp = (equity && equity.exposure != null) ? equity.exposure : 1;
+    if (!Array.isArray(pos) || !pos.length || !Number.isFinite(amt) || amt <= 0 ||
+        !Number.isFinite(exp) || exp < 0 || exp > 1) return null;
+    if (pos.some(function (p) {
+      if (!p || typeof p !== 'object') return true;
+      const q = qs[p.ticker];
+      return !Number.isFinite(p.entry) || p.entry <= 0 ||
+        !Number.isFinite(p.weight) || p.weight <= 0 || !q ||
+        !Number.isFinite(q.p) || q.p <= 0 || !Number.isFinite(q.pc) || q.pc <= 0;
+    })) return null;
     let day = 0, mv = 0, covered = 0;
     pos.forEach(function (p) {
       const q = qs[p.ticker];
       const base = p.entry > 0 ? (amt * p.weight * exp) / p.entry : 0;   // 股数
-      const price = (q && q.p > 0) ? q.p : p.last;                       // 优先实时价
+      const price = q.p;
       const prev = (q && q.pc > 0) ? q.pc : null;
       if (!base || !price) return;
       mv += base * price;
@@ -461,7 +470,7 @@
     });
     const cash = amt * (1 - exp);
     const totalMv = mv + cash;
-    if (!covered || !totalMv) return null;
+    if (covered !== pos.length || !Number.isFinite(day) || !Number.isFinite(totalMv) || !totalMv) return null;
     const age = DSH.ageHours(quotes && quotes.ts);
     // 优先用行情自带的 intraday 标志；缺失时退回「45 分钟内」
     const live = (quotes && typeof quotes.intraday === 'boolean')

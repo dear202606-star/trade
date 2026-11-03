@@ -1,0 +1,27 @@
+name: 页面收益计算回归
+
+on:
+  push:
+    branches: [main, 'codex/**']
+    paths:
+      - site_src/assets/app.js
+      - site_src/assets/page.js
+      - test_daily_pnl.mjs
+      - .github/workflows/frontend-calculation.yml
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: node --test test_daily_pnl.mjs
+      - run: node --check site_src/assets/page.js
