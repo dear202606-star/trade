@@ -24,3 +24,11 @@ BK 旧选源仍为 price_only，价格绝对单位与 BNY 不可直接混用。�
   [Dayforce 完成公告](https://www.dayforce.com/who-we-are/newsroom/thoma-bravo-completes-acquisition-of-dayforce)。
 
 这些补查不构成相应日线、公司行动收益或完整策略的验收。其余目录缺失证券继续逐项核对，不猜测继承关系。
+
+## 已定位：交易所迁移截断历史
+
+Walmart 的发行人 8-K 明确 2025-12-08 收盘后结束 NYSE 交易，12-09 开始 Nasdaq 交易，代码仍为 WMT。这不是新股票上市，不能将迁移前 234 个缺失交易日视为无交易或剔除它们。
+
+[发行人 8-K](https://stock.walmart.com/sec-filings/all-sec-filings/content/0000104169-25-000177/wmt-20251119.htm)，[Nasdaq 数据技术通知](https://m.nasdaqtrader.com/TraderNews.aspx?id=DTN2025-35)。
+
+实际有界探测：当前 Eastmoney 105.WMT 返回 2025-12-09 至 12-31 的 16 日；旧 106.WMT 返回 rc=100、无数据。因此切换交易所参数不能补齐该源的旧历史。回执为 output/wmt_exchange_history_probe.json；仍需其他完整历史成交额来源，不拼接猜测数据，不删除缺失交易日，不触碰 910 个已核验窗口。

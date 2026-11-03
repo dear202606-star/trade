@@ -1,0 +1,28 @@
+{
+  "scope": "Source discovery only; no database or accepted historical changes",
+  "issuer_evidence": "https://stock.walmart.com/sec-filings/all-sec-filings/content/0000104169-25-000177/wmt-20251119.htm",
+  "records": [
+    {
+      "requested_market": 106,
+      "returned_market": null,
+      "returned_code": null,
+      "rc": 100,
+      "days": 0,
+      "first": null,
+      "last": null,
+      "source_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=106.WMT&klt=101&fqt=0&beg=20250101&end=20251231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "payload_sha256": "0e555564698425ecc0dd78c88bd7aa89a5ac8a9eecec0c8981a570c64327efe0"
+    },
+    {
+      "requested_market": 105,
+      "returned_market": 105,
+      "returned_code": "WMT",
+      "rc": 0,
+      "days": 16,
+      "first": "2025-12-09",
+      "last": "2025-12-31",
+      "source_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=105.WMT&klt=101&fqt=0&beg=20250101&end=20251231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "payload_sha256": "9f0cf498045f178aed7278d2366b80f9cfcc01474699a8b1dc28f0e2ceccc249"
+    }
+  ]
+}
