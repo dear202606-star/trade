@@ -343,6 +343,14 @@
     $("tickPx").textContent = "SPY " + q.p.toFixed(2);
     $("tickChg").textContent = pct2(q.chg);
     $("tickChg").className = "chg " + cls(q.chg);
+    var updated = $("tickUpdated");
+    if (updated) {
+      var stamp = Q.ts_local;
+      if (!stamp && Q.ts && !isNaN(Date.parse(Q.ts))) {
+        stamp = new Date(Q.ts).toLocaleString("zh-CN", { timeZone: "Asia/Shanghai", hour12: false });
+      }
+      updated.textContent = stamp ? "行情更新 " + stamp + "（北京）" : "行情更新时间暂无";
+    }
   }
 
   /* 打开期间自动刷新：每 60 秒拉一次行情，重绘受影响的部分 */
