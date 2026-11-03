@@ -1,0 +1,22 @@
+{
+  "write": false,
+  "inserted": 0,
+  "proof": {
+    "fact": {
+      "symbol": "KLAC",
+      "date": "2025-12-31",
+      "close": 1215.08,
+      "url": "https://www.sec.gov/Archives/edgar/data/312070/000191870426000169/form424b2.htm",
+      "location": "Initial Valuation Date, KLAC Initial Value, and definitions of Initial Value and Closing Value"
+    },
+    "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=105.KLAC&klt=101&fqt=0&beg=20250101&end=20251231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+    "primary_cache_sha256": "6b4e8700743dfdb0864dba431f12fdbb5356ff9e65170f9a5da743ba6dd29e46",
+    "independent_cache_sha256": "f97475b73888e369b8360102f5deacd536bea87ed72342d8c0f3e4f54997fb5a",
+    "return_pairs": 201,
+    "median_log_deviation": 2.644318817147288e-07,
+    "p90_log_deviation": 0.007169304241160547,
+    "scope": "Only 2025-12-31; no other date approved"
+  },
+  "evidence_sha256": "133dd2fc89603e33ac16c160f7e2f273143aa914817390603ba9f711a2c7b635",
+  "return_prices_picks_locks_and_published_outputs_changed": false
+}

@@ -19,3 +19,11 @@ CRWD 的基金持仓搜索摘要曾显示 2025-12-31 的 468.76，但实际打�
 本次仅修复工程分支，不发布新预览。当前基准月在线名义价格仅覆盖 235 个代码，CRWD、KLAC 及其他候选的基准证据仍需完成；普通分红、分拆与并购承接收益、报价时刻及完整候选池仍待验收。不能因为三例拆股倍率一致就批准全市场单位。
 
 完整 128 项本地 Python 回归通过。真实 preview.py 入口随后因 ABNB 2025-12 缺少已核验实际股价而以退出码 1 停止，原预览前后 SHA256 均为 50ffdbbec0dff56319c9e4b04bea9c00814d0785f96cf0f96045d6000321a440，确认没有用不完整候选池覆盖旧文件。回执见 output/preview_native_runtime_guard.json。这是预期的失败关闭验证，不是预览数据验收通过。
+
+## KLAC 单日证据补齐
+
+后续已将 KLAC 2025-12-31 的 1215.08 追加到在线 nominal_monthly（eastmoney_native），未替换原 sina_daily 未核验观测。复用既有两个缓存，不发起供应商请求：东方财富 fqt=0 当日收盘价、独立新浪当日收盘价和上述 SEC 定价文件一致；201 对相邻月收益比较通过，中位对数偏差 0.0000002644，P90 为 0.0071693。仅该日期获得单位证据，不能推广其他月份。
+
+完整证明及哈希已保存在线 sys_event 的 verified_closing_fact 验收记录（3128），与名义价行 evidence_sha256 对应。提交后直连与只读 REST 一致；原收益价格逐值保持，活动收益锁哈希仍为 2ac2d464a920b522 并与原锁吻合。收益价格锁和独立名义价层按 SQL 094 的原有范围分别处理，未撤销或修改任何锁。
+
+脚本 research/verify_klac_nominal_fact.py 默认只读，--write 只补这一条缺失事实；已核验事实重跑时直接保留，不再处理缓存。回执为 output/klac_nominal_fact_review.json、klac_nominal_fact_ingest.json、klac_nominal_fact_verification.json。新增回归覆盖已验收跳过、冲突不覆盖、错误证券/调整方式/价格拒收，完整 131 项本地 Python 回归通过。CRWD、ABNB 等其他缺口与完整预览仍未验收，未发布新预览。

@@ -1,0 +1,10 @@
+{
+  "online_nominal_close": 1215.08,
+  "online_evidence_event_id": 3128,
+  "db_and_readonly_rest_agree": true,
+  "preserved_unreviewed_sina_row": true,
+  "active_return_lock_hash": "2ac2d464a920b522",
+  "active_return_locks_match": true,
+  "evidence_sha256": "133dd2fc89603e33ac16c160f7e2f273143aa914817390603ba9f711a2c7b635",
+  "no_new_provider_requests": true
+}
