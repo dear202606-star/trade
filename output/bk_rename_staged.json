@@ -1,0 +1,15 @@
+{
+  "write": true,
+  "staged": 202,
+  "canonical_rows_sha256": "56be42ab4d062faa13e0a0159d86dfcda88807e849756bc522ad93f975e78b50",
+  "proof": {
+    "old": "BK",
+    "current": "BNY",
+    "through": "2026-12",
+    "months": 202,
+    "independent_return_pairs": 93,
+    "median_return_deviation": 2.8750576958058716e-05,
+    "max_return_deviation": 0.0036348658581091264
+  },
+  "promoted_or_source_decisions_changed": false
+}

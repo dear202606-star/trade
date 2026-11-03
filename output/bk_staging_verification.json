@@ -1,0 +1,12 @@
+{
+  "staged": 202,
+  "pending": 202,
+  "promoted": 0,
+  "different_from_canonical": 0,
+  "source_decision": [
+    "sina_repaired",
+    "price_only",
+    false
+  ],
+  "passed": true
+}

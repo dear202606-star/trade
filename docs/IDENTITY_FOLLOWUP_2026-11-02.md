@@ -32,3 +32,11 @@ Walmart 的发行人 8-K 明确 2025-12-08 收盘后结束 NYSE 交易，12-09 �
 [发行人 8-K](https://stock.walmart.com/sec-filings/all-sec-filings/content/0000104169-25-000177/wmt-20251119.htm)，[Nasdaq 数据技术通知](https://m.nasdaqtrader.com/TraderNews.aspx?id=DTN2025-35)。
 
 实际有界探测：当前 Eastmoney 105.WMT 返回 2025-12-09 至 12-31 的 16 日；旧 106.WMT 返回 rc=100、无数据。因此切换交易所参数不能补齐该源的旧历史。回执为 output/wmt_exchange_history_probe.json；仍需其他完整历史成交额来源，不拼接猜测数据，不删除缺失交易日，不触碰 910 个已核验窗口。
+# BK→BNY 精确暂存复核（2026-11-03）
+
+在线 REPEATABLE READ 只读复核得到 202 个 canonical 月份，93 对独立收益比较仍通过；同股更名事实仍存在，原 BK 选源仍为 sina_repaired / price_only / 未冻结，目标 Yahoo 行和同源暂存行此前均为零。完整精确数值与哈希见 output/bk_exact_repair_review.json。
+
+research/stage_bk_rename.py 在复核哈希、在线身份、原选源与保护状态后，以数据库精确数值复制 202 行到 ingest_staging；不调用全局 promote_staging，不修改选源或价格。提交后另开连接验证 202 行全部待处理、0 行已提升，与 BNY 原始 canonical 数值逐行比较无差异，BK 正式选源未变，见 output/bk_staging_verification.json。重复写入被显式拒绝，不能用重跑覆盖已有暂存证据。
+
+这一步只完成在线暂存。正式提升、精确行身份验收、BK 旧源其他行保留证明、独立读取路径与选源切换仍未完成；不得把它视为新策略或历史验收完成，也不得全局提升其他未经本次审查的数据。
+
