@@ -22,9 +22,18 @@ import datafeed
 import db_ref
 import variant_b
 import monthly_pick
+import lock_stage
 
 
 class PipelineTests(unittest.TestCase):
+    def test_failed_history_validation_cannot_be_forced_into_a_lock(self):
+        with patch.object(lock_stage,'check',return_value=(1,{})), \
+             patch.object(lock_stage,'db') as database:
+            for force in (False,True):
+                with self.subTest(force=force):
+                    self.assertEqual(lock_stage.lock(2010,2025,force=force),1)
+            database.assert_not_called()
+
     def test_monthly_signal_reads_prices_members_and_sectors_from_database(self):
         with patch.object(db_prices,'load_all',return_value={'TEST':{'2025-12':(12,13)}}), \
              patch.object(db_ref,'load_members',return_value={'TEST':[('2020-01-01','2099-12-31')]}), \
