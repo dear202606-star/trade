@@ -20,11 +20,11 @@
   python relay_source.py --gaps                          # 只补缺口月份
 """
 import argparse
-import csv
 import io
 import json
 import db_prices as DB
 import ingest_validate
+import db_ref
 import os
 import sys
 import time
@@ -353,6 +353,35 @@ def reserve_av_call(sym):
         return False
 
 
+def historical_universe():
+    members = db_ref.load_members()
+    return sorted(symbol for symbol, periods in members.items()
+                  if any(end >= '2009-01-01' for start, end in periods))
+
+
+def planned_targets(source, universe, limit):
+    with db() as connection, connection.cursor() as cursor:
+        cursor.execute("""select metrics from sys_event
+            where kind='plan' and source='allocate_work' and status='ok'
+              and created_at > now()-interval '24 hours'
+            order by created_at desc,id desc limit 1""")
+        row = cursor.fetchone()
+    if row is None or not isinstance(row[0], dict):
+        raise RuntimeError('No current online work plan; rerun allocate_work.py')
+    assignments = row[0].get('assignments')
+    if not isinstance(assignments, list) or any(not isinstance(a, dict) for a in assignments):
+        raise RuntimeError('Online work plan assignments are invalid')
+    matches = [a for a in assignments if a.get('source') == source]
+    if len(matches) != 1:
+        raise RuntimeError('Online plan must contain exactly one requested source')
+    symbols = matches[0].get('symbols')
+    if not isinstance(symbols, list) or any(not isinstance(s, str) or not s for s in symbols):
+        raise RuntimeError('Online plan symbols are invalid')
+    if len(symbols) != len(set(symbols)) or set(symbols)-set(universe):
+        raise RuntimeError('Online plan has duplicate or nonmember symbols; regenerate it')
+    return symbols[:limit]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--symbols", type=int, default=20, help="本次处理多少只")
@@ -367,11 +396,10 @@ def main():
         print("调度顺序（来自 source_registry）:", dict(sorted(_prio.items(), key=lambda x: x[1])), flush=True)
 
     # 目标标的：优先「完全缺失」和「缺口最大」的
+    need = historical_universe()
     with db() as c, c.cursor() as cur:
         cur.execute("select distinct symbol from prices_monthly")
         have = {r[0] for r in cur.fetchall()}
-        mem = list(csv.DictReader(open(os.path.join(BASE, "static", "members_frozen.csv"), encoding="utf-8")))
-        need = sorted({r["ticker"] for r in mem if r["end_date"] >= "2009-01-01"})
         cur.execute("""select symbol, count(*) filter (where month like '%-12') as dec_n
                        from prices_monthly group by 1""")
         dec = dict(cur.fetchall())
@@ -379,15 +407,8 @@ def main():
     thin = sorted([t for t in need if t in have and dec.get(t, 0) < 15],
                   key=lambda t: dec.get(t, 0))
     if a.plan_source:
-        import json as _json
-        _pl = _json.load(open(os.path.join(BASE, "output", "work_plan.json"), encoding="utf-8"))
-        for _a in _pl["assignments"]:
-            if _a["source"] == a.plan_source:
-                targets = _a["symbols"][:a.symbols]
-                print("按计划执行 %s：%d 只" % (a.plan_source, len(targets)))
-                break
-        else:
-            targets = []
+        targets = planned_targets(a.plan_source, need, a.symbols)
+        print("按在线计划执行 %s：%d 只" % (a.plan_source, len(targets)))
     else:
         targets = (missing + thin) if a.gaps else (missing + thin)[:a.symbols]
         targets = targets[:a.symbols]

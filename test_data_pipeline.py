@@ -27,6 +27,37 @@ import lock_stage
 
 class PipelineTests(unittest.TestCase):
 
+    def test_relay_universe_is_online_and_never_falls_back_to_frozen_file(self):
+        with patch.object(db_ref,'load_members',return_value={
+                'NEW':[('2026-01-01','2099-12-31')],
+                'OLD':[('1990-01-01','2008-12-31')]}):
+            self.assertEqual(relay.historical_universe(),['NEW'])
+        with patch.object(db_ref,'load_members',side_effect=RuntimeError('offline')):
+            with self.assertRaisesRegex(RuntimeError,'offline'):
+                relay.historical_universe()
+
+    def test_relay_plan_uses_current_online_assignment_and_limits_after_validation(self):
+        plan={'assignments':[{'source':'test','symbols':['A','B']}]}
+        context,cursor=self.connection(relay,(plan,))
+        with context:
+            self.assertEqual(relay.planned_targets('test',['A','B'],1),['A'])
+        self.assertIn("interval '24 hours'",cursor.execute.call_args.args[0])
+
+    def test_relay_plan_missing_stale_or_invalid_evidence_stops(self):
+        plans=[None,({},),({'assignments':None},),
+               ({'assignments':[None]},),
+               ({'assignments':[]},),
+               ({'assignments':[{'source':'test','symbols':['A','UNKNOWN']}]},),
+               ({'assignments':[{'source':'test','symbols':['A','A']}]},),
+               ({'assignments':[{'source':'test','symbols':'A'}]},),
+               ({'assignments':[{'source':'test','symbols':['A']},
+                                {'source':'test','symbols':['B']}]},)]
+        for row in plans:
+            with self.subTest(row=row):
+                context,cursor=self.connection(relay,row)
+                with context,self.assertRaises(RuntimeError):
+                    relay.planned_targets('test',['A','B'],1)
+
     def test_history_lock_requires_every_row_to_be_total_return(self):
         measured={'rows':2000,'symbols':500,'dec':500,'total_return':2000,
                   'from':'2020-01','to':'2020-12','hash':'test','missing_months':[]}
