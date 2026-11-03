@@ -68,8 +68,11 @@ def unit_support(row, close):
             'usd_value_difference': str(difference)}
 
 
-def run():
+def run(symbols=None):
     import fitz
+    symbols = list(REVIEWED_NAMES) if symbols is None else list(symbols)
+    if not symbols or len(set(symbols)) != len(symbols) or not set(symbols) <= set(REVIEWED_NAMES):
+        raise ValueError('Only explicitly reviewed securities may be audited')
     raw = PDF.read_bytes()
     if hashlib.sha256(raw).hexdigest() != PDF_SHA:
         raise ValueError('Pinned source report changed')
@@ -80,7 +83,8 @@ def run():
         if FUND in text[:180]:
             candidates.extend(parse_rows(text, page.number+1))
     proofs = []
-    for symbol, name in REVIEWED_NAMES.items():
+    for symbol in symbols:
+        name = REVIEWED_NAMES[symbol]
         matches = [row for row in candidates if row['name'] == name]
         if len(matches) != 1:
             raise ValueError('Reviewed company/share class is missing or ambiguous: '+symbol)
@@ -99,7 +103,7 @@ def run():
     result = {'source_url': SOURCE, 'source_sha256': PDF_SHA,
               'fund': FUND, 'report_date': '2025-12-31',
               'parsed_candidate_rows': len(candidates), 'reviewed_unit_proofs': proofs,
-              'scope': 'Two explicitly reviewed names/classes only. Candidate extraction is incomplete; no fuzzy identity matching, no wholesale price approval.',
+              'scope': 'Explicitly reviewed names/classes only. Candidate extraction is incomplete; no fuzzy identity matching, no wholesale price approval.',
               'database_and_published_outputs_changed': False}
     csv_path = BASE / 'output/_fund_reports/ivv_holdings_requested_20251231.csv'
     if csv_path.exists():
@@ -113,6 +117,7 @@ def run():
                 'used_as_historical_price_data': False}
     (BASE / 'output/fund_native_unit_review.json').write_text(json.dumps(result, indent=2)+'\n')
     print(json.dumps(result, indent=2))
+    return result
 
 
 if __name__ == '__main__':

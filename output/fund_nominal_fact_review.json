@@ -1,0 +1,61 @@
+{
+  "write": false,
+  "inserted": 0,
+  "proofs": [
+    {
+      "unit_proof": {
+        "symbol": "ABNB",
+        "date": "2025-12-31",
+        "independent_close": "135.72",
+        "fund_row": {
+          "page": 9,
+          "name": "Airbnb, Inc., Class A(a)(b)",
+          "shares": 5529473,
+          "reported_usd_value": 750460076
+        },
+        "implied_price": "135.7200000795735868499583957",
+        "unit_interval_low": "135.7199998987245258273256782",
+        "unit_interval_high": "135.7200002604226478725911131",
+        "usd_value_difference": "0.44",
+        "independent_cache_sha256": "2b424e78b6f616f7a52f688248d0ca088a16c6a30271c7db093f93ce368d895c"
+      },
+      "fund_url": "https://www.ishares.com/us/literature/third-quarter-report/tqr-ishares-trust-equity-jpm-12-31.pdf",
+      "fund_sha256": "be504252b271284ab1d56705cf5e390f4e863811a3adc94d732a24e40b62e0fd",
+      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=105.ABNB&klt=101&fqt=0&beg=20250101&end=20251231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "primary_cache_sha256": "fa14696232ee1b04beffe6ca833cad7868d66833b77bfbf49496fa8c41d79144",
+      "return_pairs": 60,
+      "median_log_deviation": 2.551658417948081e-08,
+      "p90_log_deviation": 6.824252774279496e-08,
+      "selected_history_sha256": "a2f9bdbd4ff679b70b3313bff184d8e6581a67e801b157e992d357f780adb4df",
+      "scope": "Only 2025-12-31; no other date approved"
+    },
+    {
+      "unit_proof": {
+        "symbol": "CRWD",
+        "date": "2025-12-31",
+        "independent_close": "468.76",
+        "fund_row": {
+          "page": 11,
+          "name": "Crowdstrike Holdings, Inc., Class A(a)(b)",
+          "shares": 3262803,
+          "reported_usd_value": 1529471534
+        },
+        "implied_price": "468.7599999141842152284400866",
+        "unit_interval_low": "468.7599996076992696157261103",
+        "unit_interval_high": "468.7600002206691608411540629",
+        "usd_value_difference": "0.28",
+        "independent_cache_sha256": "6787b48013c272f3a36bce9d5ffed014e5841702f53aa89d22d1eac090dff983"
+      },
+      "fund_url": "https://www.ishares.com/us/literature/third-quarter-report/tqr-ishares-trust-equity-jpm-12-31.pdf",
+      "fund_sha256": "be504252b271284ab1d56705cf5e390f4e863811a3adc94d732a24e40b62e0fd",
+      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=105.CRWD&klt=101&fqt=0&beg=20250101&end=20251231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "primary_cache_sha256": "14a8bb27de36d754d80d32b4840986ccbb4b813ce9d281d0d2205eef808faeb7",
+      "return_pairs": 78,
+      "median_log_deviation": 2.0617975558564086e-08,
+      "p90_log_deviation": 4.8818321081932955e-08,
+      "selected_history_sha256": "1aeea13f51b6a6191d490681d2c722386284fd72437c834257fa19fbd79d69fa",
+      "scope": "Only 2025-12-31; no other date approved"
+    }
+  ],
+  "return_prices_picks_locks_and_published_outputs_changed": false
+}

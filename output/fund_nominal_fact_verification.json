@@ -1,0 +1,11 @@
+{
+  "accepted_prices": {
+    "ABNB": 135.72,
+    "CRWD": 468.76
+  },
+  "db_and_readonly_rest_match": true,
+  "online_full_evidence_matches_row_hashes": true,
+  "preserved_old_unreviewed_rows": 2,
+  "accepted_repeat_skips_evidence_processing": true,
+  "new_supplier_requests": 0
+}

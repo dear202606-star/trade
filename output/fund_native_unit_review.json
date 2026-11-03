@@ -38,7 +38,7 @@
       "independent_cache_sha256": "6787b48013c272f3a36bce9d5ffed014e5841702f53aa89d22d1eac090dff983"
     }
   ],
-  "scope": "Two explicitly reviewed names/classes only. Candidate extraction is incomplete; no fuzzy identity matching, no wholesale price approval.",
+  "scope": "Explicitly reviewed names/classes only. Candidate extraction is incomplete; no fuzzy identity matching, no wholesale price approval.",
   "database_and_published_outputs_changed": false,
   "rejected_csv_probe": {
     "sha256": "f87992fb55584a7f2d0dfa31765da5d4598de83c18f24f25282ade1834caaf6b",
