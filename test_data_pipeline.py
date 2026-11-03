@@ -27,6 +27,27 @@ import lock_stage
 
 class PipelineTests(unittest.TestCase):
 
+    def test_prefetch_loads_one_online_snapshot_and_reuses_exact_values(self):
+        bars={s:{'2025-12':(100,101)} for s in 'ABCD'}
+        with patch.object(datafeed,'_ALL_BARS',None), \
+             patch.object(db_prices,'load_all',return_value=bars) as load:
+            self.assertEqual(datafeed.prefetch(['A','B','C','D','A','MISSING'],workers=4),4)
+            self.assertEqual(datafeed.load_bars('A'),bars['A'])
+            self.assertEqual(datafeed.prefetch(['A'],workers=10),1)
+            load.assert_called_once()
+            with self.assertRaisesRegex(RuntimeError,'no selected prices'):
+                datafeed.load_bars('MISSING')
+
+    def test_prefetch_cannot_report_success_without_online_data(self):
+        with patch.object(datafeed,'_db_all') as read:
+            self.assertEqual(datafeed.prefetch([]),0)
+            read.assert_not_called()
+        for result in ({},RuntimeError('offline')):
+            with self.subTest(result=result),patch.object(datafeed,'_ALL_BARS',None):
+                option={'side_effect':result} if isinstance(result,Exception) else {'return_value':result}
+                with patch.object(db_prices,'load_all',**option),self.assertRaisesRegex(RuntimeError,'Online prefetch'):
+                    datafeed.prefetch(['A'],workers=4)
+
     def test_relay_universe_is_online_and_never_falls_back_to_frozen_file(self):
         with patch.object(db_ref,'load_members',return_value={
                 'NEW':[('2026-01-01','2099-12-31')],

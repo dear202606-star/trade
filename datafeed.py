@@ -224,18 +224,11 @@ def load_sector():
 
 
 def prefetch(tickers, workers=8):
-    """并行预热：CI 里没有本地缓存时，把 500 只票的抓取从串行 5 分钟压到 ~40 秒"""
-    from concurrent.futures import ThreadPoolExecutor, as_completed
-    todo = [t for t in tickers if t not in _mem]
-    if not todo:
+    """Warm one online snapshot; retain workers for existing callers."""
+    requested = set(tickers)
+    if not requested:
         return 0
-    n = 0
-    with ThreadPoolExecutor(max_workers=workers) as ex:
-        futs = {ex.submit(load_bars, t): t for t in todo}
-        for fu in as_completed(futs):
-            try:
-                if fu.result():
-                    n += 1
-            except Exception:
-                pass
-    return n
+    bars = _db_all()
+    if not bars:
+        raise RuntimeError('Online prefetch returned no selected prices')
+    return sum(bool(bars.get(ticker)) for ticker in requested)
