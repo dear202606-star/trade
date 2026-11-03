@@ -122,11 +122,11 @@ def check(y0, y1):
 def lock(y0, y1, force=False):
     _rc, m = check(y0, y1)
     problems = [] if _rc == 0 else ["校验未通过（见上）"]
-    if problems and not force:
+    if problems:
         print("✗ 未通过锁定校验：")
         for p in problems:
             print("   -", p)
-        print("  确认可接受时加 --force")
+        print("  必须补齐并重新通过校验后才能锁定；不允许强制放行。")
         return 1
     with db() as c, c.cursor() as cur:
         cur.execute("""insert into locks(kind, scope_from, scope_to, status, rows, symbols, hash,
