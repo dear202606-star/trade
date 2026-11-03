@@ -1,0 +1,83 @@
+{
+  "scope": "Five saved source quotes independently matched to 2026-10-30 unadjusted Eastmoney closes; no production parser change; does not prove general schema semantics",
+  "quote_probe_sha256": "e69acd29a46effe949c93d256695216bff3ff8e6c2cdd950d7b4aef0d3c78cac",
+  "rows": [
+    {
+      "symbol": "SPY",
+      "quote_regular_session_field": "Nov 02 04:00PM EST",
+      "candidate_previous_close": 755.72,
+      "independent_daily_matches": [
+        {
+          "date": "2026-10-30",
+          "close": 755.72,
+          "payload_sha256": "f1163180a30b721703a7c13ae6cd9623556697b7df5cfa5c6eca79b61e57e09f",
+          "source_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=107.SPY&klt=101&fqt=0&beg=20251101&end=20261031&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+          "matches_candidate": true
+        },
+        {
+          "date": "2026-10-30",
+          "close": 755.72,
+          "payload_sha256": "8b70515fc4f87bb1f3ceeafdbae8f0d460956d8130139cd743b71cc728b7c99a",
+          "source_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=107.SPY&klt=101&fqt=0&beg=20250101&end=20261031&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+          "matches_candidate": true
+        }
+      ]
+    },
+    {
+      "symbol": "AAPL",
+      "quote_regular_session_field": "Nov 02 04:00PM EST",
+      "candidate_previous_close": 344.63,
+      "independent_daily_matches": [
+        {
+          "date": "2026-10-30",
+          "close": 344.63,
+          "payload_sha256": "6836792aa199ecc5a3f93551ecad2075bd9ba9c36270f5184c07205e7fc6de24",
+          "source_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=105.AAPL&klt=101&fqt=0&beg=20250101&end=20261031&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+          "matches_candidate": true
+        }
+      ]
+    },
+    {
+      "symbol": "MSFT",
+      "quote_regular_session_field": "Nov 02 04:00PM EST",
+      "candidate_previous_close": 521.91,
+      "independent_daily_matches": [
+        {
+          "date": "2026-10-30",
+          "close": 521.91,
+          "payload_sha256": "88bdb629ffd1bcf9d0af68a95c47e63569ca5653bde602125e1eaf1d2f5b2508",
+          "source_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=105.MSFT&klt=101&fqt=0&beg=20251101&end=20261031&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+          "matches_candidate": true
+        }
+      ]
+    },
+    {
+      "symbol": "NVDA",
+      "quote_regular_session_field": "Nov 02 04:00PM EST",
+      "candidate_previous_close": 204.64,
+      "independent_daily_matches": [
+        {
+          "date": "2026-10-30",
+          "close": 204.64,
+          "payload_sha256": "2b27e27c8479272bddc3be4457d5e1a51106ad5803f13c4941201ff5de755a40",
+          "source_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=105.NVDA&klt=101&fqt=0&beg=20250101&end=20261031&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+          "matches_candidate": true
+        }
+      ]
+    },
+    {
+      "symbol": "META",
+      "quote_regular_session_field": "Nov 02 04:00PM EST",
+      "candidate_previous_close": 614.99,
+      "independent_daily_matches": [
+        {
+          "date": "2026-10-30",
+          "close": 614.99,
+          "payload_sha256": "ee066d5ed961d04cf70584e6b88ec0701d93d901ecf79eb6bca5ab37d28e39f8",
+          "source_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=105.META&klt=101&fqt=0&beg=20251101&end=20261031&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+          "matches_candidate": true
+        }
+      ]
+    }
+  ]
+}
