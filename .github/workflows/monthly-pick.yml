@@ -1,0 +1,206 @@
+name: 每日全量更新
+
+concurrency:
+  group: trade-pipeline
+  cancel-in-progress: false
+
+on:
+  schedule:
+    # 每天 10:00、22:00 UTC（北京 18:00、06:00）各一次全量更新
+    - cron: "0 10,22 * * *"
+    # 每周日 03:00 UTC = 北京 11:00：生存者偏差审计
+    - cron: "0 3 * * 0"
+  workflow_dispatch:
+  # 修改任何管道脚本时自动跑一次（bot 用 GITHUB_TOKEN 提交不会触发，不会循环）
+  push:
+    branches: [main]
+    paths:
+      - monthly_pick.py
+      - market_data.py
+      - quotes.py
+      - equity.py
+      - strategy_history.py
+      - datafeed.py
+      - selftest.py
+      - verify_champions.py
+      - dashboard.py
+      - site_build.py
+      - report_live.py
+      - publish_signal.py
+      - track_record.py
+      - survivorship.py
+      - requirements.txt
+      - .github/workflows/monthly-pick.yml
+      - variant_b.py
+      - audit_b.py
+      - freeze_fixtures.py
+      - freeze_bars.py
+      - static/**
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+  issues: write
+
+
+jobs:
+  pick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v5
+
+      - name: 安装 Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      - name: 写入数据库口令
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          mkdir -p output
+          if [ -n "$SUPABASE_DB_PASSWORD" ]; then
+            printf '%s' "$SUPABASE_DB_PASSWORD" > output/_supabase_dbpass.txt
+          else
+            echo "::warning::SUPABASE_DB_PASSWORD 未配置，将退回缓存/旧数据"
+          fi
+
+      - name: 运行选股与排名
+        id: pick
+        run: python runner.py monthly_pick.py --workers 10
+
+      - name: 抓取行情快照
+        continue-on-error: true
+        run: python runner.py quotes.py
+
+      - name: 计算策略净值
+        continue-on-error: true
+        run: python runner.py equity.py
+      - name: 生成明年预览
+        run: python runner.py preview.py
+
+      - name: 生成全年成分口径（B）
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          BASELINE_MODE: observe
+        run: python runner.py variant_b.py
+
+      - name: 计算 B 口径净值
+        env:
+          EQ_SIGNAL: output/signal_history_b.json
+          EQ_OUT: docs/data/b/equity.json
+        run: python runner.py equity.py
+
+      - name: 生成逐年记录
+        continue-on-error: true
+        run: python runner.py strategy_history.py
+
+      - name: 口径 B 独立审计
+        run: python runner.py audit_b.py
+
+      - name: 生成站点
+        id: site
+        run: python runner.py site_build.py
+
+      - name: 生存者偏差审计（每周日跑一次，较慢）
+        if: github.event_name == 'schedule' && github.event.schedule == '0 3 * * 0'
+        continue-on-error: true
+        timeout-minutes: 8
+        run: python runner.py survivorship.py --probe || echo "审计跳过"
+
+      - name: 部署前自检（数据不全就不部署）
+        run: python runner.py selftest.py
+
+      - name: 提交流水线状态
+        if: always()
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f output/pipeline_status.json
+          git diff --staged --quiet || git commit -m "chore: 流水线状态 18:38"
+          for i in 1 2 3; do
+            if git push; then break; fi
+            echo "push 失败，第 $i 次重试…"
+            git pull --rebase --autostash origin "${GITHUB_REF_NAME:-main}" || true
+            sleep 5
+          done
+          git push || { echo "::error::无法推送，状态可能丢失"; exit 1; }
+
+      - name: 上传 Pages 产物
+        if: steps.pick.outcome == 'success'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - name: 提交结果
+        id: commit
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # 只提交实际存在的产物；某个文件被清理后不能让 git add 报错(exit 128)拖垮整个任务
+          for f in output/signal_history.json output/track_record.json \
+                   output/survivorship.json output/survivorship.md \
+                   output/pipeline_status.json output/splits.json \
+                   output/official_locks.json output/history_baseline.json \
+                   output/lock_changelog.json output/backtest_picks.json \
+                   output/strategy_history.json output/curve.json \
+                   output/dashboard.html static/sp500_members.csv \
+                   static/sector_overrides.json; do
+            if [ -f "$f" ]; then git add -f "$f"; fi
+          done
+          if git diff --staged --quiet; then
+            echo "本期无变更，跳过提交"
+          else
+            git commit -m "chore: 每日数据更新 $(date -u +%Y-%m)"
+            git push
+          fi
+
+      # 已停用：站点是唯一信息源，不再往 Issue 推送重复内容
+      - name: 摘要
+        if: always()
+        run: |
+          echo "### 月度选股结果" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ steps.pick.outcome }}" = "success" ] && [ -f output/monthly/latest.md ]; then
+            tail -n +3 output/monthly/latest.md >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "🌐 https://dear202606-star.github.io/trade/signals.html" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "❌ 本次运行失败，未生成新报告，请查看上方日志。" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: 失败时开 Issue
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `流水线失败 ${new Date().toISOString().slice(0,10)}`;
+            const body = `运行 [${context.runId}](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) 失败。\n\n站点可能停更，请检查。`;
+            const issues = await github.rest.issues.listForRepo({owner: context.repo.owner, repo: context.repo.repo, state: 'open', labels: 'pipeline'});
+            if (issues.data.length === 0) {
+              await github.rest.issues.create({owner: context.repo.owner, repo: context.repo.repo, title, body, labels: ['pipeline']});
+            }
+
+
+  deploy:
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: false
+    needs: pick
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 部署到 GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

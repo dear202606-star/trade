@@ -1,0 +1,71 @@
+name: CI 采集（写暂存表，无需 secret）
+
+# 链路
+#   CI 采集 → REST 写 ingest_staging（anon 可写）→ 库内 pg_cron 每 10 分钟
+#   调用 promote_staging()：结构校验后合并进 prices_monthly。
+#   因此本工作流**不需要 SUPABASE_DB_PASSWORD**，也能真正把数据送进库。
+
+on:
+  schedule:
+    - cron: "25 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "本次最多处理多少只"
+        required: false
+        default: "80"
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装依赖
+        run: pip install -q pandas requests psycopg2-binary
+
+      - name: 采集并写入暂存表
+        env:
+          LIMIT: ${{ github.event.inputs.limit }}
+        run: |
+          python - <<'PY'
+          import os, time, json
+          import fetch_stockanalysis as F
+          import staging_write as SW
+          import ingest_validate as IV
+          import db_ref, db_prices
+
+          limit = int(os.environ.get("LIMIT") or 80)
+          mem = db_ref.load_members()
+          need = sorted({t for t, segs in mem.items()
+                         if max(b for _, b in segs) >= "2009-01-01"})
+          have = db_prices.load_all()
+          missing = [t for t in need if not have.get(t)]
+          print("宇宙 %d 只 ｜ 已有 %d ｜ 缺 %d ｜ 本次处理 %d"
+                % (len(need), len(need) - len(missing), len(missing), min(limit, len(missing))))
+
+          ok = bad = rows = 0
+          for t in missing[:limit]:
+              try:
+                  bars = F.fetch(t)
+              except Exception:
+                  bad += 1
+                  continue
+              if not bars:
+                  bad += 1
+                  continue
+              good, why, _ = IV.check_payload(t, bars, "total_return", allow_stale=True)
+              if not good:
+                  bad += 1
+                  print("  ✗", t, why)
+                  continue
+              rows += SW.push_from_bars(t, bars)
+              ok += 1
+              time.sleep(0.8)
+          print(json.dumps({"ok": ok, "bad": bad, "rows": rows}, ensure_ascii=False))
+          PY

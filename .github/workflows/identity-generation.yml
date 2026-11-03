@@ -1,0 +1,28 @@
+name: 证券身份生成防护回归
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - db_ref.py
+      - strategy_history.py
+      - variant_b.py
+      - test_identity_generation_guard.py
+      - .github/workflows/identity-generation.yml
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - run: python -m unittest test_identity_generation_guard

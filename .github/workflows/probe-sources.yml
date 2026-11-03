@@ -1,0 +1,30 @@
+name: 源探测（美国 runner 直连）
+
+# 目的：本机在中国大陆，很多财经站点被地区封锁或网络不通；
+# 但采集实际跑在 GitHub Actions（美国），应以 CI 的视角判断可达性。
+# 只读探测，不改数据。
+
+on:
+  workflow_dispatch:
+    inputs:
+      ticker:
+        description: "探测用标的"
+        required: false
+        default: "AAPL"
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装依赖
+        run: pip install -q requests curl_cffi
+
+      - name: 探测全球免费源（美国出口）
+        run: python probe_sources.py

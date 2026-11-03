@@ -1,0 +1,27 @@
+#!/bin/sh
+# ============================================================
+# 提交前拦截：个人资料 / 截图 一律不得进入 Git
+# 启用方式（每台机器执行一次）：git config core.hooksPath .githooks
+# 关键点：必须加 -c core.quotePath=false，否则中文文件名会被转义成 \346\214\201 导致匹配失败
+# ============================================================
+
+files=$(git -c core.quotePath=false diff --cached --name-only --diff-filter=ACM)
+[ -z "$files" ] && exit 0
+
+blocked=$(echo "$files" | grep -Ei '持仓|诊断|风险偏好|截图|截屏|screenshot|screen shot|执行手册|执行方案|调研报告|赚钱最优方案|最终方案|对抗性审查|对账单|交易记录|账户' || true)
+badimg=$(echo "$files" | grep -Ei '\.(jpg|jpeg|webp|bmp|gif|heic)$' || true)
+outside=$(echo "$files" | grep -E '\.png$' | grep -v '^output/img/' || true)
+
+if [ -n "$blocked" ] || [ -n "$badimg" ] || [ -n "$outside" ]; then
+  echo ""
+  echo "❌ 已阻止提交：检测到疑似个人资料或截图"
+  [ -n "$blocked" ] && echo "   [敏感文件名]" && echo "$blocked" | sed 's/^/     /'
+  [ -n "$badimg" ]  && echo "   [图片文件]"   && echo "$badimg"  | sed 's/^/     /'
+  [ -n "$outside" ] && echo "   [output/img 之外的 png]" && echo "$outside" | sed 's/^/     /'
+  echo ""
+  echo "   如确属误判，可用: git commit --no-verify"
+  echo ""
+  exit 1
+fi
+
+exit 0

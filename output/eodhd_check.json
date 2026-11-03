@@ -1,0 +1,34 @@
+{
+  "checked_at": "2026-10-31T10:37:56Z",
+  "source": "EODHD（免费额度仅近 1 年，用于当年数据交叉校验）",
+  "targets": 5,
+  "mismatch": 0,
+  "tolerance": 0.02,
+  "details": [
+    {
+      "ticker": "MU",
+      "months": 13,
+      "max_dev": 0.0
+    },
+    {
+      "ticker": "STX",
+      "months": 13,
+      "max_dev": 0.0
+    },
+    {
+      "ticker": "NEM",
+      "months": 13,
+      "max_dev": 0.0196
+    },
+    {
+      "ticker": "MPC",
+      "months": 13,
+      "max_dev": 0.0
+    },
+    {
+      "ticker": "SNDK",
+      "months": 13,
+      "max_dev": 0.0
+    }
+  ]
+}

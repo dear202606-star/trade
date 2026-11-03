@@ -1,0 +1,279 @@
+{
+  "generated": "2026-10-24",
+  "by_year": [
+    {
+      "year": 2008,
+      "members": 497,
+      "covered": 462,
+      "missing": 35,
+      "coverage": 0.9295774647887324,
+      "missing_list": [
+        "ABKFQ",
+        "ACS",
+        "AW",
+        "AYE",
+        "BDK",
+        "BJS",
+        "BRL",
+        "BSC",
+        "BTUUQ",
+        "CCTYQ",
+        "CFC",
+        "CITGQ",
+        "EKDKQ",
+        "GR",
+        "HET",
+        "HPC",
+        "HSP",
+        "LEHMQ",
+        "MHS",
+        "MTLQQ",
+        "NCC",
+        "NOVL",
+        "NYX",
+        "PBG",
+        "PTV",
+        "ROH",
+        "RSHCQ",
+        "RX",
+        "SOV",
+        "SUNEQ",
+        "UTX",
+        "WAMUQ",
+        "WWY",
+        "WYE",
+        "XTO"
+      ]
+    },
+    {
+      "year": 2009,
+      "members": 498,
+      "covered": 472,
+      "missing": 26,
+      "coverage": 0.9477911646586346,
+      "missing_list": [
+        "ACS",
+        "AYE",
+        "BDK",
+        "BJS",
+        "BTUUQ",
+        "CITGQ",
+        "EKDKQ",
+        "GR",
+        "HSP",
+        "MEE",
+        "MFE",
+        "MHS",
+        "MTLQQ",
+        "NCC",
+        "NOVL",
+        "NYX",
+        "PBG",
+        "PTV",
+        "ROH",
+        "RSHCQ",
+        "RX",
+        "SOV",
+        "SUNEQ",
+        "UTX",
+        "WYE",
+        "XTO"
+      ]
+    },
+    {
+      "year": 2010,
+      "members": 499,
+      "covered": 479,
+      "missing": 20,
+      "coverage": 0.9599198396793587,
+      "missing_list": [
+        "ACS",
+        "AYE",
+        "BDK",
+        "BJS",
+        "BTUUQ",
+        "EKDKQ",
+        "GR",
+        "HSP",
+        "MEE",
+        "MFE",
+        "MHS",
+        "NOVL",
+        "NYX",
+        "PBG",
+        "PTV",
+        "RSHCQ",
+        "RX",
+        "SUNEQ",
+        "UTX",
+        "XTO"
+      ]
+    },
+    {
+      "year": 2011,
+      "members": 497,
+      "covered": 485,
+      "missing": 12,
+      "coverage": 0.9758551307847082,
+      "missing_list": [
+        "AYE",
+        "BTUUQ",
+        "GR",
+        "HSP",
+        "MEE",
+        "MFE",
+        "MHS",
+        "NOVL",
+        "NYX",
+        "RSHCQ",
+        "SUNEQ",
+        "UTX"
+      ]
+    },
+    {
+      "year": 2012,
+      "members": 497,
+      "covered": 490,
+      "missing": 7,
+      "coverage": 0.9859154929577465,
+      "missing_list": [
+        "ANRZQ",
+        "BTUUQ",
+        "GR",
+        "HSP",
+        "MHS",
+        "NYX",
+        "UTX"
+      ]
+    },
+    {
+      "year": 2013,
+      "members": 497,
+      "covered": 493,
+      "missing": 4,
+      "coverage": 0.9919517102615694,
+      "missing_list": [
+        "BTUUQ",
+        "HSP",
+        "NYX",
+        "UTX"
+      ]
+    },
+    {
+      "year": 2014,
+      "members": 497,
+      "covered": 494,
+      "missing": 3,
+      "coverage": 0.993963782696177,
+      "missing_list": [
+        "BTUUQ",
+        "HSP",
+        "UTX"
+      ]
+    },
+    {
+      "year": 2015,
+      "members": 499,
+      "covered": 497,
+      "missing": 2,
+      "coverage": 0.9959919839679359,
+      "missing_list": [
+        "HSP",
+        "UTX"
+      ]
+    },
+    {
+      "year": 2016,
+      "members": 502,
+      "covered": 501,
+      "missing": 1,
+      "coverage": 0.99800796812749,
+      "missing_list": [
+        "UTX"
+      ]
+    },
+    {
+      "year": 2017,
+      "members": 506,
+      "covered": 505,
+      "missing": 1,
+      "coverage": 0.9980237154150198,
+      "missing_list": [
+        "UTX"
+      ]
+    },
+    {
+      "year": 2018,
+      "members": 505,
+      "covered": 504,
+      "missing": 1,
+      "coverage": 0.998019801980198,
+      "missing_list": [
+        "UTX"
+      ]
+    },
+    {
+      "year": 2019,
+      "members": 505,
+      "covered": 504,
+      "missing": 1,
+      "coverage": 0.998019801980198,
+      "missing_list": [
+        "UTX"
+      ]
+    },
+    {
+      "year": 2020,
+      "members": 505,
+      "covered": 504,
+      "missing": 1,
+      "coverage": 0.998019801980198,
+      "missing_list": [
+        "UTX"
+      ]
+    },
+    {
+      "year": 2021,
+      "members": 505,
+      "covered": 505,
+      "missing": 0,
+      "coverage": 1.0,
+      "missing_list": []
+    },
+    {
+      "year": 2022,
+      "members": 505,
+      "covered": 505,
+      "missing": 0,
+      "coverage": 1.0,
+      "missing_list": []
+    },
+    {
+      "year": 2023,
+      "members": 503,
+      "covered": 503,
+      "missing": 0,
+      "coverage": 1.0,
+      "missing_list": []
+    },
+    {
+      "year": 2024,
+      "members": 503,
+      "covered": 503,
+      "missing": 0,
+      "coverage": 1.0,
+      "missing_list": []
+    },
+    {
+      "year": 2025,
+      "members": 503,
+      "covered": 503,
+      "missing": 0,
+      "coverage": 1.0,
+      "missing_list": []
+    }
+  ],
+  "missing_unique": 38,
+  "recovered": 0,
+  "recovered_list": []
+}

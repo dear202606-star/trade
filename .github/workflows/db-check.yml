@@ -1,0 +1,59 @@
+name: 数据库连通与写入自检
+
+# 目的：确认 CI（美国出口）能否直连并写入 Supabase。
+# 若可以写入，采集应全部搬到 CI；若只能读，则写操作需本地或补 secret。
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 安装依赖
+        run: pip install -q -r requirements.txt
+      - name: 写入口令
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          mkdir -p output
+          if [ -n "$SUPABASE_DB_PASSWORD" ]; then
+            printf '%s' "$SUPABASE_DB_PASSWORD" > output/_supabase_dbpass.txt
+            echo "secret 已注入（长度 ${#SUPABASE_DB_PASSWORD}）"
+          else
+            echo "::warning::secret 为空"
+          fi
+      - name: 读库
+        run: |
+          python - <<'PY'
+          import db_prices, db_ref
+          try:
+              print("connect ok")
+              allp = db_prices.load_all()
+              print("prices:", len(allp), "只")
+              print("members:", len(db_ref.load_members()))
+              print("sectors:", len(db_ref.load_sectors()))
+          except Exception as e:
+              print("READ FAIL:", str(e)[:160])
+          PY
+      - name: 写库（插一条 validations 再删）
+        run: |
+          python - <<'PY'
+          import db_prices, time
+          try:
+              db_prices.log_validation(None, "ci_write_probe", "pass",
+                                       "CI 写入自检 %s" % time.strftime("%H:%M:%S"))
+              import psycopg2
+              c = db_prices.connect()
+              with c.cursor() as cur:
+                  cur.execute("select count(*) from validations where check_name='ci_write_probe'")
+                  n = cur.fetchone()[0]
+              print("WRITE OK, ci_write_probe 行数 =", n)
+          except Exception as e:
+              print("WRITE FAIL:", str(e)[:160])
+          PY

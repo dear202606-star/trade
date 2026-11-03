@@ -1,0 +1,99 @@
+name: 采集与锁定（CI 主力，写库）
+
+# 目标：采集全部在 GitHub Actions（美国出口）完成，直接写库。
+# 依赖：仓库 secret SUPABASE_DB_PASSWORD（已验证可用）
+# 顺序：补数 → 重建选源 → 校验 → 锁新达标的标的
+
+on:
+  schedule:
+    - cron: "15 */6 * * *"      # 每 6 小时
+  workflow_dispatch:
+    inputs:
+      av_quota:
+        description: "本次 Alpha Vantage 调用上限"
+        required: false
+        default: "24"
+      sa_limit:
+        description: "本次 stockanalysis 处理标的数"
+        required: false
+        default: "120"
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装依赖
+        run: pip install -q -r requirements.txt
+
+      - name: 写入数据库口令
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          mkdir -p output
+          printf '%s' "$SUPABASE_DB_PASSWORD" > output/_supabase_dbpass.txt
+          echo "口令长度 ${#SUPABASE_DB_PASSWORD}"
+
+      - name: stockanalysis 补缺（免费，10 年全收益）
+        if: ${{ github.event.inputs.sa_limit != '0' }}
+        continue-on-error: true
+        env:
+          SA_LIMIT: ${{ github.event.inputs.sa_limit }}
+        run: |
+          N="${SA_LIMIT:-120}"
+          if [ "$N" = "0" ]; then echo "跳过 stockanalysis"; exit 0; fi
+          python fetch_stockanalysis.py --symbols "$N"
+
+      # Alpha Vantage 每天 25 次额度：交给 daily-backfill（每天 10:30 UTC）单独跑，
+      # 这里不跑，否则每 6 小时跑一次会 4 倍超量、全部失败。
+
+      - name: 给「选源非全收益」的标的补 Yahoo 全收益
+        continue-on-error: true
+        run: python fill_yahoo_gaps.py --limit 400 --max-seconds 900
+
+      - name: 重建选源（每票单源）
+        run: python db_select.py
+
+      - name: 校验入库（validations）
+        continue-on-error: true
+        run: python db_validate.py
+
+      - name: 锁定新达标的标的
+        continue-on-error: true
+        run: python lock_symbols.py --lock
+
+      - name: 采集分红/拆股事件（让全收益可独立复算）
+        continue-on-error: true
+        run: python fetch_actions.py --limit 160
+
+      - name: 校验锁是否仍然有效
+        continue-on-error: true
+        run: python verify_locks.py
+
+      - name: 结构冒烟
+        continue-on-error: true
+        run: python schema_check.py --quick
+
+      - name: 汇总
+        run: |
+          python - <<'PY'
+          import db_prices, db_select
+          import psycopg2
+          c = db_prices.connect()
+          with c.cursor() as cur:
+              cur.execute("select count(*), count(distinct symbol), "
+                          "count(*) filter (where basis='total_return') from series_selected")
+              n, s, tr = cur.fetchone()
+              cur.execute("select count(*) from locked_symbols")
+              lk = cur.fetchone()[0]
+              cur.execute("select count(*) from validations where status='fail'")
+              bad = cur.fetchone()[0]
+          print("series_selected %d 行 / %d 只 / 全收益 %.1f%% ｜ 已锁 %d 只 ｜ 校验失败 %d 条"
+                % (n, s, 100.0 * tr / max(1, n), lk, bad))
+          PY

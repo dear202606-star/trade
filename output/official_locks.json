@@ -1,0 +1,22 @@
+{
+ "2025-12": {
+  "holdings": [
+   {
+    "ticker": "WDC",
+    "weight": 0.3
+   },
+   {
+    "ticker": "MU",
+    "weight": 0.3
+   },
+   {
+    "ticker": "HOOD",
+    "weight": 0.4
+   }
+  ],
+  "hash": "ca051b4bab393fbb",
+  "locked_at": "2026-10-29",
+  "version": 1,
+  "note": "首次按「排名日时点成分股」口径锁定"
+ }
+}

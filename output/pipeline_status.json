@@ -1,0 +1,325 @@
+{
+ "runs": [
+  {
+   "ts": "2026-11-03T17:40:51Z",
+   "step": "quotes.py",
+   "rc": 0,
+   "dur": 9.1,
+   "ok": true,
+   "tail": "行情 508 / 510，汇率 6.6701，缺失 2"
+  },
+  {
+   "ts": "2026-11-03T17:40:53Z",
+   "step": "monthly_pick.py",
+   "rc": 0,
+   "dur": 2.2,
+   "ok": true,
+   "tail": "[1/5] 获取标普500 成分股 ...\n      539 只\n[增量] 本月排名已存在，只刷新均线开关…\n      标普 752.10 / 10 月均线 734.28 → 满仓"
+  },
+  {
+   "ts": "2026-11-03T17:40:58Z",
+   "step": "equity.py",
+   "rc": 0,
+   "dur": 5.4,
+   "ok": true,
+   "tail": "净值 211 个交易日（20251231 起）｜策略 +76.24% ｜标普 +10.29% ｜ 最大回撤 -39.7%"
+  },
+  {
+   "ts": "2026-11-03T17:43:17Z",
+   "step": "preview.py",
+   "rc": 0,
+   "dur": 139.0,
+   "ok": true,
+   "tail": "⚠ 直连数据库失败（module 'db_select' has no attribute 'load_all'），改走 REST 只读\n预览：MRNA +685% / CTVA +679% / SNDK +368% → 排名池 495 只\n[stderr]\n/home/runner/work/trade/trade/preview.py:31: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).\n  ym = dt.datetime.utcfromtimestamp(int(ts)).strftime(\"%Y-%m\")"
+  },
+  {
+   "ts": "2026-11-03T17:43:26Z",
+   "step": "variant_b.py",
+   "rc": 1,
+   "dur": 8.1,
+   "ok": false,
+   "tail": "在线库行情覆盖 96.2%（836/869 只）\n口径来自在线库：成分 1262 行 / 行业 513 只\n[stderr]\nTraceback (most recent call last):\n  File \"/home/runner/work/trade/trade/variant_b.py\", line 714, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File \"/home/runner/work/trade/trade/variant_b.py\", line 403, in main\n    _ref.require_unquarantined_candidates(candidates)\n  File \"/home/runner/work/trade/trade/db_ref.py\", line 165, in require_unquarantined_candidates\n    raise RuntimeError('排名候选证券身份仍待核验，禁止静默剔除后发布：'+\nRuntimeError: 排名候选证券身份仍待核验，禁止静默剔除后发布：BMC, COV, EP, GAS, HAR, LSI, PARA, PCL, SBNY, SCG, TIE"
+  },
+  {
+   "ts": "2026-11-03T17:45:37Z",
+   "step": "quotes.py",
+   "rc": 0,
+   "dur": 8.6,
+   "ok": true,
+   "tail": "行情 508 / 510，汇率 6.6701，缺失 2"
+  },
+  {
+   "ts": "2026-11-03T17:45:39Z",
+   "step": "monthly_pick.py",
+   "rc": 0,
+   "dur": 2.3,
+   "ok": true,
+   "tail": "[1/5] 获取标普500 成分股 ...\n      539 只\n[增量] 本月排名已存在，只刷新均线开关…\n      标普 752.10 / 10 月均线 734.28 → 满仓"
+  },
+  {
+   "ts": "2026-11-03T17:45:44Z",
+   "step": "equity.py",
+   "rc": 0,
+   "dur": 5.2,
+   "ok": true,
+   "tail": "净值 211 个交易日（20251231 起）｜策略 +76.24% ｜标普 +10.29% ｜ 最大回撤 -39.7%"
+  },
+  {
+   "ts": "2026-11-03T17:47:16Z",
+   "step": "preview.py",
+   "rc": 0,
+   "dur": 92.2,
+   "ok": true,
+   "tail": "⚠ 直连数据库失败（module 'db_select' has no attribute 'load_all'），改走 REST 只读\n预览：MRNA +686% / CTVA +680% / SNDK +368% → 排名池 495 只\n[stderr]\n/home/runner/work/trade/trade/preview.py:31: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).\n  ym = dt.datetime.utcfromtimestamp(int(ts)).strftime(\"%Y-%m\")"
+  },
+  {
+   "ts": "2026-11-03T17:47:24Z",
+   "step": "variant_b.py",
+   "rc": 1,
+   "dur": 7.5,
+   "ok": false,
+   "tail": "在线库行情覆盖 96.2%（836/869 只）\n口径来自在线库：成分 1262 行 / 行业 513 只\n[stderr]\nTraceback (most recent call last):\n  File \"/home/runner/work/trade/trade/variant_b.py\", line 714, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File \"/home/runner/work/trade/trade/variant_b.py\", line 403, in main\n    _ref.require_unquarantined_candidates(candidates)\n  File \"/home/runner/work/trade/trade/db_ref.py\", line 165, in require_unquarantined_candidates\n    raise RuntimeError('排名候选证券身份仍待核验，禁止静默剔除后发布：'+\nRuntimeError: 排名候选证券身份仍待核验，禁止静默剔除后发布：BMC, COV, EP, GAS, HAR, LSI, PARA, PCL, SBNY, SCG, TIE"
+  },
+  {
+   "ts": "2026-11-03T17:50:34Z",
+   "step": "quotes.py",
+   "rc": 0,
+   "dur": 9.1,
+   "ok": true,
+   "tail": "行情 508 / 510，汇率 6.6701，缺失 2"
+  },
+  {
+   "ts": "2026-11-03T17:50:36Z",
+   "step": "monthly_pick.py",
+   "rc": 0,
+   "dur": 2.5,
+   "ok": true,
+   "tail": "[1/5] 获取标普500 成分股 ...\n      539 只\n[增量] 本月排名已存在，只刷新均线开关…\n      标普 752.10 / 10 月均线 734.28 → 满仓"
+  },
+  {
+   "ts": "2026-11-03T17:50:42Z",
+   "step": "equity.py",
+   "rc": 0,
+   "dur": 5.9,
+   "ok": true,
+   "tail": "净值 211 个交易日（20251231 起）｜策略 +76.24% ｜标普 +10.29% ｜ 最大回撤 -39.7%"
+  },
+  {
+   "ts": "2026-11-03T17:53:05Z",
+   "step": "preview.py",
+   "rc": 0,
+   "dur": 142.7,
+   "ok": true,
+   "tail": "⚠ 直连数据库失败（module 'db_select' has no attribute 'load_all'），改走 REST 只读\n预览：MRNA +686% / CTVA +680% / SNDK +368% → 排名池 495 只\n[stderr]\n/home/runner/work/trade/trade/preview.py:31: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).\n  ym = dt.datetime.utcfromtimestamp(int(ts)).strftime(\"%Y-%m\")"
+  },
+  {
+   "ts": "2026-11-03T17:53:13Z",
+   "step": "variant_b.py",
+   "rc": 1,
+   "dur": 8.2,
+   "ok": false,
+   "tail": "在线库行情覆盖 96.2%（836/869 只）\n口径来自在线库：成分 1262 行 / 行业 513 只\n[stderr]\nTraceback (most recent call last):\n  File \"/home/runner/work/trade/trade/variant_b.py\", line 714, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File \"/home/runner/work/trade/trade/variant_b.py\", line 403, in main\n    _ref.require_unquarantined_candidates(candidates)\n  File \"/home/runner/work/trade/trade/db_ref.py\", line 165, in require_unquarantined_candidates\n    raise RuntimeError('排名候选证券身份仍待核验，禁止静默剔除后发布：'+\nRuntimeError: 排名候选证券身份仍待核验，禁止静默剔除后发布：BMC, COV, EP, GAS, HAR, LSI, PARA, PCL, SBNY, SCG, TIE"
+  },
+  {
+   "ts": "2026-11-03T17:55:36Z",
+   "step": "quotes.py",
+   "rc": 0,
+   "dur": 9.2,
+   "ok": true,
+   "tail": "行情 508 / 510，汇率 6.6701，缺失 2"
+  },
+  {
+   "ts": "2026-11-03T17:55:38Z",
+   "step": "monthly_pick.py",
+   "rc": 0,
+   "dur": 2.1,
+   "ok": true,
+   "tail": "[1/5] 获取标普500 成分股 ...\n      539 只\n[增量] 本月排名已存在，只刷新均线开关…\n      标普 752.10 / 10 月均线 734.28 → 满仓"
+  },
+  {
+   "ts": "2026-11-03T17:55:43Z",
+   "step": "equity.py",
+   "rc": 0,
+   "dur": 4.8,
+   "ok": true,
+   "tail": "净值 211 个交易日（20251231 起）｜策略 +76.24% ｜标普 +10.29% ｜ 最大回撤 -39.7%"
+  },
+  {
+   "ts": "2026-11-03T17:57:04Z",
+   "step": "preview.py",
+   "rc": 0,
+   "dur": 80.6,
+   "ok": true,
+   "tail": "⚠ 直连数据库失败（module 'db_select' has no attribute 'load_all'），改走 REST 只读\n预览：MRNA +686% / CTVA +680% / SNDK +367% → 排名池 495 只\n[stderr]\n/home/runner/work/trade/trade/preview.py:31: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).\n  ym = dt.datetime.utcfromtimestamp(int(ts)).strftime(\"%Y-%m\")"
+  },
+  {
+   "ts": "2026-11-03T17:57:11Z",
+   "step": "variant_b.py",
+   "rc": 1,
+   "dur": 7.1,
+   "ok": false,
+   "tail": "在线库行情覆盖 96.2%（836/869 只）\n口径来自在线库：成分 1262 行 / 行业 513 只\n[stderr]\nTraceback (most recent call last):\n  File \"/home/runner/work/trade/trade/variant_b.py\", line 714, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File \"/home/runner/work/trade/trade/variant_b.py\", line 403, in main\n    _ref.require_unquarantined_candidates(candidates)\n  File \"/home/runner/work/trade/trade/db_ref.py\", line 165, in require_unquarantined_candidates\n    raise RuntimeError('排名候选证券身份仍待核验，禁止静默剔除后发布：'+\nRuntimeError: 排名候选证券身份仍待核验，禁止静默剔除后发布：BMC, COV, EP, GAS, HAR, LSI, PARA, PCL, SBNY, SCG, TIE"
+  },
+  {
+   "ts": "2026-11-03T18:01:19Z",
+   "step": "quotes.py",
+   "rc": 0,
+   "dur": 9.8,
+   "ok": true,
+   "tail": "行情 508 / 510，汇率 6.6701，缺失 2"
+  },
+  {
+   "ts": "2026-11-03T18:01:21Z",
+   "step": "monthly_pick.py",
+   "rc": 0,
+   "dur": 2.3,
+   "ok": true,
+   "tail": "[1/5] 获取标普500 成分股 ...\n      539 只\n[增量] 本月排名已存在，只刷新均线开关…\n      标普 752.10 / 10 月均线 734.28 → 满仓"
+  },
+  {
+   "ts": "2026-11-03T18:01:26Z",
+   "step": "equity.py",
+   "rc": 0,
+   "dur": 5.4,
+   "ok": true,
+   "tail": "净值 211 个交易日（20251231 起）｜策略 +76.24% ｜标普 +10.29% ｜ 最大回撤 -39.7%"
+  },
+  {
+   "ts": "2026-11-03T18:04:01Z",
+   "step": "preview.py",
+   "rc": 0,
+   "dur": 155.1,
+   "ok": true,
+   "tail": "⚠ 直连数据库失败（module 'db_select' has no attribute 'load_all'），改走 REST 只读\n预览：MRNA +685% / CTVA +680% / SNDK +367% → 排名池 495 只\n[stderr]\n/home/runner/work/trade/trade/preview.py:31: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).\n  ym = dt.datetime.utcfromtimestamp(int(ts)).strftime(\"%Y-%m\")"
+  },
+  {
+   "ts": "2026-11-03T18:04:10Z",
+   "step": "variant_b.py",
+   "rc": 1,
+   "dur": 8.0,
+   "ok": false,
+   "tail": "在线库行情覆盖 96.2%（836/869 只）\n口径来自在线库：成分 1262 行 / 行业 513 只\n[stderr]\nTraceback (most recent call last):\n  File \"/home/runner/work/trade/trade/variant_b.py\", line 714, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File \"/home/runner/work/trade/trade/variant_b.py\", line 403, in main\n    _ref.require_unquarantined_candidates(candidates)\n  File \"/home/runner/work/trade/trade/db_ref.py\", line 165, in require_unquarantined_candidates\n    raise RuntimeError('排名候选证券身份仍待核验，禁止静默剔除后发布：'+\nRuntimeError: 排名候选证券身份仍待核验，禁止静默剔除后发布：BMC, COV, EP, GAS, HAR, LSI, PARA, PCL, SBNY, SCG, TIE"
+  },
+  {
+   "ts": "2026-11-03T18:05:39Z",
+   "step": "quotes.py",
+   "rc": 0,
+   "dur": 8.9,
+   "ok": true,
+   "tail": "行情 508 / 510，汇率 6.6701，缺失 2"
+  },
+  {
+   "ts": "2026-11-03T18:05:43Z",
+   "step": "monthly_pick.py",
+   "rc": 0,
+   "dur": 3.3,
+   "ok": true,
+   "tail": "[1/5] 获取标普500 成分股 ...\n      539 只\n[增量] 本月排名已存在，只刷新均线开关…\n      标普 752.10 / 10 月均线 734.28 → 满仓"
+  },
+  {
+   "ts": "2026-11-03T18:05:48Z",
+   "step": "equity.py",
+   "rc": 0,
+   "dur": 5.1,
+   "ok": true,
+   "tail": "净值 211 个交易日（20251231 起）｜策略 +76.24% ｜标普 +10.29% ｜ 最大回撤 -39.7%"
+  },
+  {
+   "ts": "2026-11-03T18:07:17Z",
+   "step": "preview.py",
+   "rc": 0,
+   "dur": 89.4,
+   "ok": true,
+   "tail": "⚠ 直连数据库失败（module 'db_select' has no attribute 'load_all'），改走 REST 只读\n预览：MRNA +683% / CTVA +681% / SNDK +369% → 排名池 495 只\n[stderr]\n/home/runner/work/trade/trade/preview.py:31: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).\n  ym = dt.datetime.utcfromtimestamp(int(ts)).strftime(\"%Y-%m\")"
+  },
+  {
+   "ts": "2026-11-03T18:07:24Z",
+   "step": "variant_b.py",
+   "rc": 1,
+   "dur": 6.5,
+   "ok": false,
+   "tail": "在线库行情覆盖 96.2%（836/869 只）\n口径来自在线库：成分 1262 行 / 行业 513 只\n[stderr]\nTraceback (most recent call last):\n  File \"/home/runner/work/trade/trade/variant_b.py\", line 714, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File \"/home/runner/work/trade/trade/variant_b.py\", line 403, in main\n    _ref.require_unquarantined_candidates(candidates)\n  File \"/home/runner/work/trade/trade/db_ref.py\", line 165, in require_unquarantined_candidates\n    raise RuntimeError('排名候选证券身份仍待核验，禁止静默剔除后发布：'+\nRuntimeError: 排名候选证券身份仍待核验，禁止静默剔除后发布：BMC, COV, EP, GAS, HAR, LSI, PARA, PCL, SBNY, SCG, TIE"
+  },
+  {
+   "ts": "2026-11-03T18:10:38Z",
+   "step": "quotes.py",
+   "rc": 0,
+   "dur": 9.5,
+   "ok": true,
+   "tail": "行情 508 / 510，汇率 6.6701，缺失 2"
+  },
+  {
+   "ts": "2026-11-03T18:10:41Z",
+   "step": "monthly_pick.py",
+   "rc": 0,
+   "dur": 3.3,
+   "ok": true,
+   "tail": "[1/5] 获取标普500 成分股 ...\n      539 只\n[增量] 本月排名已存在，只刷新均线开关…\n      标普 752.10 / 10 月均线 734.28 → 满仓"
+  },
+  {
+   "ts": "2026-11-03T18:10:46Z",
+   "step": "equity.py",
+   "rc": 0,
+   "dur": 5.1,
+   "ok": true,
+   "tail": "净值 211 个交易日（20251231 起）｜策略 +76.24% ｜标普 +10.29% ｜ 最大回撤 -39.7%"
+  },
+  {
+   "ts": "2026-11-03T18:12:13Z",
+   "step": "preview.py",
+   "rc": 0,
+   "dur": 87.2,
+   "ok": true,
+   "tail": "⚠ 直连数据库失败（module 'db_select' has no attribute 'load_all'），改走 REST 只读\n预览：MRNA +686% / CTVA +683% / SNDK +370% → 排名池 495 只\n[stderr]\n/home/runner/work/trade/trade/preview.py:31: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).\n  ym = dt.datetime.utcfromtimestamp(int(ts)).strftime(\"%Y-%m\")"
+  },
+  {
+   "ts": "2026-11-03T18:12:21Z",
+   "step": "variant_b.py",
+   "rc": 1,
+   "dur": 7.1,
+   "ok": false,
+   "tail": "在线库行情覆盖 96.2%（836/869 只）\n口径来自在线库：成分 1262 行 / 行业 513 只\n[stderr]\nTraceback (most recent call last):\n  File \"/home/runner/work/trade/trade/variant_b.py\", line 714, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File \"/home/runner/work/trade/trade/variant_b.py\", line 403, in main\n    _ref.require_unquarantined_candidates(candidates)\n  File \"/home/runner/work/trade/trade/db_ref.py\", line 165, in require_unquarantined_candidates\n    raise RuntimeError('排名候选证券身份仍待核验，禁止静默剔除后发布：'+\nRuntimeError: 排名候选证券身份仍待核验，禁止静默剔除后发布：BMC, COV, EP, GAS, HAR, LSI, PARA, PCL, SBNY, SCG, TIE"
+  },
+  {
+   "ts": "2026-11-03T18:15:44Z",
+   "step": "quotes.py",
+   "rc": 0,
+   "dur": 8.9,
+   "ok": true,
+   "tail": "行情 508 / 510，汇率 6.6701，缺失 2"
+  },
+  {
+   "ts": "2026-11-03T18:15:47Z",
+   "step": "monthly_pick.py",
+   "rc": 0,
+   "dur": 3.0,
+   "ok": true,
+   "tail": "[1/5] 获取标普500 成分股 ...\n      539 只\n[增量] 本月排名已存在，只刷新均线开关…\n      标普 752.10 / 10 月均线 734.28 → 满仓"
+  },
+  {
+   "ts": "2026-11-03T18:15:52Z",
+   "step": "equity.py",
+   "rc": 0,
+   "dur": 5.0,
+   "ok": true,
+   "tail": "净值 211 个交易日（20251231 起）｜策略 +76.24% ｜标普 +10.29% ｜ 最大回撤 -39.7%"
+  },
+  {
+   "ts": "2026-11-03T18:17:27Z",
+   "step": "preview.py",
+   "rc": 0,
+   "dur": 94.3,
+   "ok": true,
+   "tail": "⚠ 直连数据库失败（module 'db_select' has no attribute 'load_all'），改走 REST 只读\n预览：MRNA +685% / CTVA +682% / SNDK +369% → 排名池 495 只\n[stderr]\n/home/runner/work/trade/trade/preview.py:31: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).\n  ym = dt.datetime.utcfromtimestamp(int(ts)).strftime(\"%Y-%m\")"
+  },
+  {
+   "ts": "2026-11-03T18:17:33Z",
+   "step": "variant_b.py",
+   "rc": 1,
+   "dur": 6.4,
+   "ok": false,
+   "tail": "在线库行情覆盖 96.2%（836/869 只）\n口径来自在线库：成分 1262 行 / 行业 513 只\n[stderr]\nTraceback (most recent call last):\n  File \"/home/runner/work/trade/trade/variant_b.py\", line 714, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File \"/home/runner/work/trade/trade/variant_b.py\", line 403, in main\n    _ref.require_unquarantined_candidates(candidates)\n  File \"/home/runner/work/trade/trade/db_ref.py\", line 165, in require_unquarantined_candidates\n    raise RuntimeError('排名候选证券身份仍待核验，禁止静默剔除后发布：'+\nRuntimeError: 排名候选证券身份仍待核验，禁止静默剔除后发布：BMC, COV, EP, GAS, HAR, LSI, PARA, PCL, SBNY, SCG, TIE"
+  }
+ ],
+ "updated": "2026-11-03T18:17:33Z"
+}

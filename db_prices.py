@@ -1,0 +1,264 @@
+# -*- coding: utf-8 -*-
+"""db_prices.py — 价格数据访问层（唯一数据真相 = Supabase/Postgres）
+
+所有下游（variant_b / equity / 校验 / 导出）都通过这一层读数据，不再读本地 csv/json。
+
+核心规则
+  · 一个 (symbol, month) 可能多源并存 → 取「等级最高」的一条（source_priority）
+  · basis：total_return 优先于 price_only；同 basis 内按 source_registry.priority
+  · 读取带进程内缓存，减少往返
+"""
+import io
+import os
+
+import psycopg2
+import psycopg2.extras
+
+BASE = os.path.dirname(os.path.abspath(__file__))
+REF = "fnvahsyrzmmxwovbsqpc"
+HOST = "aws-0-ap-northeast-1.pooler.supabase.com"
+
+# 源优先级（与 source_registry 保持一致；DB 不可达时的兜底）
+PRIORITY = {"alphavantage": 1, "yahoo_relay": 2, "eodhd": 3,
+            "hf_ayushkhaire": 4, "sina_repaired": 5, "sina_repaired+eodhd": 3}
+
+_conn = None
+_DB_DEAD = None      # True = 本进程已确认连不上
+_MARKER = os.path.join(BASE, "output", ".db_unavailable")
+CACHE_FILE = os.path.join(BASE, "output", "_prices_cache.json")
+CACHE_TTL = 6 * 3600      # 派生缓存，6 小时内直接用
+_cache = {}
+
+
+def connect():
+    global _conn, _DB_DEAD
+    if _DB_DEAD:
+        raise RuntimeError("数据库不可用（本进程已判定）")
+    if _conn is not None and not _conn.closed:
+        return _conn
+    pw = ""
+    env = os.environ.get("SUPABASE_DB_PASSWORD")
+    p = os.path.join(BASE, "output", "_supabase_dbpass.txt")
+    if env:
+        pw = env.strip()
+    elif os.path.exists(p):
+        pw = io.open(p, encoding="utf-8").read().strip()
+    try:
+        _conn = psycopg2.connect(host=HOST, port=6543, user="postgres." + REF, password=pw,
+                                 dbname="postgres", connect_timeout=6, sslmode="require")
+    except Exception:
+        _DB_DEAD = True
+        try:
+            open(_MARKER, "w").write("1")
+        except Exception:
+            pass
+        raise
+    return _conn
+
+
+def series(symbol, prefer_basis="total_return"):
+    """返回 {YYYY-MM: (adj, raw)}；同月多源时取最优"""
+    key = (symbol, prefer_basis)
+    if key in _cache:
+        return _cache[key]
+    with connect() as c, c.cursor() as cur:
+        cur.execute("""select month, adj_close, raw_close, source, basis
+                       from prices_monthly where symbol=%s""", (symbol,))
+        rows = cur.fetchall()
+    best = {}
+    for month, adj, raw, source, basis in rows:
+        rank = PRIORITY.get(source, 99)
+        score = (0 if basis == prefer_basis else 1, rank)
+        cur_score = best.get(month, (9, 99))[0:2]
+        if month not in best or score < (best[month][2], best[month][3]):
+            best[month] = (adj, raw, score[0], score[1], source)
+    out = {m: (float(v[0]), float(v[1]) if v[1] else float(v[0]))
+           for m, v in best.items() if v[0]}
+    _cache[key] = out
+    return out
+
+
+def symbols():
+    with connect() as c, c.cursor() as cur:
+        cur.execute("select distinct symbol from prices_monthly order by 1")
+        return [r[0] for r in cur.fetchall()]
+
+
+def coverage(symbol):
+    with connect() as c, c.cursor() as cur:
+        cur.execute("""select count(*) filter (where month like '%-12'),
+                              count(*), min(month), max(month)
+                       from prices_monthly where symbol=%s""", (symbol,))
+        return cur.fetchone()
+
+
+def write_rows(rows):
+    """rows: [(symbol, month, adj, raw, source, quality, basis)]"""
+    if not rows:
+        return 0
+    with connect() as c, c.cursor() as cur:
+        psycopg2.extras.execute_values(
+            cur, """insert into prices_monthly(symbol,month,adj_close,raw_close,source,quality,basis)
+                    values %s
+                    on conflict (symbol,month,source) do update
+                    set adj_close=excluded.adj_close, raw_close=excluded.raw_close,
+                        quality=excluded.quality, basis=excluded.basis, fetched_at=now()""",
+            rows, page_size=5000)
+    _cache.clear()
+    return len(rows)
+
+
+def dataset_id(name):
+    with connect() as c, c.cursor() as cur:
+        cur.execute("select id, input_hash, status from datasets where name=%s", (name,))
+        r = cur.fetchone()
+        return r
+
+
+def log_validation(dataset, check_name, status, detail=""):
+    with connect() as c, c.cursor() as cur:
+        cur.execute("""insert into sys_event(kind, source, subject, status, detail,
+                                            dataset_id, finished_at)
+                       values ('validation','db_prices',%s,%s,%s,
+                               (select id from datasets where name=%s), now())""",
+                    (check_name, status, detail, dataset))
+
+
+def stats():
+    with connect() as c, c.cursor() as cur:
+        cur.execute("""select count(distinct symbol), count(*),
+                              count(*) filter (where basis='total_return')
+                       from prices_monthly""")
+        return cur.fetchone()
+
+def _db_stamp():
+    """数据版本戳：行数 + 最大抓取时间 + 标的数（一条轻量查询）"""
+    if _DB_DEAD and os.path.exists(_MARKER):
+        return None
+    try:
+        with connect() as c, c.cursor() as cur:
+            cur.execute("""select count(*), coalesce(max(fetched_at)::text,''),
+                                  count(distinct symbol) from prices_monthly""")
+            a = cur.fetchone()
+            # 必须把 series_selected 也算进指纹：重建选源不改变 prices_monthly，
+            # 只比 prices_monthly 会让旧缓存被误判为新鲜（实测导致本地 31.07x vs CI 30.07x）
+            cur.execute("""select count(*), count(distinct symbol),
+                                  coalesce(sum(adj_close),0)::text
+                           from series_selected""")
+            b = cur.fetchone()
+            return (a[0], a[1], a[2], b[0], b[1], b[2])
+    except Exception:
+        return None
+
+
+def _cache_fresh():
+    """只认数据版本戳，不认 mtime（mtime 会被 git checkout 刷新）"""
+    try:
+        if not os.path.exists(CACHE_FILE):
+            return False
+        import json as _json
+        head = _json.load(open(CACHE_FILE, encoding="utf-8"))
+        stamp = head.get("__stamp__")
+        if not stamp:
+            return False
+        live = _db_stamp()
+        if live is None:
+            # DB 不可达（CI 走 REST）时用缓存内置构建时间，而不是 mtime
+            built = head.get("__built_at__") or 0
+            return (__import__("time").time() - float(built)) < 2 * 3600
+        return tuple(stamp) == tuple(live or ())
+    except Exception:
+        return False
+
+
+def load_all(prefer_basis="total_return", chunk=60, use_cache=True):
+    """对外唯一入口：委托 db_select 的「每票单源」结果（已修正逐月换源造假）"""
+    import db_select as _ds
+    if use_cache and prefer_basis == "total_return" and _cache_fresh():
+        import json as _json
+        raw = _json.load(open(CACHE_FILE, encoding="utf-8"))
+        raw.pop("__stamp__", None)
+        raw.pop("__built_at__", None)
+        return {k: {m: (v[0], v[1]) for m, v in d.items()} for k, d in raw.items()}
+    try:
+        out = _ds.load_all()
+    except Exception as _e:
+        print("⚠ 直连数据库失败（%s），改走 REST 只读" % str(_e)[:60], flush=True)
+        import db_rest as _rest
+        out = _rest.load_selected()
+        if not out:
+            raise RuntimeError("REST 返回 0 行（凭据/RLS 异常），禁止退回文件数据")
+    try:
+        import json as _json
+        payload = {k: {m: [v[0], v[1]] for m, v in d.items()} for k, d in out.items()}
+        _live = _db_stamp()
+        # DB 不可达时必须给一个真值标记，否则空列表会被当作「无指纹」而永不命中缓存
+        payload["__stamp__"] = list(_live) if _live else ["rest", len(out),
+                                                          sum(len(d) for d in out.values())]
+        payload["__built_at__"] = __import__("time").time()
+        _json.dump(payload, open(CACHE_FILE, "w"), separators=(",", ":"))
+    except Exception as _e:
+        print("写缓存失败：%s" % _e)
+    return out
+
+
+def _load_all_legacy(prefer_basis="total_return", chunk=60, use_cache=True):
+    if use_cache and prefer_basis == "total_return" and _cache_fresh():
+        import json as _json
+        raw = _json.load(open(CACHE_FILE, encoding="utf-8"))
+        raw.pop("__stamp__", None)
+        raw.pop("__built_at__", None)
+        return {k: {m: (v[0], v[1]) for m, v in d.items()} for k, d in raw.items()}
+    """分片载入全库（避免单条查询超时），返回 {symbol: {month: (adj, raw)}}"""
+    syms = symbols()
+    best = {}
+    conn = connect()
+    for i in range(0, len(syms), chunk):
+        part = syms[i:i + chunk]
+        with conn.cursor() as cur:
+            cur.execute("""select symbol, month, adj_close, raw_close, source, basis
+                           from prices_monthly where symbol = any(%s)""", (part,))
+            rows = cur.fetchall()
+        for sym, month, adj, raw, source, basis in rows:
+            rank = PRIORITY.get(source, 99)
+            score = (0 if basis == prefer_basis else 1, rank)
+            d = best.setdefault(sym, {})
+            cur_s = d.get(month)
+            if cur_s is None or score < (cur_s[2], cur_s[3]):
+                d[month] = (adj, raw, score[0], score[1])
+        print("  载入 %d/%d" % (min(i + chunk, len(syms)), len(syms)), end="\r", flush=True)
+    out = {}
+    for sym, months in best.items():
+        out[sym] = {m: (float(v[0]), float(v[1]) if v[1] else float(v[0]))
+                    for m, v in months.items() if v[0]}
+    print()
+    try:
+        import json as _json
+        payload = {k: {m: [v[0], v[1]] for m, v in d.items()} for k, d in out.items()}
+        _live = _db_stamp()
+        # DB 不可达时必须给一个真值标记，否则空列表会被当作「无指纹」而永不命中缓存
+        payload["__stamp__"] = list(_live) if _live else ["rest", len(out),
+                                                          sum(len(d) for d in out.values())]
+        payload["__built_at__"] = __import__("time").time()
+        _json.dump(payload, open(CACHE_FILE, "w"), separators=(",", ":"))
+    except Exception as _e:
+        print("写缓存失败：%s" % _e)
+    return out
+
+
+def log_run(source, requested, ok, failed=0, duration_s=0.0, note=""):
+    """统一采集台账：每次运行都写一行，含耗时与失败数"""
+    try:
+        with connect() as c, c.cursor() as cur:
+            cur.execute("""insert into sys_event(kind, source, subject, status, detail,
+                                                metrics, started_at, finished_at)
+                           values ('fetch', %s, 'run',
+                                   case when %s > 0 then 'warn' else 'ok' end,
+                                   %s,
+                                   jsonb_build_object('requested', %s, 'ok', %s, 'failed', %s,
+                                                      'duration_ms', %s),
+                                   now() - make_interval(secs => %s), now())""",
+                        (source, failed, (note or "")[:300], requested, ok, failed,
+                         int(float(duration_s)*1000), float(duration_s)))
+    except Exception as e:
+        print("台账写入失败：%s" % str(e)[:80])

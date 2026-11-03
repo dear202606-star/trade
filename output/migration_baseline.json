@@ -1,0 +1,260 @@
+{
+ "captured_at": "2026-11-01T09:16:36+0800",
+ "git_head": "e1856ca096ea18af81c85fc5382901c7e478afcc",
+ "files": {
+  "docs/data/b/strategy_history.json": {
+   "sha256": "8297f481d0756f81d773155be2ccd3c7a4d95348f25d6fdd561f910d3fc7efbc",
+   "bytes": 5803
+  },
+  "docs/data/b/curve.json": {
+   "sha256": "9695b08610b0ebfa611a846cf0590ca6729c8f76655cf770b26a141be1226ed2",
+   "bytes": 13593
+  },
+  "docs/data/b/equity.json": {
+   "sha256": "b4266d31b7e06d7633a2c2b4050963ef6771fd4d2e8b26e876d03911b789bfc1",
+   "bytes": 9759
+  },
+  "docs/data/b/signal.json": {
+   "sha256": "ac99e7722f3f2c62f0d9d8a2decf2893ded4ba7899a0ef6d511b7e412a9a6582",
+   "bytes": 814
+  },
+  "docs/data/b/preview.json": {
+   "sha256": "4cd92df6656c112798fe5dee94e60e833790fff974eb93f8b78c80713b20cb3b",
+   "bytes": 638
+  },
+  "docs/data/strategy_history.json": {
+   "sha256": "800a5b60ad0fd3bb279c533730e6f214223a711dc221f230a5a44dee89f65f90",
+   "bytes": 12599
+  },
+  "docs/data/curve.json": {
+   "sha256": "84f52e8643dc36b85300448be565197fc724b43f45170f2d37399d2cf2bdc7be",
+   "bytes": 10644
+  },
+  "docs/data/equity.json": {
+   "sha256": "536ef3113ce47f03ef8e7105189c70ad76fae3e4fb10326aff775a834f3b8351",
+   "bytes": 9769
+  },
+  "docs/data/signal.json": {
+   "sha256": "d240f85f97dc01db2733ea4596dbd88a25b47b2dfff7902c528b9499710f6e37",
+   "bytes": 2398
+  },
+  "docs/data/quality.json": {
+   "sha256": "a149b0941030e34b3f04a286ecf54d9758dd1767505039a99027d052a817151a",
+   "bytes": 3069
+  },
+  "docs/data/health.json": {
+   "sha256": "f0a84fa03f457814ea8ac0b904d44bb38fd788f79f4c370d6798cff4f83b8b40",
+   "bytes": 269
+  },
+  "docs/data/quotes.json": {
+   "sha256": "fd380d520415f5272eb3afc4a1e9701f8e39d1f140e39e9bcc8009921f1cee28",
+   "bytes": 42695
+  },
+  "docs/data/cloud.json": {
+   "sha256": "0211bbbcd53432e915e157e98cb1b85e1343913fcdaca9e4e8fd1a0aeb9e3cd4",
+   "bytes": 108
+  },
+  "static/members_frozen.csv": {
+   "sha256": "c9da7210aea687d4b89f370d024ba1ba8ce80e7c7761b1373d2976b84502a939",
+   "bytes": 34351
+  },
+  "static/sector_frozen.json": {
+   "sha256": "84135bafb5aba1812e59cd8bba23ed0008159b78a7f5b2f1164473f311fc596e",
+   "bytes": 13395
+  },
+  "static/cloud.json": {
+   "sha256": "0211bbbcd53432e915e157e98cb1b85e1343913fcdaca9e4e8fd1a0aeb9e3cd4",
+   "bytes": 108
+  },
+  "static/bars_monthly.json": {
+   "sha256": "ERR:[Errno 2] No such file or directory: 'C:",
+   "bytes": null
+  },
+  "output/signal_history.json": {
+   "sha256": "a9eb11755be21449589ee67df05406880e6750885d683e7068249368396644d6",
+   "bytes": 3809
+  },
+  "output/_prices_cache.json": {
+   "sha256": "8a00e89787c05dbf889614aa3f30dc558ac1a83c2fbcdcae2d7ab1d422c87c1a",
+   "bytes": 5049463
+  },
+  "output/baseline_b.json": {
+   "sha256": "ec543e175381712955a9069c4d125056c445fd215ab191f6bd84700926cc0cde",
+   "bytes": 368
+  },
+  "output/pipeline_status.json": {
+   "sha256": "c01cd6dbcda402fdee0d3dbe871147397bcf83f7e838395c3989cbbf723ba5f1",
+   "bytes": 37555
+  }
+ },
+ "page_numbers": {
+  "B.input_sha": "546d20e1666b33a8",
+  "B.signal.input_sha": "546d20e1666b33a8",
+  "B.generated_at": "2026-11-01T00:54:38Z",
+  "B.curve.stats": {
+   "total": 22.8013,
+   "cagr": 0.2541,
+   "mdd": -0.2173
+  },
+  "B.summary.total": 22.8013,
+  "B.summary.cagr": 0.2541,
+  "B.summary.worst_intra": -0.2173,
+  "B.summary.benchmark": 5.9566,
+  "B.years.n": 14,
+  "B.years.ret": {
+   "2012": 0.2301,
+   "2013": 0.3487,
+   "2014": 0.1795,
+   "2015": 0.1155,
+   "2016": 0.095,
+   "2017": 0.1555,
+   "2018": 0.0332,
+   "2019": 0.3709,
+   "2020": 0.4983,
+   "2021": 0.5755,
+   "2022": -0.0777,
+   "2023": 0.1293,
+   "2024": 1.0252,
+   "2025": 0.2219
+  },
+  "B.years.holdings": {
+   "2012": [
+    "COG",
+    "ISRG",
+    "MA"
+   ],
+   "2013": [
+    "PHM",
+    "WHR",
+    "BAC"
+   ],
+   "2014": [
+    "NFLX",
+    "BBY",
+    "MU"
+   ],
+   "2015": [
+    "LUV",
+    "EW",
+    "DAL"
+   ],
+   "2016": [
+    "NFLX",
+    "AMZN",
+    "CVC"
+   ],
+   "2017": [
+    "OKE",
+    "FCX",
+    "NEM"
+   ],
+   "2018": [
+    "NRG",
+    "VRTX",
+    "WYNN"
+   ],
+   "2019": [
+    "AAP",
+    "CMG",
+    "ORLY"
+   ],
+   "2020": [
+    "LRCX",
+    "KLAC",
+    "TGT"
+   ],
+   "2021": [
+    "GPS",
+    "NVDA",
+    "ALB"
+   ],
+   "2022": [
+    "DVN",
+    "FTNT",
+    "F"
+   ],
+   "2023": [
+    "OXY",
+    "HES",
+    "CAH"
+   ],
+   "2024": [
+    "NVDA",
+    "RCL",
+    "CCL"
+   ],
+   "2025": [
+    "NVDA",
+    "NFLX",
+    "RCL"
+   ]
+  },
+  "B.curve.points": 168,
+  "B.curve.last": {
+   "d": "2025-12",
+   "s": 23.801255,
+   "b": 5.430206
+  },
+  "B.equity.position": [
+   "MU",
+   "STX",
+   "NEM"
+  ],
+  "B.signal.official": [
+   "MU",
+   "STX",
+   "NEM"
+  ],
+  "B.signal.month": "2026-11",
+  "preview.year": null,
+  "quality.total_return_ratio": 0.8111,
+  "quality.degraded": true,
+  "quality.summary": {
+   "pass": 25,
+   "warn": 3,
+   "fail": 0
+  }
+ },
+ "db": {
+  "prices_monthly": {
+   "rows": 351889,
+   "md5": "ffd63ae8f4069a1a8b343e0318a3fa65"
+  },
+  "series_selected": {
+   "rows": 117113,
+   "md5": "86369418dd12a88b4bf1b7ddec896bc8"
+  },
+  "members": {
+   "rows": 1262,
+   "md5": "d04cc8086a69abcd8817a8788c336657"
+  },
+  "sectors": {
+   "rows": 513,
+   "md5": "d2813713baa4c1c07ee279d397417c6c"
+  },
+  "locked_symbols": {
+   "rows": 430,
+   "md5": "45642bcb563a3009b9edf9f9a7ec4ff5"
+  },
+  "dataset_rows": {
+   "rows": 347833,
+   "md5": "581d0154fd749a80b3c2e18a2e8565de"
+  },
+  "check_selection_mismatch": 0,
+  "check_series_orphan": 0,
+  "check_dataset_drift": {
+   "1": 206126,
+   "2": 7759
+  },
+  "dec2025_symbols": 654,
+  "series_basis": {
+   "rows": 117113,
+   "total_return": 94993
+  },
+  "prices_basis": {
+   "rows": 351889,
+   "total_return": 95336
+  }
+ },
+ "git_status_dirty": true
+}
