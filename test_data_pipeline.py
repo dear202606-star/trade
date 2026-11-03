@@ -165,7 +165,8 @@ class PipelineTests(unittest.TestCase):
             self.assertIsNone(relay.av_used_last_24h())
 
     def test_failed_upstream_still_consumes_reservation(self):
-        with patch.object(relay, "reserve_av_call", return_value=True), \
+        with patch.object(relay, "has_protected_history", return_value=False), \
+             patch.object(relay, "reserve_av_call", return_value=True), \
              patch.object(relay, "fetch_av", side_effect=RuntimeError("upstream")), \
              patch.object(relay, "fetch_yahoo_relay", return_value={}), \
              patch.object(relay, "fetch_eodhd", return_value={}), \
@@ -173,6 +174,30 @@ class PipelineTests(unittest.TestCase):
              patch.object(relay, "sina_local", return_value={}):
             rows, used, count = relay.relay("TEST", {"alphavantage_key": "test"}, 1)
         self.assertEqual((rows, used, count), ([], True, 0))
+
+    def test_protected_history_is_skipped_before_quota_or_source_access(self):
+        with patch.object(relay,'has_protected_history',return_value=True), \
+             patch.object(relay,'reserve_av_call') as reserve, \
+             patch.object(relay,'fetch_av') as fetch, \
+             patch.object(relay,'sina_local') as local:
+            self.assertEqual(relay.relay('TEST',{'alphavantage_key':'test'},1),([],False,0))
+            reserve.assert_not_called();fetch.assert_not_called();local.assert_not_called()
+
+    def test_unknown_history_protection_cannot_fetch(self):
+        with patch.object(relay,'has_protected_history',side_effect=RuntimeError('offline')), \
+             patch.object(relay,'fetch_av') as fetch:
+            with self.assertRaisesRegex(RuntimeError,'offline'):
+                relay.relay('TEST',{'alphavantage_key':'test'},1)
+            fetch.assert_not_called()
+
+    def test_protection_query_checks_active_ranges_and_revocations(self):
+        context,cursor=self.connection(relay,(True,))
+        with context:
+            self.assertTrue(relay.has_protected_history('TEST'))
+        sql=cursor.execute.call_args.args[0]
+        self.assertIn("l.scope='month_range'",sql)
+        self.assertIn("supersedes_id=l.id and x.status='void'",sql)
+        self.assertEqual(cursor.execute.call_args.args[1],('TEST','TEST','TEST'))
 
     def test_archive_registration_requires_database_guard(self):
         context, cursor = self.connection(archive.db_sources, None)

@@ -257,8 +257,28 @@ def sina_local(sym):
     return {r[0]: (r[1], r[1]) for r in d["bars"]}
 
 
+def has_protected_history(sym):
+    """Full-history sources cannot safely refresh a partly accepted symbol."""
+    with db() as connection, connection.cursor() as cursor:
+        cursor.execute("""select
+            exists(select 1 from locked_symbols where symbol=%s)
+            or exists(select 1 from series_pick where symbol=%s and frozen)
+            or exists(select 1 from data_lock l where l.status='locked'
+                and (l.symbol=%s or l.scope='month_range')
+                and not exists(select 1 from data_lock x
+                               where x.supersedes_id=l.id and x.status='void'))""",
+                       (sym, sym, sym))
+        row = cursor.fetchone()
+        if row is None or type(row[0]) is not bool:
+            raise RuntimeError('Cannot establish historical protection state')
+        return row[0]
+
+
 def relay(sym, k, av_left):
     """按优先级逐源取数，返回该标的的候选行 [(sym,month,adj,raw,source,quality,basis)]"""
+    if has_protected_history(sym):
+        print("    跳过 %s：存在已保护历史；新增月份须使用有日期边界的采集路径" % sym, flush=True)
+        return [], False, 0
     rows, av_reserved = [], False
     got = {}
     for src, fn in (("alphavantage", lambda: fetch_av(sym, k.get("alphavantage_key", ""))),
