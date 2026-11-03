@@ -1,0 +1,7 @@
+{
+  "exit_code": 1,
+  "output_unchanged": true,
+  "before_sha256": "50ffdbbec0dff56319c9e4b04bea9c00814d0785f96cf0f96045d6000321a440",
+  "after_sha256": "50ffdbbec0dff56319c9e4b04bea9c00814d0785f96cf0f96045d6000321a440",
+  "diagnostic_tail": "/tmp/leaderquant-deps/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020\n  warnings.warn(\nTraceback (most recent call last):\n  File \"[repo]/preview.py\", line 184, in <module>\n    main()\n  File \"[repo]/preview.py\", line 107, in main\n    ratio = price_ratio(t, cur, BASE_YM, q['session'])\n  File \"[repo]/preview.py\", line 48, in price_ratio\n    base = nominal_prices.price(ticker, base_ym)\n  File \"[repo]/nominal_prices.py\", line 40, in price\n    raise RuntimeError('%s %s \u7f3a\u5c11\u5df2\u6838\u9a8c\u7684\u5f53\u65f6\u5b9e\u9645\u80a1\u4ef7\uff0c\u4e0d\u80fd\u5b8c\u6210\u7b5b\u9009' % (symbol, month))\nRuntimeError: ABNB 2025-12 \u7f3a\u5c11\u5df2\u6838\u9a8c\u7684\u5f53\u65f6\u5b9e\u9645\u80a1\u4ef7\uff0c\u4e0d\u80fd\u5b8c\u6210\u7b5b\u9009\n"
+}
