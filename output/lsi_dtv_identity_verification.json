@@ -1,0 +1,49 @@
+{
+  "verified_at": "2026-11-03T12:25:46.310308+00:00",
+  "preserved_physical_counts": {
+    "prices_monthly": 550,
+    "nominal_monthly": 461,
+    "series_pick": 2,
+    "data_lock": 0
+  },
+  "online_identity_proofs": 2,
+  "anonymous_rest_checks": [
+    {
+      "view": "series_selected",
+      "symbol": "LSI",
+      "month_filter": null,
+      "returned_rows": 0
+    },
+    {
+      "view": "v_nominal_monthly",
+      "symbol": "LSI",
+      "month_filter": null,
+      "returned_rows": 0
+    },
+    {
+      "view": "series_selected",
+      "symbol": "DTV",
+      "month_filter": "gt.2015-06",
+      "returned_rows": 0
+    },
+    {
+      "view": "v_nominal_monthly",
+      "symbol": "DTV",
+      "month_filter": "gt.2015-06",
+      "returned_rows": 0
+    },
+    {
+      "view": "series_selected",
+      "symbol": "DTV",
+      "month_filter": "eq.2015-06",
+      "returned_rows": 1
+    }
+  ],
+  "repeat_skips_local_processing": true,
+  "historical_strategy_rebuild_accepted": false,
+  "production_candidate_guard": {
+    "quarantined_LSI": "blocked",
+    "unquarantined_MSFT_NVDA": "allowed",
+    "verified_at": "2026-11-03T12:33:21.741382+00:00"
+  }
+}

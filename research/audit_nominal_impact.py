@@ -36,12 +36,24 @@ def nominal_snapshot():
     return {(s,m):p for s,m,p,source,proof in rows},digest
 
 
+def quarantine_snapshot():
+    connection = db_select.db()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('select symbol,reason from series_quarantine order by symbol')
+            rows = cursor.fetchall()
+    finally:
+        connection.close()
+    return dict(rows),hashlib.sha256(json.dumps(rows,separators=(',',':')).encode()).hexdigest()
+
+
 def run():
     prices = db_prices.load_all()
     stamp = tuple(db_prices._db_stamp() or ())
     if not stamp:
         raise RuntimeError('No selected input version')
     observations,nominal_sha=nominal_snapshot()
+    quarantines,quarantine_sha=quarantine_snapshot()
     event_paths=holding_paths.load_all()
     event_sha=holding_paths.input_sha()
     published_b=json.loads((BASE/'output/baseline_b.json').read_text()).get('years',{})
@@ -58,6 +70,7 @@ def run():
             pool = (variant_b.members_full_year(frame, year-1) if variant == 'B' else
                     set(frame[(frame.start_date <= '%d-01-01' % year) &
                               (frame.end_date >= '%d-01-01' % year)].ticker))
+            unresolved_identity = sorted(set(pool)&set(quarantines))
             candidates = []
             for symbol in sorted(pool):
                 bars = prices.get(symbol, {})
@@ -114,11 +127,12 @@ def run():
                         result.update(return_value=ret, drawdown=drawdown,return_status='complete')
                 return result
             before_summary,after_summary=summarize(old),summarize(new)
-            complete=(not unknown and after_summary is not None and
+            complete=(not unknown and not unresolved_identity and after_summary is not None and
                       (year==2026 or after_summary.get('return_status')=='complete'))
             years.append({'variant': variant, 'year': year, 'complete': complete,
                           'published_b_return':published_b.get(str(year)) if variant=='B' else None,
-                          'price_screen_complete':not unknown,
+                          'price_screen_complete':not unknown and not unresolved_identity,
+                          'quarantined_candidate_symbols':unresolved_identity,
                           'missing_nominal_symbols': unknown,
                           'before': before_summary, 'after': after_summary,
                           'unknown_all_fail_holdings': summarize(lower),
@@ -130,12 +144,16 @@ def run():
         raise RuntimeError('Snapshot changed during analysis')
     if nominal_sha!=nominal_snapshot()[1]:
         raise RuntimeError('Nominal observations changed during analysis')
+    if quarantine_sha!=quarantine_snapshot()[1]:
+        raise RuntimeError('Identity quarantine changed during analysis')
     holding_paths._PATHS=None
     if event_sha!=holding_paths.input_sha():
         raise RuntimeError('Holding-event evidence changed during analysis')
     result = {'policy': '5 USD screen uses observed as-traded close; ranking and holdings share actual cash/successor paths',
               'snapshot_stamp': list(stamp), 'published_baselines_changed': False,
               'nominal_snapshot_sha256':nominal_sha,
+              'quarantine_snapshot_sha256':quarantine_sha,
+              'quarantined_security_reasons':quarantines,
               'holding_event_policy':POLICY,'holding_event_input_sha':event_sha,
               'comparison_scope':'legacy versus nominal floor on current sources and approved holding-event policy; before is not the published old baseline',
               'nominal_year_end_observations':len(observations),

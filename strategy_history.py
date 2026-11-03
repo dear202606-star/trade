@@ -24,6 +24,7 @@ import sys
 import pandas as pd
 
 import datafeed
+import db_ref
 import holding_paths
 from holding_consideration import POLICY
 
@@ -303,6 +304,12 @@ def main():
     sector, name_map = datafeed.load_sector()
     if not sector:
         print("WARN: 行业表不可用，按等权处理", file=sys.stderr)
+
+    candidates = set()
+    for year in range(2010, END_YEAR + 1):
+        date = '%d-01-01' % year
+        candidates.update(m[(m.start_date <= date) & (m.end_date >= date)].ticker)
+    db_ref.require_unquarantined_candidates(candidates)
 
     datafeed.prefetch(sorted(m["ticker"].unique().tolist()) + ["SPY"], workers=8)
     spy = load_bars("SPY")

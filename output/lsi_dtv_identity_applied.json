@@ -1,0 +1,77 @@
+{
+  "write": true,
+  "facts": {
+    "LSI": {
+      "original_cik": "703360",
+      "original_issuer": "LSI Corporation",
+      "original_2013_q4_price_range": [
+        7.39,
+        11.04
+      ],
+      "price_range_url": "https://www.sec.gov/Archives/edgar/data/703360/000119312514082531/d649519dprer14a.htm",
+      "price_range_location": "Market Price Data and Dividend Information, 2013 Fourth Quarter",
+      "other_issuer_cik": "944314",
+      "other_issuer": "Sovran Self Storage / Life Storage",
+      "other_issuer_reported_2013_year_end_price": 65.17,
+      "other_price_url": "https://www.sec.gov/Archives/edgar/data/944314/000115752314000793/a50811660ex99_1.htm",
+      "other_price_location": "Fourth quarter 2013 report, debt to enterprise value per-share price",
+      "reuse_effective_date": "2016-08-15",
+      "reuse_url": "https://www.sec.gov/Archives/edgar/data/944314/000119312516681926/d243423dex991.htm",
+      "original_exit_date": "2014-05-06",
+      "cash_per_share": 11.15,
+      "exit_url": "https://www.sec.gov/Archives/edgar/data/1441634/000144163414000045/R21.htm",
+      "action": "Quarantine the entire current series, including dates before original exit; cap future reviewed original history at 2014-04"
+    },
+    "DTV": {
+      "original_cik": "1465112",
+      "original_issuer": "DIRECTV",
+      "original_exit_date": "2015-07-24",
+      "cash_per_share": 28.5,
+      "successor_symbol": "T",
+      "successor_shares_per_share": 1.892,
+      "exit_url": "https://www.sec.gov/Archives/edgar/data/1465112/000104746915006714/a2225634z10-q.htm",
+      "exit_location": "Note 12: Subsequent Events",
+      "action": "Exclude original-ticker month ends after 2015-06; actual consideration path still requires acceptance"
+    }
+  },
+  "view_exclusions": {
+    "series_selected": [
+      {
+        "symbol": "DTV",
+        "removed_rows": 36,
+        "from": "2016-10",
+        "through": "2019-09"
+      },
+      {
+        "symbol": "LSI",
+        "removed_rows": 157,
+        "from": "2010-07",
+        "through": "2023-07"
+      }
+    ],
+    "v_nominal_monthly": [
+      {
+        "symbol": "DTV",
+        "removed_rows": 7,
+        "from": "2016-10",
+        "through": "2017-04"
+      },
+      {
+        "symbol": "LSI",
+        "removed_rows": 82,
+        "from": "2010-07",
+        "through": "2017-04"
+      }
+    ]
+  },
+  "preserved_physical_sha256": {
+    "prices_monthly": "72bf0c33dd5772aa944847bb67e3d0b534682a210483c1596c248b6fe18db1bb",
+    "nominal_monthly": "d6d7c6b3f0cc28a139f7125a5420005c9f78a871222fe738411471f2b7204431",
+    "series_pick": "0a48e3fb1c65fc802e3db1096c5cc5ed9cb39e0edfbe3e1cb4854b063c563b42",
+    "data_lock": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
+  "baseline_b_sha256": "20c0680276cf79cbb06d8aaab35c3e40cde010447f6e15e75abd95ff0ef33c90",
+  "physical_observations_picks_locks_and_baseline_changed": false,
+  "unrelated_or_retained_view_rows_changed": 0,
+  "strategy_rebuild_and_missing_original_history_acceptance": "pending"
+}

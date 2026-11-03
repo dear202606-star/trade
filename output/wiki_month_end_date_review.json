@@ -877,5 +877,21 @@
     "selected_date_requires_review": 56,
     "not_in_selected_nominal_view": 1,
     "selected_date_matches_benchmark": 5
+  },
+  "post_identity_boundary_review": {
+    "verified_at": "2026-11-03T12:25:46.310308+00:00",
+    "applied_receipt_sha256": "d837ae9f49dd621442fdaf8467079e76506ad9a4edd4d069c79617c4a48d7ff0",
+    "excluded_keys": [
+      {
+        "symbol": "DTV",
+        "month": "2017-04"
+      },
+      {
+        "symbol": "LSI",
+        "month": "2017-04"
+      }
+    ],
+    "remaining_early_selected_dates": 54,
+    "scope": "Prior full selected-view audit plus committed exclusion diff; original audit retained"
   }
 }

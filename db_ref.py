@@ -144,5 +144,27 @@ def load_sectors():
     return out
 
 
+def require_unquarantined_candidates(symbols):
+    """An unknown original security cannot silently leave a ranking pool."""
+    symbols = sorted(set(symbols))
+    if not symbols:
+        return
+    connection = None
+    try:
+        connection = db()
+        with connection.cursor() as cursor:
+            cursor.execute('select symbol,reason from series_quarantine where symbol=any(%s) order by symbol',
+                           (symbols,))
+            unresolved = cursor.fetchall()
+    except Exception as exc:
+        raise RuntimeError('在线证券身份隔离检查失败，禁止生成新策略结果') from exc
+    finally:
+        if connection is not None:
+            connection.close()
+    if unresolved:
+        raise RuntimeError('排名候选证券身份仍待核验，禁止静默剔除后发布：'+
+                           ', '.join(symbol for symbol,reason in unresolved))
+
+
 if __name__ == "__main__":
     bootstrap()

@@ -394,6 +394,11 @@ def main():
     today_et = dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=4)
     end_year = today_et.year - 1
 
+    candidates = set()
+    for year in range(START_YEAR, end_year + 2):
+        candidates.update(members_full_year(m, year - 1))
+    _ref.require_unquarantined_candidates(candidates)
+
     global NEED_MONTH
     NEED_MONTH = "%d-12" % end_year
     _fr = frozen_bars("SPY") or {}

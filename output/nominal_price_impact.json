@@ -1,19 +1,34 @@
 {
   "policy": "5 USD screen uses observed as-traded close; ranking and holdings share actual cash/successor paths",
   "snapshot_stamp": [
-    406639,
-    "2026-11-02 12:22:11.753983+00",
+    406844,
+    "2026-11-03 07:10:00.221764+00",
     849,
-    143637,
-    837,
-    "16115491.355340132718478142"
+    143425,
+    836,
+    "16017707.104684876065639142"
   ],
   "published_baselines_changed": false,
-  "nominal_snapshot_sha256": "18ac6b007c5f5d23e4b2ea5517eeef8e2ed0aaf7da3fee1bc9af6bc4448260e2",
+  "nominal_snapshot_sha256": "8ba2326cf07afff88772015fa17b05b21d55950d03429bda61e949354815f83b",
+  "quarantine_snapshot_sha256": "0e9d2dc58ffe9787ab8de0c7b05a58a3788c404bb312db948e7cd0df76949154",
+  "quarantined_security_reasons": {
+    "BMC": "Unreviewed >10x or <0.01x Sina jump within membership; see output/selected_jump_audit.json. May include genuine events; not a price correction.",
+    "CBE": "Unreviewed >10x or <0.01x Sina jump within membership; see output/selected_jump_audit.json. May include genuine events; not a price correction.",
+    "COV": "Unreviewed >10x or <0.01x Sina jump within membership; see output/selected_jump_audit.json. May include genuine events; not a price correction.",
+    "EP": "Member universe is El Paso (delisted 2012); current EP is Empire Petroleum (ticker since 2022). Historical issuer identity unverified; SEC references in docs/ARCHIVE_IDENTITY_REVIEW.md.",
+    "GAS": "Unreviewed >10x or <0.01x Sina jump within membership; see output/selected_jump_audit.json. May include genuine events; not a price correction.",
+    "HAR": "Unreviewed >10x or <0.01x Sina jump within membership; see output/selected_jump_audit.json. May include genuine events; not a price correction.",
+    "LSI": "Original index security is LSI Corporation (CIK 703360); selected 2013-12 close 65.17 is Sovran/Life Storage history, outside original issuer Q4 range 7.39-11.04. SEC d649519dprer14a; d243423dex991. Preserve observations; independently identify original equity before release.",
+    "PARA": "HF selected values 107090 and 18800 in 2023-11/12 disagree with Sina USD 14.37 and 14.79; issuer/currency identity unverified. See output/selected_jump_audit.json.",
+    "PCL": "Unreviewed >10x or <0.01x Sina jump within membership; see output/selected_jump_audit.json. May include genuine events; not a price correction.",
+    "SBNY": "Unreviewed >10x or <0.01x Sina jump within membership; see output/selected_jump_audit.json. May include genuine events; not a price correction.",
+    "SCG": "Unreviewed >10x or <0.01x Sina jump within membership; see output/selected_jump_audit.json. May include genuine events; not a price correction.",
+    "TIE": "Unreviewed >10x or <0.01x Sina jump within membership; see output/selected_jump_audit.json. May include genuine events; not a price correction."
+  },
   "holding_event_policy": "cash_and_all_successor_shares",
   "holding_event_input_sha": "6fda621260c877262c5b615aaff5b92f87c3e0d51565e190974f039ab4c94aff",
   "comparison_scope": "legacy versus nominal floor on current sources and approved holding-event policy; before is not the published old baseline",
-  "nominal_year_end_observations": 8456,
+  "nominal_year_end_observations": 8450,
   "baseline_b_sha256": "20c0680276cf79cbb06d8aaab35c3e40cde010447f6e15e75abd95ff0ef33c90",
   "fully_verified": false,
   "complete_variant_years": 0,
@@ -25,6 +40,16 @@
       "complete": false,
       "published_b_return": null,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "BMC",
+        "EP",
+        "GAS",
+        "HAR",
+        "LSI",
+        "PCL",
+        "SCG",
+        "TIE"
+      ],
       "missing_nominal_symbols": [
         "AABA",
         "ANDV",
@@ -105,6 +130,15 @@
       "complete": false,
       "published_b_return": null,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "BMC",
+        "EP",
+        "GAS",
+        "HAR",
+        "LSI",
+        "PCL",
+        "TIE"
+      ],
       "missing_nominal_symbols": [
         "AABA",
         "ANDV",
@@ -185,6 +219,16 @@
       "complete": false,
       "published_b_return": null,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "BMC",
+        "EP",
+        "GAS",
+        "HAR",
+        "LSI",
+        "PCL",
+        "SCG",
+        "TIE"
+      ],
       "missing_nominal_symbols": [
         "AABA",
         "ANDV",
@@ -265,6 +309,16 @@
       "complete": false,
       "published_b_return": null,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "BMC",
+        "EP",
+        "GAS",
+        "HAR",
+        "LSI",
+        "PCL",
+        "SCG",
+        "TIE"
+      ],
       "missing_nominal_symbols": [
         "AABA",
         "ANDV",
@@ -345,6 +399,18 @@
       "complete": false,
       "published_b_return": null,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "BMC",
+        "CBE",
+        "COV",
+        "EP",
+        "GAS",
+        "HAR",
+        "LSI",
+        "PCL",
+        "SCG",
+        "TIE"
+      ],
       "missing_nominal_symbols": [
         "AABA",
         "ANDV",
@@ -431,6 +497,15 @@
       "complete": false,
       "published_b_return": 0.2301,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "BMC",
+        "EP",
+        "HAR",
+        "LSI",
+        "PCL",
+        "SCG",
+        "TIE"
+      ],
       "missing_nominal_symbols": [
         "AABA",
         "ANDV",
@@ -517,6 +592,15 @@
       "complete": false,
       "published_b_return": null,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "BMC",
+        "COV",
+        "GAS",
+        "HAR",
+        "LSI",
+        "PCL",
+        "SCG"
+      ],
       "missing_nominal_symbols": [
         "AABA",
         "ANDV",
@@ -603,6 +687,15 @@
       "complete": false,
       "published_b_return": 0.3487,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "BMC",
+        "COV",
+        "GAS",
+        "HAR",
+        "LSI",
+        "PCL",
+        "SCG"
+      ],
       "missing_nominal_symbols": [
         "AABA",
         "ANDV",
@@ -689,6 +782,14 @@
       "complete": false,
       "published_b_return": null,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "COV",
+        "GAS",
+        "HAR",
+        "LSI",
+        "PCL",
+        "SCG"
+      ],
       "missing_nominal_symbols": [
         "AABA",
         "ANDV",
@@ -771,6 +872,14 @@
       "complete": false,
       "published_b_return": 0.1795,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "COV",
+        "GAS",
+        "HAR",
+        "LSI",
+        "PCL",
+        "SCG"
+      ],
       "missing_nominal_symbols": [
         "AABA",
         "ANDV",
@@ -853,6 +962,13 @@
       "complete": false,
       "published_b_return": null,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "COV",
+        "GAS",
+        "HAR",
+        "PCL",
+        "SCG"
+      ],
       "missing_nominal_symbols": [
         "AABA",
         "ANDV",
@@ -935,6 +1051,13 @@
       "complete": false,
       "published_b_return": 0.1155,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "COV",
+        "GAS",
+        "HAR",
+        "PCL",
+        "SCG"
+      ],
       "missing_nominal_symbols": [
         "AABA",
         "ANDV",
@@ -1017,6 +1140,12 @@
       "complete": false,
       "published_b_return": null,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "GAS",
+        "HAR",
+        "PCL",
+        "SCG"
+      ],
       "missing_nominal_symbols": [
         "AABA",
         "ANDV",
@@ -1098,6 +1227,12 @@
       "complete": false,
       "published_b_return": 0.095,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "GAS",
+        "HAR",
+        "PCL",
+        "SCG"
+      ],
       "missing_nominal_symbols": [
         "AABA",
         "ANDV",
@@ -1179,6 +1314,10 @@
       "complete": false,
       "published_b_return": null,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "HAR",
+        "SCG"
+      ],
       "missing_nominal_symbols": [
         "AABA",
         "ANDV",
@@ -1261,6 +1400,10 @@
       "complete": false,
       "published_b_return": 0.1555,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "HAR",
+        "SCG"
+      ],
       "missing_nominal_symbols": [
         "AABA",
         "ANDV",
@@ -1342,6 +1485,9 @@
       "complete": false,
       "published_b_return": null,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "SCG"
+      ],
       "missing_nominal_symbols": [
         "ANDV",
         "ARNC",
@@ -1426,6 +1572,9 @@
       "complete": false,
       "published_b_return": 0.0332,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "SCG"
+      ],
       "missing_nominal_symbols": [
         "ANDV",
         "ARNC",
@@ -1508,6 +1657,9 @@
       "complete": false,
       "published_b_return": null,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "SCG"
+      ],
       "missing_nominal_symbols": [
         "ADS",
         "AGN",
@@ -1649,6 +1801,9 @@
       "complete": false,
       "published_b_return": 0.8139,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "SCG"
+      ],
       "missing_nominal_symbols": [
         "ADS",
         "AGN",
@@ -1786,6 +1941,7 @@
       "complete": false,
       "published_b_return": null,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [],
       "missing_nominal_symbols": [
         "ADS",
         "AGN",
@@ -1901,6 +2057,7 @@
       "complete": false,
       "published_b_return": 0.6544,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [],
       "missing_nominal_symbols": [
         "ADS",
         "AGN",
@@ -2015,6 +2172,7 @@
       "complete": false,
       "published_b_return": null,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [],
       "missing_nominal_symbols": [
         "ANTM",
         "BF.B",
@@ -2112,6 +2270,7 @@
       "complete": false,
       "published_b_return": 0.7362,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [],
       "missing_nominal_symbols": [
         "ANTM",
         "BF.B",
@@ -2209,6 +2368,9 @@
       "complete": false,
       "published_b_return": null,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "SBNY"
+      ],
       "missing_nominal_symbols": [
         "ANTM",
         "BF.B",
@@ -2296,6 +2458,7 @@
       "complete": false,
       "published_b_return": -0.0777,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [],
       "missing_nominal_symbols": [
         "ANTM",
         "BF.B",
@@ -2382,6 +2545,10 @@
       "complete": false,
       "published_b_return": null,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "PARA",
+        "SBNY"
+      ],
       "missing_nominal_symbols": [
         "AAL",
         "AAP",
@@ -2506,6 +2673,9 @@
       "complete": false,
       "published_b_return": 0.1293,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "SBNY"
+      ],
       "missing_nominal_symbols": [
         "AAL",
         "AAP",
@@ -2627,6 +2797,9 @@
       "complete": false,
       "published_b_return": null,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "PARA"
+      ],
       "missing_nominal_symbols": [
         "AAL",
         "ABNB",
@@ -2968,6 +3141,9 @@
       "complete": false,
       "published_b_return": 1.0542,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "PARA"
+      ],
       "missing_nominal_symbols": [
         "AAL",
         "AMT",
@@ -3295,6 +3471,9 @@
       "complete": false,
       "published_b_return": null,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "PARA"
+      ],
       "missing_nominal_symbols": [
         "ABNB",
         "AMT",
@@ -3633,6 +3812,9 @@
       "complete": false,
       "published_b_return": 0.1878,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [
+        "PARA"
+      ],
       "missing_nominal_symbols": [
         "ABNB",
         "AMT",
@@ -3957,8 +4139,8 @@
       "complete": false,
       "published_b_return": null,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [],
       "missing_nominal_symbols": [
-        "ABNB",
         "AMT",
         "APO",
         "APP",
@@ -3978,7 +4160,6 @@
         "CPAY",
         "CPB",
         "CRH",
-        "CRWD",
         "CTRA",
         "CVNA",
         "DASH",
@@ -4083,7 +4264,6 @@
         "KEYS",
         "KHC",
         "KKR",
-        "KLAC",
         "KMB",
         "KMI",
         "KO",
@@ -4299,8 +4479,8 @@
       "complete": false,
       "published_b_return": null,
       "price_screen_complete": false,
+      "quarantined_candidate_symbols": [],
       "missing_nominal_symbols": [
-        "ABNB",
         "AMT",
         "APO",
         "AVB",
@@ -4316,7 +4496,6 @@
         "COR",
         "CPAY",
         "CPB",
-        "CRWD",
         "CTRA",
         "DAY",
         "DD",
@@ -4413,7 +4592,6 @@
         "KEYS",
         "KHC",
         "KKR",
-        "KLAC",
         "KMB",
         "KMI",
         "KO",
@@ -4797,18 +4975,6 @@
       "return12": 0.6159318698351606,
       "legacy_price": 18.6,
       "nominal_price": 18.6,
-      "nominal_status": "verified_observation",
-      "legacy_pass": true,
-      "nominal_pass": true
-    },
-    {
-      "variant": "A",
-      "year": 2010,
-      "symbol": "BK",
-      "month": "2009-12",
-      "return12": -0.010942580657723133,
-      "legacy_price": 253.985,
-      "nominal_price": 27.97,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
       "nominal_pass": true
@@ -5932,18 +6098,6 @@
     {
       "variant": "B",
       "year": 2010,
-      "symbol": "BK",
-      "month": "2009-12",
-      "return12": -0.010942580657723133,
-      "legacy_price": 253.985,
-      "nominal_price": 27.97,
-      "nominal_status": "verified_observation",
-      "legacy_pass": true,
-      "nominal_pass": true
-    },
-    {
-      "variant": "B",
-      "year": 2010,
       "symbol": "BMS",
       "month": "2009-12",
       "return12": 0.25211159437202557,
@@ -6993,18 +7147,6 @@
       "return12": 0.04494291686766361,
       "legacy_price": 6.4985,
       "nominal_price": 30.46,
-      "nominal_status": "verified_observation",
-      "legacy_pass": true,
-      "nominal_pass": true
-    },
-    {
-      "variant": "A",
-      "year": 2011,
-      "symbol": "BK",
-      "month": "2010-12",
-      "return12": 0.07780183869126112,
-      "legacy_price": 273.7455,
-      "nominal_price": 30.2,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
       "nominal_pass": true
@@ -8229,18 +8371,6 @@
       "return12": 0.04494291686766361,
       "legacy_price": 6.4985,
       "nominal_price": 30.46,
-      "nominal_status": "verified_observation",
-      "legacy_pass": true,
-      "nominal_pass": true
-    },
-    {
-      "variant": "B",
-      "year": 2011,
-      "symbol": "BK",
-      "month": "2010-12",
-      "return12": 0.07780183869126112,
-      "legacy_price": 273.7455,
-      "nominal_price": 30.2,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
       "nominal_pass": true
@@ -9942,8 +10072,8 @@
       "year": 2012,
       "symbol": "BK",
       "month": "2011-12",
-      "return12": -0.3403975590466327,
-      "legacy_price": 180.5632,
+      "return12": -0.32830236359246434,
+      "legacy_price": 19.90999984741211,
       "nominal_price": 19.91,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -12213,18 +12343,6 @@
       "return12": 0.03387167395499868,
       "legacy_price": 25.3799991607666,
       "nominal_price": 25.38,
-      "nominal_status": "verified_observation",
-      "legacy_pass": true,
-      "nominal_pass": true
-    },
-    {
-      "variant": "A",
-      "year": 2012,
-      "symbol": "LSI",
-      "month": "2011-12",
-      "return12": 0.1591958706873131,
-      "legacy_price": 42.67,
-      "nominal_price": 42.67,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
       "nominal_pass": true
@@ -15150,8 +15268,8 @@
       "year": 2012,
       "symbol": "BK",
       "month": "2011-12",
-      "return12": -0.3403975590466327,
-      "legacy_price": 180.5632,
+      "return12": -0.32830236359246434,
+      "legacy_price": 19.90999984741211,
       "nominal_price": 19.91,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -17361,18 +17479,6 @@
       "return12": 0.03387167395499868,
       "legacy_price": 25.3799991607666,
       "nominal_price": 25.38,
-      "nominal_status": "verified_observation",
-      "legacy_pass": true,
-      "nominal_pass": true
-    },
-    {
-      "variant": "B",
-      "year": 2012,
-      "symbol": "LSI",
-      "month": "2011-12",
-      "return12": 0.1591958706873131,
-      "legacy_price": 42.67,
-      "nominal_price": 42.67,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
       "nominal_pass": true
@@ -20286,8 +20392,8 @@
       "year": 2013,
       "symbol": "BK",
       "month": "2012-12",
-      "return12": 0.2901610073370433,
-      "legacy_price": 232.9556,
+      "return12": 0.32147162263741125,
+      "legacy_price": 25.700000762939453,
       "nominal_price": 25.7,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -22643,18 +22749,6 @@
       "nominal_price": 36.13,
       "nominal_status": "verified_observation",
       "legacy_pass": false,
-      "nominal_pass": true
-    },
-    {
-      "variant": "A",
-      "year": 2013,
-      "symbol": "LSI",
-      "month": "2012-12",
-      "return12": 0.45535505038668855,
-      "legacy_price": 62.1,
-      "nominal_price": 62.1,
-      "nominal_status": "verified_observation",
-      "legacy_pass": true,
       "nominal_pass": true
     },
     {
@@ -25662,8 +25756,8 @@
       "year": 2013,
       "symbol": "BK",
       "month": "2012-12",
-      "return12": 0.2901610073370433,
-      "legacy_price": 232.9556,
+      "return12": 0.32147162263741125,
+      "legacy_price": 25.700000762939453,
       "nominal_price": 25.7,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -27933,18 +28027,6 @@
       "return12": 0.4290300043280417,
       "legacy_price": 35.52000045776367,
       "nominal_price": 35.52,
-      "nominal_status": "verified_observation",
-      "legacy_pass": true,
-      "nominal_pass": true
-    },
-    {
-      "variant": "B",
-      "year": 2013,
-      "symbol": "LSI",
-      "month": "2012-12",
-      "return12": 0.45535505038668855,
-      "legacy_price": 62.1,
-      "nominal_price": 62.1,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
       "nominal_pass": true
@@ -30882,8 +30964,8 @@
       "year": 2014,
       "symbol": "BK",
       "month": "2013-12",
-      "return12": 0.3595328895291634,
-      "legacy_price": 316.7108,
+      "return12": 0.38659698142437215,
+      "legacy_price": 34.939998626708984,
       "nominal_price": 34.94,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -33237,18 +33319,6 @@
       "return12": 0.507057648611152,
       "legacy_price": 5.445000171661377,
       "nominal_price": 54.45,
-      "nominal_status": "verified_observation",
-      "legacy_pass": true,
-      "nominal_pass": true
-    },
-    {
-      "variant": "A",
-      "year": 2014,
-      "symbol": "LSI",
-      "month": "2013-12",
-      "return12": 0.04943639291465374,
-      "legacy_price": 65.17,
-      "nominal_price": 65.17,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
       "nominal_pass": true
@@ -36282,8 +36352,8 @@
       "year": 2014,
       "symbol": "BK",
       "month": "2013-12",
-      "return12": 0.3595328895291634,
-      "legacy_price": 316.7108,
+      "return12": 0.38659698142437215,
+      "legacy_price": 34.939998626708984,
       "nominal_price": 34.94,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -38565,18 +38635,6 @@
       "return12": 0.507057648611152,
       "legacy_price": 5.445000171661377,
       "nominal_price": 54.45,
-      "nominal_status": "verified_observation",
-      "legacy_pass": true,
-      "nominal_pass": true
-    },
-    {
-      "variant": "B",
-      "year": 2014,
-      "symbol": "LSI",
-      "month": "2013-12",
-      "return12": 0.04943639291465374,
-      "legacy_price": 65.17,
-      "nominal_price": 65.17,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
       "nominal_pass": true
@@ -41598,8 +41656,8 @@
       "year": 2015,
       "symbol": "BK",
       "month": "2014-12",
-      "return12": 0.16113343782403367,
-      "legacy_price": 367.7435,
+      "return12": 0.18301560740589928,
+      "legacy_price": 40.56999969482422,
       "nominal_price": 40.57,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -47118,8 +47176,8 @@
       "year": 2015,
       "symbol": "BK",
       "month": "2014-12",
-      "return12": 0.16113343782403367,
-      "legacy_price": 367.7435,
+      "return12": 0.18301560740589928,
+      "legacy_price": 40.56999969482422,
       "nominal_price": 40.57,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -52518,8 +52576,8 @@
       "year": 2016,
       "symbol": "BK",
       "month": "2015-12",
-      "return12": 0.01602176517056053,
-      "legacy_price": 373.6354,
+      "return12": 0.03292077157196016,
+      "legacy_price": 41.220001220703125,
       "nominal_price": 41.22,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -58026,8 +58084,8 @@
       "year": 2016,
       "symbol": "BK",
       "month": "2015-12",
-      "return12": 0.01602176517056053,
-      "legacy_price": 373.6354,
+      "return12": 0.03292077157196016,
+      "legacy_price": 41.220001220703125,
       "nominal_price": 41.22,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -63426,8 +63484,8 @@
       "year": 2017,
       "symbol": "BK",
       "month": "2016-12",
-      "return12": 0.14944194259965737,
-      "legacy_price": 429.4722,
+      "return12": 0.17049391609349573,
+      "legacy_price": 47.380001068115234,
       "nominal_price": 47.38,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -69186,8 +69244,8 @@
       "year": 2017,
       "symbol": "BK",
       "month": "2016-12",
-      "return12": 0.14944194259965737,
-      "legacy_price": 429.4722,
+      "return12": 0.17049391609349573,
+      "legacy_price": 47.380001068115234,
       "nominal_price": 47.38,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -74778,8 +74836,8 @@
       "year": 2018,
       "symbol": "BK",
       "month": "2017-12",
-      "return12": 0.13676647755081706,
-      "legacy_price": 488.2096,
+      "return12": 0.15675392670157073,
+      "legacy_price": 53.86000061035156,
       "nominal_price": 53.86,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -77648,7 +77706,7 @@
       "month": "2017-12",
       "return12": 0.3490373695094886,
       "legacy_price": 196.7976531982422,
-      "nominal_price": 238.26,
+      "nominal_price": 235.37,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
       "nominal_pass": true
@@ -80682,8 +80740,8 @@
       "year": 2018,
       "symbol": "BK",
       "month": "2017-12",
-      "return12": 0.13676647755081706,
-      "legacy_price": 488.2096,
+      "return12": 0.15675392670157073,
+      "legacy_price": 53.86000061035156,
       "nominal_price": 53.86,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -83396,7 +83454,7 @@
       "month": "2017-12",
       "return12": 0.3490373695094886,
       "legacy_price": 196.7976531982422,
-      "nominal_price": 238.26,
+      "nominal_price": 235.37,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
       "nominal_pass": true
@@ -86394,8 +86452,8 @@
       "year": 2019,
       "symbol": "BK",
       "month": "2018-12",
-      "return12": -0.12606757425499215,
-      "legacy_price": 426.6622,
+      "return12": -0.1084633509131202,
+      "legacy_price": 47.06999969482422,
       "nominal_price": 47.06999116623541,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -92382,8 +92440,8 @@
       "year": 2019,
       "symbol": "BK",
       "month": "2018-12",
-      "return12": -0.12606757425499215,
-      "legacy_price": 426.6622,
+      "return12": -0.1084633509131202,
+      "legacy_price": 47.06999969482422,
       "nominal_price": 47.06999116623541,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -98094,8 +98152,8 @@
       "year": 2020,
       "symbol": "BK",
       "month": "2019-12",
-      "return12": 0.06925853755031497,
-      "legacy_price": 456.2122,
+      "return12": 0.09556918521918334,
+      "legacy_price": 50.33000183105469,
       "nominal_price": 50.33000037639765,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -104058,8 +104116,8 @@
       "year": 2020,
       "symbol": "BK",
       "month": "2019-12",
-      "return12": 0.06925853755031497,
-      "legacy_price": 456.2122,
+      "return12": 0.09556918521918334,
+      "legacy_price": 50.33000183105469,
       "nominal_price": 50.33000037639765,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -109722,8 +109780,8 @@
       "year": 2021,
       "symbol": "BK",
       "month": "2020-12",
-      "return12": -0.15676520706811437,
-      "legacy_price": 384.694,
+      "return12": -0.12906934173221163,
+      "legacy_price": 42.439998626708984,
       "nominal_price": 42.43999318164996,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -115698,8 +115756,8 @@
       "year": 2021,
       "symbol": "BK",
       "month": "2020-12",
-      "return12": -0.15676520706811437,
-      "legacy_price": 384.694,
+      "return12": -0.12906934173221163,
+      "legacy_price": 42.439998626708984,
       "nominal_price": 42.43999318164996,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -121530,8 +121588,8 @@
       "year": 2022,
       "symbol": "BK",
       "month": "2021-12",
-      "return12": 0.3685201744763369,
-      "legacy_price": 526.4615,
+      "return12": 0.40551876671282816,
+      "legacy_price": 58.08000183105469,
       "nominal_price": 58.08000131782059,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -127554,8 +127612,8 @@
       "year": 2022,
       "symbol": "BK",
       "month": "2021-12",
-      "return12": 0.3685201744763369,
-      "legacy_price": 526.4615,
+      "return12": 0.40551876671282816,
+      "legacy_price": 58.08000183105469,
       "nominal_price": 58.08000131782059,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -133374,8 +133432,8 @@
       "year": 2023,
       "symbol": "BK",
       "month": "2022-12",
-      "return12": -0.21625342024060645,
-      "legacy_price": 412.6124,
+      "return12": -0.19140514573115797,
+      "legacy_price": 45.52000045776367,
       "nominal_price": 45.520002825107596,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -139350,8 +139408,8 @@
       "year": 2023,
       "symbol": "BK",
       "month": "2022-12",
-      "return12": -0.21625342024060645,
-      "legacy_price": 412.6124,
+      "return12": -0.19140514573115797,
+      "legacy_price": 45.52000045776367,
       "nominal_price": 45.520002825107596,
       "nominal_status": "verified_observation",
       "legacy_pass": true,
@@ -145146,8 +145204,8 @@
       "year": 2024,
       "symbol": "BK",
       "month": "2023-12",
-      "return12": 0.14345327479251724,
-      "legacy_price": 471.803,
+      "return12": 0.18515548624517209,
+      "legacy_price": 52.04999923706055,
       "nominal_price": null,
       "nominal_status": "unknown",
       "legacy_pass": true,
@@ -151110,8 +151168,8 @@
       "year": 2024,
       "symbol": "BK",
       "month": "2023-12",
-      "return12": 0.14345327479251724,
-      "legacy_price": 471.803,
+      "return12": 0.18515548624517209,
+      "legacy_price": 52.04999923706055,
       "nominal_price": null,
       "nominal_status": "unknown",
       "legacy_pass": true,
@@ -156942,8 +157000,8 @@
       "year": 2025,
       "symbol": "BK",
       "month": "2024-12",
-      "return12": 0.4760806946967273,
-      "legacy_price": 696.4193,
+      "return12": 0.519004939526885,
+      "legacy_price": 76.83000183105469,
       "nominal_price": null,
       "nominal_status": "unknown",
       "legacy_pass": true,
@@ -162918,8 +162976,8 @@
       "year": 2025,
       "symbol": "BK",
       "month": "2024-12",
-      "return12": 0.4760806946967273,
-      "legacy_price": 696.4193,
+      "return12": 0.519004939526885,
+      "legacy_price": 76.83000183105469,
       "nominal_price": null,
       "nominal_status": "unknown",
       "legacy_pass": true,
@@ -168044,10 +168102,10 @@
       "month": "2025-12",
       "return12": 0.03279809328425198,
       "legacy_price": 135.72000122070312,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 135.72,
+      "nominal_status": "verified_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -168738,8 +168796,8 @@
       "year": 2026,
       "symbol": "BK",
       "month": "2025-12",
-      "return12": 0.5109983310341915,
-      "legacy_price": 1052.2884,
+      "return12": 0.5444614771184848,
+      "legacy_price": 116.08999633789062,
       "nominal_price": null,
       "nominal_status": "unknown",
       "legacy_pass": true,
@@ -169388,10 +169446,10 @@
       "month": "2025-12",
       "return12": 0.37000235196553244,
       "legacy_price": 117.19000244140625,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 468.76,
+      "nominal_status": "verified_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -171236,10 +171294,10 @@
       "month": "2025-12",
       "return12": 0.9448134750046253,
       "legacy_price": 121.50800323486328,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 1215.08,
+      "nominal_status": "verified_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -174044,10 +174102,10 @@
       "month": "2025-12",
       "return12": 0.03279809328425198,
       "legacy_price": 135.72000122070312,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 135.72,
+      "nominal_status": "verified_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -174714,8 +174772,8 @@
       "year": 2026,
       "symbol": "BK",
       "month": "2025-12",
-      "return12": 0.5109983310341915,
-      "legacy_price": 1052.2884,
+      "return12": 0.5444614771184848,
+      "legacy_price": 116.08999633789062,
       "nominal_price": null,
       "nominal_status": "unknown",
       "legacy_pass": true,
@@ -175340,10 +175398,10 @@
       "month": "2025-12",
       "return12": 0.37000235196553244,
       "legacy_price": 117.19000244140625,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 468.76,
+      "nominal_status": "verified_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -177080,10 +177138,10 @@
       "month": "2025-12",
       "return12": 0.9448134750046253,
       "legacy_price": 121.50800323486328,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 1215.08,
+      "nominal_status": "verified_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
