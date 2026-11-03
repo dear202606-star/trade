@@ -16,6 +16,8 @@ def run():
     seed=BASE/'output/liquidity_window_seed_ingest.json'
     if receipt.exists() and not seed.exists():shutil.copyfile(receipt,seed)
     plan=inventory()
+    if plan.get('status_counts',{}).get('accepted_version_review_required',0):
+        raise RuntimeError('Accepted historical calculator version requires review; automatic recollection forbidden')
     results=[]
     progress=BASE/'output/liquidity_plan_progress.json'
     progress.write_text('[]\n')

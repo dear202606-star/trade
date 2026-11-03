@@ -36,7 +36,8 @@ def run():
                 for symbol,basis,price,verified,calculator in cursor.fetchall():
                     current=verified is True and calculator==liquidity_prices.calculator_sha()
                     status=('below_known_price_floor' if price is not None and price<5 else
-                            'verified_liquidity' if current else 'missing_liquidity')
+                            'verified_liquidity' if current else
+                            'accepted_version_review_required' if verified is True else 'missing_liquidity')
                     rows.append({'symbol':symbol,'base_month':base,'rank_month':month,'price_basis':basis,
                                  'nominal_close':float(price) if price is not None else None,'status':status})
     finally:connection.close()

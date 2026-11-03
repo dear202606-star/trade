@@ -80,5 +80,22 @@ class PlannedLiquidityTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError,'unknown status'):
             self.execute({'2025-12':[{'symbol':'AAA','status':'unexpected'}]})
 
+    def test_accepted_old_calculator_never_becomes_a_collection_target(self):
+        from research import audit_liquidity_inventory as inventory
+        with patch.object(inventory,'BASE',self.base),patch.object(inventory.db_select,'db') as database:
+            cursor=database.return_value.cursor.return_value.__enter__.return_value
+            cursor.fetchall.return_value=[('AAA','total_return',10,True,'older-accepted-version')]
+            result=inventory.run()
+        self.assertEqual(result['targets_by_month'],{})
+        self.assertTrue(all(r['status']=='accepted_version_review_required' for r in result['rows']))
+
+    def test_version_review_stops_before_any_external_collection(self):
+        with patch.object(planner,'BASE',self.base), \
+             patch.object(planner,'inventory',return_value={
+                 'status_counts':{'accepted_version_review_required':1},'targets_by_month':{'2025-12':['AAA']}}), \
+             patch.object(planner,'collect') as source:
+            with self.assertRaisesRegex(RuntimeError,'automatic recollection forbidden'):planner.run()
+            source.assert_not_called()
+
 
 if __name__=='__main__':unittest.main()
