@@ -12,6 +12,7 @@
 产物：docs/data/quotes.json  {ts, fx, quotes:{TICKER:{p,pc,chg,vol,name}}, stale:[...]}
 """
 import json
+import math
 import os
 import re
 import sys
@@ -54,6 +55,8 @@ def parse_us(f):
         if price <= 0:
             return None
         vol = float(f[10]) if len(f) > 10 and f[10] else 0
+        if not all(math.isfinite(v) for v in (price,chg,vol)) or vol<0 or chg<=-100:
+            return None
         prev = price / (1 + chg / 100) if chg != -100 else price
         return {"p": round(price, 4), "pc": round(prev, 4),
                 "chg": round(chg / 100, 6), "vol": vol, "name": f[0]}
@@ -164,6 +167,9 @@ def last_session(now_utc=None):
 def main():
     tickers = universe()
     quotes, stale = fetch_quotes(tickers)
+    if not tickers or len(quotes)<0.98*len(tickers) or 'SPY' not in quotes:
+        raise RuntimeError('行情快照不完整，保留上一有效版本：%d/%d，SPY=%s' %
+                           (len(quotes),len(tickers),'SPY' in quotes))
     fx = fetch_fx()
     payload = {
         "ts": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -182,8 +188,6 @@ def main():
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, separators=(",", ":"))
     print(f"行情 {len(quotes)} / {len(tickers)}，汇率 {fx}，缺失 {len(stale)}")
-    if len(quotes) < 0.8 * len(tickers):
-        print("WARN: 行情覆盖率过低", file=sys.stderr)
 
 
 if __name__ == "__main__":
