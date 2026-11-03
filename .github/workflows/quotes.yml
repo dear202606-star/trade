@@ -50,6 +50,9 @@ jobs:
       - name: 安装依赖
         run: pip install -r requirements.txt
 
+      - name: 行情快照失败保护回归
+        run: python -m unittest test_quote_snapshot
+
       - name: 写入数据库口令
         env:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
