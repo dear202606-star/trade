@@ -1,0 +1,659 @@
+{
+  "scope": "2025-12 rejected windows; diagnosis only, no raw data or database changes",
+  "reason_counts": {
+    "Provider amount/share units conflict with daily prices": 23,
+    "Security directory identity missing/ambiguous: AVB": 1,
+    "Security directory identity missing/ambiguous: BF.B": 1,
+    "Security directory identity missing/ambiguous: BK": 1,
+    "Security directory identity missing/ambiguous: BRK.B": 1,
+    "Security directory identity missing/ambiguous: CTRA": 1,
+    "Security directory identity missing/ambiguous: DAY": 1,
+    "Security directory identity missing/ambiguous: EA": 1,
+    "Security directory identity missing/ambiguous: EQR": 1,
+    "Daily data does not match the complete market calendar": 6,
+    "Security directory identity missing/ambiguous: HOLX": 1,
+    "Daily OHLC range invalid": 2,
+    "Security directory identity missing/ambiguous: MMC": 1
+  },
+  "rejected_windows": 41,
+  "rows": [
+    {
+      "symbol": "AES",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices",
+      "amount_conflict_days": [
+        {
+          "date": "2025-07-08",
+          "open": 11.13,
+          "close": 11.07,
+          "high": 11.28,
+          "low": 10.98,
+          "volume": 19675215.0,
+          "amount": 224367722.0,
+          "implied_average": 11.403571549281672
+        }
+      ]
+    },
+    {
+      "symbol": "ALGN",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices",
+      "amount_conflict_days": [
+        {
+          "date": "2025-07-30",
+          "open": 205.41,
+          "close": 203.57,
+          "high": 207.08,
+          "low": 201.875,
+          "volume": 2687360.0,
+          "amount": 468557488.0,
+          "implied_average": 174.35605501309837
+        }
+      ]
+    },
+    {
+      "symbol": "AMAT",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices",
+      "amount_conflict_days": [
+        {
+          "date": "2025-08-14",
+          "open": 187.86,
+          "close": 188.24,
+          "high": 190.03,
+          "low": 186.78,
+          "volume": 10992443.0,
+          "amount": 1990331856.0,
+          "implied_average": 181.0636503641638
+        }
+      ]
+    },
+    {
+      "symbol": "AMZN",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices",
+      "amount_conflict_days": [
+        {
+          "date": "2025-10-30",
+          "open": 227.06,
+          "close": 222.86,
+          "high": 228.44,
+          "low": 222.75,
+          "volume": 102252937.0,
+          "amount": 23652576512.0,
+          "implied_average": 231.31439747300362
+        }
+      ]
+    },
+    {
+      "symbol": "AVB",
+      "status": "review_required",
+      "reason": "Security directory identity missing/ambiguous: AVB",
+      "amount_conflict_days": []
+    },
+    {
+      "symbol": "AXON",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices",
+      "amount_conflict_days": [
+        {
+          "date": "2025-11-04",
+          "open": 715.46,
+          "close": 706.13,
+          "high": 719.92,
+          "low": 698.315,
+          "volume": 1132911.0,
+          "amount": 774150384.0,
+          "implied_average": 683.3285085942321
+        }
+      ]
+    },
+    {
+      "symbol": "BF.B",
+      "status": "review_required",
+      "reason": "Security directory identity missing/ambiguous: BF.B",
+      "amount_conflict_days": []
+    },
+    {
+      "symbol": "BK",
+      "status": "review_required",
+      "reason": "Security directory identity missing/ambiguous: BK",
+      "amount_conflict_days": []
+    },
+    {
+      "symbol": "BLK",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices",
+      "amount_conflict_days": [
+        {
+          "date": "2025-11-24",
+          "open": 1006.85,
+          "close": 1019.49,
+          "high": 1024.22,
+          "low": 1004.935,
+          "volume": 1010311.0,
+          "amount": 1047490800.0,
+          "implied_average": 1036.800351574911
+        }
+      ]
+    },
+    {
+      "symbol": "BRK.B",
+      "status": "review_required",
+      "reason": "Security directory identity missing/ambiguous: BRK.B",
+      "amount_conflict_days": []
+    },
+    {
+      "symbol": "CMG",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices",
+      "amount_conflict_days": [
+        {
+          "date": "2025-07-23",
+          "open": 52.45,
+          "close": 52.78,
+          "high": 53.03,
+          "low": 52.16,
+          "volume": 20980487.0,
+          "amount": 1077102336.0,
+          "implied_average": 51.338290479148554
+        },
+        {
+          "date": "2025-10-29",
+          "open": 39.99,
+          "close": 39.76,
+          "high": 40.65,
+          "low": 39.585,
+          "volume": 30048438.0,
+          "amount": 1172029536.0,
+          "implied_average": 39.00467425295118
+        }
+      ]
+    },
+    {
+      "symbol": "CTRA",
+      "status": "review_required",
+      "reason": "Security directory identity missing/ambiguous: CTRA",
+      "amount_conflict_days": []
+    },
+    {
+      "symbol": "CVNA",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices",
+      "amount_conflict_days": [
+        {
+          "date": "2025-07-30",
+          "open": 336.46,
+          "close": 333.59,
+          "high": 340.8,
+          "low": 328.58,
+          "volume": 3986361.0,
+          "amount": 1378048880.0,
+          "implied_average": 345.69093968157927
+        }
+      ]
+    },
+    {
+      "symbol": "DASH",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices",
+      "amount_conflict_days": [
+        {
+          "date": "2025-11-05",
+          "open": 241.51,
+          "close": 238.0,
+          "high": 241.51,
+          "low": 234.79,
+          "volume": 8126701.0,
+          "amount": 1832638304.0,
+          "implied_average": 225.50827254503395
+        }
+      ]
+    },
+    {
+      "symbol": "DAY",
+      "status": "review_required",
+      "reason": "Security directory identity missing/ambiguous: DAY",
+      "amount_conflict_days": []
+    },
+    {
+      "symbol": "DDOG",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices",
+      "amount_conflict_days": [
+        {
+          "date": "2025-07-02",
+          "open": 131.5,
+          "close": 135.01,
+          "high": 135.39,
+          "low": 131.0,
+          "volume": 4959225.0,
+          "amount": 680787024.0,
+          "implied_average": 137.276897902394
+        }
+      ]
+    },
+    {
+      "symbol": "DECK",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices",
+      "amount_conflict_days": [
+        {
+          "date": "2025-07-24",
+          "open": 108.15,
+          "close": 104.94,
+          "high": 108.38,
+          "low": 103.87,
+          "volume": 8710877.0,
+          "amount": 957386688.0,
+          "implied_average": 109.90703783327442
+        },
+        {
+          "date": "2025-10-23",
+          "open": 101.26,
+          "close": 102.54,
+          "high": 104.079,
+          "low": 100.93,
+          "volume": 9160748.0,
+          "amount": 914818160.0,
+          "implied_average": 99.86282342882917
+        }
+      ]
+    },
+    {
+      "symbol": "EA",
+      "status": "review_required",
+      "reason": "Security directory identity missing/ambiguous: EA",
+      "amount_conflict_days": []
+    },
+    {
+      "symbol": "EQR",
+      "status": "review_required",
+      "reason": "Security directory identity missing/ambiguous: EQR",
+      "amount_conflict_days": []
+    },
+    {
+      "symbol": "FISV",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Daily data does not match the complete market calendar",
+      "amount_conflict_days": []
+    },
+    {
+      "symbol": "FITB",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Daily data does not match the complete market calendar",
+      "amount_conflict_days": []
+    },
+    {
+      "symbol": "FTNT",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices",
+      "amount_conflict_days": [
+        {
+          "date": "2025-08-06",
+          "open": 96.99,
+          "close": 96.58,
+          "high": 97.589,
+          "low": 96.3,
+          "volume": 8765691.0,
+          "amount": 830994512.0,
+          "implied_average": 94.80079916118422
+        }
+      ]
+    },
+    {
+      "symbol": "HAS",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices",
+      "amount_conflict_days": [
+        {
+          "date": "2025-07-08",
+          "open": 76.57,
+          "close": 76.51,
+          "high": 77.165,
+          "low": 75.72,
+          "volume": 4796185.0,
+          "amount": 333885536.0,
+          "implied_average": 69.6148159422541
+        },
+        {
+          "date": "2025-10-01",
+          "open": 75.85,
+          "close": 75.31,
+          "high": 76.23,
+          "low": 74.48,
+          "volume": 4326653.0,
+          "amount": 296929136.0,
+          "implied_average": 68.62790614361725
+        }
+      ]
+    },
+    {
+      "symbol": "HOLX",
+      "status": "review_required",
+      "reason": "Security directory identity missing/ambiguous: HOLX",
+      "amount_conflict_days": []
+    },
+    {
+      "symbol": "HUBB",
+      "status": "review_required",
+      "reason": "Daily OHLC range invalid",
+      "amount_conflict_days": []
+    },
+    {
+      "symbol": "ISRG",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices",
+      "amount_conflict_days": [
+        {
+          "date": "2025-10-21",
+          "open": 459.47,
+          "close": 462.74,
+          "high": 466.98,
+          "low": 456.31,
+          "volume": 4779628.0,
+          "amount": 2293253040.0,
+          "implied_average": 479.7973900897727
+        }
+      ]
+    },
+    {
+      "symbol": "KHC",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Daily data does not match the complete market calendar",
+      "amount_conflict_days": []
+    },
+    {
+      "symbol": "KMB",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Daily data does not match the complete market calendar",
+      "amount_conflict_days": []
+    },
+    {
+      "symbol": "LULU",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices",
+      "amount_conflict_days": [
+        {
+          "date": "2025-06-05",
+          "open": 335.11,
+          "close": 330.78,
+          "high": 338.49,
+          "low": 329.595,
+          "volume": 5450423.0,
+          "amount": 1661536272.0,
+          "implied_average": 304.8453802576424
+        },
+        {
+          "date": "2025-09-04",
+          "open": 200.9,
+          "close": 206.09,
+          "high": 206.64,
+          "low": 197.67,
+          "volume": 15476660.0,
+          "amount": 2977874128.0,
+          "implied_average": 192.41064467398004
+        },
+        {
+          "date": "2025-12-11",
+          "open": 183.44,
+          "close": 187.01,
+          "high": 188.5,
+          "low": 182.04,
+          "volume": 9925735.0,
+          "amount": 1900773792.0,
+          "implied_average": 191.49955061262466
+        }
+      ]
+    },
+    {
+      "symbol": "META",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices",
+      "amount_conflict_days": [
+        {
+          "date": "2025-07-30",
+          "open": 708.09,
+          "close": 695.21,
+          "high": 708.5,
+          "low": 691.2,
+          "volume": 27077286.0,
+          "amount": 19477458688.0,
+          "implied_average": 719.3283214573278
+        },
+        {
+          "date": "2025-10-29",
+          "open": 754.75,
+          "close": 751.67,
+          "high": 759.155,
+          "low": 742.51,
+          "volume": 26818592.0,
+          "amount": 19507409920.0,
+          "implied_average": 727.3838208955937
+        }
+      ]
+    },
+    {
+      "symbol": "MMC",
+      "status": "review_required",
+      "reason": "Security directory identity missing/ambiguous: MMC",
+      "amount_conflict_days": []
+    },
+    {
+      "symbol": "MOH",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices",
+      "amount_conflict_days": [
+        {
+          "date": "2025-10-22",
+          "open": 196.24,
+          "close": 195.13,
+          "high": 197.98,
+          "low": 192.85,
+          "volume": 2759716.0,
+          "amount": 523016064.0,
+          "implied_average": 189.51807504830208
+        }
+      ]
+    },
+    {
+      "symbol": "ORCL",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices",
+      "amount_conflict_days": [
+        {
+          "date": "2025-09-09",
+          "open": 239.94,
+          "close": 241.51,
+          "high": 243.49,
+          "low": 234.56,
+          "volume": 41178697.0,
+          "amount": 10700224256.0,
+          "implied_average": 259.84853906377856
+        }
+      ]
+    },
+    {
+      "symbol": "SMCI",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices",
+      "amount_conflict_days": [
+        {
+          "date": "2025-08-05",
+          "open": 58.81,
+          "close": 57.26,
+          "high": 59.4,
+          "low": 56.79,
+          "volume": 49970613.0,
+          "amount": 2769264928.0,
+          "implied_average": 55.41786985883083
+        }
+      ]
+    },
+    {
+      "symbol": "SNA",
+      "status": "review_required",
+      "reason": "Daily OHLC range invalid",
+      "amount_conflict_days": []
+    },
+    {
+      "symbol": "SNPS",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices",
+      "amount_conflict_days": [
+        {
+          "date": "2025-09-09",
+          "open": 610.94,
+          "close": 604.37,
+          "high": 614.89,
+          "low": 602.5,
+          "volume": 2236236.0,
+          "amount": 1313637040.0,
+          "implied_average": 587.4322030411817
+        }
+      ]
+    },
+    {
+      "symbol": "TTD",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices",
+      "amount_conflict_days": [
+        {
+          "date": "2025-07-14",
+          "open": 76.11,
+          "close": 75.43,
+          "high": 77.77,
+          "low": 75.3,
+          "volume": 8322969.0,
+          "amount": 659699168.0,
+          "implied_average": 79.2624804922378
+        },
+        {
+          "date": "2025-08-07",
+          "open": 90.75,
+          "close": 88.33,
+          "high": 91.45,
+          "low": 87.44,
+          "volume": 21958031.0,
+          "amount": 1693193360.0,
+          "implied_average": 77.11043672358419
+        }
+      ]
+    },
+    {
+      "symbol": "TTWO",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices",
+      "amount_conflict_days": [
+        {
+          "date": "2025-11-06",
+          "open": 253.09,
+          "close": 252.4,
+          "high": 256.915,
+          "low": 252.04,
+          "volume": 3324737.0,
+          "amount": 823874480.0,
+          "implied_average": 247.80139902795318
+        }
+      ]
+    },
+    {
+      "symbol": "UNH",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Provider amount/share units conflict with daily prices",
+      "amount_conflict_days": [
+        {
+          "date": "2025-08-14",
+          "open": 272.095,
+          "close": 271.49,
+          "high": 273.85,
+          "low": 267.0,
+          "volume": 25011098.0,
+          "amount": 7008899328.0,
+          "implied_average": 280.23157272023803
+        }
+      ]
+    },
+    {
+      "symbol": "WMT",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Daily data does not match the complete market calendar",
+      "amount_conflict_days": []
+    },
+    {
+      "symbol": "XYZ",
+      "base_month": "2024-12",
+      "rank_month": "2025-12",
+      "status": "review_required",
+      "reason": "Daily data does not match the complete market calendar",
+      "amount_conflict_days": [
+        {
+          "date": "2025-07-18",
+          "open": 72.01,
+          "close": 72.82,
+          "high": 73.25,
+          "low": 71.17,
+          "volume": 10786378.0,
+          "amount": 799594976.0,
+          "implied_average": 74.13007183690392
+        }
+      ]
+    }
+  ]
+}
