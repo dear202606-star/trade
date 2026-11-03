@@ -53,19 +53,25 @@ def parse_us(f):
     try:
         price = float(f[1])
         chg = float(f[2])
+        delta = float(f[4])
+        prev = float(f[26])
         if price <= 0:
             return None
         vol = float(f[10]) if len(f) > 10 and f[10] else 0
-        if not all(math.isfinite(v) for v in (price,chg,vol)) or vol<0 or chg<=-100:
+        if not all(math.isfinite(v) for v in (price,chg,vol,delta,prev)) or vol<0 or chg<=-100 or prev<=0:
             return None
-        prev = price / (1 + chg / 100)
-        if not math.isfinite(prev) or prev<=0:
+        # Check the source close against both change fields; never infer it
+        # from a percentage already rounded to two decimal places.
+        actual_change = (price / prev - 1) * 100
+        if (not math.isfinite(actual_change)
+                or not math.isclose(price-prev,delta,rel_tol=0,abs_tol=0.00011)
+                or abs(actual_change-chg)>0.0051):
             return None
         price,prev=round(price,4),round(prev,4)
         if price<=0 or prev<=0:
             return None
         return {"p": price, "pc": prev,
-                "chg": round(chg / 100, 6), "vol": vol, "name": f[0]}
+                "chg": round(actual_change / 100, 6), "vol": vol, "name": f[0]}
     except (ValueError,TypeError,IndexError,OverflowError,ZeroDivisionError):
         return None
 
