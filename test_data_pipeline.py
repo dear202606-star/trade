@@ -27,6 +27,19 @@ import lock_stage
 
 class PipelineTests(unittest.TestCase):
 
+    def test_history_lock_requires_every_row_to_be_total_return(self):
+        measured={'rows':2000,'symbols':500,'dec':500,'total_return':2000,
+                  'from':'2020-01','to':'2020-12','hash':'test','missing_months':[]}
+        with patch.object(lock_stage,'measure',return_value=measured):
+            self.assertEqual(lock_stage.check(2020,2020)[0],0)
+            measured['total_return']=1999
+            self.assertEqual(lock_stage.check(2020,2020)[0],1)
+
+    def test_history_lock_rejects_a_whole_missing_month_even_with_enough_rows(self):
+        measured={'rows':10000,'symbols':500,'dec':500,'total_return':10000,
+                  'from':'2020-01','to':'2020-12','hash':'test','missing_months':['2020-06']}
+        with patch.object(lock_stage,'measure',return_value=measured):
+            self.assertEqual(lock_stage.check(2020,2020)[0],1)
 
 
 

@@ -73,8 +73,14 @@ def measure(y0, y1):
                        from series_selected where month between %s and %s""",
                     ("%d-01" % y0, "%d-12" % y1))
         h = cur.fetchone()[0]
+        cur.execute("""select to_char(d,'YYYY-MM') from generate_series(
+                         %s::date,%s::date,interval '1 month') d
+                       where not exists(select 1 from series_selected s
+                                        where s.month=to_char(d,'YYYY-MM'))
+                       order by d""", ("%d-01-01" % y0, "%d-12-01" % y1))
+        missing_months = [row[0] for row in cur.fetchall()]
     return {"rows": rows, "symbols": syms, "dec": dec, "total_return": tr,
-            "from": mn, "to": mx, "hash": h}
+            "from": mn, "to": mx, "hash": h, "missing_months": missing_months}
 
 
 def _measure_raw(y0, y1):
@@ -102,15 +108,15 @@ def _measure_raw(y0, y1):
 
 def check(y0, y1):
     m = measure(y0, y1)
-    years = y1 - y0 + 1
     problems = []
     if m["rows"] == 0:
         problems.append("区间无数据")
     if m["dec"] < 480:
         problems.append("末年 12 月标的仅 %d（预期 ≥480）" % m["dec"])
-    tr_ratio = m["total_return"] / max(1, m["rows"])
-    if tr_ratio < 0.999:
-        problems.append("全收益口径 %.1f%%（要求 100%%）" % (tr_ratio * 100))
+    if m["total_return"] != m["rows"]:
+        problems.append("仍有 %d 行不是全收益口径（要求逐行 100%%）" % (m["rows"]-m["total_return"]))
+    if m["missing_months"]:
+        problems.append("区间缺少整月数据：%s" % ", ".join(m["missing_months"]))
     print("区间 %d-%d：%d 行 / %d 只 / 12月 %d 行 / 全收益 %d 行（%.1f%%）/ hash %s" % (
         y0, y1, m["rows"], m["symbols"], m["dec"], m["total_return"],
         100.0 * m["total_return"] / max(1, m["rows"]), m["hash"]))
