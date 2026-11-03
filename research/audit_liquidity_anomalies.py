@@ -23,11 +23,27 @@ def run():
         if path.exists():
             payload=json.loads(path.read_text())['payload']
             daily=daily_records((payload.get('data') or {}).get('klines') or [],'eastmoney',start,end)
+            independent_path=BASE/'output/_nominal_daily'/(symbol+'.json')
+            independent_raw=json.loads(independent_path.read_text())['rows'] if independent_path.exists() else []
+            independent_dates={r['d'] for r in independent_raw if start<=r['d']<=end}
+            try:independent=daily_records(independent_raw,'sina',start,end)
+            except ValueError as exc:
+                independent={};row['independent_parse_error']=str(exc)
+            calendar_path=path.with_name('SPY-'+start+'-'+end+'.json')
+            if calendar_path.exists():
+                calendar_payload=json.loads(calendar_path.read_text())['payload']['data']['klines']
+                calendar=set(daily_records(calendar_payload,'eastmoney',start,end))
+                row['calendar_differences']={
+                    'primary_missing':sorted(calendar-set(daily)),
+                    'primary_extra':sorted(set(daily)-calendar),
+                    'independent_missing':sorted(calendar-independent_dates),
+                    'independent_extra':sorted(independent_dates-calendar)}
             for date,quote in sorted(daily.items()):
                 lower=quote['low']*quote['volume']*.99
                 upper=quote['high']*quote['volume']*1.01
                 if not lower<=quote['amount']<=upper:
                     row['amount_conflict_days'].append(dict(date=date,**quote,
+                        independent_ohlcv=independent.get(date),
                         implied_average=quote['amount']/quote['volume'] if quote['volume'] else None))
         rows.append(row)
     report={'scope':'2025-12 rejected windows; diagnosis only, no raw data or database changes',
