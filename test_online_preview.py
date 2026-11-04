@@ -68,8 +68,9 @@ class OnlinePreviewInputTests(unittest.TestCase):
             stack.enter_context(patch.object(preview.live_quotes,'load_snapshot',return_value={
                 'quotes':quotes,'session':session,'version':'online-version','ts':'2026-11-03T21:00:00Z'}))
             guard=stack.enter_context(patch.object(preview.db_ref,'require_unquarantined_candidates'))
-            stack.enter_context(patch.object(preview.datafeed,'load_members',return_value=members))
-            stack.enter_context(patch.object(preview.datafeed,'load_sector',return_value=(sectors if sectors is not None else {'A':'One','B':'Two','C':'Three'},{})))
+            live=set(members[(members.start_date<=session)&(members.end_date>=session)].ticker)
+            stack.enter_context(patch.object(preview.db_ref,'load_market_reference',return_value=(
+                live,sectors if sectors is not None else {'A':'One','B':'Two','C':'Three'},'reference-version')))
             stack.enter_context(patch.object(preview.datafeed,'prefetch'))
             stack.enter_context(patch.object(preview.datafeed,'load_bars',return_value=bars if bars is not None else {base:(100,100)}))
             stack.enter_context(patch.object(preview.datafeed,'_splits',return_value={}))
@@ -111,13 +112,14 @@ class OnlinePreviewInputTests(unittest.TestCase):
         self.assertEqual(checked,{'A','B','C'})
         self.assertEqual(result['base_month'],'2024-12')
         self.assertEqual(result['quote_version'],'online-version')
+        self.assertEqual(result['reference_version'],'reference-version')
         self.assertEqual(len(result['top']),3)
         self.assertEqual({r['ticker'] for r in result['top']},{'A','B','C'})
         self.assertFalse(result['final'])
 
     def test_unavailable_database_stops_before_reference_data_or_file_reads(self):
         with patch.object(preview.live_quotes,'load_snapshot',side_effect=RuntimeError('offline')), \
-             patch.object(preview.datafeed,'load_members') as members:
+             patch.object(preview.db_ref,'load_market_reference') as members:
             with self.assertRaisesRegex(RuntimeError,'offline'):preview.main()
         members.assert_not_called()
 

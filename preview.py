@@ -42,15 +42,12 @@ def split_factor_after(ticker, base_ym, as_of):
 def main():
     q = live_quotes.load_snapshot()
     quotes = q.get("quotes") or {}
-    m = datafeed.load_members()
-    m["start_date"] = m["start_date"].astype(str)
-    m["end_date"] = m["end_date"].fillna("2099-12-31").astype(str)
     today = dt.date.fromisoformat(q['session']).isoformat()
     base_ym = '%d-12' % (int(today[:4])-1)
     official_month = '%s-12' % today[:4]
-    live = set(m[(m.start_date <= today) & (m.end_date >= today)]["ticker"])
+    live,sector,reference_version=db_ref.load_market_reference(today)
     db_ref.require_unquarantined_candidates(live)
-    sector, name_map = datafeed.load_sector()
+    name_map={t:quotes.get(t,{}).get('name') or t for t in live}
 
     # 并行预热：CI 没有本地缓存时，500 只串行抓取会超时
     missing=sorted(t for t in live if t not in quotes)
@@ -129,6 +126,7 @@ def main():
         "hold_year": int(base_ym[:4]) + 2,
         "official_month": official_month,
         "quote_version": q['version'],
+        "reference_version": reference_version,
         "top": picks,
         "near": [{"ticker": r["ticker"], "sector": r["sector"], "ytd": round(r["ytd"], 4)}
                  for r in rows[:12] if r["ticker"] not in {p["ticker"] for p in picks}][:5],
