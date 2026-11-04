@@ -163,3 +163,9 @@ LSI/DTV 身份核查已发现并隔离实质错误：LSI 当前整段是另一�
 
 真实在线验证 FDX、HON、KVUE、PSKY、WBD 的 2026 年未验收持仓会在调用旧价格入口之前拒绝；BBWI/LB 2021、CVC 2016、WDC 2025 的四条原验收路径仍各返回 12 个月。相关价格、数据库路径记录及旧策略文件未写入，回执见 `output/pending_corporate_terms_guard_verification.json`。完整回归 190 项通过；本批为工程分支防错改动，不代表新承接收益已补齐或公开主分支算法已整体验收。
 
+## BE / TWLO 缺失基准的来源收敛（2026-11-04）
+
+查阅发行人 SEC 代理声明，确认 BE 的 Class A 2025-12-31 实际收盘价为 86.89 美元，TWLO 同日为 142.24 美元；出处及具体位置固定在 `research/stage_new_member_baselines.py`。本次东方财富日线连接被远端关闭，未获得该源交叉证明；改查新浪后取得两只证券各 250 条 2025 年日线，精确年末日期收盘价均与发行人披露一致。单日单位和价格一致不自动证明全年复权收益或其他日期正确。
+
+观察值本身及发行人身份、日期、股类、出处、散列已保存到在线 `sys_event`，来源为 `new_member_baseline_review`、状态为 `warn`，明确 `price_selection_accepted=false`、`nominal_fact_accepted=false`，不进入自动行情晋升队列。默认回滚、与回滚回执匹配后提交及在线重复跳过均已验证；未更改价格表、选源、锁或策略结果。回执见 `output/new_member_baseline_source_review.json`、`output/new_member_baselines_{rollback,applied}.json`。完整回归 192 项通过。第二行情源、完整交易日和公司行为核对、正式选源及名义价验收仍待完成，整体目标继续有效。
+

@@ -1,0 +1,17 @@
+{
+  "write": false,
+  "records": [
+    {
+      "subject": "BE:2025-12-31",
+      "evidence_sha256": "8e01acf7b42b2ffac903c380e6e26a4be835cb6014fac52fa276203f63122305",
+      "observations": 250
+    },
+    {
+      "subject": "TWLO:2025-12-31",
+      "evidence_sha256": "962d0f8d11b31954a9adb3235c86f1d4891f6c9c2182e71e7b21d24bc6f635ac",
+      "observations": 250
+    }
+  ],
+  "database_price_writes": 0,
+  "price_selection_accepted": false
+}

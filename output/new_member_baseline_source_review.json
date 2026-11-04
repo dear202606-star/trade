@@ -1,0 +1,25 @@
+{
+  "results": [
+    {
+      "symbol": "BE",
+      "date": "2025-12-31",
+      "close": 86.89,
+      "daily_2025_observations": 250,
+      "daily_sha256": "4a69a1079980cb1a7fb649eb5648f02afce59d73e1bb77194e0fb8dfed9a7208",
+      "daily_url": "https://stock.finance.sina.com.cn/usstock/api/jsonp_v2.php/x/US_MinKService.getDailyK?symbol=BE",
+      "price_selection_accepted": false
+    },
+    {
+      "symbol": "TWLO",
+      "date": "2025-12-31",
+      "close": 142.24,
+      "daily_2025_observations": 250,
+      "daily_sha256": "805141f2419e97cc9ad08b7f253df4ac56f3da41a20a604bf91f821be3ed8b89",
+      "daily_url": "https://stock.finance.sina.com.cn/usstock/api/jsonp_v2.php/x/US_MinKService.getDailyK?symbol=TWLO",
+      "price_selection_accepted": false
+    }
+  ],
+  "eastmoney_status": "connection_closed_without_response",
+  "database_price_writes": 0,
+  "strategy_writes": 0
+}
