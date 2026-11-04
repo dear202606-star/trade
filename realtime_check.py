@@ -7,20 +7,10 @@ import requests
 import db_sources
 import market_calendar
 from watchdog_checks import quote_problems
+from live_quotes import read_snapshot
 
 BASE=Path(__file__).resolve().parent
 SITE='https://dear202606-star.github.io/trade/data/'
-
-
-def read_snapshot(cursor):
-    cursor.execute('select source_as_of,collected_at,evidence_sha256,payload from live_quote_snapshot where singleton')
-    row=cursor.fetchone()
-    if row is None:raise RuntimeError('在线报价快照不存在')
-    snapshot=dict(zip(('source_as_of','collected_at','evidence_sha256','payload'),row))
-    cursor.execute("""select finished_at,metrics from sys_event where kind='fetch'
-        and source='live_quotes' and status='ok' order by finished_at desc,id desc limit 1""")
-    event=cursor.fetchone()
-    return snapshot,dict(zip(('finished_at','metrics'),event)) if event else None
 
 
 def public_snapshot():
