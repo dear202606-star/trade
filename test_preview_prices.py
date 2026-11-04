@@ -1,8 +1,9 @@
 import datetime as dt
+import json
 import unittest
 import tempfile
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import patch, mock_open
 import pandas as pd
 
 import preview
@@ -45,7 +46,8 @@ class PreviewPriceTests(unittest.TestCase):
             output=Path(directory)/'preview.json';output.write_bytes(b'previous accepted preview')
             with patch.object(preview,'OUT',str(output)), \
                  patch.object(preview,'BASE_YM','2025-12'), \
-                 patch.object(preview.json,'load',return_value={'quotes':{'X':{'p':100}},'session':'2026-10-30'}), \
+                 patch.object(preview,'open',mock_open(read_data=json.dumps(
+                     {'quotes':{'X':{'p':100}},'session':'2026-10-30'})),create=True), \
                  patch.object(preview.datafeed,'load_members',return_value=members), \
                  patch.object(preview.datafeed,'load_sector',return_value=({'X':'Tech'},{})), \
                  patch.object(preview.datafeed,'prefetch'), \
