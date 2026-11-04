@@ -117,6 +117,23 @@ def page(path, must, forbid=("加载中…", "尚未生成", "渲染失败")):
 
 
 def data(name):
+    if name == 'quotes.json':
+        cfg = data('cloud.json')
+        if not cfg or not cfg.get('url') or not cfg.get('key'):
+            bad('在线行情配置缺失')
+            return None
+        try:
+            response = requests.get(cfg['url'].rstrip('/')+'/rest/v1/live_quote_snapshot',
+                params={'singleton':'eq.true','select':'payload'},
+                headers={**H,'apikey':cfg['key']},timeout=20)
+            response.raise_for_status()
+            rows = response.json()
+            if len(rows)!=1 or not rows[0]['payload'].get('ok') or not rows[0]['payload'].get('quotes',{}).get('SPY'):
+                raise ValueError('Missing valid online quote snapshot')
+            return rows[0]['payload']
+        except Exception as exc:
+            bad('在线行情读取失败：'+type(exc).__name__)
+            return None
     code, txt = get("data/" + name)
     if code != 200:
         bad("数据 %s 状态码 %s" % (name, code))

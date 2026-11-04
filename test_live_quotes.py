@@ -4,6 +4,7 @@ import unittest
 from unittest.mock import patch
 
 import live_quotes as live
+import e2e_check
 
 
 def fields(date='Nov 02 04:00PM EST',year='2026'):
@@ -14,6 +15,26 @@ def fields(date='Nov 02 04:00PM EST',year='2026'):
 
 class LiveQuoteTests(unittest.TestCase):
     now = dt.datetime(2026,11,3,12,tzinfo=dt.timezone.utc)
+
+    def test_online_probe_checks_database_quotes_instead_of_deployment_files(self):
+        cfg = '{"url":"https://example.supabase.co","key":"public-test-key"}'
+        payload = {'ok':True,'quotes':{'SPY':{'p':100}}}
+        from unittest.mock import MagicMock
+        response = MagicMock();response.json.return_value=[{'payload':payload}]
+        with patch.object(e2e_check,'get',return_value=(200,cfg)) as static, \
+             patch.object(e2e_check.requests,'get',return_value=response) as online:
+            self.assertEqual(e2e_check.data('quotes.json'),payload)
+        static.assert_called_once_with('data/cloud.json')
+        self.assertIn('/rest/v1/live_quote_snapshot',online.call_args.args[0])
+
+    def test_online_probe_cannot_pass_when_database_is_unavailable(self):
+        cfg = '{"url":"https://example.supabase.co","key":"public-test-key"}'
+        with patch.object(e2e_check,'get',return_value=(200,cfg)) as static, \
+             patch.object(e2e_check.requests,'get',side_effect=RuntimeError('offline')), \
+             patch.object(e2e_check,'fails',[]) as failures:
+            self.assertIsNone(e2e_check.data('quotes.json'))
+            self.assertEqual(len(failures),1)
+        static.assert_called_once_with('data/cloud.json')
 
     def test_automated_publication_uses_the_existing_secret_without_a_local_password_file(self):
         expected = object()
