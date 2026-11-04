@@ -16,7 +16,7 @@ const equity = { exposure: 1, last_session: '20261103', position: [
   { ticker: 'A', weight: 0.6, entry: 100, last: 999, last_raw: 999, last_date: '20261103' },
   { ticker: 'B', weight: 0.4, entry: 200, last: 999, last_raw: 999, last_date: '20261103' },
 ] };
-const quotes = { session: '2026-11-03', quotes: { A: { p: 110, pc: 100 }, B: { p: 190, pc: 200 } } };
+const quotes = { session: '2026-11-03', previous_session:'2026-11-02', quotes: { A: { p: 110, pc: 100 }, B: { p: 190, pc: 200 } } };
 
 test('all holdings contribute shares times actual price change', () => {
   const result = calculator()(null, quotes, equity);
@@ -46,7 +46,7 @@ const adjusted = { last_session: '20261102', stats: { strategy: .06, benchmark: 
   { ticker:'A',weight:.6,entry:75,last:82.5,last_raw:110,last_date:'20261102' },
   { ticker:'B',weight:.4,entry:200,last:200,last_raw:200,last_date:'20261102' },
 ] };
-const nextQuotes = { session:'2026-11-03',intraday:false,
+const nextQuotes = { session:'2026-11-03',previous_session:'2026-11-02',intraday:false,
   quotes:{ A:{p:121,pc:110},B:{p:190,pc:200},SPY:{p:101,pc:100} } };
 
 test('raw quotes are converted to the net-value share unit before calculating dollars', () => {
@@ -78,6 +78,17 @@ test('unverified units, a multi-session gap or mismatched previous close retain 
     assert.equal(result.pct,.06);
     assert.equal(result.bridged,false);
   }
+});
+
+test('holiday bridges use the online exchange predecessor instead of a weekday guess',()=>{
+  const eq={...adjusted,last_session:'20261125',position:adjusted.position.map(p=>({...p,last_date:'20261125'}))};
+  const q={...nextQuotes,session:'2026-11-27',previous_session:'2026-11-25'};
+  assert.ok(Math.abs(calculator()(null,q,eq).amount-4600)<1e-8);
+  assert.equal(calculator('100000','yearResult')(null,q,eq).asOf,'2026-11-27');
+});
+
+test('missing online predecessor cannot authorize a cross-session estimate',()=>{
+  assert.equal(calculator()(null,{...nextQuotes,previous_session:undefined},adjusted),null);
 });
 
 test('invalid position or capital cannot silently omit a holding', () => {

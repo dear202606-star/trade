@@ -468,11 +468,7 @@
     const settled = String(equity.last_session || '').replace(/-/g, '');
     const session = String(quotes && quotes.session || '').replace(/-/g, '');
     if (!/^\d{8}$/.test(settled) || !/^\d{8}$/.test(session) || settled > session) return null;
-    let previous = new Date(session.slice(0,4)+'-'+session.slice(4,6)+'-'+session.slice(6,8)+'T00:00:00Z');
-    if (!Number.isFinite(previous.getTime()) || previous.toISOString().slice(0,10).replace(/-/g,'') !== session) return null;
-    do { previous.setUTCDate(previous.getUTCDate()-1); }
-    while (previous.getUTCDay() === 0 || previous.getUTCDay() === 6);
-    const previousDay = previous.toISOString().slice(0,10).replace(/-/g,'');
+    const previousDay = String(quotes && quotes.previous_session || '').replace(/-/g,'');
     if (settled !== session && settled !== previousDay) return null;
     if (pos.some(function (p) {
       if (!p || typeof p !== 'object') return true;

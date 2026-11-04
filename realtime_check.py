@@ -1,99 +1,78 @@
-# -*- coding: utf-8 -*-
-"""realtime_check.py — 当年持仓层是否保持 5 分钟级更新
-
-检查四件事
-  1. pg_cron 的盘中任务（*/5 13-21 * * 1-5）是否在跑、成功率多少
-  2. 最近一次盘中派发距今多久（交易日 + 盘中时段内应 <10 分钟）
-  3. signal.json / equity.json 的新鲜度
-  4. 当天是否有价格写入
-
-退出码非 0 表示实时层有问题（可接看门狗）。
-"""
-import io
+"""Check the online quote worker and public quote path against reviewed sessions."""
+import datetime as dt
 import json
-import os
-import sys
-import time
-import urllib.request
-from datetime import datetime, timezone
+from pathlib import Path
 
-import psycopg2
+import requests
+import db_sources
+import market_calendar
+from watchdog_checks import quote_problems
 
-try:
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-except Exception:
-    pass
-
-BASE = os.path.dirname(os.path.abspath(__file__))
-REF = "fnvahsyrzmmxwovbsqpc"
-HOST = "aws-0-ap-northeast-1.pooler.supabase.com"
-SITE = "https://dear202606-star.github.io/trade/data/"
-FAILS = []
+BASE=Path(__file__).resolve().parent
+SITE='https://dear202606-star.github.io/trade/data/'
 
 
-def ok(cond, name, detail=""):
-    print(("  ✅ " if cond else "  ❌ ") + "%-34s %s" % (name, detail))
-    if not cond:
-        FAILS.append(name)
+def read_snapshot(cursor):
+    cursor.execute('select source_as_of,collected_at,evidence_sha256,payload from live_quote_snapshot where singleton')
+    row=cursor.fetchone()
+    if row is None:raise RuntimeError('在线报价快照不存在')
+    snapshot=dict(zip(('source_as_of','collected_at','evidence_sha256','payload'),row))
+    cursor.execute("""select finished_at,metrics from sys_event where kind='fetch'
+        and source='live_quotes' and status='ok' order by finished_at desc,id desc limit 1""")
+    event=cursor.fetchone()
+    return snapshot,dict(zip(('finished_at','metrics'),event)) if event else None
 
 
-def db():
-    pw = os.environ.get("SUPABASE_DB_PASSWORD", "")
-    if not pw:
-        p = os.path.join(BASE, "output", "_supabase_dbpass.txt")
-        if os.path.exists(p):
-            pw = io.open(p, encoding="utf-8").read().strip()
-    c = psycopg2.connect(host=HOST, port=6543, user="postgres." + REF, password=pw,
-                         dbname="postgres", connect_timeout=15, sslmode="require")
-    c.autocommit = True
-    return c
+def public_snapshot():
+    response=requests.get(SITE+'cloud.json',params={'monitor':dt.datetime.now(dt.timezone.utc).timestamp()},timeout=20)
+    response.raise_for_status();cfg=response.json()
+    if cfg.get('url','').rstrip('/')!='https://'+db_sources.REF+'.supabase.co' or not cfg.get('key'):
+        raise RuntimeError('正式网页在线库配置不一致')
+    response=requests.get(cfg['url']+'/rest/v1/live_quote_snapshot',
+        params={'singleton':'eq.true','select':'source_as_of,collected_at,evidence_sha256,payload'},
+        headers={'apikey':cfg['key'],'Cache-Control':'no-cache'},timeout=20)
+    response.raise_for_status();rows=response.json()
+    if len(rows)!=1:raise RuntimeError('公开报价快照缺失或不唯一')
+    return rows[0]
 
 
-def main():
-    now = datetime.now(timezone.utc)
-    print("当前 UTC: %s（星期 %d）" % (now.strftime("%Y-%m-%d %H:%M"), now.isoweekday()))
-    c = db()
-    with c.cursor() as cur:
-        print("\n[1] 盘中派发任务")
-        cur.execute("select jobid, jobname, schedule, active from cron.job where schedule like '*/5%'")
-        jobs = cur.fetchall()
-        ok(bool(jobs), "存在 5 分钟任务", str(jobs))
-        for jid, name, sched, act in jobs:
-            ok(act, "任务 %s 已启用" % name, sched)
-            cur.execute("""select count(*), count(*) filter (where status='succeeded'),
-                                  max(start_time)
-                             from cron.job_run_details
-                            where jobid=%s and start_time > now() - interval '3 days'""", (jid,))
-            n, okn, last = cur.fetchone()
-            ok(n == 0 or okn == n, "近 3 天成功率", "%d/%d" % (okn, n))
-            if last:
-                print("     最近一次: %s" % last)
-
-        print("\n[2] 数据新鲜度")
-        cur.execute("select count(*) from prices_monthly where fetched_at > now() - interval '24 hours'")
-        fresh = cur.fetchone()[0]
-        ok(fresh > 0, "24 小时内写入价格行", "%d 行" % fresh)
-        cur.execute("""select count(*) from sys_event
-                        where kind='fetch' and created_at > now() - interval '24 hours'""")
-        n_ev = cur.fetchone()[0]
-        ok(n_ev > 0, "24 小时内采集事件", "%d 条" % n_ev)
-    c.close()
-
-    print("\n[3] 站点产物新鲜度")
-    for f in ("b/signal.json", "b/equity.json"):
-        try:
-            r = urllib.request.urlopen(urllib.request.Request(
-                SITE + f + "?n=%d" % time.time(), headers={"User-Agent": "Mozilla/5.0"}), timeout=25)
-            lm = r.headers.get("Last-Modified")
-            d = json.loads(r.read())
-            gen = d.get("generated_at") or d.get("as_of") or "?"
-            ok(True, f, "generated=%s ｜ LM=%s" % (gen, lm))
-        except Exception as e:
-            ok(False, f, str(e)[:50])
-
-    print("\n结果：失败 %d 项" % len(FAILS))
-    return 0 if not FAILS else 1
+def run(now=None):
+    now=now or dt.datetime.now(dt.timezone.utc)
+    problems=[];warnings=[];report={'checked_at':now.isoformat()}
+    connection=None
+    try:
+        calendar=market_calendar.load();state=calendar.state(now)
+        connection=db_sources.db()
+        with connection.cursor() as cursor:
+            cursor.execute("set local statement_timeout='20s'")
+            row,heartbeat=read_snapshot(cursor)
+            public=public_snapshot()
+            if public['evidence_sha256']!=row['evidence_sha256']:
+                # Publication can finish between the two reads. Reconcile once.
+                row,heartbeat=read_snapshot(cursor)
+                if public['evidence_sha256']!=row['evidence_sha256']:public=public_snapshot()
+            problems.extend(quote_problems(row,heartbeat,calendar,now))
+            problems.extend('公开读取：'+p for p in quote_problems(public,heartbeat,calendar,now))
+            if row['evidence_sha256']!=public['evidence_sha256']:
+                problems.append('公开报价与库内版本不一致')
+            cursor.execute("select jobname,schedule,active from cron.job where jobname='trade-dispatch-market'")
+            jobs=cursor.fetchall()
+            if len(jobs)!=1 or not jobs[0][2]:warnings.append('备用五分钟派发任务未启用')
+            report.update(calendar_sha256=calendar.sha,expected_session=str(state['session']),
+                minimum_source_time=state['minimum_source_time'].isoformat(),refresh_due=state['refresh_due'],
+                source_as_of=str(row['source_as_of']),collected_at=str(row['collected_at']),
+                worker_finished_at=str(heartbeat['finished_at']) if heartbeat else None,
+                evidence_sha256=row['evidence_sha256'],public_read_matches=row['evidence_sha256']==public['evidence_sha256'],
+                dispatcher_jobs=jobs)
+    except Exception as exc:
+        problems.append('在线报价监控失败：'+type(exc).__name__+': '+str(exc)[:140])
+    finally:
+        if connection is not None:connection.close()
+    report.update(problems=list(dict.fromkeys(problems)),warnings=warnings)
+    (BASE/'output/realtime_check.json').write_text(json.dumps(report,indent=2,ensure_ascii=False)+'\n')
+    print(json.dumps(report,indent=2,ensure_ascii=False))
+    return 1 if problems else 0
 
 
-if __name__ == "__main__":
-    sys.exit(main())
+if __name__=='__main__':
+    raise SystemExit(run())

@@ -28,7 +28,7 @@ jobs:
         env:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
-          pip install psycopg2-binary
+          pip install psycopg2-binary requests
           python realtime_check.py
 
       - name: 检查线上健康与部署新鲜度
@@ -37,32 +37,28 @@ jobs:
         run: |
           python - <<'PY'
           import json, time, urllib.request, datetime as dt
-          from watchdog_checks import quality_problems
+          from watchdog_checks import quality_problems, history_problems
           problems = []
           base = "https://dear202606-star.github.io/trade/data/"
           # 1) health.json
           try:
               h = json.load(urllib.request.urlopen(base + "health.json?nocache=" + str(time.time()), timeout=20))
-              age = h.get("quotes_age_hours")
               print("health:", h)
-              if h.get("status") != "ok":
+              # Static quote checks were superseded by the online check above.
+              issues = h.get("issues")
+              if not isinstance(issues, list) or any(not isinstance(x, str) for x in issues):
+                  raise ValueError("health.issues 无效")
+              problems.extend(x for x in issues if not x.startswith("行情"))
+              if h.get("status") not in ("ok", "degraded"):
                   problems.append("health.status=%s" % h.get("status"))
-              if isinstance(age, (int, float)) and age > 12:
-                  problems.append("行情年龄 %.1f 小时（>12）" % age)
           except Exception as e:
               problems.append("health.json 读取失败: %s" % str(e)[:60])
-          # 2) 构建更新时间（deploy 是否在跑）
+          # 2) 已核验历史允许冻结，仅检查年度连续性及新增年度。
           try:
               req = urllib.request.Request(base + "b/strategy_history.json?nocache=" + str(time.time()))
               r = urllib.request.urlopen(req, timeout=20)
               d = json.load(r)
-              ga = d.get("generated_at", "")
-              print("strategy_history generated_at:", ga)
-              if ga:
-                  t = dt.datetime.fromisoformat(ga.replace("Z", "+00:00"))
-                  lag = (dt.datetime.now(dt.timezone.utc) - t).total_seconds() / 3600
-                  if lag > 6:
-                      problems.append("构建产物 %.1f 小时未更新（>6）" % lag)
+              problems.extend(history_problems(d, dt.datetime.now(dt.timezone.utc)))
           except Exception as e:
               problems.append("产物读取失败: %s" % str(e)[:60])
           # 3) 校验实际发布的质量报告，缺失证据也必须告警
@@ -71,6 +67,11 @@ jobs:
               problems.extend(quality_problems(q))
           except Exception as e:
               problems.append("线上质量报告读取或校验失败: %s" % str(e)[:100])
+          try:
+              with open("output/realtime_check.json", encoding="utf-8") as f:
+                  problems.extend(json.load(f)["problems"])
+          except Exception as e:
+              problems.append("在线报价监控回执缺失: %s" % str(e)[:100])
           with open("problems.txt", "w", encoding="utf-8") as f:
               f.write("\n".join(problems))
           print("PROBLEMS=%d" % len(problems))

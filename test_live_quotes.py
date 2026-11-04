@@ -5,6 +5,8 @@ from unittest.mock import patch
 
 import live_quotes as live
 import e2e_check
+from market_calendar import Calendar, fingerprint
+from research.install_exchange_calendar import CALENDAR
 
 
 def fields(date='Nov 02 04:00PM EST',year='2026'):
@@ -15,6 +17,10 @@ def fields(date='Nov 02 04:00PM EST',year='2026'):
 
 class LiveQuoteTests(unittest.TestCase):
     now = dt.datetime(2026,11,3,12,tzinfo=dt.timezone.utc)
+
+    def setUp(self):
+        loader=patch.object(live.market_calendar,'load',return_value=Calendar(CALENDAR,fingerprint(CALENDAR)))
+        loader.start();self.addCleanup(loader.stop)
 
     def test_online_probe_checks_database_quotes_instead_of_deployment_files(self):
         cfg = '{"url":"https://example.supabase.co","key":"public-test-key"}'

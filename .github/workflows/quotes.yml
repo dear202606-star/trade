@@ -13,6 +13,7 @@ on:
     branches: [main]
     paths:
       - live_quotes.py
+      - market_calendar.py
       - quotes.py
       - db_ref.py
       - db_sources.py
@@ -36,7 +37,7 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - name: 在线报价与失败保护回归
-        run: python -m unittest test_live_quotes test_quote_snapshot
+        run: python -m unittest test_live_quotes test_quote_snapshot test_market_calendar test_watchdog_checks
       - name: 检查在线写入凭据
         run: test -n "$SUPABASE_DB_PASSWORD"
       - name: 刷新在线行情
