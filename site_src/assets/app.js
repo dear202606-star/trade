@@ -73,10 +73,24 @@
     if (cache[name] !== undefined) return cache[name];
     let url = "data/" + name + ".json";
     try {
-      url = "data/" + name + ".json?t=" + Date.now();
-      const r = await fetch(url, { cache: "no-store" });
+      let headers = {};
+      if (name === 'quotes') {
+        const cfg = await DSH.json('cloud', null);
+        if (!cfg || !cfg.url || !cfg.key) throw new Error('Online quote configuration unavailable');
+        url = cfg.url + '/rest/v1/live_quote_snapshot?singleton=eq.true&select=payload';
+        headers = { apikey: cfg.key };
+      } else {
+        url = "data/" + name + ".json?t=" + Date.now();
+      }
+      const r = await fetch(url, { cache: "no-store", headers: headers });
       if (!r.ok) throw new Error("HTTP " + r.status);
-      const _d = await r.json();
+      let _d = await r.json();
+      if (name === 'quotes') {
+        if (!Array.isArray(_d) || _d.length !== 1 || !_d[0].payload ||
+            !_d[0].payload.ok || !_d[0].payload.quotes || !_d[0].payload.quotes.SPY)
+          throw new Error('Online quote snapshot unavailable');
+        _d = _d[0].payload;
+      }
       // 行情：把「最近交易日」挂到报价表上，供各页面显示与判断新仓
       if (name === 'quotes' && _d && _d.quotes) _d.quotes.__session = _d.session || '';
       cache[name] = _d;
@@ -451,19 +465,34 @@
     // Strategy performance stays fully invested; exposure is advice only.
     const exp = 1;
     if (!Array.isArray(pos) || !pos.length || !Number.isFinite(amt) || amt <= 0) return null;
+    const settled = String(equity.last_session || '').replace(/-/g, '');
+    const session = String(quotes && quotes.session || '').replace(/-/g, '');
+    if (!/^\d{8}$/.test(settled) || !/^\d{8}$/.test(session) || settled > session) return null;
+    let previous = new Date(session.slice(0,4)+'-'+session.slice(4,6)+'-'+session.slice(6,8)+'T00:00:00Z');
+    if (!Number.isFinite(previous.getTime()) || previous.toISOString().slice(0,10).replace(/-/g,'') !== session) return null;
+    do { previous.setUTCDate(previous.getUTCDate()-1); }
+    while (previous.getUTCDay() === 0 || previous.getUTCDay() === 6);
+    const previousDay = previous.toISOString().slice(0,10).replace(/-/g,'');
+    if (settled !== session && settled !== previousDay) return null;
     if (pos.some(function (p) {
       if (!p || typeof p !== 'object') return true;
       const q = qs[p.ticker];
       return !Number.isFinite(p.entry) || p.entry <= 0 ||
+        !Number.isFinite(p.last) || p.last <= 0 || !Number.isFinite(p.last_raw) || p.last_raw <= 0 ||
         !Number.isFinite(p.weight) || p.weight <= 0 || !q ||
-        !Number.isFinite(q.p) || q.p <= 0 || !Number.isFinite(q.pc) || q.pc <= 0;
+        !Number.isFinite(q.p) || q.p <= 0 || !Number.isFinite(q.pc) || q.pc <= 0 ||
+        String(p.last_date || '').replace(/-/g,'') !== settled ||
+        (settled !== session && Math.abs(p.last_raw-q.pc) > Math.max(.00011,p.last_raw*1e-8));
     })) return null;
     let day = 0, mv = 0, covered = 0;
     pos.forEach(function (p) {
       const q = qs[p.ticker];
       const base = p.entry > 0 ? (amt * p.weight * exp) / p.entry : 0;   // 股数
-      const price = q.p;
-      const prev = (q && q.pc > 0) ? q.pc : null;
+      // Net-value entries and last prices share an adjusted unit. Convert
+      // current raw quotes to that unit before multiplying by strategy shares.
+      const unit = p.last / p.last_raw;
+      const price = q.p * unit;
+      const prev = q.pc * unit;
       if (!base || !price) return;
       mv += base * price;
       if (prev) { day += base * (price - prev); covered++; }
@@ -484,6 +513,25 @@
       live: live,
       label: "今日",
     };
+  };
+
+  DSH.yearResult = function (signal, quotes, equity) {
+    const last = String(equity && equity.last_session || '').replace(/-/g,'');
+    const pct = equity && equity.stats && equity.stats.strategy;
+    const bench = equity && equity.stats && equity.stats.benchmark;
+    const result = { pct: Number.isFinite(pct) ? pct : null,
+      benchmark: Number.isFinite(bench) ? bench : null,
+      asOf: /^\d{8}$/.test(last) ? last.slice(0,4)+'-'+last.slice(4,6)+'-'+last.slice(6,8) : '', bridged: false };
+    const day = DSH.today(signal,quotes,equity);
+    const session = quotes && quotes.session;
+    if (!day || !Number.isFinite(day.pct) || result.pct == null || !result.asOf || session <= result.asOf) return result;
+    result.pct = (1+result.pct)*(1+day.pct)-1;
+    const spy = quotes.quotes && quotes.quotes.SPY;
+    result.benchmark = result.benchmark != null && spy && Number.isFinite(spy.p) && spy.p>0 && Number.isFinite(spy.pc) && spy.pc>0
+      ? (1+result.benchmark)*spy.p/spy.pc-1 : null;
+    result.asOf = session;
+    result.bridged = true;
+    return result;
   };
 
   /* 目标权重（占总资金） */

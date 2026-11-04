@@ -7,6 +7,7 @@ on:
       - site_src/assets/app.js
       - site_src/assets/page.js
       - test_daily_pnl.mjs
+      - test_online_quotes.mjs
       - .github/workflows/frontend-calculation.yml
   pull_request:
   workflow_dispatch:
@@ -23,5 +24,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - run: node --test test_daily_pnl.mjs
+      - run: node --test test_daily_pnl.mjs test_online_quotes.mjs
       - run: node --check site_src/assets/page.js

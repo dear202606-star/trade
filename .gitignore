@@ -108,3 +108,5 @@ output/_chrome_profile/
 # 娲剧敓缂撳瓨锛堜笉鍙叆搴擄細mtime 浼氳 checkout 鍒锋柊锛屽鑷?CI 姘镐箙鍛戒腑鏃х紦瀛橈級
 output/_prices_cache.json
 output/_chrome_copy2/
+
+/_site_release/
