@@ -46,8 +46,8 @@ class PreviewPriceTests(unittest.TestCase):
                      {'quotes':{'X':{'p':100}},'session':'2026-10-30'}), \
                  patch.object(preview.db_ref,'require_unquarantined_candidates'), \
                  patch.object(preview.db_ref,'load_market_reference',return_value=({'X'},{'X':'Tech'},'reference-version')), \
-                 patch.object(preview.datafeed,'prefetch'), \
-                 patch.object(preview.datafeed,'load_bars',return_value={'2025-12':(1,1)}), \
+                 patch.object(preview.datafeed,'prefetch',side_effect=AssertionError('Historical collection forbidden')), \
+                 patch.object(preview.datafeed,'load_bars',side_effect=AssertionError('Local history forbidden')), \
                  patch.object(preview.nominal_prices,'price',side_effect=RuntimeError('unverified')):
                 with self.assertRaisesRegex(RuntimeError,'unverified'):
                     preview.main()

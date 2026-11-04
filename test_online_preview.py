@@ -71,11 +71,12 @@ class OnlinePreviewInputTests(unittest.TestCase):
             live=set(members[(members.start_date<=session)&(members.end_date>=session)].ticker)
             stack.enter_context(patch.object(preview.db_ref,'load_market_reference',return_value=(
                 live,sectors if sectors is not None else {'A':'One','B':'Two','C':'Three'},'reference-version')))
-            stack.enter_context(patch.object(preview.datafeed,'prefetch'))
-            stack.enter_context(patch.object(preview.datafeed,'load_bars',return_value=bars if bars is not None else {base:(100,100)}))
+            prefetch=stack.enter_context(patch.object(preview.datafeed,'prefetch'))
+            load_bars=stack.enter_context(patch.object(preview.datafeed,'load_bars',return_value=bars if bars is not None else {base:(100,100)}))
             stack.enter_context(patch.object(preview.datafeed,'_splits',return_value={}))
             if hasattr(preview,'nominal_prices'):
-                stack.enter_context(patch.object(preview.nominal_prices,'price',return_value=100))
+                stack.enter_context(patch.object(preview.nominal_prices,'price',return_value=100,
+                    side_effect=RuntimeError('缺少基准价格') if bars=={} else None))
             def export_trap(path,mode='r',**kwargs):
                 if 'w' in mode:return open(path,mode,**kwargs)
                 if str(path).endswith('signal.json'):
@@ -88,6 +89,9 @@ class OnlinePreviewInputTests(unittest.TestCase):
             except RuntimeError as exc:
                 self.assertEqual(output.read_bytes(),b'previous accepted preview')
                 return str(exc),guard.call_args.args[0]
+            if hasattr(preview,'nominal_prices'):
+                prefetch.assert_not_called()
+                load_bars.assert_not_called()
             return json.loads(output.read_text()),guard.call_args.args[0]
 
     def test_missing_quote_base_or_sector_stops_without_overwriting_output(self):

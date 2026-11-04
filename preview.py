@@ -64,10 +64,8 @@ def main():
     db_ref.require_unquarantined_candidates(live)
     name_map={t:quotes.get(t,{}).get('name') or t for t in live}
 
-    # 并行预热：CI 没有本地缓存时，500 只串行抓取会超时
     missing=sorted(t for t in live if t not in quotes)
     if missing:raise RuntimeError('预览缺少候选报价，禁止缩小排名池：'+', '.join(missing))
-    datafeed.prefetch(sorted(live), workers=10)
 
     rows = []
     for t in sorted(live):
@@ -77,9 +75,6 @@ def main():
         cur = float(qq["p"])
         if cur < MIN_PRICE:
             continue
-        bars = datafeed.load_bars(t)
-        if not bars or base_ym not in bars:
-            raise RuntimeError('预览缺少基准价格或上市资格证据：'+t+' '+base_ym)
         if not sector.get(t) or sector[t]=='Unknown':
             raise RuntimeError('预览缺少候选行业：'+t)
         ratio = price_ratio(t, cur, base_ym, q['session'])
