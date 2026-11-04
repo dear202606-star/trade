@@ -1,0 +1,23 @@
+{
+  "physical_source_inventory": [
+    [
+      "stockanalysis",
+      "total_return",
+      2966,
+      29,
+      1203
+    ]
+  ],
+  "selected_source_inventory": [
+    [
+      "stockanalysis",
+      "total_return",
+      2504,
+      21
+    ]
+  ],
+  "promoter_has_exact_batch_guard": true,
+  "historical_adjustment_semantics_accepted": false,
+  "database_writes": 0,
+  "scope": "Counts only; original raw response is required to resolve any prior fallback use"
+}

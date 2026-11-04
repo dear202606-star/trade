@@ -29,6 +29,9 @@ jobs:
       - name: 安装依赖
         run: pip install -q pandas requests psycopg2-binary
 
+      - name: 复权字段与失败保护回归
+        run: python -m unittest test_stockanalysis_history
+
       - name: 采集并写入暂存表
         env:
           LIMIT: ${{ github.event.inputs.limit }}
