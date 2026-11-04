@@ -1,0 +1,326 @@
+{
+  "write": true,
+  "changes": [
+    {
+      "symbol": "BE",
+      "action": "add",
+      "effective_on": "2026-09-21",
+      "sector": "Industrials",
+      "sector_from": "2026-09-21",
+      "url": "https://press.spglobal.com/2026-09-04-Bloom-Energy,-Illumina,-and-Everpure-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+    },
+    {
+      "symbol": "P",
+      "action": "add",
+      "effective_on": "2026-09-21",
+      "sector": "Information Technology",
+      "sector_from": "2026-09-21",
+      "url": "https://press.spglobal.com/2026-09-04-Bloom-Energy,-Illumina,-and-Everpure-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+    },
+    {
+      "symbol": "ILMN",
+      "action": "add",
+      "effective_on": "2026-09-21",
+      "sector": "Health Care",
+      "sector_from": "2026-09-21",
+      "url": "https://press.spglobal.com/2026-09-04-Bloom-Energy,-Illumina,-and-Everpure-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+    },
+    {
+      "symbol": "TAP",
+      "action": "remove",
+      "effective_on": "2026-09-21",
+      "sector": null,
+      "sector_from": "2026-09-21",
+      "url": "https://press.spglobal.com/2026-09-04-Bloom-Energy,-Illumina,-and-Everpure-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+    },
+    {
+      "symbol": "TTD",
+      "action": "remove",
+      "effective_on": "2026-09-21",
+      "sector": null,
+      "sector_from": "2026-09-21",
+      "url": "https://press.spglobal.com/2026-09-04-Bloom-Energy,-Illumina,-and-Everpure-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+    },
+    {
+      "symbol": "BLDR",
+      "action": "remove",
+      "effective_on": "2026-09-21",
+      "sector": null,
+      "sector_from": "2026-09-21",
+      "url": "https://press.spglobal.com/2026-09-04-Bloom-Energy,-Illumina,-and-Everpure-Set-to-Join-S-P-500-Others-to-Join-S-P-100,-S-P-MidCap-400,-and-S-P-SmallCap-600"
+    },
+    {
+      "symbol": "VYLR",
+      "action": "add",
+      "effective_on": "2026-10-01",
+      "sector": "Consumer Staples",
+      "sector_from": "2026-10-06",
+      "url": "https://press.spglobal.com/2026-10-01-Vylor-Added-to-the-S-P-500-Twilio-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+    },
+    {
+      "symbol": "CTVA",
+      "action": "remove",
+      "effective_on": "2026-10-06",
+      "sector": null,
+      "sector_from": "2026-10-06",
+      "url": "https://press.spglobal.com/2026-10-01-Vylor-Added-to-the-S-P-500-Twilio-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+    },
+    {
+      "symbol": "TWLO",
+      "action": "add",
+      "effective_on": "2026-10-06",
+      "sector": "Information Technology",
+      "sector_from": "2026-10-06",
+      "url": "https://press.spglobal.com/2026-10-01-Vylor-Added-to-the-S-P-500-Twilio-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+    },
+    {
+      "symbol": "WBD",
+      "action": "remove",
+      "effective_on": "2026-10-06",
+      "sector": null,
+      "sector_from": "2026-10-06",
+      "url": "https://press.spglobal.com/2026-10-01-Vylor-Added-to-the-S-P-500-Twilio-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+    },
+    {
+      "symbol": "PSKY",
+      "action": "remove",
+      "effective_on": "2026-10-06",
+      "sector": null,
+      "sector_from": "2026-10-06",
+      "url": "https://ir.paramount.com/news-releases/news-release-details/paramount-completes-acquisition-warner-bros-discovery-creating"
+    },
+    {
+      "symbol": "SKYD",
+      "action": "add",
+      "effective_on": "2026-10-06",
+      "sector": "Communication Services",
+      "sector_from": "2026-10-06",
+      "url": "https://ir.paramount.com/news-releases/news-release-details/paramount-completes-acquisition-warner-bros-discovery-creating"
+    },
+    {
+      "symbol": "OKTA",
+      "action": "add",
+      "effective_on": "2026-11-04",
+      "sector": "Information Technology",
+      "sector_from": "2026-11-04",
+      "url": "https://press.spglobal.com/2026-10-30-Okta-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+    },
+    {
+      "symbol": "KVUE",
+      "action": "remove",
+      "effective_on": "2026-11-04",
+      "sector": null,
+      "sector_from": "2026-11-04",
+      "url": "https://press.spglobal.com/2026-10-30-Okta-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600"
+    }
+  ],
+  "corporate_terms": [
+    {
+      "symbol": "KVUE",
+      "event_date": "2026-11-02",
+      "ceased_trading_on": "2026-11-02",
+      "cash_usd_per_share": "3.50",
+      "successor_symbol": "KMB",
+      "successor_units_per_share": "0.14625",
+      "url": "https://www.investor.kimberly-clark.com/news-releases/news-release-details/kimberly-clark-completes-acquisition-kenvue-creating-preeminent"
+    },
+    {
+      "symbol": "WBD",
+      "event_date": "2026-10-06",
+      "ceased_trading_on": "2026-10-06",
+      "cash_usd_per_share": "31.01666668",
+      "successor_symbol": null,
+      "successor_units_per_share": "0",
+      "url": "https://ir.paramount.com/news-releases/news-release-details/paramount-completes-acquisition-warner-bros-discovery-creating"
+    },
+    {
+      "symbol": "PSKY",
+      "event_date": "2026-10-06",
+      "old_ticker_ceased_on": "2026-10-06",
+      "successor_symbol": "SKYD",
+      "same_equity_ticker_change": true,
+      "url": "https://ir.paramount.com/news-releases/news-release-details/paramount-completes-acquisition-warner-bros-discovery-creating",
+      "additional_asset": {
+        "kind": "warrant",
+        "record_date": "2026-10-05",
+        "issued_on": "2026-10-13",
+        "units_per_common_share": "1",
+        "trading_symbol": "SKYD WS",
+        "exercise_price_usd": "12.00",
+        "url": "https://www.sec.gov/Archives/edgar/data/2041610/000110465926115294/tm2626659d12_8k.htm"
+      }
+    }
+  ],
+  "new_symbol_masters": [
+    "BE",
+    "OKTA",
+    "P",
+    "SKYD",
+    "TWLO",
+    "VYLR"
+  ],
+  "existing_symbol_master_sha256": "51e5e5c22197393b5a1398f90bd48faacf53d0de915018b9baa4e133afa02f9e",
+  "P_identity_pending": {
+    "symbol": "P",
+    "issuer": "Everpure, Inc.",
+    "cik": "1474432",
+    "prior_ticker": "PSTG",
+    "rename_effective": "2026-04-17",
+    "rename_url": "https://www.everpuredata.com/company/newsroom/press-releases/everpure-to-change-ticker-symbol.html",
+    "rename_confirmation_url": "https://www.sec.gov/Archives/edgar/data/1474432/000147443226000061/pstg-20260503.htm",
+    "prior_reused_issuer": "Pandora Media, Inc.",
+    "prior_reuse_url": "https://investor.siriusxm.com/sec-filings/all-sec-filings/content/0001193125-19-020898/d674763dex991.htm",
+    "price_history_accepted": false
+  },
+  "membership_before_sha256": "7cc363657dc375feb4571737953c10a971d3f7239c79a8221ac6ef7e9edf306b",
+  "membership_after_sha256": "d7521a6e06c6523d43d06b2cad8ae5c30311c04a372fc4b9339f64d656221ee1",
+  "pre_2026_09_21_membership_unchanged": true,
+  "unrelated_membership_unchanged": true,
+  "preserved_inputs": {
+    "sectors": {
+      "count": 513,
+      "sha256": "5eb760db79853b1b55b4c3a5963a440907e2c98bf299a2a5c3addbe1e9de17ee"
+    },
+    "prices_monthly": {
+      "count": 2632,
+      "sha256": "e9f10a66d87022ca4cd47efabc47e8c005a268c5fc84cb2df546a8140fec8919"
+    },
+    "nominal_monthly": {
+      "count": 1559,
+      "sha256": "3bea39a118a48abd845c42cb1701c9786455b63b5c437def788abcd6fdcc1a67"
+    },
+    "series_pick": {
+      "count": 8,
+      "sha256": "627b7fbb5c1b182352618c0b37841c769813459ec62426a4de0536f68e06175f"
+    },
+    "data_lock": {
+      "count": 5,
+      "sha256": "af42a0f725265169c1cd39d3fa79bf508ab53bb5260c85b4d08b63458259a591"
+    }
+  },
+  "baseline_b_sha256": "20c0680276cf79cbb06d8aaab35c3e40cde010447f6e15e75abd95ff0ef33c90",
+  "effective_day_deltas": [
+    {
+      "date": "2026-09-20",
+      "before_count": 503,
+      "after_count": 503,
+      "added": [],
+      "removed": []
+    },
+    {
+      "date": "2026-09-21",
+      "before_count": 503,
+      "after_count": 503,
+      "added": [
+        "BE",
+        "ILMN",
+        "P"
+      ],
+      "removed": [
+        "BLDR",
+        "TAP",
+        "TTD"
+      ]
+    },
+    {
+      "date": "2026-10-01",
+      "before_count": 503,
+      "after_count": 504,
+      "added": [
+        "BE",
+        "ILMN",
+        "P",
+        "VYLR"
+      ],
+      "removed": [
+        "BLDR",
+        "TAP",
+        "TTD"
+      ]
+    },
+    {
+      "date": "2026-10-05",
+      "before_count": 503,
+      "after_count": 504,
+      "added": [
+        "BE",
+        "ILMN",
+        "P",
+        "VYLR"
+      ],
+      "removed": [
+        "BLDR",
+        "TAP",
+        "TTD"
+      ]
+    },
+    {
+      "date": "2026-10-06",
+      "before_count": 503,
+      "after_count": 503,
+      "added": [
+        "BE",
+        "ILMN",
+        "P",
+        "SKYD",
+        "TWLO",
+        "VYLR"
+      ],
+      "removed": [
+        "BLDR",
+        "CTVA",
+        "PSKY",
+        "TAP",
+        "TTD",
+        "WBD"
+      ]
+    },
+    {
+      "date": "2026-11-03",
+      "before_count": 503,
+      "after_count": 503,
+      "added": [
+        "BE",
+        "ILMN",
+        "P",
+        "SKYD",
+        "TWLO",
+        "VYLR"
+      ],
+      "removed": [
+        "BLDR",
+        "CTVA",
+        "PSKY",
+        "TAP",
+        "TTD",
+        "WBD"
+      ]
+    },
+    {
+      "date": "2026-11-04",
+      "before_count": 503,
+      "after_count": 503,
+      "added": [
+        "BE",
+        "ILMN",
+        "OKTA",
+        "P",
+        "SKYD",
+        "TWLO",
+        "VYLR"
+      ],
+      "removed": [
+        "BLDR",
+        "CTVA",
+        "KVUE",
+        "PSKY",
+        "TAP",
+        "TTD",
+        "WBD"
+      ]
+    }
+  ],
+  "historical_price_writes": 0,
+  "global_sector_writes": 0,
+  "financial_acceptance": false
+}

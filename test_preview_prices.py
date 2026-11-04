@@ -3,7 +3,6 @@ import unittest
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
-import pandas as pd
 
 import preview
 
@@ -40,15 +39,13 @@ class PreviewPriceTests(unittest.TestCase):
                 preview.price_ratio('X',100,'2025-12','2026-10-30')
 
     def test_missing_native_price_preserves_previous_preview_file(self):
-        members=pd.DataFrame([{'ticker':'X','start_date':'2020-01-01','end_date':'2099-12-31'}])
         with tempfile.TemporaryDirectory() as directory:
             output=Path(directory)/'preview.json';output.write_bytes(b'previous accepted preview')
             with patch.object(preview,'OUT',str(output)), \
                  patch.object(preview.live_quotes,'load_snapshot',return_value=
                      {'quotes':{'X':{'p':100}},'session':'2026-10-30'}), \
                  patch.object(preview.db_ref,'require_unquarantined_candidates'), \
-                 patch.object(preview.datafeed,'load_members',return_value=members), \
-                 patch.object(preview.datafeed,'load_sector',return_value=({'X':'Tech'},{})), \
+                 patch.object(preview.db_ref,'load_market_reference',return_value=({'X'},{'X':'Tech'},'reference-version')), \
                  patch.object(preview.datafeed,'prefetch'), \
                  patch.object(preview.datafeed,'load_bars',return_value={'2025-12':(1,1)}), \
                  patch.object(preview.nominal_prices,'price',side_effect=RuntimeError('unverified')):

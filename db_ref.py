@@ -11,6 +11,8 @@
 import csv
 import io
 import json
+import hashlib
+import datetime as dt
 import os
 import sys
 
@@ -164,6 +166,51 @@ def require_unquarantined_candidates(symbols):
     if unresolved:
         raise RuntimeError('排名候选证券身份仍待核验，禁止静默剔除后发布：'+
                            ', '.join(symbol for symbol,reason in unresolved))
+
+
+def load_market_reference(as_of):
+    """One online point-in-time pool with reviewed sector overlays, no file fallback.
+
+    The legacy sector table stays unchanged. A new member's current sector
+    must not be backfilled into its earlier historical membership intervals.
+    """
+    day=dt.date.fromisoformat(as_of)
+    connection=db()
+    try:
+        connection.autocommit=False
+        connection.set_session(isolation_level='REPEATABLE READ',readonly=True)
+        with connection.cursor() as cursor:
+            cursor.execute("set local statement_timeout='20s'")
+            cursor.execute('select symbol,start_date,end_date,source from members order by symbol,start_date')
+            all_members=cursor.fetchall()
+            members=[r for r in all_members if r[1]<=day<=r[2]]
+            if not members:
+                raise RuntimeError('在线预览成分场次无效')
+            live={r[0] for r in members}
+            cursor.execute('select symbol,sector from sectors where symbol=any(%s) order by symbol',(sorted(live),))
+            sectors=dict(cursor.fetchall())
+            cursor.execute("select id,metrics from sys_event where kind='validation' and source='reviewed_index_change' and status='pass' order by id")
+            rows=cursor.fetchall()
+        reviews=[]
+        membership_sha=hashlib.sha256(json.dumps(all_members,sort_keys=True,separators=(',',':'),default=str).encode()).hexdigest()
+        for identity,metrics in rows:
+            proof=metrics.get('proof')
+            sha=hashlib.sha256(json.dumps(proof,sort_keys=True,separators=(',',':'),default=str).encode()).hexdigest()
+            if metrics.get('evidence_sha256')!=sha or not isinstance(proof,dict) or proof.get('index')!='S&P 500':
+                raise RuntimeError('在线指数变更证明无效')
+            change=proof['change']
+            if change['action']=='add' and change['symbol'] in live and change['sector_from']<=as_of:
+                if not change['sector']:raise RuntimeError('在线行业变更缺少分类')
+                reviews.append((change['sector_from'],identity,change,sha))
+        if rows and rows[-1][1]['proof'].get('membership_after_sha256')!=membership_sha:
+            raise RuntimeError('在线成分与最近核验版本不一致，禁止使用未审查的更新')
+        for _,_,change,sha in sorted(reviews,key=lambda r:(r[0],r[1])):
+            sectors[change['symbol']]=change['sector']
+        version=hashlib.sha256(json.dumps({'as_of':as_of,'members':members,'sectors':sectors,
+            'review_sha256':[r[3] for r in reviews]},sort_keys=True,separators=(',',':'),default=str).encode()).hexdigest()
+        return live,sectors,version
+    finally:
+        connection.close()
 
 
 if __name__ == "__main__":

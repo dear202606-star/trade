@@ -1,0 +1,80 @@
+{
+  "verified_at": "2026-11-04T07:41:41.594447+00:00",
+  "rejected_probes": [
+    {
+      "sql": "update members set end_date='2099-12-31' where symbol='WBD'",
+      "reason": "Reviewed index exit cannot be extended: WBD"
+    },
+    {
+      "sql": "update members set end_date='2026-12-31' where symbol='BE'",
+      "reason": "Reviewed index boundary mismatch: BE"
+    },
+    {
+      "sql": "delete from members where symbol='BE'",
+      "reason": "Reviewed index boundary mismatch: BE"
+    },
+    {
+      "sql": "insert into members(symbol,start_date,end_date,source) values('ILMN','2026-01-01','2099-12-31','rollback probe')",
+      "reason": "Overlapping reviewed index admission: ILMN"
+    },
+    {
+      "sql": "update sys_event set status='fail' where source='reviewed_index_change' and subject='S&P500:2026-09-21:add:BE'",
+      "reason": "Reviewed index evidence is append-only"
+    },
+    {
+      "sql": "delete from sys_event where source='verified_corporate_terms' and subject='WBD:2026-10-06'",
+      "reason": "Reviewed index evidence is append-only"
+    },
+    {
+      "sql": "truncate probe_members",
+      "reason": "Reviewed membership cannot be truncated"
+    },
+    {
+      "sql": "truncate probe_sys_event",
+      "reason": "Reviewed index evidence is append-only"
+    }
+  ],
+  "future_exit_with_matching_proof_allowed": true,
+  "all_mutation_probes_rolled_back": true,
+  "truncate_scope": "temporary tables only",
+  "membership_sha256_preserved": "d7521a6e06c6523d43d06b2cad8ae5c30311c04a372fc4b9339f64d656221ee1",
+  "point_in_time_reader_checks": [
+    {
+      "as_of": "2026-09-20",
+      "members": 503,
+      "version": "5eb347bfeb32b009b537bae5ea613be6d948571317eca7f911afb31b9da972e9",
+      "VYLR_sector": null
+    },
+    {
+      "as_of": "2026-09-21",
+      "members": 503,
+      "version": "b8a03da11d6bf38fefadfba152cb7043bf0d506b070469d32600353756746492",
+      "VYLR_sector": null
+    },
+    {
+      "as_of": "2026-10-02",
+      "members": 504,
+      "version": "cc1e835e65434b3ad4cc01fcb4ca3b0fb28373a718fbe374007537a0cbc1685c",
+      "VYLR_sector": null
+    },
+    {
+      "as_of": "2026-10-06",
+      "members": 503,
+      "version": "dd8b97c2475902f4c3b0ffe2d2fe3cd1fd1e5c56b369070b118cd31c58f35f7a",
+      "VYLR_sector": "Consumer Staples"
+    },
+    {
+      "as_of": "2026-11-03",
+      "members": 503,
+      "version": "7451e8c56a4517fee750141742d02d25f9d77f08591d43a27702dca572f02c85",
+      "VYLR_sector": "Consumer Staples"
+    },
+    {
+      "as_of": "2026-11-04",
+      "members": 503,
+      "version": "ef085d3d4024f02659ecc9d148013ed0aa652e81a990939be2c22e6f819eb9d7",
+      "VYLR_sector": "Consumer Staples"
+    }
+  ],
+  "historical_price_writes": 0
+}

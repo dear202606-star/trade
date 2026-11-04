@@ -73,7 +73,7 @@ def source_time(fields, now):
     return stamp
 
 
-def build_snapshot(tickers, raw, fx, now, calendar=None):
+def build_snapshot(tickers, raw, fx, now, calendar=None, reference=None):
     if now.tzinfo is None or not tickers or len(set(tickers)) != len(tickers):
         raise ValueError('Invalid snapshot request')
     if not isinstance(fx,(int,float)) or not math.isfinite(fx) or not 5<fx<10:
@@ -115,6 +115,7 @@ def build_snapshot(tickers, raw, fx, now, calendar=None):
         'previous_session':calendar.previous(session).isoformat(),'calendar_sha256':calendar.sha,
         'count':len(values),'universe':len(tickers),'coverage':len(values)/len(tickers),
         'ok':True,'stale':[s for s in tickers if s not in values], 'quotes':values}
+    if reference is not None:payload['reference']=reference
     sha = hashlib.sha256(json.dumps(payload,sort_keys=True,separators=(',',':'),
                                     allow_nan=False).encode()).hexdigest()
     payload['version'] = sha
@@ -123,17 +124,16 @@ def build_snapshot(tickers, raw, fx, now, calendar=None):
 
 def universe(now):
     date = now.astimezone(ET).date().isoformat()
-    members = db_ref.load_members()
-    active = {s for s,periods in members.items() if any(a<=date<=b for a,b in periods)}
+    active,_,version = db_ref.load_market_reference(date)
     if len(active)<450:
         raise RuntimeError('Online current membership is incomplete')
-    return sorted(active | set(quotes.EXTRA))
+    return sorted(active | set(quotes.EXTRA)),{'as_of':date,'version':version}
 
 
 def collect(now):
     calendar = market_calendar.load()
     calendar.state(now)
-    tickers = universe(now)
+    tickers,reference = universe(now)
     raw = {}
     for start in range(0,len(tickers),quotes.BATCH):
         batch = tickers[start:start+quotes.BATCH]
@@ -141,7 +141,7 @@ def collect(now):
         raw.update(quotes.sina_batch(['gb_'+s.replace('.','$').lower() for s in batch]))
         time.sleep(.2)
     fx = quotes.fetch_fx()
-    return build_snapshot(tickers,raw,fx,dt.datetime.now(UTC),calendar)
+    return build_snapshot(tickers,raw,fx,dt.datetime.now(UTC),calendar,reference)
 
 
 def publish(payload, sha, collected_at):
