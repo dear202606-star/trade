@@ -1,13 +1,13 @@
 {
-  "checked_at": "2026-11-04T03:03:11.362464+00:00",
+  "checked_at": "2026-11-04T03:06:09.495367+00:00",
   "calendar_sha256": "7ae1e57168770775d6295fab2f19d562e1a6058df4c7584a45798ca6ff275605",
   "expected_session": "2026-11-03",
   "minimum_source_time": "2026-11-03T21:00:00+00:00",
   "refresh_due": false,
   "source_as_of": "2026-11-03 21:00:00+00:00",
-  "collected_at": "2026-11-04 03:03:09.525378+00:00",
-  "worker_finished_at": "2026-11-04 03:03:10.284042+00:00",
-  "evidence_sha256": "5644b989e2e2e5f2b1e71e082ef2ea1377bddf82996ba7744dd186a28b00e45e",
+  "collected_at": "2026-11-04 03:05:12.754336+00:00",
+  "worker_finished_at": "2026-11-04 03:05:41.234232+00:00",
+  "evidence_sha256": "725791e12c10fd95d4dc3c243c9333b3d129a4c70afec6f42d7361789c55ce0f",
   "public_read_matches": true,
   "dispatcher_jobs": [
     [
