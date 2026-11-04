@@ -28,7 +28,8 @@ class OnlineQuoteReaderTests(unittest.TestCase):
 
     def fixture(self):
         payload={'ts':'2026-11-02T21:00:00Z','session':'2026-11-02','previous_session':'2026-10-30',
-                 'calendar_sha256':fingerprint(CALENDAR),'ok':True,'count':1,'universe':1,'quotes':{'SPY':{'p':100}}}
+                 'fresh_until':'2026-11-03T14:50:00+00:00',
+                 'calendar_sha256':fingerprint(CALENDAR),'ok':True,'count':1,'universe':1,'quotes':{'SPY':{'p':100,'as_of':'2026-11-02T21:00:00Z'}}}
         sha=hashlib.sha256(json.dumps(payload,sort_keys=True,separators=(',',':')).encode()).hexdigest()
         payload['version']=sha
         row=(payload['ts'],'2026-11-03T12:00:00Z',sha,payload)

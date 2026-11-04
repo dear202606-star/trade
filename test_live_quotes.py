@@ -18,6 +18,16 @@ def fields(date='Nov 02 04:00PM EST',year='2026'):
 class LiveQuoteTests(unittest.TestCase):
     now = dt.datetime(2026,11,3,12,tzinfo=dt.timezone.utc)
 
+    def test_old_component_cannot_hide_behind_a_fresh_benchmark_after_close(self):
+        with self.assertRaisesRegex(ValueError,'Incomplete same-session quote coverage'):
+            live.build_snapshot(['SPY','A'],{'gb_spy':fields(),'gb_a':fields('Nov 02 03:00PM EST')},7,self.now)
+
+    def test_intraday_deadline_uses_the_oldest_valid_component(self):
+        now=dt.datetime(2026,11,3,16,tzinfo=dt.timezone.utc)
+        payload,_=live.build_snapshot(['SPY','A'],
+            {'gb_spy':fields('Nov 03 10:59AM EST'),'gb_a':fields('Nov 03 10:45AM EST')},7,now)
+        self.assertEqual(payload['fresh_until'],'2026-11-03T16:05:00+00:00')
+
     def setUp(self):
         loader=patch.object(live.market_calendar,'load',return_value=Calendar(CALENDAR,fingerprint(CALENDAR)))
         loader.start();self.addCleanup(loader.stop)

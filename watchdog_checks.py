@@ -2,6 +2,7 @@
 import datetime as dt
 import hashlib
 import json
+import math
 from zoneinfo import ZoneInfo
 
 
@@ -36,6 +37,28 @@ def quote_problems(row, heartbeat, calendar, now):
         problems.append('报价场次与源时间不一致')
     elif payload.get('previous_session')!=calendar.previous(dt.date.fromisoformat(payload['session'])).isoformat():
         problems.append('报价前一场次与核验日历不一致')
+    deadlines=[]
+    for symbol,quote in quotes.items():
+        if not isinstance(quote,dict) or type(quote.get('p')) not in (int,float) or not math.isfinite(quote['p']) or quote['p']<=0:
+            problems.append('成分报价价格无效：'+symbol)
+            continue
+        try:
+            stamp=timestamp(quote.get('as_of'))
+            deadline=calendar.source_deadline(stamp)
+        except (ValueError,TypeError,RuntimeError):
+            problems.append('成分报价时间无效：'+symbol)
+            continue
+        deadlines.append(deadline)
+        if stamp.astimezone(ZoneInfo('America/New_York')).date().isoformat()!=payload.get('session'):
+            problems.append('成分报价场次不一致：'+symbol)
+        if stamp>now+dt.timedelta(minutes=5):problems.append('成分报价时间来自未来：'+symbol)
+        if stamp<state['minimum_source_time']:problems.append('成分报价未达到应有时点：'+symbol)
+        if symbol=='SPY' and stamp!=source:problems.append('基准成分时间与快照不一致')
+    try:
+        deadline=timestamp(payload.get('fresh_until'))
+        if not deadlines or deadline!=min(deadlines):problems.append('报价有效期与成分核验日历不一致')
+    except (ValueError,TypeError):
+        problems.append('报价有效期缺失或无效')
     if heartbeat is None:
         problems.append('缺少实际报价刷新回执')
     else:

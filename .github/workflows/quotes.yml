@@ -18,6 +18,8 @@ on:
       - db_ref.py
       - db_sources.py
       - test_live_quotes.py
+      - watchdog_checks.py
+      - test_watchdog_checks.py
       - .github/workflows/quotes.yml
 
 permissions:
