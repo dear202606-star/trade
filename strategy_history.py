@@ -174,14 +174,8 @@ def year_perf(y, picks):
         for p in picks:
             bars = p["_bars"]
             if m not in bars:
-                # 用上一个有效月
-                cand_m = [k for k in sorted(bars) if k <= m]
-                if not cand_m:
-                    v = None
-                    break
-                px = bars[cand_m[-1]][0]
-            else:
-                px = bars[m][0]
+                return None, None, None, None
+            px = bars[m][0]
             base = bars[prev_ym][0]
             if not base or base <= 0:
                 v = None

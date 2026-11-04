@@ -8,6 +8,9 @@ on:
       - strategy_history.py
       - variant_b.py
       - test_identity_generation_guard.py
+      - test_merger_boundaries.py
+      - test_missing_holding_months.py
+      - sql/112_bcr_cam_merger_boundaries.sql
       - .github/workflows/identity-generation.yml
   pull_request:
   workflow_dispatch:
@@ -25,4 +28,4 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
-      - run: python -m unittest test_identity_generation_guard
+      - run: python -m unittest test_identity_generation_guard test_merger_boundaries test_missing_holding_months

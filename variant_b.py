@@ -298,16 +298,7 @@ def pick_year(m, sector, year):
 
 def year_return(picks, year):
     """该年持仓的收益（用月线复权，年末比年初）"""
-    y0, y1 = "%d-12" % (year - 1), "%d-12" % year
-    ret, covered = 0.0, 0.0
-    for p in picks:
-        bars = load_bars(p["ticker"])
-        r = ret12(bars, y1, y0)
-        if r is None:
-            continue
-        ret += p["weight"] * r
-        covered += p["weight"]
-    return (ret / covered) if covered > 0 else 0.0
+    return year_perf(picks, year)[0]
 
 
 def year_perf(picks, year):
@@ -327,10 +318,9 @@ def year_perf(picks, year):
         v = 0.0
         for p in picks:
             bars = bars_cache[p["ticker"]]
-            keys = [k for k in sorted(bars) if k <= mm]
-            if not keys:
+            if mm not in bars:
                 raise RuntimeError("year_perf(%d)：%s 缺 %s 价格" % (year, p["ticker"], mm))
-            px = bars[keys[-1]][0]
+            px = bars[mm][0]
             v += p["weight"] * (px / bars[prev_ym][0])
         vals.append(v)
     ret = vals[-1] - 1

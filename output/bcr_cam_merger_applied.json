@@ -1,0 +1,77 @@
+{
+  "write": true,
+  "issuer_facts": {
+    "BCR": {
+      "issuer": "C. R. Bard, Inc.",
+      "event_date": "2017-12-29",
+      "month_to": "2017-11",
+      "cash_per_share": 222.93,
+      "successor": "BDX",
+      "successor_shares": 0.5077,
+      "url": "https://investors.bd.com/sec-filings/all-sec-filings/content/0001193125-17-383523/d517273dex991.htm",
+      "location": "Exhibit 99.1, completion and consideration paragraphs"
+    },
+    "CAM": {
+      "issuer": "Cameron International Corporation",
+      "event_date": "2016-04-01",
+      "month_to": "2016-03",
+      "cash_per_share": 14.44,
+      "successor": "SLB",
+      "successor_shares": 0.716,
+      "url": "https://www.sec.gov/Archives/edgar/data/87347/000156459016026174/R12.htm",
+      "location": "Note 4: Acquisition of Cameron, effective date and per-share consideration"
+    }
+  },
+  "view_exclusions": {
+    "series_selected": [
+      {
+        "symbol": "BCR",
+        "count": 23,
+        "from": "2017-12",
+        "through": "2019-11"
+      },
+      {
+        "symbol": "CAM",
+        "count": 14,
+        "from": "2016-04",
+        "through": "2026-10"
+      }
+    ],
+    "v_nominal_monthly": [
+      {
+        "symbol": "BCR",
+        "count": 1,
+        "from": "2017-12",
+        "through": "2017-12"
+      },
+      {
+        "symbol": "CAM",
+        "count": 1,
+        "from": "2016-04",
+        "through": "2016-04"
+      }
+    ]
+  },
+  "preserved_originals": {
+    "prices_monthly": {
+      "count": 839,
+      "sha256": "1f72c57b8a619316ebb6711f5f5f4d4b893e9c424e8d08e20e0007852657dccc"
+    },
+    "nominal_monthly": {
+      "count": 472,
+      "sha256": "f7b982a3ff2d78910db72f2b56e54b19031634f2b3396180569de761d0be4590"
+    },
+    "series_pick": {
+      "count": 2,
+      "sha256": "a43417e6eb7555dbd34a82e5645c3b8b0c77b99f2085d464c4dde0c7a81af0a3"
+    },
+    "data_lock": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "baseline_b_sha256": "20c0680276cf79cbb06d8aaab35c3e40cde010447f6e15e75abd95ff0ef33c90"
+  },
+  "unrelated_or_retained_view_changes": 0,
+  "historical_price_writes": 0,
+  "consideration_paths_and_prior_history_acceptance": "pending"
+}
