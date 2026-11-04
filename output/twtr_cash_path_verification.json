@@ -1,0 +1,17 @@
+{
+  "symbol": "TWTR",
+  "year": 2022,
+  "return": 0.2540490513651088,
+  "cash_months_constant": true,
+  "ranking_matches_holding": true,
+  "public_matches_direct": true,
+  "accepted_paths": [
+    "BBWI:2021",
+    "CVC:2016",
+    "LB:2021",
+    "TWTR:2022",
+    "WDC:2025"
+  ],
+  "tests_passed": 204,
+  "price_and_baseline_writes": 0
+}
