@@ -1,0 +1,33 @@
+{
+  "verified_at": "2026-11-04T03:20:35.177607+00:00",
+  "main_code_commit": "19c5d180a7444f295b342864c8ec04bbd0d4f687",
+  "engineering_tests": 169,
+  "remote_regression_run": 41766013811,
+  "remote_regression_tests": 8,
+  "remote_regression_conclusion": "success",
+  "full_pipeline_runs": [
+    {
+      "run": 41765797495,
+      "commit": "b0988b1d40868307f6050167a89a281109218510",
+      "result": "failure",
+      "identity_gate": "failure",
+      "site_build": "skipped",
+      "pages_upload": "skipped",
+      "deploy": "skipped",
+      "status_git_commit": "success"
+    },
+    {
+      "run": 41766013777,
+      "commit": "19c5d180a7444f295b342864c8ec04bbd0d4f687",
+      "result": "failure",
+      "identity_gate": "failure",
+      "site_build": "skipped",
+      "pages_upload": "skipped",
+      "deploy": "skipped",
+      "status_git_commit": "failure"
+    }
+  ],
+  "known_open_issue": "Second full run status-only git push/rebase conflicted in output/pipeline_status.json; no forced push or deployment. Durable status persistence needs repair.",
+  "historical_strategy_full_acceptance": "not rerun; prior complete audit 0/34; BCR/CAM consideration paths pending",
+  "live_selection_audit": "output/wiki_month_end_live_selection.json"
+}

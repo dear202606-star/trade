@@ -1,0 +1,571 @@
+{
+  "verified_at": "2026-11-04T03:16:46.059544+00:00",
+  "scope": "Read-only live selection audit of the original 62 reviewed keys; calendar dates remain the original reviewed SPY daily evidence, not new acceptance",
+  "counts": {
+    "selected_date_requires_review": 52,
+    "not_in_selected_nominal_view": 5,
+    "selected_date_matches_benchmark": 5
+  },
+  "cases": [
+    {
+      "symbol": "ACAS",
+      "month": "2017-01",
+      "benchmark_date": "2017-01-31",
+      "selected_date": "2017-01-03",
+      "source": "quandl_wiki",
+      "close": 17.99,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "AN",
+      "month": "2017-08",
+      "benchmark_date": "2017-08-31",
+      "selected_date": "2017-08-07",
+      "source": "quandl_wiki",
+      "close": 40.34,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "APOL",
+      "month": "2017-02",
+      "benchmark_date": "2017-02-28",
+      "selected_date": "2017-02-01",
+      "source": "quandl_wiki",
+      "close": 9.995,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "ARG",
+      "month": "2016-05",
+      "benchmark_date": "2016-05-31",
+      "selected_date": "2016-05-20",
+      "source": "quandl_wiki",
+      "close": 142.95,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "ATI",
+      "month": "2017-04",
+      "benchmark_date": "2017-04-28",
+      "selected_date": "2017-04-25",
+      "source": "quandl_wiki",
+      "close": 19.88,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "AVP",
+      "month": "2017-04",
+      "benchmark_date": "2017-04-28",
+      "selected_date": "2017-04-25",
+      "source": "quandl_wiki",
+      "close": 4.82,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "BBBY",
+      "month": "2017-07",
+      "benchmark_date": "2017-07-31",
+      "selected_date": "2017-07-25",
+      "source": "quandl_wiki",
+      "close": 28.31,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "BCR",
+      "month": "2017-12",
+      "benchmark_date": "2017-12-29",
+      "selected_date": null,
+      "source": null,
+      "close": null,
+      "status": "not_in_selected_nominal_view"
+    },
+    {
+      "symbol": "BKNG",
+      "month": "2018-02",
+      "benchmark_date": "2018-02-28",
+      "selected_date": "2018-02-28",
+      "source": "eastmoney_native",
+      "close": 2034.04,
+      "status": "selected_date_matches_benchmark"
+    },
+    {
+      "symbol": "CAM",
+      "month": "2016-04",
+      "benchmark_date": "2016-04-29",
+      "selected_date": null,
+      "source": null,
+      "close": null,
+      "status": "not_in_selected_nominal_view"
+    },
+    {
+      "symbol": "CFN",
+      "month": "2015-03",
+      "benchmark_date": "2015-03-31",
+      "selected_date": "2015-03-16",
+      "source": "quandl_wiki",
+      "close": 59.91,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "CMCSK",
+      "month": "2015-12",
+      "benchmark_date": "2015-12-31",
+      "selected_date": "2015-12-11",
+      "source": "quandl_wiki",
+      "close": 58.0,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "CNX",
+      "month": "2017-04",
+      "benchmark_date": "2017-04-28",
+      "selected_date": "2017-04-25",
+      "source": "quandl_wiki",
+      "close": 15.92,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "CPWR",
+      "month": "2014-12",
+      "benchmark_date": "2014-12-31",
+      "selected_date": "2014-12-15",
+      "source": "quandl_wiki",
+      "close": 10.35,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "CVC",
+      "month": "2016-06",
+      "benchmark_date": "2016-06-30",
+      "selected_date": null,
+      "source": null,
+      "close": null,
+      "status": "not_in_selected_nominal_view"
+    },
+    {
+      "symbol": "DTV",
+      "month": "2017-04",
+      "benchmark_date": "2017-04-28",
+      "selected_date": null,
+      "source": null,
+      "close": null,
+      "status": "not_in_selected_nominal_view"
+    },
+    {
+      "symbol": "ESV",
+      "month": "2017-04",
+      "benchmark_date": "2017-04-28",
+      "selected_date": "2017-04-25",
+      "source": "quandl_wiki",
+      "close": 8.35,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "FOSL",
+      "month": "2017-04",
+      "benchmark_date": "2017-04-28",
+      "selected_date": "2017-04-25",
+      "source": "quandl_wiki",
+      "close": 17.15,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "FSLR",
+      "month": "2017-04",
+      "benchmark_date": "2017-04-28",
+      "selected_date": "2017-04-25",
+      "source": "quandl_wiki",
+      "close": 27.54,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "GMCR",
+      "month": "2016-03",
+      "benchmark_date": "2016-03-31",
+      "selected_date": "2016-03-02",
+      "source": "quandl_wiki",
+      "close": 91.67,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "GNW",
+      "month": "2017-04",
+      "benchmark_date": "2017-04-28",
+      "selected_date": "2017-04-25",
+      "source": "quandl_wiki",
+      "close": 4.11,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "HOT",
+      "month": "2016-09",
+      "benchmark_date": "2016-09-30",
+      "selected_date": "2016-09-22",
+      "source": "quandl_wiki",
+      "close": 77.05,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "HSH",
+      "month": "2014-07",
+      "benchmark_date": "2014-07-31",
+      "selected_date": "2014-07-30",
+      "source": "quandl_wiki",
+      "close": 62.79,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "JNS",
+      "month": "2017-05",
+      "benchmark_date": "2017-05-31",
+      "selected_date": "2017-05-26",
+      "source": "quandl_wiki",
+      "close": 14.17,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "JNY",
+      "month": "2014-04",
+      "benchmark_date": "2014-04-30",
+      "selected_date": "2014-04-08",
+      "source": "quandl_wiki",
+      "close": 14.99,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "JOY",
+      "month": "2017-04",
+      "benchmark_date": "2017-04-28",
+      "selected_date": "2017-04-05",
+      "source": "quandl_wiki",
+      "close": 28.3,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "KRFT",
+      "month": "2015-07",
+      "benchmark_date": "2015-07-31",
+      "selected_date": "2015-07-02",
+      "source": "quandl_wiki",
+      "close": 88.19,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "LLTC",
+      "month": "2017-03",
+      "benchmark_date": "2017-03-31",
+      "selected_date": "2017-03-10",
+      "source": "quandl_wiki",
+      "close": 65.0,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "LSI",
+      "month": "2017-04",
+      "benchmark_date": "2017-04-28",
+      "selected_date": null,
+      "source": null,
+      "close": null,
+      "status": "not_in_selected_nominal_view"
+    },
+    {
+      "symbol": "LXK",
+      "month": "2016-11",
+      "benchmark_date": "2016-11-30",
+      "selected_date": "2016-11-28",
+      "source": "quandl_wiki",
+      "close": 40.49,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "MIL",
+      "month": "2016-02",
+      "benchmark_date": "2016-02-29",
+      "selected_date": "2016-02-12",
+      "source": "quandl_wiki",
+      "close": 1.93,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "MJN",
+      "month": "2017-06",
+      "benchmark_date": "2017-06-30",
+      "selected_date": "2017-06-14",
+      "source": "quandl_wiki",
+      "close": 89.98,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "MMM",
+      "month": "2017-11",
+      "benchmark_date": "2017-11-30",
+      "selected_date": "2017-11-30",
+      "source": "eastmoney_native",
+      "close": 243.14,
+      "status": "selected_date_matches_benchmark"
+    },
+    {
+      "symbol": "MMM",
+      "month": "2017-12",
+      "benchmark_date": "2017-12-29",
+      "selected_date": "2017-12-29",
+      "source": "eastmoney_native",
+      "close": 235.37,
+      "status": "selected_date_matches_benchmark"
+    },
+    {
+      "symbol": "MUR",
+      "month": "2017-07",
+      "benchmark_date": "2017-07-31",
+      "selected_date": "2017-07-25",
+      "source": "quandl_wiki",
+      "close": 25.72,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "NBR",
+      "month": "2017-04",
+      "benchmark_date": "2017-04-28",
+      "selected_date": "2017-04-25",
+      "source": "quandl_wiki",
+      "close": 11.77,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "NE",
+      "month": "2017-04",
+      "benchmark_date": "2017-04-28",
+      "selected_date": "2017-04-25",
+      "source": "quandl_wiki",
+      "close": 4.94,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "OI",
+      "month": "2017-04",
+      "benchmark_date": "2017-04-28",
+      "selected_date": "2017-04-25",
+      "source": "quandl_wiki",
+      "close": 21.99,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "PBI",
+      "month": "2017-04",
+      "benchmark_date": "2017-04-28",
+      "selected_date": "2017-04-25",
+      "source": "quandl_wiki",
+      "close": 13.41,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "PETM",
+      "month": "2015-03",
+      "benchmark_date": "2015-03-31",
+      "selected_date": "2015-03-11",
+      "source": "quandl_wiki",
+      "close": 82.98,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "Q",
+      "month": "2017-11",
+      "benchmark_date": "2017-11-30",
+      "selected_date": "2017-11-14",
+      "source": "quandl_wiki",
+      "close": 103.48,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "QEP",
+      "month": "2017-04",
+      "benchmark_date": "2017-04-28",
+      "selected_date": "2017-04-25",
+      "source": "quandl_wiki",
+      "close": 11.79,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "QLGC",
+      "month": "2016-08",
+      "benchmark_date": "2016-08-31",
+      "selected_date": "2016-08-16",
+      "source": "quandl_wiki",
+      "close": 16.07,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "R",
+      "month": "2017-06",
+      "benchmark_date": "2017-06-30",
+      "selected_date": "2017-06-16",
+      "source": "quandl_wiki",
+      "close": 67.15,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "RAI",
+      "month": "2017-07",
+      "benchmark_date": "2017-07-31",
+      "selected_date": "2017-07-24",
+      "source": "quandl_wiki",
+      "close": 65.4,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "RDC",
+      "month": "2017-04",
+      "benchmark_date": "2017-04-28",
+      "selected_date": "2017-04-25",
+      "source": "quandl_wiki",
+      "close": 14.52,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "RIG",
+      "month": "2017-07",
+      "benchmark_date": "2017-07-31",
+      "selected_date": "2017-07-25",
+      "source": "quandl_wiki",
+      "close": 8.77,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "SIAL",
+      "month": "2015-11",
+      "benchmark_date": "2015-11-30",
+      "selected_date": "2015-11-18",
+      "source": "quandl_wiki",
+      "close": 139.76,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "SLM",
+      "month": "2017-04",
+      "benchmark_date": "2017-04-28",
+      "selected_date": "2017-04-25",
+      "source": "quandl_wiki",
+      "close": 12.71,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "SPLS",
+      "month": "2017-09",
+      "benchmark_date": "2017-09-29",
+      "selected_date": "2017-09-12",
+      "source": "quandl_wiki",
+      "close": 10.25,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "STJ",
+      "month": "2017-01",
+      "benchmark_date": "2017-01-31",
+      "selected_date": "2017-01-04",
+      "source": "quandl_wiki",
+      "close": 80.82,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "SWN",
+      "month": "2017-04",
+      "benchmark_date": "2017-04-28",
+      "selected_date": "2017-04-25",
+      "source": "quandl_wiki",
+      "close": 7.71,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "SWY",
+      "month": "2015-01",
+      "benchmark_date": "2015-01-30",
+      "selected_date": "2015-01-29",
+      "source": "quandl_wiki",
+      "close": 35.1,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "TDC",
+      "month": "2017-06",
+      "benchmark_date": "2017-06-30",
+      "selected_date": "2017-06-16",
+      "source": "quandl_wiki",
+      "close": 28.3,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "TEG",
+      "month": "2015-06",
+      "benchmark_date": "2015-06-30",
+      "selected_date": "2015-06-29",
+      "source": "quandl_wiki",
+      "close": 69.66,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "TGNA",
+      "month": "2017-06",
+      "benchmark_date": "2017-06-30",
+      "selected_date": "2017-06-01",
+      "source": "quandl_wiki",
+      "close": 15.35,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "THC",
+      "month": "2017-04",
+      "benchmark_date": "2017-04-28",
+      "selected_date": "2017-04-25",
+      "source": "quandl_wiki",
+      "close": 15.61,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "TRV",
+      "month": "2010-08",
+      "benchmark_date": "2010-08-31",
+      "selected_date": "2010-08-31",
+      "source": "eastmoney_native",
+      "close": 48.99,
+      "status": "selected_date_matches_benchmark"
+    },
+    {
+      "symbol": "TRV",
+      "month": "2011-08",
+      "benchmark_date": "2011-08-31",
+      "selected_date": "2011-08-31",
+      "source": "eastmoney_native",
+      "close": 50.46,
+      "status": "selected_date_matches_benchmark"
+    },
+    {
+      "symbol": "TWC",
+      "month": "2016-05",
+      "benchmark_date": "2016-05-31",
+      "selected_date": "2016-05-17",
+      "source": "quandl_wiki",
+      "close": 209.56,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "URBN",
+      "month": "2017-04",
+      "benchmark_date": "2017-04-28",
+      "selected_date": "2017-04-25",
+      "source": "quandl_wiki",
+      "close": 23.31,
+      "status": "selected_date_requires_review"
+    },
+    {
+      "symbol": "WFM",
+      "month": "2017-08",
+      "benchmark_date": "2017-08-31",
+      "selected_date": "2017-08-28",
+      "source": "quandl_wiki",
+      "close": 41.99,
+      "status": "selected_date_requires_review"
+    }
+  ],
+  "query": "with reviewed as (select * from jsonb_to_recordset(%s::jsonb) as x(symbol text,month text,benchmark_date text)) select r.symbol,r.month,r.benchmark_date,n.trade_date,n.source,n.close from reviewed r left join v_nominal_monthly n using(symbol,month) order by r.symbol,r.month",
+  "query_parameter_source": "output/wiki_month_end_date_review.json cases: symbol, month, benchmark_date"
+}
