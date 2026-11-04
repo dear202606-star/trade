@@ -13,6 +13,8 @@ on:
       - runner.py
       - publish_pipeline_status.py
       - test_pipeline_status.py
+      - preview.py
+      - test_online_preview.py
       - sql/112_bcr_cam_merger_boundaries.sql
       - .github/workflows/identity-generation.yml
   pull_request:
@@ -34,3 +36,5 @@ jobs:
       - run: python -m unittest test_identity_generation_guard test_merger_boundaries test_missing_holding_months
       - name: 运行状态入库与失败传递
         run: python -m unittest test_pipeline_status
+      - name: 在线预览输入与候选完整性
+        run: python -m unittest test_online_preview

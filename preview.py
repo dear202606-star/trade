@@ -16,9 +16,9 @@ import math
 
 import datafeed
 import nominal_prices
+import live_quotes
+import db_ref
 
-_NOW = dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=8)
-BASE_YM = "%d-12" % (_NOW.year - 1)   # 建仓基准：上一年 12 月末（自动跨年）
 MIN_PRICE = 5.0
 TOPN = 3
 OUT = os.path.join("docs", "data", "preview.json")
@@ -54,57 +54,38 @@ def price_ratio(ticker, current, base_ym, session):
     return ratio
 
 
-def resolve_final(sig, official_month, picks):
-    """年末定稿判定：官方排名月 == 预览基准月 → 直接用官方结果。"""
-    try:
-        if sig.get("official_month") == official_month and sig.get("official"):
-            out = []
-            for i, p in enumerate(sig["official"]):
-                out.append({
-                    "ticker": p["ticker"],
-                    "name": p.get("name", p["ticker"]),
-                    "sector": p.get("sector", ""),
-                    "price": None,
-                    "ytd": round(float(p.get("ret12") or 0), 4),
-                    "weight": round(float(p.get("weight") or 0), 4),
-                    "rank": i + 1,
-                })
-            return out, True
-    except Exception:
-        pass
-    return picks, False
-
-
 def main():
-    q = json.load(open(os.path.join("docs", "data", "quotes.json"), encoding="utf-8"))
+    q = live_quotes.load_snapshot()
     quotes = q.get("quotes") or {}
     m = datafeed.load_members()
     m["start_date"] = m["start_date"].astype(str)
     m["end_date"] = m["end_date"].fillna("2099-12-31").astype(str)
-    today = (dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=8)).strftime("%Y-%m-%d")
-    official_month = "%d-12" % (int(BASE_YM[:4]) + 1)   # 次年持有的官方排名月
+    today = dt.date.fromisoformat(q['session']).isoformat()
+    base_ym = '%d-12' % (int(today[:4])-1)
+    official_month = '%s-12' % today[:4]
     live = set(m[(m.start_date <= today) & (m.end_date >= today)]["ticker"])
+    db_ref.require_unquarantined_candidates(live)
     sector, name_map = datafeed.load_sector()
 
     # 并行预热：CI 没有本地缓存时，500 只串行抓取会超时
-    try:
-        datafeed.prefetch(sorted(live), workers=10)
-    except Exception as _e:
-        print("预热失败（继续）：%s" % _e)
+    missing=sorted(t for t in live if t not in quotes)
+    if missing:raise RuntimeError('预览缺少候选报价，禁止缩小排名池：'+', '.join(missing))
+    datafeed.prefetch(sorted(live), workers=10)
 
     rows = []
-    bad = []
     for t in sorted(live):
         qq = quotes.get(t)
-        if not qq or not qq.get("p"):
-            continue
+        if not isinstance(qq,dict) or type(qq.get('p')) not in (int,float) or not math.isfinite(qq['p']) or qq['p']<=0:
+            raise RuntimeError('预览候选报价无效：'+t)
         cur = float(qq["p"])
         if cur < MIN_PRICE:
             continue
         bars = datafeed.load_bars(t)
-        if not bars or BASE_YM not in bars:
-            continue
-        ratio = price_ratio(t, cur, BASE_YM, q['session'])
+        if not bars or base_ym not in bars:
+            raise RuntimeError('预览缺少基准价格或上市资格证据：'+t+' '+base_ym)
+        if not sector.get(t) or sector[t]=='Unknown':
+            raise RuntimeError('预览缺少候选行业：'+t)
+        ratio = price_ratio(t, cur, base_ym, q['session'])
         # An unresolved outlier must stop publication, not shrink the pool.
         if ratio > 8 or ratio < 1 / 8:
             raise RuntimeError('Preview return outside reviewed range: '+t)
@@ -124,13 +105,12 @@ def main():
         if len(picks) >= TOPN:
             break
         s = r["sector"]
-        if s == "Unknown":
-            continue                      # 未知行业不参与（与正式规则一致）
         if cnt.get(s, 0) >= 2:
             continue
         picks.append(r)
         cnt[s] = cnt.get(s, 0) + 1
 
+    if len(picks)!=TOPN:raise RuntimeError('预览未形成完整三只持仓，禁止发布')
     # 权重：有 2 只同行业 → 该行业 60%，其余 40%
     dup = [s for s, c in cnt.items() if c >= 2]
     if dup:
@@ -148,25 +128,19 @@ def main():
         p["ytd"] = round(p["ytd"], 4)
         p["rank"] = picks.index(p) + 1
 
-    # ---- 年末定稿：官方排名月一旦等于预览基准月，直接采用已锁定的官方结果 ----
-    try:
-        _sig = json.load(open(os.path.join("docs", "data", "signal.json"), encoding="utf-8"))
-    except Exception:
-        _sig = {}
-    picks, final = resolve_final(_sig, official_month, picks)
-
     out = {
-        "final": final,
+        "final": False,
         "as_of": q.get("ts_local") or "",
         "as_of_ts": q.get("ts"),
         "session": q.get("session"),
-        "base_month": BASE_YM,
+        "base_month": base_ym,
         "universe": len(live),
         "ranked": len(rows),
-        "excluded": sorted(bad)[:20],
-        "excluded_n": len(bad),
-        "hold_year": int(BASE_YM[:4]) + 2,
-        "official_month": "%d-12" % (int(BASE_YM[:4]) + 1),
+        "excluded": [],
+        "excluded_n": 0,
+        "hold_year": int(base_ym[:4]) + 2,
+        "official_month": official_month,
+        "quote_version": q['version'],
         "top": picks,
         "near": [{"ticker": r["ticker"], "sector": r["sector"], "ytd": round(r["ytd"], 4)}
                  for r in rows[:12] if r["ticker"] not in {p["ticker"] for p in picks}][:5],

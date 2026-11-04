@@ -1,0 +1,37 @@
+{
+  "verified_at": "2026-11-04T03:44:33.305255+00:00",
+  "actual_online_input": {
+    "version": "725791e12c10fd95d4dc3c243c9333b3d129a4c70afec6f42d7361789c55ce0f",
+    "session": "2026-11-03",
+    "source_as_of": "2026-11-03T21:00:00Z",
+    "quote_count": 505
+  },
+  "runtime_error": "RuntimeError: \u9884\u89c8\u7f3a\u5c11\u5019\u9009\u62a5\u4ef7\uff0c\u7981\u6b62\u7f29\u5c0f\u6392\u540d\u6c60\uff1aBF.B, BRK.B, KVUE, PSKY, WBD",
+  "temporary_output_preserved_on_failure": true,
+  "published_preview_unchanged": true,
+  "published_preview_sha256": "3c64c7aa4f5e585e7ee113284dc16fc2c43eb825a1972d1bba273c290afdc6b9",
+  "duration_seconds": 4.34,
+  "historical_strategy_acceptance": false,
+  "scope": "Actual online reader and reference/price inputs; output redirected to a temporary path, no published data replaced",
+  "after_parser_repair": {
+    "verified_at": "2026-11-04T03:48:47.320453+00:00",
+    "quote_version": "ebd2275986e06b35acb0925c83bf187cdc0ba46767b13de7a29298b459a23dec",
+    "quote_count": 507,
+    "source_as_of": "2026-11-03T21:00:00Z",
+    "recovered_quotes": {
+      "BRK.B": {
+        "p": 557.07,
+        "pc": 556.11,
+        "as_of": "2026-11-03T21:03:00+00:00"
+      },
+      "BF.B": {
+        "p": 28.95,
+        "pc": 30.0,
+        "as_of": "2026-11-03T21:00:00+00:00"
+      }
+    },
+    "runtime_replay_error": "RuntimeError: \u9884\u89c8\u7f3a\u5c11\u5019\u9009\u62a5\u4ef7\uff0c\u7981\u6b62\u7f29\u5c0f\u6392\u540d\u6c60\uff1aKVUE, PSKY, WBD",
+    "output_preserved": true,
+    "scope": "Replay of validated actual online quote version with actual online reference data, temporary output only; no price sources mocked"
+  }
+}

@@ -30,7 +30,7 @@ UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
 SINA_HQ = "https://hq.sinajs.cn/list="
 BATCH = 60
 OUT = os.path.join("docs", "data", "quotes.json")
-LINE = re.compile(r'hq_str_(\w+)="([^"]*)"')
+LINE = re.compile(r'hq_str_([A-Za-z0-9_$]+)="([^"]*)"')
 
 EXTRA = ["SPY", "QQQ", "DIA", "IWM", "VTI", "GLD", "TLT", "AAPL", "MSFT", "NVDA",
          "GOOGL", "AMZN", "META", "TSLA", "BRK.B", "AVGO", "JPM", "V", "UNH", "XOM"]
@@ -40,6 +40,7 @@ def sina_batch(symbols):
     url = SINA_HQ + ",".join(symbols)
     r = requests.get(url, headers={"User-Agent": UA,
                                    "Referer": "https://finance.sina.com.cn"}, timeout=15)
+    r.raise_for_status()
     r.encoding = "gbk"
     out = {}
     for m in LINE.finditer(r.text):

@@ -20,6 +20,38 @@ MONTHS = {name:i for i,name in enumerate(
     ('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'),1)}
 
 
+def read_snapshot(cursor):
+    cursor.execute('select source_as_of,collected_at,evidence_sha256,payload from live_quote_snapshot where singleton')
+    row=cursor.fetchone()
+    if row is None:raise RuntimeError('在线报价快照不存在')
+    result=dict(zip(('source_as_of','collected_at','evidence_sha256','payload'),row))
+    cursor.execute("""select finished_at,metrics from sys_event where kind='fetch'
+        and source='live_quotes' and status='ok' order by finished_at desc,id desc limit 1""")
+    event=cursor.fetchone()
+    return result,dict(zip(('finished_at','metrics'),event)) if event else None
+
+
+def load_snapshot(now=None):
+    """Read one consistent online quote/calendar/worker version; no file fallback."""
+    from watchdog_checks import quote_problems
+    now=now or dt.datetime.now(UTC)
+    connection=db_sources.db()
+    try:
+        connection.set_session(isolation_level='REPEATABLE READ',readonly=True)
+        with connection.cursor() as cursor:
+            cursor.execute("set local statement_timeout='20s'")
+            cursor.execute('select calendar,evidence_sha256 from v_market_calendar')
+            rows=cursor.fetchall()
+            if len(rows)!=1:raise RuntimeError('No unique reviewed online exchange calendar')
+            calendar=market_calendar.Calendar(*rows[0])
+            row,heartbeat=read_snapshot(cursor)
+            problems=quote_problems(row,heartbeat,calendar,now)
+            if problems:raise RuntimeError('在线报价未通过核验：'+'；'.join(problems))
+            return row['payload']
+    finally:
+        connection.close()
+
+
 def source_time(fields, now):
     """Use the explicitly zoned regular-session quote time, not collection time."""
     match = SOURCE_TIME.fullmatch(fields[25].strip())
