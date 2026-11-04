@@ -811,7 +811,6 @@
         parts.push("行情时间(北京) <b style=\"color:var(--txt-2)\">" +
           DSH.esc(d.toLocaleString('zh-CN', {timeZone:'Asia/Shanghai', hour12:false})) + "</b>");
       }
-      const age = DSH.ageHours(q.ts);
       if (DSH.quoteFreshness(q) === true) {
         parts.push("<b style=\"color:#FFAB6B\">⚠ 行情更新超时</b>");
       }
@@ -823,7 +822,6 @@
     if (!parts.length) return;
 
     // 行情过旧时，顶部通栏提醒（不能只缩在页脚）
-    const age = q ? DSH.ageHours(q.ts) : null;
     if (DSH.quoteFreshness(q) === true && !document.getElementById("staleBar")) {
       const bar = document.createElement("div");
       bar.id = "staleBar";
