@@ -1,0 +1,29 @@
+{
+  "symbol": "ATVI",
+  "year": 2023,
+  "return": 0.2543903662819871,
+  "cash_months_constant": true,
+  "ranking_matches_holding": true,
+  "public_matches_direct": true,
+  "accepted_paths": [
+    "ATVI:2023",
+    "BBWI:2021",
+    "CVC:2016",
+    "LB:2021",
+    "TWTR:2022",
+    "WDC:2025"
+  ],
+  "return_precision_interval": [
+    0.25438208478302493,
+    0.25439864789029953
+  ],
+  "native_overlap_months": 104,
+  "return_pairs": 103,
+  "tests_passed": 206,
+  "price_and_baseline_writes": 0,
+  "immutable_probes_rejected": [
+    "update",
+    "delete"
+  ],
+  "probes_rolled_back": true
+}

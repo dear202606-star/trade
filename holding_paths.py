@@ -13,6 +13,8 @@ PRODUCERS={'lb_distribution':('research/audit_lb_distribution.py','reconstruct_n
            'cvc_cash_merger':('research/audit_cvc_cash_merger.py',),
            'wdc_distribution':('research/audit_wdc_distribution.py','collect_eastmoney_nominal.py'),
            'twtr_cash_merger':('research/audit_twtr_cash_merger.py','research/import_twtr_cash_merger.py',
+                               'fetch_stockanalysis.py','reconstruct_nominal.py'),
+           'atvi_cash_merger':('research/audit_atvi_cash_merger.py','research/import_atvi_cash_merger.py',
                                'fetch_stockanalysis.py','reconstruct_nominal.py')}
 _PATHS=None
 _EVIDENCE_SHA=None
