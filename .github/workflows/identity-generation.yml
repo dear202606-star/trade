@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - db_ref.py
+      - fetch_stockanalysis.py
+      - test_stockanalysis_history.py
       - strategy_history.py
       - variant_b.py
       - test_identity_generation_guard.py
@@ -40,4 +42,4 @@ jobs:
       - name: 运行状态入库与失败传递
         run: python -m unittest test_pipeline_status
       - name: 在线预览输入与候选完整性
-        run: python -m unittest test_online_preview test_recent_index_changes
+        run: python -m unittest test_online_preview test_recent_index_changes test_stockanalysis_history

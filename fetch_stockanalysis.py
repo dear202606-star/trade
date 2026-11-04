@@ -18,6 +18,8 @@
 import argparse
 import io
 import json
+import math
+import re
 import os
 import sys
 import time
@@ -36,6 +38,26 @@ HOST = "aws-0-ap-northeast-1.pooler.supabase.com"
 UA = {"User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                      "Chrome/130 Safari/537.36")}
 API = "https://stockanalysis.com/api/symbol/s/%s/history?range=10Y&period=Monthly"
+
+
+def parse_rows(rows):
+    if not isinstance(rows,list):raise ValueError('Unexpected monthly history schema')
+    result={}
+    for row in rows:
+        if not isinstance(row,dict):raise ValueError('Unexpected monthly history row')
+        month=str(row.get('t') or '')[:7]
+        if not re.fullmatch(r'\d{4}-(0[1-9]|1[0-2])',month) or month in result:
+            raise ValueError('Invalid or duplicate monthly history date')
+        values=[]
+        for key in ('a','c'):
+            value=row.get(key)
+            if value is None or isinstance(value,bool):
+                raise ValueError('Explicit adjusted and close fields are required')
+            value=float(value)
+            if not math.isfinite(value) or value<=0:raise ValueError('Invalid monthly history price')
+            values.append(value)
+        result[month]=tuple(values)
+    return result
 
 
 def db():
@@ -61,14 +83,9 @@ def fetch(sym, tries=3):
             rows = data.get("data") if isinstance(data, dict) else data
             if not rows:
                 return {}
-            out = {}
-            for x in rows:
-                t = (x.get("t") or "")[:7]
-                a = x.get("a") or x.get("c")
-                c = x.get("c") or a
-                if len(t) == 7 and a:
-                    out[t] = (float(a), float(c) if c else float(a))
-            return out
+            return parse_rows(rows)
+        except (ValueError,TypeError):
+            raise
         except Exception as e:
             if attempt == tries - 1:
                 raise
