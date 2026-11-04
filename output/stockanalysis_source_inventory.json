@@ -19,5 +19,134 @@
   "promoter_has_exact_batch_guard": true,
   "historical_adjustment_semantics_accepted": false,
   "database_writes": 0,
-  "scope": "Counts only; original raw response is required to resolve any prior fallback use"
+  "scope": "Counts only; original raw response is required to resolve any prior fallback use",
+  "selected_symbols": [
+    {
+      "symbol": "ANSS",
+      "rows": 120,
+      "from": "2015-08",
+      "through": "2025-07"
+    },
+    {
+      "symbol": "ATVI",
+      "rows": 120,
+      "from": "2013-11",
+      "through": "2023-10"
+    },
+    {
+      "symbol": "AVB",
+      "rows": 119,
+      "from": "2016-10",
+      "through": "2026-08"
+    },
+    {
+      "symbol": "CMA",
+      "rows": 120,
+      "from": "2016-02",
+      "through": "2026-01"
+    },
+    {
+      "symbol": "CTLT",
+      "rows": 120,
+      "from": "2015-01",
+      "through": "2024-12"
+    },
+    {
+      "symbol": "EA",
+      "rows": 119,
+      "from": "2016-10",
+      "through": "2026-08"
+    },
+    {
+      "symbol": "FL",
+      "rows": 120,
+      "from": "2015-10",
+      "through": "2025-09"
+    },
+    {
+      "symbol": "HBI",
+      "rows": 120,
+      "from": "2015-12",
+      "through": "2025-11"
+    },
+    {
+      "symbol": "HOLX",
+      "rows": 120,
+      "from": "2016-05",
+      "through": "2026-04"
+    },
+    {
+      "symbol": "IPG",
+      "rows": 120,
+      "from": "2015-12",
+      "through": "2025-11"
+    },
+    {
+      "symbol": "JNPR",
+      "rows": 120,
+      "from": "2015-08",
+      "through": "2025-07"
+    },
+    {
+      "symbol": "JWN",
+      "rows": 120,
+      "from": "2015-06",
+      "through": "2025-05"
+    },
+    {
+      "symbol": "K",
+      "rows": 120,
+      "from": "2016-01",
+      "through": "2025-12"
+    },
+    {
+      "symbol": "LEG",
+      "rows": 119,
+      "from": "2016-10",
+      "through": "2026-08"
+    },
+    {
+      "symbol": "PDCO",
+      "rows": 120,
+      "from": "2015-05",
+      "through": "2025-04"
+    },
+    {
+      "symbol": "SEE",
+      "rows": 120,
+      "from": "2016-05",
+      "through": "2026-04"
+    },
+    {
+      "symbol": "SIVB",
+      "rows": 120,
+      "from": "2013-04",
+      "through": "2023-03"
+    },
+    {
+      "symbol": "SRCL",
+      "rows": 120,
+      "from": "2014-12",
+      "through": "2024-11"
+    },
+    {
+      "symbol": "TWTR",
+      "rows": 107,
+      "from": "2013-12",
+      "through": "2022-10"
+    },
+    {
+      "symbol": "WBA",
+      "rows": 120,
+      "from": "2015-09",
+      "through": "2025-08"
+    },
+    {
+      "symbol": "X",
+      "rows": 120,
+      "from": "2015-07",
+      "through": "2025-06"
+    }
+  ],
+  "promoter_body_matches_sql_093": true
 }
