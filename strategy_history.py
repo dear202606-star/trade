@@ -343,6 +343,8 @@ def main():
         if not picks:
             continue
         ret, dd, ok, months = year_perf(y, picks)
+        if ret is None or not ok:
+            raise RuntimeError(f"{y} 年持仓收益缺少完整证据，保留旧产物并停止发布")
         bench = None
         if spy and f"{y-1}-12" in spy and f"{y}-12" in spy:
             bench = round(spy[f"{y}-12"][0] / spy[f"{y-1}-12"][0] - 1, 4)

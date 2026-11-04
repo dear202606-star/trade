@@ -101,7 +101,6 @@ jobs:
         run: python runner.py equity.py
 
       - name: 生成逐年记录
-        continue-on-error: true
         run: python runner.py strategy_history.py
 
       - name: 口径 B 独立审计
