@@ -152,10 +152,11 @@
 
   /* 数据停更检测：按用户当前时间算，不依赖构建时的健康快照 */
   function checkFreshness() {
-    var ts = Q && Q.ts;
-    if (!ts) return;
-    var ageH = (Date.now() - Date.parse(ts)) / 36e5;
-    if (!isFinite(ageH) || ageH <= 26) return;
+    if (DSH.quoteFreshness(Q) !== true) {
+      var old = document.getElementById("freshBanner");
+      if (old) old.remove();
+      return;
+    }
     var bar = document.getElementById("freshBanner");
     if (!bar) {
       bar = document.createElement("div");
@@ -165,7 +166,7 @@
         "padding:8px 16px;text-align:center";
       document.body.insertBefore(bar, document.body.firstChild);
     }
-    bar.textContent = "⚠ 行情已 " + Math.round(ageH) + " 小时未更新";
+    bar.textContent = "⚠ 行情更新超时";
   }
 
   /* 全站统一 SPY 价格：优先实时行情，其次用信号里的收盘价 */

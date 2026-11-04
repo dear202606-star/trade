@@ -55,6 +55,7 @@ class LiveQuoteTests(unittest.TestCase):
         self.assertEqual(payload['ts'],'2026-11-02T21:00:00Z')
         self.assertEqual(payload['ts_local'],'2026-11-03 05:00')
         self.assertEqual(payload['session'],'2026-11-02')
+        self.assertEqual(payload['fresh_until'],'2026-11-03T14:50:00+00:00')
         self.assertFalse(payload['intraday'])
         self.assertEqual(payload['version'],sha)
 

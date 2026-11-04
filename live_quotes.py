@@ -110,6 +110,7 @@ def build_snapshot(tickers, raw, fx, now, calendar=None, reference=None):
     if len(values)<.98*len(tickers):
         raise ValueError('Incomplete same-session quote coverage: %d/%d'%(len(values),len(tickers)))
     payload = {'ts':as_of.strftime('%Y-%m-%dT%H:%M:%SZ'),
+        'fresh_until':calendar.source_deadline(as_of).isoformat(),
         'ts_local':as_of.astimezone(ZoneInfo('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M'),
         'session':session.isoformat(),'intraday':intraday,'fx':fx,
         'previous_session':calendar.previous(session).isoformat(),'calendar_sha256':calendar.sha,

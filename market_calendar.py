@@ -50,6 +50,18 @@ class Calendar:
             if self.bounds(day) is not None:
                 return day
 
+    def source_deadline(self, stamp):
+        if stamp.tzinfo is None:raise ValueError('Source clock requires timezone')
+        stamp=stamp.astimezone(UTC)
+        day=stamp.astimezone(ET).date()
+        bounds=self.bounds(day)
+        if bounds is None:raise ValueError('Source date is not an exchange session')
+        if stamp<bounds[1]:return stamp+dt.timedelta(minutes=20)
+        while True:
+            day+=dt.timedelta(days=1)
+            following=self.bounds(day)
+            if following is not None:return following[0]+dt.timedelta(minutes=20)
+
     def state(self, now):
         if now.tzinfo is None:
             raise ValueError('Exchange clock requires timezone')
