@@ -30,5 +30,15 @@
   ],
   "probe_database_writes": 0,
   "tests_passed": 196,
-  "heartbeat_note": "Synthetic probe heartbeat only; actual read used the stored worker receipt"
+  "heartbeat_note": "Synthetic probe heartbeat only; actual read used the stored worker receipt",
+  "release": {
+    "main_commit": "9c88d6e62b6c8ef7f43a4bcd1b197946a083fcaf",
+    "quote_run": 41799287398,
+    "identity_regression_run": 41799287397,
+    "both_runs_succeeded": true,
+    "public_matches_direct": true,
+    "count": 510,
+    "quote_version": "ca503354cf72fd22b9687deb7632d38a8c6235efe935bfde9884f91e526a2859",
+    "fresh_until": "2026-11-04T14:50:00+00:00"
+  }
 }
