@@ -1,0 +1,51 @@
+{
+  "verified_at": "2026-11-04T03:33:54.050687+00:00",
+  "main_code_commit": "21ff4c06e3f55004f8633d3c8316c68b926da734",
+  "engineering_regression_run": 41767399647,
+  "engineering_tests": 174,
+  "engineering_result": "success",
+  "main_regression_run": 41767303260,
+  "main_tests": 13,
+  "main_regression_result": "success",
+  "production_failure_runs": [
+    {
+      "run": 41767303250,
+      "commit": "113d009358d36b1ffb6231b53c75f3050543ff29",
+      "run_conclusion": "failure",
+      "data_gate": "failure",
+      "state_saved": "success",
+      "artifact_uploaded": "success",
+      "deployment": "skipped",
+      "online_matches_artifact": true,
+      "online_steps": 5,
+      "online_status": "fail",
+      "online_finished_at": "2026-11-04 03:30:34.481097+00:00",
+      "evidence_sha256": "125a2b664c61171ddd794ec09e2894b89debb50af5ff0f2295a8957d8212be06",
+      "artifact_sha256": "faaac9d0ff2462130f288733e722d6ce5964f61a16e45a9918519fe187a49260"
+    },
+    {
+      "run": 41767536803,
+      "commit": "21ff4c06e3f55004f8633d3c8316c68b926da734",
+      "run_conclusion": "failure",
+      "data_gate": "failure",
+      "state_saved": "success",
+      "artifact_uploaded": "success",
+      "deployment": "skipped",
+      "online_matches_artifact": true,
+      "online_steps": 5,
+      "online_status": "fail",
+      "online_finished_at": "2026-11-04 03:32:34.108659+00:00",
+      "evidence_sha256": "9cadac6f9711208e2b722c46edd7a287beec00048b3296515539ac0d2e7f7370",
+      "artifact_sha256": "8990e7dfd80bb0766fe82e37b1507ebf753518824137e51bbf84468c467283af"
+    }
+  ],
+  "online_concurrency_verification": "output/pipeline_status_online_verification.json",
+  "retired_runtime_file_recovery": "output/pipeline_status_retirement.json",
+  "full_pipeline_acceptance": false,
+  "remaining": "Identity and historical data acceptance still block publication; successful full pipeline not yet accepted.",
+  "sql": "select status,metrics,finished_at from sys_event where source='pipeline_status' and run_id=%s",
+  "sql_run_id_parameters": [
+    "41767303250:1:pick",
+    "41767536803:1:pick"
+  ]
+}
