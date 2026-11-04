@@ -893,5 +893,21 @@
     ],
     "remaining_early_selected_dates": 54,
     "scope": "Prior full selected-view audit plus committed exclusion diff; original audit retained"
+  },
+  "post_bcr_cam_boundary_review": {
+    "verified_at": "2026-11-04T03:13:04.223650+00:00",
+    "applied_receipt_sha256": "e91f5572064dbc3dfc5addd98051985e4686d82f03883d57c0655f52ad5ddda0",
+    "excluded_keys": [
+      {
+        "symbol": "BCR",
+        "month": "2017-12"
+      },
+      {
+        "symbol": "CAM",
+        "month": "2016-04"
+      }
+    ],
+    "remaining_early_selected_dates": 52,
+    "scope": "Prior 54-key review plus verified exclusion diff; original audit retained; actual consideration paths still pending"
   }
 }
