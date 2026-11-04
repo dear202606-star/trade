@@ -1,0 +1,23 @@
+{
+  "verified_at": "2026-11-04T03:25:37.296014+00:00",
+  "source": "pipeline_status_probe",
+  "synthetic_probe_run_id": "1793762737296153000",
+  "concurrent_writers": 4,
+  "inserted": 2,
+  "identical_replays_skipped": 2,
+  "conflicting_replay_rejected": true,
+  "read_only_write_failure_raised": true,
+  "recovery_after_failure_inserted": true,
+  "stored_distinct_receipts": 3,
+  "stored_statuses": [
+    "pass",
+    "fail",
+    "pass"
+  ],
+  "historical_price_writes": 0,
+  "git_writes": 0,
+  "code_sha256": {
+    "runner.py": "3218235fd7bc6e2eb32e7308cfcb4f89ea5fc08cb9cbc4c848c828d30ea089e3",
+    "publish_pipeline_status.py": "40dc5c9b221d8bc38fb2fc3c1138faa578fbc0bfc5c0236986e3876cb331e8c2"
+  }
+}

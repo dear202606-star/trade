@@ -1,0 +1,19 @@
+{
+  "reason": "No active reader or writer remains; online per-execution records replace shared Git status. Prior snapshots retained in Git, not reclassified as new online executions.",
+  "archives": [
+    {
+      "commit": "806799d731fff6ecae72357abe7b63baa3b447ef",
+      "path": "output/pipeline_status.json",
+      "sha256": "6a214b6c0c8954a80b4d066459f87cdaf92767362cf6ea56226e4f8579649907",
+      "bytes": 35752,
+      "git_restore_verified": true
+    },
+    {
+      "commit": "9f35ac57dde04b5aa42c1ca993da925781dd22f2",
+      "path": "output/pipeline_status.json",
+      "sha256": "14054606eb8ebe5cdbaa13d9e5393a4d1a2b1e7c05000c9381b7197b4a6593e5",
+      "bytes": 17524,
+      "git_restore_verified": true
+    }
+  ]
+}

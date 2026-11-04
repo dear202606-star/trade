@@ -24,4 +24,4 @@ jobs:
           python-version: '3.12'
       - run: pip install -r requirements.txt
       - name: 数据、事件、证券身份和流动性回归
-        run: python -m unittest test_data_pipeline test_nominal_prices test_holding_consideration test_holding_paths test_eastmoney_nominal test_security_membership test_liquidity_prices test_planned_liquidity test_quote_snapshot test_watchdog_checks test_preview_prices test_klac_nominal_fact test_fund_native_units test_fund_nominal_facts test_nominal_month_ends test_nominal_month_end_repair test_security_identity_boundaries test_identity_generation_guard test_live_quotes
+        run: python -m unittest test_data_pipeline test_nominal_prices test_holding_consideration test_holding_paths test_eastmoney_nominal test_security_membership test_liquidity_prices test_planned_liquidity test_quote_snapshot test_watchdog_checks test_preview_prices test_klac_nominal_fact test_fund_native_units test_fund_nominal_facts test_nominal_month_ends test_nominal_month_end_repair test_security_identity_boundaries test_identity_generation_guard test_live_quotes test_pipeline_status
