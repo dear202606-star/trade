@@ -7,5 +7,17 @@
   "python_tests": 193,
   "javascript_tests": 12,
   "main_python_tests": 29,
-  "historical_data_writes": 0
+  "historical_data_writes": 0,
+  "main_commit": "da922a56a2b4b322906fdf0cec0b6a800aee31e1",
+  "initial_release_run": 41798469413,
+  "initial_quote_run": 41798469479,
+  "initial_frontend_run": 41798469512,
+  "cleanup_release_run": 41798639023,
+  "live_assets_match_source": true,
+  "live_asset_sha256": {
+    "app.js": "d67fcddded2225bf79cdd90cf8bf339ff95ae8ad2ab05fb942b97aebc84c017d",
+    "page.js": "1569ae65669fab337145d349047f8a5f4080653e7539d06b64ce8aa18496656c"
+  },
+  "live_preview_sha256": "3c64c7aa4f5e585e7ee113284dc16fc2c43eb825a1972d1bba273c290afdc6b9",
+  "financial_files_preserved_by_release": 16
 }
