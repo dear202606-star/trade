@@ -139,3 +139,5 @@ LSI/DTV 身份核查已发现并隔离实质错误：LSI 当前整段是另一�
 
 仍待解决的实质数据问题：KVUE、PSKY、WBD 的免费报价较旧；在线成员表最新新增区间止于 2026-08-18，近期指数变更未持续接入。官方 [2026-10-01 公告](https://press.spglobal.com/2026-10-01-Vylor-Added-to-the-S-P-500-Twilio-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600) 明确 TWLO 从 10 月 6 日起替代 WBD、VYLR/CTVA 存在 10 月变更，而当前库未体现这些新增；[2026-10-30 公告](https://press.spglobal.com/2026-10-30-Okta-Set-to-Join-S-P-500-Others-to-Join-S-P-MidCap-400-and-S-P-SmallCap-600) 明确 OKTA/KVUE 变更从 11 月 4 日开市前生效，不能反写到 11 月 3 日报价场次。下一步需按官方有效日补齐 8 月后变更及事件资格证据，不能仅为填满报价剔除旧成员。拆股文件、普通分红、实际承接收益及全候选原价验收仍待对齐，本批不发布新的预览排名或历史收益，不改变上次 0/34 年度验收结论。
 
+主分支 `03441aa` 的正式报价任务 41769534086 成功写入并可通过公开接口核对 507 个报价；工程远端 181 项、主分支专项 20 项回归通过。真实全量任务 41769533979 在预览缺少 KVUE/PSKY/WBD 时以非零退出，状态与独立回执均保存成功，站点构建和部署跳过；正式网站既有预览的字节散列未变。完整发布范围和未决数据边界见 `output/preview_online_release_verification.json`。
+

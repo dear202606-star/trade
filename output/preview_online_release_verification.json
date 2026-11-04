@@ -1,0 +1,29 @@
+{
+  "verified_at": "2026-11-04T03:53:08.109473+00:00",
+  "main_commit": "03441aa9c1740e6cab7abd8236def6d2dff27e0d",
+  "engineering_regression_run": 41769460304,
+  "engineering_tests": 181,
+  "main_regression_run": 41769534195,
+  "main_tests": 20,
+  "quote_worker_run": 41769534086,
+  "quote_worker_result": "success",
+  "quote_count": 507,
+  "quote_version": "0f2839d800891b31c9ea90613d724c555736b18626e01c9aa05e0b8c701188fc",
+  "source_as_of": "2026-11-03T21:00:00Z",
+  "public_quote_matches_online": true,
+  "share_class_quotes_restored": [
+    "BRK.B",
+    "BF.B"
+  ],
+  "full_run": 41769533979,
+  "full_run_result": "failure",
+  "preview_gate": "failure",
+  "state_saved": "success",
+  "artifact_saved": "success",
+  "site_build": "skipped",
+  "deployment": "skipped",
+  "published_preview_sha256": "3c64c7aa4f5e585e7ee113284dc16fc2c43eb825a1972d1bba273c290afdc6b9",
+  "published_preview_unchanged": true,
+  "complete_financial_acceptance": false,
+  "remaining": "Reference updates after August 2026, KVUE/PSKY/WBD source gaps, nominal units and actual corporate-action returns remain unaccepted"
+}
