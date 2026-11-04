@@ -1,0 +1,11 @@
+{
+  "quote_count": 510,
+  "source_as_of": "2026-11-03T21:00:00Z",
+  "fresh_until": "2026-11-04T14:50:00+00:00",
+  "quote_version": "bf38c4a46f329065105bcde799d5d3ebed1256ff346f65ad69e0612d9c406708",
+  "public_matches_direct": true,
+  "python_tests": 193,
+  "javascript_tests": 12,
+  "main_python_tests": 29,
+  "historical_data_writes": 0
+}

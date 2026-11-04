@@ -10,6 +10,13 @@
 
   const DSH = (g.DSH = {});
 
+  DSH.quoteFreshness = function (q, now) {
+    const source = Date.parse(q && q.ts), limit = Date.parse(q && q.fresh_until);
+    now = now == null ? Date.now() : now;
+    if (!Number.isFinite(source) || !Number.isFinite(limit) || limit <= source || !Number.isFinite(now)) return null;
+    return now >= limit;
+  };
+
   /* 单只移动止损：从持有期最高点回撤 30% 清仓（回测验证：16 年零亏损年） */
   DSH.STOP = 0.30;
 
@@ -290,7 +297,7 @@
     const spy = q.quotes && q.quotes.SPY;
     const c = spy ? (spy.chg >= 0 ? "up" : "dn") : "";
     const age = DSH.ageHours(q.ts);
-    const stale = age == null ? false : age > 36;
+    const stale = DSH.quoteFreshness(q);
     const ageTxt = age == null ? "" :
       age < 1 / 60 ? "刚刚更新" :
       age < 1 ? Math.round(age * 60) + " 分钟前" :
@@ -309,7 +316,7 @@
     el.innerHTML =
       (spy ? "SPY <b>" + spy.p.toFixed(2) + "</b> <span class=\"" + c + "\">" + DSH.pct(spy.chg) + "</span><br>" : "") +
       '<span style="color:' + (stale ? "#FF6B72" : "#5A6779") + '">' +
-      (stale ? "⚠ 数据已 " + ageTxt : ageTxt) + " ｜ " + DSH.esc(when) + "</span>";
+      (stale ? "⚠ 数据已 " + ageTxt : (stale === null ? "时效待核验 ｜ " : "") + ageTxt) + " ｜ " + DSH.esc(when) + "</span>";
   };
   /* ---------- 页面打开期间的自动刷新 ----------
      数据由 GitHub Actions 定期生成；页面这边每 5 分钟重新拉一次，
@@ -801,31 +808,33 @@
     if (q && q.ts) {
       const d = new Date(q.ts);
       if (!isNaN(d.getTime())) {
-        const p = (n) => String(n).padStart(2, "0");
-        parts.push("采集于(北京) <b style=\"color:var(--txt-2)\">" +
-          p(d.getMonth() + 1) + "-" + p(d.getDate()) + " " + p(d.getHours()) + ":" + p(d.getMinutes()) + "</b>");
+        parts.push("行情时间(北京) <b style=\"color:var(--txt-2)\">" +
+          DSH.esc(d.toLocaleString('zh-CN', {timeZone:'Asia/Shanghai', hour12:false})) + "</b>");
       }
       const age = DSH.ageHours(q.ts);
-      if (age != null && age > 26) {
-        parts.push("<b style=\"color:#FFAB6B\">⚠ 行情已 " + Math.floor(age / 24) + " 天未更新</b>");
+      if (DSH.quoteFreshness(q) === true) {
+        parts.push("<b style=\"color:#FFAB6B\">⚠ 行情更新超时</b>");
       }
     }
     if (eq && eq.updated) {
       parts.push("净值截至(北京) <b style=\"color:var(--txt-2)\">" + DSH.esc(eq.updated) + "</b>");
     }
-    parts.push("两源已核对");
+    if (DSH.quoteFreshness(q) === null) parts.push("行情时效待核验");
     if (!parts.length) return;
 
     // 行情过旧时，顶部通栏提醒（不能只缩在页脚）
     const age = q ? DSH.ageHours(q.ts) : null;
-    if (age != null && age > 26 && !document.getElementById("staleBar")) {
+    if (DSH.quoteFreshness(q) === true && !document.getElementById("staleBar")) {
       const bar = document.createElement("div");
       bar.id = "staleBar";
       bar.style.cssText = "position:sticky;top:0;z-index:60;background:#7A4A12;color:#FFE7C2;" +
         "font-size:13px;padding:9px 16px;text-align:center;letter-spacing:.01em";
-      bar.textContent = "⚠ 行情已 " + Math.floor(age / 24) + " 天未更新，最新数据为 " +
-        (q.session || "上次交易日") + " 收盘，请勿据此下单";
+      bar.textContent = "⚠ 行情更新超时，最近行情所属交易日为 " + (q.session || "未知");
       document.body.insertBefore(bar, document.body.firstChild);
+    }
+    if (DSH.quoteFreshness(q) !== true) {
+      const old = document.getElementById("staleBar");
+      if (old) old.remove();
     }
 
     // 复用同一个节点，避免每次刷新都多插一行

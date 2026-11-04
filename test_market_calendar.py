@@ -13,6 +13,17 @@ class ExchangeCalendarTests(unittest.TestCase):
     def at(self,value):
         return self.calendar.state(dt.datetime.fromisoformat(value))
 
+    def test_quote_deadlines_cross_weekends_holidays_early_close_and_dst(self):
+        cases=[('2026-11-06T21:00:00+00:00','2026-11-09T14:50:00+00:00'),
+               ('2026-11-25T21:00:00+00:00','2026-11-27T14:50:00+00:00'),
+               ('2026-11-27T18:00:00+00:00','2026-11-30T14:50:00+00:00'),
+               ('2026-03-06T21:00:00+00:00','2026-03-09T13:50:00+00:00'),
+               ('2026-11-03T15:00:00+00:00','2026-11-03T15:20:00+00:00')]
+        for source,expected in cases:
+            self.assertEqual(self.calendar.source_deadline(dt.datetime.fromisoformat(source)).isoformat(),expected)
+        with self.assertRaisesRegex(RuntimeError,'coverage missing'):
+            self.calendar.source_deadline(dt.datetime(2028,12,29,21,tzinfo=dt.timezone.utc))
+
     def test_thanksgiving_is_closed_and_friday_settles_at_one(self):
         holiday=self.at('2026-11-26T16:00:00+00:00')
         self.assertFalse(holiday['refresh_due'])
