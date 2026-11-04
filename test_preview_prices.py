@@ -12,6 +12,18 @@ def timestamp(date):
 
 
 class PreviewPriceTests(unittest.TestCase):
+    def setUp(self):
+        guard=patch.object(preview.holding_paths,'load_all',return_value={})
+        guard.start();self.addCleanup(guard.stop)
+
+    def test_unaccepted_distribution_cannot_be_valued_as_a_split_only_quote(self):
+        with patch.object(preview.holding_paths,'load_all',return_value={('HON',2026):None}), \
+             patch.object(preview.holding_paths,'_EVENT_MONTHS',{('HON',2026):'2026-06'}), \
+             patch.object(preview.nominal_prices,'price') as price:
+            with self.assertRaisesRegex(RuntimeError,'企业行动收益尚未核验'):
+                preview.price_ratio('HON',100,'2025-12','2026-11-03')
+        price.assert_not_called()
+
     def test_split_shares_use_actual_historical_cost_not_adjusted_close(self):
         cases=[('BKNG',5355.33,148.13,25,'2026-04-06'),
                ('CRWD',468.76,250.43,4,'2026-07-02'),

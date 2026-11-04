@@ -1,0 +1,57 @@
+{
+  "accepted_paths": [
+    {
+      "symbol": "BBWI",
+      "year": 2021,
+      "months": 12
+    },
+    {
+      "symbol": "CVC",
+      "year": 2016,
+      "months": 12
+    },
+    {
+      "symbol": "LB",
+      "year": 2021,
+      "months": 12
+    },
+    {
+      "symbol": "WDC",
+      "year": 2025,
+      "months": 12
+    }
+  ],
+  "blocked_2026_events": [
+    {
+      "symbol": "FDX",
+      "error": "FDX 2026 \u4f01\u4e1a\u884c\u52a8\u8bc1\u636e\u5f85\u6838\u9a8c\u6216\u5df2\u64a4\u56de"
+    },
+    {
+      "symbol": "HON",
+      "error": "HON 2026 \u4f01\u4e1a\u884c\u52a8\u8bc1\u636e\u5f85\u6838\u9a8c\u6216\u5df2\u64a4\u56de"
+    },
+    {
+      "symbol": "KVUE",
+      "error": "KVUE 2026 \u4f01\u4e1a\u884c\u52a8\u8bc1\u636e\u5f85\u6838\u9a8c\u6216\u5df2\u64a4\u56de"
+    },
+    {
+      "symbol": "PSKY",
+      "error": "PSKY 2026 \u4f01\u4e1a\u884c\u52a8\u8bc1\u636e\u5f85\u6838\u9a8c\u6216\u5df2\u64a4\u56de"
+    },
+    {
+      "symbol": "WBD",
+      "error": "WBD 2026 \u4f01\u4e1a\u884c\u52a8\u8bc1\u636e\u5f85\u6838\u9a8c\u6216\u5df2\u64a4\u56de"
+    }
+  ],
+  "input_sha256": "69230974ecdff3a51318dc5e867c734f0acc5c06f9a8f33df8bd8faf51b82596",
+  "price_writes": 0,
+  "strategy_output_writes": 0,
+  "price_only_preview_blocked": [
+    "FDX",
+    "HON",
+    "KVUE",
+    "PSKY",
+    "WBD"
+  ],
+  "tests_passed": 190
+}

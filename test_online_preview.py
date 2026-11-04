@@ -75,6 +75,7 @@ class OnlinePreviewInputTests(unittest.TestCase):
             load_bars=stack.enter_context(patch.object(preview.datafeed,'load_bars',return_value=bars if bars is not None else {base:(100,100)}))
             stack.enter_context(patch.object(preview.datafeed,'_splits',return_value={}))
             if hasattr(preview,'nominal_prices'):
+                stack.enter_context(patch.object(preview.holding_paths,'load_all',return_value={}))
                 stack.enter_context(patch.object(preview.nominal_prices,'price',return_value=100,
                     side_effect=RuntimeError('缺少基准价格') if bars=={} else None))
             def export_trap(path,mode='r',**kwargs):

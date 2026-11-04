@@ -1,5 +1,6 @@
 """One return path for annual holdings; event evidence comes only from the DB."""
 import hashlib
+import datetime as dt
 import json
 import math
 from pathlib import Path
@@ -57,15 +58,15 @@ def load_all():
     connection=None
     try:
         connection=db_select.db()
+        connection.autocommit=False
+        connection.set_session(isolation_level='REPEATABLE READ',readonly=True)
         with connection.cursor() as cursor:
             cursor.execute('''select symbol,hold_year,event_date,policy,monthly_values,evidence,evidence_sha256,calculator_sha256,verified
                               from v_holding_event_paths order by symbol,hold_year''')
             keys=('symbol','hold_year','event_date','policy','monthly_values','evidence','evidence_sha256','calculator_sha256','verified')
             rows=[dict(zip(keys,r)) for r in cursor.fetchall()]
-    except Exception:
-        import db_rest
-        rows=db_rest.get('v_holding_event_paths',{'select':'symbol,hold_year,event_date,policy,monthly_values,evidence,evidence_sha256,calculator_sha256,verified',
-                                               'order':'symbol,hold_year'})
+            cursor.execute("select subject,metrics from sys_event where kind='validation' and source='verified_corporate_terms' and status='pass' order by subject,id")
+            terms=cursor.fetchall()
     finally:
         if connection is not None:connection.close()
     result={}
@@ -73,11 +74,30 @@ def load_all():
         key=(row['symbol'],row['hold_year'])
         if key in result:raise RuntimeError('Duplicate holding-event evidence')
         result[key]=validate(row) if row['verified'] else None
+    event_months={(r['symbol'],r['hold_year']):str(r['event_date'])[:7] for r in rows}
+    term_hashes=[]
+    for subject,metrics in terms:
+        proof=metrics.get('proof',{})
+        if metrics.get('evidence_sha256')!=evidence_sha(proof):
+            raise RuntimeError('Corporate terms evidence hash mismatch')
+        term=proof.get('terms',{})
+        date=dt.date.fromisoformat(term['event_date'])
+        symbol=term['symbol']
+        if subject!=symbol+':'+date.isoformat() or proof.get('holding_valuation_accepted') is not False:
+            raise RuntimeError('Corporate terms identity/scope mismatch')
+        sha=metrics['evidence_sha256'];term_hashes.append(sha)
+        key=(symbol,date.year)
+        accepted=next((r for r in rows if (r['symbol'],r['hold_year'])==key and r['verified']),None)
+        # A path must explicitly cover this exact terms version. Existing paths
+        # cannot accidentally authorize a later event in the same holding year.
+        if accepted is None or sha not in accepted['evidence'].get('corporate_terms_sha256',[]):
+            result[key]=None
+        event_months[key]=min(event_months.get(key,date.isoformat()[:7]),date.isoformat()[:7])
     _PATHS=result
-    _EVENT_MONTHS={(r['symbol'],r['hold_year']):str(r['event_date'])[:7] for r in rows}
-    _EVIDENCE_SHA=evidence_sha([{'symbol':r['symbol'],'year':r['hold_year'],
+    _EVENT_MONTHS=event_months
+    _EVIDENCE_SHA=evidence_sha({'paths':[{'symbol':r['symbol'],'year':r['hold_year'],
                                'evidence':r['evidence_sha256'],'calculator':r['calculator_sha256'],
-                               'verified':r['verified']} for r in rows])
+                               'verified':r['verified']} for r in rows], 'corporate_terms':term_hashes})
     return result
 
 
@@ -85,6 +105,17 @@ def input_sha():
     load_all()
     if _EVIDENCE_SHA is None:raise RuntimeError('Holding-event snapshot was not loaded')
     return _EVIDENCE_SHA
+
+
+def require_price_only_window(symbol,base_month,end_month):
+    """A quote/split-only calculation cannot value a distribution window."""
+    paths=load_all()
+    for key in paths:
+        if key[0]!=symbol:continue
+        month=_EVENT_MONTHS.get(key)
+        if month is None:raise RuntimeError('Holding-event dates were not loaded')
+        if base_month<month<=end_month:
+            raise RuntimeError('%s %s→%s 滚动企业行动收益尚未核验'%(symbol,base_month,end_month))
 
 
 def momentum_bars(symbol,bars,base_month,rank_month):
@@ -101,12 +132,7 @@ def momentum_bars(symbol,bars,base_month,rank_month):
         result={base_month:(1.0,None)}
         result.update({'%d-%02d'%(year,m):(value,None) for m,value in enumerate(values_,1)})
         return result
-    for key in paths:
-        if key[0]!=symbol:continue
-        month=_EVENT_MONTHS.get(key)
-        if month is None:raise RuntimeError('Holding-event dates were not loaded')
-        if base_month<month<=rank_month:
-            raise RuntimeError('%s %s→%s 滚动企业行动收益尚未核验'%(symbol,base_month,rank_month))
+    require_price_only_window(symbol,base_month,rank_month)
     return bars or {}
 
 

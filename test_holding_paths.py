@@ -1,6 +1,6 @@
 import copy
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock,patch
 
 import holding_paths
 import monthly_pick
@@ -11,6 +11,43 @@ from holding_consideration import POLICY
 
 
 class HoldingPathTests(unittest.TestCase):
+    def online_terms(self):
+        from research.apply_2026_spinoff_terms import TERMS,proof
+        term=next(t for t in TERMS if t['symbol']=='HON')
+        value=proof(term)
+        return [('HON:2026-06-29',{'proof':value,'evidence_sha256':holding_paths.evidence_sha(value)})]
+
+    def test_reviewed_terms_without_accepted_path_block_parent_only_holdings_and_rankings(self):
+        connection=MagicMock();cursor=connection.cursor.return_value.__enter__.return_value
+        cursor.fetchall.side_effect=[[],self.online_terms()]
+        with patch.object(holding_paths,'_PATHS',None),patch.object(holding_paths,'_EVIDENCE_SHA',None), \
+             patch.object(holding_paths,'_EVENT_MONTHS',{}), \
+             patch.object(holding_paths.db_select,'db',return_value=connection):
+            self.assertIsNone(holding_paths.load_all()[('HON',2026)])
+            loader=MagicMock(return_value={'2025-12':(100,100),'2026-12':(120,120)})
+            with self.assertRaisesRegex(RuntimeError,'企业行动证据待核验'):
+                holding_paths.values('HON',2026,loader)
+            loader.assert_not_called()
+            with self.assertRaisesRegex(RuntimeError,'动量企业行动证据尚未核验'):
+                holding_paths.momentum_bars('HON',loader.return_value,'2025-12','2026-12')
+            with self.assertRaisesRegex(RuntimeError,'滚动企业行动收益尚未核验'):
+                holding_paths.momentum_bars('HON',{},'2025-10','2026-10')
+            self.assertEqual(holding_paths.momentum_bars('HON',{'untouched':1},'2026-07','2027-07'),{'untouched':1})
+            self.assertEqual(holding_paths.momentum_bars('HON',{'untouched':1},'2025-12','2026-05'),{'untouched':1})
+        connection.set_session.assert_called_once_with(isolation_level='REPEATABLE READ',readonly=True)
+        connection.close.assert_called_once()
+
+    def test_unavailable_or_corrupt_combined_snapshot_never_uses_partial_fallback(self):
+        connection=MagicMock();cursor=connection.cursor.return_value.__enter__.return_value
+        terms=self.online_terms();terms[0][1]['evidence_sha256']='0'*64
+        cursor.fetchall.side_effect=[[],terms]
+        with patch.object(holding_paths,'_PATHS',None),patch.object(holding_paths.db_select,'db',return_value=connection):
+            with self.assertRaisesRegex(RuntimeError,'hash mismatch'):holding_paths.load_all()
+            self.assertIsNone(holding_paths._PATHS)
+        with patch.object(holding_paths,'_PATHS',None), \
+             patch.object(holding_paths.db_select,'db',side_effect=RuntimeError('offline')):
+            with self.assertRaisesRegex(RuntimeError,'offline'):holding_paths.load_all()
+
     def test_legacy_or_stale_locked_signals_cannot_bypass_new_ranking_policy(self):
         with patch.object(holding_paths,'input_sha',return_value='current'), \
              patch.object(liquidity_prices,'input_sha',return_value='turnover-proof'):

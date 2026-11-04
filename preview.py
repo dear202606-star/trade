@@ -18,6 +18,7 @@ import datafeed
 import nominal_prices
 import live_quotes
 import db_ref
+import holding_paths
 
 MIN_PRICE = 5.0
 TOPN = 3
@@ -45,6 +46,7 @@ def split_factor_after(ticker, base_ym, as_of):
 
 def price_ratio(ticker, current, base_ym, session):
     """Value all successor split shares against the verified as-traded cost."""
+    holding_paths.require_price_only_window(ticker,base_ym,session[:7])
     base = nominal_prices.price(ticker, base_ym)
     if not all(math.isfinite(x) and x > 0 for x in (current, base)):
         raise ValueError('Invalid preview price')
