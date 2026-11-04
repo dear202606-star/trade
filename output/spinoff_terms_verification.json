@@ -1,0 +1,13 @@
+{
+  "subjects": [
+    "FDX:2026-06-01",
+    "HON:2026-06-29"
+  ],
+  "verified_online_terms": 2,
+  "rejected_evidence_mutations": [
+    "update",
+    "delete"
+  ],
+  "probes_rolled_back": true,
+  "holding_valuation_accepted": false
+}

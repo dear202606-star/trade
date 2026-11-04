@@ -1,0 +1,47 @@
+{
+  "write": true,
+  "terms": [
+    {
+      "symbol": "FDX",
+      "event_date": "2026-06-01",
+      "kind": "spinoff",
+      "retained_parent_symbol": "FDX",
+      "retained_parent_units_per_original_share": "1",
+      "distributed_symbol": "FDXF",
+      "distributed_units_per_original_share": "0.5",
+      "record_date": "2026-05-15",
+      "distributed_regular_way_start": "2026-06-01",
+      "fractional_shares": "Cash in lieu; exact proceeds not accepted",
+      "url": "https://investor.fedex.com/news-and-events/investor-news/investor-news-details/2026/FedEx-Completes-Spin-Off-of-FedEx-Freight/default.aspx"
+    },
+    {
+      "symbol": "HON",
+      "event_date": "2026-06-29",
+      "kind": "spinoff_and_reverse_split",
+      "retained_parent_symbol": "HON",
+      "retained_parent_units_per_original_share": "0.5",
+      "distributed_symbol": "HONA",
+      "distributed_units_per_original_share": "0.5",
+      "record_date": "2026-06-15",
+      "distributed_regular_way_start": "2026-06-29",
+      "fractional_shares": "Cash in lieu for both securities; exact proceeds not accepted",
+      "url": "https://www.honeywell.com/us/en/news/press-releases/2026/06/honeywell-technologies-launches-independent-pure-play-automation-company-following-honeywell-aerospace-spin-off"
+    }
+  ],
+  "preserved_input_symbols": [
+    "FDX",
+    "FDXF",
+    "HON",
+    "HONA"
+  ],
+  "preserved_inputs": {
+    "prices_monthly": "5cdf6e4be2dcd608ebc6ffdbd5b8376ee91697a5aab17ed0fcda48cdf5ce5a71",
+    "nominal_monthly": "67c7494275caaa5605e60d855188943ef7ae9da51d297d4cfaf639834a09772a",
+    "series_pick": "64aa84dba233b7c3b225720ecf95a95c598f2f528200369d80fccc5f324c7684",
+    "data_lock": "4efeadcac38e6884ec2af98920a5dfab84aa1c63b050979517cfbfe847aa958e",
+    "members": "c8449266d5e82abb563a7be6cc775af6f275d2a96da2c95b73ff85324a37eba0"
+  },
+  "price_writes": 0,
+  "strategy_output_writes": 0,
+  "holding_valuation_accepted": false
+}
