@@ -1,4 +1,5 @@
 import datetime as dt
+import os
 import unittest
 from unittest.mock import patch
 
@@ -13,6 +14,14 @@ def fields(date='Nov 02 04:00PM EST',year='2026'):
 
 class LiveQuoteTests(unittest.TestCase):
     now = dt.datetime(2026,11,3,12,tzinfo=dt.timezone.utc)
+
+    def test_automated_publication_uses_the_existing_secret_without_a_local_password_file(self):
+        expected = object()
+        with patch.dict(os.environ,{'SUPABASE_DB_PASSWORD':'test-environment-secret'}), \
+             patch.object(live.db_sources.io,'open',side_effect=AssertionError('No local credential file in Actions')), \
+             patch.object(live.db_sources.psycopg2,'connect',return_value=expected) as connect:
+            self.assertIs(live.db_sources.db(),expected)
+        self.assertEqual(connect.call_args.kwargs['password'],'test-environment-secret')
 
     def test_source_time_controls_snapshot_not_fetch_time(self):
         payload,sha = live.build_snapshot(['SPY','A'],{'gb_spy':fields(),'gb_a':fields()},7,self.now)
