@@ -171,7 +171,7 @@ jobs:
         if: always()
         run: |
           echo "### 月度选股结果" >> "$GITHUB_STEP_SUMMARY"
-          if [ "${{ steps.pick.outcome }}" = "success" ] && [ -f output/monthly/latest.md ]; then
+          if [ "${{ job.status }}" = "success" ] && [ -f output/monthly/latest.md ]; then
             tail -n +3 output/monthly/latest.md >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo "🌐 https://dear202606-star.github.io/trade/signals.html" >> "$GITHUB_STEP_SUMMARY"
