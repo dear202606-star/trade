@@ -1,0 +1,39 @@
+{
+  "verified_at": "2026-11-04T02:46:52.967434+00:00",
+  "main_quote_commit": "6c21001243500a4f72e96ed124e0fcd8e0885d41",
+  "main_ui_commit": "ee7dcc7238a15ea9cdd6d95ff939dbb8fdfce15b",
+  "quote_worker_run": 41761911714,
+  "quote_worker_conclusion": "success",
+  "ui_publish_run": 41761780863,
+  "ui_publish_conclusion": "success",
+  "source_quote_time_beijing": "2026-11-04 05:00",
+  "public_browser_confirmed": true,
+  "automatic_browser_quote_http_statuses": [
+    200,
+    200
+  ],
+  "mobile_viewport": 390,
+  "mobile_document_width": 375,
+  "local_python_tests_passed": 155,
+  "local_node_tests_passed": 9,
+  "full_historical_strategy_acceptance": false,
+  "preserved_ui_financial_files": 16,
+  "preserved_ui_financial_sha256": {
+    "data/signal.json": "4430a05a47426d92ef2487b50f168fe1a260bf844d920683df9ccd8e50d29b1a",
+    "data/equity.json": "e1ae529acd9c4a8f369bf837bd3271685ecc58c11a65c160561a7b894e26dc4c",
+    "data/curve.json": "84f52e8643dc36b85300448be565197fc724b43f45170f2d37399d2cf2bdc7be",
+    "data/health.json": "fc2bf3b3c738f48e1b67abf2a2177b0fcdb6a9df6ecacb1f48682d0d4f63e168",
+    "data/quality.json": "e84ca76b2bbe721b504f7aa941574dbe468e512cb90203e5eb579a43284e462d",
+    "data/cloud.json": "0211bbbcd53432e915e157e98cb1b85e1343913fcdaca9e4e8fd1a0aeb9e3cd4",
+    "data/quotes.json": "bfb4a639709f835397fe769722e326015508c33a484ac3e7ddae4c983c4a0df6",
+    "data/strategy_history.json": "800a5b60ad0fd3bb279c533730e6f214223a711dc221f230a5a44dee89f65f90",
+    "data/backtest_picks.json": "684e13f4e7fa944d7673405fb578e5d1b58f5e498df676e7a2d7d3c97747a396",
+    "data/preview.json": "3c64c7aa4f5e585e7ee113284dc16fc2c43eb825a1972d1bba273c290afdc6b9",
+    "data/name_zh.json": "2d7d31d6c7d79b8d8d0bb513c7fdda5d361d2a9f1e32c8f2dc64aab0bc9a39d9",
+    "data/b/signal.json": "c0a74ee69ee8b5269f3eed6c7e4419cf59ba6b89e621a73664e474b18df5323b",
+    "data/b/equity.json": "0fe52d1ca4b5fa039be61bd168a37d945086422eb8bf4c4ad3ee8149299c6060",
+    "data/b/curve.json": "5e9fd20738de672b5f7329c291cb60e593651da592cfa46cb2f031023f7d64ae",
+    "data/b/strategy_history.json": "dfab7579ba176ce2987716ea0d38d5f918660df21fae4e899ad073001f5044ae",
+    "data/b/preview.json": "4f0bb9d24a45b2bd60cbc74ae691d3caf40da1badec63da99e00a8b54ea2fe99"
+  }
+}

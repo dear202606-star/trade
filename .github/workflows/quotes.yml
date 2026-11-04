@@ -1,187 +1,43 @@
 name: 行情快照
 
 concurrency:
-  group: trade-pipeline
+  group: trade-live-quotes
   cancel-in-progress: false
 
 on:
   schedule:
-    # GitHub 定时任务经常延迟/漏触发（实测延迟 3-4.5 小时、平台故障时停摆半天），
-    # 所以打散成全天每 2 小时两次（半小时错开），任何一次失败都有下一次兜底。
-    - cron: "0 */2 * * *"
-    - cron: "30 */2 * * *"
+    - cron: "*/5 13-21 * * 1-5"
+    - cron: "17 2 * * 2-6"
   workflow_dispatch:
   push:
     branches: [main]
     paths:
+      - live_quotes.py
       - quotes.py
-      - equity.py
-      - strategy_history.py
-      - datafeed.py
-      - site_build.py
-      - selftest.py
-      - runner.py
-      - site_src/**
+      - db_ref.py
+      - db_sources.py
+      - test_live_quotes.py
       - .github/workflows/quotes.yml
-      - variant_b.py
-      - audit_b.py
-      - freeze_fixtures.py
-      - freeze_bars.py
-      - static/**
 
 permissions:
-  contents: write
-  pages: write
-  id-token: write
+  contents: read
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 4
+    env:
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
     steps:
-      - uses: actions/checkout@v5
-
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: '3.12'
           cache: pip
-          cache-dependency-path: requirements.txt
-
-      - name: 安装依赖
-        run: pip install -r requirements.txt
-
-      - name: 行情快照失败保护回归
-        run: python -m unittest test_quote_snapshot
-
-      - name: 写入数据库口令
-        env:
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-        run: |
-          mkdir -p output
-          if [ -n "$SUPABASE_DB_PASSWORD" ]; then
-            printf '%s' "$SUPABASE_DB_PASSWORD" > output/_supabase_dbpass.txt
-          else
-            echo "::warning::SUPABASE_DB_PASSWORD 未配置，将退回缓存/旧数据"
-          fi
-
-      - name: 抓取行情
-        run: python runner.py quotes.py
-
-      - name: 更新信号（同月增量，秒级）
-        timeout-minutes: 12
-        run: python runner.py monthly_pick.py --workers 10
-
-      - name: 计算策略净值
-        timeout-minutes: 5
-        run: python runner.py equity.py
-      - name: 生成明年预览
-        timeout-minutes: 4
-        run: python runner.py preview.py
-
-      - name: 生成全年成分口径（B）
-        env:
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-          BASELINE_MODE: observe
-        run: python runner.py variant_b.py
-
-      - name: 计算 B 口径净值
-        env:
-          EQ_SIGNAL: output/signal_history_b.json
-          EQ_OUT: docs/data/b/equity.json
-        run: python runner.py equity.py
-
-      - name: 生成逐年记录（历史已锁定，不再重算）
-        run: python runner.py strategy_history.py
-
-      - name: 第二数据源交叉校验（EODHD，近 13 个月）
-        continue-on-error: true
-        env:
-          EODHD_API_TOKEN: ${{ secrets.EODHD_API_TOKEN }}
-        run: python crosscheck_eodhd.py
-
-      - name: 口径 B 独立审计
-        run: python runner.py audit_b.py
-
-      - name: 数据库结构冒烟（schema_check）
-        continue-on-error: true
-        run: python schema_check.py --quick
-
-      - name: 数据校验入库（validations）
-        continue-on-error: true
-        env:
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-        run: python db_validate.py
-
-      - name: 锁定就绪度
-        continue-on-error: true
-        env:
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-        run: python lock_stage.py --check 2010,2025
-
-      - name: 构建站点
-        run: python runner.py site_build.py
-
-      - name: 部署前自检
-        env:
-          BASELINE_MODE: observe
-        run: python runner.py selftest.py
-
-      - name: 提交状态日志
-        if: always()
-        continue-on-error: true
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f output/pipeline_status.json
-          # 成分表过期时会自动刷新，把刷新结果提交回去，避免每次重复拉
-          if [ -f static/sp500_members.csv ]; then git add static/sp500_members.csv; fi
-          if [ -f output/signal_history.json ]; then git add -f output/signal_history.json; fi
-          if [ -f output/splits.json ]; then git add -f output/splits.json; fi
-          git diff --staged --quiet || git commit -m "chore: 流水线状态 $(date -u +%H:%M)"
-          # 站点发布走 Pages 产物，不依赖这次提交；推送失败只告警，不阻断部署
-          for i in 1 2 3; do
-            if git push; then exit 0; fi
-            echo "push 失败，第 $i 次重试…"
-            git pull --rebase --autostash origin "${GITHUB_REF_NAME:-main}" || true
-            sleep 5
-          done
-          echo "::warning::状态日志未能推送（不影响站点发布）"
-
-      - name: 上传 Pages 产物
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs
-
-  deploy:
-    concurrency:
-      group: pages-deploy
-      cancel-in-progress: false
-    needs: refresh
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: 部署
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-  alert:
-    needs: [refresh, deploy]
-    if: failure() || cancelled()
-    runs-on: ubuntu-latest
-    permissions:
-      issues: write
-    steps:
-      - name: 失败时开 Issue
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh label create pipeline --description "流水线失败" --color B60205 --force || true
-          NUM=$(gh issue list --label pipeline --state open --json number --jq '.[0].number // empty' -R ${{ github.repository }})
-          BODY="运行 [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) 失败。站点可能停更，请检查（含口径 B）。"
-          if [ -z "$NUM" ]; then
-            gh issue create -R ${{ github.repository }} --title "流水线失败 $(date -u +%Y-%m-%d)" --body "$BODY" --label pipeline
-          else
-            gh issue comment "$NUM" -R ${{ github.repository }} --body "$BODY"
-          fi
+      - run: pip install -r requirements.txt
+      - name: 在线报价与失败保护回归
+        run: python -m unittest test_live_quotes test_quote_snapshot
+      - name: 检查在线写入凭据
+        run: test -n "$SUPABASE_DB_PASSWORD"
+      - name: 刷新在线行情
+        run: python live_quotes.py --write

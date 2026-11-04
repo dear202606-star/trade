@@ -129,7 +129,9 @@ SEED = [
 
 
 def db():
-    pw = io.open(os.path.join(BASE, "output", "_supabase_dbpass.txt"), encoding="utf-8").read().strip()
+    pw = os.environ.get("SUPABASE_DB_PASSWORD", "").strip()
+    if not pw:
+        pw = io.open(os.path.join(BASE, "output", "_supabase_dbpass.txt"), encoding="utf-8").read().strip()
     return psycopg2.connect(host=HOST, port=6543, user="postgres." + REF, password=pw,
                             dbname="postgres", connect_timeout=20, sslmode="require")
 

@@ -1,0 +1,56 @@
+{
+  "checked_at": "2026-11-04T02:30:29.451119+00:00",
+  "public_read_matches_sha256": "5ed7593802a8642a4d567fd4b5152c6839dbbdc2847a3974f4cad5ba04f82d95",
+  "source_as_of": "2026-11-03T21:00:00+00:00",
+  "collected_at": "2026-11-04T02:14:47.846853+00:00",
+  "count": 505,
+  "universe": 510,
+  "session": "2026-11-03",
+  "history_recalculated": false,
+  "duplicate_and_older_snapshot_cannot_replace": true,
+  "malformed_snapshot_rejected": true,
+  "mutation_probes_rolled_back": true,
+  "dispatcher_configuration": {
+    "checked_at": "2026-11-04T02:45:32.390348+00:00",
+    "jobs": [
+      {
+        "id": 4,
+        "name": "trade-dispatch",
+        "schedule": "20 */2 * * *",
+        "active": true
+      },
+      {
+        "id": 5,
+        "name": "trade-dispatch-market",
+        "schedule": "*/5 13-21 * * 1-5",
+        "active": true
+      }
+    ],
+    "recent_dispatches": [
+      {
+        "job": "trade-dispatch",
+        "status": "succeeded",
+        "start": "2026-11-04 02:20:00.236284+00:00",
+        "end": "2026-11-04 02:20:00.278242+00:00"
+      },
+      {
+        "job": "trade-dispatch",
+        "status": "succeeded",
+        "start": "2026-11-04 00:20:00.214740+00:00",
+        "end": "2026-11-04 00:20:00.318473+00:00"
+      },
+      {
+        "job": "trade-dispatch",
+        "status": "succeeded",
+        "start": "2026-11-03 22:20:00.229509+00:00",
+        "end": "2026-11-03 22:20:00.332424+00:00"
+      },
+      {
+        "job": "trade-dispatch-market",
+        "status": "succeeded",
+        "start": "2026-11-03 21:55:00.228266+00:00",
+        "end": "2026-11-03 21:55:00.308520+00:00"
+      }
+    ]
+  }
+}

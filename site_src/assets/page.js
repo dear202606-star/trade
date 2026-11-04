@@ -52,17 +52,19 @@
   }
 
   /* ---------- ② 当期账户 ---------- */
-  function account() {
+  function account(bridge) {
     var pos = (EQ && EQ.position) || [];
     // Match the full-holding equity curve; advice does not trade this account.
     var exposure = 1;
     var rows = [], mv = 0, cost = 0;
     pos.forEach(function (p) {
       var shares = p.entry > 0 ? (amt * p.weight * exposure) / p.entry : 0;
-      var c = shares * p.entry, v = shares * p.last;
+      var quote = Q && Q.quotes && Q.quotes[p.ticker];
+      var last = bridge ? quote.p * p.last / p.last_raw : p.last;
+      var c = shares * p.entry, v = shares * last;
       mv += v; cost += c;
-      rows.push({ ticker: p.ticker, weight: p.weight, entry: p.entry, last: p.last,
-        entry_raw: p.entry_raw, last_raw: p.last_raw,
+      rows.push({ ticker: p.ticker, weight: p.weight, entry: p.entry, last: last,
+        entry_raw: p.entry_raw, last_raw: bridge ? quote.p : p.last_raw,
         shares: shares, mv: v, cost: c });
     });
     var cash = amt * (1 - exposure);
@@ -72,26 +74,27 @@
 
   function renderYear() {
     var y = EQ && EQ.base_date ? (+String(EQ.base_date).slice(0, 4) + 1) : "";
-    $("yearTitle").textContent = (y ? y + " 年" : "") + "策略收益";
-    var c = account();
+    var yearResult = DSH.yearResult(SIG, Q, EQ);
+    $("yearTitle").textContent = (y ? y + " 年" : "") + "策略收益" +
+      (yearResult.asOf ? " · 截至 " + yearResult.asOf.slice(5).replace('-', '/') : "");
+    var c = account(yearResult.bridged);
 
     // 收盘口径（曲线末点）
     var closePct = (EQ && EQ.stats) ? EQ.stats.strategy : c.pnlPct;
     // 盘中口径：只有盘中才叠加今日涨跌（收盘后净值已含当日，叠加会重复计算）
     var td = DSH.today(SIG, Q, EQ);
     var dayPct = (td && td.pct != null) ? td.pct : 0;
-    var isLive = !!(Q && Q.intraday) && Math.abs(dayPct) > 1e-9;
-    var livePct = (closePct == null) ? null
-      : (isLive ? (1 + closePct) * (1 + dayPct) - 1 : closePct);
+    var isLive = yearResult.bridged;
+    var livePct = yearResult.pct;
 
     $("yearRet").textContent = pct2(livePct);
     $("yearRet").className = "num num-xl " + cls(livePct);
 
-    var bench = EQ && EQ.stats ? EQ.stats.benchmark : null;
+    var bench = yearResult.benchmark;
     var extra = "";
     if (isLive && closePct != null) {
-      extra = " ｜ 含今日 <span class='" + cls(dayPct) + "'>" + pct2(dayPct) +
-        "</span>（收盘 " + pct2(closePct) + "）";
+      extra = " ｜ 含 " + yearResult.asOf.slice(5).replace('-', '/') + " <span class='" + cls(dayPct) + "'>" + pct2(dayPct) +
+        "</span>（前收 " + pct2(closePct) + "）";
     }
     $("yearVs").innerHTML = "同期标普 <span class='" + cls(bench) + "'>" + pct2(bench) + "</span>" +
       (livePct != null && bench != null
@@ -368,7 +371,7 @@
       busy = true;
       try {
         var fresh = await DSH.jsonNoCache("quotes", {});
-        if (fresh && fresh.ts && (!Q || fresh.ts !== Q.ts)) {
+        if (fresh && fresh.ts && (!Q || fresh.ts !== Q.ts || fresh.version !== Q.version)) {
           Q = fresh;
           checkFreshness();
           renderTick();
