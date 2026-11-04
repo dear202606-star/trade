@@ -1,0 +1,49 @@
+{
+  "write": false,
+  "facts": [
+    {
+      "symbol": "ATVI",
+      "event_date": "2023-10-13",
+      "month_to": "2023-09",
+      "cash_usd_per_share": "95.00",
+      "last_trading_date": "2023-10-12",
+      "last_observed_quote": 94.42,
+      "url": "https://www.sec.gov/Archives/edgar/data/718877/000110465923108985/tm2328253d1_8k.htm",
+      "location": "Items 2.01 and 3.01; common shares converted to cash, trading halted before opening"
+    },
+    {
+      "symbol": "TWTR",
+      "event_date": "2022-10-27",
+      "month_to": "2022-09",
+      "cash_usd_per_share": "54.20",
+      "last_trading_date": "2022-10-27",
+      "last_observed_quote": 53.7,
+      "url": "https://www.sec.gov/Archives/edgar/data/1035410/000112329222000109/twitter13da.htm",
+      "location": "Item 4; cash conversion October 27, trading suspended before opening October 28"
+    }
+  ],
+  "excluded_view_rows": {
+    "series_selected": [
+      [
+        "ATVI",
+        "2023-10"
+      ],
+      [
+        "TWTR",
+        "2022-10"
+      ]
+    ],
+    "v_nominal_monthly": []
+  },
+  "preserved_sha256": {
+    "prices_monthly": "88e8376dc53d3891e89dcbde9cd90f9d37f23a2cf2b94f59e2490a8c83651fd4",
+    "nominal_monthly": "024cf6d85d3922beb7c856c81b6a481a799b49e5d0319d8316090824ccb00587",
+    "series_pick": "80cac6b0eb38831985b6413dc7705bc730e00660fafbbe46afa89bc95a478f6c",
+    "data_lock": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "holding_event_paths": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "baseline_b": "20c0680276cf79cbb06d8aaab35c3e40cde010447f6e15e75abd95ff0ef33c90"
+  },
+  "retained_and_unrelated_view_rows_changed": 0,
+  "raw_price_writes": 0,
+  "holding_valuation_accepted": false
+}

@@ -1,0 +1,34 @@
+{
+  "selected_post_conversion_rows": [],
+  "public_exclusion_matches": true,
+  "unaccepted_holding_paths_blocked": [
+    {
+      "symbol": "ATVI",
+      "year": 2023
+    },
+    {
+      "symbol": "TWTR",
+      "year": 2022
+    }
+  ],
+  "accepted_existing_paths": [
+    {
+      "symbol": "BBWI",
+      "year": 2021
+    },
+    {
+      "symbol": "CVC",
+      "year": 2016
+    },
+    {
+      "symbol": "LB",
+      "year": 2021
+    },
+    {
+      "symbol": "WDC",
+      "year": 2025
+    }
+  ],
+  "probe_writes": 0,
+  "tests_passed": 202
+}
