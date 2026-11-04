@@ -52,17 +52,19 @@
   }
 
   /* ---------- ② 当期账户 ---------- */
-  function account() {
+  function account(bridge) {
     var pos = (EQ && EQ.position) || [];
     // Match the full-holding equity curve; advice does not trade this account.
     var exposure = 1;
     var rows = [], mv = 0, cost = 0;
     pos.forEach(function (p) {
       var shares = p.entry > 0 ? (amt * p.weight * exposure) / p.entry : 0;
-      var c = shares * p.entry, v = shares * p.last;
+      var quote = Q && Q.quotes && Q.quotes[p.ticker];
+      var last = bridge ? quote.p * p.last / p.last_raw : p.last;
+      var c = shares * p.entry, v = shares * last;
       mv += v; cost += c;
-      rows.push({ ticker: p.ticker, weight: p.weight, entry: p.entry, last: p.last,
-        entry_raw: p.entry_raw, last_raw: p.last_raw,
+      rows.push({ ticker: p.ticker, weight: p.weight, entry: p.entry, last: last,
+        entry_raw: p.entry_raw, last_raw: bridge ? quote.p : p.last_raw,
         shares: shares, mv: v, cost: c });
     });
     var cash = amt * (1 - exposure);
@@ -75,7 +77,7 @@
     var yearResult = DSH.yearResult(SIG, Q, EQ);
     $("yearTitle").textContent = (y ? y + " 年" : "") + "策略收益" +
       (yearResult.asOf ? " · 截至 " + yearResult.asOf.slice(5).replace('-', '/') : "");
-    var c = account();
+    var c = account(yearResult.bridged);
 
     // 收盘口径（曲线末点）
     var closePct = (EQ && EQ.stats) ? EQ.stats.strategy : c.pnlPct;
