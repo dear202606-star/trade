@@ -1,4 +1,67 @@
 """Validate the published quality report without accepting missing evidence."""
+import datetime as dt
+import hashlib
+import json
+from zoneinfo import ZoneInfo
+
+
+def timestamp(value):
+    if not isinstance(value,(str,dt.datetime)):raise ValueError('时间无效')
+    result=value if isinstance(value,dt.datetime) else dt.datetime.fromisoformat(value.replace('Z','+00:00'))
+    if result.tzinfo is None:raise ValueError('时间缺少时区')
+    return result.astimezone(dt.timezone.utc)
+
+
+def quote_problems(row, heartbeat, calendar, now):
+    """Check the current source session and real worker proof, not history writes."""
+    if not isinstance(row,dict) or not isinstance(row.get('payload'),dict):
+        raise ValueError('缺少在线报价快照')
+    payload=dict(row['payload']);version=payload.pop('version',None)
+    sha=hashlib.sha256(json.dumps(payload,sort_keys=True,separators=(',',':'),allow_nan=False).encode()).hexdigest()
+    if sha!=row.get('evidence_sha256') or sha!=version:
+        raise ValueError('在线报价内容散列不一致')
+    quotes=payload.get('quotes');count=payload.get('count');universe=payload.get('universe')
+    if (payload.get('ok') is not True or not isinstance(quotes,dict) or 'SPY' not in quotes
+            or type(count) is not int or type(universe) is not int or universe<=0
+            or count!=len(quotes) or count<.98*universe):
+        raise ValueError('在线报价覆盖或基准无效')
+    source=timestamp(row['source_as_of'])
+    if source!=timestamp(payload['ts']):raise ValueError('报价源时间与快照不一致')
+    state=calendar.state(now);problems=[]
+    if payload.get('calendar_sha256')!=calendar.sha:
+        problems.append('报价日历版本与在线核验版本不一致')
+    if source>now+dt.timedelta(minutes=5):problems.append('报价源时间来自未来')
+    if source<state['minimum_source_time']:problems.append('报价未达到交易所应有时点')
+    if payload.get('session')!=source.astimezone(ZoneInfo('America/New_York')).date().isoformat():
+        problems.append('报价场次与源时间不一致')
+    elif payload.get('previous_session')!=calendar.previous(dt.date.fromisoformat(payload['session'])).isoformat():
+        problems.append('报价前一场次与核验日历不一致')
+    if heartbeat is None:
+        problems.append('缺少实际报价刷新回执')
+    else:
+        if heartbeat.get('metrics',{}).get('stored_evidence_sha256')!=sha:
+            problems.append('刷新回执与当前报价版本不一致')
+        finished=timestamp(heartbeat['finished_at'])
+        if finished>now+dt.timedelta(minutes=5):problems.append('刷新回执时间来自未来')
+        if state['refresh_due'] and now>=state['open']+dt.timedelta(minutes=15) and now-finished>dt.timedelta(minutes=15):
+            problems.append('报价刷新任务超过 15 分钟未成功')
+    return problems
+
+
+def history_problems(report, now):
+    """Frozen history may stay unchanged; validate content and annual coverage."""
+    if not isinstance(report,dict) or not isinstance(report.get('years'),list) or not report['years']:
+        raise ValueError('历史产物缺少年度记录')
+    years=[r.get('year') for r in report['years'] if isinstance(r,dict)]
+    if len(years)!=len(report['years']) or any(type(y) is not int for y in years) or len(set(years))!=len(years):
+        raise ValueError('历史年度记录无效或重复')
+    problems=[]
+    if sorted(years)!=list(range(min(years),max(years)+1)):problems.append('历史产物缺少区间内年度')
+    if max(years)<now.year-1:problems.append('历史产物缺少新增的已结束年度')
+    generated=report.get('generated_at')
+    if generated and timestamp(generated)>now+dt.timedelta(minutes=5):
+        problems.append('历史生成时间来自未来')
+    return problems
 
 
 def quality_problems(report):

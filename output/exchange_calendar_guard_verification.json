@@ -1,0 +1,10 @@
+{
+  "scope": "temporary clone only; transaction rolled back",
+  "blocked": [
+    "update",
+    "delete",
+    "truncate"
+  ],
+  "ordinary_event_update_allowed": true,
+  "live_historical_price_writes": 0
+}

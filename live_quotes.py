@@ -11,6 +11,7 @@ from zoneinfo import ZoneInfo
 import db_ref
 import db_sources
 import quotes
+import market_calendar
 
 UTC = dt.timezone.utc
 ET = ZoneInfo('America/New_York')
@@ -40,7 +41,7 @@ def source_time(fields, now):
     return stamp
 
 
-def build_snapshot(tickers, raw, fx, now):
+def build_snapshot(tickers, raw, fx, now, calendar=None):
     if now.tzinfo is None or not tickers or len(set(tickers)) != len(tickers):
         raise ValueError('Invalid snapshot request')
     if not isinstance(fx,(int,float)) or not math.isfinite(fx) or not 5<fx<10:
@@ -62,14 +63,11 @@ def build_snapshot(tickers, raw, fx, now):
         raise ValueError('No verified SPY source timestamp')
     as_of = parsed['SPY'][1]
     session = as_of.astimezone(ET).date()
-    if now-as_of > dt.timedelta(days=4):
-        raise ValueError('Benchmark source session is too old')
-    # On a holiday/weekend the provider retains the actual previous session.
-    intraday = quotes.is_intraday(now) and session == now.astimezone(ET).date()
-    if quotes.is_intraday(now) and not intraday:
-        raise ValueError('No current regular-session benchmark; retain prior snapshot')
-    if intraday and now-as_of > dt.timedelta(minutes=20):
-        raise ValueError('Regular-session benchmark quote exceeds 20-minute delay')
+    calendar = calendar or market_calendar.load()
+    state = calendar.state(now)
+    if as_of<state['minimum_source_time']:
+        raise ValueError('Benchmark source is older than the reviewed exchange session permits')
+    intraday = state['intraday'] and session==state['session']
     values = {}
     for symbol,(quote,stamp) in parsed.items():
         if stamp.astimezone(ET).date() != session:
@@ -82,6 +80,7 @@ def build_snapshot(tickers, raw, fx, now):
     payload = {'ts':as_of.strftime('%Y-%m-%dT%H:%M:%SZ'),
         'ts_local':as_of.astimezone(ZoneInfo('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M'),
         'session':session.isoformat(),'intraday':intraday,'fx':fx,
+        'previous_session':calendar.previous(session).isoformat(),'calendar_sha256':calendar.sha,
         'count':len(values),'universe':len(tickers),'coverage':len(values)/len(tickers),
         'ok':True,'stale':[s for s in tickers if s not in values], 'quotes':values}
     sha = hashlib.sha256(json.dumps(payload,sort_keys=True,separators=(',',':'),
@@ -100,6 +99,8 @@ def universe(now):
 
 
 def collect(now):
+    calendar = market_calendar.load()
+    calendar.state(now)
     tickers = universe(now)
     raw = {}
     for start in range(0,len(tickers),quotes.BATCH):
@@ -108,7 +109,7 @@ def collect(now):
         raw.update(quotes.sina_batch(['gb_'+s.replace('.','$').lower() for s in batch]))
         time.sleep(.2)
     fx = quotes.fetch_fx()
-    return build_snapshot(tickers,raw,fx,dt.datetime.now(UTC))
+    return build_snapshot(tickers,raw,fx,dt.datetime.now(UTC),calendar)
 
 
 def publish(payload, sha, collected_at):
@@ -117,6 +118,9 @@ def publish(payload, sha, collected_at):
         with connection,connection.cursor() as cursor:
             cursor.execute("set local statement_timeout='20s'")
             cursor.execute("set local lock_timeout='5s'")
+            cursor.execute('select evidence_sha256 from v_market_calendar')
+            if cursor.fetchone()!=(payload.get('calendar_sha256'),):
+                raise RuntimeError('Reviewed exchange calendar changed before publication')
             cursor.execute('''insert into live_quote_snapshot
                 (singleton,source_as_of,collected_at,evidence_sha256,payload)
                 values (true,%s,%s,%s,%s)
