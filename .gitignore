@@ -110,3 +110,5 @@ output/_prices_cache.json
 output/_chrome_copy2/
 
 /_site_release/
+
+output/pipeline_status_run.json

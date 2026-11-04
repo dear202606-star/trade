@@ -789,7 +789,7 @@ from locked_symbols;
 | E1 | `validations` 中无新增 `fail` | 0 |
 | E2 | `locked_symbols` 仍在增长（说明 `lock_symbols` 正常） | ≥ 430 |
 | E3 | 旧表索引扫描归零 | `idx_scan = 0` |
-| E4 | `pipeline_status.json` 连续 N 次成功 | 无 `degraded` 新增 |
+| E4 | 在线 `sys_event` 的 `pipeline_status` 回执及对应 Actions 运行连续 N 次成功 | 无 `degraded` 新增；步骤回执不代替发布验收 |
 | E5 | 站点数值零漂移 | C1–C7 再核一次 |
 
 ---

@@ -20,6 +20,8 @@ on:
       - quotes.py
       - equity.py
       - strategy_history.py
+      - runner.py
+      - publish_pipeline_status.py
       - datafeed.py
       - selftest.py
       - verify_champions.py
@@ -119,21 +121,6 @@ jobs:
       - name: 部署前自检（数据不全就不部署）
         run: python runner.py selftest.py
 
-      - name: 提交流水线状态
-        if: always()
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f output/pipeline_status.json
-          git diff --staged --quiet || git commit -m "chore: 流水线状态 18:38"
-          for i in 1 2 3; do
-            if git push; then break; fi
-            echo "push 失败，第 $i 次重试…"
-            git pull --rebase --autostash origin "${GITHUB_REF_NAME:-main}" || true
-            sleep 5
-          done
-          git push || { echo "::error::无法推送，状态可能丢失"; exit 1; }
-
       - name: 上传 Pages 产物
         if: steps.pick.outcome == 'success'
         uses: actions/upload-pages-artifact@v3
@@ -148,7 +135,7 @@ jobs:
           # 只提交实际存在的产物；某个文件被清理后不能让 git add 报错(exit 128)拖垮整个任务
           for f in output/signal_history.json output/track_record.json \
                    output/survivorship.json output/survivorship.md \
-                   output/pipeline_status.json output/splits.json \
+                   output/splits.json \
                    output/official_locks.json output/history_baseline.json \
                    output/lock_changelog.json output/backtest_picks.json \
                    output/strategy_history.json output/curve.json \
@@ -162,6 +149,22 @@ jobs:
             git commit -m "chore: 每日数据更新 $(date -u +%Y-%m)"
             git push
           fi
+
+      - name: 在线保存流水线状态
+        if: always()
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          PIPELINE_JOB_STATUS: ${{ job.status }}
+        run: python publish_pipeline_status.py
+
+      - name: 保留本次运行回执
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-status-${{ github.run_id }}-${{ github.run_attempt }}
+          path: output/pipeline_status_run.json
+          if-no-files-found: error
+          retention-days: 30
 
       # 已停用：站点是唯一信息源，不再往 Issue 推送重复内容
       - name: 摘要
