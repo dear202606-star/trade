@@ -33,10 +33,28 @@ class QualityReportTests(unittest.TestCase):
 
 
 class OnlineQuoteMonitorTests(unittest.TestCase):
+    def test_rehashed_snapshot_cannot_hide_invalid_or_stale_components(self):
+        cases=[({'p':0,'as_of':'2026-11-03T15:55:00Z'},'价格无效'),
+               ({'p':True,'as_of':'2026-11-03T15:55:00Z'},'价格无效'),
+               ({'p':100},'时间无效'),
+               ({'p':100,'as_of':'2026-11-02T21:00:00Z'},'场次不一致'),
+               ({'p':100,'as_of':'2026-11-03T15:00:00Z'},'未达到应有时点'),
+               ({'p':100,'as_of':'2026-11-03T17:00:00Z'},'时间来自未来')]
+        now=dt.datetime(2026,11,3,16,tzinfo=dt.timezone.utc)
+        for quote,expected in cases:
+            row,event,calendar=self.snapshot('2026-11-03T15:55:00Z','2026-11-03','2026-11-02','2026-11-03T15:59:00Z')
+            payload=row['payload'];payload.pop('version')
+            payload['quotes']['A']=quote;payload['count']=payload['universe']=2
+            sha=hashlib.sha256(json.dumps(payload,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+            payload['version']=row['evidence_sha256']=event['metrics']['stored_evidence_sha256']=sha
+            with self.subTest(quote=quote):
+                self.assertTrue(any(expected in p for p in quote_problems(row,event,calendar,now)))
+
     def snapshot(self,source,session,previous,worker_time):
         calendar=Calendar(CALENDAR,fingerprint(CALENDAR))
         payload={'ok':True,'ts':source,'session':session,'previous_session':previous,
-                 'calendar_sha256':calendar.sha,'count':1,'universe':1,'quotes':{'SPY':{'p':100}}}
+                 'fresh_until':calendar.source_deadline(dt.datetime.fromisoformat(source.replace('Z','+00:00'))).isoformat(),
+                 'calendar_sha256':calendar.sha,'count':1,'universe':1,'quotes':{'SPY':{'p':100,'as_of':source}}}
         sha=hashlib.sha256(json.dumps(payload,sort_keys=True,separators=(',',':')).encode()).hexdigest()
         payload['version']=sha
         row={'source_as_of':source,'evidence_sha256':sha,'payload':payload}

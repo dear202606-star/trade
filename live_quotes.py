@@ -104,13 +104,13 @@ def build_snapshot(tickers, raw, fx, now, calendar=None, reference=None):
     for symbol,(quote,stamp) in parsed.items():
         if stamp.astimezone(ET).date() != session:
             continue
-        if intraday and (now-stamp > dt.timedelta(minutes=20)):
+        if stamp<state['minimum_source_time']:
             continue
         values[symbol] = dict(quote,as_of=stamp.isoformat())
     if len(values)<.98*len(tickers):
         raise ValueError('Incomplete same-session quote coverage: %d/%d'%(len(values),len(tickers)))
     payload = {'ts':as_of.strftime('%Y-%m-%dT%H:%M:%SZ'),
-        'fresh_until':calendar.source_deadline(as_of).isoformat(),
+        'fresh_until':min(calendar.source_deadline(parsed[s][1]) for s in values).isoformat(),
         'ts_local':as_of.astimezone(ZoneInfo('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M'),
         'session':session.isoformat(),'intraday':intraday,'fx':fx,
         'previous_session':calendar.previous(session).isoformat(),'calendar_sha256':calendar.sha,
