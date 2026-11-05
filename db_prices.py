@@ -112,6 +112,16 @@ def stats():
                        from prices_monthly""")
         return cur.fetchone()
 
+def selected_stamp(cursor):
+    """Fingerprint every selected financial value and its source/identity key."""
+    cursor.execute("""select count(*),count(distinct symbol),
+        encode(sha256(convert_to(coalesce(string_agg(
+          jsonb_build_array(symbol,month,adj_close,raw_close,source,basis)::text,
+          E'\\n' order by symbol,month),''),'UTF8')),'hex')
+        from series_selected""")
+    return cursor.fetchone()
+
+
 def _db_stamp():
     """数据版本戳：行数 + 最大抓取时间 + 标的数（一条轻量查询）"""
     if _DB_DEAD and os.path.exists(_MARKER):
@@ -123,10 +133,7 @@ def _db_stamp():
             a = cur.fetchone()
             # 必须把 series_selected 也算进指纹：重建选源不改变 prices_monthly，
             # 只比 prices_monthly 会让旧缓存被误判为新鲜（实测导致本地 31.07x vs CI 30.07x）
-            cur.execute("""select count(*), count(distinct symbol),
-                                  coalesce(sum(adj_close),0)::text
-                           from series_selected""")
-            b = cur.fetchone()
+            b = selected_stamp(cur)
             return (a[0], a[1], a[2], b[0], b[1], b[2])
     except Exception:
         return None

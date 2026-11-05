@@ -55,5 +55,11 @@ class SingleSeriesTests(unittest.TestCase):
         with patch.object(db_prices,'connect',side_effect=RuntimeError('offline')):
             with self.assertRaisesRegex(RuntimeError,'offline'):db_prices.series('OPEN')
 
+    def test_strategy_fingerprint_failure_is_not_a_reusable_input_version(self):
+        import variant_b
+        with patch.object(db_prices,'connect',side_effect=RuntimeError('offline')):
+            with self.assertRaisesRegex(RuntimeError,'Cannot verify online'):
+                variant_b._db_sha()
+
 
 if __name__=='__main__':unittest.main()
