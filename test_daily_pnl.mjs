@@ -18,6 +18,16 @@ const equity = { exposure: 1, last_session: '20261103', position: [
 ] };
 const quotes = { session: '2026-11-03', previous_session:'2026-11-02', quotes: { A: { p: 110, pc: 100 }, B: { p: 190, pc: 200 } } };
 
+test('online calculated daily dollars scale with capital and reject a different quote version',()=>{
+  const q={...quotes,version:'current',ts:new Date(Date.now()-1000).toISOString(),
+    fresh_until:new Date(Date.now()+60000).toISOString()};
+  const e={runtime_verified:true,quote_version:'current',today:{quote_version:'current',
+    session:q.session,pct:.02,per_dollar:.03}};
+  assert.equal(calculator()(null,q,e).amount,3000);
+  assert.equal(calculator('1000000')(null,q,e).amount,30000);
+  assert.equal(calculator()(null,{...q,version:'new'},e),null);
+});
+
 test('all holdings contribute shares times actual price change', () => {
   const result = calculator()(null, quotes, equity);
   assert.equal(result.amount, 4000);

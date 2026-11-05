@@ -53,14 +53,14 @@
 
   /* ---------- ② 当期账户 ---------- */
   function account(bridge) {
-    var pos = (EQ && EQ.position) || [];
+    var pos = (EQ && (bridge && EQ.runtime_verified ? EQ.live_position : EQ.position)) || [];
     // Match the full-holding equity curve; advice does not trade this account.
     var exposure = 1;
     var rows = [], mv = 0, cost = 0;
     pos.forEach(function (p) {
       var shares = p.entry > 0 ? (amt * p.weight * exposure) / p.entry : 0;
       var quote = Q && Q.quotes && Q.quotes[p.ticker];
-      var last = bridge ? quote.p * p.last / p.last_raw : p.last;
+      var last = bridge && !EQ.runtime_verified ? quote.p * p.last / p.last_raw : p.last;
       var c = shares * p.entry, v = shares * last;
       mv += v; cost += c;
       rows.push({ ticker: p.ticker, weight: p.weight, entry: p.entry, last: last,
@@ -414,10 +414,10 @@
       read(vpath("equity"), null),
       read(vpath("signal"), null),
       read("quotes", {}),
-      read(vpath("curve"), null),
-      read(vpath("strategy_history"), null),
+      DSH.json(vpath("curve"), null),
+      DSH.json(vpath("strategy_history"), null),
       read(vpath("preview"), null),
-      read("name_zh", {}),
+      DSH.json("name_zh", {}),
       variant === "B" ? read("signal", null) : Promise.resolve(null)
     ]);
     if (variant !== VARIANT) return;
