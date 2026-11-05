@@ -2,7 +2,8 @@ import copy
 import unittest
 from unittest.mock import MagicMock,patch
 
-from live_strategy import calculate_equity,parse_daily,validate_anchor,store
+from live_strategy import calculate_equity,parse_daily,validate_anchor,store,online_prices,sha,fetch_daily
+import requests
 from market_calendar import Calendar,fingerprint
 from research.install_exchange_calendar import CALENDAR
 
@@ -16,6 +17,7 @@ class IndependentEquityTests(unittest.TestCase):
             'stats':{'strategy':.2,'benchmark':.1},'points':[{'d':'20261102','s':1.2,'b':1.1}]},
             'signal':{'official':[{'ticker':'X','weight':1.}]}}
         self.quotes={'session':'2026-11-04','previous_session':'2026-11-03','intraday':False,
+            'fresh_until':'2026-11-05T14:50:00Z',
             'ts_local':'2026-11-05 05:00','ts':'2026-11-04T21:00:00Z','version':'v',
             'quotes':{'X':{'p':144.,'pc':132.},'SPY':{'p':110.,'pc':105.}}}
         self.prices={s:{'raw':dict(zip(['2026-11-02','2026-11-03','2026-11-04'],v)),
@@ -88,6 +90,29 @@ class IndependentEquityTests(unittest.TestCase):
 
 
 class ResultPublicationTests(unittest.TestCase):
+    def test_existing_online_paired_prices_need_no_external_fetch(self):
+        body={'raw':{'2026-11-02':120.,'2026-11-03':132.,'2026-11-04':144.},
+              'adjusted':{'2026-11-02':120.,'2026-11-03':132.,'2026-11-04':144.}}
+        connection=MagicMock();cursor=connection.cursor.return_value.__enter__.return_value
+        cursor.fetchall.return_value=[('X',body,sha(body))]
+        q={'session':'2026-11-04','previous_session':'2026-11-03','intraday':False}
+        with patch('live_strategy.db_sources.db',return_value=connection),patch('live_strategy.requests.get') as get:
+            result=online_prices(['X'],'2026-11-02',q)
+        self.assertEqual(result['X']['raw']['2026-11-04'],144)
+        self.assertAlmostEqual(result['X']['adjusted']['2026-11-04'],1.2)
+        get.assert_not_called()
+
+    def test_transient_source_disconnect_retries_but_does_not_swallow_permanent_failure(self):
+        response=MagicMock();response.json.return_value={'rc':0,'data':{'code':'X','market':105,
+            'klines':['2026-11-04,1,2,3,1,1,1,1,1,1,1']}}
+        with patch('live_strategy.requests.get',side_effect=[requests.ConnectionError('disconnect'),response,response]) as get, \
+                patch('live_strategy.time.sleep'):
+            self.assertEqual(fetch_daily('X',105,'2026-11-04','2026-11-04')['raw']['2026-11-04'],2)
+            self.assertEqual(get.call_count,3)
+        with patch('live_strategy.requests.get',side_effect=requests.ConnectionError('offline')), \
+                patch('live_strategy.time.sleep'),self.assertRaises(requests.ConnectionError):
+            fetch_daily('X',105,'2026-11-04','2026-11-04')
+
     def test_quote_race_cannot_commit_any_financial_result(self):
         connection=MagicMock();cursor=connection.cursor.return_value.__enter__.return_value
         cursor.fetchone.return_value=('newer',)

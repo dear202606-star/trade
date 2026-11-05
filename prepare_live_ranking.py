@@ -10,7 +10,7 @@ from psycopg2.extras import Json,execute_values
 import db_ref
 import db_sources
 import live_quotes
-from live_strategy import fetch_daily,sha
+from live_strategy import fetch_daily,sha,close_enough
 
 
 def normalized(body):
@@ -71,8 +71,16 @@ def prepare(path=None):
             begin=base
             if previous:
                 old=previous[0]
+                if sha(old)!=previous[1]:raise ValueError('Previous ranking context hash mismatch')
                 begin=q['previous_session'] if old['source_end']==session else old['source_end']
             data=fetch_daily(provider_symbol,market,begin,session)
+            quote=q['quotes'].get(symbol)
+            if quote:
+                previous=q['previous_session']
+                if previous not in data['raw'] or not close_enough(data['raw'][previous],quote['pc']):
+                    raise ValueError('Previous close not settled; retry collection: '+symbol)
+                if phase=='close' and (session not in data['raw'] or not close_enough(data['raw'][session],quote['p'])):
+                    raise ValueError('Closing bar not settled; retry collection: '+symbol)
             body={'symbol':symbol,'provider_symbol':provider_symbol,'market':market,'source_start':begin,'source_end':session,**data}
             if previous:
                 old,digest=previous;values=normalized(old)

@@ -19,9 +19,32 @@
 
   DSH.previewCurrent = function (preview, quotes) {
     return !!(preview && quotes && preview.quote_version && quotes.version &&
-      preview.quote_version === quotes.version && preview.session === quotes.session &&
+      (preview.quote_version === quotes.version ||
+        (Date.parse(preview.as_of_ts) <= Date.parse(quotes.ts) &&
+         DSH.quoteFreshness({ts:preview.as_of_ts,fresh_until:preview.fresh_until}) === false)) &&
+      preview.session === quotes.session &&
       preview.reference_version && Array.isArray(preview.top) && preview.top.length === 3 &&
       DSH.quoteFreshness(quotes) === false);
+  };
+
+  DSH.marketAdvice = function (equity, quotes) {
+    const basis=equity && equity.market_advice, spy=quotes && quotes.quotes && quotes.quotes.SPY;
+    if (!basis || !spy || DSH.quoteFreshness(quotes)!==false || !Number.isFinite(spy.p) || spy.p<=0 ||
+        !/^\d{4}-(0[1-9]|1[0-2])$/.test(basis.month) ||
+        basis.month!==String(quotes.session || '').slice(0,7) || basis.window!==10 ||
+        !basis.calendar_sha256 || basis.calendar_sha256!==quotes.calendar_sha256 ||
+        !Array.isArray(basis.closes) || basis.closes.length!==9) return null;
+    const date=new Date(basis.month+'-01T00:00:00Z');
+    let sum=0;
+    for (let i=8;i>=0;i--) {
+      date.setUTCMonth(date.getUTCMonth()-1);
+      const row=basis.closes[i];
+      if (!row || String(row.date).slice(0,7)!==date.toISOString().slice(0,7) ||
+          !Number.isFinite(row.price) || row.price<=0) return null;
+      sum+=row.price;
+    }
+    const ma=(sum+spy.p)/10;
+    return {spy:spy.p,ma:ma,trend:spy.p>=ma?'满仓':'半仓'};
   };
 
   DSH.todayUnavailable = function (quotes, equity) {
@@ -114,8 +137,13 @@
         url = "data/" + name + ".json?t=" + Date.now();
       }
       const r = await fetch(url, { cache: "no-store", headers: headers });
-      if (!r.ok) throw new Error("HTTP " + r.status);
+      if (!r.ok) {
+        if ((name === 'quotes' || runtime) && (r.status===401 || r.status===403)) delete cache.cloud;
+        throw new Error("HTTP " + r.status);
+      }
       let _d = await r.json();
+      if (name==='cloud' && (!_d || typeof _d.url!=='string' || !/^https:\/\//.test(_d.url) ||
+          typeof _d.key!=='string' || !_d.key)) throw new Error('Invalid online configuration');
       if (name === 'quotes') {
         if (!Array.isArray(_d) || _d.length !== 1 || !_d[0].payload ||
             !_d[0].payload.ok || !_d[0].payload.quotes || !_d[0].payload.quotes.SPY)
@@ -131,8 +159,8 @@
       if (name === 'quotes' && _d && _d.quotes) _d.quotes.__session = _d.session || '';
       cache[name] = _d;
     } catch (e) {
-      g.__dshErr = (g.__dshErr || []).concat(url + " -> " + e.message);
-      cache[name] = fallback === undefined ? null : fallback;
+      g.__dshErr = (g.__dshErr || []).concat(url + " -> " + e.message).slice(-20);
+      return fallback === undefined ? null : fallback;
     }
     return cache[name];
   };
@@ -496,12 +524,16 @@
   DSH.today = function (signal, quotes, equity) {
     if (equity && equity.runtime_verified === true) {
       const day = equity.today, amount = +(localStorage.getItem("dsh.amt") || 100000);
+      const lagging = !!(quotes && equity.quote_version !== quotes.version);
+      const ownFresh = DSH.quoteFreshness({ts:equity.source_as_of,fresh_until:equity.fresh_until});
       if (!day || !quotes || DSH.quoteFreshness(quotes) !== false ||
-          equity.quote_version !== quotes.version || day.quote_version !== quotes.version ||
+          (lagging && (ownFresh !== false || Date.parse(equity.source_as_of) > Date.parse(quotes.ts))) ||
+          day.quote_version !== equity.quote_version ||
           day.session !== quotes.session || !Number.isFinite(day.pct) || day.pct <= -1 ||
           !Number.isFinite(day.per_dollar) || !Number.isFinite(amount) || amount <= 0) return null;
       return {amount:amount*day.per_dollar,pct:day.pct,session:day.session,
-        asOf:quotes.ts_local,live:quotes.intraday === true,label:"今日"};
+        asOf:equity.updated,live:typeof equity.quote_intraday==='boolean' ? equity.quote_intraday : quotes.intraday === true,
+        label:"今日",lagging:lagging};
     }
     // 口径：day = Σ 股数×(最新价−昨收)，基数 = 当前市值（不是目标权重）
     const qs = (quotes && quotes.quotes) || {};

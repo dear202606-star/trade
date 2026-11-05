@@ -87,17 +87,28 @@ def history_problems(report, now):
     return problems
 
 
-def published_dependency_problems(equity, preview, quotes):
+def published_dependency_problems(equity, preview, quotes, now=None):
     """A healthy quote worker does not prove dependent calculations advanced."""
     if not isinstance(quotes,dict) or not quotes.get('version') or not quotes.get('session'):
         raise ValueError('缺少在线报价版本或场次')
     problems=[]
+    now=now or dt.datetime.now(dt.timezone.utc)
+    def current(payload):
+        if not isinstance(payload,dict) or not payload.get('quote_version'):return False
+        if payload['quote_version']==quotes['version']:return True
+        try:
+            source=timestamp(payload.get('source_as_of') or payload.get('as_of_ts'))
+            deadline=timestamp(payload.get('fresh_until'))
+            return source<=timestamp(quotes.get('ts')) and source<deadline and now<deadline
+        except (ValueError,TypeError):return False
     settled=str((equity or {}).get('last_session','')).replace('-','')
     allowed={str(quotes.get(k,'')).replace('-','') for k in ('session','previous_session')}
-    if not settled or settled not in allowed:
+    if not settled or settled not in allowed or not current(equity):
         problems.append('收益基准落后于可衔接报价场次')
+    if isinstance(equity,dict) and equity.get('market_advice_error'):
+        problems.append('大盘建议缺少已核验的月末价格')
     if (not isinstance(preview,dict) or not preview.get('reference_version')
-            or preview.get('quote_version')!=quotes['version']
+            or not current(preview)
             or preview.get('session')!=quotes['session']
             or not isinstance(preview.get('top'),list) or len(preview['top'])!=3):
         problems.append('次年预览未跟随当前报价版本完成核验')

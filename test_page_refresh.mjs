@@ -7,13 +7,13 @@ function page(read) {
   const calls=[], paints=[], elements=new Map();
   const document={readyState:'loading',hidden:false,addEventListener(){},querySelectorAll(){return [];},
     getElementById(id){
-      if (!elements.has(id)) elements.set(id,{textContent:'',className:'',innerHTML:''});
+      if (!elements.has(id)) elements.set(id,{textContent:'',className:'',innerHTML:'',style:{}});
       return elements.get(id);
     }};
   let tick;
   const context=vm.createContext({document,window:{},localStorage:{getItem(){return null;}},
     DSH:{jsonNoCache:async(name,fallback)=>{calls.push(name);return read(name,fallback);},
-      json:async(name,fallback)=>read(name,fallback)},
+      json:async(name,fallback)=>read(name,fallback),previewCurrent:()=>false},
     setInterval(fn){tick=fn;},console});
   const source=readFileSync(new URL('./site_src/assets/page.js',import.meta.url),'utf8');
   vm.runInContext(source.replace('  if (document.readyState === "loading")',`
@@ -51,4 +51,13 @@ test('an old variant response cannot overwrite a newly selected variant',async()
   const pending=p.api.loadVariant(true);
   p.api.switchTo('A');release();await pending;
   assert.equal(p.api.state().EQ,null);
+});
+
+test('a failed account refresh clears the prior variant positions instead of leaving ghost values',async()=>{
+  const p=page(()=>null);p.api.startAutoRefresh();
+  const positions=p.context.document.getElementById('posRows');positions.innerHTML='old variant holdings';
+  const daily=p.context.document.getElementById('todayPct');daily.textContent='+9%';
+  await p.tick();
+  assert.equal(positions.innerHTML,'');assert.equal(daily.textContent,'—');
+  assert.equal(p.context.document.getElementById('verdict').textContent,'数据未就绪');
 });

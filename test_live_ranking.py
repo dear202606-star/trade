@@ -40,6 +40,7 @@ class IndependentRankingTests(unittest.TestCase):
         bodies={s:{'raw':{'2025-12-31':10.,'2026-11-04':v},
                    'adjusted':{'2025-12-31':10.,'2026-11-04':v}} for s,v in [('A',80.),('B',40.),('C',30.),('D',20.)]}
         q={'session':'2026-11-04','previous_session':'2026-11-03','intraday':False,
+           'fresh_until':'2026-11-05T14:50:00Z',
            'ts_local':'2026-11-05 05:00','ts':'2026-11-04T21:00:00Z','version':'v',
            'quotes':{s:{'p':b['raw']['2026-11-04']} for s,b in bodies.items()}}
         return q,pool,sectors,bodies
@@ -59,6 +60,20 @@ class IndependentRankingTests(unittest.TestCase):
               'adjusted':{'2026-11-03':100.,'2026-11-04':110.},
               'normalized':{'2026-11-03':2.,'2026-11-04':2.2}}
         self.assertEqual(normalized(body)['2026-11-04'],2.2)
+
+    def test_prior_year_renames_listings_and_distributions_are_not_applied_again(self):
+        q,pool,sectors,bodies=self.fixture()
+        for body in bodies.values():
+            value=body['raw']['2026-11-04']
+            body['raw']={'2026-12-31':10.,'2027-11-04':value};body['adjusted']=dict(body['raw'])
+        q.update(session='2027-11-04',previous_session='2027-11-03')
+        reviews={'A':{'effective_date':'2026-05-21','raw':{'2025-12-31':5.,'2026-05-20':8.},
+                       'pre_boundary_cash_distributions':[]},
+                 'D':{'kind':'new_listing','first_regular_way_date':'2026-06-01','sources':['issuer']}}
+        terms={'D':{'event_date':'2026-06-01','kind':'spinoff','distributed_symbol':'OLD_CHILD'}}
+        payload,_=calculate('A',q,pool,sectors,[],reviews,bodies,bodies,terms,'ref')
+        self.assertEqual(payload['ranked'],4)
+        self.assertEqual(payload['top'][0]['ytd'],7)
 
 
 if __name__=='__main__':unittest.main()
