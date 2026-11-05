@@ -1,0 +1,73 @@
+{
+  "read_only": true,
+  "selected_WIKI_return_rows": 0,
+  "selected_WIKI_raw_nominal_observations_not_acceptance_count": 60760,
+  "accepted_holding_paths_checked": [
+    {
+      "symbol": "ATVI",
+      "year": 2023,
+      "producer": "atvi_cash_merger",
+      "evidence_sha256": "7132c4c4b1c6602a035a653c7ed0790468b872346c1c66a641a34800c308f04b",
+      "calculator_sha256": "744de5fde76e99079f6aaf36f0a388ba02f8a46411b74889e23f9976c6a580fe",
+      "wiki_usage": "No WIKI holding-return input"
+    },
+    {
+      "symbol": "BBWI",
+      "year": 2021,
+      "producer": "lb_distribution",
+      "evidence_sha256": "6e690ab4c64270ac37af9ed8ef76f4ca99d1381b9d94e41d9ecdc5f2fb831b84",
+      "calculator_sha256": "1b047e7994aba2a2c266384cbeecc3613c4ceb026c45fccc23d130ee9089e656",
+      "wiki_usage": "WIKI earlier unit/identity crosscheck only; 2021 holdings use the separate 2022 Yahoo vintage and VSCO inputs"
+    },
+    {
+      "symbol": "CVC",
+      "year": 2016,
+      "producer": "cvc_cash_merger",
+      "evidence_sha256": "ece6e92f0073303cb3435ad15b62b05a15eb9005f53944abed7bea285f6e8bbc",
+      "calculator_sha256": "9842aad8ef6f4a4691bf1230876a6fa660d157dd84a9cbc8b5bec7302f8989a6",
+      "wiki_usage": "WIKI actual 2016 return input; issuer confirms no ordinary dividends before cash exit"
+    },
+    {
+      "symbol": "LB",
+      "year": 2021,
+      "producer": "lb_distribution",
+      "evidence_sha256": "5ab6f4a641b372351d8dc9968a198fef3a68b2c7f651042e5f06bdf9e1354804",
+      "calculator_sha256": "1b047e7994aba2a2c266384cbeecc3613c4ceb026c45fccc23d130ee9089e656",
+      "wiki_usage": "WIKI earlier unit/identity crosscheck only; 2021 holdings use the separate 2022 Yahoo vintage and VSCO inputs"
+    },
+    {
+      "symbol": "TT",
+      "year": 2020,
+      "producer": "tt_ir_distribution",
+      "evidence_sha256": "792d191dbb4703353fc6c5fa630eb992e464aa9567757ef3c6479d6bf0d1b97d",
+      "calculator_sha256": "65d110fbe64307e9f0794e80377d6dbe260958502c106a01bc36c4cfcf335c97",
+      "wiki_usage": "No WIKI holding-return input"
+    },
+    {
+      "symbol": "TWTR",
+      "year": 2022,
+      "producer": "twtr_cash_merger",
+      "evidence_sha256": "45a28735ce3e289276afa7120215502f654be701fbee08def4fc4a3cfa3e92a2",
+      "calculator_sha256": "da02e5f676d3003c3a9c9ef1f7c0907f20d637542d74da1036e01e96f0216fdb",
+      "wiki_usage": "No WIKI holding-return input"
+    },
+    {
+      "symbol": "WDC",
+      "year": 2025,
+      "producer": "wdc_distribution",
+      "evidence_sha256": "22a69f3611222a96d819b4380b2faf57c60f0a07cfebbd79e01122e393ab393c",
+      "calculator_sha256": "e39859073d3f9a072204e7842fb3e5368fa7e0bbb96d474c8bf3775226ff35af",
+      "wiki_usage": "No WIKI holding-return input"
+    }
+  ],
+  "CVC_independent_cash_review": {
+    "issuer_no_dividend_source": "https://www.sec.gov/Archives/edgar/data/1702780/000104746918003930/R41.htm",
+    "issuer_period": "2016-01-01 through 2016-06-20",
+    "verified_months": 12,
+    "cash_conversion_from_month": "2016-06",
+    "cash_per_original_share": 34.9
+  },
+  "2017_dividend_gap_enters_current_accepted_holding_values": false,
+  "raw_close_and_full_return_acceptance_are_separate": true,
+  "full_history_accepted": false
+}
