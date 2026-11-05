@@ -26,6 +26,7 @@ class MissingHoldingMonthTests(unittest.TestCase):
             stack.enter_context(patch.object(strategy_history.datafeed,'load_members',return_value=frame))
             stack.enter_context(patch.object(strategy_history.datafeed,'load_sector',return_value=({'BCR':'Health'},{})))
             stack.enter_context(patch.object(strategy_history.db_ref,'require_unquarantined_candidates'))
+            stack.enter_context(patch.object(strategy_history.historical_lineage,'require_complete_history'))
             stack.enter_context(patch.object(strategy_history.datafeed,'prefetch'))
             stack.enter_context(patch.object(strategy_history,'load_bars',return_value={}))
             stack.enter_context(patch.object(strategy_history,'pick_for_year',return_value=[{'ticker':'BCR','weight':1,'ret12':.1,'sector':'Health'}]))
