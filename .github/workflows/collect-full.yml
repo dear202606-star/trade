@@ -32,6 +32,9 @@ jobs:
       - name: 安装依赖
         run: pip install -q -r requirements.txt
 
+      - name: 档案隔离与选源口径回归
+        run: python -m unittest test_source_selection
+
       - name: 写入数据库口令
         env:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}

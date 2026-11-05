@@ -55,10 +55,13 @@ def compute_picks(cur):
                  count(*) filter (where month between '2012-01' and '2025-12') as cov
           from prices_monthly
           where month >= '2008-01'
+            and source <> 'kaggle_cc0'
+            and source <> 'kaggle_yahoo2020'
+            and not exists (select 1 from series_quarantine q where q.symbol=prices_monthly.symbol)
           group by symbol, source
         )
-        select symbol, source from (
-          select symbol, source,
+        select symbol, source, case when basis_rank=0 then 'total_return' else 'price_only' end from (
+          select symbol, source, basis_rank,
                  row_number() over (partition by symbol
                    order by
                      -- 1) 覆盖够（>=150 个月）且是全收益 最优
@@ -84,24 +87,24 @@ def refresh(dry_run=False):
     changed = kept = blocked = 0
     with c.cursor() as cur:
         picks = compute_picks(cur)
-        cur.execute("select symbol, source from series_pick")
-        cur_pick = dict(cur.fetchall())
+        cur.execute("select symbol, source, basis from series_pick")
+        cur_pick = {symbol: (source, basis) for symbol, source, basis in cur.fetchall()}
         cur.execute("select symbol from locked_symbols")
         locked = {r[0] for r in cur.fetchall()}
         cur.execute("select symbol from series_pick where frozen")
         frozen = {r[0] for r in cur.fetchall()}
 
         rows = []
-        for sym, src in picks:
+        for sym, src, basis in picks:
             old = cur_pick.get(sym)
-            if old == src:
+            if old == (src, basis):
                 kept += 1
                 continue
             if old is not None and (sym in locked or sym in frozen):
                 blocked += 1
                 continue
             changed += 1
-            rows.append((sym, src))
+            rows.append((sym, src, basis))
 
         print("决策：不变 %d ｜ 变更 %d ｜ 因锁定/冻结而拒绝 %d" % (kept, changed, blocked))
         if dry_run:
@@ -114,10 +117,10 @@ def refresh(dry_run=False):
                 cur, """insert into series_pick(symbol, source, basis, chosen_at, reason)
                         values %s
                         on conflict (symbol) do update
-                          set source = excluded.source, chosen_at = now(),
+                          set source = excluded.source, basis = excluded.basis, chosen_at = now(),
                               reason = excluded.reason""",
-                [(s, src, "total_return", __import__("datetime").datetime.now(
-                    __import__("datetime").timezone.utc), "auto") for s, src in rows],
+                [(s, src, basis, __import__("datetime").datetime.now(
+                    __import__("datetime").timezone.utc), "auto") for s, src, basis in rows],
                 page_size=500)
         cur.execute("select count(*), count(distinct symbol) from v_series")
         n, syms = cur.fetchone()
