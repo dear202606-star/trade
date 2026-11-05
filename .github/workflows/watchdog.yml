@@ -37,7 +37,7 @@ jobs:
         run: |
           python - <<'PY'
           import json, time, urllib.request, datetime as dt
-          from watchdog_checks import quality_problems, history_problems
+          from watchdog_checks import quality_problems, history_problems, published_dependency_problems
           problems = []
           base = "https://dear202606-star.github.io/trade/data/"
           # 1) health.json
@@ -67,6 +67,20 @@ jobs:
               problems.extend(quality_problems(q))
           except Exception as e:
               problems.append("线上质量报告读取或校验失败: %s" % str(e)[:100])
+          # 行情独立成功时，仍需检查收益基准与预览是否推进。
+          try:
+              cfg = json.load(urllib.request.urlopen(base + "cloud.json", timeout=20))
+              req = urllib.request.Request(cfg['url'] + '/rest/v1/live_quote_snapshot?singleton=eq.true&select=payload', headers={'apikey':cfg['key']})
+              quotes = json.load(urllib.request.urlopen(req, timeout=20))[0]['payload']
+              for prefix in ('', 'b/'):
+                  try:
+                      def artifact(name):
+                          return json.load(urllib.request.urlopen(base + prefix + name + '.json?nocache=' + str(time.time()), timeout=20))
+                      problems.extend(prefix + p for p in published_dependency_problems(artifact('equity'), artifact('preview'), quotes))
+                  except Exception as e:
+                      problems.append(prefix + '计算依赖读取或校验失败: ' + str(e)[:100])
+          except Exception as e:
+              problems.append('在线计算依赖检查失败: ' + str(e)[:100])
           try:
               with open("output/realtime_check.json", encoding="utf-8") as f:
                   problems.extend(json.load(f)["problems"])

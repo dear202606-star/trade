@@ -15,6 +15,27 @@ function reader(reply) {
   return {dsh:context.window.DSH,calls};
 }
 
+test('preview requires the same quote version and session, proof and three selections',()=>{
+  const {dsh}=reader(async()=>({ok:false}));
+  const quotes={version:'current',session:'2026-11-04',ts:new Date(Date.now()-1000).toISOString(),
+    fresh_until:new Date(Date.now()+60000).toISOString()};
+  const preview={quote_version:'current',session:quotes.session,reference_version:'reviewed',top:[{},{},{}]};
+  assert.equal(dsh.previewCurrent(preview,quotes),true);
+  for (const patch of [{quote_version:undefined},{quote_version:'old'},{session:'2026-11-02'},
+      {reference_version:null},{top:[]}]) assert.equal(dsh.previewCurrent({...preview,...patch},quotes),false);
+  assert.equal(dsh.previewCurrent(preview,{...quotes,fresh_until:new Date(Date.now()-100).toISOString()}),false);
+  assert.equal(dsh.previewCurrent(null,quotes),false);
+});
+
+test('daily failure explains a stalled equity anchor separately from quote failure',()=>{
+  const {dsh}=reader(async()=>({ok:false}));
+  const quotes={session:'2026-11-04',previous_session:'2026-11-03',quotes:{},
+    ts:new Date(Date.now()-1000).toISOString(),fresh_until:new Date(Date.now()+60000).toISOString()};
+  assert.equal(dsh.todayUnavailable({},{}),'行情读取失败');
+  assert.equal(dsh.todayUnavailable(quotes,{last_session:'20261102'}),'收益基准待更新');
+  assert.equal(dsh.todayUnavailable(quotes,{last_session:'20261103'}),'持仓报价或价格口径待核验');
+});
+
 test('freshness follows the reviewed deadline across weekends and recovers after refresh',()=>{
   const {dsh}=reader(async()=>({ok:false}));
   const friday={ts:'2026-11-06T21:00:00Z',fresh_until:'2026-11-09T14:50:00Z'};
