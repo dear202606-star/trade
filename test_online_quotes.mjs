@@ -53,9 +53,19 @@ test('quotes read the online database instead of a deployment snapshot',async()=
   const {dsh,calls}=reader(async()=>({ok:true,json:async()=>[{payload}]}));
   const result=await dsh.json('quotes',{});
   assert.equal(result.ts,payload.ts);
-  assert.ok(calls[1].url.includes('/rest/v1/live_quote_snapshot?'));
+  assert.ok(calls[1].url.includes('/rest/v1/v_live_quote_display?'));
   assert.equal(calls[1].options.headers.apikey,'public-test-key');
   assert.equal(calls.some(c=>c.url.includes('data/quotes.json')),false);
+});
+
+test('both strategy variants read live equity, ranking and official anchors online',async()=>{
+  for (const prefix of ['', 'b/']) {
+    const {dsh,calls}=reader(async(url)=>({ok:true,json:async()=>[
+      {payload:url.includes('live_strategy_anchor')?{signal:{official:[{ticker:'X'}]}}:{quote_version:'current'}}]}));
+    for (const name of ['equity','preview','signal']) assert.ok(await dsh.json(prefix+name,null));
+    assert.ok(calls.some(c=>c.url.includes('variant=eq.'+(prefix?'B':'A'))));
+    assert.equal(calls.some(c=>/data\/(b\/)?(equity|preview|signal)\.json/.test(c.url)),false);
+  }
 });
 
 test('database failure and malformed snapshots never fall back to old quote files',async()=>{

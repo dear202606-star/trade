@@ -27,6 +27,7 @@
   DSH.todayUnavailable = function (quotes, equity) {
     if (!quotes || !quotes.quotes || !quotes.ts) return "行情读取失败";
     if (DSH.quoteFreshness(quotes) !== false) return "行情时效待核验";
+    if (equity && equity.runtime_verified && equity.quote_version !== quotes.version) return "收益计算更新中";
     const settled = String(equity && equity.last_session || '').replace(/\D/g, '');
     const session = String(quotes.session || '').replace(/\D/g, '');
     const previous = String(quotes.previous_session || '').replace(/\D/g, '');
@@ -98,10 +99,16 @@
     let url = "data/" + name + ".json";
     try {
       let headers = {};
-      if (name === 'quotes') {
+      const runtime = /^(b\/)?(equity|preview|signal)$/.exec(name);
+      if (name === 'quotes' || runtime) {
         const cfg = await DSH.json('cloud', null);
         if (!cfg || !cfg.url || !cfg.key) throw new Error('Online quote configuration unavailable');
-        url = cfg.url + '/rest/v1/live_quote_snapshot?singleton=eq.true&select=payload';
+        if (runtime) {
+          const variant = runtime[1] ? 'B' : 'A', kind = runtime[2];
+          url = cfg.url + (kind === 'signal'
+            ? '/rest/v1/live_strategy_anchor?variant=eq.' + variant + '&select=payload&order=hold_year.desc,revision.desc&limit=1'
+            : '/rest/v1/v_live_strategy_results?variant=eq.' + variant + '&kind=eq.' + kind + '&select=payload');
+        } else url = cfg.url + '/rest/v1/v_live_quote_display?select=payload';
         headers = { apikey: cfg.key };
       } else {
         url = "data/" + name + ".json?t=" + Date.now();
@@ -114,6 +121,11 @@
             !_d[0].payload.ok || !_d[0].payload.quotes || !_d[0].payload.quotes.SPY)
           throw new Error('Online quote snapshot unavailable');
         _d = _d[0].payload;
+      } else if (runtime) {
+        if (!Array.isArray(_d) || _d.length !== 1 || !_d[0].payload)
+          throw new Error('Online strategy result unavailable');
+        _d = runtime[2] === 'signal' ? _d[0].payload.signal : _d[0].payload;
+        if (!_d) throw new Error('Online strategy payload unavailable');
       }
       // 行情：把「最近交易日」挂到报价表上，供各页面显示与判断新仓
       if (name === 'quotes' && _d && _d.quotes) _d.quotes.__session = _d.session || '';
@@ -482,6 +494,15 @@
   /* ---------- 当日涨跌（三页共用的唯一口径） ----------
      按正式持仓权重合成最新报价的日内涨跌；行情够新显示「盘中」，否则「收盘」。 */
   DSH.today = function (signal, quotes, equity) {
+    if (equity && equity.runtime_verified === true) {
+      const day = equity.today, amount = +(localStorage.getItem("dsh.amt") || 100000);
+      if (!day || !quotes || DSH.quoteFreshness(quotes) !== false ||
+          equity.quote_version !== quotes.version || day.quote_version !== quotes.version ||
+          day.session !== quotes.session || !Number.isFinite(day.pct) || day.pct <= -1 ||
+          !Number.isFinite(day.per_dollar) || !Number.isFinite(amount) || amount <= 0) return null;
+      return {amount:amount*day.per_dollar,pct:day.pct,session:day.session,
+        asOf:quotes.ts_local,live:quotes.intraday === true,label:"今日"};
+    }
     // 口径：day = Σ 股数×(最新价−昨收)，基数 = 当前市值（不是目标权重）
     const qs = (quotes && quotes.quotes) || {};
     const pos = (equity && equity.position) || [];
@@ -549,6 +570,11 @@
     const spy = quotes.quotes && quotes.quotes.SPY;
     result.benchmark = result.benchmark != null && spy && Number.isFinite(spy.p) && spy.p>0 && Number.isFinite(spy.pc) && spy.pc>0
       ? (1+result.benchmark)*spy.p/spy.pc-1 : null;
+    if (equity && equity.runtime_verified) {
+      const factor = equity.today && equity.today.benchmark_factor;
+      result.benchmark = Number.isFinite(bench) && Number.isFinite(factor) && factor > 0
+        ? (1+bench)*factor-1 : null;
+    }
     result.asOf = session;
     result.bridged = true;
     return result;

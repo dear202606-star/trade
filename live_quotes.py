@@ -123,12 +123,24 @@ def build_snapshot(tickers, raw, fx, now, calendar=None, reference=None):
     return payload,sha
 
 
+def held_symbols(year):
+    connection=db_sources.db()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('''select payload from (
+                select distinct on(variant) variant,payload from live_strategy_anchor
+                where hold_year<=%s order by variant,hold_year desc,revision desc
+                ) anchors''',(year,))
+            return {p['ticker'] for (body,) in cursor.fetchall() for p in body['equity']['position']}
+    finally:connection.close()
+
+
 def universe(now):
     date = now.astimezone(ET).date().isoformat()
     active,_,version = db_ref.load_market_reference(date)
     if len(active)<450:
         raise RuntimeError('Online current membership is incomplete')
-    return sorted(active | set(quotes.EXTRA)),{'as_of':date,'version':version}
+    return sorted(active | set(quotes.EXTRA) | held_symbols(int(date[:4]))),{'as_of':date,'version':version}
 
 
 def collect(now):

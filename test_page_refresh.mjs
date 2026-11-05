@@ -39,8 +39,9 @@ test('unchanged quotes still refresh dependent artifacts and recheck deadlines',
   assert.equal(p.paints[1].EQ.revision,1);
   assert.equal(p.paints[1].PV.revision,1);
   assert.equal(p.context.window.checked,2);
-  for(const name of ['b/equity','b/signal','b/preview','b/curve','b/strategy_history','quotes'])
+  for(const name of ['b/equity','b/signal','b/preview','quotes'])
     assert.equal(p.calls.filter(n=>n===name).length,2);
+  assert.equal(p.calls.some(n=>['b/curve','b/strategy_history','name_zh'].includes(n)),false);
 });
 
 test('an old variant response cannot overwrite a newly selected variant',async()=>{

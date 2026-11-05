@@ -1,0 +1,57 @@
+name: 在线净值与动态排名
+
+on:
+  workflow_run:
+    workflows: [行情快照]
+    types: [completed]
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - live_strategy.py
+      - live_ranking.py
+      - live_cash_dividends.py
+      - prepare_live_ranking.py
+      - test_live_strategy.py
+      - test_live_ranking.py
+      - test_live_cash_dividends.py
+      - .github/workflows/live-strategy.yml
+
+permissions:
+  contents: read
+
+jobs:
+  equity:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    concurrency:
+      group: trade-current-equity
+      cancel-in-progress: false
+    env:
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - run: python -m unittest test_live_strategy test_live_cash_dividends
+      - run: python live_strategy.py
+  ranking:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: trade-current-ranking
+      cancel-in-progress: false
+    env:
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - run: python -m unittest test_live_ranking
+      - run: python live_ranking.py

@@ -92,12 +92,14 @@ class LiveQuoteTests(unittest.TestCase):
 
     def test_online_universe_does_not_read_local_files_or_use_inactive_members(self):
         members = {str(i) for i in range(500)}
-        with patch.object(live.db_ref,'load_market_reference',return_value=(members,{},'verified-reference')) as reader:
+        with patch.object(live.db_ref,'load_market_reference',return_value=(members,{},'verified-reference')) as reader, \
+                patch.object(live,'held_symbols',return_value={'STILL_HELD'}):
             actual,reference = live.universe(self.now)
         reader.assert_called_once_with('2026-11-03')
         self.assertEqual(reference,{'as_of':'2026-11-03','version':'verified-reference'})
         self.assertNotIn('OLD',actual)
         self.assertIn('SPY',actual)
+        self.assertIn('STILL_HELD',actual)
         with patch.object(live.db_ref,'load_market_reference',side_effect=RuntimeError('offline')):
             with self.assertRaisesRegex(RuntimeError,'offline'):
                 live.universe(self.now)
