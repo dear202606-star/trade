@@ -1,0 +1,14 @@
+{
+  "issuer_fact": {
+    "symbol": "SCG",
+    "date": "2013-12-31",
+    "close": 46.93,
+    "sha256": "e7c9791c4cbc2d5b7d261a632129948a8f4ac92344f0663d4b2e90a5cf1cb734"
+  },
+  "raw_rows_preserved": 562,
+  "online_receipt_hash_matches": true,
+  "public_selected_nominal_rows": 0,
+  "quarantine_preserved": true,
+  "accepted_nominal_fact_receipts": 75,
+  "full_history_accepted": false
+}
