@@ -4,9 +4,8 @@
 所有下游（variant_b / equity / 校验 / 导出）都通过这一层读数据，不再读本地 csv/json。
 
 核心规则
-  · 一个 (symbol, month) 可能多源并存 → 取「等级最高」的一条（source_priority）
-  · basis：total_return 优先于 price_only；同 basis 内按 source_registry.priority
-  · 读取带进程内缓存，减少往返
+  · 正式读取统一使用 series_selected 的在线选源与证券隔离边界
+  · 不按月份重新混选来源，不以复权价补造缺失的原始价格
 """
 import io
 import os
@@ -19,16 +18,11 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 REF = "fnvahsyrzmmxwovbsqpc"
 HOST = "aws-0-ap-northeast-1.pooler.supabase.com"
 
-# 源优先级（与 source_registry 保持一致；DB 不可达时的兜底）
-PRIORITY = {"alphavantage": 1, "yahoo_relay": 2, "eodhd": 3,
-            "hf_ayushkhaire": 4, "sina_repaired": 5, "sina_repaired+eodhd": 3}
-
 _conn = None
 _DB_DEAD = None      # True = 本进程已确认连不上
 _MARKER = os.path.join(BASE, "output", ".db_unavailable")
 CACHE_FILE = os.path.join(BASE, "output", "_prices_cache.json")
 CACHE_TTL = 6 * 3600      # 派生缓存，6 小时内直接用
-_cache = {}
 
 
 def connect():
@@ -58,25 +52,13 @@ def connect():
 
 
 def series(symbol, prefer_basis="total_return"):
-    """返回 {YYYY-MM: (adj, raw)}；同月多源时取最优"""
-    key = (symbol, prefer_basis)
-    if key in _cache:
-        return _cache[key]
+    """在线读取单证券正式序列；旧口径参数不覆盖已审核选源。"""
     with connect() as c, c.cursor() as cur:
-        cur.execute("""select month, adj_close, raw_close, source, basis
-                       from prices_monthly where symbol=%s""", (symbol,))
+        cur.execute("""select month, adj_close, raw_close
+                       from series_selected where symbol=%s order by month""", (symbol,))
         rows = cur.fetchall()
-    best = {}
-    for month, adj, raw, source, basis in rows:
-        rank = PRIORITY.get(source, 99)
-        score = (0 if basis == prefer_basis else 1, rank)
-        cur_score = best.get(month, (9, 99))[0:2]
-        if month not in best or score < (best[month][2], best[month][3]):
-            best[month] = (adj, raw, score[0], score[1], source)
-    out = {m: (float(v[0]), float(v[1]) if v[1] else float(v[0]))
-           for m, v in best.items() if v[0]}
-    _cache[key] = out
-    return out
+    return {month: (float(adj), float(raw) if raw is not None else None)
+            for month, adj, raw in rows}
 
 
 def symbols():
@@ -105,7 +87,6 @@ def write_rows(rows):
                     set adj_close=excluded.adj_close, raw_close=excluded.raw_close,
                         quality=excluded.quality, basis=excluded.basis, fetched_at=now()""",
             rows, page_size=5000)
-    _cache.clear()
     return len(rows)
 
 
