@@ -16,7 +16,8 @@ PRODUCERS={'lb_distribution':('research/audit_lb_distribution.py','reconstruct_n
            'twtr_cash_merger':('research/audit_twtr_cash_merger.py','research/import_twtr_cash_merger.py',
                                'fetch_stockanalysis.py','reconstruct_nominal.py'),
            'atvi_cash_merger':('research/audit_atvi_cash_merger.py','research/import_atvi_cash_merger.py',
-                               'fetch_stockanalysis.py','reconstruct_nominal.py')}
+                               'fetch_stockanalysis.py','reconstruct_nominal.py'),
+           'tt_ir_distribution':('research/audit_tt_ir_distribution.py','research/import_tt_ir_distribution.py')}
 _PATHS=None
 _EVIDENCE_SHA=None
 _EVENT_MONTHS={}

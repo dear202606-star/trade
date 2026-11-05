@@ -31,7 +31,7 @@
     "TIE": "Unreviewed >10x or <0.01x Sina jump within membership; see output/selected_jump_audit.json. May include genuine events; not a price correction."
   },
   "holding_event_policy": "cash_and_all_successor_shares",
-  "holding_event_input_sha": "eb6468b4c22f5f5eafb7c5988e18c1ecf4dc2f7efe4f399d91b3767de050ebe0",
+  "holding_event_input_sha": "2f4fb73bec29e55f9bc7c7904a5ee4eafb6b22ca3639d5d447fa8f5eefc21582",
   "comparison_scope": "legacy versus nominal floor on current sources and approved holding-event policy; before is not the published old baseline",
   "nominal_year_end_observations": 8509,
   "baseline_b_sha256": "20c0680276cf79cbb06d8aaab35c3e40cde010447f6e15e75abd95ff0ef33c90",
@@ -16206,11 +16206,6 @@
             "2020-01",
             "2020-02"
           ]
-        },
-        {
-          "symbol": "TT",
-          "reason": "unaccepted_momentum_event",
-          "detail": "TT transition window requires actual TT and distributed IR ownership evidence"
         },
         {
           "symbol": "VNT",
@@ -127706,6 +127701,18 @@
       "return12": -0.27345152326694244,
       "legacy_price": 64.44000244140625,
       "nominal_price": 64.44000031865298,
+      "nominal_status": "unit_supported_observation",
+      "legacy_pass": true,
+      "nominal_pass": true
+    },
+    {
+      "variant": "A",
+      "year": 2021,
+      "symbol": "TT",
+      "month": "2020-12",
+      "return12": 0.41506262819098594,
+      "legacy_price": 145.16000366210938,
+      "nominal_price": 145.16002807514528,
       "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
       "nominal_pass": true
