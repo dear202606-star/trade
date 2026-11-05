@@ -18,6 +18,7 @@ on:
       - db_ref.py
       - db_sources.py
       - test_live_quotes.py
+      - test_quote_repairs.py
       - watchdog_checks.py
       - test_watchdog_checks.py
       - .github/workflows/quotes.yml
@@ -39,7 +40,7 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - name: 在线报价与失败保护回归
-        run: python -m unittest test_live_quotes test_quote_snapshot test_market_calendar test_watchdog_checks
+        run: python -m unittest test_live_quotes test_quote_repairs test_quote_snapshot test_market_calendar test_watchdog_checks
       - name: 检查在线写入凭据
         run: test -n "$SUPABASE_DB_PASSWORD"
       - name: 刷新在线行情
