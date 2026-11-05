@@ -6,6 +6,8 @@ from unittest.mock import MagicMock, patch
 
 import fill_yahoo_gaps as backfill
 import lock_symbols
+import lock_stage
+import verify_locks
 import yahoo_fetch
 
 
@@ -89,6 +91,37 @@ class HistoricalBackfillGuards(unittest.TestCase):
                 lock_symbols.main()
             self.assertEqual(error.exception.code, 2)
             database.assert_not_called()
+
+    def test_even_a_passing_coverage_check_cannot_create_a_historical_lock(self):
+        with patch.object(lock_stage, 'db') as database, \
+             patch.object(lock_stage, 'check', return_value=(0, {'hash': 'unreviewed'})) as check:
+            cursor = database.return_value.__enter__.return_value.cursor.return_value.__enter__.return_value
+            cursor.fetchone.return_value = None
+            for force in (False, True):
+                with self.subTest(force=force), contextlib.redirect_stdout(io.StringIO()):
+                    self.assertEqual(lock_stage.lock(2010, 2025, force=force), 1)
+            check.assert_not_called()
+            self.assertEqual(cursor.execute.call_count, 2)
+            self.assertTrue(all(call.args[0].lstrip().startswith('select') for call in cursor.execute.call_args_list))
+
+    def test_read_only_lock_check_never_creates_missing_schema(self):
+        with patch.object(lock_stage, 'db') as database:
+            cursor = database.return_value.__enter__.return_value.cursor.return_value.__enter__.return_value
+            cursor.fetchone.return_value = (False,)
+            with self.assertRaisesRegex(RuntimeError, '只读诊断'):
+                lock_stage.ensure_table()
+            cursor.execute.assert_called_once()
+            self.assertTrue(cursor.execute.call_args.args[0].startswith('select '))
+
+    def test_empty_lock_list_cannot_claim_all_history_was_verified(self):
+        output = io.StringIO()
+        with patch('sys.argv', ['verify_locks.py']), \
+             patch.object(verify_locks, 'db') as database, contextlib.redirect_stdout(output):
+            cursor = database.return_value.cursor.return_value.__enter__.return_value
+            cursor.fetchall.return_value = []
+            self.assertEqual(verify_locks.main(), 0)
+        self.assertIn('未验证历史数据', output.getvalue())
+        self.assertNotIn('所有锁有效', output.getvalue())
 
 
 if __name__ == '__main__':

@@ -9,7 +9,7 @@
 
 用法
   python lock_stage.py --check 2010,2025      # 只校验，不锁
-  python lock_stage.py --lock 2010,2025       # 校验通过后锁定
+  python lock_stage.py --lock 2010,2025       # 只读核对既有锁；不创建新验收
   python lock_stage.py --list
 """
 import argparse
@@ -41,20 +41,9 @@ def db():
 
 def ensure_table():
     with db() as c, c.cursor() as cur:
-        cur.execute("""
-        create table if not exists locks (
-          id serial primary key,
-          kind text not null,              -- monthly_prices | membership | sector | derived
-          scope_from text, scope_to text,
-          status text default 'draft',      -- draft | locked
-          rows int, symbols int,
-          hash text,
-          monthly_only boolean default true,
-          locked_at timestamptz,
-          note text,
-          unique (kind, scope_from, scope_to)
-        )""")
-        # 不再重建守卫函数：只由 sql/010_guard_locked.sql 管理
+        cur.execute("select to_regclass('public.locks') is not null")
+        if not cur.fetchone()[0]:
+            raise RuntimeError('locks 不存在；只读诊断入口不创建数据库结构')
 
 
 def measure(y0, y1):
@@ -134,29 +123,8 @@ def lock(y0, y1, force=False):
     if existing is not None:
         print("✅ 历史区间已锁定，直接保留，不重新加工（hash %s）" % existing[0])
         return 0
-    _rc, m = check(y0, y1)
-    problems = [] if _rc == 0 else ["校验未通过（见上）"]
-    if problems:
-        print("✗ 未通过锁定校验：")
-        for p in problems:
-            print("   -", p)
-        print("  必须补齐并重新通过校验后才能锁定；不允许强制放行。")
-        return 1
-    with db() as c, c.cursor() as cur:
-        cur.execute("""insert into locks(kind, scope_from, scope_to, status, rows, symbols, hash,
-                                        locked_at, note)
-                       values ('monthly_prices', %s, %s, 'locked', %s, %s, %s, now(), %s)
-                       on conflict (kind, scope_from, scope_to) do update
-                       set status='locked', rows=excluded.rows, symbols=excluded.symbols,
-                           hash=excluded.hash, locked_at=now()
-                       where locks.status is distinct from 'locked'""",
-                    ("%d-01" % y0, "%d-12" % y1, m["rows"], m["symbols"], m["hash"],
-                     "锁定后不可写；修复需新建版本"))
-        if cur.rowcount==0:
-            print("✅ 历史区间已被锁定，保留原验收记录")
-            return 0
-    print("✅ 已锁定 %d-%d（hash %s）" % (y0, y1, m["hash"]))
-    return 0
+    print("✗ 覆盖和口径初筛不能创建完整验收锁；需要绑定身份、价格、现金流及收益的独立验收证据。")
+    return 1
 
 
 def listing():

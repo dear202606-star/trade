@@ -9,6 +9,8 @@ on:
       - test_source_selection.py
       - fill_yahoo_gaps.py
       - lock_symbols.py
+      - lock_stage.py
+      - verify_locks.py
       - test_historical_backfill_guards.py
       - fetch_stockanalysis.py
       - test_stockanalysis_history.py
