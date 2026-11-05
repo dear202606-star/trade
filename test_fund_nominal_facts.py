@@ -9,6 +9,31 @@ from research import import_fund_nominal_facts as facts
 
 
 class FundFactTests(unittest.TestCase):
+    def test_unresolved_security_is_reported_without_discarding_reviewed_points(self):
+        connection=MagicMock();cursor=connection.cursor.return_value.__enter__.return_value
+        cursor.fetchall.return_value=[]
+        cursor.fetchone.return_value=('yahoo_relay','total_return',False)
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);(root/'output').mkdir()
+            with patch.object(facts,'BASE',root), \
+                 patch.object(facts.db_sources,'db',return_value=connection), \
+                 patch.object(facts.fund,'REVIEWED_NAMES',{'ABNB':'Airbnb','CRWD':'Crowdstrike'}), \
+                 patch.object(facts.fund,'run',return_value={'reviewed_unit_proofs':[{'symbol':'ABNB'},{'symbol':'CRWD'}]}), \
+                 patch.object(facts,'review_symbol',side_effect=[{'valid':True},ValueError('identity unresolved')]):
+                with self.assertRaisesRegex(RuntimeError,'CRWD'):
+                    facts.run()
+            result=json.loads((root/'output/fund_nominal_fact_review.json').read_text())
+        self.assertEqual(result['proofs'],[{'valid':True}])
+        self.assertEqual(result['unresolved'],[{'symbol':'CRWD','reason':'identity unresolved'}])
+        self.assertTrue(all(call.args[0].lstrip().startswith('select') for call in cursor.execute.call_args_list))
+
+    def test_changed_fitb_issuer_document_is_rejected_before_pdf_processing(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);(root/'output/_fund_reports').mkdir(parents=True)
+            (root/'output/_fund_reports/FITB_2026_proxy.pdf').write_bytes(b'changed document')
+            with patch.object(facts,'BASE',root),self.assertRaisesRegex(ValueError,'issuer closing fact differs'):
+                facts.fitb_primary(46.81)
+
     def test_changed_review_batch_cannot_write_closing_facts(self):
         connection=MagicMock();cursor=connection.cursor.return_value.__enter__.return_value
         cursor.fetchall.side_effect=[[], [], []]

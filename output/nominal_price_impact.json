@@ -12,7 +12,7 @@
     "15953552.001695769696688242"
   ],
   "published_baselines_changed": false,
-  "nominal_snapshot_sha256": "6d0c5471ce02b64c2946149f1bca5c0eaa7cdf663cb0a55be68bd1e14b95be9e",
+  "nominal_snapshot_sha256": "3e70f863621bce6b35a6468944b7d2512a9fe0f76214b40f72caab21505b010b",
   "quarantine_snapshot_sha256": "1b8f6222f63f6a4acc4c3fd6c77657103555276091a2eb24bef12b62ca89be8e",
   "quarantined_security_reasons": {
     "BMC": "Unreviewed >10x or <0.01x Sina jump within membership; see output/selected_jump_audit.json. May include genuine events; not a price correction.",
@@ -33,7 +33,7 @@
   "holding_event_policy": "cash_and_all_successor_shares",
   "holding_event_input_sha": "3776ace159b52b324ae779312c2dfc89998cd1d929e13f51b1b2ba34feae38bb",
   "comparison_scope": "legacy versus nominal floor on current sources and approved holding-event policy; before is not the published old baseline",
-  "nominal_year_end_observations": 8462,
+  "nominal_year_end_observations": 8507,
   "baseline_b_sha256": "20c0680276cf79cbb06d8aaab35c3e40cde010447f6e15e75abd95ff0ef33c90",
   "fully_verified": false,
   "complete_variant_years": 0,
@@ -17945,67 +17945,22 @@
         "EQR",
         "ERIE",
         "ES",
-        "ETN",
         "ETR",
         "EW",
-        "EXC",
         "EXE",
-        "EXR",
-        "F",
-        "FANG",
-        "FAST",
-        "FCX",
-        "FDX",
-        "FE",
         "FICO",
-        "FIS",
         "FISV",
-        "FITB",
         "FIX",
-        "FTNT",
-        "FTV",
-        "GD",
         "GDDY",
-        "GE",
         "GEHC",
         "GEN",
         "GEV",
-        "GILD",
-        "GIS",
-        "GLW",
-        "GM",
-        "GPN",
-        "GRMN",
-        "GS",
         "GWW",
-        "HAL",
-        "HCA",
-        "HD",
-        "HIG",
-        "HLT",
         "HOLX",
-        "HON",
-        "HPE",
-        "HPQ",
-        "HSY",
         "HUBB",
-        "HUM",
-        "HWM",
         "IBKR",
-        "ICE",
-        "IDXX",
-        "IFF",
-        "INTU",
-        "INVH",
-        "IQV",
         "IR",
-        "ISRG",
-        "IT",
-        "ITW",
-        "JBL",
         "JCI",
-        "JNJ",
-        "JPM",
         "KDP",
         "KEYS",
         "KHC",
@@ -18215,63 +18170,18 @@
         "EQR",
         "ERIE",
         "ES",
-        "ETN",
         "ETR",
         "EW",
-        "EXC",
-        "EXR",
-        "F",
-        "FANG",
-        "FAST",
-        "FCX",
-        "FDX",
-        "FE",
         "FICO",
-        "FIS",
-        "FITB",
-        "FTNT",
-        "FTV",
-        "GD",
         "GDDY",
-        "GE",
         "GEHC",
         "GEN",
         "GEV",
-        "GILD",
-        "GIS",
-        "GLW",
-        "GM",
-        "GPN",
-        "GRMN",
-        "GS",
         "GWW",
-        "HAL",
-        "HCA",
-        "HD",
-        "HIG",
-        "HLT",
         "HOLX",
-        "HON",
-        "HPE",
-        "HPQ",
-        "HSY",
         "HUBB",
-        "HUM",
-        "HWM",
-        "ICE",
-        "IDXX",
-        "IFF",
-        "INTU",
-        "INVH",
-        "IQV",
         "IR",
-        "ISRG",
-        "IT",
-        "ITW",
-        "JBL",
         "JCI",
-        "JNJ",
-        "JPM",
         "KDP",
         "KEYS",
         "KHC",
@@ -183802,10 +183712,10 @@
       "month": "2025-12",
       "return12": -0.027895715092083773,
       "legacy_price": 318.510009765625,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 318.51,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -183850,10 +183760,10 @@
       "month": "2025-12",
       "return12": 0.20017575572695745,
       "legacy_price": 43.59000015258789,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 43.59,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -183898,10 +183808,10 @@
       "month": "2025-12",
       "return12": -0.08915973820226786,
       "legacy_price": 130.22000122070312,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 130.22,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -183910,10 +183820,10 @@
       "month": "2025-12",
       "return12": 0.4234514331619317,
       "legacy_price": 13.119999885559082,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 13.12,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -183922,10 +183832,10 @@
       "month": "2025-12",
       "return12": -0.056350737826706854,
       "legacy_price": 150.3300018310547,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 150.33,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -183934,10 +183844,10 @@
       "month": "2025-12",
       "return12": 0.13982867224476414,
       "legacy_price": 40.130001068115234,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 40.13,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -183946,10 +183856,10 @@
       "month": "2025-12",
       "return12": 0.3541070973793672,
       "legacy_price": 50.790000915527344,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 50.79,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -183970,10 +183880,10 @@
       "month": "2025-12",
       "return12": 0.05106004181287083,
       "legacy_price": 232.76390075683594,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 288.86,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -183982,10 +183892,10 @@
       "month": "2025-12",
       "return12": 0.1726055535183202,
       "legacy_price": 44.77000045776367,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 44.77,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184018,10 +183928,10 @@
       "month": "2025-12",
       "return12": -0.15847013437882207,
       "legacy_price": 66.45999908447266,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 66.46,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184042,10 +183952,10 @@
       "month": "2025-12",
       "return12": 0.147535562698204,
       "legacy_price": 46.810001373291016,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 46.81,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184114,10 +184024,10 @@
       "month": "2025-12",
       "return12": -0.15950464817292243,
       "legacy_price": 79.41000366210938,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 79.41,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184126,10 +184036,10 @@
       "month": "2025-12",
       "return12": -0.018774019853918467,
       "legacy_price": 55.209999084472656,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 55.21,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184138,10 +184048,10 @@
       "month": "2025-12",
       "return12": 0.30393977395376814,
       "legacy_price": 336.6600036621094,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 336.66,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184162,10 +184072,10 @@
       "month": "2025-12",
       "return12": 0.8573374157375835,
       "legacy_price": 308.0299987792969,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 308.03,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184210,10 +184120,10 @@
       "month": "2025-12",
       "return12": 0.36593454254789703,
       "legacy_price": 122.73999786376953,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 122.74,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184222,10 +184132,10 @@
       "month": "2025-12",
       "return12": -0.23745516705200787,
       "legacy_price": 46.5,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 46.5,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184246,10 +184156,10 @@
       "month": "2025-12",
       "return12": 0.8776111587063786,
       "legacy_price": 87.55999755859375,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 87.56,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184258,10 +184168,10 @@
       "month": "2025-12",
       "return12": 0.5423711852576061,
       "legacy_price": 81.31999969482422,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 81.32,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184318,10 +184228,10 @@
       "month": "2025-12",
       "return12": -0.30105855317057295,
       "legacy_price": 77.4000015258789,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 77.4,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184330,10 +184240,10 @@
       "month": "2025-12",
       "return12": -0.0005840216100931883,
       "legacy_price": 202.85000610351562,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 202.85,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184342,10 +184252,10 @@
       "month": "2025-12",
       "return12": 0.566376961935215,
       "legacy_price": 879.0,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 879.0,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184366,10 +184276,10 @@
       "month": "2025-12",
       "return12": 0.07023271866672598,
       "legacy_price": 28.260000228881836,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 28.26,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184402,10 +184312,10 @@
       "month": "2025-12",
       "return12": 0.5670884947030426,
       "legacy_price": 466.8599853515625,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 466.86,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184414,10 +184324,10 @@
       "month": "2025-12",
       "return12": -0.09334735555643736,
       "legacy_price": 344.1000061035156,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 344.1,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184426,10 +184336,10 @@
       "month": "2025-12",
       "return12": 0.2808673758339213,
       "legacy_price": 137.8000030517578,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 137.8,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184450,10 +184360,10 @@
       "month": "2025-12",
       "return12": 0.16485486243872338,
       "legacy_price": 287.25,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 287.25,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184474,10 +184384,10 @@
       "month": "2025-12",
       "return12": -0.06366077537849013,
       "legacy_price": 204.60409545898438,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 195.09,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184498,10 +184408,10 @@
       "month": "2025-12",
       "return12": 0.1553844471277619,
       "legacy_price": 24.020000457763672,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 24.02,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184510,10 +184420,10 @@
       "month": "2025-12",
       "return12": -0.2869343399585427,
       "legacy_price": 22.280000686645508,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 22.28,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184558,10 +184468,10 @@
       "month": "2025-12",
       "return12": 0.1098147555524438,
       "legacy_price": 181.97999572753906,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 181.98,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184582,10 +184492,10 @@
       "month": "2025-12",
       "return12": 0.0236468348900174,
       "legacy_price": 256.1300048828125,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 256.13,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184594,10 +184504,10 @@
       "month": "2025-12",
       "return12": 0.8795381464847711,
       "legacy_price": 205.02000427246094,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 205.02,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184630,10 +184540,10 @@
       "month": "2025-12",
       "return12": 0.09921827059043253,
       "legacy_price": 161.9600067138672,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 161.96,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184642,10 +184552,10 @@
       "month": "2025-12",
       "return12": 0.6363439079476945,
       "legacy_price": 676.530029296875,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 676.53,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184666,10 +184576,10 @@
       "month": "2025-12",
       "return12": -0.18430801062025348,
       "legacy_price": 67.38999938964844,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 67.39,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184702,10 +184612,10 @@
       "month": "2025-12",
       "return12": 0.060933977864377376,
       "legacy_price": 662.4199829101562,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 662.42,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184714,10 +184624,10 @@
       "month": "2025-12",
       "return12": -0.09678927849648589,
       "legacy_price": 27.790000915527344,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 27.79,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184738,10 +184648,10 @@
       "month": "2025-12",
       "return12": 0.14706635775855204,
       "legacy_price": 225.41000366210938,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 225.41,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184774,10 +184684,10 @@
       "month": "2025-12",
       "return12": 0.08506391583612927,
       "legacy_price": 566.3599853515625,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 566.36,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184786,10 +184696,10 @@
       "month": "2025-12",
       "return12": -0.47926600585457246,
       "legacy_price": 252.27999877929688,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 252.28,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184798,10 +184708,10 @@
       "month": "2025-12",
       "return12": -0.004253008328124364,
       "legacy_price": 246.3000030517578,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 246.3,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184846,10 +184756,10 @@
       "month": "2025-12",
       "return12": 0.587293677240387,
       "legacy_price": 228.02000427246094,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 228.02,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184882,10 +184792,10 @@
       "month": "2025-12",
       "return12": 0.4747952514353806,
       "legacy_price": 206.9499969482422,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 206.95,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184894,10 +184804,10 @@
       "month": "2025-12",
       "return12": 0.37266315689254803,
       "legacy_price": 322.2200012207031,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 322.22,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -189706,10 +189616,10 @@
       "month": "2025-12",
       "return12": -0.027895715092083773,
       "legacy_price": 318.510009765625,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 318.51,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -189754,10 +189664,10 @@
       "month": "2025-12",
       "return12": 0.20017575572695745,
       "legacy_price": 43.59000015258789,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 43.59,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -189790,10 +189700,10 @@
       "month": "2025-12",
       "return12": -0.08915973820226786,
       "legacy_price": 130.22000122070312,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 130.22,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -189802,10 +189712,10 @@
       "month": "2025-12",
       "return12": 0.4234514331619317,
       "legacy_price": 13.119999885559082,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 13.12,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -189814,10 +189724,10 @@
       "month": "2025-12",
       "return12": -0.056350737826706854,
       "legacy_price": 150.3300018310547,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 150.33,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -189826,10 +189736,10 @@
       "month": "2025-12",
       "return12": 0.13982867224476414,
       "legacy_price": 40.130001068115234,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 40.13,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -189838,10 +189748,10 @@
       "month": "2025-12",
       "return12": 0.3541070973793672,
       "legacy_price": 50.790000915527344,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 50.79,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -189862,10 +189772,10 @@
       "month": "2025-12",
       "return12": 0.05106004181287083,
       "legacy_price": 232.76390075683594,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 288.86,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -189874,10 +189784,10 @@
       "month": "2025-12",
       "return12": 0.1726055535183202,
       "legacy_price": 44.77000045776367,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 44.77,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -189910,10 +189820,10 @@
       "month": "2025-12",
       "return12": -0.15847013437882207,
       "legacy_price": 66.45999908447266,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 66.46,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -189922,10 +189832,10 @@
       "month": "2025-12",
       "return12": 0.147535562698204,
       "legacy_price": 46.810001373291016,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 46.81,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -189982,10 +189892,10 @@
       "month": "2025-12",
       "return12": -0.15950464817292243,
       "legacy_price": 79.41000366210938,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 79.41,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -189994,10 +189904,10 @@
       "month": "2025-12",
       "return12": -0.018774019853918467,
       "legacy_price": 55.209999084472656,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 55.21,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190006,10 +189916,10 @@
       "month": "2025-12",
       "return12": 0.30393977395376814,
       "legacy_price": 336.6600036621094,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 336.66,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190030,10 +189940,10 @@
       "month": "2025-12",
       "return12": 0.8573374157375835,
       "legacy_price": 308.0299987792969,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 308.03,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190078,10 +189988,10 @@
       "month": "2025-12",
       "return12": 0.36593454254789703,
       "legacy_price": 122.73999786376953,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 122.74,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190090,10 +190000,10 @@
       "month": "2025-12",
       "return12": -0.23745516705200787,
       "legacy_price": 46.5,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 46.5,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190114,10 +190024,10 @@
       "month": "2025-12",
       "return12": 0.8776111587063786,
       "legacy_price": 87.55999755859375,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 87.56,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190126,10 +190036,10 @@
       "month": "2025-12",
       "return12": 0.5423711852576061,
       "legacy_price": 81.31999969482422,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 81.32,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190186,10 +190096,10 @@
       "month": "2025-12",
       "return12": -0.30105855317057295,
       "legacy_price": 77.4000015258789,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 77.4,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190198,10 +190108,10 @@
       "month": "2025-12",
       "return12": -0.0005840216100931883,
       "legacy_price": 202.85000610351562,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 202.85,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190210,10 +190120,10 @@
       "month": "2025-12",
       "return12": 0.566376961935215,
       "legacy_price": 879.0,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 879.0,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190234,10 +190144,10 @@
       "month": "2025-12",
       "return12": 0.07023271866672598,
       "legacy_price": 28.260000228881836,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 28.26,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190270,10 +190180,10 @@
       "month": "2025-12",
       "return12": 0.5670884947030426,
       "legacy_price": 466.8599853515625,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 466.86,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190282,10 +190192,10 @@
       "month": "2025-12",
       "return12": -0.09334735555643736,
       "legacy_price": 344.1000061035156,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 344.1,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190294,10 +190204,10 @@
       "month": "2025-12",
       "return12": 0.2808673758339213,
       "legacy_price": 137.8000030517578,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 137.8,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190318,10 +190228,10 @@
       "month": "2025-12",
       "return12": 0.16485486243872338,
       "legacy_price": 287.25,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 287.25,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190342,10 +190252,10 @@
       "month": "2025-12",
       "return12": -0.06366077537849013,
       "legacy_price": 204.60409545898438,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 195.09,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190354,10 +190264,10 @@
       "month": "2025-12",
       "return12": 0.1553844471277619,
       "legacy_price": 24.020000457763672,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 24.02,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190366,10 +190276,10 @@
       "month": "2025-12",
       "return12": -0.2869343399585427,
       "legacy_price": 22.280000686645508,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 22.28,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190414,10 +190324,10 @@
       "month": "2025-12",
       "return12": 0.1098147555524438,
       "legacy_price": 181.97999572753906,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 181.98,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190438,10 +190348,10 @@
       "month": "2025-12",
       "return12": 0.0236468348900174,
       "legacy_price": 256.1300048828125,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 256.13,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190450,10 +190360,10 @@
       "month": "2025-12",
       "return12": 0.8795381464847711,
       "legacy_price": 205.02000427246094,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 205.02,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190474,10 +190384,10 @@
       "month": "2025-12",
       "return12": 0.09921827059043253,
       "legacy_price": 161.9600067138672,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 161.96,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190486,10 +190396,10 @@
       "month": "2025-12",
       "return12": 0.6363439079476945,
       "legacy_price": 676.530029296875,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 676.53,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190510,10 +190420,10 @@
       "month": "2025-12",
       "return12": -0.18430801062025348,
       "legacy_price": 67.38999938964844,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 67.39,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190546,10 +190456,10 @@
       "month": "2025-12",
       "return12": 0.060933977864377376,
       "legacy_price": 662.4199829101562,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 662.42,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190558,10 +190468,10 @@
       "month": "2025-12",
       "return12": -0.09678927849648589,
       "legacy_price": 27.790000915527344,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 27.79,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190582,10 +190492,10 @@
       "month": "2025-12",
       "return12": 0.14706635775855204,
       "legacy_price": 225.41000366210938,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 225.41,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190618,10 +190528,10 @@
       "month": "2025-12",
       "return12": 0.08506391583612927,
       "legacy_price": 566.3599853515625,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 566.36,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190630,10 +190540,10 @@
       "month": "2025-12",
       "return12": -0.47926600585457246,
       "legacy_price": 252.27999877929688,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 252.28,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190642,10 +190552,10 @@
       "month": "2025-12",
       "return12": -0.004253008328124364,
       "legacy_price": 246.3000030517578,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 246.3,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190690,10 +190600,10 @@
       "month": "2025-12",
       "return12": 0.587293677240387,
       "legacy_price": 228.02000427246094,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 228.02,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190726,10 +190636,10 @@
       "month": "2025-12",
       "return12": 0.4747952514353806,
       "legacy_price": 206.9499969482422,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 206.95,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190738,10 +190648,10 @@
       "month": "2025-12",
       "return12": 0.37266315689254803,
       "legacy_price": 322.2200012207031,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 322.22,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",

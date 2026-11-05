@@ -6,244 +6,756 @@
   "parsed_candidate_rows": 494,
   "reviewed_unit_proofs": [
     {
-      "symbol": "BLDR",
+      "symbol": "ETN",
       "date": "2025-12-31",
-      "independent_close": "102.89",
-      "fund_row": {
-        "page": 7,
-        "name": "Builders FirstSource, Inc.(a)(b)",
-        "shares": 1438000,
-        "reported_usd_value": 147955820
-      },
-      "implied_price": "102.89",
-      "unit_interval_low": "102.8899993045897079276773296",
-      "unit_interval_high": "102.8900006954102920723226704",
-      "usd_value_difference": "0.00",
-      "independent_cache_sha256": "3639e15ecd9a4072101631adaafee381ccc69c572b436e5156409274d59589db"
-    },
-    {
-      "symbol": "CB",
-      "date": "2025-12-31",
-      "independent_close": "312.12",
-      "fund_row": {
-        "page": 10,
-        "name": "Chubb Ltd",
-        "shares": 4758576,
-        "reported_usd_value": 1485246741
-      },
-      "implied_price": "312.1199999747823718692314676",
-      "unit_interval_low": "312.1199997646354707794936973",
-      "unit_interval_high": "312.1200001849292729589692379",
-      "usd_value_difference": "0.12",
-      "independent_cache_sha256": "51ba29f7959b463de3428b37b0b79734849a63e2261d069b791b3fdc28eb2feb"
-    },
-    {
-      "symbol": "DLR",
-      "date": "2025-12-31",
-      "independent_close": "154.71",
-      "fund_row": {
-        "page": 11,
-        "name": "Digital Realty Trust, Inc",
-        "shares": 4198086,
-        "reported_usd_value": 649485885
-      },
-      "implied_price": "154.7099999857077725420584524",
-      "unit_interval_low": "154.7099997475039815763659915",
-      "unit_interval_high": "154.7100002239115635077509132",
-      "usd_value_difference": "0.06",
-      "independent_cache_sha256": "84c5a8412a866da3c3a053cc5068a1552e7feb727d741eecf14fac79f23fed54"
-    },
-    {
-      "symbol": "DOV",
-      "date": "2025-12-31",
-      "independent_close": "195.24",
-      "fund_row": {
-        "page": 10,
-        "name": "Dover Corp",
-        "shares": 1782402,
-        "reported_usd_value": 347996166
-      },
-      "implied_price": "195.2399997307004817095133421",
-      "unit_interval_low": "195.2399991696598186043328048",
-      "unit_interval_high": "195.2400002917411448146938794",
-      "usd_value_difference": "0.48",
-      "independent_cache_sha256": "e092422dff48fe6295d73a9d48bba3377f93bbed954772f6eb852b204fe76b8a"
-    },
-    {
-      "symbol": "DTE",
-      "date": "2025-12-31",
-      "independent_close": "128.98",
-      "fund_row": {
-        "page": 10,
-        "name": "DTE Energy Co",
-        "shares": 2697787,
-        "reported_usd_value": 347960567
-      },
-      "implied_price": "128.9799999036247116618176305",
-      "unit_interval_low": "128.9799995329505257457315941",
-      "unit_interval_high": "128.9800002742988975779036670",
-      "usd_value_difference": "0.26",
-      "independent_cache_sha256": "4dffd17b12b200d6e3741395b041ea50f17dcb7ae694fbbe2a9e5d312597b87b"
-    },
-    {
-      "symbol": "DUK",
-      "date": "2025-12-31",
-      "independent_close": "117.21",
+      "independent_close": "318.51",
       "fund_row": {
         "page": 8,
-        "name": "Duke Energy Corp",
-        "shares": 10110500,
-        "reported_usd_value": 1185051705
+        "name": "Eaton Corp. plc",
+        "shares": 5049772,
+        "reported_usd_value": 1608402880
       },
-      "implied_price": "117.21",
-      "unit_interval_low": "117.2099999010929231986548638",
-      "unit_interval_high": "117.2100000989070768013451362",
-      "usd_value_difference": "0.00",
-      "independent_cache_sha256": "0414140f54404ed1666f92a0f6863512cdf973b2619dde947bcd74893f3ea2f3"
+      "implied_price": "318.5100000554480479514718684",
+      "unit_interval_low": "318.5099998574193052676437669",
+      "unit_interval_high": "318.5100002534767906352999700",
+      "usd_value_difference": "0.28",
+      "independent_cache_sha256": "3ddaff73a672843b455303d677363866af8f6801fed5f1dbb147286a08866569"
     },
     {
-      "symbol": "DVN",
+      "symbol": "EXC",
       "date": "2025-12-31",
-      "independent_close": "36.63",
+      "independent_close": "43.59",
+      "fund_row": {
+        "page": 8,
+        "name": "Exelon Corp",
+        "shares": 13131763,
+        "reported_usd_value": 572413549
+      },
+      "implied_price": "43.58999998705428966392402909",
+      "unit_interval_low": "43.58999991090305239288890608",
+      "unit_interval_high": "43.59000006320552693495915210",
+      "usd_value_difference": "0.17",
+      "independent_cache_sha256": "84b95aa3410677954e514272f8152d01edc473d5bfe6e47f449636faa584166f"
+    },
+    {
+      "symbol": "EXR",
+      "date": "2025-12-31",
+      "independent_close": "130.22",
+      "fund_row": {
+        "page": 11,
+        "name": "Extra Space Storage, Inc",
+        "shares": 2759221,
+        "reported_usd_value": 359305759
+      },
+      "implied_price": "130.2200001377200303998846051",
+      "unit_interval_low": "130.2199997752988977686093285",
+      "unit_interval_high": "130.2200005001411630311598817",
+      "usd_value_difference": "0.38",
+      "independent_cache_sha256": "52cce2166e94c2b9d87787c236039d6f491b94aca8af236e2874d7b4ee101bfc"
+    },
+    {
+      "symbol": "F",
+      "date": "2025-12-31",
+      "independent_close": "13.12",
+      "fund_row": {
+        "page": 7,
+        "name": "Ford Motor Co",
+        "shares": 50883255,
+        "reported_usd_value": 667588306
+      },
+      "implied_price": "13.12000000786113231160231396",
+      "unit_interval_low": "13.11999998820830153259652905",
+      "unit_interval_high": "13.12000002751396309060809887",
+      "usd_value_difference": "0.40",
+      "independent_cache_sha256": "9cc3859c0ea1e3953a02485c9726c61e6841c2db9d3b2d8deb1a311c23993144"
+    },
+    {
+      "symbol": "FANG",
+      "date": "2025-12-31",
+      "independent_close": "150.33",
       "fund_row": {
         "page": 10,
-        "name": "Devon Energy Corp",
-        "shares": 8155845,
-        "reported_usd_value": 298748602
+        "name": "Diamondback Energy, Inc",
+        "shares": 2421427,
+        "reported_usd_value": 364013121
       },
-      "implied_price": "36.62999995708599170288302438",
-      "unit_interval_low": "36.62999983447453942540595119",
-      "unit_interval_high": "36.63000007969744398036009757",
-      "usd_value_difference": "0.35",
-      "independent_cache_sha256": "93fcc83f5d91252631e62f7bb9732dd8dcf50b3eff6cd62f4a409a9563970237"
+      "implied_price": "150.3300000371681657138538556",
+      "unit_interval_low": "150.3299996241885466710332378",
+      "unit_interval_high": "150.3300004501477847566744734",
+      "usd_value_difference": "0.09",
+      "independent_cache_sha256": "a6b8555d34aab2a8ca8baac86730fb4fb4f98641b034094e4d26882ca902ce60"
     },
     {
-      "symbol": "EBAY",
+      "symbol": "FAST",
       "date": "2025-12-31",
-      "independent_close": "87.10",
+      "independent_close": "40.13",
       "fund_row": {
-        "page": 7,
-        "name": "eBay, Inc",
-        "shares": 5876656,
-        "reported_usd_value": 511856737
+        "page": 12,
+        "name": "Fastenal Co",
+        "shares": 14926160,
+        "reported_usd_value": 598986801
       },
-      "implied_price": "87.09999989790111927599641701",
-      "unit_interval_low": "87.09999972773631806932377869",
-      "unit_interval_high": "87.10000006806592048266905533",
-      "usd_value_difference": "0.60",
-      "independent_cache_sha256": "2a1e1ac45adcf439125089ca0671e0f43c30df6a12ad889f8c18fba07ece24ee"
+      "implied_price": "40.13000001339929358924197516",
+      "unit_interval_low": "40.12999994640282564303209935",
+      "unit_interval_high": "40.13000008039576153545185098",
+      "usd_value_difference": "0.20",
+      "independent_cache_sha256": "13c2c28b28bc79f95b6f8c0415639e718f179a3f7ca98e633ae11e60577506e5"
     },
     {
-      "symbol": "ECL",
+      "symbol": "FCX",
       "date": "2025-12-31",
-      "independent_close": "262.52",
+      "independent_close": "50.79",
+      "fund_row": {
+        "page": 10,
+        "name": "Freeport-McMoRan, Inc",
+        "shares": 18667376,
+        "reported_usd_value": 948116027
+      },
+      "implied_price": "50.78999999785722428262011758",
+      "unit_interval_low": "50.78999994428783134812305704",
+      "unit_interval_high": "50.79000005142661721711717812",
+      "usd_value_difference": "0.04",
+      "independent_cache_sha256": "1e2cccc29409ec435d8d2c3b92ab5f534fa0da6c8fdff96a00b1ab96c4a2a759"
+    },
+    {
+      "symbol": "FDX",
+      "date": "2025-12-31",
+      "independent_close": "288.86",
       "fund_row": {
         "page": 7,
-        "name": "Ecolab, Inc",
-        "shares": 3314238,
-        "reported_usd_value": 870053760
+        "name": "FedEx Corp",
+        "shares": 2821800,
+        "reported_usd_value": 815105148
       },
-      "implied_price": "262.5200000724148356273749803",
-      "unit_interval_low": "262.5199997706863538466458957",
-      "unit_interval_high": "262.5200003741433174081040649",
+      "implied_price": "288.86",
+      "unit_interval_low": "288.8599996456162733007300305",
+      "unit_interval_high": "288.8600003543837266992699695",
+      "usd_value_difference": "0.00",
+      "independent_cache_sha256": "d94c112dc92101de4e37065ff4017f78aeee770143436aea6ab984a5375390ea"
+    },
+    {
+      "symbol": "FE",
+      "date": "2025-12-31",
+      "independent_close": "44.77",
+      "fund_row": {
+        "page": 8,
+        "name": "FirstEnergy Corp",
+        "shares": 6756366,
+        "reported_usd_value": 302482506
+      },
+      "implied_price": "44.77000002664154073358370461",
+      "unit_interval_low": "44.76999987863298110256312343",
+      "unit_interval_high": "44.77000017465010036460428580",
+      "usd_value_difference": "0.18",
+      "independent_cache_sha256": "4ad7f94bfd8b10f896b38a0e4755ada94e4be9df07a6acfd3653e964bb2dc42e"
+    },
+    {
+      "symbol": "FIS",
+      "date": "2025-12-31",
+      "independent_close": "66.46",
+      "fund_row": {
+        "page": 8,
+        "name": "Fidelity National Information Services, Inc",
+        "shares": 6732845,
+        "reported_usd_value": 447464879
+      },
+      "implied_price": "66.46000004455768698076370390",
+      "unit_interval_low": "66.45999989603206371155135756",
+      "unit_interval_high": "66.46000019308331024997605024",
+      "usd_value_difference": "0.30",
+      "independent_cache_sha256": "d44a4c3a4df266771ab882e05c51a77cc2c87aa1a094ae426349100a72f0b8a2"
+    },
+    {
+      "symbol": "FITB",
+      "date": "2025-12-31",
+      "independent_close": "46.81",
+      "fund_row": {
+        "page": 7,
+        "name": "Fifth Third Bancorp",
+        "shares": 8604996,
+        "reported_usd_value": 402799863
+      },
+      "implied_price": "46.81000002789077415027270204",
+      "unit_interval_low": "46.80999991167921519080311019",
+      "unit_interval_high": "46.81000014410233310974229390",
       "usd_value_difference": "0.24",
-      "independent_cache_sha256": "86725ae4af285aa97c4f41d387a3da5a2848d114b0d13b3f34e3c1b7b2b6b12f"
+      "independent_cache_sha256": "cef9acb5c90675fd6b7d1b854f4fe489a5fd0412ad2b5f90ce0fc6eaa3c70c80"
     },
     {
-      "symbol": "ED",
+      "symbol": "FTNT",
       "date": "2025-12-31",
-      "independent_close": "99.32",
-      "fund_row": {
-        "page": 10,
-        "name": "Consolidated Edison, Inc",
-        "shares": 4689014,
-        "reported_usd_value": 465712871
-      },
-      "implied_price": "99.32000011089751491464943376",
-      "unit_interval_low": "99.31999989763306315570821499",
-      "unit_interval_high": "99.32000032416196667359065253",
-      "usd_value_difference": "0.52",
-      "independent_cache_sha256": "b09e36d5e88b1b7156b1b63ffff9375d80361984058778bb06cef19f5344d9aa"
-    },
-    {
-      "symbol": "EFX",
-      "date": "2025-12-31",
-      "independent_close": "216.98",
+      "independent_close": "79.41",
       "fund_row": {
         "page": 11,
-        "name": "Equifax, Inc",
-        "shares": 1591328,
-        "reported_usd_value": 345286349
+        "name": "Fortinet, Inc.(b)",
+        "shares": 8218273,
+        "reported_usd_value": 652613059
       },
-      "implied_price": "216.9799997235013774658649882",
-      "unit_interval_low": "216.9799990950954171610126888",
-      "unit_interval_high": "216.9800003519073377707172877",
-      "usd_value_difference": "0.44",
-      "independent_cache_sha256": "57d14b3c11c21e7b76649010a4b536424580f9909fea0a5512c464c220e3e11b"
+      "implied_price": "79.41000000851760461109043226",
+      "unit_interval_low": "79.40999988683753873836997140",
+      "unit_interval_high": "79.41000013019767048381089312",
+      "usd_value_difference": "0.07",
+      "independent_cache_sha256": "16dfa17e8eced86ff0dac35d3c5c85921a68e40898d0adda4f293ca144982225"
     },
     {
-      "symbol": "EIX",
+      "symbol": "FTV",
       "date": "2025-12-31",
-      "independent_close": "60.02",
+      "independent_close": "55.21",
       "fund_row": {
-        "page": 8,
-        "name": "Edison International",
-        "shares": 5003051,
-        "reported_usd_value": 300283121
+        "page": 10,
+        "name": "Fortive Corp.(a)",
+        "shares": 4129445,
+        "reported_usd_value": 227986658
       },
-      "implied_price": "60.01999999600243931153210311",
-      "unit_interval_low": "60.01999979612440488813725864",
-      "unit_interval_high": "60.02000019588047373492694758",
-      "usd_value_difference": "0.02",
-      "independent_cache_sha256": "c95cac54df81844852568a634c3842e564626a2c1cbce959834e585b067d0ef0"
+      "implied_price": "55.20999989102651809141422152",
+      "unit_interval_low": "55.20999964886322496122360269",
+      "unit_interval_high": "55.21000013318981122160484036",
+      "usd_value_difference": "0.45",
+      "independent_cache_sha256": "080ba92a5d3d23367f27f206aec420bfb8069c56a952caceb93093c987412937"
     },
     {
-      "symbol": "EMR",
+      "symbol": "GD",
       "date": "2025-12-31",
-      "independent_close": "132.72",
+      "independent_close": "336.66",
       "fund_row": {
-        "page": 8,
-        "name": "Emerson Electric Co",
-        "shares": 7304264,
-        "reported_usd_value": 969421918
+        "page": 7,
+        "name": "General Dynamics Corp",
+        "shares": 3296293,
+        "reported_usd_value": 1109730001
       },
-      "implied_price": "132.7199999890474933545665929",
-      "unit_interval_low": "132.7199998521411602866490039",
-      "unit_interval_high": "132.7200001259538264224841818",
+      "implied_price": "336.6599998847189858425813482",
+      "unit_interval_low": "336.6599995813478959546375277",
+      "unit_interval_high": "336.6600001880900757305251687",
+      "usd_value_difference": "0.38",
+      "independent_cache_sha256": "ad9926140a44019a0ca9fa4cb12223b308796f8987f352530b3193aeedfdea02"
+    },
+    {
+      "symbol": "GE",
+      "date": "2025-12-31",
+      "independent_close": "308.03",
+      "fund_row": {
+        "page": 7,
+        "name": "GE Aerospace(a)",
+        "shares": 13714164,
+        "reported_usd_value": 4224373937
+      },
+      "implied_price": "308.0300000058333851046261369",
+      "unit_interval_low": "308.0299999329160712967994258",
+      "unit_interval_high": "308.0300000787506989124528480",
       "usd_value_difference": "0.08",
-      "independent_cache_sha256": "f8162b612eee2b68925f5d181f3e1590f9dfea6a4a88a565bec0fa5077696cab"
+      "independent_cache_sha256": "5ee3fe0eeb845c99facd6e77bdd06278e8a1eac0d2d43c902804c606e447108c"
     },
     {
-      "symbol": "EOG",
+      "symbol": "GILD",
       "date": "2025-12-31",
-      "independent_close": "105.01",
+      "independent_close": "122.74",
       "fund_row": {
-        "page": 10,
-        "name": "EOG Resources, Inc",
-        "shares": 7054566,
-        "reported_usd_value": 740799976
+        "page": 7,
+        "name": "Gilead Sciences, Inc",
+        "shares": 16132631,
+        "reported_usd_value": 1980119129
       },
-      "implied_price": "105.0100000481957359247897036",
-      "unit_interval_low": "105.0099999064435714401141048",
-      "unit_interval_high": "105.0100001899479004094653023",
-      "usd_value_difference": "0.34",
-      "independent_cache_sha256": "4a4b60cff705ede60ab064a957ab9e7e93b3368f9aab7058565d810666a47c29"
+      "implied_price": "122.7400000037191701713130363",
+      "unit_interval_low": "122.7399999417330006494290981",
+      "unit_interval_high": "122.7400000657053396931969745",
+      "usd_value_difference": "0.06",
+      "independent_cache_sha256": "8256a6f26f16f4256827cb7d0b10725f789af1ac5d9768d9ec2695e76d572c62"
     },
     {
-      "symbol": "EQIX",
+      "symbol": "GIS",
       "date": "2025-12-31",
-      "independent_close": "766.16",
+      "independent_close": "46.50",
+      "fund_row": {
+        "page": 9,
+        "name": "General Mills, Inc",
+        "shares": 6935207,
+        "reported_usd_value": 322487126
+      },
+      "implied_price": "46.50000007209590139126344751",
+      "unit_interval_low": "46.49999992790409860873655249",
+      "unit_interval_high": "46.50000021628770417379034252",
+      "usd_value_difference": "0.50",
+      "independent_cache_sha256": "df95bad3f25f2dbbe875dd84e4da4e012c9dddb6213a5eeb50c70b55af826f19"
+    },
+    {
+      "symbol": "GLW",
+      "date": "2025-12-31",
+      "independent_close": "87.56",
+      "fund_row": {
+        "page": 8,
+        "name": "Corning, Inc",
+        "shares": 10143719,
+        "reported_usd_value": 888184036
+      },
+      "implied_price": "87.56000003548994210111695720",
+      "unit_interval_low": "87.55999993690676959801429831",
+      "unit_interval_high": "87.56000013407311460421961610",
+      "usd_value_difference": "0.36",
+      "independent_cache_sha256": "d9577105d1118aa75166b54007793a84e3e71c10cd3de55fdc772fe0f902b242"
+    },
+    {
+      "symbol": "GM",
+      "date": "2025-12-31",
+      "independent_close": "81.32",
+      "fund_row": {
+        "page": 7,
+        "name": "General Motors Co",
+        "shares": 12128611,
+        "reported_usd_value": 986298646
+      },
+      "implied_price": "81.31999995712617050707620188",
+      "unit_interval_low": "81.31999987467649840529966704",
+      "unit_interval_high": "81.32000003957584260885273672",
+      "usd_value_difference": "0.52",
+      "independent_cache_sha256": "a183b0e4d8c664cf044ebf25b1f47634f6520eca162ad5244f8e6ac4ce18cab6"
+    },
+    {
+      "symbol": "GPN",
+      "date": "2025-12-31",
+      "independent_close": "77.40",
+      "fund_row": {
+        "page": 8,
+        "name": "Global Payments, Inc",
+        "shares": 3078000,
+        "reported_usd_value": 238237200
+      },
+      "implied_price": "77.4",
+      "unit_interval_low": "77.39999967511371020142949968",
+      "unit_interval_high": "77.40000032488628979857050032",
+      "usd_value_difference": "0.00",
+      "independent_cache_sha256": "6b86acd5e714c0378fc49662954ec9e58ee28cb0bad2782f8132e0e9d15f6ee4"
+    },
+    {
+      "symbol": "GRMN",
+      "date": "2025-12-31",
+      "independent_close": "202.85",
+      "fund_row": {
+        "page": 9,
+        "name": "Garmin Ltd",
+        "shares": 2128031,
+        "reported_usd_value": 431671088
+      },
+      "implied_price": "202.8499998355287117527893156",
+      "unit_interval_low": "202.8499993656107453321873601",
+      "unit_interval_high": "202.8500003054466781733912711",
+      "usd_value_difference": "0.35",
+      "independent_cache_sha256": "9c034513c27ed2aacd28b9a7ccc27b3c3284bc484c09639bca37afeea4a69070"
+    },
+    {
+      "symbol": "GS",
+      "date": "2025-12-31",
+      "independent_close": "879.00",
+      "fund_row": {
+        "page": 7,
+        "name": "Goldman Sachs Group, Inc. (The)",
+        "shares": 3899502,
+        "reported_usd_value": 3427662258
+      },
+      "implied_price": "879",
+      "unit_interval_low": "878.9999997435569977909999790",
+      "unit_interval_high": "879.0000002564430022090000210",
+      "usd_value_difference": "0.00",
+      "independent_cache_sha256": "67648a8a06f870c5abdc14dcf9d439adff559f8b498eca52ef0403b4d774319f"
+    },
+    {
+      "symbol": "HAL",
+      "date": "2025-12-31",
+      "independent_close": "28.26",
+      "fund_row": {
+        "page": 8,
+        "name": "Halliburton Co",
+        "shares": 10942397,
+        "reported_usd_value": 309232139
+      },
+      "implied_price": "28.25999997989471593838169096",
+      "unit_interval_low": "28.25999988850706111284392259",
+      "unit_interval_high": "28.26000007128237076391945933",
+      "usd_value_difference": "0.22",
+      "independent_cache_sha256": "838f981933bf1a01177e6c5feea3992b2c02fdb4c41eac6462b69229885058b7"
+    },
+    {
+      "symbol": "HCA",
+      "date": "2025-12-31",
+      "independent_close": "466.86",
+      "fund_row": {
+        "page": 9,
+        "name": "HCA Healthcare, Inc.(a)",
+        "shares": 2076781,
+        "reported_usd_value": 969565978
+      },
+      "implied_price": "466.8600001637149030157729679",
+      "unit_interval_low": "466.8599996822004823811465918",
+      "unit_interval_high": "466.8600006452293236503993440",
+      "usd_value_difference": "0.34",
+      "independent_cache_sha256": "628cd30cfcd81e053a5beb8deb593015a83c45183fb429f87034dd9a2bfaa942"
+    },
+    {
+      "symbol": "HD",
+      "date": "2025-12-31",
+      "independent_close": "344.10",
       "fund_row": {
         "page": 11,
-        "name": "Equinix, Inc",
-        "shares": 1276541,
-        "reported_usd_value": 978034653
+        "name": "Home Depot, Inc. (The)",
+        "shares": 12941511,
+        "reported_usd_value": 4453173935
       },
-      "implied_price": "766.1600003446814477560846068",
-      "unit_interval_low": "766.1599995613145210377105005",
-      "unit_interval_high": "766.1600011280483744744587130",
+      "implied_price": "344.0999999922729270175638687",
+      "unit_interval_low": "344.0999999150021971932025557",
+      "unit_interval_high": "344.1000000695436568419251817",
+      "usd_value_difference": "0.10",
+      "independent_cache_sha256": "da6234cc76daafb4a6d69fb4594517df903d2a20e684866731799f7ab21f40b5"
+    },
+    {
+      "symbol": "HIG",
+      "date": "2025-12-31",
+      "independent_close": "137.80",
+      "fund_row": {
+        "page": 10,
+        "name": "Hartford Insurance Group, Inc. (The)",
+        "shares": 3622868,
+        "reported_usd_value": 499231210
+      },
+      "implied_price": "137.7999998895902362437715092",
+      "unit_interval_low": "137.7999996135658268532002822",
+      "unit_interval_high": "137.8000001656146456343427362",
+      "usd_value_difference": "0.40",
+      "independent_cache_sha256": "d8b7aeddd7df50cfc23433d2fa3d3769138d29119ff362a5c5bb96c1e7c88dbf"
+    },
+    {
+      "symbol": "HLT",
+      "date": "2025-12-31",
+      "independent_close": "287.25",
+      "fund_row": {
+        "page": 9,
+        "name": "Hilton Worldwide Holdings, Inc.(a)",
+        "shares": 3022006,
+        "reported_usd_value": 868071223
+      },
+      "implied_price": "287.2499998345469863395373801",
+      "unit_interval_low": "287.2499995036409590186121404",
+      "unit_interval_high": "287.2500001654530136604626199",
+      "usd_value_difference": "0.50",
+      "independent_cache_sha256": "1a403de2df91c595bc2a9db16bf4dcd2e4a82b6a0cf081c0b0809e5f08125f6c"
+    },
+    {
+      "symbol": "HON",
+      "date": "2025-12-31",
+      "independent_close": "195.09",
+      "fund_row": {
+        "page": 9,
+        "name": "Honeywell International, Inc",
+        "shares": 8253553,
+        "reported_usd_value": 1610185655
+      },
+      "implied_price": "195.0900000278667865826995962",
+      "unit_interval_low": "195.0899999067068449187883085",
+      "unit_interval_high": "195.0900001490267282466108838",
+      "usd_value_difference": "0.23",
+      "independent_cache_sha256": "b73b80c6e3172552b3df645a6125f29555dbead68275fe93c760dc3e5692d3c8"
+    },
+    {
+      "symbol": "HPE",
+      "date": "2025-12-31",
+      "independent_close": "24.02",
+      "fund_row": {
+        "page": 11,
+        "name": "Hewlett Packard Enterprise Co",
+        "shares": 17154841,
+        "reported_usd_value": 412059281
+      },
+      "implied_price": "24.02000001049266501508233157",
+      "unit_interval_low": "24.01999995220008159795826729",
+      "unit_interval_high": "24.02000006878524843220639585",
+      "usd_value_difference": "0.18",
+      "independent_cache_sha256": "c062d2454fd1f646afa99e0d0d03b93fd130c49c7cdf11f132ab06182a23ffc6"
+    },
+    {
+      "symbol": "HPQ",
+      "date": "2025-12-31",
+      "independent_close": "22.28",
+      "fund_row": {
+        "page": 11,
+        "name": "HP, Inc",
+        "shares": 12152542,
+        "reported_usd_value": 270758636
+      },
+      "implied_price": "22.28000001974895458086053107",
+      "unit_interval_low": "22.27999993746164382727498494",
+      "unit_interval_high": "22.28000010203626533444607721",
+      "usd_value_difference": "0.24",
+      "independent_cache_sha256": "5979fabf69ccfef1f4e2afeeb0d135cfa72ef889cf7f323c57a1f6a39203b3cf"
+    },
+    {
+      "symbol": "HSY",
+      "date": "2025-12-31",
+      "independent_close": "181.98",
+      "fund_row": {
+        "page": 9,
+        "name": "Hershey Co. (The)",
+        "shares": 1926572,
+        "reported_usd_value": 350597573
+      },
+      "implied_price": "181.9800002283849241035372672",
+      "unit_interval_low": "181.9799997093282784136798417",
+      "unit_interval_high": "181.9800007474415697933946927",
       "usd_value_difference": "0.44",
-      "independent_cache_sha256": "fe919179ba59ddece4c2e47a99027b354becbbefd1fa0d783e75964a9baf3305"
+      "independent_cache_sha256": "7d2a029facf3b329ba689a058d425059adbcff7147d71517c4461c9828f74859"
+    },
+    {
+      "symbol": "HUM",
+      "date": "2025-12-31",
+      "independent_close": "256.13",
+      "fund_row": {
+        "page": 9,
+        "name": "Humana, Inc",
+        "shares": 1562829,
+        "reported_usd_value": 400287392
+      },
+      "implied_price": "256.1300001471690120928137371",
+      "unit_interval_low": "256.1299995073037421240583583",
+      "unit_interval_high": "256.1300007870342820615691160",
+      "usd_value_difference": "0.23",
+      "independent_cache_sha256": "67100c1fa5e868169de7ce39abd508f4944969019902ee7c079df313032777b5"
+    },
+    {
+      "symbol": "HWM",
+      "date": "2025-12-31",
+      "independent_close": "205.02",
+      "fund_row": {
+        "page": 7,
+        "name": "Howmet Aerospace, Inc",
+        "shares": 5227399,
+        "reported_usd_value": 1071721343
+      },
+      "implied_price": "205.0200000038259945338016096",
+      "unit_interval_low": "205.0199998125262678437211317",
+      "unit_interval_high": "205.0200001951257212238820874",
+      "usd_value_difference": "0.02",
+      "independent_cache_sha256": "2ba5197bf91a99bc5910489190605cfa6e99022e9c7c8f0cf5b14f152261bb82"
+    },
+    {
+      "symbol": "ICE",
+      "date": "2025-12-31",
+      "independent_close": "161.96",
+      "fund_row": {
+        "page": 7,
+        "name": "Intercontinental Exchange, Inc",
+        "shares": 7413153,
+        "reported_usd_value": 1200634260
+      },
+      "implied_price": "161.9600000161874441280248769",
+      "unit_interval_low": "161.9599998812920763944842363",
+      "unit_interval_high": "161.9600001510828118615655174",
+      "usd_value_difference": "0.12",
+      "independent_cache_sha256": "53a32e0aadb04da1f88c061f3fb8f3cb3e1b2ba48224ddd84ed2cb921d034bec"
+    },
+    {
+      "symbol": "IDXX",
+      "date": "2025-12-31",
+      "independent_close": "676.53",
+      "fund_row": {
+        "page": 9,
+        "name": "IDEXX Laboratories, Inc.(a)(b)",
+        "shares": 1038199,
+        "reported_usd_value": 702372769
+      },
+      "implied_price": "676.5299995472929563600041996",
+      "unit_interval_low": "676.5299985840864805302259008",
+      "unit_interval_high": "676.5300005104994321897824983",
+      "usd_value_difference": "0.47",
+      "independent_cache_sha256": "27d4cf03fb4eb1e2a63346c8cfff167f3a17275652f960b28f9ae349a8f72728"
+    },
+    {
+      "symbol": "IFF",
+      "date": "2025-12-31",
+      "independent_close": "67.39",
+      "fund_row": {
+        "page": 7,
+        "name": "International Flavors & Fragrances, Inc",
+        "shares": 3332325,
+        "reported_usd_value": 224565382
+      },
+      "implied_price": "67.39000007502269436504542624",
+      "unit_interval_low": "67.38999977493191690486372128",
+      "unit_interval_high": "67.39000037511347182522713121",
+      "usd_value_difference": "0.25",
+      "independent_cache_sha256": "f568dd98be8fd349bacbc5b25e950b00330a1f843440d7818eb05af1618d4f10"
+    },
+    {
+      "symbol": "INTU",
+      "date": "2025-12-31",
+      "independent_close": "662.42",
+      "fund_row": {
+        "page": 11,
+        "name": "Intuit, Inc",
+        "shares": 3624879,
+        "reported_usd_value": 2401192347
+      },
+      "implied_price": "662.4199999503431700754701053",
+      "unit_interval_low": "662.4199996744718927169706906",
+      "unit_interval_high": "662.4200002262144474339695201",
+      "usd_value_difference": "0.18",
+      "independent_cache_sha256": "40089bf8462d22fb3219141269299c69a4844ec2fc0c6880295eba785b5460d9"
+    },
+    {
+      "symbol": "INVH",
+      "date": "2025-12-31",
+      "independent_close": "27.79",
+      "fund_row": {
+        "page": 11,
+        "name": "Invitation Homes, Inc",
+        "shares": 7332593,
+        "reported_usd_value": 203772760
+      },
+      "implied_price": "27.79000007228002426972286611",
+      "unit_interval_low": "27.78999993590261998722689231",
+      "unit_interval_high": "27.79000020865742855221883991",
+      "usd_value_difference": "0.53",
+      "independent_cache_sha256": "09a27a8d1f18b2b1169b7bde17cdb54f9b41dbc1044fdf2e72732b252e77c3e6"
+    },
+    {
+      "symbol": "IQV",
+      "date": "2025-12-31",
+      "independent_close": "225.41",
+      "fund_row": {
+        "page": 10,
+        "name": "IQVIA Holdings, Inc.(b)",
+        "shares": 2214177,
+        "reported_usd_value": 499097638
+      },
+      "implied_price": "225.4100001942030831320169977",
+      "unit_interval_low": "225.4099997425680060808146774",
+      "unit_interval_high": "225.4100006458381601832193181",
+      "usd_value_difference": "0.43",
+      "independent_cache_sha256": "9b39df4f0794cd24f68f7f7af3cb0229ac5d59e3a014b21478de41cae143cbe8"
+    },
+    {
+      "symbol": "IR",
+      "date": "2025-12-31",
+      "independent_close": "79.22",
+      "fund_row": {
+        "page": 10,
+        "name": "Ingersoll Rand, Inc.(a)",
+        "shares": 4674673,
+        "reported_usd_value": 370327595
+      },
+      "implied_price": "79.21999998716487762887372015",
+      "unit_interval_low": "79.21999977324617144343572267",
+      "unit_interval_high": "79.22000020108358381431171763",
+      "usd_value_difference": "0.06",
+      "independent_cache_sha256": "963cce340fd18115b4e5ca3d6a7e1ff27d74627e3e0f5e8dbeaf92449b75cb42"
+    },
+    {
+      "symbol": "ISRG",
+      "date": "2025-12-31",
+      "independent_close": "566.36",
+      "fund_row": {
+        "page": 9,
+        "name": "Intuitive Surgical, Inc.(b)",
+        "shares": 4608960,
+        "reported_usd_value": 2610330586
+      },
+      "implied_price": "566.3600000867874748316322988",
+      "unit_interval_low": "566.3599998698187877525515518",
+      "unit_interval_high": "566.3600003037561619107130459",
+      "usd_value_difference": "0.40",
+      "independent_cache_sha256": "3d5d07b618a378811568a50da271e67855102cc997fb22685701744b1e6491f9"
+    },
+    {
+      "symbol": "IT",
+      "date": "2025-12-31",
+      "independent_close": "252.28",
+      "fund_row": {
+        "page": 10,
+        "name": "Gartner, Inc.(b)",
+        "shares": 937100,
+        "reported_usd_value": 236411588
+      },
+      "implied_price": "252.28",
+      "unit_interval_low": "252.2799989328780279585956675",
+      "unit_interval_high": "252.2800010671219720414043325",
+      "usd_value_difference": "0.00",
+      "independent_cache_sha256": "e9fc6ad2972b3116d0aee7a3af06f3369f03d0cc8ab9fbd72dd4161cbfdfb555"
+    },
+    {
+      "symbol": "ITW",
+      "date": "2025-12-31",
+      "independent_close": "246.30",
+      "fund_row": {
+        "page": 10,
+        "name": "Illinois Tool Works, Inc",
+        "shares": 3432256,
+        "reported_usd_value": 845364653
+      },
+      "implied_price": "246.3000000582707117417814988",
+      "unit_interval_low": "246.2999997669171530328740047",
+      "unit_interval_high": "246.3000003496242704506889929",
+      "usd_value_difference": "0.20",
+      "independent_cache_sha256": "e60781f9f3ed2464f9547af1a208b8f0a9f7b7b348c5212e810b9321f001154d"
+    },
+    {
+      "symbol": "JBL",
+      "date": "2025-12-31",
+      "independent_close": "228.02",
+      "fund_row": {
+        "page": 8,
+        "name": "Jabil, Inc",
+        "shares": 1389014,
+        "reported_usd_value": 316722972
+      },
+      "implied_price": "228.0199997984181584922830151",
+      "unit_interval_low": "228.0199990784830102504366407",
+      "unit_interval_high": "228.0200005183533067341293896",
+      "usd_value_difference": "0.28",
+      "independent_cache_sha256": "1b8c88d9444faa71071d1916bb78a4f781cedad7e5f4446877c68c9a66118f53"
+    },
+    {
+      "symbol": "JCI",
+      "date": "2025-12-31",
+      "independent_close": "119.75",
+      "fund_row": {
+        "page": 7,
+        "name": "Johnson Controls International plc",
+        "shares": 7945658,
+        "reported_usd_value": 951492545
+      },
+      "implied_price": "119.7499999370725495610306912",
+      "unit_interval_low": "119.7499998112176486830920737",
+      "unit_interval_high": "119.7500000629274504389693088",
+      "usd_value_difference": "0.50",
+      "independent_cache_sha256": "685857cb588bd92cf5f1d404aa6312b2e6b62b8cc032001039e2105d6cc48685"
+    },
+    {
+      "symbol": "JNJ",
+      "date": "2025-12-31",
+      "independent_close": "206.95",
+      "fund_row": {
+        "page": 11,
+        "name": "Johnson & Johnson",
+        "shares": 31324433,
+        "reported_usd_value": 6482591410
+      },
+      "implied_price": "206.9500000207505751181513804",
+      "unit_interval_low": "206.9499999888266133979184875",
+      "unit_interval_high": "206.9500000526745368383842734",
+      "usd_value_difference": "0.65",
+      "independent_cache_sha256": "315fe014b6b366023267de3f82e43fa8935b8cbfee8ebaf32eb082499feff13d"
+    },
+    {
+      "symbol": "JPM",
+      "date": "2025-12-31",
+      "independent_close": "322.22",
+      "fund_row": {
+        "page": 7,
+        "name": "JPMorgan Chase & Co",
+        "shares": 35393470,
+        "reported_usd_value": 11404483903
+      },
+      "implied_price": "322.2199999886984802563862769",
+      "unit_interval_low": "322.2199999604446808973519692",
+      "unit_interval_high": "322.2200000169522796154205846",
+      "usd_value_difference": "0.40",
+      "independent_cache_sha256": "199d5c4f4707cfcd2b345a7218343a0a66667972e51876b46c7cdeea056b8359"
     }
   ],
   "scope": "Explicitly reviewed names/classes only. Candidate extraction is incomplete; no fuzzy identity matching, no wholesale price approval.",

@@ -28,7 +28,9 @@ relay 候选成分改为 db_ref 在线读取，不再依赖 members_frozen.csv�
 
 ## 完整验收的名义价事实保护
 
-SQL 108 已在线部署，仅依据 verified_closing_fact / fund_native_closing_fact 的明确 pass 验收回执保护相应 eastmoney_native 价格点，不把所有带 unit_evidence 的观测提前当作完整验收。当前是 KLAC、ABNB、CRWD 的 2025-12-31 三个点。
+SQL 108 已在线部署，仅依据 verified_closing_fact / fund_native_closing_fact 的明确 pass 验收回执保护对应价格点，不把所有带 unit_evidence 的观测提前当作完整验收。最初为 KLAC、ABNB、CRWD 三个点；后续批次已增至 72 个明确验收点，范围见各自回执，不因此批准整个证券历史。
+
+SQL 120 增加明确的 issuer_native 来源并将验收及不可变保护绑定实际来源，既有未带来源字段的证明继续精确绑定原 eastmoney_native，不能自动改选。发行人披露不可冒称接口行情。迁移前后已有选中视图不变，影子探针覆盖原来源、发行人来源、未支持来源以及不可变保护；正式代码变更后自动运行只读影子验证，不自动重复迁移或加工历史。详见 `FUND_CLOSING_FACTS_2026-11-05.md`。
 
 这些价格点的价格、日期和出处不能更新或删除；对应验收回执不能改写、删除或通过清空日志表移除。新的不同验收版本被拒绝，需显式版本审查。v_nominal_monthly 对这些点固定使用验收回执关联的源与证据哈希，后来的高优先级但未验收观测不能改变选择。未验收观测仍可独立储存和审查，不作为价格点的自动修订。
 

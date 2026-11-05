@@ -1,0 +1,475 @@
+{
+  "checked_at": "2026-11-05T08:23:48.924944+00:00",
+  "verified_points": [
+    {
+      "symbol": "ETN",
+      "date": "2025-12-31",
+      "close": "318.51",
+      "source": "eastmoney_native",
+      "evidence_sha256": "8140e26dae62724aa8c1b151c7bee97546412c44f83f721b8d36f3b9d0c03c86"
+    },
+    {
+      "symbol": "EXC",
+      "date": "2025-12-31",
+      "close": "43.59",
+      "source": "eastmoney_native",
+      "evidence_sha256": "75c63c853f968768dd4bb71878c0e1404a326834b8ffabc53802b25541314870"
+    },
+    {
+      "symbol": "EXR",
+      "date": "2025-12-31",
+      "close": "130.22",
+      "source": "eastmoney_native",
+      "evidence_sha256": "4ca07c13b968bc324a0eafed23d5f1f140fd72fd1a4f75262a3879394abcec30"
+    },
+    {
+      "symbol": "F",
+      "date": "2025-12-31",
+      "close": "13.12",
+      "source": "eastmoney_native",
+      "evidence_sha256": "f2373a159dd60ef49d6ea3d91e990f4a4ed241a11408ccf13e67802bcfd8c8c4"
+    },
+    {
+      "symbol": "FANG",
+      "date": "2025-12-31",
+      "close": "150.33",
+      "source": "eastmoney_native",
+      "evidence_sha256": "508ccfb23a06d35c6a3199f5b120939adcb61cfa4ba2d1e9253097227fb50401"
+    },
+    {
+      "symbol": "FAST",
+      "date": "2025-12-31",
+      "close": "40.13",
+      "source": "eastmoney_native",
+      "evidence_sha256": "b70b0f8f3742b9a87859498105d973c77280ac6bd9cf62614f1a4ce151a6fd07"
+    },
+    {
+      "symbol": "FCX",
+      "date": "2025-12-31",
+      "close": "50.79",
+      "source": "eastmoney_native",
+      "evidence_sha256": "b4520c4faf670e77892e9fc7f01388e9bcfa4ac256d2cb4162deb6f17d2315f9"
+    },
+    {
+      "symbol": "FDX",
+      "date": "2025-12-31",
+      "close": "288.86",
+      "source": "eastmoney_native",
+      "evidence_sha256": "3a9b8c0c5d2f5e2347c09236eb67f269ed2b6e49fd813e197020327a32538331"
+    },
+    {
+      "symbol": "FE",
+      "date": "2025-12-31",
+      "close": "44.77",
+      "source": "eastmoney_native",
+      "evidence_sha256": "d42c39b9da422fb7532467701ad65d42c57b049c11c02e9497f83265aa1cd682"
+    },
+    {
+      "symbol": "FIS",
+      "date": "2025-12-31",
+      "close": "66.46",
+      "source": "eastmoney_native",
+      "evidence_sha256": "30f724947bedddcb64bb100d3f6feca2b85d583534c60393ce8b80bd83059eeb"
+    },
+    {
+      "symbol": "FITB",
+      "date": "2025-12-31",
+      "close": "46.81",
+      "source": "issuer_native",
+      "evidence_sha256": "5e6ab417eda69850fee1df0d314ce2f9d7c2449c11e534083d3e33d9969946bc"
+    },
+    {
+      "symbol": "FTNT",
+      "date": "2025-12-31",
+      "close": "79.41",
+      "source": "eastmoney_native",
+      "evidence_sha256": "acce9890094fae3c0cf329c0a40afc3a8dc67e3b948f90fd7f13c4ffa86c255e"
+    },
+    {
+      "symbol": "FTV",
+      "date": "2025-12-31",
+      "close": "55.21",
+      "source": "eastmoney_native",
+      "evidence_sha256": "eecfb400dbb8c88a8d962302d3788be1132f7668a34679715d185531e0dddc48"
+    },
+    {
+      "symbol": "GD",
+      "date": "2025-12-31",
+      "close": "336.66",
+      "source": "eastmoney_native",
+      "evidence_sha256": "e2b21fab8e56ec9b6b24e1dde678c64cc856f65ba6dd7f4bc7292e52489ba216"
+    },
+    {
+      "symbol": "GE",
+      "date": "2025-12-31",
+      "close": "308.03",
+      "source": "eastmoney_native",
+      "evidence_sha256": "c9552b983a9780551b6809c75b1271dcb3aad4eb8d805cc73d9186ea849dd722"
+    },
+    {
+      "symbol": "GILD",
+      "date": "2025-12-31",
+      "close": "122.74",
+      "source": "eastmoney_native",
+      "evidence_sha256": "c6eaaac518877ff62b74a3989bb49b97cbfb981a6986af184d0eb6a8cc82f195"
+    },
+    {
+      "symbol": "GIS",
+      "date": "2025-12-31",
+      "close": "46.50",
+      "source": "eastmoney_native",
+      "evidence_sha256": "3c52c7e86de934d57e1ef20f82a57c535cd692659811a9683b8c78665ab2672b"
+    },
+    {
+      "symbol": "GLW",
+      "date": "2025-12-31",
+      "close": "87.56",
+      "source": "eastmoney_native",
+      "evidence_sha256": "dba0d03bb5236c12adbd166b3ccfb5f262172891b9326aaf5753feb254291eee"
+    },
+    {
+      "symbol": "GM",
+      "date": "2025-12-31",
+      "close": "81.32",
+      "source": "eastmoney_native",
+      "evidence_sha256": "8f8a945c69324a6f55ad5321eca65e87e83f822f161301a3a91ced255921c70a"
+    },
+    {
+      "symbol": "GPN",
+      "date": "2025-12-31",
+      "close": "77.40",
+      "source": "eastmoney_native",
+      "evidence_sha256": "c7fdb47ceb7aa619322d3d7296933c5b00a738d4450616a769660ea546703c04"
+    },
+    {
+      "symbol": "GRMN",
+      "date": "2025-12-31",
+      "close": "202.85",
+      "source": "eastmoney_native",
+      "evidence_sha256": "cc0aed55635853740479c400088305fb0239f05f5f44e10302d5710c84b823b3"
+    },
+    {
+      "symbol": "GS",
+      "date": "2025-12-31",
+      "close": "879.00",
+      "source": "eastmoney_native",
+      "evidence_sha256": "7ddb1128da5fecaf1719dbf89684190333ae070e01fbeea122b5f27e362813f3"
+    },
+    {
+      "symbol": "HAL",
+      "date": "2025-12-31",
+      "close": "28.26",
+      "source": "eastmoney_native",
+      "evidence_sha256": "cfd3e3610188db1efb92a1dfe197d49d5e6069d89814bf987e0657629ac8c17c"
+    },
+    {
+      "symbol": "HCA",
+      "date": "2025-12-31",
+      "close": "466.86",
+      "source": "eastmoney_native",
+      "evidence_sha256": "9eb9257934278031429e8781f72e1c3d6cdd350357b6ed95ed68807fe85f99ef"
+    },
+    {
+      "symbol": "HD",
+      "date": "2025-12-31",
+      "close": "344.10",
+      "source": "eastmoney_native",
+      "evidence_sha256": "c768a1db01e0174eb0ac68c9f5dfadeb61d77d97f0b58d959524c939d345a135"
+    },
+    {
+      "symbol": "HIG",
+      "date": "2025-12-31",
+      "close": "137.80",
+      "source": "eastmoney_native",
+      "evidence_sha256": "ca4172da80333365ccaf8a67211952afc4a3c03f49e8d948453442e74fb1e88a"
+    },
+    {
+      "symbol": "HLT",
+      "date": "2025-12-31",
+      "close": "287.25",
+      "source": "eastmoney_native",
+      "evidence_sha256": "16037868c71ed3ee619b950f56a860a290c5f835da06bc8c77f66346b1f8f207"
+    },
+    {
+      "symbol": "HON",
+      "date": "2025-12-31",
+      "close": "195.09",
+      "source": "eastmoney_native",
+      "evidence_sha256": "f584b889d91b8c0edbafc610dc93651c082fdc2bf0c501163e5b2272eb96a760"
+    },
+    {
+      "symbol": "HPE",
+      "date": "2025-12-31",
+      "close": "24.02",
+      "source": "eastmoney_native",
+      "evidence_sha256": "2eb221207eed8aaf32c0e85232aa940a9d718319341844d82241f3e86946012e"
+    },
+    {
+      "symbol": "HPQ",
+      "date": "2025-12-31",
+      "close": "22.28",
+      "source": "eastmoney_native",
+      "evidence_sha256": "2f6af1bb599447bde72c3357101537069f0c2ce10b55aab9c63ad00f81dcbfb4"
+    },
+    {
+      "symbol": "HSY",
+      "date": "2025-12-31",
+      "close": "181.98",
+      "source": "eastmoney_native",
+      "evidence_sha256": "60df94ace8f3ba3b46bde547fd3fb391fa3797e98dfd82b1b080edeb15807d9a"
+    },
+    {
+      "symbol": "HUM",
+      "date": "2025-12-31",
+      "close": "256.13",
+      "source": "eastmoney_native",
+      "evidence_sha256": "21cefa51ee0897aa7d8311237479e07790617a4115b95e95623b3a15d48f0c9e"
+    },
+    {
+      "symbol": "HWM",
+      "date": "2025-12-31",
+      "close": "205.02",
+      "source": "eastmoney_native",
+      "evidence_sha256": "992fad287785129f041a8bfa80fdd2b3d1083c63306a7355c22dade3642c32df"
+    },
+    {
+      "symbol": "ICE",
+      "date": "2025-12-31",
+      "close": "161.96",
+      "source": "eastmoney_native",
+      "evidence_sha256": "65c85bcd7057fbf40393e358de6ec0de942214dd5f0a94a939ce9fe9a0bdb7db"
+    },
+    {
+      "symbol": "IDXX",
+      "date": "2025-12-31",
+      "close": "676.53",
+      "source": "eastmoney_native",
+      "evidence_sha256": "b9edf8c8e824a8f40d6168c1505d3c513a51a1ad838088ad92acbaf651a313d5"
+    },
+    {
+      "symbol": "IFF",
+      "date": "2025-12-31",
+      "close": "67.39",
+      "source": "eastmoney_native",
+      "evidence_sha256": "26cad710c785684fd6888c289420fcb3535a55a750049d56d85c29bd055db1b0"
+    },
+    {
+      "symbol": "INTU",
+      "date": "2025-12-31",
+      "close": "662.42",
+      "source": "eastmoney_native",
+      "evidence_sha256": "b28f9b7673d16dc30061cffb1e37b9c86e04f6327ea2e1231688eaaa2818d05f"
+    },
+    {
+      "symbol": "INVH",
+      "date": "2025-12-31",
+      "close": "27.79",
+      "source": "eastmoney_native",
+      "evidence_sha256": "86a4feaa58b7bf9332eaea7e46359b3cba3fae1c1a0f6fef2ae67556a27a8440"
+    },
+    {
+      "symbol": "IQV",
+      "date": "2025-12-31",
+      "close": "225.41",
+      "source": "eastmoney_native",
+      "evidence_sha256": "d25ec20b35cb67d191460c723b00f5e4c8b77e5b7c74f75bde576a79a3fd0304"
+    },
+    {
+      "symbol": "ISRG",
+      "date": "2025-12-31",
+      "close": "566.36",
+      "source": "eastmoney_native",
+      "evidence_sha256": "b4aaefb132703b61149cf69489efde9b8ff30c2c133f74448bf5038a97f6f5d1"
+    },
+    {
+      "symbol": "IT",
+      "date": "2025-12-31",
+      "close": "252.28",
+      "source": "eastmoney_native",
+      "evidence_sha256": "f8de55a48b201e9095050eaf0b0fc166d10cf3f9e308f1ab7256569ef9fdf482"
+    },
+    {
+      "symbol": "ITW",
+      "date": "2025-12-31",
+      "close": "246.30",
+      "source": "eastmoney_native",
+      "evidence_sha256": "7aa1d5a5c0f27bfd115873d880f40f674ea1121649aed7f4c20c57a17a46b47b"
+    },
+    {
+      "symbol": "JBL",
+      "date": "2025-12-31",
+      "close": "228.02",
+      "source": "eastmoney_native",
+      "evidence_sha256": "5ff40d568054058151b1c9ae03ebd299c589975eed1878374a3997abe6203710"
+    },
+    {
+      "symbol": "JNJ",
+      "date": "2025-12-31",
+      "close": "206.95",
+      "source": "eastmoney_native",
+      "evidence_sha256": "6dfc3e10ca3fd0e032903dc3ac5168a85f61e41b207ff413828c4af47ede9db1"
+    },
+    {
+      "symbol": "JPM",
+      "date": "2025-12-31",
+      "close": "322.22",
+      "source": "eastmoney_native",
+      "evidence_sha256": "d29ed4b9a525d530ae226b5866faa24a2fb26d0b677629fa6d50dcf945dd98f1"
+    }
+  ],
+  "rejected_probes": [
+    "ETN:update_price:rejected",
+    "ETN:delete_price:rejected",
+    "ETN:delete_evidence:rejected",
+    "EXC:update_price:rejected",
+    "EXC:delete_price:rejected",
+    "EXC:delete_evidence:rejected",
+    "EXR:update_price:rejected",
+    "EXR:delete_price:rejected",
+    "EXR:delete_evidence:rejected",
+    "F:update_price:rejected",
+    "F:delete_price:rejected",
+    "F:delete_evidence:rejected",
+    "FANG:update_price:rejected",
+    "FANG:delete_price:rejected",
+    "FANG:delete_evidence:rejected",
+    "FAST:update_price:rejected",
+    "FAST:delete_price:rejected",
+    "FAST:delete_evidence:rejected",
+    "FCX:update_price:rejected",
+    "FCX:delete_price:rejected",
+    "FCX:delete_evidence:rejected",
+    "FDX:update_price:rejected",
+    "FDX:delete_price:rejected",
+    "FDX:delete_evidence:rejected",
+    "FE:update_price:rejected",
+    "FE:delete_price:rejected",
+    "FE:delete_evidence:rejected",
+    "FIS:update_price:rejected",
+    "FIS:delete_price:rejected",
+    "FIS:delete_evidence:rejected",
+    "FITB:update_price:rejected",
+    "FITB:delete_price:rejected",
+    "FITB:delete_evidence:rejected",
+    "FTNT:update_price:rejected",
+    "FTNT:delete_price:rejected",
+    "FTNT:delete_evidence:rejected",
+    "FTV:update_price:rejected",
+    "FTV:delete_price:rejected",
+    "FTV:delete_evidence:rejected",
+    "GD:update_price:rejected",
+    "GD:delete_price:rejected",
+    "GD:delete_evidence:rejected",
+    "GE:update_price:rejected",
+    "GE:delete_price:rejected",
+    "GE:delete_evidence:rejected",
+    "GILD:update_price:rejected",
+    "GILD:delete_price:rejected",
+    "GILD:delete_evidence:rejected",
+    "GIS:update_price:rejected",
+    "GIS:delete_price:rejected",
+    "GIS:delete_evidence:rejected",
+    "GLW:update_price:rejected",
+    "GLW:delete_price:rejected",
+    "GLW:delete_evidence:rejected",
+    "GM:update_price:rejected",
+    "GM:delete_price:rejected",
+    "GM:delete_evidence:rejected",
+    "GPN:update_price:rejected",
+    "GPN:delete_price:rejected",
+    "GPN:delete_evidence:rejected",
+    "GRMN:update_price:rejected",
+    "GRMN:delete_price:rejected",
+    "GRMN:delete_evidence:rejected",
+    "GS:update_price:rejected",
+    "GS:delete_price:rejected",
+    "GS:delete_evidence:rejected",
+    "HAL:update_price:rejected",
+    "HAL:delete_price:rejected",
+    "HAL:delete_evidence:rejected",
+    "HCA:update_price:rejected",
+    "HCA:delete_price:rejected",
+    "HCA:delete_evidence:rejected",
+    "HD:update_price:rejected",
+    "HD:delete_price:rejected",
+    "HD:delete_evidence:rejected",
+    "HIG:update_price:rejected",
+    "HIG:delete_price:rejected",
+    "HIG:delete_evidence:rejected",
+    "HLT:update_price:rejected",
+    "HLT:delete_price:rejected",
+    "HLT:delete_evidence:rejected",
+    "HON:update_price:rejected",
+    "HON:delete_price:rejected",
+    "HON:delete_evidence:rejected",
+    "HPE:update_price:rejected",
+    "HPE:delete_price:rejected",
+    "HPE:delete_evidence:rejected",
+    "HPQ:update_price:rejected",
+    "HPQ:delete_price:rejected",
+    "HPQ:delete_evidence:rejected",
+    "HSY:update_price:rejected",
+    "HSY:delete_price:rejected",
+    "HSY:delete_evidence:rejected",
+    "HUM:update_price:rejected",
+    "HUM:delete_price:rejected",
+    "HUM:delete_evidence:rejected",
+    "HWM:update_price:rejected",
+    "HWM:delete_price:rejected",
+    "HWM:delete_evidence:rejected",
+    "ICE:update_price:rejected",
+    "ICE:delete_price:rejected",
+    "ICE:delete_evidence:rejected",
+    "IDXX:update_price:rejected",
+    "IDXX:delete_price:rejected",
+    "IDXX:delete_evidence:rejected",
+    "IFF:update_price:rejected",
+    "IFF:delete_price:rejected",
+    "IFF:delete_evidence:rejected",
+    "INTU:update_price:rejected",
+    "INTU:delete_price:rejected",
+    "INTU:delete_evidence:rejected",
+    "INVH:update_price:rejected",
+    "INVH:delete_price:rejected",
+    "INVH:delete_evidence:rejected",
+    "IQV:update_price:rejected",
+    "IQV:delete_price:rejected",
+    "IQV:delete_evidence:rejected",
+    "ISRG:update_price:rejected",
+    "ISRG:delete_price:rejected",
+    "ISRG:delete_evidence:rejected",
+    "IT:update_price:rejected",
+    "IT:delete_price:rejected",
+    "IT:delete_evidence:rejected",
+    "ITW:update_price:rejected",
+    "ITW:delete_price:rejected",
+    "ITW:delete_evidence:rejected",
+    "JBL:update_price:rejected",
+    "JBL:delete_price:rejected",
+    "JBL:delete_evidence:rejected",
+    "JNJ:update_price:rejected",
+    "JNJ:delete_price:rejected",
+    "JNJ:delete_evidence:rejected",
+    "JPM:update_price:rejected",
+    "JPM:delete_price:rejected",
+    "JPM:delete_evidence:rejected"
+  ],
+  "all_probes_rolled_back": true,
+  "public_and_direct_equal": true,
+  "return_history_hashes_unchanged": true,
+  "total_accepted_closing_facts": 72,
+  "unresolved": [
+    {
+      "symbol": "IR",
+      "reason": "Selected-security returns disagree"
+    },
+    {
+      "symbol": "JCI",
+      "reason": "Selected-security returns disagree"
+    }
+  ],
+  "batch_complete": false,
+  "external_price_requests": 1,
+  "new_price_payloads_received": 0,
+  "new_issuer_document_downloads": 1
+}
