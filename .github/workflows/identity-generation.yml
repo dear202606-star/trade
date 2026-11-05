@@ -9,6 +9,8 @@ on:
       - db_prices.py
       - test_single_series.py
       - test_selected_reader.py
+      - research/review_scg_original_equity.py
+      - test_scg_original_equity.py
       - research/verify_selected_fingerprint.py
       - test_source_selection.py
       - fill_yahoo_gaps.py
@@ -58,7 +60,7 @@ jobs:
           python-version: '3.12'
       - run: pip install -r requirements.txt
       - name: 档案隔离与选源口径
-        run: python -m unittest test_source_selection test_historical_backfill_guards test_sun_quarantine test_historical_lineage test_single_series test_selected_reader
+        run: python -m unittest test_source_selection test_historical_backfill_guards test_sun_quarantine test_historical_lineage test_single_series test_selected_reader test_scg_original_equity
       - name: 原价验收来源与不可变守卫影子验证
         if: github.event_name != 'pull_request'
         env:
