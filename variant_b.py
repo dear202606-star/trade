@@ -54,14 +54,11 @@ def _db_sha():
                                   count(distinct symbol), count(distinct source)
                            from prices_monthly""")
             a = cur.fetchone()
-            cur.execute("""select count(*), coalesce(sum(adj_close),0),
-                                  count(distinct symbol)
-                           from series_selected""")
-            b = cur.fetchone()
-        return "db:%s|%s|%s|%s" % (a[0], a[1], a[2], a[3]), "sel:%s|%.2f|%s" % (
-            b[0], float(b[1] or 0), b[2])
+            b = db_prices.selected_stamp(cur)
+        return "db:%s|%s|%s|%s" % (a[0], a[1], a[2], a[3]), "sel:%s|%s|%s" % (
+            b[0], b[1], b[2])
     except Exception as e:
-        return "db:unavailable", str(e)[:60]
+        raise RuntimeError('Cannot verify online selected-price fingerprint') from e
 
 
 def _input_sha():
