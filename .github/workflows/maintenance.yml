@@ -1,0 +1,42 @@
+# 在线库维护：手动 dispatch 运行仓库内维护脚本（仅限 allowlist）。
+# 用途示例：provider 身份修正等一次性数据治理动作，需人工触发并留审计记录。
+name: 在线库维护
+on:
+  workflow_dispatch:
+    inputs:
+      script:
+        description: '维护脚本文件名（须在 allowlist 内）'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: trade-pipeline
+  cancel-in-progress: false
+
+jobs:
+  maintenance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+      - name: allowlist 校验
+        run: |
+          case "${{ inputs.script }}" in
+            patch_provider_identity.py) ;;
+            *) echo "脚本不在 allowlist 内：${{ inputs.script }}"; exit 1 ;;
+          esac
+      - name: 执行维护脚本
+        run: python "${{ inputs.script }}"
