@@ -11,6 +11,25 @@ import variant_b
 
 
 class IdentityGenerationGuardTests(unittest.TestCase):
+    def test_full_history_identity_failure_preserves_existing_artifact_before_prices(self):
+        from research.install_historical_identity_reviews import FACTS
+        frame=pd.DataFrame([{'ticker':'OTHER','start_date':'2008-01-01','end_date':'2099-12-31'}])
+        with tempfile.TemporaryDirectory() as directory:
+            old=Path(directory)/'strategy_history.json';old.write_text('old accepted artifact')
+            with patch.object(strategy_history,'OUT',str(old)), \
+                 patch.object(strategy_history,'locked_ok',return_value=(False,'review needed')), \
+                 patch.object(strategy_history,'missing_new_year',return_value=None), \
+                 patch.object(strategy_history.sys,'argv',['strategy_history.py']), \
+                 patch.object(strategy_history.datafeed,'load_members',return_value=frame), \
+                 patch.object(strategy_history.datafeed,'load_sector',return_value=({'OTHER':'Tech'},{})), \
+                 patch.object(db_ref,'require_unquarantined_candidates'), \
+                 patch.object(strategy_history.historical_lineage,'load',return_value=FACTS), \
+                 patch.object(strategy_history.datafeed,'prefetch') as prices:
+                with self.assertRaisesRegex(RuntimeError,'unresolved equity identities'):
+                    strategy_history.main()
+            prices.assert_not_called()
+            self.assertEqual(old.read_text(),'old accepted artifact')
+
     def test_online_identity_guard_rejects_quarantine_and_unavailable_database(self):
         connection = MagicMock()
         cursor = connection.cursor.return_value.__enter__.return_value
