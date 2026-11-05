@@ -60,9 +60,30 @@ def shadow_probe(sql):
             blocked(q,"""insert into pg_temp.sys_event(kind,source,subject,status,metrics)
                 values ('validation','verified_closing_fact','ABNB:2025-12-31','pass',
                         jsonb_build_object('proof','{}'::jsonb,'evidence_sha256',repeat('f',64)))""")
+            q.execute("""insert into pg_temp.series_selected(symbol,month,adj_close,raw_close,source,basis)
+                values('FUND_PROBE','2025-12',46.81,46.81,'probe','total_return')""")
+            q.execute("""insert into pg_temp.nominal_monthly
+                (symbol,month,close,trade_date,source,source_url,fetched_at,evidence_sha256,
+                 crosscheck_pairs,median_log_deviation,p90_log_deviation,unit_evidence)
+                values('FUND_PROBE','2025-12',46.81,'2025-12-31','issuer_native','https://example.invalid/probe',
+                       now(),repeat('e',64),100,0,0,'probe')""")
+            q.execute("""insert into pg_temp.sys_event(kind,source,subject,status,metrics)
+                values('validation','fund_native_closing_fact','FUND_PROBE:2025-12-31','pass',
+                    jsonb_build_object('proof',jsonb_build_object('nominal_source','issuer_native'),
+                                       'evidence_sha256',repeat('e',64)))""")
+            q.execute("select source from pg_temp.v_nominal_monthly where symbol='FUND_PROBE'")
+            assert q.fetchone()==('issuer_native',)
+            blocked(q,"update pg_temp.nominal_monthly set close=100 where symbol='FUND_PROBE'")
+            blocked(q,"delete from pg_temp.nominal_monthly where symbol='FUND_PROBE'")
+            blocked(q,"delete from pg_temp.sys_event where subject='FUND_PROBE:2025-12-31'")
+            blocked(q,"""insert into pg_temp.sys_event(kind,source,subject,status,metrics)
+                values('validation','fund_native_closing_fact','UNSUPPORTED:2025-12-31','pass',
+                    jsonb_build_object('proof',jsonb_build_object('nominal_source','unreviewed'),
+                                       'evidence_sha256',repeat('e',64)))""")
             # Unrelated validation logs remain writable.
             q.execute("insert into pg_temp.sys_event(kind,source,subject,status,metrics) values ('validation',null,'other','pass','{}')")
-        return {'blocked_mutations':8,'higher_priority_cannot_replace_accepted':True,
+        return {'blocked_mutations':12,'higher_priority_cannot_replace_accepted':True,
+                'issuer_source_protected':True,'unsupported_source_rejected':True,
                 'ordinary_validation_logs_unaffected':True,'unreviewed_rows_not_prematurely_locked':True,
                 'temporary_changes_rolled_back':True}
     finally:
@@ -70,7 +91,7 @@ def shadow_probe(sql):
 
 
 def run(apply=False):
-    sql=(BASE/'sql/108_accepted_nominal_fact_guards.sql').read_text()
+    sql=(BASE/'sql/120_source_aware_nominal_fact_guards.sql').read_text()
     result={'shadow_probe':shadow_probe(sql),'applied':False}
     if apply:
         c=db_sources.db()
@@ -78,6 +99,7 @@ def run(apply=False):
             with c,c.cursor() as q:
                 q.execute("set local lock_timeout='5s'")
                 q.execute("set local statement_timeout='30s'")
+                q.execute('lock table prices_monthly,nominal_monthly,sys_event,series_pick,series_quarantine,security_history_window in share row exclusive mode')
                 q.execute('create temp table before_nominal on commit drop as select * from public.v_nominal_monthly')
                 q.execute('select count(*) from before_nominal')
                 assert q.fetchone()[0]>0,'Cannot accept an empty nominal snapshot'

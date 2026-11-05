@@ -14,6 +14,8 @@ on:
       - test_historical_backfill_guards.py
       - test_sun_quarantine.py
       - sql/119_sun_identity_quarantine.sql
+      - sql/120_source_aware_nominal_fact_guards.sql
+      - research/verify_nominal_acceptance_guards.py
       - fetch_stockanalysis.py
       - test_stockanalysis_history.py
       - strategy_history.py
@@ -49,6 +51,11 @@ jobs:
       - run: pip install -r requirements.txt
       - name: 档案隔离与选源口径
         run: python -m unittest test_source_selection test_historical_backfill_guards test_sun_quarantine
+      - name: 原价验收来源与不可变守卫影子验证
+        if: github.event_name != 'pull_request'
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: python research/verify_nominal_acceptance_guards.py
       - run: python -m unittest test_identity_generation_guard test_merger_boundaries test_missing_holding_months
       - name: 运行状态入库与失败传递
         run: python -m unittest test_pipeline_status
