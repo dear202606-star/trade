@@ -4,8 +4,8 @@
 原理
   锁定时把序列（2012-01..2025-12 的 month|adj_close）哈希存进 data_lock.fingerprint。
   现在用同一算法重算，与存量比对：
-    · 一致 → 锁有效，数据未被改动
-    · 不一致 → 说明锁定后被改过（严重），列出差异月份
+    · 一致 → 当前选中序列与旧指纹一致，不证明原验收语义正确
+    · 不一致 → 可能是选源、身份边界或数据变化，必须调查，不能自动重锁
 
 用法
   python verify_locks.py            # 全量校验
@@ -91,7 +91,11 @@ def main():
         print("异常样例:")
         for s, why in bad[:10]:
             print("  %-8s %s" % (s, why))
-    print("\n结论:", "✅ 所有锁有效，数据未被改动" if drift == 0 and missing == 0 else "❌ 存在漂移")
+    if not locks:
+        print("\n结论: 没有可检查的有效锁，未验证历史数据。")
+    else:
+        print("\n结论:", "本次检查的选中序列与旧指纹一致，不代表完整数据验收。"
+              if drift == 0 and missing == 0 else "存在不一致；保留原锁并调查原因，禁止自动重建指纹。")
     return 0 if drift == 0 and missing == 0 else 1
 
 
