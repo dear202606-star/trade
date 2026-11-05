@@ -99,6 +99,9 @@ def calculate(variant,q,pool,sectors,members,reviews,contexts,initial,terms,refe
     def growth(symbol,day):return current_value(symbol)/normalized(initial[symbol])[day]
     for symbol in sorted(selected_pool):
         body=contexts[symbol];first=initial[symbol];review=reviews.get(symbol)
+        if review:
+            boundary=review.get('first_regular_way_date') or review.get('effective_date')
+            if boundary and not base<boundary<=session:review=None
         quote=q['quotes'].get(symbol)
         if not quote:raise ValueError('Missing candidate quote: '+symbol)
         price=positive(quote['p']);current_value(symbol)
@@ -115,14 +118,16 @@ def calculate(variant,q,pool,sectors,members,reviews,contexts,initial,terms,refe
             if min(first['raw'])!=base:raise ValueError('Unresolved base identity or price: '+symbol)
             lower=upper=current_value(symbol)
         event=terms.get(symbol)
-        if event and event.get('kind') in ('spinoff','spinoff_and_reverse_split'):
+        if event and base<event['event_date']<=session and event.get('kind') in ('spinoff','spinoff_and_reverse_split'):
             day=event['event_date'];pre=max(d for d in first['raw'] if d<day)
             child=event['distributed_symbol'];child_first=initial[child]
             shares=normalized(first)[pre]/first['raw'][pre]
             parent=shares*float(event['retained_parent_units_per_original_share'])*first['raw'][day]*growth(symbol,day)
             distributed=shares*float(event['distributed_units_per_original_share'])*child_first['raw'][day]*growth(child,day)
             lower=upper=parent+distributed
-        if symbol=='SKYD':
+        asset=terms.get('PSKY',{}).get('additional_asset',{})
+        if symbol=='SKYD' and review and not asset:raise ValueError('Missing warrant entitlement evidence')
+        if symbol=='SKYD' and base<asset.get('issued_on','')<=session:
             if not review or not terms.get('PSKY',{}).get('additional_asset'):
                 raise ValueError('Missing warrant entitlement evidence')
             asset=terms['PSKY']['additional_asset'];warrant=asset['trading_symbol'].replace(' ','_')
@@ -143,6 +148,7 @@ def calculate(variant,q,pool,sectors,members,reviews,contexts,initial,terms,refe
               'calculator_sha256':sha({name:hashlib.sha256((Path(__file__).resolve().parent/name).read_bytes()).hexdigest()
                   for name in ('live_ranking.py','prepare_live_ranking.py','live_strategy.py')})}
     payload={'variant':variant,'final':False,'as_of':q['ts_local'],'as_of_ts':q['ts'],
+             'fresh_until':q['fresh_until'],
              'session':session,'base_month':str(year-1)+'-12','hold_year':year+1,
              'quote_version':q['version'],'reference_version':reference_version,
              'universe':len(selected_pool),'ranked':len(rows)+len(bounded),

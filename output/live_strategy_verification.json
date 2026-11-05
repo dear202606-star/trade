@@ -1,7 +1,7 @@
 {
-  "checked_at": "2026-11-05T04:17:37.869327+00:00",
+  "checked_at": "2026-11-05T05:12:41.570443+00:00",
   "quote_session": "2026-11-04",
-  "quote_version": "34f11e2c7933b619e5a2606f27f9583dc38f3eccd9f02eb7401cbd00a7ec32c0",
+  "quote_version": "62b417eb1038ee797779c57220da9d5a5b4f574ca247b2df43dace8e8f60bd2d",
   "public_runtime_results": 4,
   "result_bytes": 27204,
   "all_dependencies_current": true,
@@ -22,7 +22,7 @@
   "locks": 966,
   "accepted_holding_paths": 8,
   "online_ranking_contexts": 505,
-  "online_runtime_result_rows": 28,
+  "online_runtime_result_rows": 42,
   "old_baseline_b_sha256": "20c0680276cf79cbb06d8aaab35c3e40cde010447f6e15e75abd95ff0ef33c90",
   "equity": {
     "A": {
@@ -52,7 +52,13 @@
   },
   "current_result_rows": 4,
   "duplicate_run_no_new_archive_or_collection": true,
-  "python_tests": 223,
-  "frontend_tests": 18,
-  "account_basis_revision": 2
+  "python_tests": 227,
+  "frontend_tests": 25,
+  "account_basis_revision": 2,
+  "online_fact_reuse_verified": true,
+  "market_advice_verified": true,
+  "official_spy_workbook_verified": true,
+  "public_dependencies_checked": true,
+  "online_fact_reuse_live_replay_verified": true,
+  "online_fact_reuse_external_requests": 0
 }

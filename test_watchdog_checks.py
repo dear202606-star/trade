@@ -90,11 +90,20 @@ class OnlineQuoteMonitorTests(unittest.TestCase):
 
 
 class PublishedDependencyTests(unittest.TestCase):
+    def test_valid_previous_calculation_expires_without_a_new_quote_version(self):
+        now=dt.datetime(2026,11,4,16,tzinfo=dt.timezone.utc)
+        quotes={'version':'new','session':'2026-11-04','previous_session':'2026-11-03','ts':'2026-11-04T16:00:00Z'}
+        equity={'last_session':'20261103','quote_version':'old','source_as_of':'2026-11-04T15:55:00Z','fresh_until':'2026-11-04T16:15:00Z'}
+        preview={'quote_version':'old','session':quotes['session'],'reference_version':'ref','top':[{}, {}, {}],
+                 'as_of_ts':equity['source_as_of'],'fresh_until':equity['fresh_until']}
+        self.assertEqual(published_dependency_problems(equity,preview,quotes,now),[])
+        self.assertEqual(len(published_dependency_problems(equity,preview,quotes,now+dt.timedelta(minutes=15))),2)
+
     def test_quote_success_does_not_hide_stalled_calculations(self):
         quotes={'version':'new','session':'2026-11-04','previous_session':'2026-11-03'}
         preview={'quote_version':'new','session':quotes['session'],'reference_version':'reviewed','top':[{}, {}, {}]}
-        self.assertEqual(published_dependency_problems({'last_session':'20261103'},preview,quotes),[])
-        self.assertEqual(len(published_dependency_problems({'last_session':'20261102'},dict(preview,quote_version='old'),quotes)),2)
+        self.assertEqual(published_dependency_problems({'last_session':'20261103','quote_version':'new'},preview,quotes),[])
+        self.assertEqual(len(published_dependency_problems({'last_session':'20261102','quote_version':'new'},dict(preview,quote_version='old'),quotes)),2)
         self.assertTrue(published_dependency_problems(None,None,quotes))
         with self.assertRaises(ValueError):published_dependency_problems({}, {}, {})
 

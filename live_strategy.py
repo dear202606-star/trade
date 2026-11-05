@@ -5,6 +5,7 @@ import datetime as dt
 import hashlib
 import json
 import math
+import time
 from concurrent.futures import ThreadPoolExecutor,as_completed
 from pathlib import Path
 
@@ -57,9 +58,16 @@ def fetch_daily(symbol,market,start,end):
                 'beg':start.replace('-',''),'end':end.replace('-',''),
                 'fields1':'f1,f2,f3,f4,f5,f6',
                 'fields2':'f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61'}
-        response=requests.get(API,params=params,timeout=25)
-        response.raise_for_status();body=response.json()
+        for attempt in range(3):
+            try:
+                response=requests.get(API,params=params,headers={'User-Agent':'Mozilla/5.0',
+                    'Referer':'https://quote.eastmoney.com/'},timeout=25)
+                response.raise_for_status();body=response.json();break
+            except requests.RequestException:
+                if attempt==2:raise
+                time.sleep(attempt+1)
         series[adjustment]=parse_daily(body,symbol,market)
+        if any(not start<=day<=end for day in series[adjustment]):raise ValueError('Source dates outside requested window')
         evidence[str(adjustment)]={'url':response.url,'payload':body}
     if set(series[0])!=set(series[1]):raise ValueError('Adjusted/raw source dates differ')
     return {'raw':series[0],'adjusted':series[1],'evidence':evidence}
@@ -84,6 +92,34 @@ def provider_markets(symbols):
     finally:connection.close()
 
 
+def online_prices(symbols,start,quotes):
+    """Read sealed paired facts before making any external request."""
+    if not symbols:return {}
+    from prepare_live_ranking import normalized
+    phase='intraday' if quotes['intraday'] else 'close';connection=db_sources.db();result={}
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('''select symbol,payload,evidence_sha256 from live_ranking_context
+                where symbol=any(%s) and base_year=%s and session between %s and %s
+                  and (phase='close' or (session=%s and phase=%s))
+                order by session,created_at''',
+                (symbols,int(quotes['session'][:4]),start,quotes['session'],quotes['session'],phase))
+            rows=cursor.fetchall()
+    finally:connection.close()
+    for symbol,body,digest in rows:
+        if sha(body)!=digest:raise ValueError('Online paired-price evidence mismatch')
+        item=result.setdefault(symbol,{'raw':{},'adjusted':{},'evidence':{'online_context_sha256':[]}})
+        values=normalized(body)
+        for day,price in body['raw'].items():
+            if start<=day<=quotes['session']:
+                if day in item['raw'] and not close_enough(item['raw'][day],price):
+                    raise ValueError('Previously sealed native price changed: '+symbol+' '+day)
+                item['raw'][day]=price;item['adjusted'][day]=values[day]
+        item['evidence']['online_context_sha256'].append(digest)
+    required={start,quotes['previous_session'],quotes['session']}
+    return {s:p for s,p in result.items() if required<=set(p['raw'])}
+
+
 def iso(day):
     value=str(day).replace('-','')
     return dt.datetime.strptime(value,'%Y%m%d').date().isoformat()
@@ -91,6 +127,28 @@ def iso(day):
 
 def close_enough(a,b):
     return abs(positive(a)-positive(b))<=max(.0011,abs(b)*1e-8)
+
+
+def market_advice(quotes,calendar):
+    """Existing rule: nine prior month ends plus the current month's latest SPY."""
+    month=dt.date.fromisoformat(quotes['session']).replace(day=1);dates=[]
+    for _ in range(9):
+        close=calendar.previous(month);dates.append(close.isoformat());month=close.replace(day=1)
+    connection=db_sources.db()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('''select distinct on(point.key) point.key,point.value,evidence_sha256
+                from live_ranking_context c cross join lateral jsonb_each_text(c.payload->'raw') point
+                where symbol='SPY' and point.key=any(%s)
+                order by point.key,session desc,created_at desc''',(dates,))
+            rows=cursor.fetchall()
+    finally:connection.close()
+    values={d:positive(float(v)) for d,v,_ in rows}
+    if set(values)!=set(dates):raise ValueError('Missing verified SPY month ends')
+    return {'month':quotes['session'][:7],'calendar_sha256':calendar.sha,
+            'calculator_sha256':equity_code_sha(),
+            'closes':[{'date':d,'price':values[d]} for d in sorted(dates)],
+            'source_evidence_sha256':{d:h for d,_,h in rows},'window':10}
 
 
 def validate_anchor(body):
@@ -178,7 +236,7 @@ def calculate_equity(anchor,quotes,prices,calendar,cash_proofs=None):
         peak=max(peak,point['s']);drawdown=min(drawdown,point['s']/peak-1)
     equity['stats'].update(mdd=drawdown,days=len(equity['points']))
     equity.update(updated=quotes['ts_local'],quote_version=quotes['version'],
-                  source_as_of=quotes['ts'],runtime_verified=True,
+                  source_as_of=quotes['ts'],fresh_until=quotes['fresh_until'],quote_intraday=quotes['intraday'],runtime_verified=True,
                   today={'pct':current/prior-1,'per_dollar':current-prior,
                          'benchmark_factor':value('SPY',end)/value('SPY',previous),
                          'session':end,'quote_version':quotes['version']})
@@ -266,6 +324,7 @@ def run_equity():
         prior=previous_results.get(variant)
         if prior and prior[1]==quotes['version']:
             prices.update(prior[2].get('prices',{}))
+    prices.update(online_prices([s for s in symbols if s not in prices],start,quotes))
     markets=provider_markets([s for s in symbols if s not in prices])
     with ThreadPoolExecutor(max_workers=5) as pool:
         futures={pool.submit(fetch_daily,s.replace('.','_'),markets[s],start,quotes['session']):s for s in symbols if s not in prices}
@@ -285,6 +344,15 @@ def run_equity():
         try:
             if sha(body)!=digest:raise RuntimeError('Online account anchor hash mismatch')
             result=calculate_equity(body,quotes,prices,calendar,cash_proofs)
+            result.pop('market_advice_error',None)
+            basis=body['equity'].get('market_advice',{})
+            try:
+                if (basis.get('month')!=quotes['session'][:7] or basis.get('calendar_sha256')!=calendar.sha
+                        or basis.get('calculator_sha256')!=code_version):basis=market_advice(quotes,calendar)
+                result['market_advice']=basis
+            except Exception as exc:
+                result.pop('market_advice',None)
+                result['market_advice_error']=type(exc).__name__+': '+str(exc)[:120]
             used={s:prices[s] for s in {p['ticker'] for p in body['equity']['position']}|{'SPY'}}
             store(variant,'equity',quotes,result,{'anchor_sha256':digest,'root_anchor_sha256':roots[variant],
                 'prices':used,'cash_distribution_proofs':cash_proofs,'calculator_sha256':code_version})

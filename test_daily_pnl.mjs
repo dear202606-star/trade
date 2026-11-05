@@ -28,6 +28,17 @@ test('online calculated daily dollars scale with capital and reject a different 
   assert.equal(calculator()(null,{...q,version:'new'},e),null);
 });
 
+test('a timestamped verified calculation stays visible during a refresh and expires at its own deadline',()=>{
+  const now=Date.now();
+  const q={...quotes,version:'new',ts:new Date(now).toISOString(),fresh_until:new Date(now+1200000).toISOString()};
+  const e={runtime_verified:true,quote_version:'old',updated:'2026-11-04 23:55',
+    source_as_of:new Date(now-300000).toISOString(),fresh_until:new Date(now+900000).toISOString(),
+    today:{quote_version:'old',session:q.session,pct:.02,per_dollar:.03}};
+  assert.equal(calculator()(null,q,e).lagging,true);
+  assert.equal(calculator()(null,q,e).asOf,e.updated);
+  assert.equal(calculator()(null,q,{...e,fresh_until:new Date(now-1).toISOString()}),null);
+});
+
 test('all holdings contribute shares times actual price change', () => {
   const result = calculator()(null, quotes, equity);
   assert.equal(result.amount, 4000);

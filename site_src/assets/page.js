@@ -22,11 +22,12 @@
   /* ---------- ① 今日 ---------- */
   function renderNow() {
     var off = (SIG && SIG.official) || [];
-    var trend = (SIG && SIG.trend) || "—";
+    var advice = DSH.marketAdvice(EQ, Q);
+    var trend = advice ? advice.trend : "—";
     var hold = trend === "满仓";
 
-    $("verdict").textContent = hold ? "持有不动" : "建议减仓";
-    $("verdictSub").textContent = hold
+    $("verdict").textContent = advice ? (hold ? "持有不动" : "建议减仓") : "建议待更新";
+    $("verdictSub").textContent = !advice ? "大盘建议暂不可用" : hold
       ? "下次换仓 " + ((SIG && SIG.rebalance_hint) || "12 月末")
       : "大盘跌破均线 · 建议减仓";
 
@@ -36,7 +37,7 @@
       $("todayPct").className = "num num-lg " + cls(t.pct);
       $("todayAmt").textContent = yuan(t.amount);
       $("todayAmt").className = "sub " + cls(t.amount);
-      $("todayLabel").textContent = "策略今日表现";
+      $("todayLabel").textContent = t.lagging ? "今日表现 · " + String(t.asOf || "").slice(11,16) : "策略今日表现";
     } else {
       $("todayPct").textContent = "—";
       $("todayPct").className = "num num-lg";
@@ -46,9 +47,9 @@
     }
 
     $("switchTxt").textContent = trend;
-    var _spy = spyNow(), _ma = (SIG && SIG.ma) ? SIG.ma.toFixed(0) : "—";
+    var _spy = advice ? advice.spy.toFixed(0) : "—", _ma = advice ? advice.ma.toFixed(0) : "—";
     $("switchSub").textContent = "SPY " + _spy + " " +
-      ((SIG && SIG.trend === "满仓") ? "高于均线 " : "低于均线 ") + _ma;
+      (advice ? (hold ? "高于均线 " : "低于均线 ") : "均线 ") + _ma;
   }
 
   /* ---------- ② 当期账户 ---------- */
@@ -64,7 +65,7 @@
       var c = shares * p.entry, v = shares * last;
       mv += v; cost += c;
       rows.push({ ticker: p.ticker, weight: p.weight, entry: p.entry, last: last,
-        entry_raw: p.entry_raw, last_raw: bridge ? quote.p : p.last_raw,
+        entry_raw: p.entry_raw, last_raw: bridge && !EQ.runtime_verified ? quote.p : p.last_raw,
         shares: shares, mv: v, cost: c });
     });
     var cash = amt * (1 - exposure);
@@ -117,7 +118,8 @@
       ? EQ.base_date.slice(0, 4) + "-" + EQ.base_date.slice(4, 6) + "-" + EQ.base_date.slice(6, 8) : "—";
     $("posTitle").textContent = "当年策略明细";
     var pm = $("posMeta");
-    if (pm) pm.textContent = (y ? (y - 1) + "-12 选出 · " : "") + (bdTxt ? "建仓 " + bdTxt : "");
+    if (pm) pm.textContent = (y ? (y - 1) + "-12 选出 · " : "") + (bdTxt ? "建仓 " + bdTxt : "") +
+      (EQ && EQ.updated ? " · 估值 " + EQ.updated.slice(5,16) + "（北京）" : "");
     $("posRows").innerHTML = c.rows.map(function (r, i) {
       var eraw = (r.entry_raw != null) ? r.entry_raw : r.entry;
       var lraw = (r.last_raw != null) ? r.last_raw : r.last;
@@ -141,7 +143,8 @@
 
   function drawYearSpark() {
     var box = $("yearSpark");
-    if (!box || !EQ || !EQ.points || EQ.points.length < 3) return;
+    if (!box) return;
+    if (!EQ || !EQ.points || EQ.points.length < 3) { box.innerHTML = ""; return; }
     try {
       box.innerHTML = DSH.spark(EQ.points.map(function (p) { return { y: p.s }; }),
         { h: box.clientHeight || 176, w: Math.max(240, Math.round(box.clientWidth)), color: "#009c80" });
@@ -165,14 +168,6 @@
       document.body.insertBefore(bar, document.body.firstChild);
     }
     bar.textContent = "⚠ 行情更新超时";
-  }
-
-  /* 全站统一 SPY 价格：优先实时行情，其次用信号里的收盘价 */
-  function spyNow() {
-    var q = (Q && Q.quotes && Q.quotes.SPY) || null;
-    if (q && isFinite(q.p) && q.p > 0) return q.p.toFixed(0);
-    if (SIG && isFinite(SIG.spy)) return Number(SIG.spy).toFixed(0);
-    return "—";
   }
 
   /* 中文名优先（行情源带中文），否则回退英文 */
@@ -202,7 +197,8 @@
 
   function drawAllChart() {
     var box = $("allChart");
-    if (!box || !CV || !CV.points || CV.points.length < 4) return;
+    if (!box) return;
+    if (!CV || !CV.points || CV.points.length < 4) { box.innerHTML = ""; return; }
     try {
       var wpx = Math.max(300, Math.round(box.clientWidth));
       var _cv = (typeof CV_VIEW !== "undefined" && CV_VIEW && CV_VIEW.length) ? CV_VIEW : CV.points;
@@ -227,7 +223,8 @@
     }
     var y = PV.hold_year || "";
     $("nextYearTitle").textContent = "次年策略预览";
-    $("previewNote").textContent = PV.final ? "已定稿 · 与正式持仓一致" : "年初至今涨幅 · 年末定稿";
+    $("previewNote").textContent = PV.final ? "已定稿 · 与正式持仓一致" :
+      "年初至今涨幅 · 截至 " + String(PV.as_of || "").slice(5,16) + "（北京）";
     var SEC = {
       "Information Technology": "信息技术",
       "Communication Services": "通信服务",
@@ -384,10 +381,7 @@
       try {
         await loadVariant(true);
         if (!dataReady()) {
-          renderTick();
-          renderNow();
-          renderPreview();
-          showDegraded("计算数据读取失败 · 请刷新后重试");
+          renderUnavailable("计算数据读取失败 · 正在重试");
           return;
         }
         checkFreshness();
@@ -449,6 +443,18 @@
     renderYears();
     drawYearSpark();
     drawAllChart();
+    renderStamp();
+  }
+
+  function renderStamp() {
+    var foot = $("footStamp");
+    if (foot) foot.textContent = "行情 " + (Q && Q.ts_local ? Q.ts_local.slice(5,16) : "暂无") +
+      " · 收益 " + (EQ && EQ.updated ? EQ.updated.slice(5,16) : "暂无") + "（北京）";
+  }
+
+  function renderUnavailable(reason) {
+    renderTick(); renderPreview(); renderAll(); renderYears(); drawAllChart(); renderStamp();
+    showDegraded(reason);
   }
 
   function initVariants() {
@@ -460,7 +466,7 @@
         localStorage.setItem("dsh.variant.v2", v);
         applyVariantUI();
         await loadVariant();
-        if (!dataReady()) { showDegraded("该口径的数据缺失，请刷新或切换口径"); return; }
+        if (!dataReady()) { renderUnavailable("该口径的数据缺失 · 正在重试"); return; }
         renderAllCards();
       });
     });
@@ -486,6 +492,15 @@
     var ret = $("yearRet");
     if (ret) { ret.textContent = "—"; ret.className = "num num-xl"; }
     var vs2 = $("yearVs"); if (vs2) vs2.textContent = "";
+    ["todayPct", "todayAmt", "switchTxt"].forEach(function (id) {
+      var el = $(id); if (el) el.textContent = "—";
+    });
+    $("todayLabel").textContent = "收益数据待更新";
+    $("switchSub").textContent = "大盘建议暂不可用";
+    $("posRows").innerHTML = "";
+    $("yearSpark").innerHTML = "";
+    $("posMeta").textContent = "账户数据暂不可用";
+    $("yearTitle").textContent = "当期策略收益";
     var b = document.getElementById("freshBanner");
     if (!b) {
       b = document.createElement("div");
@@ -507,19 +522,12 @@
     renderQuality();
 
     if (!dataReady()) {
-      showDegraded("行情或净值数据缺失，请稍后刷新");
+      renderUnavailable("行情或净值数据缺失 · 正在重试");
       return;
     }
 
     checkFreshness();
-    renderTick();
-    renderNow();
-    renderYear();
-    renderPreview();
-    renderAll();
-    renderYears();
-    drawYearSpark();
-    drawAllChart();
+    renderAllCards();
 
     var _rt = null;
     window.addEventListener("resize", function () {
@@ -527,10 +535,6 @@
       _rt = setTimeout(function () { drawYearSpark(); drawAllChart(); }, 180);
     });
 
-    var when = (Q && Q.ts_local) || (EQ && EQ.updated) || "";
-    var _td = DSH.today(SIG, Q, EQ);
-    if (when) $("footStamp").textContent = "数据更新 " + when.slice(5, 16) + "（北京）" +
-      (_td ? (" · " + (_td.live ? "盘中" : "收盘")) : "");
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
