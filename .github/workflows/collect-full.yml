@@ -37,7 +37,7 @@ jobs:
         run: pip install -q -r requirements.txt
 
       - name: 档案隔离与选源口径回归
-        run: python -m unittest test_source_selection
+        run: python -m unittest test_source_selection test_historical_backfill_guards
 
       - name: 补数与档案隔离回归
         run: python -m unittest test_data_pipeline test_nominal_prices test_holding_consideration test_holding_paths test_eastmoney_nominal test_security_membership test_liquidity_prices
@@ -64,7 +64,6 @@ jobs:
       # 这里不跑，否则每 6 小时跑一次会 4 倍超量、全部失败。
 
       - name: 给「选源非全收益」的标的补 Yahoo 全收益
-        continue-on-error: true
         run: python fill_yahoo_gaps.py --limit 400 --max-seconds 900
 
       - name: 重建选源（每票单源）
@@ -73,9 +72,8 @@ jobs:
       - name: 校验入库（validations）
         run: python db_validate.py --data-only
 
-      - name: 锁定新达标的标的
-        continue-on-error: true
-        run: python lock_symbols.py --lock
+      - name: 历史覆盖初筛（不创建验收锁）
+        run: python lock_symbols.py --check
 
       - name: 采集分红/拆股事件（让全收益可独立复算）
         continue-on-error: true
