@@ -36,6 +36,9 @@ jobs:
       - name: 安装依赖
         run: pip install -q -r requirements.txt
 
+      - name: 档案隔离与选源口径回归
+        run: python -m unittest test_source_selection
+
       - name: 补数与档案隔离回归
         run: python -m unittest test_data_pipeline test_nominal_prices test_holding_consideration test_holding_paths test_eastmoney_nominal test_security_membership test_liquidity_prices
 
