@@ -22,8 +22,10 @@ BASE = Path(__file__).resolve().parent
 DDL = BASE / "sql" / "122_site_dataset.sql"
 
 # 前端实际会读取的数据集（runtime 4 类走专用在线视图，不在此列）
+# 说明：history.json 由 site_build.py 在构建期生成、用于 signals.html 渲染，
+# 但从未发布到 Pages，前端也不读取，因此不作为在线数据集的必需项。
 REQUIRED = (
-    "curve", "strategy_history", "history", "health", "name_zh", "sectors",
+    "curve", "strategy_history", "health", "name_zh", "sectors",
 )
 # B 口径（页面默认）专有的数据集，仅在完整数据管线的构建产物中存在；
 # 本地 site_build.py 不带 variant_b 输出，故 dry-run 只提示、不阻断。
