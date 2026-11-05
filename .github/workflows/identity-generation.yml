@@ -16,6 +16,10 @@ on:
       - sql/119_sun_identity_quarantine.sql
       - sql/120_source_aware_nominal_fact_guards.sql
       - research/verify_nominal_acceptance_guards.py
+      - historical_lineage.py
+      - test_historical_lineage.py
+      - research/install_historical_identity_reviews.py
+      - sql/121_historical_identity_review_guards.sql
       - fetch_stockanalysis.py
       - test_stockanalysis_history.py
       - strategy_history.py
@@ -50,7 +54,7 @@ jobs:
           python-version: '3.12'
       - run: pip install -r requirements.txt
       - name: 档案隔离与选源口径
-        run: python -m unittest test_source_selection test_historical_backfill_guards test_sun_quarantine
+        run: python -m unittest test_source_selection test_historical_backfill_guards test_sun_quarantine test_historical_lineage
       - name: 原价验收来源与不可变守卫影子验证
         if: github.event_name != 'pull_request'
         env:
