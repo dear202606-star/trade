@@ -116,34 +116,66 @@ def page(path, must, forbid=("加载中…", "尚未生成", "渲染失败")):
                                   "，含浏览器渲染校验" if dom else ""))
 
 
-def data(name):
-    if name == 'quotes.json':
-        cfg = data('cloud.json')
-        if not cfg or not cfg.get('url') or not cfg.get('key'):
-            bad('在线行情配置缺失')
-            return None
-        try:
-            response = requests.get(cfg['url'].rstrip('/')+'/rest/v1/live_quote_snapshot',
-                params={'singleton':'eq.true','select':'payload'},
-                headers={**H,'apikey':cfg['key']},timeout=20)
-            response.raise_for_status()
-            rows = response.json()
-            if len(rows)!=1 or not rows[0]['payload'].get('ok') or not rows[0]['payload'].get('quotes',{}).get('SPY'):
-                raise ValueError('Missing valid online quote snapshot')
-            return rows[0]['payload']
-        except Exception as exc:
-            bad('在线行情读取失败：'+type(exc).__name__)
-            return None
-    code, txt = get("data/" + name)
-    if code != 200:
-        bad("数据 %s 状态码 %s" % (name, code))
-        return None
+def _cloud():
+    """Pages 上唯一保留的引导文件。"""
     try:
-        return json.loads(txt)
-    except Exception as e:
-        bad("数据 %s 解析失败：%s" % (name, e))
+        response = requests.get(BASE+'data/cloud.json',headers=H,timeout=20)
+        response.raise_for_status(); cfg=response.json()
+        if not cfg.get('url') or not cfg.get('key'):raise ValueError('invalid cloud config')
+        return cfg
+    except Exception as exc:
+        bad('引导配置 cloud.json 读取失败：'+type(exc).__name__)
         return None
 
+
+def _online(cfg,path,params=None):
+    response = requests.get(cfg['url'].rstrip('/')+'/rest/v1/'+path,
+        params=params or {},headers={**H,'apikey':cfg['key']},timeout=20)
+    response.raise_for_status()
+    rows = response.json()
+    if not isinstance(rows,list) or len(rows)!=1:
+        raise ValueError('online result is not a single row')
+    return rows[0]
+
+
+def data(name):
+    """与页面同一数据源：实时类走在线视图，历史类走 v_site_dataset。
+
+    2026-11-06 起 Pages 不再发布 data/*.json（仅保留 cloud.json 引导配置），
+    E2E 必须校验「用户真正看到的那份在线数据」，而不是已下线的静态快照。
+    """
+    key = name[:-5] if name.endswith('.json') else name
+    if key == 'cloud':
+        return _cloud()
+    cfg = _cloud()
+    if not cfg:
+        return None
+    try:
+        if key == 'quotes':
+            row = _online(cfg,'live_quote_snapshot',{'singleton':'eq.true','select':'payload'})
+            payload = row['payload']
+            if not payload.get('ok') or not payload.get('quotes',{}).get('SPY'):
+                raise ValueError('invalid online quote snapshot')
+            return payload
+        if key in ('equity','signal','preview','b/equity','b/signal','b/preview'):
+            variant = 'B' if key.startswith('b/') else 'A'
+            kind = key.split('/')[-1]
+            if kind == 'signal':
+                row = _online(cfg,'live_strategy_anchor',
+                    {'variant':'eq.'+variant,'select':'payload',
+                     'order':'hold_year.desc,revision.desc','limit':1})
+                return row['payload']['signal']
+            row = _online(cfg,'v_live_strategy_results',
+                {'variant':'eq.'+variant,'kind':'eq.'+kind,'select':'payload'})
+            return row['payload']
+        # 历史/静态展示数据：在线库 site_dataset
+        row = _online(cfg,'v_site_dataset',{'key':'eq.'+key,'select':'payload'})
+        payload = row['payload']
+        if payload is None:raise ValueError('empty online dataset: '+key)
+        return payload
+    except Exception as exc:
+        bad('在线数据 %s 读取失败：%s' % (name,type(exc).__name__))
+        return None
 
 def main():
     # 1. 单页结构
