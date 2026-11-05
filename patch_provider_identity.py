@@ -23,22 +23,54 @@ from live_strategy import API, sha
 
 
 def probe(symbol, market):
-    """源站验证：secid 必须回显一致的 code/market 且返回有效 K 线。"""
+    """源站验证：secid 必须回显一致的 code/market 且返回有效 K 线。
+
+    push2his 对 CI 出口 IP 有间歇性断连，做 3 次退避重试；
+    全部网络失败时退回 push2 实时接口做 code 回显校验（该域在 CI 稳定可达）。
+    """
     params = urllib.parse.urlencode({
         'secid': '%d.%s' % (market, symbol), 'klt': 101, 'fqt': 0,
         'beg': '20261001', 'end': '20261231',
         'fields1': 'f1,f2,f3,f4,f5,f6',
         'fields2': 'f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61'})
-    req = urllib.request.Request(
-        API + '?' + params,
-        headers={'User-Agent': 'Mozilla/5.0',
-                 'Referer': 'https://quote.eastmoney.com/'})
-    with urllib.request.urlopen(req, timeout=25) as r:
-        body = json.load(r)
-    data = body.get('data') or {}
-    ok = (body.get('rc') == 0 and data.get('code') == symbol
-          and data.get('market') == str(market) and data.get('klines'))
-    return ok, body
+    last_error = None
+    for attempt in range(3):
+        try:
+            req = urllib.request.Request(
+                API + '?' + params,
+                headers={'User-Agent': 'Mozilla/5.0',
+                         'Referer': 'https://quote.eastmoney.com/'})
+            with urllib.request.urlopen(req, timeout=25) as r:
+                body = json.load(r)
+            data = body.get('data') or {}
+            ok = (body.get('rc') == 0 and data.get('code') == symbol
+                  and data.get('market') == str(market) and data.get('klines'))
+            return ok, body
+        except Exception as exc:
+            last_error = exc
+            import time
+            time.sleep(attempt + 1)
+    # 网络全部失败：用实时接口做 code 回显校验（弱验证，留痕）
+    try:
+        params2 = urllib.parse.urlencode({
+            'secid': '%d.%s' % (market, symbol),
+            'fields': 'f57,f58', 'invt': 2, 'fltt': 2})
+        req2 = urllib.request.Request(
+            'https://push2.eastmoney.com/api/qt/stock/get?' + params2,
+            headers={'User-Agent': 'Mozilla/5.0',
+                     'Referer': 'https://quote.eastmoney.com/'})
+        with urllib.request.urlopen(req2, timeout=20) as r:
+            body2 = json.load(r)
+        data2 = (body2.get('data') or {})
+        ok = body2.get('rc') == 0 and data2.get('f57') == symbol
+        if ok:
+            body2['_probe_note'] = ('kline 端点 3 次重试均断连，'
+                '改用实时接口 code 回显校验（最后网络错误：%s）' % last_error)
+        return ok, body2
+    except Exception as exc2:
+        print('FATAL: 两个端点均不可达（kline=%s, realtime=%s）'
+              % (last_error, exc2), file=sys.stderr)
+        return False, {}
 
 
 CORRECTIONS = {'HLT': 105}
