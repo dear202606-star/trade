@@ -15,25 +15,35 @@ BASE = Path(__file__).resolve().parent
 
 
 class SecurityIdentityBoundaryTests(unittest.TestCase):
-    def test_quarantined_member_cannot_disappear_into_a_complete_screen(self):
+    def test_quarantined_or_unproved_member_cannot_disappear_into_a_complete_screen(self):
         picks = [{'ticker':'ABC','weight':1}]
-        prices = {'ABC':{'2024-12':(100,100),'2025-12':(110,110)}}
-        for member_end,expected in (('2099-12-31',False),('2020-12-31',True)):
-            with self.subTest(member_end=member_end), tempfile.TemporaryDirectory() as directory:
+        prices = {'ABC':{'2024-12':(100,100),**{'2025-%02d'%m:(110,110) for m in range(1,13)}}}
+        partial={'2024-12':(100,100),**{'2025-%02d'%m:(110,110) for m in range(1,13) if m!=5}}
+        cases=[('2099-12-31',False,{'Q':'Wrong issuer'},None),
+               ('2020-12-31',True,{'Q':'Wrong issuer'},None),
+               ('2099-12-31',False,{},None),
+               ('2099-12-31',False,{}, {'2025-12':(110,110)}),
+               ('2099-12-31',False,{},partial),
+               ('2099-12-31',False,{},'pending_event')]
+        for member_end,expected,quarantine,q_bars in cases:
+            current_prices=dict(prices)
+            if q_bars is not None:current_prices['Q']=prices['ABC'] if q_bars=='pending_event' else q_bars
+            with self.subTest(member_end=member_end,quarantine=quarantine,q_bars=q_bars), tempfile.TemporaryDirectory() as directory:
                 root = Path(directory); (root/'output').mkdir()
                 (root/'output/baseline_b.json').write_text('{"years":{}}')
                 patches = [patch.object(impact,'BASE',root),
-                     patch.object(impact,'range',return_value=[2026],create=True),
-                     patch.object(impact.db_prices,'load_all',return_value=prices),
+                     patch.object(impact,'range',side_effect=lambda *args:[2026] if args==(2010,2027) else range(*args),create=True),
+                     patch.object(impact.db_prices,'load_all',return_value=current_prices),
                      patch.object(impact.db_prices,'_db_stamp',return_value=('stamp',)),
                      patch.object(impact,'nominal_snapshot',return_value=({('ABC','2025-12'):110},'native')),
-                     patch.object(impact,'quarantine_snapshot',return_value=({'Q':'Wrong issuer'},'quarantine')),
+                     patch.object(impact,'quarantine_snapshot',return_value=(quarantine,'quarantine')),
                      patch.object(impact.holding_paths,'load_all',return_value={}),
                      patch.object(impact.holding_paths,'input_sha',return_value='events'),
                      patch.object(impact.holding_paths,'_PATHS',None),
                      patch.object(impact.datafeed,'_ALL_BARS',None),
                      patch.object(impact.variant_b,'_ALL_BARS',None),
-                     patch.object(impact.holding_paths,'momentum_bars',side_effect=lambda s,b,a,z:b),
+                     patch.object(impact.holding_paths,'momentum_bars',side_effect=lambda s,b,a,z:
+                         (_ for _ in ()).throw(RuntimeError('Unaccepted event')) if s=='Q' and q_bars=='pending_event' else b),
                      patch.object(impact.db_ref,'load_members',return_value={
                          'ABC':[('2008-01-01','2099-12-31')], 'Q':[('2008-01-01',member_end)]}),
                      patch.object(impact.db_ref,'load_sectors',return_value={'ABC':'Tech','Q':'Tech'}),
@@ -49,9 +59,14 @@ class SecurityIdentityBoundaryTests(unittest.TestCase):
                     impact.run()
                 result = json.loads((root/'output/nominal_price_impact.json').read_text())
                 self.assertEqual(result['fully_verified'],expected)
+                self.assertEqual(result['full_strategy_acceptance'],'not_evaluated')
                 for year in result['years']:
                     self.assertEqual(year['price_screen_complete'],expected)
-                    self.assertEqual(year['quarantined_candidate_symbols'],[] if expected else ['Q'])
+                    self.assertEqual(year['quarantined_candidate_symbols'],['Q'] if quarantine and not expected else [])
+                    if not expected:
+                        self.assertEqual(year['unresolved_rank_inputs'][0]['symbol'],'Q')
+                        self.assertIsNone(year['after'])
+                        self.assertFalse(year['predicate_bounds_agree'])
 
     def test_reused_lsi_history_is_excluded_before_and_after_original_exit(self):
         connection = sqlite3.connect(':memory:')

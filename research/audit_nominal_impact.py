@@ -71,12 +71,22 @@ def run():
                     set(frame[(frame.start_date <= '%d-01-01' % year) &
                               (frame.end_date >= '%d-01-01' % year)].ticker))
             unresolved_identity = sorted(set(pool)&set(quarantines))
-            candidates = []
+            candidates = [];unresolved_rank_inputs=[]
+            expected_months=['%d-12'%(year-2)]+['%d-%02d'%(year-1,m) for m in range(1,13)]
             for symbol in sorted(pool):
                 bars = prices.get(symbol, {})
                 if month not in bars:
+                    unresolved_rank_inputs.append({'symbol':symbol,'reason':'missing_ranking_quote_or_eligibility_evidence','months':[month]})
                     continue
-                momentum=holding_paths.momentum_bars(symbol,bars,'%d-12'%(year-2),month)
+                try:
+                    momentum=holding_paths.momentum_bars(symbol,bars,'%d-12'%(year-2),month)
+                except RuntimeError as error:
+                    unresolved_rank_inputs.append({'symbol':symbol,'reason':'unaccepted_momentum_event','detail':str(error)})
+                    continue
+                missing=[m for m in expected_months if m not in momentum]
+                if missing:
+                    unresolved_rank_inputs.append({'symbol':symbol,'reason':'incomplete_lookback_or_listing_evidence','months':missing})
+                    continue
                 if variant == 'B':
                     ret = variant_b.ret12(momentum, month, '%d-12' % (year-2))
                     eligible = (ret is not None and abs(ret) <= variant_b.MAX_ABS_RET12
@@ -89,7 +99,7 @@ def run():
                 cell = {'variant': variant, 'year': year, 'symbol': symbol, 'month': month,
                         'return12': ret, 'legacy_price': bars[month][1],
                         'nominal_price': nominal,
-                        'nominal_status': 'verified_observation' if nominal is not None else 'unknown',
+                        'nominal_status': 'unit_supported_observation' if nominal is not None else 'unknown',
                         'legacy_pass': bool(bars[month][1] and bars[month][1] >= 5),
                         'nominal_pass': nominal >= 5 if nominal is not None else None}
                 cells.append(cell)
@@ -102,10 +112,10 @@ def run():
                     return variant_b.pick_year(frame, sectors, year, price_lookup=lookup)[0]
                 return variant_a.pick_for_year(year, [c['symbol'] for c in candidates],
                                                sectors, price_lookup=lookup)
-            old = select(lambda s,m: prices[s][m][1])
-            new = None if unknown else select(lambda s,m: observations[(s,m)])
+            old = None if unresolved_rank_inputs else select(lambda s,m: prices[s][m][1])
+            new = None if unknown or unresolved_rank_inputs else select(lambda s,m: observations[(s,m)])
             lower = upper = None
-            if unknown:
+            if unknown and not unresolved_rank_inputs:
                 # Predicate bounds only, not invented price observations:
                 # unknown candidates all fail versus all pass the $5 screen.
                 lower = select(lambda s,m: observations.get((s,m), 0.0))
@@ -123,15 +133,21 @@ def run():
                         result['return_status']='missing_actual_holding_months'
                         result['missing_holding_months']=missing
                     else:
-                        ret, drawdown = variant_b.year_perf(picks, year)
-                        result.update(return_value=ret, drawdown=drawdown,return_status='complete')
+                        try:
+                            ret, drawdown = variant_b.year_perf(picks, year)
+                        except RuntimeError as error:
+                            result.update(return_status='unaccepted_holding_inputs',return_error=str(error))
+                        else:
+                            result.update(return_value=ret, drawdown=drawdown,return_status='complete')
                 return result
             before_summary,after_summary=summarize(old),summarize(new)
-            complete=(not unknown and not unresolved_identity and after_summary is not None and
+            complete=(not unknown and not unresolved_identity and not unresolved_rank_inputs and after_summary is not None and
                       (year==2026 or after_summary.get('return_status')=='complete'))
             years.append({'variant': variant, 'year': year, 'complete': complete,
                           'published_b_return':published_b.get(str(year)) if variant=='B' else None,
-                          'price_screen_complete':not unknown and not unresolved_identity,
+                          'price_screen_complete':not unknown and not unresolved_identity and not unresolved_rank_inputs,
+                          'unresolved_rank_inputs':unresolved_rank_inputs,
+                          'holding_period_scope':'selection_only_ongoing_year' if year==2026 else 'available_full_year_values',
                           'quarantined_candidate_symbols':unresolved_identity,
                           'missing_nominal_symbols': unknown,
                           'before': before_summary, 'after': after_summary,
@@ -150,6 +166,9 @@ def run():
     if event_sha!=holding_paths.input_sha():
         raise RuntimeError('Holding-event evidence changed during analysis')
     result = {'policy': '5 USD screen uses observed as-traded close; ranking and holdings share actual cash/successor paths',
+              'validation_scope':'nominal screen impact and available holding values only',
+              'full_strategy_acceptance':'not_evaluated',
+              'nominal_observation_scope':'Unit-supported selected observations; exact-date and full point acceptance are separate checks',
               'snapshot_stamp': list(stamp), 'published_baselines_changed': False,
               'nominal_snapshot_sha256':nominal_sha,
               'quarantine_snapshot_sha256':quarantine_sha,
