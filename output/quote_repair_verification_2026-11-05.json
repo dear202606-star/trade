@@ -1,0 +1,69 @@
+{
+  "session": "2026-11-04",
+  "quote_version": "e73684df6c65085442356e9fa0453580b3ba9519d7c0bcdfd049ac707586a1a0",
+  "coverage": [
+    510,
+    510
+  ],
+  "stale": [],
+  "components": {
+    "CBOE": {
+      "p": 345.21,
+      "pc": 344.28,
+      "chg": 0.002701,
+      "as_of": "2026-11-04T21:00:00+00:00",
+      "source": "eastmoney_quote",
+      "source_sha256": "30f4bca89474c04ea43dff0fcce172dd3f0954624b66fc63c4be0da35c419aaf",
+      "context_sha256": "635decaed6ea5a3af6bd6cd1978ba97cac68025f0bb99955ed5054a2e2224ba7"
+    },
+    "ECHO": {
+      "p": 98.62,
+      "pc": 101.94,
+      "chg": -0.032568,
+      "as_of": "2026-11-04T21:00:00+00:00",
+      "source": "eastmoney_quote",
+      "source_sha256": "6c5ab62321ea6681412e120569c084619627aa5894c20be8db3da70304461ab5",
+      "context_sha256": "52d7701af5890eb9f5aec0ea7abcbaf2c46d892fec1d39fa20b1bc8efecd1a02"
+    },
+    "HLT": {
+      "p": 376.53,
+      "pc": 363.83,
+      "chg": 0.034906,
+      "as_of": "2026-11-04T21:00:00+00:00",
+      "source": "corroborated_daily_close",
+      "context_sha256": "7a044d53a8ddb03e953825457d9c78a33e784a6560d33d3c8c0a40b65f2c3138",
+      "corroboration_sha256": "20348de666c183111723e2096f434193e497eb1589f28077836b1ce290736382"
+    }
+  },
+  "public_current_results": [
+    {
+      "variant": "A",
+      "kind": "equity",
+      "quote_version": "e73684df6c65085442356e9fa0453580b3ba9519d7c0bcdfd049ac707586a1a0",
+      "source_as_of": "2026-11-04T21:00:00+00:00"
+    },
+    {
+      "variant": "A",
+      "kind": "preview",
+      "quote_version": "e73684df6c65085442356e9fa0453580b3ba9519d7c0bcdfd049ac707586a1a0",
+      "source_as_of": "2026-11-04T21:00:00+00:00"
+    },
+    {
+      "variant": "B",
+      "kind": "equity",
+      "quote_version": "e73684df6c65085442356e9fa0453580b3ba9519d7c0bcdfd049ac707586a1a0",
+      "source_as_of": "2026-11-04T21:00:00+00:00"
+    },
+    {
+      "variant": "B",
+      "kind": "preview",
+      "quote_version": "e73684df6c65085442356e9fa0453580b3ba9519d7c0bcdfd049ac707586a1a0",
+      "source_as_of": "2026-11-04T21:00:00+00:00"
+    }
+  ],
+  "all_results_match_quote": true,
+  "quote_run": 42006394576,
+  "dependent_strategy_run": 42006537541,
+  "main_runtime_commit": "740c330",
+  "full_history_accepted": false
+}
