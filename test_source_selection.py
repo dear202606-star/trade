@@ -1,5 +1,6 @@
 import sqlite3
 import unittest
+from unittest.mock import MagicMock, patch
 
 import db_select
 
@@ -36,6 +37,25 @@ class SourceSelectionTests(unittest.TestCase):
         self.add('MIXED', 'eodhd', 'price_only', 1)
         self.assertEqual(sorted(db_select.compute_picks(self.connection.cursor())),
             [('MIXED', 'eodhd', 'price_only'), ('PRICE', 'hf_ayushkhaire', 'price_only')])
+
+    def test_refresh_corrects_basis_without_bypassing_locks_or_dry_run(self):
+        for locked, frozen, dry_run in [(False, False, False), (True, False, False),
+                                         (False, True, False), (False, False, True)]:
+            with self.subTest(locked=locked, frozen=frozen, dry_run=dry_run):
+                connection = MagicMock()
+                cursor = connection.cursor.return_value.__enter__.return_value
+                cursor.fetchall.side_effect = [[('PRICE', 'eodhd', 'total_return')],
+                    [('PRICE',)] if locked else [], [('PRICE',)] if frozen else []]
+                cursor.fetchone.return_value = (1, 1)
+                with patch.object(db_select, 'db', return_value=connection), \
+                     patch.object(db_select, 'compute_picks', return_value=[('PRICE', 'eodhd', 'price_only')]), \
+                     patch.object(db_select.psycopg2.extras, 'execute_values') as write:
+                    db_select.refresh(dry_run)
+                if locked or frozen or dry_run:
+                    write.assert_not_called()
+                else:
+                    self.assertEqual(write.call_args.args[2][0][:3], ('PRICE', 'eodhd', 'price_only'))
+                    self.assertIn('basis = excluded.basis', write.call_args.args[1])
 
 
 if __name__ == '__main__':
