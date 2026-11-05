@@ -15,12 +15,15 @@ function reader(reply,cloudReply) {
   return {dsh:context.window.DSH,calls};
 }
 
-test('a transient static-file failure retries, while a successful frozen file stays cached',async()=>{
+test('a transient online-dataset failure retries, while a successful response stays cached',async()=>{
   let attempts=0;
-  const {dsh}=reader(async()=>++attempts===1?{ok:false,status:503}:{ok:true,json:async()=>({points:[1]})});
+  const {dsh,calls}=reader(async()=>++attempts===1?{ok:false,status:503}:
+    {ok:true,json:async()=>[{payload:{points:[1]}}]});
   assert.equal(await dsh.json('curve',null),null);
   assert.equal((await dsh.json('curve',null)).points.length,1);
   await dsh.json('curve',null);assert.equal(attempts,2);
+  // 2026-11-06：展示数据不再读线下 JSON，必须走在线库视图。
+  assert.match(calls.at(-1).url,/v_site_dataset\?key=eq\.curve/);
 });
 
 test('failed or malformed cloud configuration cannot poison future refreshes',async()=>{

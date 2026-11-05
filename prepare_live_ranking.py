@@ -76,8 +76,8 @@ def prepare(path=None):
             data=fetch_daily(provider_symbol,market,begin,session)
             quote=q['quotes'].get(symbol)
             if quote:
-                previous=q['previous_session']
-                if previous not in data['raw'] or not close_enough(data['raw'][previous],quote['pc']):
+                previous_session=q['previous_session']
+                if previous_session not in data['raw'] or not close_enough(data['raw'][previous_session],quote['pc']):
                     raise ValueError('Previous close not settled; retry collection: '+symbol)
                 if phase=='close' and (session not in data['raw'] or not close_enough(data['raw'][session],quote['p'])):
                     raise ValueError('Closing bar not settled; retry collection: '+symbol)

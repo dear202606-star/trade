@@ -121,7 +121,7 @@ gh workflow run daily-backfill.yml        # Alpha Vantage 25 只/天
 | 查某只票的覆盖 | `select * from v_collect_state where symbol='AAPL'` |
 | 补某只票 | `python relay_source.py --symbols 1`（会自动按优先级选源） |
 | 提升基线（数据修正后） | `BASELINE_UPDATE=1 python variant_b.py` —— **会改对外数字，先想清楚** |
-| 看数据库结构 | `docs/DATABASE.md`、`docs/DB_SCHEMA_REDESIGN_2026-11.md` |
+| 看数据库结构 | `sql/` 下的现行迁移脚本、`docs/DB_SCHEMA_REDESIGN_2026-11.md` |
 
 ---
 
@@ -146,7 +146,7 @@ gh workflow run daily-backfill.yml        # Alpha Vantage 25 只/天
 | `docs/QA_MECHANISM.md` | 六层质量闸门 + 每层验证证据 + 基线变更记录 |
 | `docs/SOURCE_EXHAUSTION.md` | 30+ 数据源穷举结论 + 敏感性分析 |
 | `docs/COVERAGE_STATUS.md` | 覆盖率现状与口径决策 |
-| `docs/DATABASE.md` | 库表说明 |
+| `sql/*.sql` | 线上库表结构的唯一事实来源（21 个迁移脚本） |
 | `docs/DB_SCHEMA_REDESIGN_2026-11.md` | 架构师的 1591 行重构设计（含 P0–P9 迁移步骤） |
 | `docs/LOCKING.md` | 锁定机制 |
 | `docs/DATA_SOURCES.md` | 数据源能力矩阵 |

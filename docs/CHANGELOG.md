@@ -1,5 +1,27 @@
 # 变更日志
 
+## v6.4 ｜ 2026-11-06 ｜ 在线单源、排名管线修复与失效项清理
+
+**在线管线故障修复（P0）**
+- `prepare_live_ranking.py` 的 `previous` 变量在行情分支被 `q['previous_session']` 覆盖，随后按二元组解包，导致 504 只标的全部报 `too many values to unpack (expected 2)`、`stored=0`，排名证据链断裂并触发 `Incomplete current universe context`。该工作流自 11-05 18:50 UTC 起连续失败，是移动端「数据未就绪」的上游根因。现拆分为 `previous` / `previous_session` 两个变量。
+
+**展示数据源统一（在线单源）**
+- 新增 `sql/122_site_dataset.sql`（`site_dataset` 表 + `v_site_dataset` 只读视图 + RLS）与 `publish_site_dataset.py`：把构建期生成的全部展示数据写入在线库，并从 Pages 产物中剔除（`--prune`）。
+- 前端 `DSH.json` 除 `cloud` 引导配置外，所有数据集改为读 `v_site_dataset`；`health` 提示、中文名、行业、曲线、逐年明细不再依赖线下 JSON。双源不一致导致的「移动端数据未就绪 / 桌面正常」路径被消除。
+- 两条发布路径（`ui-publish.yml` / `monthly-pick.yml`）均改为「先建表写库、再剔除静态数据、最后上传」，避免部署与在线数据可用之间出现白屏窗口。
+- `publish_ui.py` 在静态数据已下线的情况下允许 404 跳过逐字节比对，仍保留本地快照作为迁移源。
+
+**界面**
+- 持仓明细、次年预览、逐年明细统一标注 GICS 行业（中文名 + hover 全称），行业映射由 `static/sector_frozen.json` 与 `sector_overrides.json` 合并注入在线库。
+- 异常态文案改为「在线数据源暂不可用」并显示最后一次请求错误，便于定位。
+- 移除 `renderQuality()` 死代码（目标元素与 `quality.json` 均不存在）。
+
+**清理（均先做引用验证）**
+- 物理删除 4 个零引用死资源：`site_src/assets/{app,page,theme}.css`、`output/db_viewer.html`。
+- 删除 `site_build.py` 的 `build_report()` / `_replace()` / `LIVE_*` 常量（依赖不存在的报告文件且从未调用）。
+- 归档 47 个一次性/过时文件至 `_archive/2026-11-06/`：25 个 applied/rollback/verification 回执、13 份一次性审查记录、7 张零引用图片、过时的 `db/schema.sql` 与 `docs/DATABASE.md`；同步修正 5 份现行文档中的引用。
+- 只读核对线上表：`db/schema.sql` 中 10 张表线上从未创建（404），27 张表/视图在线可读，2 张内部表 anon 不可读。**线上未删除任何表**；现行结构以 `sql/*.sql` 21 个迁移脚本为准。
+
 ## v6.3 ｜ 2026-11-05 ｜ 全链路审查修复（不改动策略参数与历史业绩）
 
 **安全**

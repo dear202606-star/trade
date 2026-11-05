@@ -133,12 +133,21 @@
             : '/rest/v1/v_live_strategy_results?variant=eq.' + variant + '&kind=eq.' + kind + '&select=payload');
         } else url = cfg.url + '/rest/v1/v_live_quote_display?select=payload';
         headers = { apikey: cfg.key };
+      } else if (name === 'cloud') {
+        // 唯一保留的线下文件：引导配置（数据库地址 + 可公开 key）。
+        url = "data/cloud.json?t=" + Date.now();
       } else {
-        url = "data/" + name + ".json?t=" + Date.now();
+        // 2026-11-06 单源改造：其余展示数据一律从在线库读取，
+        // 不再存在「在线视图 + 线下 JSON 快照」双源不一致的可能。
+        const cfg = await DSH.json('cloud', null);
+        if (!cfg || !cfg.url || !cfg.key) throw new Error('Online dataset configuration unavailable');
+        url = cfg.url + '/rest/v1/v_site_dataset?key=eq.' +
+              encodeURIComponent(name).replace(/%2F/gi, '/') + '&select=payload';
+        headers = { apikey: cfg.key };
       }
       const r = await fetch(url, { cache: "no-store", headers: headers });
       if (!r.ok) {
-        if ((name === 'quotes' || runtime) && (r.status===401 || r.status===403)) delete cache.cloud;
+        if (name !== 'cloud' && (r.status===401 || r.status===403)) delete cache.cloud;
         throw new Error("HTTP " + r.status);
       }
       let _d = await r.json();
@@ -154,6 +163,10 @@
           throw new Error('Online strategy result unavailable');
         _d = runtime[2] === 'signal' ? _d[0].payload.signal : _d[0].payload;
         if (!_d) throw new Error('Online strategy payload unavailable');
+      } else if (name !== 'cloud') {
+        if (!Array.isArray(_d) || _d.length !== 1 || _d[0].payload == null)
+          throw new Error('Online dataset unavailable: ' + name);
+        _d = _d[0].payload;
       }
       // 行情：把「最近交易日」挂到报价表上，供各页面显示与判断新仓
       if (name === 'quotes' && _d && _d.quotes) _d.quotes.__session = _d.session || '';
@@ -932,8 +945,7 @@
   /* ---------- 数据健康状态（异常时顶部红条，避免停更无人知） ---------- */
   (function () {
     if (location.pathname.indexOf("report.html") >= 0) return;
-    fetch("data/health.json?t=" + Date.now(), { cache: "no-store" })
-      .then(function (r) { return r.ok ? r.json() : null; })
+    DSH.json("health", null)
       .then(function (h) {
         if (!h || h.status === "ok") return;
         var bar = document.createElement("div");
@@ -942,6 +954,5 @@
         bar.textContent = "⚠ 数据异常：" + (h.issues || []).join("；") +
           (h.quotes_ts ? "（行情 " + h.quotes_ts + " UTC）" : "");
         document.body.insertBefore(bar, document.body.firstChild);
-      })
-      .catch(function () {});
+      });
   })();

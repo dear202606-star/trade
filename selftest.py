@@ -46,10 +46,12 @@ def strict_fail(msg):
 
 
 def check_artifacts():
-    """校验「发布出去的产物」而不只是输入（2026-11-05 新增）。
+    """校验构建产物完整性（2026-11-05 新增，2026-11-06 扩展）。
 
     此前 selftest 只检查 output/ 与 docs/data 的输入，site_build 里
     history.json / signals.html 的缩进缺陷因此长期未被发现。
+    2026-11-06 起数据统一入在线库，这里同时检查入库所需的数据集源与
+    迁移脚本是否齐备（Pages 产物在发布前会剔除这些数据 JSON）。
     """
     for fn in ("index.html", "signals.html"):
         p = os.path.join(DOCS, fn)
@@ -68,6 +70,11 @@ def check_artifacts():
             ok = False
         check(ok, "产物 data/%s 可解析且非空" % fn,
               "发布数据缺失或不可解析：%s" % p)
+
+    for fn in ("static/sector_frozen.json", "static/sector_overrides.json",
+               "sql/122_site_dataset.sql", "publish_site_dataset.py"):
+        check(os.path.isfile(fn) and os.path.getsize(fn) > 0,
+              "在线发布依赖 %s 存在" % fn, "在线发布依赖缺失：%s" % fn)
 
     # 防止明文凭据再次随 Pages 发布（publishable key 属设计上可公开，排除）
     secret_pat = re.compile(

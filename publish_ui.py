@@ -7,6 +7,7 @@ import subprocess
 import tarfile
 import tempfile
 import urllib.request
+import urllib.error
 
 import site_build
 
@@ -56,8 +57,15 @@ def run(archive=None):
         for name in ('equity','signal'):
             for variant in ('','b/'):
                 relative = 'data/'+variant+name+'.json'
-                with urllib.request.urlopen(SITE+relative+'?ui_baseline=1',timeout=20) as response:
-                    deployed = json.load(response)
+                try:
+                    with urllib.request.urlopen(SITE+relative+'?ui_baseline=1',timeout=20) as response:
+                        deployed = json.load(response)
+                except urllib.error.HTTPError as exc:
+                    # 2026-11-06 起静态数据不再发布到 Pages，改由在线库承载；
+                    # 线上已移除时跳过逐字节比对，仍保留本地快照作为迁移源。
+                    if exc.code == 404:
+                        continue
+                    raise
                 local = json.loads((target/relative).read_text())
                 if local != deployed:
                     raise RuntimeError('Pages baseline differs from current deployed data: '+relative)

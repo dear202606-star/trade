@@ -129,6 +129,12 @@ jobs:
         if: steps.pick.outcome == 'success'
         run: find docs -type f -name '*.md' -delete
 
+      - name: 展示数据入库并剔除 Pages 静态数据
+        if: steps.pick.outcome == 'success'
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: python publish_site_dataset.py --install --source docs/data --prune
+
       - name: 上传 Pages 产物
         if: steps.pick.outcome == 'success'
         uses: actions/upload-pages-artifact@v3

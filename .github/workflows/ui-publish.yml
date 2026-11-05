@@ -38,6 +38,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python publish_ui.py
+      - name: 展示数据入库并剔除 Pages 静态数据
+        # 2026-11-06：页面改为只连在线库。先建表+写库，再删 Pages 产物中的
+        # 数据 JSON，保证「部署完成」与「在线数据可用」之间不存在白屏窗口。
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: python publish_site_dataset.py --install --source _site_release/data --prune
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site_release

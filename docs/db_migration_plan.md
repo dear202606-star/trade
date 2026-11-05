@@ -60,7 +60,7 @@ locks            (id, kind, scope_from, scope_to, status, rows, symbols, hash, m
 datasets         (id, name, created_at, symbols, months, source_mix, input_hash, status, locked_at, notes)
 ```
 
-> ⚠ `db/schema.sql` 里的 DDL（`ticker/ym/adj/raw/vol/as_of`）与线上表**完全不同名**，是废稿。不要照它迁移。
+> ⚠ `db/schema.sql` 曾是与线上表完全不同名的废稿，2026-11-06 已归档至 `_archive/2026-11-06/db/schema.sql`。线上结构一律以 `sql/*.sql` 为准。
 
 ### 1.2 代码 → 表 矩阵
 

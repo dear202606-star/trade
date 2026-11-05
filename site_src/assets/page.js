@@ -1,7 +1,19 @@
 /* 单页渲染：一次加载，全部可见，无 Tab、无隐藏内容 */
 (function () {
   var $ = function (id) { return document.getElementById(id); };
-  var EQ = null, SIG = null, Q = null, CV = null, SH = null, PV = null, ZH = {};
+  var EQ = null, SIG = null, Q = null, CV = null, SH = null, PV = null, ZH = {}, SEC = {};
+  /* GICS 行业中文名：持仓、次年预览、逐年明细共用一套口径 */
+  var SECTOR_ZH = {
+    "Information Technology": "信息技术", "Communication Services": "通信服务",
+    "Consumer Discretionary": "可选消费", "Consumer Staples": "必需消费",
+    "Health Care": "医疗保健", "Financials": "金融", "Industrials": "工业",
+    "Energy": "能源", "Utilities": "公用事业", "Materials": "原材料",
+    "Real Estate": "房地产", "Unknown": "未分类"
+  };
+  function sectorOf(ticker, inline) {
+    var raw = inline || (SEC && SEC[ticker]) || "Unknown";
+    return { raw: raw, zh: SECTOR_ZH[raw] || raw };
+  }
   var amt = 100000;
   localStorage.setItem("dsh.amt", String(amt));
 
@@ -131,6 +143,8 @@
       var pnlAdj = mvAdj - r.cost;
       return '<div class="pr-row">' +
         '<div><span class="tk">' + DSH.esc(r.ticker) + '</span>' +
+          '<span class="sec-tag" title="GICS 行业：' + DSH.esc(sectorOf(r.ticker, r.sector).raw) + '">' +
+          DSH.esc(sectorOf(r.ticker, r.sector).zh) + '</span>' +
           '<div class="nm">' + eraw.toFixed(2) + ' → ' + liveRaw.toFixed(2) + '</div></div>' +
         '<div class="r">' + Math.round(r.weight * 100) + '%</div>' +
         '<div class="r">' + eraw.toFixed(2) + '</div>' +
@@ -234,21 +248,8 @@
     $("nextYearTitle").textContent = "次年策略预览";
     $("previewNote").textContent = PV.final ? "已定稿 · 与正式持仓一致" :
       "年初至今涨幅 · 截至 " + String(PV.as_of || "").slice(5,16) + "（北京）";
-    var SEC = {
-      "Information Technology": "信息技术",
-      "Communication Services": "通信服务",
-      "Consumer Discretionary": "可选消费",
-      "Consumer Staples": "必需消费",
-      "Health Care": "医疗保健",
-      "Financials": "金融",
-      "Industrials": "工业",
-      "Energy": "能源",
-      "Utilities": "公用事业",
-      "Materials": "原材料",
-      "Real Estate": "房地产"
-    };
     box.innerHTML = (PV.top || []).map(function (r) {
-      var sec = SEC[r.sector] || r.sector || "";
+      var sec = sectorOf(r.ticker, r.sector).zh;
       return '<div class="pv-row">' +
         '<div class="pv-rank">' + (r.rank || "") + '</div>' +
         '<div class="pv-main"><div class="tk">' + DSH.esc(r.ticker) + '</div>' +
@@ -329,7 +330,9 @@
     var years = ((SH && SH.years) || []).filter(function (x) { return x.year >= SHOW_FROM; });
     $("yearRows").innerHTML = years.slice().reverse().map(function (r) {
       var holds = (r.holdings || []).map(function (h) {
-        return '<span class="chip"><b>' + DSH.esc(h.ticker) + '</b><i>' +
+        return '<span class="chip" title="GICS 行业：' + DSH.esc(sectorOf(h.ticker, h.sector).raw) + '">' +
+          '<b>' + DSH.esc(h.ticker) + '</b><em>' +
+          DSH.esc(sectorOf(h.ticker, h.sector).zh) + '</em><i>' +
           Math.round((h.weight || 0) * 100) + '%</i></span>';
       }).join('');
       return '<div class="yr-row">' +
@@ -395,7 +398,6 @@
         }
         checkFreshness();
         renderAllCards();
-        renderQuality();
       } finally { busy = false; }
     }, 60000);
   }
@@ -421,10 +423,12 @@
       DSH.json(vpath("strategy_history"), null),
       read(vpath("preview"), null),
       DSH.json("name_zh", {}),
-      variant === "B" ? read("signal", null) : Promise.resolve(null)
+      variant === "B" ? read("signal", null) : Promise.resolve(null),
+      DSH.json("sectors", {})
     ]);
     if (variant !== VARIANT) return;
     EQ = arr[0]; SIG = arr[1]; Q = arr[2]; CV = arr[3]; SH = arr[4]; PV = arr[5]; ZH = arr[6] || {};
+    SEC = arr[8] || {};
 
     // B 口径的 signal 不含大盘开关，用 A 的补齐（开关与选股口径无关）
     if (variant === "B" && SIG) {
@@ -517,7 +521,9 @@
       b.className = "data-alert";
       document.body.insertBefore(b, document.body.firstChild);
     }
-    b.textContent = "⚠ 数据加载失败，已隐藏操作建议";
+    var lastErr = (window.__dshErr || []).slice(-1)[0] || "";
+    b.textContent = "⚠ 在线数据源暂不可用，已隐藏操作建议" +
+      (lastErr ? "（" + lastErr.split(" -> ").slice(-1)[0] + "）" : "");
     b.style.display = "block";
   }
 
@@ -526,10 +532,9 @@
     await loadVariant();
     initVariants();
     startAutoRefresh();
-    renderQuality();
 
     if (!dataReady()) {
-      renderUnavailable("行情或净值数据缺失 · 正在重试");
+      renderUnavailable("在线数据源暂不可用 · 正在重试");
       return;
     }
 
@@ -547,34 +552,6 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else boot();
 })();
-
-/* ---------- 数据质量提示（来自 data/quality.json） ---------- */
-function renderQuality() {
-  var el = document.getElementById("dataQuality");
-  if (!el) return;
-  fetch("data/quality.json?t=" + Date.now(), { cache: "no-store" })
-    .then(function (r) { return r.ok ? r.json() : null; })
-    .then(function (q) {
-      if (!q) throw new Error("质量报告读取失败");
-      var s = q.summary || {};
-      if (q.degraded !== false || s.fail !== 0 || !Array.isArray(q.checks) || !q.checks.length ||
-          q.checks.some(function (c) { return c.status !== "pass"; })) {
-        el.hidden = false;
-        el.className = "foot warn";
-        el.textContent = "数据校验中 · " + (q.reason || "口径尚未统一") +
-          " ｜ 检查 " + (s.pass || 0) + " 项通过" + (s.fail ? "、" + s.fail + " 项失败" : "");
-      } else {
-        el.hidden = false;
-        el.className = "foot ok";
-        el.textContent = "已完成 " + (s.pass || 0) + " 项检查 · 详见数据校验报告";
-      }
-    })
-    .catch(function () {
-      el.hidden = false;
-      el.className = "foot warn";
-      el.textContent = "数据校验状态暂不可用";
-    });
-}
 
 /* Section navigation reflects the reading position and keyboard activation. */
 (function () {

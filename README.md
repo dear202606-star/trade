@@ -121,9 +121,13 @@ python simulate_rollover.py # 跨年仿真：任意日期推导全链路
 
 > 根目录另有约 120 个 Python 脚本，其中 `probe_*` / `audit_*` / `verify_*` /
 > `research/stepNN_*` 多为一次性排查脚本，正式入口以上表为准。
-> 新克隆仓库不含 `docs/data/` 与 `docs/*.html`（由 CI 生成），如需本地静态预览，
-> 先跑一次 `site_build.py`，或从已发布的 Pages 站点取 `data/` 快照放入 `docs/data/`。
-> 完整数据管线需要 Supabase 凭据；只预览界面不需要。
+> **数据源（2026-11-06 起）**：页面展示数据一律从在线库 `v_site_dataset`
+> 与实时视图读取，Pages 上只保留 `data/cloud.json`（数据库地址 + 可公开 key）
+> 这一个引导文件。`site_build.py` 生成的 `docs/data/*.json` 只是构建中间产物，
+> 由 `publish_site_dataset.py` 写库后从发布产物中剔除，不再作为展示数据源。
+> 新克隆仓库不含 `docs/data/` 与 `docs/*.html`（由 CI 生成）；本地静态预览可用
+> `python site_build.py` 生成中间产物，但页面正常展示需要在线库可用。
+> 一次性审查记录与过时设计稿已归档至 `_archive/2026-11-06/`（不入库）。
 
 ## 8. 免责声明
 
