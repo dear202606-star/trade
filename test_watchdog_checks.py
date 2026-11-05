@@ -3,7 +3,7 @@ import datetime as dt
 import json
 import hashlib
 
-from watchdog_checks import quality_problems,quote_problems,history_problems
+from watchdog_checks import quality_problems,quote_problems,history_problems,published_dependency_problems
 from market_calendar import Calendar,fingerprint
 from research.install_exchange_calendar import CALENDAR
 
@@ -87,6 +87,16 @@ class OnlineQuoteMonitorTests(unittest.TestCase):
         self.assertEqual(history_problems(old,now),[])
         self.assertTrue(history_problems(old,now.replace(year=2027)))
         self.assertTrue(history_problems({'years':[{'year':2023},{'year':2025}]},now))
+
+
+class PublishedDependencyTests(unittest.TestCase):
+    def test_quote_success_does_not_hide_stalled_calculations(self):
+        quotes={'version':'new','session':'2026-11-04','previous_session':'2026-11-03'}
+        preview={'quote_version':'new','session':quotes['session'],'reference_version':'reviewed','top':[{}, {}, {}]}
+        self.assertEqual(published_dependency_problems({'last_session':'20261103'},preview,quotes),[])
+        self.assertEqual(len(published_dependency_problems({'last_session':'20261102'},dict(preview,quote_version='old'),quotes)),2)
+        self.assertTrue(published_dependency_problems(None,None,quotes))
+        with self.assertRaises(ValueError):published_dependency_problems({}, {}, {})
 
 
 if __name__ == '__main__':

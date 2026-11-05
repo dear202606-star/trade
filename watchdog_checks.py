@@ -87,6 +87,23 @@ def history_problems(report, now):
     return problems
 
 
+def published_dependency_problems(equity, preview, quotes):
+    """A healthy quote worker does not prove dependent calculations advanced."""
+    if not isinstance(quotes,dict) or not quotes.get('version') or not quotes.get('session'):
+        raise ValueError('缺少在线报价版本或场次')
+    problems=[]
+    settled=str((equity or {}).get('last_session','')).replace('-','')
+    allowed={str(quotes.get(k,'')).replace('-','') for k in ('session','previous_session')}
+    if not settled or settled not in allowed:
+        problems.append('收益基准落后于可衔接报价场次')
+    if (not isinstance(preview,dict) or not preview.get('reference_version')
+            or preview.get('quote_version')!=quotes['version']
+            or preview.get('session')!=quotes['session']
+            or not isinstance(preview.get('top'),list) or len(preview['top'])!=3):
+        problems.append('次年预览未跟随当前报价版本完成核验')
+    return problems
+
+
 def quality_problems(report):
     if not isinstance(report, dict):
         raise ValueError('质量报告不是对象')

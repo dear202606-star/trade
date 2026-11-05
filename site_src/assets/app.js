@@ -17,6 +17,23 @@
     return now >= limit;
   };
 
+  DSH.previewCurrent = function (preview, quotes) {
+    return !!(preview && quotes && preview.quote_version && quotes.version &&
+      preview.quote_version === quotes.version && preview.session === quotes.session &&
+      preview.reference_version && Array.isArray(preview.top) && preview.top.length === 3 &&
+      DSH.quoteFreshness(quotes) === false);
+  };
+
+  DSH.todayUnavailable = function (quotes, equity) {
+    if (!quotes || !quotes.quotes || !quotes.ts) return "行情读取失败";
+    if (DSH.quoteFreshness(quotes) !== false) return "行情时效待核验";
+    const settled = String(equity && equity.last_session || '').replace(/\D/g, '');
+    const session = String(quotes.session || '').replace(/\D/g, '');
+    const previous = String(quotes.previous_session || '').replace(/\D/g, '');
+    if (!settled || (settled !== session && settled !== previous)) return "收益基准待更新";
+    return "持仓报价或价格口径待核验";
+  };
+
   /* 单只移动止损：从持有期最高点回撤 30% 清仓（回测验证：16 年零亏损年） */
   DSH.STOP = 0.30;
 
