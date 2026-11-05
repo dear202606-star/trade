@@ -11,7 +11,7 @@ function page(read) {
       return elements.get(id);
     }};
   let tick;
-  const context=vm.createContext({document,window:{},localStorage:{getItem(){return null;}},
+  const context=vm.createContext({document,window:{},localStorage:{getItem(){return null;},setItem(){}},
     DSH:{jsonNoCache:async(name,fallback)=>{calls.push(name);return read(name,fallback);},
       json:async(name,fallback)=>read(name,fallback),previewCurrent:()=>false},
     setInterval(fn){tick=fn;},console});
