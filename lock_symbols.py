@@ -1,23 +1,14 @@
 # -*- coding: utf-8 -*-
-"""lock_symbols.py — 逐标的锁定（验证通过的标的先冻结）
+"""lock_symbols.py — 旧历史覆盖初筛，只读诊断。
 
-背景
-  「整段锁定」要求 100% 全收益，目前还差 171 只退市票。
-  但库里已有 432 只标的满足：2012-2025 每月都有、且全部是全收益口径、连续性通过。
-  这些标的的数据已经可靠，可以先冻结——这就是「逐段锁定」的第一段。
-
-做法
-  1. 建 locked_symbols(symbol, locked_at, rows, hash)
-  2. 扩展 prices_monthly 触发器：已锁标的的任何写入直接报错
-  3. 锁之前跑校验：覆盖完整、口径全收益、无 >150% 单月跳变
+覆盖月数、口径标签与价格跳变不能证明证券身份、现金流及收益正确，
+不得据此创建完整验收锁。新验收使用绑定独立证据的专用验收入口。
 
 用法
-  python lock_symbols.py --check     # 只看能锁多少
-  python lock_symbols.py --lock      # 执行锁定
+  python lock_symbols.py --check     # 初筛，不代表完整验收
   python lock_symbols.py --list
 """
 import argparse
-import hashlib
 import io
 import os
 import sys
@@ -98,19 +89,14 @@ def candidates():
     return out
 
 
-def hash_series(ser):
-    h = hashlib.sha256()
-    for m, v in ser:
-        h.update(("%s|%.10f;" % (m, float(v or 0))).encode())
-    return h.hexdigest()[:16]
-
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--lock", action="store_true")
     ap.add_argument("--list", action="store_true")
     a = ap.parse_args()
+    if a.lock:
+        ap.error('覆盖初筛不能创建验收锁；请使用绑定独立验收证据的专用入口')
     ensure()
 
     if a.list:
@@ -124,25 +110,8 @@ def main():
         return
 
     cands = candidates()
-    print("可锁标的: %d 只（%s..%s，每月全收益且无大跳变）" % (len(cands), Y0, Y1))
-    if a.check or not a.lock:
-        print("样例:", [c[0] for c in cands[:12]])
-        return
-
-    c = db()
-    n = 0
-    with c.cursor() as cur:
-        for sym, months, ser in cands:
-            cur.execute("""insert into data_lock(scope, symbol, month_from, month_to, status,
-                                                symbol_count, fingerprint, fingerprint_algo, note)
-                           values ('symbol_month', %s, %s, %s, 'locked', 1, %s, 'sha256-16', %s)
-                           on conflict do nothing""",
-                        (sym, Y0, Y1, hash_series(ser), "%s..%s 全收益完整" % (Y0, Y1)))
-            n += cur.rowcount
-        cur.execute("select count(*) from data_lock where scope='symbol_month' and status='locked'")
-        total = cur.fetchone()[0]
-    c.close()
-    print("✅ 本次锁定 %d 只，累计 %d 只" % (n, total))
+    print("覆盖初筛候选: %d 只（%s..%s，非完整验收，不创建锁）" % (len(cands), Y0, Y1))
+    print("样例:", [c[0] for c in cands[:12]])
 
 
 if __name__ == "__main__":

@@ -41,13 +41,23 @@ def db():
     return c
 
 
-def targets(cur, limit):
+def targets(cur, limit, symbol=None):
     """选源不是全收益、且在指数里的标的"""
     cur.execute("""
         select k.symbol
           from series_pick k
           join members m on m.symbol = k.symbol
          where m.end_date >= '2009-01-01'
+           and k.basis <> 'total_return'
+           and not k.frozen
+           and (cast(%s as text) is null or k.symbol = %s)
+           and not exists (select 1 from locked_symbols l where l.symbol=k.symbol)
+           and not exists (select 1 from series_quarantine q where q.symbol=k.symbol)
+           and not exists (
+             select 1 from data_lock l where l.status='locked'
+               and (l.symbol=k.symbol or l.scope='month_range')
+               and not exists (select 1 from data_lock x
+                               where x.supersedes_id=l.id and x.status='void'))
            and not exists (
              select 1 from prices_monthly p
               where p.symbol = k.symbol and p.source = 'yahoo_relay'
@@ -56,7 +66,7 @@ def targets(cur, limit):
          group by k.symbol
          order by k.symbol
          limit %s
-    """, (limit,))
+    """, (symbol, symbol, limit))
     return [r[0] for r in cur.fetchall()]
 
 
@@ -77,7 +87,7 @@ def main():
         c.close()
         return
 
-    ok = bad = rows = 0
+    ok = bad = rows = skipped = 0
     batch = []
     t0 = time.time()
     deadline = t0 + a.max_seconds
@@ -86,6 +96,10 @@ def main():
             print("  ⏱ 达到时间预算 %ds，停止（剩余 %d 只留待下次）" % (a.max_seconds, len(syms)-i+1),
                   flush=True)
             break
+        with c.cursor() as cur:
+            if not targets(cur, 1, sym):
+                skipped += 1
+                continue
         try:
             bars = YF.fetch(sym)
         except Exception as e:
@@ -129,7 +143,11 @@ def main():
                 batch, page_size=2000)
         rows += len(batch)
     c.close()
-    print("完成：成功 %d / 失败 %d / 写入 %d 行 / %.0fs" % (ok, bad, rows, time.time() - t0))
+    print("完成：成功 %d / 失败 %d / 保护或资格变化跳过 %d / 写入 %d 行 / %.0fs" %
+          (ok, bad, skipped, rows, time.time() - t0))
+    remaining = len(syms) - ok - bad - skipped
+    if bad or remaining:
+        raise RuntimeError('Yahoo historical backfill incomplete: %d failed, %d unattempted' % (bad, remaining))
 
 
 if __name__ == "__main__":
