@@ -1,5 +1,5 @@
--- PENDING USER DECISION: SUN has existing historical locks. Do not apply
--- automatically. Preserve all prices, picks, locks and accepted evidence.
+-- User approved this read-time quarantine on 2026-11-05. Apply only after
+-- matching the rollback evidence. Preserve prices, picks, locks and evidence.
 -- Original Sunoco, Inc. (CIK 95304) exited on 2012-10-05:
 -- https://www.sec.gov/Archives/edgar/data/1012569/000119312512416888/d421405d8k.htm
 -- Different common units first traded as SUSP in September 2012, becoming SUN
