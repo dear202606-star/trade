@@ -19,6 +19,7 @@ import sys
 
 import datafeed
 import db_prices
+import historical_lineage
 import sys as _sys
 try:                                    # Windows cp936 下避免 emoji 打印崩溃
     _sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -73,6 +74,7 @@ def _input_sha():
                     h.update(chunk)
     for part in _db_sha():
         h.update(part.encode())
+    h.update(historical_lineage.input_sha().encode())
     return h.hexdigest()[:16]
 
 
@@ -244,10 +246,12 @@ def pick_year(m, sector, year):
     """选出「hold_year = year」的一年前三（口径 B）"""
     y0 = year - 1
     pool = members_full_year(m, y0)
+    historical_lineage.require_membership(pool,y0)
     rank_m, base_m = "%d-12" % y0, "%d-12" % (y0 - 1)
     rows = []
     _dropped = []
     for t in pool:
+        historical_lineage.require_rank(t,rank_m,base_m)
         bars = load_bars(t)
         if not _series_ok(bars, "%d-12" % (y0 - 1), "%d-12" % y0):
             continue
@@ -309,6 +313,7 @@ def year_perf(picks, year):
     if not picks:
         raise RuntimeError("year_perf(%d)：没有持仓" % year)
     for p in picks:
+        historical_lineage.require_holding(p['ticker'],prev_ym,'%d-12'%year)
         bars = load_bars(p["ticker"])
         if not bars or prev_ym not in bars or not bars[prev_ym][0]:
             raise RuntimeError("year_perf(%d)：%s 缺 %s 价格" % (year, p["ticker"], prev_ym))
@@ -391,6 +396,7 @@ def main():
     for year in range(START_YEAR, end_year + 2):
         candidates.update(members_full_year(m, year - 1))
     _ref.require_unquarantined_candidates(candidates)
+    historical_lineage.require_complete_history()
 
     global NEED_MONTH
     NEED_MONTH = "%d-12" % end_year

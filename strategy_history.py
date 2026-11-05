@@ -25,6 +25,7 @@ import pandas as pd
 
 import datafeed
 import db_ref
+import historical_lineage
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 CACHE = os.path.join(BASE, "data", "sina2")
@@ -126,6 +127,7 @@ def pick_for_year(y, members, sector):
     cand = []
     rank_ym = f"{y-1}-12"
     for t in members:
+        historical_lineage.require_rank(t,rank_ym,f'{y-2}-12')
         bars = load_bars(t)
         if not bars or rank_ym not in bars:
             continue
@@ -159,6 +161,7 @@ def year_perf(y, picks):
     prev_ym = f"{y-1}-12"
     curves, ok = [], True
     for p in picks:
+        historical_lineage.require_holding(p['ticker'],prev_ym,f'{y}-12')
         bars = load_bars(p["ticker"])
         if not bars or prev_ym not in bars:
             ok = False
@@ -253,6 +256,7 @@ def locked_ok():
                      and abs(base[y] - {str(x["year"]): x for x in ys}[y]["ret"]) > 0.005]
             if drift:
                 return False, "历史收益被改动：%s" % ",".join(drift[:5])
+        historical_lineage.require_complete_history()
         return True, "校验通过"
     except Exception as e:
         return False, "校验异常：%s" % e
@@ -318,6 +322,7 @@ def main():
         date = '%d-01-01' % year
         candidates.update(m[(m.start_date <= date) & (m.end_date >= date)].ticker)
     db_ref.require_unquarantined_candidates(candidates)
+    historical_lineage.require_complete_history()
 
     datafeed.prefetch(sorted(m["ticker"].unique().tolist()) + ["SPY"], workers=8)
     spy = load_bars("SPY")
