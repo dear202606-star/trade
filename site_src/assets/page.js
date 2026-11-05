@@ -2,7 +2,8 @@
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var EQ = null, SIG = null, Q = null, CV = null, SH = null, PV = null, ZH = {};
-  var amt = +(localStorage.getItem("dsh.amt") || 100000);
+  var amt = 100000;
+  localStorage.setItem("dsh.amt", String(amt));
 
   function yuan(v) {
     if (v == null || !isFinite(v)) return "—";
