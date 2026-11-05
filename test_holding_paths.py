@@ -11,6 +11,18 @@ from holding_consideration import POLICY
 
 
 class HoldingPathTests(unittest.TestCase):
+    def test_unreviewed_old_equity_cannot_fall_back_to_current_ticker_prices(self):
+        from research.install_historical_identity_reviews import FACTS
+        with patch.object(holding_paths.historical_lineage,'load',return_value=FACTS), \
+             patch.object(holding_paths,'load_all',return_value={}), \
+             patch.object(holding_paths,'_EVENT_MONTHS',{}):
+            with self.assertRaisesRegex(RuntimeError,'differs'):
+                holding_paths.momentum_bars('IR',{'2019-12':(100,100)},'2018-12','2019-12')
+            bars = MagicMock()
+            with self.assertRaisesRegex(RuntimeError,'requires independent'):
+                holding_paths.values('JCI',2016,bars)
+            bars.assert_not_called()
+
     def online_terms(self):
         from research.apply_2026_spinoff_terms import TERMS,proof
         term=next(t for t in TERMS if t['symbol']=='HON')

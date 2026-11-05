@@ -12,6 +12,7 @@ from urllib.parse import parse_qs, urlparse
 BASE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BASE))
 import db_sources
+import historical_lineage
 from import_verified_closing_facts import verify_exact_close
 from research import audit_fund_native_units as fund
 
@@ -80,7 +81,10 @@ def review_symbol(cursor, unit, source):
         raise ValueError('Invalid selected history observation')
     if '2025-12' not in selected:
         raise ValueError('No eligible selected month')
-    common = sorted(set(monthly)&set(selected)); deviations = []
+    lineage = historical_lineage.comparison(symbol)
+    common = sorted(m for m in set(monthly)&set(selected)
+                    if lineage is None or m >= lineage['comparison_from'])
+    deviations = []
     for a,b in zip(common, common[1:]):
         if (int(b[:4])-int(a[:4]))*12+int(b[5:])-int(a[5:]) != 1:
             continue
@@ -95,6 +99,7 @@ def review_symbol(cursor, unit, source):
             'primary_url':record['source_url'],'primary_cache_sha256':hashlib.sha256(raw).hexdigest(),
             'primary_kind':record.get('kind','native_daily'),'primary_location':record.get('location','Exact-date daily bar'),
             'return_pairs':len(deviations),'median_log_deviation':median,'p90_log_deviation':p90,
+            'comparison_identity_review':lineage,
             'selected_history_sha256':digest(selected),'scope':'Only 2025-12-31; no other date approved'}
 
 

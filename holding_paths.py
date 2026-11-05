@@ -6,6 +6,7 @@ import math
 from pathlib import Path
 
 import db_select
+import historical_lineage
 from holding_consideration import POLICY
 
 BASE=Path(__file__).resolve().parent
@@ -108,7 +109,7 @@ def load_all():
 def input_sha():
     load_all()
     if _EVIDENCE_SHA is None:raise RuntimeError('Holding-event snapshot was not loaded')
-    return _EVIDENCE_SHA
+    return evidence_sha({'events':_EVIDENCE_SHA,'historical_lineages':historical_lineage.input_sha()})
 
 
 def require_price_only_window(symbol,base_month,end_month):
@@ -136,6 +137,7 @@ def momentum_bars(symbol,bars,base_month,rank_month):
         result={base_month:(1.0,None)}
         result.update({'%d-%02d'%(year,m):(value,None) for m,value in enumerate(values_,1)})
         return result
+    historical_lineage.require_rank(symbol,rank_month,base_month)
     require_price_only_window(symbol,base_month,rank_month)
     return bars or {}
 
@@ -146,8 +148,9 @@ def values(symbol,year,load_bars):
         event=paths[(symbol,year)]
         if event is None:raise RuntimeError('%s %d 企业行动证据待核验或已撤回'%(symbol,year))
         return list(event)
-    bars=load_bars(symbol)
     base='%d-12'%(year-1)
+    historical_lineage.require_holding(symbol,base,'%d-12'%year)
+    bars=load_bars(symbol)
     if not bars or base not in bars or not bars[base][0]:
         raise RuntimeError('%s 缺 %s 价格'%(symbol,base))
     result=[]

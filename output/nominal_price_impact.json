@@ -12,7 +12,7 @@
     "15953552.001695769696688242"
   ],
   "published_baselines_changed": false,
-  "nominal_snapshot_sha256": "3e70f863621bce6b35a6468944b7d2512a9fe0f76214b40f72caab21505b010b",
+  "nominal_snapshot_sha256": "0a0ccd491c6cb17888432a4541403af635f60272f38a45b5e8532b6b4dd4ecb4",
   "quarantine_snapshot_sha256": "1b8f6222f63f6a4acc4c3fd6c77657103555276091a2eb24bef12b62ca89be8e",
   "quarantined_security_reasons": {
     "BMC": "Unreviewed >10x or <0.01x Sina jump within membership; see output/selected_jump_audit.json. May include genuine events; not a price correction.",
@@ -31,9 +31,9 @@
     "TIE": "Unreviewed >10x or <0.01x Sina jump within membership; see output/selected_jump_audit.json. May include genuine events; not a price correction."
   },
   "holding_event_policy": "cash_and_all_successor_shares",
-  "holding_event_input_sha": "3776ace159b52b324ae779312c2dfc89998cd1d929e13f51b1b2ba34feae38bb",
+  "holding_event_input_sha": "eb6468b4c22f5f5eafb7c5988e18c1ecf4dc2f7efe4f399d91b3767de050ebe0",
   "comparison_scope": "legacy versus nominal floor on current sources and approved holding-event policy; before is not the published old baseline",
-  "nominal_year_end_observations": 8507,
+  "nominal_year_end_observations": 8509,
   "baseline_b_sha256": "20c0680276cf79cbb06d8aaab35c3e40cde010447f6e15e75abd95ff0ef33c90",
   "fully_verified": false,
   "complete_variant_years": 0,
@@ -7087,10 +7087,8 @@
         },
         {
           "symbol": "JCI",
-          "reason": "incomplete_lookback_or_listing_evidence",
-          "months": [
-            "2009-12"
-          ]
+          "reason": "unaccepted_momentum_event",
+          "detail": "JCI 2010-12 historical index equity differs from selected price lineage"
         },
         {
           "symbol": "JEF",
@@ -9869,10 +9867,8 @@
         },
         {
           "symbol": "JCI",
-          "reason": "incomplete_lookback_or_listing_evidence",
-          "months": [
-            "2009-12"
-          ]
+          "reason": "unaccepted_momentum_event",
+          "detail": "JCI 2010-12 historical index equity differs from selected price lineage"
         },
         {
           "symbol": "JEF",
@@ -11487,6 +11483,11 @@
           ]
         },
         {
+          "symbol": "JCI",
+          "reason": "unaccepted_momentum_event",
+          "detail": "JCI 2011-12 historical index equity differs from selected price lineage"
+        },
+        {
           "symbol": "JNPR",
           "reason": "missing_ranking_quote_or_eligibility_evidence",
           "months": [
@@ -12006,6 +12007,11 @@
           ]
         },
         {
+          "symbol": "JCI",
+          "reason": "unaccepted_momentum_event",
+          "detail": "JCI 2011-12 historical index equity differs from selected price lineage"
+        },
+        {
           "symbol": "JNPR",
           "reason": "missing_ranking_quote_or_eligibility_evidence",
           "months": [
@@ -12426,6 +12432,11 @@
           ]
         },
         {
+          "symbol": "JCI",
+          "reason": "unaccepted_momentum_event",
+          "detail": "JCI 2012-12 historical index equity differs from selected price lineage"
+        },
+        {
           "symbol": "JNPR",
           "reason": "missing_ranking_quote_or_eligibility_evidence",
           "months": [
@@ -12810,6 +12821,11 @@
           ]
         },
         {
+          "symbol": "JCI",
+          "reason": "unaccepted_momentum_event",
+          "detail": "JCI 2012-12 historical index equity differs from selected price lineage"
+        },
+        {
           "symbol": "JNPR",
           "reason": "missing_ranking_quote_or_eligibility_evidence",
           "months": [
@@ -13186,6 +13202,11 @@
           ]
         },
         {
+          "symbol": "JCI",
+          "reason": "unaccepted_momentum_event",
+          "detail": "JCI 2013-12 historical index equity differs from selected price lineage"
+        },
+        {
           "symbol": "JNPR",
           "reason": "missing_ranking_quote_or_eligibility_evidence",
           "months": [
@@ -13539,6 +13560,11 @@
           ]
         },
         {
+          "symbol": "JCI",
+          "reason": "unaccepted_momentum_event",
+          "detail": "JCI 2013-12 historical index equity differs from selected price lineage"
+        },
+        {
           "symbol": "JNPR",
           "reason": "missing_ranking_quote_or_eligibility_evidence",
           "months": [
@@ -13851,6 +13877,11 @@
           ]
         },
         {
+          "symbol": "JCI",
+          "reason": "unaccepted_momentum_event",
+          "detail": "JCI 2014-12 historical index equity differs from selected price lineage"
+        },
+        {
           "symbol": "JNPR",
           "reason": "missing_ranking_quote_or_eligibility_evidence",
           "months": [
@@ -14160,6 +14191,11 @@
           "months": [
             "2014-12"
           ]
+        },
+        {
+          "symbol": "JCI",
+          "reason": "unaccepted_momentum_event",
+          "detail": "JCI 2014-12 historical index equity differs from selected price lineage"
         },
         {
           "symbol": "JNPR",
@@ -14528,6 +14564,11 @@
           ]
         },
         {
+          "symbol": "JCI",
+          "reason": "unaccepted_momentum_event",
+          "detail": "JCI 2015-12 historical index equity differs from selected price lineage"
+        },
+        {
           "symbol": "JNPR",
           "reason": "incomplete_lookback_or_listing_evidence",
           "months": [
@@ -14867,6 +14908,11 @@
           ]
         },
         {
+          "symbol": "JCI",
+          "reason": "unaccepted_momentum_event",
+          "detail": "JCI 2015-12 historical index equity differs from selected price lineage"
+        },
+        {
           "symbol": "JNPR",
           "reason": "incomplete_lookback_or_listing_evidence",
           "months": [
@@ -15174,6 +15220,11 @@
           ]
         },
         {
+          "symbol": "JCI",
+          "reason": "unaccepted_momentum_event",
+          "detail": "JCI identity transition window requires actual ownership and cash-flow evidence"
+        },
+        {
           "symbol": "K",
           "reason": "incomplete_lookback_or_listing_evidence",
           "months": [
@@ -15386,6 +15437,11 @@
           ]
         },
         {
+          "symbol": "JCI",
+          "reason": "unaccepted_momentum_event",
+          "detail": "JCI identity transition window requires actual ownership and cash-flow evidence"
+        },
+        {
           "symbol": "K",
           "reason": "incomplete_lookback_or_listing_evidence",
           "months": [
@@ -15517,14 +15573,8 @@
         },
         {
           "symbol": "IR",
-          "reason": "incomplete_lookback_or_listing_evidence",
-          "months": [
-            "2016-12",
-            "2017-01",
-            "2017-02",
-            "2017-03",
-            "2017-04"
-          ]
+          "reason": "unaccepted_momentum_event",
+          "detail": "IR 2017-12 historical index equity differs from selected price lineage"
         },
         {
           "symbol": "PX",
@@ -15606,14 +15656,8 @@
         },
         {
           "symbol": "IR",
-          "reason": "incomplete_lookback_or_listing_evidence",
-          "months": [
-            "2016-12",
-            "2017-01",
-            "2017-02",
-            "2017-03",
-            "2017-04"
-          ]
+          "reason": "unaccepted_momentum_event",
+          "detail": "IR 2017-12 historical index equity differs from selected price lineage"
         },
         {
           "symbol": "PX",
@@ -15685,6 +15729,11 @@
           ]
         },
         {
+          "symbol": "IR",
+          "reason": "unaccepted_momentum_event",
+          "detail": "IR 2018-12 historical index equity differs from selected price lineage"
+        },
+        {
           "symbol": "SCG",
           "reason": "missing_ranking_quote_or_eligibility_evidence",
           "months": [
@@ -15745,7 +15794,6 @@
         "HRB",
         "HRS",
         "INFO",
-        "IR",
         "JEC",
         "JEF",
         "JWN",
@@ -15804,6 +15852,11 @@
           "months": [
             "2018-12"
           ]
+        },
+        {
+          "symbol": "IR",
+          "reason": "unaccepted_momentum_event",
+          "detail": "IR 2018-12 historical index equity differs from selected price lineage"
         },
         {
           "symbol": "SCG",
@@ -15865,7 +15918,6 @@
         "HRB",
         "HRS",
         "INFO",
-        "IR",
         "JEC",
         "JEF",
         "JWN",
@@ -15936,6 +15988,11 @@
             "2019-01",
             "2019-02"
           ]
+        },
+        {
+          "symbol": "IR",
+          "reason": "unaccepted_momentum_event",
+          "detail": "IR 2019-12 historical index equity differs from selected price lineage"
         },
         {
           "symbol": "PEAK",
@@ -16012,7 +16069,6 @@
         "HP",
         "HRB",
         "INFO",
-        "IR",
         "JWN",
         "KSS",
         "KSU",
@@ -16054,6 +16110,11 @@
           ]
         },
         {
+          "symbol": "IR",
+          "reason": "unaccepted_momentum_event",
+          "detail": "IR 2019-12 historical index equity differs from selected price lineage"
+        },
+        {
           "symbol": "UTX",
           "reason": "missing_ranking_quote_or_eligibility_evidence",
           "months": [
@@ -16092,7 +16153,6 @@
         "HP",
         "HRB",
         "INFO",
-        "IR",
         "JWN",
         "KSS",
         "KSU",
@@ -16134,6 +16194,11 @@
           ]
         },
         {
+          "symbol": "IR",
+          "reason": "unaccepted_momentum_event",
+          "detail": "IR identity transition window requires actual ownership and cash-flow evidence"
+        },
+        {
           "symbol": "OTIS",
           "reason": "incomplete_lookback_or_listing_evidence",
           "months": [
@@ -16141,6 +16206,11 @@
             "2020-01",
             "2020-02"
           ]
+        },
+        {
+          "symbol": "TT",
+          "reason": "unaccepted_momentum_event",
+          "detail": "TT transition window requires actual TT and distributed IR ownership evidence"
         },
         {
           "symbol": "VNT",
@@ -16179,7 +16249,6 @@
         "HBI",
         "HFC",
         "INFO",
-        "IR",
         "KSU",
         "LEG",
         "MXIM",
@@ -16203,7 +16272,18 @@
       "complete": false,
       "published_b_return": 0.7362,
       "price_screen_complete": false,
-      "unresolved_rank_inputs": [],
+      "unresolved_rank_inputs": [
+        {
+          "symbol": "IR",
+          "reason": "unresolved_security_identity_membership",
+          "detail": "IR 2020 contains two index securities; old IR\u2192TT continuity and new IR admission require identity-aware membership"
+        },
+        {
+          "symbol": "IR",
+          "reason": "unaccepted_momentum_event",
+          "detail": "IR identity transition window requires actual ownership and cash-flow evidence"
+        }
+      ],
       "holding_period_scope": "available_full_year_values",
       "quarantined_candidate_symbols": [],
       "missing_nominal_symbols": [
@@ -16225,7 +16305,6 @@
         "HBI",
         "HFC",
         "INFO",
-        "IR",
         "KSU",
         "LEG",
         "MXIM",
@@ -16237,65 +16316,11 @@
         "VIAC",
         "WLTW"
       ],
-      "before": {
-        "holdings": [
-          {
-            "ticker": "LB",
-            "weight": 0.3333
-          },
-          {
-            "ticker": "NVDA",
-            "weight": 0.3333
-          },
-          {
-            "ticker": "PYPL",
-            "weight": 0.3334
-          }
-        ],
-        "return_value": 0.8159677410255091,
-        "drawdown": -0.08734933900306552,
-        "return_status": "complete"
-      },
+      "before": null,
       "after": null,
-      "unknown_all_fail_holdings": {
-        "holdings": [
-          {
-            "ticker": "LB",
-            "weight": 0.3333
-          },
-          {
-            "ticker": "NVDA",
-            "weight": 0.3333
-          },
-          {
-            "ticker": "PYPL",
-            "weight": 0.3334
-          }
-        ],
-        "return_value": 0.8159677410255091,
-        "drawdown": -0.08734933900306552,
-        "return_status": "complete"
-      },
-      "unknown_all_pass_holdings": {
-        "holdings": [
-          {
-            "ticker": "LB",
-            "weight": 0.3333
-          },
-          {
-            "ticker": "NVDA",
-            "weight": 0.3333
-          },
-          {
-            "ticker": "PYPL",
-            "weight": 0.3334
-          }
-        ],
-        "return_value": 0.8159677410255091,
-        "drawdown": -0.08734933900306552,
-        "return_status": "complete"
-      },
-      "predicate_bounds_agree": true
+      "unknown_all_fail_holdings": null,
+      "unknown_all_pass_holdings": null,
+      "predicate_bounds_agree": false
     },
     {
       "variant": "A",
@@ -17959,8 +17984,6 @@
         "HOLX",
         "HUBB",
         "IBKR",
-        "IR",
-        "JCI",
         "KDP",
         "KEYS",
         "KHC",
@@ -18180,8 +18203,6 @@
         "GWW",
         "HOLX",
         "HUBB",
-        "IR",
-        "JCI",
         "KDP",
         "KEYS",
         "KHC",
@@ -25608,18 +25629,6 @@
     {
       "variant": "A",
       "year": 2012,
-      "symbol": "JCI",
-      "month": "2011-12",
-      "return12": 0.15078803986009848,
-      "legacy_price": 24.313655853271484,
-      "nominal_price": 46.71,
-      "nominal_status": "unit_supported_observation",
-      "legacy_pass": true,
-      "nominal_pass": true
-    },
-    {
-      "variant": "A",
-      "year": 2012,
       "symbol": "JCP",
       "month": "2011-12",
       "return12": 0.08789803827560028,
@@ -30737,18 +30746,6 @@
       "return12": -0.00624079484149076,
       "legacy_price": 19.65999984741211,
       "nominal_price": 19.66,
-      "nominal_status": "unit_supported_observation",
-      "legacy_pass": true,
-      "nominal_pass": true
-    },
-    {
-      "variant": "B",
-      "year": 2012,
-      "symbol": "JCI",
-      "month": "2011-12",
-      "return12": 0.15078803986009848,
-      "legacy_price": 24.313655853271484,
-      "nominal_price": 46.71,
       "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
       "nominal_pass": true
@@ -35969,18 +35966,6 @@
       "return12": -0.003674566259589729,
       "legacy_price": 19.290000915527344,
       "nominal_price": 19.29,
-      "nominal_status": "unit_supported_observation",
-      "legacy_pass": true,
-      "nominal_pass": true
-    },
-    {
-      "variant": "A",
-      "year": 2013,
-      "symbol": "JCI",
-      "month": "2012-12",
-      "return12": 0.285227839569584,
-      "legacy_price": 30.628271102905273,
-      "nominal_price": 29.25,
       "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
       "nominal_pass": true
@@ -41280,18 +41265,6 @@
     {
       "variant": "B",
       "year": 2013,
-      "symbol": "JCI",
-      "month": "2012-12",
-      "return12": 0.285227839569584,
-      "legacy_price": 30.628271102905273,
-      "nominal_price": 29.25,
-      "nominal_status": "unit_supported_observation",
-      "legacy_pass": true,
-      "nominal_pass": true
-    },
-    {
-      "variant": "B",
-      "year": 2013,
       "symbol": "JCP",
       "month": "2012-12",
       "return12": -0.43926053105145246,
@@ -46529,18 +46502,6 @@
       "return12": -0.08184682076580874,
       "legacy_price": 17.440000534057617,
       "nominal_price": 17.44,
-      "nominal_status": "unit_supported_observation",
-      "legacy_pass": true,
-      "nominal_pass": true
-    },
-    {
-      "variant": "A",
-      "year": 2014,
-      "symbol": "JCI",
-      "month": "2013-12",
-      "return12": 0.4299665726776487,
-      "legacy_price": 42.97382354736328,
-      "nominal_price": 41.04,
       "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
       "nominal_pass": true
@@ -51876,18 +51837,6 @@
     {
       "variant": "B",
       "year": 2014,
-      "symbol": "JCI",
-      "month": "2013-12",
-      "return12": 0.4299665726776487,
-      "legacy_price": 42.97382354736328,
-      "nominal_price": 41.04,
-      "nominal_status": "unit_supported_observation",
-      "legacy_pass": true,
-      "nominal_pass": true
-    },
-    {
-      "variant": "B",
-      "year": 2014,
       "symbol": "JEC",
       "month": "2013-12",
       "return12": 0.4796807850882696,
@@ -57209,18 +57158,6 @@
       "return12": 0.11436260000646281,
       "legacy_price": 39.52000045776367,
       "nominal_price": 39.52,
-      "nominal_status": "unit_supported_observation",
-      "legacy_pass": true,
-      "nominal_pass": true
-    },
-    {
-      "variant": "A",
-      "year": 2015,
-      "symbol": "JCI",
-      "month": "2014-12",
-      "return12": 0.08649262467314278,
-      "legacy_price": 45.926700592041016,
-      "nominal_price": 43.86,
       "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
       "nominal_pass": true
@@ -62688,18 +62625,6 @@
     {
       "variant": "B",
       "year": 2015,
-      "symbol": "JCI",
-      "month": "2014-12",
-      "return12": 0.08649262467314278,
-      "legacy_price": 45.926700592041016,
-      "nominal_price": 43.86,
-      "nominal_status": "unit_supported_observation",
-      "legacy_pass": true,
-      "nominal_pass": true
-    },
-    {
-      "variant": "B",
-      "year": 2015,
       "symbol": "JEC",
       "month": "2014-12",
       "return12": -0.2905220126327279,
@@ -68148,18 +68073,6 @@
     {
       "variant": "A",
       "year": 2016,
-      "symbol": "JCI",
-      "month": "2015-12",
-      "return12": -0.2581373723678272,
-      "legacy_price": 33.392669677734375,
-      "nominal_price": 31.89,
-      "nominal_status": "unit_supported_observation",
-      "legacy_pass": true,
-      "nominal_pass": true
-    },
-    {
-      "variant": "A",
-      "year": 2016,
       "symbol": "JEC",
       "month": "2015-12",
       "return12": -0.06131156969814555,
@@ -73553,18 +73466,6 @@
       "return12": -0.1283206164594467,
       "legacy_price": 33.47999954223633,
       "nominal_price": 33.48,
-      "nominal_status": "unit_supported_observation",
-      "legacy_pass": true,
-      "nominal_pass": true
-    },
-    {
-      "variant": "B",
-      "year": 2016,
-      "symbol": "JCI",
-      "month": "2015-12",
-      "return12": -0.2581373723678272,
-      "legacy_price": 33.392669677734375,
-      "nominal_price": 31.89,
       "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
       "nominal_pass": true
@@ -79133,18 +79034,6 @@
       "return12": 0.3377783369844549,
       "legacy_price": 97.06999969482422,
       "nominal_price": 97.07,
-      "nominal_status": "unit_supported_observation",
-      "legacy_pass": true,
-      "nominal_pass": true
-    },
-    {
-      "variant": "A",
-      "year": 2017,
-      "symbol": "JCI",
-      "month": "2016-12",
-      "return12": 0.42109659485640805,
-      "legacy_price": 41.189998626708984,
-      "nominal_price": 41.19,
       "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
       "nominal_pass": true
@@ -84725,18 +84614,6 @@
       "return12": 0.3377783369844549,
       "legacy_price": 97.06999969482422,
       "nominal_price": 97.07,
-      "nominal_status": "unit_supported_observation",
-      "legacy_pass": true,
-      "nominal_pass": true
-    },
-    {
-      "variant": "B",
-      "year": 2017,
-      "symbol": "JCI",
-      "month": "2016-12",
-      "return12": 0.42109659485640805,
-      "legacy_price": 41.189998626708984,
-      "nominal_price": 41.19,
       "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
       "nominal_pass": true
@@ -102216,18 +102093,6 @@
     {
       "variant": "A",
       "year": 2019,
-      "symbol": "IR",
-      "month": "2018-12",
-      "return12": -0.39728853047259416,
-      "legacy_price": 20.450000762939453,
-      "nominal_price": null,
-      "nominal_status": "unknown",
-      "legacy_pass": true,
-      "nominal_pass": null
-    },
-    {
-      "variant": "A",
-      "year": 2019,
       "symbol": "IRM",
       "month": "2018-12",
       "return12": -0.07970423282536387,
@@ -108084,18 +107949,6 @@
     {
       "variant": "B",
       "year": 2019,
-      "symbol": "IR",
-      "month": "2018-12",
-      "return12": -0.39728853047259416,
-      "legacy_price": 20.450000762939453,
-      "nominal_price": null,
-      "nominal_status": "unknown",
-      "legacy_pass": true,
-      "nominal_pass": null
-    },
-    {
-      "variant": "B",
-      "year": 2019,
       "symbol": "IRM",
       "month": "2018-12",
       "return12": -0.07970423282536387,
@@ -113900,18 +113753,6 @@
       "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
       "nominal_pass": true
-    },
-    {
-      "variant": "A",
-      "year": 2020,
-      "symbol": "IR",
-      "month": "2019-12",
-      "return12": 0.9280332297676277,
-      "legacy_price": 36.68000030517578,
-      "nominal_price": null,
-      "nominal_status": "unknown",
-      "legacy_pass": true,
-      "nominal_pass": null
     },
     {
       "variant": "A",
@@ -119796,18 +119637,6 @@
     {
       "variant": "B",
       "year": 2020,
-      "symbol": "IR",
-      "month": "2019-12",
-      "return12": 0.9280332297676277,
-      "legacy_price": 36.68000030517578,
-      "nominal_price": null,
-      "nominal_status": "unknown",
-      "legacy_pass": true,
-      "nominal_pass": null
-    },
-    {
-      "variant": "B",
-      "year": 2020,
       "symbol": "IRM",
       "month": "2019-12",
       "return12": 0.05871488641837819,
@@ -125544,18 +125373,6 @@
     {
       "variant": "A",
       "year": 2021,
-      "symbol": "IR",
-      "month": "2020-12",
-      "return12": 0.24209369361679345,
-      "legacy_price": 45.560001373291016,
-      "nominal_price": null,
-      "nominal_status": "unknown",
-      "legacy_pass": true,
-      "nominal_pass": null
-    },
-    {
-      "variant": "A",
-      "year": 2021,
       "symbol": "IRM",
       "month": "2020-12",
       "return12": 0.009850600571746915,
@@ -127889,18 +127706,6 @@
       "return12": -0.27345152326694244,
       "legacy_price": 64.44000244140625,
       "nominal_price": 64.44000031865298,
-      "nominal_status": "unit_supported_observation",
-      "legacy_pass": true,
-      "nominal_pass": true
-    },
-    {
-      "variant": "A",
-      "year": 2021,
-      "symbol": "TT",
-      "month": "2020-12",
-      "return12": 0.4341525872357188,
-      "legacy_price": 145.16000366210938,
-      "nominal_price": 145.16002807514528,
       "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
       "nominal_pass": true
@@ -131456,18 +131261,6 @@
       "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
       "nominal_pass": true
-    },
-    {
-      "variant": "B",
-      "year": 2021,
-      "symbol": "IR",
-      "month": "2020-12",
-      "return12": 0.24209369361679345,
-      "legacy_price": 45.560001373291016,
-      "nominal_price": null,
-      "nominal_status": "unknown",
-      "legacy_pass": true,
-      "nominal_pass": null
     },
     {
       "variant": "B",
@@ -184660,10 +184453,10 @@
       "month": "2025-12",
       "return12": -0.12338554264708745,
       "legacy_price": 79.22000122070312,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 79.22,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -184768,10 +184561,10 @@
       "month": "2025-12",
       "return12": 0.5295177990836395,
       "legacy_price": 119.75,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 119.75,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "A",
@@ -190504,10 +190297,10 @@
       "month": "2025-12",
       "return12": -0.12338554264708745,
       "legacy_price": 79.22000122070312,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 79.22,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",
@@ -190612,10 +190405,10 @@
       "month": "2025-12",
       "return12": 0.5295177990836395,
       "legacy_price": 119.75,
-      "nominal_price": null,
-      "nominal_status": "unknown",
+      "nominal_price": 119.75,
+      "nominal_status": "unit_supported_observation",
       "legacy_pass": true,
-      "nominal_pass": null
+      "nominal_pass": true
     },
     {
       "variant": "B",

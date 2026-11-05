@@ -21,6 +21,7 @@ import datafeed
 import db_prices
 import nominal_prices
 import holding_paths
+import historical_lineage
 import security_membership
 from holding_consideration import POLICY
 import sys as _sys
@@ -254,6 +255,7 @@ def pick_year(m, sector, year, price_lookup=None):
     """选出「hold_year = year」的一年前三（口径 B）"""
     y0 = year - 1
     pool = members_full_year(m, y0)
+    holding_paths.historical_lineage.require_membership(pool,y0)
     rank_m, base_m = "%d-12" % y0, "%d-12" % (y0 - 1)
     rows = []
     _dropped = []
@@ -398,6 +400,7 @@ def main():
     for year in range(START_YEAR, end_year + 2):
         candidates.update(members_full_year(m, year - 1))
     _ref.require_unquarantined_candidates(candidates)
+    historical_lineage.require_complete_history()
 
     global NEED_MONTH
     NEED_MONTH = "%d-12" % end_year

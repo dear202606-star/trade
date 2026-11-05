@@ -25,6 +25,7 @@ import pandas as pd
 
 import datafeed
 import db_ref
+import historical_lineage
 import holding_paths
 from holding_consideration import POLICY
 
@@ -225,6 +226,7 @@ def locked_ok():
         cv = json.load(open(cv_p, encoding="utf-8"))
         if cv.get('holding_event_policy')!=POLICY or cv.get('momentum_event_policy')!=POLICY or cv.get('holding_event_input_sha')!=holding_paths.input_sha():
             return False,'曲线企业行动口径或证据版本尚未核验'
+        historical_lineage.require_complete_history()
         ys = sh.get("years") or []
         if len(ys) < 8:
             return False, "历史年份不足"
@@ -310,6 +312,7 @@ def main():
         date = '%d-01-01' % year
         candidates.update(m[(m.start_date <= date) & (m.end_date >= date)].ticker)
     db_ref.require_unquarantined_candidates(candidates)
+    historical_lineage.require_complete_history()
 
     datafeed.prefetch(sorted(m["ticker"].unique().tolist()) + ["SPY"], workers=8)
     spy = load_bars("SPY")

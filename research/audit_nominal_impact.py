@@ -72,6 +72,11 @@ def run():
                               (frame.end_date >= '%d-01-01' % year)].ticker))
             unresolved_identity = sorted(set(pool)&set(quarantines))
             candidates = [];unresolved_rank_inputs=[]
+            if variant == 'B':
+                try:
+                    holding_paths.historical_lineage.require_membership(pool,year-1)
+                except RuntimeError as error:
+                    unresolved_rank_inputs.append({'symbol':'IR','reason':'unresolved_security_identity_membership','detail':str(error)})
             expected_months=['%d-12'%(year-2)]+['%d-%02d'%(year-1,m) for m in range(1,13)]
             for symbol in sorted(pool):
                 bars = prices.get(symbol, {})
