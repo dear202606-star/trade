@@ -82,6 +82,26 @@ def compute_picks(cur):
     return cur.fetchall()
 
 
+def load_all():
+    """Read the selected single-source series without a REST round trip."""
+    connection = db()
+    try:
+        # A server cursor bounds each transfer; a single 145k-row response can
+        # hit the pooler's statement timeout while waiting for the client.
+        connection.autocommit = False
+        with connection.cursor(name="selected_series") as cur:
+            cur.itersize = 2000
+            cur.execute("select symbol, month, adj_close, raw_close from series_selected")
+            out = {}
+            for symbol, month, adj, raw in cur:
+                out.setdefault(symbol, {})[month] = (float(adj), float(raw) if raw is not None else None)
+        if not out:
+            raise RuntimeError("series_selected 返回 0 行")
+        return out
+    finally:
+        connection.close()
+
+
 def refresh(dry_run=False):
     c = db()
     changed = kept = blocked = 0
