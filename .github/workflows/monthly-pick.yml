@@ -87,8 +87,10 @@ jobs:
       - name: 计算策略净值
         continue-on-error: true
         run: python runner.py equity.py
-      - name: 生成明年预览
-        run: python runner.py preview.py
+      - name: 更新在线 A/B 动态排名
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: python runner.py live_ranking.py
 
       - name: 生成全年成分口径（B）
         env:
