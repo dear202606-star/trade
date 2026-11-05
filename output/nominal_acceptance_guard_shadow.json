@@ -1,7 +1,10 @@
 {
   "shadow_probe": {
-    "blocked_mutations": 8,
+    "blocked_mutations": 14,
     "higher_priority_cannot_replace_accepted": true,
+    "historical_identity_reviews_immutable": true,
+    "issuer_source_protected": true,
+    "unsupported_source_rejected": true,
     "ordinary_validation_logs_unaffected": true,
     "unreviewed_rows_not_prematurely_locked": true,
     "temporary_changes_rolled_back": true

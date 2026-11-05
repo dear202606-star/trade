@@ -1,0 +1,51 @@
+{
+  "write": true,
+  "proofs": {
+    "IR": {
+      "symbol": "IR",
+      "selected_source": "yahoo_relay",
+      "comparison_from": "2020-03",
+      "current_issuer_cik": "1699150",
+      "historical_index_issuer_cik": "1466258",
+      "current_equity_predecessor": "Gardner Denver Holdings, Inc. (GDI)",
+      "historical_index_equity_successor": "Trane Technologies plc (TT)",
+      "new_ir_index_admission": "2020-03-03",
+      "old_ir_tt_continuity_unresolved": true,
+      "full_history_accepted": false,
+      "evidence_urls": [
+        "https://www.spglobal.com/spdji/en/documents/indexnews/announcements/20200227-1098962/1098962_Final5Ingersol4Cimar.pdf",
+        "https://www.sec.gov/Archives/edgar/data/1699150/000114036120014177/nt10012610x3_424b7.htm",
+        "https://www.sec.gov/Archives/edgar/data/1466258/000114036120004470/nc10009348x1_ex99-1.htm"
+      ]
+    },
+    "JCI": {
+      "symbol": "JCI",
+      "selected_source": "yahoo_relay",
+      "comparison_from": "2016-09",
+      "current_issuer_cik": "833444",
+      "historical_index_issuer_cik": "53669",
+      "current_equity_predecessor": "Tyco International plc",
+      "historical_index_equity": "Johnson Controls, Inc.",
+      "merger_date": "2016-09-02",
+      "default_cash_usd_per_original_share": "5.7293",
+      "default_current_shares_per_original_share": "0.8357",
+      "tyco_consolidation_ratio": "0.955",
+      "holding_path_accepted": false,
+      "full_history_accepted": false,
+      "evidence_urls": [
+        "https://www.sec.gov/Archives/edgar/data/53669/000110465916143072/a16-17944_18k.htm",
+        "https://www.sec.gov/Archives/edgar/data/833444/000083344417000010/ex991fy2016recastof10-k.htm"
+      ]
+    }
+  },
+  "preserved_sha256": {
+    "prices_monthly": "3313d4177d3628bf7caeca15d36559b4ef615c986a31e76e7c426430ff668faa",
+    "nominal_monthly": "12eb170bf7fbecf7185b51bcdbe437210e8713c9ac7cc0da95c9c83a665665b2",
+    "series_pick": "ad165e8888a41f0c0ae3346a60f282c445912125604289078a3ea20aa43e5e39",
+    "data_lock": "3d98b9a58b5f000cf5b285ad51ea0bf598906b2859472438e49c0bd0a21997ae",
+    "members": "01444411d4ef660df53621a7586b57230e8b91c3480c3b63c467344f4b6ff615",
+    "baseline_b": "20c0680276cf79cbb06d8aaab35c3e40cde010447f6e15e75abd95ff0ef33c90"
+  },
+  "prices_picks_members_locks_and_baseline_changed": false,
+  "full_strategy_accepted": false
+}

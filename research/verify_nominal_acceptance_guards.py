@@ -80,9 +80,17 @@ def shadow_probe(sql):
                 values('validation','fund_native_closing_fact','UNSUPPORTED:2025-12-31','pass',
                     jsonb_build_object('proof',jsonb_build_object('nominal_source','unreviewed'),
                                        'evidence_sha256',repeat('e',64)))""")
+            q.execute((BASE/'sql/121_historical_identity_review_guards.sql').read_text().replace('public.','pg_temp.'))
+            q.execute("""create trigger historical_identity_probe before update or delete on pg_temp.sys_event
+                for each row execute function pg_temp.guard_live_identity_reviews()""")
+            q.execute("""insert into pg_temp.sys_event(kind,source,subject,status,metrics)
+                values('validation','historical_identity_review','lineage-probe','pass','{}')""")
+            blocked(q,"update pg_temp.sys_event set metrics='{}' where subject='lineage-probe'")
+            blocked(q,"delete from pg_temp.sys_event where subject='lineage-probe'")
             # Unrelated validation logs remain writable.
             q.execute("insert into pg_temp.sys_event(kind,source,subject,status,metrics) values ('validation',null,'other','pass','{}')")
-        return {'blocked_mutations':12,'higher_priority_cannot_replace_accepted':True,
+        return {'blocked_mutations':14,'higher_priority_cannot_replace_accepted':True,
+                'historical_identity_reviews_immutable':True,
                 'issuer_source_protected':True,'unsupported_source_rejected':True,
                 'ordinary_validation_logs_unaffected':True,'unreviewed_rows_not_prematurely_locked':True,
                 'temporary_changes_rolled_back':True}
