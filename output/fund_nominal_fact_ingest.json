@@ -1,59 +1,410 @@
 {
   "write": true,
-  "inserted": 2,
+  "inserted": 15,
   "proofs": [
     {
       "unit_proof": {
-        "symbol": "ABNB",
+        "symbol": "BLDR",
         "date": "2025-12-31",
-        "independent_close": "135.72",
+        "independent_close": "102.89",
         "fund_row": {
-          "page": 9,
-          "name": "Airbnb, Inc., Class A(a)(b)",
-          "shares": 5529473,
-          "reported_usd_value": 750460076
+          "page": 7,
+          "name": "Builders FirstSource, Inc.(a)(b)",
+          "shares": 1438000,
+          "reported_usd_value": 147955820
         },
-        "implied_price": "135.7200000795735868499583957",
-        "unit_interval_low": "135.7199998987245258273256782",
-        "unit_interval_high": "135.7200002604226478725911131",
-        "usd_value_difference": "0.44",
-        "independent_cache_sha256": "2b424e78b6f616f7a52f688248d0ca088a16c6a30271c7db093f93ce368d895c"
+        "implied_price": "102.89",
+        "unit_interval_low": "102.8899993045897079276773296",
+        "unit_interval_high": "102.8900006954102920723226704",
+        "usd_value_difference": "0.00",
+        "independent_cache_sha256": "3639e15ecd9a4072101631adaafee381ccc69c572b436e5156409274d59589db"
       },
       "fund_url": "https://www.ishares.com/us/literature/third-quarter-report/tqr-ishares-trust-equity-jpm-12-31.pdf",
       "fund_sha256": "be504252b271284ab1d56705cf5e390f4e863811a3adc94d732a24e40b62e0fd",
-      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=105.ABNB&klt=101&fqt=0&beg=20250101&end=20251231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
-      "primary_cache_sha256": "fa14696232ee1b04beffe6ca833cad7868d66833b77bfbf49496fa8c41d79144",
-      "return_pairs": 60,
-      "median_log_deviation": 2.551658417948081e-08,
-      "p90_log_deviation": 6.824252774279496e-08,
-      "selected_history_sha256": "a2f9bdbd4ff679b70b3313bff184d8e6581a67e801b157e992d357f780adb4df",
+      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=106.BLDR&klt=101&fqt=0&beg=20250101&end=20251231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "primary_cache_sha256": "8aaf5d3426468f3e7b04438fe0e7ca3ec8d4d186e31edbfec5106950f6a19cf4",
+      "return_pairs": 53,
+      "median_log_deviation": 2.8602298494590667e-08,
+      "p90_log_deviation": 5.215867662801872e-08,
+      "selected_history_sha256": "ad3d0689912932333b5cab37217f7d96414683f8b127cc1a8ac7d43b1cbb1473",
       "scope": "Only 2025-12-31; no other date approved"
     },
     {
       "unit_proof": {
-        "symbol": "CRWD",
+        "symbol": "CB",
         "date": "2025-12-31",
-        "independent_close": "468.76",
+        "independent_close": "312.12",
         "fund_row": {
-          "page": 11,
-          "name": "Crowdstrike Holdings, Inc., Class A(a)(b)",
-          "shares": 3262803,
-          "reported_usd_value": 1529471534
+          "page": 10,
+          "name": "Chubb Ltd",
+          "shares": 4758576,
+          "reported_usd_value": 1485246741
         },
-        "implied_price": "468.7599999141842152284400866",
-        "unit_interval_low": "468.7599996076992696157261103",
-        "unit_interval_high": "468.7600002206691608411540629",
-        "usd_value_difference": "0.28",
-        "independent_cache_sha256": "6787b48013c272f3a36bce9d5ffed014e5841702f53aa89d22d1eac090dff983"
+        "implied_price": "312.1199999747823718692314676",
+        "unit_interval_low": "312.1199997646354707794936973",
+        "unit_interval_high": "312.1200001849292729589692379",
+        "usd_value_difference": "0.12",
+        "independent_cache_sha256": "51ba29f7959b463de3428b37b0b79734849a63e2261d069b791b3fdc28eb2feb"
       },
       "fund_url": "https://www.ishares.com/us/literature/third-quarter-report/tqr-ishares-trust-equity-jpm-12-31.pdf",
       "fund_sha256": "be504252b271284ab1d56705cf5e390f4e863811a3adc94d732a24e40b62e0fd",
-      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=105.CRWD&klt=101&fqt=0&beg=20250101&end=20251231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
-      "primary_cache_sha256": "14a8bb27de36d754d80d32b4840986ccbb4b813ce9d281d0d2205eef808faeb7",
-      "return_pairs": 78,
-      "median_log_deviation": 2.0617975558564086e-08,
-      "p90_log_deviation": 4.8818321081932955e-08,
-      "selected_history_sha256": "1aeea13f51b6a6191d490681d2c722386284fd72437c834257fa19fbd79d69fa",
+      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=106.CB&klt=101&fqt=0&beg=20250101&end=20251231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "primary_cache_sha256": "3940366a202c5ee70748cb59ba86ded08bc364880cce00554ba31ba0f510d575",
+      "return_pairs": 191,
+      "median_log_deviation": 0.003309808639010059,
+      "p90_log_deviation": 0.027765973202665824,
+      "selected_history_sha256": "f6b8a0a4633698892395cd103862b76355796979c9b22a41fbbdc05f723feb19",
+      "scope": "Only 2025-12-31; no other date approved"
+    },
+    {
+      "unit_proof": {
+        "symbol": "DLR",
+        "date": "2025-12-31",
+        "independent_close": "154.71",
+        "fund_row": {
+          "page": 11,
+          "name": "Digital Realty Trust, Inc",
+          "shares": 4198086,
+          "reported_usd_value": 649485885
+        },
+        "implied_price": "154.7099999857077725420584524",
+        "unit_interval_low": "154.7099997475039815763659915",
+        "unit_interval_high": "154.7100002239115635077509132",
+        "usd_value_difference": "0.06",
+        "independent_cache_sha256": "84c5a8412a866da3c3a053cc5068a1552e7feb727d741eecf14fac79f23fed54"
+      },
+      "fund_url": "https://www.ishares.com/us/literature/third-quarter-report/tqr-ishares-trust-equity-jpm-12-31.pdf",
+      "fund_sha256": "be504252b271284ab1d56705cf5e390f4e863811a3adc94d732a24e40b62e0fd",
+      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=106.DLR&klt=101&fqt=0&beg=20250101&end=20251231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "primary_cache_sha256": "24f8dc9437fb918e7be0310a7f7f0112ea81d4498dc0db5e0b000676804f3135",
+      "return_pairs": 191,
+      "median_log_deviation": 2.478209410361943e-07,
+      "p90_log_deviation": 0.010927137971207989,
+      "selected_history_sha256": "c66fd388958fe01f963b922cdc55e076ab63cfbb18b34fe76a5d64cc7712eed0",
+      "scope": "Only 2025-12-31; no other date approved"
+    },
+    {
+      "unit_proof": {
+        "symbol": "DOV",
+        "date": "2025-12-31",
+        "independent_close": "195.24",
+        "fund_row": {
+          "page": 10,
+          "name": "Dover Corp",
+          "shares": 1782402,
+          "reported_usd_value": 347996166
+        },
+        "implied_price": "195.2399997307004817095133421",
+        "unit_interval_low": "195.2399991696598186043328048",
+        "unit_interval_high": "195.2400002917411448146938794",
+        "usd_value_difference": "0.48",
+        "independent_cache_sha256": "e092422dff48fe6295d73a9d48bba3377f93bbed954772f6eb852b204fe76b8a"
+      },
+      "fund_url": "https://www.ishares.com/us/literature/third-quarter-report/tqr-ishares-trust-equity-jpm-12-31.pdf",
+      "fund_sha256": "be504252b271284ab1d56705cf5e390f4e863811a3adc94d732a24e40b62e0fd",
+      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=106.DOV&klt=101&fqt=0&beg=20250101&end=20251231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "primary_cache_sha256": "aa5b6fad987af952cc0b7dc8bbdbd4c4ce02f4fcd418cdff72651dbc508d3f64",
+      "return_pairs": 191,
+      "median_log_deviation": 2.1882133287078146e-07,
+      "p90_log_deviation": 0.005547084018210641,
+      "selected_history_sha256": "982161cb225e4ff106201284c87d8d78295e91b4f01df2203f7267eab56d6f82",
+      "scope": "Only 2025-12-31; no other date approved"
+    },
+    {
+      "unit_proof": {
+        "symbol": "DTE",
+        "date": "2025-12-31",
+        "independent_close": "128.98",
+        "fund_row": {
+          "page": 10,
+          "name": "DTE Energy Co",
+          "shares": 2697787,
+          "reported_usd_value": 347960567
+        },
+        "implied_price": "128.9799999036247116618176305",
+        "unit_interval_low": "128.9799995329505257457315941",
+        "unit_interval_high": "128.9800002742988975779036670",
+        "usd_value_difference": "0.26",
+        "independent_cache_sha256": "4dffd17b12b200d6e3741395b041ea50f17dcb7ae694fbbe2a9e5d312597b87b"
+      },
+      "fund_url": "https://www.ishares.com/us/literature/third-quarter-report/tqr-ishares-trust-equity-jpm-12-31.pdf",
+      "fund_sha256": "be504252b271284ab1d56705cf5e390f4e863811a3adc94d732a24e40b62e0fd",
+      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=106.DTE&klt=101&fqt=0&beg=20250101&end=20251231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "primary_cache_sha256": "97b63b819e24a935890a47fb985347f92d7961fe8b5887b177af09c801fcb857",
+      "return_pairs": 191,
+      "median_log_deviation": 2.511998449047043e-07,
+      "p90_log_deviation": 0.009312017968280644,
+      "selected_history_sha256": "d8ef3edd3e31fbecf96f878e76a319358211f16fa398eb549ad31ade7dc1c66f",
+      "scope": "Only 2025-12-31; no other date approved"
+    },
+    {
+      "unit_proof": {
+        "symbol": "DUK",
+        "date": "2025-12-31",
+        "independent_close": "117.21",
+        "fund_row": {
+          "page": 8,
+          "name": "Duke Energy Corp",
+          "shares": 10110500,
+          "reported_usd_value": 1185051705
+        },
+        "implied_price": "117.21",
+        "unit_interval_low": "117.2099999010929231986548638",
+        "unit_interval_high": "117.2100000989070768013451362",
+        "usd_value_difference": "0.00",
+        "independent_cache_sha256": "0414140f54404ed1666f92a0f6863512cdf973b2619dde947bcd74893f3ea2f3"
+      },
+      "fund_url": "https://www.ishares.com/us/literature/third-quarter-report/tqr-ishares-trust-equity-jpm-12-31.pdf",
+      "fund_sha256": "be504252b271284ab1d56705cf5e390f4e863811a3adc94d732a24e40b62e0fd",
+      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=106.DUK&klt=101&fqt=0&beg=20250101&end=20251231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "primary_cache_sha256": "5ac40d2f31c4e04bacc940d6d640e8116c7a63f2da7578eec4988bdaa5b59bde",
+      "return_pairs": 191,
+      "median_log_deviation": 2.39027980221166e-07,
+      "p90_log_deviation": 0.011324227490344802,
+      "selected_history_sha256": "e3649b6753b446117de4a41da1fdca816e138dae4e240d0210838f704ca44e6f",
+      "scope": "Only 2025-12-31; no other date approved"
+    },
+    {
+      "unit_proof": {
+        "symbol": "DVN",
+        "date": "2025-12-31",
+        "independent_close": "36.63",
+        "fund_row": {
+          "page": 10,
+          "name": "Devon Energy Corp",
+          "shares": 8155845,
+          "reported_usd_value": 298748602
+        },
+        "implied_price": "36.62999995708599170288302438",
+        "unit_interval_low": "36.62999983447453942540595119",
+        "unit_interval_high": "36.63000007969744398036009757",
+        "usd_value_difference": "0.35",
+        "independent_cache_sha256": "93fcc83f5d91252631e62f7bb9732dd8dcf50b3eff6cd62f4a409a9563970237"
+      },
+      "fund_url": "https://www.ishares.com/us/literature/third-quarter-report/tqr-ishares-trust-equity-jpm-12-31.pdf",
+      "fund_sha256": "be504252b271284ab1d56705cf5e390f4e863811a3adc94d732a24e40b62e0fd",
+      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=106.DVN&klt=101&fqt=0&beg=20250101&end=20251231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "primary_cache_sha256": "977c51b7d70ab73b07297026344c2dab38fc75b16cdd29a1b8ef725ea1272646",
+      "return_pairs": 191,
+      "median_log_deviation": 2.482887055548944e-07,
+      "p90_log_deviation": 0.009324051345229852,
+      "selected_history_sha256": "07768c550dcf0a397f27e82c06468642d394fdf8d9f17dd208b399c5ebea3b51",
+      "scope": "Only 2025-12-31; no other date approved"
+    },
+    {
+      "unit_proof": {
+        "symbol": "EBAY",
+        "date": "2025-12-31",
+        "independent_close": "87.10",
+        "fund_row": {
+          "page": 7,
+          "name": "eBay, Inc",
+          "shares": 5876656,
+          "reported_usd_value": 511856737
+        },
+        "implied_price": "87.09999989790111927599641701",
+        "unit_interval_low": "87.09999972773631806932377869",
+        "unit_interval_high": "87.10000006806592048266905533",
+        "usd_value_difference": "0.60",
+        "independent_cache_sha256": "2a1e1ac45adcf439125089ca0671e0f43c30df6a12ad889f8c18fba07ece24ee"
+      },
+      "fund_url": "https://www.ishares.com/us/literature/third-quarter-report/tqr-ishares-trust-equity-jpm-12-31.pdf",
+      "fund_sha256": "be504252b271284ab1d56705cf5e390f4e863811a3adc94d732a24e40b62e0fd",
+      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=105.EBAY&klt=101&fqt=0&beg=20250101&end=20251231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "primary_cache_sha256": "87fadb3b60b891927e85d509d63f53ecb7d48eb8513fa30e27bb76c3d06b9980",
+      "return_pairs": 191,
+      "median_log_deviation": 1.9004306721041374e-07,
+      "p90_log_deviation": 0.0038857533853724354,
+      "selected_history_sha256": "34ddf71e10d541227b295da354337457b89ef96acb1e7ff81403a2b01efcdfa0",
+      "scope": "Only 2025-12-31; no other date approved"
+    },
+    {
+      "unit_proof": {
+        "symbol": "ECL",
+        "date": "2025-12-31",
+        "independent_close": "262.52",
+        "fund_row": {
+          "page": 7,
+          "name": "Ecolab, Inc",
+          "shares": 3314238,
+          "reported_usd_value": 870053760
+        },
+        "implied_price": "262.5200000724148356273749803",
+        "unit_interval_low": "262.5199997706863538466458957",
+        "unit_interval_high": "262.5200003741433174081040649",
+        "usd_value_difference": "0.24",
+        "independent_cache_sha256": "86725ae4af285aa97c4f41d387a3da5a2848d114b0d13b3f34e3c1b7b2b6b12f"
+      },
+      "fund_url": "https://www.ishares.com/us/literature/third-quarter-report/tqr-ishares-trust-equity-jpm-12-31.pdf",
+      "fund_sha256": "be504252b271284ab1d56705cf5e390f4e863811a3adc94d732a24e40b62e0fd",
+      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=106.ECL&klt=101&fqt=0&beg=20250101&end=20251231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "primary_cache_sha256": "fdb4b77f8341a18dd1822dd6487ceb0b14b1f3b19afb474e3c0b26fd933bfeda",
+      "return_pairs": 191,
+      "median_log_deviation": 2.435939397121397e-07,
+      "p90_log_deviation": 0.0030864664045881754,
+      "selected_history_sha256": "ed6d674398ab02d7e8a07ed6c24127c8e92fa54ecf320ab572dcd6ad0d8a8766",
+      "scope": "Only 2025-12-31; no other date approved"
+    },
+    {
+      "unit_proof": {
+        "symbol": "ED",
+        "date": "2025-12-31",
+        "independent_close": "99.32",
+        "fund_row": {
+          "page": 10,
+          "name": "Consolidated Edison, Inc",
+          "shares": 4689014,
+          "reported_usd_value": 465712871
+        },
+        "implied_price": "99.32000011089751491464943376",
+        "unit_interval_low": "99.31999989763306315570821499",
+        "unit_interval_high": "99.32000032416196667359065253",
+        "usd_value_difference": "0.52",
+        "independent_cache_sha256": "b09e36d5e88b1b7156b1b63ffff9375d80361984058778bb06cef19f5344d9aa"
+      },
+      "fund_url": "https://www.ishares.com/us/literature/third-quarter-report/tqr-ishares-trust-equity-jpm-12-31.pdf",
+      "fund_sha256": "be504252b271284ab1d56705cf5e390f4e863811a3adc94d732a24e40b62e0fd",
+      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=106.ED&klt=101&fqt=0&beg=20250101&end=20251231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "primary_cache_sha256": "31399633eeb06283edb2568e436378d1cf6e80da9ded0b34182355b5941b216c",
+      "return_pairs": 191,
+      "median_log_deviation": 2.6475504436785976e-07,
+      "p90_log_deviation": 0.010250799110479339,
+      "selected_history_sha256": "c9eab836ad16e7e4824a3df2016958c6b678c99b54ed03a66404ad7a4042b0c2",
+      "scope": "Only 2025-12-31; no other date approved"
+    },
+    {
+      "unit_proof": {
+        "symbol": "EFX",
+        "date": "2025-12-31",
+        "independent_close": "216.98",
+        "fund_row": {
+          "page": 11,
+          "name": "Equifax, Inc",
+          "shares": 1591328,
+          "reported_usd_value": 345286349
+        },
+        "implied_price": "216.9799997235013774658649882",
+        "unit_interval_low": "216.9799990950954171610126888",
+        "unit_interval_high": "216.9800003519073377707172877",
+        "usd_value_difference": "0.44",
+        "independent_cache_sha256": "57d14b3c11c21e7b76649010a4b536424580f9909fea0a5512c464c220e3e11b"
+      },
+      "fund_url": "https://www.ishares.com/us/literature/third-quarter-report/tqr-ishares-trust-equity-jpm-12-31.pdf",
+      "fund_sha256": "be504252b271284ab1d56705cf5e390f4e863811a3adc94d732a24e40b62e0fd",
+      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=106.EFX&klt=101&fqt=0&beg=20250101&end=20251231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "primary_cache_sha256": "a5035a9bdc4c7719cf1ac1b2b6db0238045ecee0d851d989e3d24e346c6b253a",
+      "return_pairs": 191,
+      "median_log_deviation": 2.541934935870247e-07,
+      "p90_log_deviation": 0.003375001434458144,
+      "selected_history_sha256": "ad23ed106e38dbe025b7f56190cd95b50734e97f500c2af48019acc89fd3784f",
+      "scope": "Only 2025-12-31; no other date approved"
+    },
+    {
+      "unit_proof": {
+        "symbol": "EIX",
+        "date": "2025-12-31",
+        "independent_close": "60.02",
+        "fund_row": {
+          "page": 8,
+          "name": "Edison International",
+          "shares": 5003051,
+          "reported_usd_value": 300283121
+        },
+        "implied_price": "60.01999999600243931153210311",
+        "unit_interval_low": "60.01999979612440488813725864",
+        "unit_interval_high": "60.02000019588047373492694758",
+        "usd_value_difference": "0.02",
+        "independent_cache_sha256": "c95cac54df81844852568a634c3842e564626a2c1cbce959834e585b067d0ef0"
+      },
+      "fund_url": "https://www.ishares.com/us/literature/third-quarter-report/tqr-ishares-trust-equity-jpm-12-31.pdf",
+      "fund_sha256": "be504252b271284ab1d56705cf5e390f4e863811a3adc94d732a24e40b62e0fd",
+      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=106.EIX&klt=101&fqt=0&beg=20250101&end=20251231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "primary_cache_sha256": "312eb769619a5b1386cbc40639ba576ab43d0db0b28d1e171b6a595a5c749687",
+      "return_pairs": 191,
+      "median_log_deviation": 2.2636502192357863e-07,
+      "p90_log_deviation": 0.010683182100852081,
+      "selected_history_sha256": "9b20bc4c353bcc9f08564bf964010f43519be14f8b324ae7e7a595beea5d3666",
+      "scope": "Only 2025-12-31; no other date approved"
+    },
+    {
+      "unit_proof": {
+        "symbol": "EMR",
+        "date": "2025-12-31",
+        "independent_close": "132.72",
+        "fund_row": {
+          "page": 8,
+          "name": "Emerson Electric Co",
+          "shares": 7304264,
+          "reported_usd_value": 969421918
+        },
+        "implied_price": "132.7199999890474933545665929",
+        "unit_interval_low": "132.7199998521411602866490039",
+        "unit_interval_high": "132.7200001259538264224841818",
+        "usd_value_difference": "0.08",
+        "independent_cache_sha256": "f8162b612eee2b68925f5d181f3e1590f9dfea6a4a88a565bec0fa5077696cab"
+      },
+      "fund_url": "https://www.ishares.com/us/literature/third-quarter-report/tqr-ishares-trust-equity-jpm-12-31.pdf",
+      "fund_sha256": "be504252b271284ab1d56705cf5e390f4e863811a3adc94d732a24e40b62e0fd",
+      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=106.EMR&klt=101&fqt=0&beg=20250101&end=20251231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "primary_cache_sha256": "e53cca65b84f2646993d1048eaa7b812ce6a7d021784812f419c9440a57bf239",
+      "return_pairs": 191,
+      "median_log_deviation": 2.8383473962059807e-07,
+      "p90_log_deviation": 0.007779407651986902,
+      "selected_history_sha256": "4c6cffdc5808c8915e8603cf90cc7c4337b9e75c5544ec347854d6ad9d96ed83",
+      "scope": "Only 2025-12-31; no other date approved"
+    },
+    {
+      "unit_proof": {
+        "symbol": "EOG",
+        "date": "2025-12-31",
+        "independent_close": "105.01",
+        "fund_row": {
+          "page": 10,
+          "name": "EOG Resources, Inc",
+          "shares": 7054566,
+          "reported_usd_value": 740799976
+        },
+        "implied_price": "105.0100000481957359247897036",
+        "unit_interval_low": "105.0099999064435714401141048",
+        "unit_interval_high": "105.0100001899479004094653023",
+        "usd_value_difference": "0.34",
+        "independent_cache_sha256": "4a4b60cff705ede60ab064a957ab9e7e93b3368f9aab7058565d810666a47c29"
+      },
+      "fund_url": "https://www.ishares.com/us/literature/third-quarter-report/tqr-ishares-trust-equity-jpm-12-31.pdf",
+      "fund_sha256": "be504252b271284ab1d56705cf5e390f4e863811a3adc94d732a24e40b62e0fd",
+      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=106.EOG&klt=101&fqt=0&beg=20250101&end=20251231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "primary_cache_sha256": "0dcce2fa85a37d739a6fdfd2c2839df8c96eac64d89938ae2bdc92811bb90ee7",
+      "return_pairs": 191,
+      "median_log_deviation": 3.079112266287345e-07,
+      "p90_log_deviation": 0.007324671891969182,
+      "selected_history_sha256": "20b9f1f5dfa21002f6c649f1b3d64cac98fec5522db74b64a5d9b82e9d3bd4f4",
+      "scope": "Only 2025-12-31; no other date approved"
+    },
+    {
+      "unit_proof": {
+        "symbol": "EQIX",
+        "date": "2025-12-31",
+        "independent_close": "766.16",
+        "fund_row": {
+          "page": 11,
+          "name": "Equinix, Inc",
+          "shares": 1276541,
+          "reported_usd_value": 978034653
+        },
+        "implied_price": "766.1600003446814477560846068",
+        "unit_interval_low": "766.1599995613145210377105005",
+        "unit_interval_high": "766.1600011280483744744587130",
+        "usd_value_difference": "0.44",
+        "independent_cache_sha256": "fe919179ba59ddece4c2e47a99027b354becbbefd1fa0d783e75964a9baf3305"
+      },
+      "fund_url": "https://www.ishares.com/us/literature/third-quarter-report/tqr-ishares-trust-equity-jpm-12-31.pdf",
+      "fund_sha256": "be504252b271284ab1d56705cf5e390f4e863811a3adc94d732a24e40b62e0fd",
+      "primary_url": "https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=105.EQIX&klt=101&fqt=0&beg=20250101&end=20251231&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61",
+      "primary_cache_sha256": "05ac925ef13325954e382876786c985df8f0f0070ee075fa67ae912bc96270cd",
+      "return_pairs": 191,
+      "median_log_deviation": 2.4530693198894887e-07,
+      "p90_log_deviation": 0.00536888253929425,
+      "selected_history_sha256": "0f0358293d34f0ded6abe7b5b6ffcadec72d9e293a76e8163da7544afef91c14",
       "scope": "Only 2025-12-31; no other date approved"
     }
   ],

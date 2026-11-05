@@ -14,7 +14,23 @@ SOURCE = 'https://www.ishares.com/us/literature/third-quarter-report/tqr-ishares
 PDF_SHA = 'be504252b271284ab1d56705cf5e390f4e863811a3adc94d732a24e40b62e0fd'
 FUND = 'iShares® Core S&P 500 ETF'
 REVIEWED_NAMES = {'ABNB': 'Airbnb, Inc., Class A(a)(b)',
-                  'CRWD': 'Crowdstrike Holdings, Inc., Class A(a)(b)'}
+                  'CRWD': 'Crowdstrike Holdings, Inc., Class A(a)(b)',
+                  'AMT': 'American Tower Corp',
+                  'CCI': 'Crown Castle, Inc',
+                  'DE': 'Deere & Co',
+                  'DIS': 'Walt Disney Co. (The)',
+                  'BLDR': 'Builders FirstSource, Inc.(a)(b)', 'CB': 'Chubb Ltd',
+                  'DLR': 'Digital Realty Trust, Inc', 'DOV': 'Dover Corp',
+                  'DTE': 'DTE Energy Co', 'DUK': 'Duke Energy Corp',
+                  'DVN': 'Devon Energy Corp', 'EBAY': 'eBay, Inc',
+                  'ECL': 'Ecolab, Inc', 'ED': 'Consolidated Edison, Inc',
+                  'EFX': 'Equifax, Inc', 'EIX': 'Edison International',
+                  'EMR': 'Emerson Electric Co', 'EOG': 'EOG Resources, Inc',
+                  'EQIX': 'Equinix, Inc'}
+REVIEWED_MARKETS = {'ABNB': 105, 'CRWD': 105, 'AMT': 106, 'CCI': 106, 'DE': 106, 'DIS': 106,
+                    'BLDR': 106, 'CB': 106, 'DLR': 106, 'DOV': 106, 'DTE': 106, 'DUK': 106,
+                    'DVN': 106, 'EBAY': 105, 'ECL': 106, 'ED': 106, 'EFX': 106, 'EIX': 106,
+                    'EMR': 106, 'EOG': 106, 'EQIX': 105}
 
 
 def check_csv_date(content, expected):

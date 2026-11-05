@@ -24,6 +24,7 @@ def review_symbol(cursor, unit, source):
     symbol = unit['symbol']
     if symbol not in fund.REVIEWED_NAMES or unit['fund_row']['name'] != fund.REVIEWED_NAMES[symbol]:
         raise ValueError('Unreviewed security/share class')
+    market = fund.REVIEWED_MARKETS[symbol]
     if unit['date'] != '2025-12-31' or source['report_date'] != unit['date']:
         raise ValueError('Unit evidence date differs')
     if source['source_sha256'] != fund.PDF_SHA or source['source_url'] != fund.SOURCE:
@@ -34,11 +35,11 @@ def review_symbol(cursor, unit, source):
     raw = path.read_bytes(); record = json.loads(raw)
     url = urlparse(record['source_url']); params = parse_qs(url.query)
     if (url.scheme != 'https' or url.netloc != 'push2his.eastmoney.com'
-            or params.get('secid') != ['105.'+symbol] or params.get('fqt') != ['0']
+            or params.get('secid') != [str(market)+'.'+symbol] or params.get('fqt') != ['0']
             or params.get('klt') != ['101'] or record.get('mode') != 'fqt=0'
-            or record.get('secid') != '105.'+symbol or record['payload'].get('rc') != 0):
+            or record.get('secid') != str(market)+'.'+symbol or record['payload'].get('rc') != 0):
         raise ValueError('Primary request identity differs')
-    verify_exact_close(record['payload']['data'], {'symbol':symbol,'date':unit['date'],'close':close}, 105)
+    verify_exact_close(record['payload']['data'], {'symbol':symbol,'date':unit['date'],'close':close}, market)
     path = BASE/'output/_nominal_daily'/(symbol+'.json')
     independent_raw = path.read_bytes(); independent = json.loads(independent_raw)
     if hashlib.sha256(independent_raw).hexdigest() != unit['independent_cache_sha256']:
@@ -101,6 +102,9 @@ def run(write=False):
             proofs = [review_symbol(cursor, unit, source) for unit in source['reviewed_unit_proofs']]
             inserted = 0
             if write:
+                reviewed = json.loads((BASE/'output/fund_nominal_fact_review.json').read_text())
+                if reviewed.get('write') is not False or digest(reviewed.get('proofs')) != digest(proofs):
+                    raise RuntimeError('Closing-fact batch differs from prior read-only review')
                 for proof in proofs:
                     symbol = proof['unit_proof']['symbol']; close = proof['unit_proof']['independent_close']; sha = digest(proof)
                     cursor.execute("""insert into nominal_monthly

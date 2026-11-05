@@ -9,15 +9,31 @@ from research import import_fund_nominal_facts as facts
 
 
 class FundFactTests(unittest.TestCase):
+    def test_changed_review_batch_cannot_write_closing_facts(self):
+        connection=MagicMock();cursor=connection.cursor.return_value.__enter__.return_value
+        cursor.fetchall.side_effect=[[], [], []]
+        cursor.fetchone.return_value=('yahoo_relay','total_return',False)
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);(root/'output').mkdir()
+            (root/'output/fund_nominal_fact_review.json').write_text(json.dumps({'write':False,'proofs':[{'old':True}]}))
+            with patch.object(facts,'BASE',root), \
+                 patch.object(facts.db_sources,'db',return_value=connection), \
+                 patch.object(facts.fund,'REVIEWED_NAMES',{'ABNB':'Airbnb'}), \
+                 patch.object(facts.fund,'run',return_value={'reviewed_unit_proofs':[{}]}), \
+                 patch.object(facts,'review_symbol',return_value={'new':True}):
+                with self.assertRaisesRegex(RuntimeError,'differs from prior'):
+                    facts.run(write=True)
+        self.assertTrue(all(call.args[0].lstrip().startswith('select') for call in cursor.execute.call_args_list))
+
     def test_accepted_batch_skips_pdf_processing_and_all_writes(self):
         connection=MagicMock();cursor=connection.cursor.return_value.__enter__.return_value
-        cursor.fetchall.side_effect=[ [('eastmoney_native',135.72,'accepted')],
-                                     [('eastmoney_native',468.76,'accepted')] ]
+        cursor.fetchall.side_effect=[ [('eastmoney_native',100,'accepted')]
+                                     for _ in facts.fund.REVIEWED_NAMES ]
         with patch.object(facts.db_sources,'db',return_value=connection), \
              patch.object(facts.fund,'run') as review:
             facts.run(write=True)
         review.assert_not_called()
-        self.assertEqual(cursor.execute.call_count,2)
+        self.assertEqual(cursor.execute.call_count,len(facts.fund.REVIEWED_NAMES))
         self.assertTrue(all(call.args[0].startswith('select') for call in cursor.execute.call_args_list))
 
     def test_wrong_date_or_company_class_rejected_without_prices(self):

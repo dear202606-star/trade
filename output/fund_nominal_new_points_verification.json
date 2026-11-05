@@ -1,0 +1,202 @@
+{
+  "checked_at": "2026-11-05T07:56:19.451746+00:00",
+  "points": [
+    {
+      "symbol": "AMT",
+      "date": "2025-12-31",
+      "close": "175.57",
+      "evidence_sha256": "3dc910bc12a453ea0cbac550818b8edfe4ce7fff6d08532168595738cca59fcf",
+      "return_pairs": 191
+    },
+    {
+      "symbol": "BLDR",
+      "date": "2025-12-31",
+      "close": "102.89",
+      "evidence_sha256": "b285f6b4e6bfccfba76b8013513c819108f5fa6930866a839f1edf71d59e00dc",
+      "return_pairs": 53
+    },
+    {
+      "symbol": "CB",
+      "date": "2025-12-31",
+      "close": "312.12",
+      "evidence_sha256": "2e1aecc3f14bdab44ea2336ce2591bbba5a0221336a8dbae9cdfb59608c4727d",
+      "return_pairs": 191
+    },
+    {
+      "symbol": "CCI",
+      "date": "2025-12-31",
+      "close": "88.87",
+      "evidence_sha256": "87167a6f91b96f9b5507075325113beb9c5fb97bcfc72a7226323d6c9c6517a0",
+      "return_pairs": 191
+    },
+    {
+      "symbol": "DE",
+      "date": "2025-12-31",
+      "close": "465.57",
+      "evidence_sha256": "a4eb11396414c36adccd72094185be0eabc25dd2fe00e8a1151c401288f7dbca",
+      "return_pairs": 191
+    },
+    {
+      "symbol": "DIS",
+      "date": "2025-12-31",
+      "close": "113.77",
+      "evidence_sha256": "a5c60f2704b2aaff3e79eecd056890b201aaefdf8ef19c618f96af42596ba1e5",
+      "return_pairs": 191
+    },
+    {
+      "symbol": "DLR",
+      "date": "2025-12-31",
+      "close": "154.71",
+      "evidence_sha256": "b9c6e97a51b3ae3fee8c3c8e23104fbe02cb945e2e7f7621fc65bead88c1a613",
+      "return_pairs": 191
+    },
+    {
+      "symbol": "DOV",
+      "date": "2025-12-31",
+      "close": "195.24",
+      "evidence_sha256": "321a88e3dde63c5d261f9772da550b868e98963fe3e14eea63717ca7901d1dea",
+      "return_pairs": 191
+    },
+    {
+      "symbol": "DTE",
+      "date": "2025-12-31",
+      "close": "128.98",
+      "evidence_sha256": "aa4074921c64af6f8a701e4951b2b46f967c9f7ae9574cb722aeb0573440e62f",
+      "return_pairs": 191
+    },
+    {
+      "symbol": "DUK",
+      "date": "2025-12-31",
+      "close": "117.21",
+      "evidence_sha256": "495cdb12fb3c83b7ed72e1e0151429e63fcdbfa311238a69dc7f6f9fcf296976",
+      "return_pairs": 191
+    },
+    {
+      "symbol": "DVN",
+      "date": "2025-12-31",
+      "close": "36.63",
+      "evidence_sha256": "175f9cedb677194799f6f6264845a4cc42e7e757f7d141895f58a22403cba8e8",
+      "return_pairs": 191
+    },
+    {
+      "symbol": "EBAY",
+      "date": "2025-12-31",
+      "close": "87.10",
+      "evidence_sha256": "cbb7f87b35fd7bb82bf127630f294e26ce9ec7806642fe9afb87ee9c1cb18d81",
+      "return_pairs": 191
+    },
+    {
+      "symbol": "ECL",
+      "date": "2025-12-31",
+      "close": "262.52",
+      "evidence_sha256": "faa6df1ffb496f9fc7939a7a6cc8a31ceefe54284c6a27a438638027dc459793",
+      "return_pairs": 191
+    },
+    {
+      "symbol": "ED",
+      "date": "2025-12-31",
+      "close": "99.32",
+      "evidence_sha256": "e842553b873d15f0546a67a409e78134e43f91ac40e8b5f2f272590c1f61e90e",
+      "return_pairs": 191
+    },
+    {
+      "symbol": "EFX",
+      "date": "2025-12-31",
+      "close": "216.98",
+      "evidence_sha256": "f3021bebf47aac12ff373b17c31432ff63a59c779bb4a75a721faa13fa2cc03a",
+      "return_pairs": 191
+    },
+    {
+      "symbol": "EIX",
+      "date": "2025-12-31",
+      "close": "60.02",
+      "evidence_sha256": "1b17c2f6e08a4f5039d34d496c3602051123fc82eb418e50ec95b058b345f40f",
+      "return_pairs": 191
+    },
+    {
+      "symbol": "EMR",
+      "date": "2025-12-31",
+      "close": "132.72",
+      "evidence_sha256": "94a429f2a289d5c6035e96631268252d6d81907e11ef6bd1b8b8cf9470858f72",
+      "return_pairs": 191
+    },
+    {
+      "symbol": "EOG",
+      "date": "2025-12-31",
+      "close": "105.01",
+      "evidence_sha256": "bf2e78b4197d6ce2bc86bca86c185b41dbaa6ec59477f30238a2581d1cab3e62",
+      "return_pairs": 191
+    },
+    {
+      "symbol": "EQIX",
+      "date": "2025-12-31",
+      "close": "766.16",
+      "evidence_sha256": "d724b19a9d94fe6925756cfdcc4e49ca59688c913460e19f3f093adbf9c63da6",
+      "return_pairs": 191
+    }
+  ],
+  "immutable_guard_probes": [
+    "AMT:update_point:rejected",
+    "AMT:delete_point:rejected",
+    "AMT:delete_evidence:rejected",
+    "BLDR:update_point:rejected",
+    "BLDR:delete_point:rejected",
+    "BLDR:delete_evidence:rejected",
+    "CB:update_point:rejected",
+    "CB:delete_point:rejected",
+    "CB:delete_evidence:rejected",
+    "CCI:update_point:rejected",
+    "CCI:delete_point:rejected",
+    "CCI:delete_evidence:rejected",
+    "DE:update_point:rejected",
+    "DE:delete_point:rejected",
+    "DE:delete_evidence:rejected",
+    "DIS:update_point:rejected",
+    "DIS:delete_point:rejected",
+    "DIS:delete_evidence:rejected",
+    "DLR:update_point:rejected",
+    "DLR:delete_point:rejected",
+    "DLR:delete_evidence:rejected",
+    "DOV:update_point:rejected",
+    "DOV:delete_point:rejected",
+    "DOV:delete_evidence:rejected",
+    "DTE:update_point:rejected",
+    "DTE:delete_point:rejected",
+    "DTE:delete_evidence:rejected",
+    "DUK:update_point:rejected",
+    "DUK:delete_point:rejected",
+    "DUK:delete_evidence:rejected",
+    "DVN:update_point:rejected",
+    "DVN:delete_point:rejected",
+    "DVN:delete_evidence:rejected",
+    "EBAY:update_point:rejected",
+    "EBAY:delete_point:rejected",
+    "EBAY:delete_evidence:rejected",
+    "ECL:update_point:rejected",
+    "ECL:delete_point:rejected",
+    "ECL:delete_evidence:rejected",
+    "ED:update_point:rejected",
+    "ED:delete_point:rejected",
+    "ED:delete_evidence:rejected",
+    "EFX:update_point:rejected",
+    "EFX:delete_point:rejected",
+    "EFX:delete_evidence:rejected",
+    "EIX:update_point:rejected",
+    "EIX:delete_point:rejected",
+    "EIX:delete_evidence:rejected",
+    "EMR:update_point:rejected",
+    "EMR:delete_point:rejected",
+    "EMR:delete_evidence:rejected",
+    "EOG:update_point:rejected",
+    "EOG:delete_point:rejected",
+    "EOG:delete_evidence:rejected",
+    "EQIX:update_point:rejected",
+    "EQIX:delete_point:rejected",
+    "EQIX:delete_evidence:rejected"
+  ],
+  "all_probes_rolled_back": true,
+  "public_and_direct_equal": true,
+  "selected_return_history_hashes_unchanged": true,
+  "external_collection_requests": 0,
+  "scope": "Nineteen new exact closing facts; not full strategy acceptance"
+}
