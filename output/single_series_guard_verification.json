@@ -1,0 +1,11 @@
+{
+  "SUN_former_unguarded_rows": 170,
+  "SUN_guarded_single_symbol_rows": 0,
+  "SUN_original_price_rows": 317,
+  "SUN_original_lock_rows": 2,
+  "control_symbol": "AAPL",
+  "control_rows": 202,
+  "control_matches_guarded_view": true,
+  "read_only": true,
+  "full_history_accepted": false
+}
