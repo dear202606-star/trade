@@ -5,12 +5,13 @@ import json
 from concurrent.futures import ThreadPoolExecutor,as_completed
 from pathlib import Path
 
+import requests
 from psycopg2.extras import Json,execute_values
 
 import db_ref
 import db_sources
 import live_quotes
-from live_strategy import fetch_daily,sha,close_enough
+from live_strategy import fetch_daily,fetch_daily_yahoo,sha,close_enough
 
 
 def normalized(body):
@@ -73,7 +74,17 @@ def prepare(path=None):
                 old=previous[0]
                 if sha(old)!=previous[1]:raise ValueError('Previous ranking context hash mismatch')
                 begin=q['previous_session'] if old['source_end']==session else old['source_end']
-            data=fetch_daily(provider_symbol,market,begin,session)
+            # 2026-11-06：东方财富对 CI 出口 IP 间歇断连，增加 Yahoo 日线兜底。
+            # 只在「网络故障」与「目录身份不匹配」两类错误时切换；schema/空数据
+            # 等数据性错误仍然 fail-closed，防止用兜底掩盖真实源损坏。
+            try:
+                data=fetch_daily(provider_symbol,market,begin,session)
+                data['provider']='eastmoney'
+            except (requests.RequestException,ValueError) as exc:
+                if isinstance(exc,ValueError) and 'Daily source identity mismatch' not in str(exc):
+                    raise
+                data=fetch_daily_yahoo(provider_symbol,begin,session)
+                data['fallback_reason']=str(exc)[:120]
             quote=q['quotes'].get(symbol)
             if quote:
                 previous_session=q['previous_session']

@@ -18,6 +18,14 @@ import market_calendar
 
 SITE='https://dear202606-star.github.io/trade/data/'
 API='https://push2his.eastmoney.com/api/qt/stock/kline/get'
+YAHOO_TPL='https://query1.finance.yahoo.com/v8/finance/chart/%s'
+# 东方财富对 CI 出口 IP 间歇断连时的备用通道（与 yahoo_fetch 同策略，日线粒度）
+YAHOO_CHANNELS=(
+    ('direct',YAHOO_TPL),
+    ('translate','https://query1-finance-yahoo-com.translate.goog/v8/finance/chart/%s'),
+    ('codetabs','https://api.codetabs.com/v1/proxy?quest=https://query1.finance.yahoo.com/v8/finance/chart/%s'),
+    ('allorigins','https://api.allorigins.win/raw?url=https://query1.finance.yahoo.com/v8/finance/chart/%s'),
+)
 
 
 def sha(value):
@@ -71,6 +79,55 @@ def fetch_daily(symbol,market,start,end):
         evidence[str(adjustment)]={'url':response.url,'payload':body}
     if set(series[0])!=set(series[1]):raise ValueError('Adjusted/raw source dates differ')
     return {'raw':series[0],'adjusted':series[1],'evidence':evidence}
+
+
+def parse_daily_yahoo(payload,symbol,start,end):
+    """Yahoo chart 日线解析：身份回显校验 + raw/adjclose 同构。"""
+    result=(payload.get('chart') or {}).get('result') or []
+    if len(result)!=1:raise ValueError('Yahoo source identity mismatch: '+symbol)
+    data=result[0]
+    if (data.get('meta') or {}).get('symbol','').upper()!=symbol.upper():
+        raise ValueError('Yahoo source identity mismatch: '+symbol)
+    ts=data.get('timestamp') or []
+    quote=((data.get('indicators') or {}).get('quote') or [{}])[0]
+    adj=(((data.get('indicators') or {}).get('adjclose') or [{}])[0].get('adjclose')) or []
+    close=quote.get('close') or []
+    if not ts or not close or len(ts)!=len(close) or (adj and len(adj)!=len(ts)):
+        raise ValueError('Unexpected Yahoo daily schema: '+symbol)
+    raw={};adjusted={}
+    for i,stamp in enumerate(ts):
+        day=dt.datetime.fromtimestamp(stamp,dt.timezone.utc).date().isoformat()
+        if not start<=day<=end:raise ValueError('Yahoo source dates outside requested window: '+symbol)
+        c=close[i];a=adj[i] if i<len(adj) else None
+        if c is None or a is None:continue        # 停牌日两端都必须缺，最后统一校验
+        raw[day]=positive(float(c));adjusted[day]=positive(float(a))
+    if not raw or set(raw)!=set(adjusted):raise ValueError('Empty or divergent Yahoo daily source: '+symbol)
+    return raw,adjusted
+
+
+def fetch_daily_yahoo(symbol,start,end):
+    """东方财富不可达时的备用日线通路（raw+adjusted，含证据）。"""
+    yahoo_symbol=symbol.replace('.','-')       # BRK.B → BRK-B
+    period1=int(dt.datetime.fromisoformat(start+'T00:00:00+00:00').timestamp())-86400
+    period2=int(dt.datetime.fromisoformat(end+'T00:00:00+00:00').timestamp())+86400*2
+    tail='?period1=%d&period2=%d&interval=1d&events=div%%2Csplits&includeAdjustedClose=true'%(period1,period2)
+    last_error=None
+    for attempt in range(4):
+        name,tpl=YAHOO_CHANNELS[attempt%len(YAHOO_CHANNELS)]
+        if name=='translate':url=(tpl%yahoo_symbol)+tail+'&_x_tr_sl=en&_x_tr_tl=zh-CN&_x_tr_hl=en'
+        elif name in ('codetabs','allorigins'):
+            import urllib.parse
+            url=(tpl%yahoo_symbol)+urllib.parse.quote(tail,safe='')
+        else:url=(tpl%yahoo_symbol)+tail
+        try:
+            response=requests.get(url,headers={'User-Agent':'Mozilla/5.0'},timeout=35)
+            response.raise_for_status()
+            raw,adjusted=parse_daily_yahoo(response.json(),symbol,start,end)
+            return {'raw':raw,'adjusted':adjusted,'provider':'yahoo',
+                    'evidence':{'yahoo':{'url':response.url,'payload':response.json()}}}
+        except requests.RequestException as exc:
+            last_error=exc;time.sleep(attempt+1)
+    raise RuntimeError('Yahoo daily source unreachable after channel rotation: %s (%s)'%(symbol,last_error))
 
 
 def provider_markets(symbols):
