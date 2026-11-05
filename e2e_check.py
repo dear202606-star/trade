@@ -117,10 +117,12 @@ def page(path, must, forbid=("加载中…", "尚未生成", "渲染失败")):
 
 
 def _cloud():
-    """Pages 上唯一保留的引导文件。"""
+    """Pages 上唯一保留的引导文件。统一走 get() 助手（带缓存穿透与编码处理）。"""
     try:
-        response = requests.get(BASE+'data/cloud.json',headers=H,timeout=20)
-        response.raise_for_status(); cfg=response.json()
+        status, text = get('data/cloud.json')
+        if status != 200:
+            raise ValueError('HTTP %s' % status)
+        cfg = json.loads(text)
         if not cfg.get('url') or not cfg.get('key'):raise ValueError('invalid cloud config')
         return cfg
     except Exception as exc:
