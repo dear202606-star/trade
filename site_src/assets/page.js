@@ -163,9 +163,7 @@
     if (!bar) {
       bar = document.createElement("div");
       bar.id = "freshBanner";
-      bar.style.cssText = "position:sticky;top:0;z-index:99;background:rgba(255,90,95,.16);" +
-        "border-bottom:1px solid rgba(255,90,95,.4);color:#FFB3B6;font-size:12.5px;" +
-        "padding:8px 16px;text-align:center";
+      bar.className = "data-alert";
       document.body.insertBefore(bar, document.body.firstChild);
     }
     bar.textContent = "⚠ 行情更新超时";
@@ -199,6 +197,16 @@
   function drawAllChart() {
     var box = $("allChart");
     if (!box) return;
+    var note = $("curveNote");
+    if (note) {
+      if (CV && CV.degraded) {
+        note.textContent = "曲线月内点含 " + (CV.synthetic_months || "部分") +
+          " 个线性插值点，仅年末点对应真实复利；回撤与波动率不宜据此解读";
+        note.hidden = false;
+      } else {
+        note.hidden = true;
+      }
+    }
     if (!CV || !CV.points || CV.points.length < 4) { box.innerHTML = ""; return; }
     try {
       var wpx = Math.max(300, Math.round(box.clientWidth));
@@ -506,9 +514,7 @@
     if (!b) {
       b = document.createElement("div");
       b.id = "freshBanner";
-      b.style.cssText = "position:sticky;top:0;z-index:99;background:rgba(255,90,95,.16);" +
-        "border-bottom:1px solid rgba(255,90,95,.4);color:#FFB3B6;font-size:12.5px;" +
-        "padding:9px 16px;text-align:center;backdrop-filter:blur(8px)";
+      b.className = "data-alert";
       document.body.insertBefore(b, document.body.firstChild);
     }
     b.textContent = "⚠ 数据加载失败，已隐藏操作建议";

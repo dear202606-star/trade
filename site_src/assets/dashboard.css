@@ -29,3 +29,16 @@
   .history>.row-split{flex-wrap:wrap;gap:0}
   .history>.row-split>.sub{margin-top:8px}
 }
+
+/* 2026-11-05：异常态告警条由旧深色主题内联样式收敛为设计 token。
+   旧值 #FFB3B6 / rgba(255,90,95,.16) 在暖白底上对比度仅 1.33:1；
+   新值 8.02:1，满足 WCAG AA 正文 4.5:1。 */
+:root{--alert-fg:#8a1f1a;--alert-bg:#fdeceb;--alert-border:#e9b3ae}
+.data-alert{position:sticky;top:0;z-index:99;background:var(--alert-bg);
+  border-bottom:1px solid var(--alert-border);color:var(--alert-fg);
+  font-size:12.5px;font-weight:600;padding:9px 16px;text-align:center;
+  backdrop-filter:blur(8px)}
+@media(max-width:760px){.data-alert{font-size:12px;padding:10px 14px}}
+.curve-note{margin:10px 0 0;padding:8px 12px;border-radius:8px;
+  background:#fff7e8;border:1px solid #f0dcae;color:#7a5a1e;font-size:11px;line-height:1.7}
+.curve-note[hidden]{display:none}

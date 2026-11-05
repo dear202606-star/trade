@@ -242,8 +242,10 @@ def main():
     if os.path.exists(_hp):
         try:
             hist_prev = json.load(open(_hp, encoding="utf-8"))
-        except Exception:
-            hist_prev = []
+        except Exception as e:
+            print("FATAL: 信号历史不可读，禁止以空历史继续（随后会覆盖写回）：%s" % e,
+                  file=sys.stderr)
+            sys.exit(1)
     if (hist_prev and hist_prev[0].get("month") == this_month
             and hist_prev[0].get("picks") and hist_prev[0].get("official")
             and "--rerank" not in sys.argv):
@@ -351,8 +353,9 @@ def main():
                 if _r.get("official_month") == official_month and _r.get("official"):
                     locked = _r["official"]
                     break
-    except Exception:
-        locked = None
+    except Exception as e:
+        print("FATAL: 年度锁定记录不可读，禁止降级为重算：%s" % e, file=sys.stderr)
+        sys.exit(1)
 
     if locked:
         class _P(dict):
@@ -367,8 +370,12 @@ def main():
         print(f"      正式持仓已锁定（{official_month}），沿用不重算", flush=True)
     else:
         q_off, _ = ranking_at(data, months, sp, official_month)
-        if q_off is None:                   # 数据不足时退回当月
-            q_off, official_month = q_now, latest
+        if q_off is None:
+            # 数据不足时绝不退回当月：那会把「上一年 12 月锁定」悄悄改成
+            # 「本月锁定」，直接改变全年持仓基准。
+            print("FATAL: %s 排名数据不足，禁止退回当月重算年度锁定" % official_month,
+                  file=sys.stderr)
+            sys.exit(1)
         official = select_holdings(q_off)
 
     preview = select_holdings(q_now)
@@ -472,8 +479,10 @@ def main():
     if os.path.exists(hist_path):
         try:
             hist = json.load(open(hist_path, encoding="utf-8"))
-        except Exception:
-            hist = []
+        except Exception as e:
+            print("FATAL: 信号历史不可读，禁止以空历史覆盖写回：%s" % e,
+                  file=sys.stderr)
+            sys.exit(1)
     prev = next((h for h in hist if h.get("month") != latest), hist[0] if hist else None)
     if prev is None:
         rec["change"] = "首次生成"

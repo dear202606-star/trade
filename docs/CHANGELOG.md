@@ -1,5 +1,34 @@
 # 变更日志
 
+## v6.3 ｜ 2026-11-05 ｜ 全链路审查修复（不改动策略参数与历史业绩）
+
+**安全**
+- 移除 `docs/CHANGELOG.md` 中的第三方 API 明文凭据；`output/_legacy_backup/` 8 个数据库迁移前快照移出版本控制并加入 `.gitignore`（凭据字段在工作区已脱敏）。**仍需轮换凭据并 purge git 历史**，见文末交接说明。
+- `docs/` 是 Pages 发布根目录，`monthly-pick.yml` 现在会在上传前剔除所有 `*.md`，避免内部文档被公网读取。
+- `site_build.py` 删除「回退读取私密 `output/_supabase.json`」分支，只认 `site_src/cloud.json` 且校验必须是 publishable key。
+- `selftest.py` 新增产物凭据扫描，明文凭据进 Pages 产物即失败。
+
+**数据可信度（统一 fail-closed）**
+- 历史锁定：`monthly_pick.py` / `strategy_history.py` 的信号历史、年度锁定、冻结选股快照读失败一律非零退出，不再以空列表继续并覆盖写回；`q_off` 数据不足不再退回当月重算年度基准。
+- 年度结转：`carry_over` 不再被 `--refresh` 覆盖，新年份会写回冻结快照，历史年份仍沿用冻结结果。
+- 漂移闸门：`variant_b.py` 基线读取失败返回阻断项、移除 `BASELINE_MODE=observe` 豁免；`selftest.py` 同步移除豁免。
+- 自检：新增 `strict_fail()`，14 处「校验本身抛异常」由警告改为失败（本地可用 `SELFTEST_ALLOW_WARN=1` 显式降级并留痕）。
+- CI：`data-check.yml` 质量门禁不再 `continue-on-error`、报告提交改 `if: success()`；`collect-full.yml` 四处校验改为阻断式。
+
+**构建与产物**
+- 修复 `site_build.py` 缩进缺陷：`docs/data/history.json` 与 `docs/signals.html` 不再被误放进 `except`，正常构建必定产出。
+- 新增产物契约自检：页面与 8 份关键 JSON 必须存在、可解析、非空。
+- 资产哈希只覆盖页面真正引用的 3 个资源，死 CSS 不再触发全站缓存失效。
+- 插值净值显式标记：曲线写入 `degraded` / `synthetic_months` / `curve_note`，页面在历史曲线下展示说明（年末点仍为真实复利，历史业绩数字未变）。
+- `selftest.py` 的 2026 硬编码日期改为按当前年份动态生成。
+
+**界面**
+- 异常态告警条从旧深色主题内联样式收敛为设计 token（对比度 1.33:1 → **8.02:1**，满足 WCAG AA）；三处 JS 统一用 `.data-alert`。
+- 重定向空壳页与注入导航改为暖白主站配色，去掉跳转时的黑屏闪烁；导航 active 高亮修复。
+- 曲线插值说明、`.gitignore` 编码（GBK mojibake → UTF-8）、若干确定性缺陷（`datafeed.py` 缺 `import sys`、`db_prices.py` 未定义 `PRIORITY`、`equity.py` 重复键、`variant_b.py` 死代码）。
+
+**文档**：README / RUNBOOK / KNOWN_ISSUES 的自检项数、测试清单、目录结构与业绩口径统一；不再写死校验项数。
+
 ## v4.6 ｜ 2026-10-31 ｜ 默认改为全年成分
 
 - 首页默认口径改为**全年成分**（Tab 顺序也调成 B 在前）。
@@ -276,7 +305,7 @@ B3（失败静默）、G1（复权表权威性）、G3（锁无时点证明）�
 - 修复缺失行情时误用成本价导致盈亏假 0%。
 - 引入历史锁定（`history_baseline.json`），回测不再每次重算。## v6.2 ｜ 2026-10-31 ｜ 双源交叉校验与自动修补
 
-EODHD 账号可用（token 即 `[REDACTED-ROTATED]`，免费额度只返回近 13 个月）。
+EODHD 账号可用（凭据已改为环境变量注入，禁止写入文档；免费额度只返回近 13 个月）。
 
 **新增第二源校验**：`crosscheck_eodhd.py` 每日比对「当前持仓 + 次年预览前 5 名」的月度收益，
 偏差 >2% 判异常。

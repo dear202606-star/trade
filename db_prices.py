@@ -23,6 +23,10 @@ _MARKER = os.path.join(BASE, "output", ".db_unavailable")
 CACHE_FILE = os.path.join(BASE, "output", "_prices_cache.json")
 CACHE_TTL = 6 * 3600      # 派生缓存，6 小时内直接用
 
+# 同一 symbol+month 存在多源记录时的选源优先级（数值越小越优先）。
+# 2026-11-05：_load_all_legacy 引用了未定义的 PRIORITY，调用即 NameError。
+PRIORITY = {"sina": 0, "yahoo": 1, "eodhd": 2, "alphavantage": 3, "stooq": 4}
+
 
 def connect():
     global _conn, _DB_DEAD

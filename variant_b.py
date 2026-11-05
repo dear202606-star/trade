@@ -93,7 +93,8 @@ def _drift_check(years, total):
         if old.get("input_sha") and old.get("input_sha") != _input_sha():
             out.append("输入指纹: %s → %s" % (old.get("input_sha"), _input_sha()))
     except Exception as e:
-        print("⚠ 基线读取失败：%s" % e)
+        # 基线不可读不能返回空列表，否则闸门误判「无漂移」并继续写盘。
+        out.append("基线读取失败：%s（禁止放行）" % e)
     return out
 
 
@@ -361,8 +362,6 @@ def main():
     # 覆盖率闸门：新源未满 95% 前只用旧快照，避免新旧混算
     global PRICE_SOURCE
     try:
-        _need = len([f for f in os.listdir(os.path.join(BASE, "static"))
-                     if False]) or 0
         import db_ref as _ref0
         _mem0 = _ref0.load_members()
         _need = len([t for t in _mem0 if max(b for _, b in _mem0[t]) >= "2009-01-01"])
@@ -418,12 +417,12 @@ def main():
             "bench": round(bret, 4),
             "pool": pool_n,
         })
-        ret = ret
         print("  %d  %+7.2f%%  %s  （全年成分池 %d）" % (
             y, ret * 100, " / ".join(p["ticker"] for p in picks), pool_n))
 
     # 曲线（年末复利）
     eq, beq, pts = 1.0, 1.0, []
+    synthetic_months = 0   # 月内点由线性插值造出的数量（需对外标注）
     spy = load_bars("SPY") or {}
     for r in years:
         y = r["year"]
@@ -448,12 +447,14 @@ def main():
         target = 1 + r["ret"]
         last = shape[-1] if shape and shape[-1] else None
         if not last:
+            synthetic_months += 12
             shape = [1 + (target - 1) * (i + 1) / 12.0 for i in range(12)]
         else:
             shape = [((x / last) * target) if x else None for x in shape]
             # 填补空缺
             for i, x in enumerate(shape):
                 if not x:
+                    synthetic_months += 1
                     shape[i] = 1 + (target - 1) * (i + 1) / 12.0
         spy0 = spy.get(prev_ym, (None, None))[0]
         for mi, v in enumerate(shape, start=1):
@@ -517,7 +518,7 @@ def main():
         "years": years,
         "summary": {"start": years[0]["year"] if years else START_YEAR,
                     "end": end_year, "years": n,
-                    "excluded_years": _excluded if '_excluded' in dir() else [],
+                    "excluded_years": _excluded if '_excluded' in locals() else [],
                     "total": round(total, 4), "cagr": round(cagr, 4),
                     "dd": round(mdd, 4), "worst_intra": round(mdd, 4),
                     "wins": wins, "losses": n - wins,
@@ -528,11 +529,8 @@ def main():
     }
     # ---- 基线漂移闸门：写盘之前判定，命中即中止（不产出任何新文件）----
     _drift = _drift_check(years, total)
-    if _drift and os.environ.get("BASELINE_MODE") == "observe":
-        print("\n⚠ [observe] 历史漂移（迁移期不阻断，仅记录）：", flush=True)
-        for d in _drift[:10]:
-            print("   " + d, flush=True)
-        _drift = []
+    # 2026-11-05：移除 BASELINE_MODE=observe 豁免。迁移已结束，
+    # 任何历史漂移都必须在写盘前阻断；确需提升基线用 BASELINE_UPDATE=1。
     if _drift:
         print("\n✗ 口径 B 历史发生漂移（未写入任何文件）：", flush=True)
         for d in _drift[:10]:
@@ -545,7 +543,11 @@ def main():
     json.dump({"points": pts, "years": years,
                "stats": {"total": round(total, 4), "cagr": round(cagr, 4),
                          "mdd": round(mdd, 4)},
-               "variant": "B"},
+               "variant": "B",
+               "degraded": bool(synthetic_months),
+               "synthetic_months": synthetic_months,
+               "curve_note": ("月内点含线性插值，仅年末点为真实复利"
+                              if synthetic_months else "")},
               open(os.path.join(OUT, "curve.json"), "w", encoding="utf-8"), ensure_ascii=False)
 
     # 当年持仓（下一年）

@@ -18,6 +18,9 @@ on:
       - lock_stage.py
       - verify_locks.py
       - test_historical_backfill_guards.py
+      # 2026-11-05：通配兜底，新增/改动测试必定触发回归。
+      - 'test_*.py'
+      - 'test_*.mjs'
       - test_sun_quarantine.py
       - sql/119_sun_identity_quarantine.sql
       - sql/120_source_aware_nominal_fact_guards.sql

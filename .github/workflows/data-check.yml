@@ -44,11 +44,12 @@ jobs:
 
       - name: 质量门禁
         id: gate
-        continue-on-error: true
+        # 2026-11-05：原 continue-on-error 会把门禁失败吞掉，报告仍照常 push。
+        # 门禁失败必须阻断本次 job，不允许发布未通过核对的数据。
         run: python quality_gate.py
 
       - name: 提交报告
-        if: always()
+        if: success()
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

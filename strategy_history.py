@@ -259,7 +259,8 @@ def locked_ok():
         historical_lineage.require_complete_history()
         return True, "校验通过"
     except Exception as e:
-        return False, "校验异常：%s" % e
+        # 校验本身异常 ≠ 未锁定。降级为「未锁定」会触发全量重算并改写历史。
+        raise RuntimeError("历史锁定校验异常，禁止降级为重算：%s" % e) from e
 
 
 def publish_locked():
@@ -277,13 +278,15 @@ def missing_new_year():
         sh = json.load(open(os.path.join(BASE, "output", "strategy_history.json"),
                             encoding="utf-8"))
         have = {r.get("year") for r in (sh.get("years") or [])}
-    except Exception:
-        return END_YEAR
+    except Exception as e:
+        # 读不到归档状态不能当作「缺年份」，否则误触发年度结转重算。
+        raise RuntimeError("年度归档状态不可读，禁止降级为结转重算：%s" % e) from e
     return None if END_YEAR in have else END_YEAR
 
 
 def main():
     refresh = "--refresh" in sys.argv
+    carry_over = False   # 年度结转触发：需把新年份写回冻结快照
 
     # 历史已锁定 → 直接发布，秒级完成，不再拉取任何历史数据
     if not refresh:
@@ -300,7 +303,7 @@ def main():
         if ok and new_year is not None:
             print(f"年度结转：{new_year} 已结束但未归档，执行一次重算以补入该年…",
                   file=sys.stderr)
-            refresh = True
+            carry_over = True
         else:
             print(f"历史未锁定（{why}），执行一次完整重算…", file=sys.stderr)
 
@@ -338,8 +341,11 @@ def main():
             frozen = {int(k): v for k, v in (fd.get("years") or {}).items()}
             frozen_years = fd.get("generated_years") or {}
             print(f"      选股已冻结（{len(frozen)} 年，{fd.get('generated','')}）", flush=True)
-        except Exception:
-            frozen = {}
+        except Exception as e:
+            # 冻结快照读失败绝不能当作「没有冻结」——下方 if not frozen
+            # 会用新结果覆盖「回测的唯一事实来源」。
+            print("FATAL: 冻结选股快照不可读：%s" % e, file=sys.stderr)
+            return 1
 
     MONTHS.clear()
     SPYB.clear()
@@ -501,7 +507,8 @@ def main():
               f"年化 {cstats['cagr']*100:.1f}% 回撤 {cstats['mdd']*100:.1f}%")
 
     # 写入选股快照（回测的唯一事实来源，供全周期曲线复用）
-    if not frozen:
+    if not frozen or carry_over:
+        # 年度结转时，历史年份仍沿用 frozen，只把新年份补入冻结快照。
         snap = {"generated": (pd.Timestamp.utcnow() + pd.Timedelta(hours=8)).strftime("%Y-%m-%d"),
                 "note": "冻结的逐年持仓，回测与曲线均以此为准；重算用 --refresh",
                 "years": {str(r["year"]): [p["ticker"] for p in r["holdings"]] for r in years}}

@@ -63,22 +63,18 @@ jobs:
         run: python db_select.py
 
       - name: 校验入库（validations）
-        continue-on-error: true
         run: python db_validate.py
 
       - name: 历史覆盖初筛（不创建验收锁）
         run: python lock_symbols.py --check
 
       - name: 采集分红/拆股事件（让全收益可独立复算）
-        continue-on-error: true
         run: python fetch_actions.py --limit 160
 
       - name: 校验锁是否仍然有效
-        continue-on-error: true
         run: python verify_locks.py
 
       - name: 结构冒烟
-        continue-on-error: true
         run: python schema_check.py --quick
 
       - name: 汇总

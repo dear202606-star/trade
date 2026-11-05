@@ -21,6 +21,10 @@ on:
       - test_quote_repairs.py
       - watchdog_checks.py
       - test_watchdog_checks.py
+      # 2026-11-05：原白名单漏了实际会跑的 test_quote_snapshot.py /
+      # test_market_calendar.py，改这两个文件不触发任何 CI。改为通配。
+      - 'test_*.py'
+      - 'test_*.mjs'
       - .github/workflows/quotes.yml
 
 permissions:

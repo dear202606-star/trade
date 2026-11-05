@@ -76,7 +76,7 @@ python monthly_pick.py      # 信号（同月自动走增量）
 python equity.py            # 当期净值
 python strategy_history.py  # 历史（已锁定则 1 秒返回）
 python site_build.py        # 构建 docs/
-python selftest.py          # 部署前自检（78 项硬校验）
+python selftest.py          # 部署前自检（含产物契约与发布物凭据扫描）
 python simulate_rollover.py # 跨年仿真：任意日期推导全链路
 ```
 
@@ -88,9 +88,9 @@ python simulate_rollover.py # 跨年仿真：任意日期推导全链路
 |---|---|
 | 数据源 | 新浪（主）+ Yahoo（交叉核对，不可达时降级并记录） |
 | 公司与行业 | `output/splits.json`（合并写入，不被覆盖）、`static/sector_overrides.json`（退市票行业） |
-| 自检 | 78 项硬校验：无 NaN、3 只持仓、权重和 1、行业 ≤60%、曲线=逐年复利、持仓锁定一致、持仓为排名日成分股、账户=净值 |
+| 自检 | 硬门禁（项数以运行时输出为准，勿在文档写死）：无 NaN、3 只持仓、权重和 1、行业 ≤60%、曲线=逐年复利、持仓锁定一致、持仓为排名日成分股、账户=净值、**发布产物齐全**、**产物内无明文凭据** |
 | 前端 | 页面内不变量校验（市值=Σ股数×价、盈亏=市值−成本），失败即页面提示 |
-| 测试 | `ui_test.py`(34) / `e2e_check.py`(20) / `consistency_check.py`(14) / `live_audit.py`(20) |
+| 测试 | CI 实跑 22 个 `unittest` 模块 + 3 个 `node:test`（分散在 6 个工作流）；`ui_test.py` / `consistency_check.py` / `live_audit.py` 为**本地手工脚本**，未接入 CI |
 
 ## 6. 文档
 
@@ -116,8 +116,14 @@ python simulate_rollover.py # 跨年仿真：任意日期推导全链路
 ├─ 测试          ui_test.py  e2e_check.py  consistency_check.py  live_audit.py  link_check.py
 ├─ 静态资源      site_src/（html/css/js）  static/（成分表、行业覆盖）
 ├─ 产出          output/（锁定数据、报告）  docs/（站点 + 文档）
-└─ 自动化        .github/workflows/（quotes / monthly-pick / e2e / data-check）
+└─ 自动化        .github/workflows/（18 个工作流，以目录内容为准）
 ```
+
+> 根目录另有约 120 个 Python 脚本，其中 `probe_*` / `audit_*` / `verify_*` /
+> `research/stepNN_*` 多为一次性排查脚本，正式入口以上表为准。
+> 新克隆仓库不含 `docs/data/` 与 `docs/*.html`（由 CI 生成），如需本地静态预览，
+> 先跑一次 `site_build.py`，或从已发布的 Pages 站点取 `data/` 快照放入 `docs/data/`。
+> 完整数据管线需要 Supabase 凭据；只预览界面不需要。
 
 ## 8. 免责声明
 

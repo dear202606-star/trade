@@ -123,6 +123,12 @@ jobs:
       - name: 部署前自检（数据不全就不部署）
         run: python runner.py selftest.py
 
+      - name: 剔除不应发布的文档
+        # docs/ 是 Pages 发布根目录。CHANGELOG 等 md 属仓库内部文档，
+        # 曾因其中写入第三方 token 造成公网可直接读取；发布前统一剔除。
+        if: steps.pick.outcome == 'success'
+        run: find docs -type f -name '*.md' -delete
+
       - name: 上传 Pages 产物
         if: steps.pick.outcome == 'success'
         uses: actions/upload-pages-artifact@v3

@@ -111,8 +111,9 @@ def asset_version():
     """用 css/js 内容哈希做版本号，避免部署后浏览器还在用旧配色/旧脚本"""
     import hashlib
     h = hashlib.md5()
-    for f in ("assets/app.css", "assets/app.js", "assets/page.css",
-              "assets/page.js", "assets/theme.css", "assets/dashboard.css"):
+    # 2026-11-05：只对页面真正引用的资源做哈希。此前 app.css / page.css /
+    # theme.css 无任何页面引用，改动这些死文件会触发全站缓存失效。
+    for f in ("assets/dashboard.css", "assets/app.js", "assets/page.js"):
         p = os.path.join(SRC_SITE, f)
         if os.path.exists(p):
             with open(p, "rb") as fh:
@@ -134,8 +135,7 @@ def bust_cache():
         except Exception:
             continue
         new = html
-        for a in ("assets/app.css", "assets/app.js", "assets/page.css",
-                  "assets/page.js", "assets/theme.css", "assets/tabs.css", "assets/dashboard.css"):
+        for a in ("assets/dashboard.css", "assets/app.js", "assets/page.js"):
             new = re.sub(re.escape(a) + r"(\?v=[0-9a-f]+)?", a + "?v=" + v, new)
         if new != html:
             with open(p, "w", encoding="utf-8") as f:
@@ -146,13 +146,15 @@ def bust_cache():
 
 
 
-NAV_BAR = """<div style="position:sticky;top:0;z-index:50;background:#0b0f17f2;border-bottom:1px solid #232f44;">
-<div style="max-width:1180px;margin:0 auto;padding:0 22px;display:flex;align-items:center;gap:4px;height:56px;
-font-family:'Microsoft YaHei',system-ui,sans-serif;">
-<a href="index.html" style="font-weight:800;color:#e8eef8;text-decoration:none;margin-right:18px;font-size:15px;">LEADER<span style="color:#ffc857;">·</span>QUANT</a>
-<a href="index.html" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;text-decoration:none;font-size:14px;">总览</a>
-<a href="portfolio.html" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;text-decoration:none;font-size:14px;">持仓</a>
-<a href="strategy.html" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;text-decoration:none;font-size:14px;">策略</a>
+# 2026-11-05：导航条原为旧深色主题（#0b0f17 + 金色），与当前暖白主站
+# 视觉完全断裂；同时 active 高亮替换的目标字符串并不存在，从未生效。
+NAV_BAR = """<div style="position:sticky;top:0;z-index:50;background:rgba(248,251,249,.94);border-bottom:1px solid #e3ebe6;backdrop-filter:blur(18px);">
+<div style="max-width:1280px;margin:0 auto;padding:0 32px;display:flex;align-items:center;gap:4px;height:56px;
+font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;">
+<a href="index.html" style="font-weight:850;color:#193c36;text-decoration:none;margin-right:18px;font-size:15px;letter-spacing:-.4px;">LEADER<span style="color:#00977b;">·</span>QUANT</a>
+<a class="nav-link" href="index.html" style="padding:6px 12px;border-radius:9px;color:#62766b;text-decoration:none;font-size:13px;">总览</a>
+<a class="nav-link" href="portfolio.html" style="padding:6px 12px;border-radius:9px;color:#62766b;text-decoration:none;font-size:13px;">持仓</a>
+<a class="nav-link" href="strategy.html" style="padding:6px 12px;border-radius:9px;color:#62766b;text-decoration:none;font-size:13px;">策略</a>
 </div></div>"""
 
 
@@ -167,9 +169,11 @@ def inject_nav(path, active=""):
         with open(path, "w", encoding="utf-8") as f:
             nav = NAV_BAR
             if active:
-                nav = nav.replace('background:#182233;color:#ffc857;text-decoration:none;font-size:14px;font-weight:700;','color:#8fa2bd;font-weight:400;text-decoration:none;font-size:14px;padding:6px 12px;border-radius:9px;')
-                nav = nav.replace('href="%s" style="padding:6px 12px;border-radius:9px;color:#8fa2bd;' % active,
-                                  'href="%s" style="padding:6px 12px;border-radius:9px;background:#182233;color:#ffc857;font-weight:700;' % active)
+                # 高亮当前页：用主站的浅绿选中态，替换目标与 NAV_BAR 保持一致。
+                nav = nav.replace('class="nav-link" href="%s"' % active,
+                                  'class="nav-link" aria-current="page" href="%s" data-nav-active="1"' % active)
+                nav = nav.replace('data-nav-active="1" style="padding:6px 12px;border-radius:9px;color:#62766b;',
+                                  'data-nav-active="1" style="padding:6px 12px;border-radius:9px;background:#e5f5e8;color:#225b43;font-weight:650;')
             f.write(html[:j] + nav + html[j:])
     except Exception as e:
         print("WARN: 导航注入失败", e)
@@ -199,20 +203,25 @@ def main():
     os.makedirs(DATA, exist_ok=True)
     n = copy_site()
 
-    # 云同步配置：publishable key 本就是公开的，数据靠「同步码 + 客户端加密」保护
-    # 优先用随源码入库的公开配置（publishable key 可公开），其次本地私密副本
+    # 云同步配置：只发布随源码入库的 publishable key。
+    # 2026-11-05：原逻辑在 site_src/cloud.json 缺失时回退读取本地私密的
+    # output/_supabase.json，且不区分 publishable / service key，存在把高权限
+    # 凭据写进公开 docs/data/cloud.json 的风险。此处改为单一来源 + 类型校验。
     cfgp = os.path.join(BASE, "site_src", "cloud.json")
-    if not os.path.exists(cfgp):
-        cfgp = os.path.join(BASE, "output", "_supabase.json")
     if os.path.exists(cfgp):
         try:
             cfg = json.load(open(cfgp, encoding="utf-8"))
-            key = cfg.get("key") or cfg.get("publishable_key")
-            if cfg.get("url") and key:
+            key = cfg.get("key") or cfg.get("publishable_key") or ""
+            if not str(key).startswith("sb_publishable_") or "service_role" in str(key):
+                print("FATAL: cloud.json 不是 publishable key，拒绝写入公开站点")
+                raise SystemExit(1)
+            if cfg.get("url"):
                 with open(os.path.join(DATA, "cloud.json"), "w", encoding="utf-8") as f:
                     json.dump({"url": cfg["url"], "key": key}, f, ensure_ascii=False)
             else:
-                print("WARN: cloud.json 缺少 url 或 key")
+                print("WARN: cloud.json 缺少 url")
+        except SystemExit:
+            raise
         except Exception as e:
             print("WARN: 云同步配置写入失败", e)
 
@@ -265,13 +274,15 @@ def main():
     except Exception as e:
         print("WARN 健康状态生成失败：%s" % e)
 
-        with open(os.path.join(DATA, "history.json"), "w", encoding="utf-8") as f:
-            json.dump([with_validity(r) for r in hist], f, ensure_ascii=False)
+    # 以下产物与健康状态无关，必须无条件产出。
+    # 2026-11-05：原先这两段被缩进进 except 块，导致正常构建缺
+    # docs/data/history.json 与 docs/signals.html（仅在健康状态生成失败时才写）。
+    with open(os.path.join(DATA, "history.json"), "w", encoding="utf-8") as f:
+        json.dump([with_validity(r) for r in hist], f, ensure_ascii=False)
 
     # 净值为 equity.py 直接写入 docs/data/，这里无需复制
     # 数据质量明细（output/data_quality.json）仅供内部核查，不再发布到站点
-
-        dashboard.build(hist, os.path.join(DOCS, "signals.html"))
+    dashboard.build(hist, os.path.join(DOCS, "signals.html"))
     inject_nav(os.path.join(DOCS, "signals.html"), "signals.html")
 
     for fn in ("策略模型研究与行动步骤.pdf", "策略模型研究与行动步骤.xlsx"):

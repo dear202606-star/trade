@@ -255,7 +255,6 @@ def main():
             "entry": round(bp_adj, 4) if bp_adj else None,
             "entry_raw": round(bp_raw, 4) if bp_raw else None,
             "last_raw": round(px_raw, 4) if px_raw else None,
-            "entry": round(bp_adj, 4) if bp_adj else None,
             "last_date": last_day,
             "last": round(px_adj, 4) if px_adj else None,
         })

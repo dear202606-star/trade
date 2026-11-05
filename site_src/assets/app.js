@@ -938,9 +938,7 @@
         if (!h || h.status === "ok") return;
         var bar = document.createElement("div");
         bar.id = "healthBanner";
-        bar.style.cssText = "position:sticky;top:0;z-index:99;background:rgba(255,90,95,.16);" +
-          "border-bottom:1px solid rgba(255,90,95,.4);color:#FFB3B6;font-size:12.5px;" +
-          "padding:8px 16px;text-align:center";
+        bar.className = "data-alert";
         bar.textContent = "⚠ 数据异常：" + (h.issues || []).join("；") +
           (h.quotes_ts ? "（行情 " + h.quotes_ts + " UTC）" : "");
         document.body.insertBefore(bar, document.body.firstChild);

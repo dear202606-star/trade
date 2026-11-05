@@ -32,6 +32,64 @@ def check(cond, ok_msg, fail_msg, hard=True):
     return cond
 
 
+def strict_fail(msg):
+    """校验过程本身抛异常：默认按失败处理（fail-closed）。
+
+    2026-11-05：此前 14 处校验异常走 warns，使「防未来函数 / 历史基线 /
+    历史锁定一致」等关键门禁形同虚设。本地调试可显式设
+    SELFTEST_ALLOW_WARN=1 临时降级，输出会带 [DEGRADED] 留痕。
+    """
+    if os.environ.get("SELFTEST_ALLOW_WARN") == "1":
+        warns.append("[DEGRADED] " + msg)
+    else:
+        fails.append(msg)
+
+
+def check_artifacts():
+    """校验「发布出去的产物」而不只是输入（2026-11-05 新增）。
+
+    此前 selftest 只检查 output/ 与 docs/data 的输入，site_build 里
+    history.json / signals.html 的缩进缺陷因此长期未被发现。
+    """
+    for fn in ("index.html", "signals.html"):
+        p = os.path.join(DOCS, fn)
+        check(os.path.isfile(p) and os.path.getsize(p) > 200,
+              "产物 %s 存在且非空" % fn, "发布产物缺失或为空：%s" % p)
+
+    for fn in ("signal.json", "equity.json", "quotes.json", "curve.json",
+               "strategy_history.json", "history.json", "cloud.json", "health.json"):
+        p = os.path.join(DATA, fn)
+        ok = False
+        try:
+            with open(p, encoding="utf-8") as f:
+                obj = json.load(f)
+            ok = obj is not None and (not isinstance(obj, (list, dict)) or len(obj) > 0)
+        except Exception:
+            ok = False
+        check(ok, "产物 data/%s 可解析且非空" % fn,
+              "发布数据缺失或不可解析：%s" % p)
+
+    # 防止明文凭据再次随 Pages 发布（publishable key 属设计上可公开，排除）
+    secret_pat = re.compile(
+        r'"(?:key|token|password|secret|api_key|access_key)"\s*:\s*"([^"]{16,})"',
+        re.I)
+    for root, _dirs, files in os.walk(DOCS):
+        for fn in files:
+            if not fn.endswith((".html", ".json", ".js", ".css")):
+                continue
+            p = os.path.join(root, fn)
+            try:
+                txt = open(p, encoding="utf-8", errors="ignore").read()
+            except Exception:
+                continue
+            for m in secret_pat.finditer(txt):
+                v = m.group(1)
+                if v.startswith(("sb_publishable_", "http", "[REDACTED")):
+                    continue
+                fails.append("发布产物疑似含明文凭据：%s" % os.path.relpath(p, DOCS))
+                break
+
+
 def load(name):
     p = os.path.join(DATA, name)
     if not os.path.exists(p):
@@ -121,7 +179,7 @@ def main():
         check(not _bad_w, "权重形态合规（等权 / 同行业 30-30-40）",
               "异常年份：%s" % _bad_w[:3])
     except Exception as e:
-        warns.append("权重形态校验失败：%s" % e)
+        strict_fail("权重形态校验失败：%s" % e)
 
     # ================= 口径 B（全年成分）=================
     # 设计原则：结构缺失一律硬失败，绝不用 except → 警告 把整段跳过
@@ -227,7 +285,7 @@ def main():
             if not _bm:
                 # 价格已全部迁到在线库，禁止退回线下文件
                 _bm = {}
-                warns.append("在线库不可用，跳过 B 预览复算（不再读线下文件）")
+                strict_fail("在线库不可用，跳过 B 预览复算（不再读线下文件）")
             _base = _pv0.get("base_month")
             _badpv = []
             for _x in (_pv0.get("top") or []):
@@ -242,7 +300,7 @@ def main():
                         _x.get("ticker"), (_x.get("ytd") or 0) * 100, _re * 100))
             check(not _badpv, "B 预览涨幅可用复权月线复算", "不一致：%s" % _badpv)
         except Exception as _e:
-            warns.append("预览复算失败：%s" % _e)
+            strict_fail("预览复算失败：%s" % _e)
 
         _pv = _b.get("preview.json") or {}
         _top = _pv.get("top") or []
@@ -313,11 +371,9 @@ def main():
                       "缺失 %s / 多余 %s" % (
                           sorted(_cur_years - _bl_years)[:3],
                           sorted(_bl_years - _cur_years)[:3]))
+                # 2026-11-05：移除 observe 豁免，历史漂移一律阻断。
                 check(not _drift, "口径 B 历史未漂移（%d 年）" % len(_yrs),
-                      "漂移：%s" % _drift[:3]) if os.environ.get("BASELINE_MODE") != "observe" \
-                    else None
-                if _drift and os.environ.get("BASELINE_MODE") == "observe":
-                    warns.append("迁移期历史漂移（不阻断）：%s" % _drift[:3])
+                      "漂移：%s" % _drift[:3])
         except Exception as _e:
             check(False, "口径 B 基线校验可执行", str(_e)[:80])
 
@@ -348,7 +404,11 @@ def main():
     # ---- 跨年链路：任意年份都必须能自动切换 ----
     try:
         import simulate_rollover as _sim
-        _days = ["2026-10-30", "2027-01-02", "2027-12-31", "2028-01-02", "2031-01-02"]
+        # 2026-11-05：改为按当前年份动态生成，避免跨年后断言失效。
+        _y = dt.date.today().year
+        _days = ["%d-10-30" % _y, "%d-01-02" % (_y + 1),
+                 "%d-12-31" % (_y + 1), "%d-01-02" % (_y + 2),
+                 "%d-01-02" % (_y + 5)]
         _rows = [_sim.simulate(d) for d in _days]
         _bad = []
         for _r in _rows:
@@ -361,7 +421,7 @@ def main():
         check(not _bad, "跨年链路自洽（%d 个日期）" % len(_days),
               "不自洽：%s" % _bad[:3])
     except Exception as e:
-        warns.append("跨年仿真失败：%s" % e)
+        strict_fail("跨年仿真失败：%s" % e)
 
     # ---- 明年预览（年初至今前 3）----
     try:
@@ -388,7 +448,7 @@ def main():
                       "官方月 %s 与预览基准 %s 不同，却标记为已定稿" % (_sig_om, _om))
             check(_om.endswith("-12"), "预览基准月为 12 月（%s）" % _om, "基准月 %s" % _om)
     except Exception as e:
-        warns.append("预览校验失败：%s" % e)
+        strict_fail("预览校验失败：%s" % e)
 
     # ---- 年度结转：排名基准月必须符合规则，且锁与持仓一致 ----
     try:
@@ -412,7 +472,7 @@ def main():
               "当前日期在生效区间内（%s~%s）" % (_vf, _vt),
               "当前 %s 不在 %s~%s" % (_td, _vf, _vt))
     except Exception as e:
-        warns.append("年度结转校验失败：%s" % e)
+        strict_fail("年度结转校验失败：%s" % e)
 
     # ---- 健康状态与新鲜度（B3：停更必须可见）----
     try:
@@ -454,7 +514,7 @@ def main():
                       "持仓发生漂移：当前 %s / 锁定 %s" % (
                           [x["ticker"] for x in _cur], [x["ticker"] for x in _want]))
     except Exception as e:
-        warns.append("持仓锁定校验失败：%s" % e)
+        strict_fail("持仓锁定校验失败：%s" % e)
 
     # ---- 防未来函数：正式持仓必须是「排名日」的标普 500 成分股 ----
     try:
@@ -473,7 +533,7 @@ def main():
                   "正式持仓均为 %s 成分股" % om,
                   "以下持仓在 %s 时还不是成分股（未来函数）：%s" % (om, ",".join(ghosts)))
     except Exception as e:
-        warns.append("成分股时点校验失败：%s" % e)
+        strict_fail("成分股时点校验失败：%s" % e)
 
     # ---- 理论账户：加权建仓收益必须等于净值曲线 ----
     try:
@@ -492,7 +552,7 @@ def main():
             check(not bad_pos, "全部持仓有建仓价与现价",
                   "缺少建仓价/现价：" + ",".join(bad_pos))
     except Exception as e2:
-        warns.append("理论账户校验失败：%s" % e2)
+        strict_fail("理论账户校验失败：%s" % e2)
 
     # ---- 全链路一致性：行情 ↔ 持仓 ↔ 净值 ----
     qq = (q or {}).get("quotes") or {}
@@ -535,16 +595,20 @@ def main():
                 hit = mm[(mm.ticker == p["ticker"]) & (mm.start_date <= d) & (mm.end_date >= d)]
                 if not len(hit):
                     bad_hold.append("%d:%s" % (r["year"], p["ticker"]))
+        _today = dt.date.today().isoformat()
         for p in (sig or {}).get("official", []):
-            hit = mm[(mm.ticker == p["ticker"]) & (mm.start_date <= "2026-12-31") & (mm.end_date >= "2026-01-01")]
+            hit = mm[(mm.ticker == p["ticker"]) & (mm.start_date <= _today) & (mm.end_date >= _today)]
             if not len(hit):
                 bad_hold.append("当前:%s" % p["ticker"])
         check(not bad_hold, "全部持仓均为标普500 成分股",
               "存在非成分股持仓：" + ", ".join(bad_hold[:8]))
     except Exception as e:
-        warns.append("成分股校验失败：%s" % e)
+        strict_fail("成分股校验失败：%s" % e)
 
     cv = load("curve.json")
+    if cv and cv.get("degraded"):
+        warns.append("曲线含 %s 个插值月内点（年末点为真实复利），页面已标注"
+                     % cv.get("synthetic_months", "?"))
     check(cv and len(cv.get("points") or []) >= 120,
           "全周期曲线 %d 个月" % len((cv or {}).get("points") or []),
           "curve.json 缺失或过短（%s）" % os.path.join(DATA, "curve.json"))
@@ -616,7 +680,7 @@ def main():
             else:
                 warns.append("缺少历史基线（首次运行会建立）")
         except Exception as e:
-            warns.append("历史基线校验失败：%s" % e)
+            strict_fail("历史基线校验失败：%s" % e)
 
         # 6) 曲线末值必须等于逐年复利
         cv = load("curve.json")
@@ -643,7 +707,7 @@ def main():
                 check(same, "历史锁定一致（%d 年未改动）" % len(lk.get("years", [])),
                       "发布的历史与锁定版本不一致")
         except Exception as e:
-            warns.append("历史锁定校验失败：%s" % e)
+            strict_fail("历史锁定校验失败：%s" % e)
 
         # 8) 成分表与选股池
         try:
@@ -656,14 +720,17 @@ def main():
                       "成分表快照已 %.0f 天未刷新" % age)
             mt = _pd.read_csv(mp)
             mt["end_date"] = mt["end_date"].fillna("2099-12-31")
-            cur = mt[mt["end_date"] >= "2026-10-27"]
+            cur = mt[mt["end_date"] >= dt.date.today().isoformat()]
             check(len(cur) >= 480, "当前成分 %d 只" % len(cur), "当前成分不足 480 只")
         except Exception as e:
-            warns.append("成分表校验失败：%s" % e)
+            strict_fail("成分表校验失败：%s" % e)
 
         # 9) 降级标记：沿用旧数据时必须让页面看得到
         if sh.get("degraded"):
-            warns.append("本次沿用 %s 的结果（数据抓取不完整）" % sh.get("asof", "上次"))
+            strict_fail("本次沿用 %s 的结果（数据抓取不完整）" % sh.get("asof", "上次"))
+
+    # E. 产物契约：门禁必须检查真正发布出去的东西
+    check_artifacts()
 
     # 报告
     print("=== 部署前自检 ===")

@@ -3,7 +3,7 @@
 ## 1. 日常检查（1 分钟）
 
 ```bash
-python selftest.py          # 78 项门禁，必须全绿（含口径 B 专项）
+python selftest.py          # 部署前门禁，必须全绿（项数以运行时输出为准）
 ```
 
 页面看三处：
