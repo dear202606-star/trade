@@ -251,8 +251,8 @@
     box.innerHTML = (PV.top || []).map(function (r) {
       var sec = sectorOf(r.ticker, r.sector).zh;
       return '<div class="pv-row">' +
-        '<div class="pv-rank">' + (r.rank || "") + '</div>' +
-        '<div class="pv-main"><span class="tk">' + DSH.esc(r.ticker) + '</span>' +
+        '<div class="pv-main"><div class="pv-id"><span class="pv-rank">' + (r.rank || "") + '</span>' +
+          '<span class="tk">' + DSH.esc(r.ticker) + '</span></div>' +
           '<span class="sec-tag">' + DSH.esc(sec) + '</span></div>' +
         '<div class="pv-val ' + cls(r.ytd) + '">' + pct2(r.ytd, 1) + '</div>' +
         '</div>';
