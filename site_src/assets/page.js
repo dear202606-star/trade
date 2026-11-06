@@ -252,9 +252,8 @@
       var sec = sectorOf(r.ticker, r.sector).zh;
       return '<div class="pv-row">' +
         '<div class="pv-rank">' + (r.rank || "") + '</div>' +
-        '<div class="pv-main"><div class="tk">' + DSH.esc(r.ticker) + '</div>' +
-          '</div>' +
-        '<div class="pv-sec">' + DSH.esc(sec) + '</div>' +
+        '<div class="pv-main"><span class="tk">' + DSH.esc(r.ticker) + '</span>' +
+          '<span class="sec-tag">' + DSH.esc(sec) + '</span></div>' +
         '<div class="pv-val ' + cls(r.ytd) + '">' + pct2(r.ytd, 1) + '</div>' +
         '</div>';
     }).join("");
