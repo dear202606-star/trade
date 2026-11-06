@@ -160,6 +160,31 @@ def main():
     if a.verify:
         return 0 if verify() else 1
     records = collect(a.source)
+    source_root = Path(a.source)
+    artifact_keys = {p.relative_to(source_root).with_suffix("").as_posix()
+                     for p in source_root.rglob("*.json") if p.is_file()}
+    if artifact_keys <= KEEP_STATIC:
+        # 稳态（在线单源）：上一轮发布已剔除产物中的数据 JSON，本产物仅含 cloud.json。
+        # 此时唯一合法数据源是在线库——齐备则放行，不齐备才 fail-closed。
+        if not verify():
+            print("FATAL: Pages 产物已剔除静态数据，且在线库必需数据集不齐备", file=sys.stderr)
+            return 1
+        print(json.dumps({"mode": "online-only", "artifact_data_files": sorted(artifact_keys),
+                          "online_source": True}, ensure_ascii=False))
+        if a.install:
+            conn = connection()
+            try:
+                conn.autocommit = True
+                with conn.cursor() as cur:
+                    install(cur)
+            finally:
+                conn.close()
+        if a.prune:
+            removed, keep = prune_files(a.source)
+            print(json.dumps({"pruned": removed, "kept": keep}, ensure_ascii=False))
+            if keep != ["cloud.json"]:
+                raise RuntimeError("Pages 产物仍含非引导数据文件：%s" % keep)
+        return 0
     missing = sorted(set(REQUIRED) - set(records))
     if missing:
         print("FATAL: 构建产物缺少必需数据集 %s" % missing, file=sys.stderr)
