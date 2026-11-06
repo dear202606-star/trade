@@ -142,7 +142,7 @@
       var mvAdj = r.shares * liveAdj;
       var pnlAdj = mvAdj - r.cost;
       return '<div class="pr-row">' +
-        '<div><span class="tk">' + DSH.esc(r.ticker) + '</span>' +
+        '<div class="tk-cell"><span class="tk">' + DSH.esc(r.ticker) + '</span>' +
           '<span class="sec-tag" title="GICS 行业：' + DSH.esc(sectorOf(r.ticker, r.sector).raw) + '">' +
           DSH.esc(sectorOf(r.ticker, r.sector).zh) + '</span>' +
           '</div>' +
