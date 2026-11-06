@@ -103,8 +103,18 @@ def prepare(path=None):
             body={'symbol':symbol,'provider_symbol':provider_symbol,'market':market,'source_start':begin,'source_end':session,**data}
             if previous:
                 old,digest=previous;values=normalized(old)
-                if begin not in values or begin not in data['raw'] or old['raw'].get(begin)!=data['raw'][begin]:
+                if begin not in values or begin not in data['raw']:
                     raise ValueError('Incremental source cannot reconcile previous close: '+symbol)
+                # 2026-11-06：Yahoo 为 float32 精度（376.5299987792969 vs 东财
+                # 376.53），跨供应商对账必须用相对容差而非精确相等。
+                a=old['raw'][begin];b=data['raw'][begin]
+                if abs(a-b)>1e-6*max(abs(a),abs(b)):
+                    raise ValueError('Incremental source cannot reconcile previous close: '+symbol)
+                # 复权因子（adjusted/raw）在供应商切换点必须连续：容忍方法论
+                # 微差（<0.1%），拦截 gross 错配（如错标的、口径跳变）。
+                f_old=old['adjusted'][begin]/a;f_new=data['adjusted'][begin]/b
+                if abs(f_old-f_new)>0.001*max(f_old,f_new):
+                    raise ValueError('Incremental source adjustment factor discontinuity: '+symbol)
                 body['normalized']={d:values[begin]*v/data['adjusted'][begin] for d,v in data['adjusted'].items()}
                 body['base_day']=old.get('base_day',min(old['raw']))
                 body['base_raw']=old.get('base_raw',old['raw'][min(old['raw'])])
