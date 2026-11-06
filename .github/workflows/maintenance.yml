@@ -35,7 +35,7 @@ jobs:
       - name: allowlist 校验
         run: |
           case "${{ inputs.script }}" in
-            patch_provider_identity.py) ;;
+            patch_provider_identity.py|rebuild_symbol_context.py) ;;
             *) echo "脚本不在 allowlist 内：${{ inputs.script }}"; exit 1 ;;
           esac
       - name: 执行维护脚本
