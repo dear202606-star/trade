@@ -145,7 +145,7 @@
         '<div><span class="tk">' + DSH.esc(r.ticker) + '</span>' +
           '<span class="sec-tag" title="GICS 行业：' + DSH.esc(sectorOf(r.ticker, r.sector).raw) + '">' +
           DSH.esc(sectorOf(r.ticker, r.sector).zh) + '</span>' +
-          '<div class="nm">' + eraw.toFixed(2) + ' → ' + liveRaw.toFixed(2) + '</div></div>' +
+          '</div>' +
         '<div class="r">' + Math.round(r.weight * 100) + '%</div>' +
         '<div class="r">' + eraw.toFixed(2) + '</div>' +
         '<div class="r">' + liveRaw.toFixed(2) + '</div>' +
