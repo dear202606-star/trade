@@ -88,7 +88,15 @@ def prepare(path=None):
             quote=q['quotes'].get(symbol)
             if quote:
                 previous_session=q['previous_session']
-                if previous_session not in data['raw'] or not close_enough(data['raw'][previous_session],quote['pc']):
+                # 2026-11-06：除息日供应商的「昨收」是除息调整后口径（实测 SYF
+                # 2026-11-05 除息：raw 前收 76.03、前复权前收 74.69、实时 pc=74.69）。
+                # 因此 pc 允许匹配 raw 前收（普通日）或前复权前收（除息日）——
+                # 两者来自同一供应商自身的序列，均需通过 close_enough 容差。
+                prev_raw=data['raw'].get(previous_session)
+                prev_adj=data['adjusted'].get(previous_session)
+                settled=((prev_raw is not None and close_enough(prev_raw,quote['pc']))
+                         or (prev_adj is not None and close_enough(prev_adj,quote['pc'])))
+                if not settled:
                     raise ValueError('Previous close not settled; retry collection: '+symbol)
                 if phase=='close' and (session not in data['raw'] or not close_enough(data['raw'][session],quote['p'])):
                     raise ValueError('Closing bar not settled; retry collection: '+symbol)

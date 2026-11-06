@@ -108,8 +108,11 @@ def parse_daily_yahoo(payload,symbol,start,end):
 def fetch_daily_yahoo(symbol,start,end):
     """东方财富不可达时的备用日线通路（raw+adjusted，含证据）。"""
     yahoo_symbol=symbol.replace('.','-')       # BRK.B → BRK-B
-    period1=int(dt.datetime.fromisoformat(start+'T00:00:00+00:00').timestamp())-86400
-    period2=int(dt.datetime.fromisoformat(end+'T00:00:00+00:00').timestamp())+86400*2
+    # Yahoo period1/period2 均为含边界的时间戳；美股日线 bar 的时间戳在当日
+    # 13:30/14:30 UTC，因此 period1 取 start 当日零点即可精确排除窗口外 bar，
+    # period2 取 end 次日零点即可包含 end 当日 bar（已实测否则引入窗口外日期）。
+    period1=int(dt.datetime.fromisoformat(start+'T00:00:00+00:00').timestamp())
+    period2=int(dt.datetime.fromisoformat(end+'T00:00:00+00:00').timestamp())+86400
     tail='?period1=%d&period2=%d&interval=1d&events=div%%2Csplits&includeAdjustedClose=true'%(period1,period2)
     last_error=None
     for attempt in range(4):
