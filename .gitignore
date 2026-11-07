@@ -107,3 +107,11 @@ probe3.py
 
 # 运行时状态
 output/pipeline_status_run.json
+
+# 本地凭据 / 数据库连接串（绝不入库）
+# 2026-11-07：Neon 冷备连接串、Supabase 直连口令等只保留在本机。
+output/*.local.json
+output/_supabase_dbpass.txt
+output/*connection_string*
+backups/*.local.json
+backups/*.connection.json

@@ -183,6 +183,40 @@ def _runtime_state(cur) -> dict:
     return state
 
 
+def _table_ddl(cur, tables) -> str:
+    """从系统目录导出全部业务表的建表语句（列 + 类型 + NOT NULL）。
+
+    仓库 sql/ 只覆盖 12/24 张表，prices_monthly / dataset_rows /
+    nominal_monthly 等最大的表是 db_init.py 运行时创建的。仅打包 sql/
+    会让备份在换库恢复时缺表结构。这里从 pg_catalog 现取，保证
+    归档自包含；刻意不导约束/触发器/默认值/RLS，因为冷备是只读副本，
+    且 Supabase 平台对象（pg_cron/vault/net）在其它 PG 环境中不存在。
+    """
+    lines = ["-- 自动导出：全部业务表结构（由 db_backup.py 从 pg_catalog 生成）",
+             "-- 不含约束 / 触发器 / RLS / 默认值；冷备只读副本使用。", ""]
+    for table in tables:
+        q = 'public."%s"' % table.replace('"', '""')
+        try:
+            cur.execute("""select a.attname, format_type(a.atttypid, a.atttypmod),
+                                  a.attnotnull
+                           from pg_attribute a
+                           where a.attrelid = %s::regclass
+                             and a.attnum > 0 and not a.attisdropped
+                           order by a.attnum""", (q,))
+            cols = cur.fetchall()
+        except Exception as exc:
+            lines.append("-- %s 结构读取失败：%s" % (table, str(exc)[:100]))
+            continue
+        if not cols:
+            continue
+        body = ",\n  ".join(
+            '"%s" %s%s' % (name.replace('"', '""'), typ,
+                           " not null" if notnull else "")
+            for name, typ, notnull in cols)
+        lines.append('create table if not exists %s (\n  %s\n);\n' % (q, body))
+    return "\n".join(lines) + "\n"
+
+
 def _fingerprints(cur, tables):
     """在库内计算轻量指纹，只回传 (行数, 哈希和)，不传任何表数据。
 
@@ -259,6 +293,7 @@ def build(previous=None) -> dict:
         with conn.cursor() as cur:
             cur.execute("set statement_timeout = '300s'")
             tables = _tables(cur)
+            table_ddl = _table_ddl(cur, tables)
             fingerprints = _fingerprints(cur, tables)
             schema_sql = _schema_sql(cur)
             runtime = _runtime_state(cur)
@@ -282,8 +317,8 @@ def build(previous=None) -> dict:
           % (len(fetched), fetched_rows, len(reused),
              "有基线" if prev_payload else "首次全量"), file=sys.stderr, flush=True)
     return {"tables": tables, "schema_sql": schema_sql, "runtime": runtime,
-            "ddl_files": _ddl_files(), "payload": payload,
-            "table_fingerprints": fingerprints,
+            "ddl_files": _ddl_files(), "table_ddl": table_ddl,
+            "payload": payload, "table_fingerprints": fingerprints,
             "reused_tables": reused, "fetched_tables": fetched}
 
 
@@ -310,6 +345,8 @@ def write_archive(target: Path, snapshot: dict) -> dict:
                             for t in snapshot.get("fetched_tables", snapshot["tables"])),
         "ddl_files": {name: hashlib.sha256(text.encode("utf-8")).hexdigest()
                       for name, text in snapshot["ddl_files"].items()},
+        "tables_schema_sha256": hashlib.sha256(
+            snapshot.get("table_ddl", "").encode("utf-8")).hexdigest(),
         "runtime_objects": {"sequences": len(snapshot["runtime"]["sequences"]),
                             "cron_jobs": len(snapshot["runtime"]["cron_jobs"]),
                             "rls_enabled_tables": len(snapshot["runtime"]["rls_enabled_tables"]),
@@ -327,6 +364,7 @@ def write_archive(target: Path, snapshot: dict) -> dict:
             generated_at=generated,
             excluded=", ".join(sorted(EXCLUDE_TABLES))).encode("utf-8"))
         add("schema.sql", snapshot["schema_sql"].encode("utf-8"))
+        add("tables_schema.sql", snapshot.get("table_ddl", "").encode("utf-8"))
         add("runtime.json", json.dumps(snapshot["runtime"], ensure_ascii=False,
                                        indent=2, sort_keys=True).encode("utf-8"))
         for name, text in snapshot["ddl_files"].items():
@@ -406,6 +444,12 @@ def verify_archive(path: Path, expected_file_sha: str | None = None) -> dict:
             problems.append("缺少 DDL：" + name)
         elif hashlib.sha256(members[key]).hexdigest() != digest:
             problems.append("DDL 校验和不符：" + name)
+    schema_key = "tables_schema.sql"
+    body = members.get(schema_key, b"")
+    if not body.strip() or b"create table" not in body.lower():
+        problems.append("tables_schema.sql 为空或不含建表语句（全表结构不可恢复）")
+    elif m.get("tables_schema_sha256") != hashlib.sha256(body).hexdigest():
+        problems.append("tables_schema.sql 校验和不符")
     if "runtime.json" not in members:
         problems.append("缺少 runtime.json（序列 / pg_cron / RLS 状态不可恢复）")
     else:
