@@ -1,5 +1,19 @@
 # 变更日志
 
+## v6.7 ｜ 2026-11-08 ｜ 修复发布门禁跳过导致 Pages 未部署
+
+**问题**：`18a1517`（v6.6）push 后，「网页发布」run `42415082350` 显示 **`build` success / `calendar_gate` skipped / `deploy` skipped**。job 级 `if: github.event_name == 'schedule'` 让门禁 job 在 push 事件被跳过；GitHub Actions 中「被跳过」会沿 `needs` 链传播给下游，于是 `deploy` 不执行、Pages 没部署。更具迷惑性的是 workflow 总体结论仍为 `success`，单看绿灯完全发现不了。线上复核确认：`data/cloud.json` 不含 `calendar`，`assets/app.js` 不含 `easternParts` / `setExchangeCalendar` —— 改动只在仓库里，没到访客端。
+
+**设计口径（勿回退）**：门禁 job 必须**始终运行**，事件判断交给脚本。
+
+- `ui-publish.yml`：删除 `calendar_gate` 的 `if:`；门禁 step 补 `SCHEDULE: ${{ github.event.schedule }}`；`trading_window.gate()` 对非 `schedule` 事件直接返回 `allow=true`（`manual` 分支），只把结果通过 `outputs.allow` 传给 `build` 的 job 级 `if`（保留 `!cancelled()` 兜底）。这样 push / dispatch 随时能发布，schedule 休市日仍正确不发版。
+- **新增结构回归** `test_trading_window.test_publish_gate_never_skips_the_deploy_chain`：纯文本解析工作流（不引入 PyYAML 依赖），断言 `calendar_gate` 无 job 级 `if`、含 `EVENT_NAME` / `--gate` / `outputs.allow`，并遍历 `deploy` 的整条 `needs` 链，禁止「只在 schedule 运行」的 job 级 `if`、要求所有 `if` 带 `!cancelled()`。同时把 `test_trading_window` 接入发布工作流的 Python 门禁，让守卫真正守在发布路径上。
+- 本地模拟三种事件：push → `allow=true`；schedule 交易日 → `allow=true`；schedule 感恩节休市 → `allow=false`（本就不该发版）。
+
+**验收**：发布 run `42415751992` 的 `calendar_gate` / `build` / `deploy` 三个 job 全 success；线上 `data/cloud.json` 含 `calendar`（XNYS、29 休市日、5 半日、`evidence_sha256` 与本地证据一致、无 `a=rw` 写 token），`assets/app.js` 含 `easternParts` / `setExchangeCalendar` / `isTradingHours`，静态资源版本 `89a45221`；无头 Chrome 渲染线上 index：旧误报文案 0、`data-alert` / `data-notice` 元素 0，SPY / 收益 / 持仓正常。全量 Python **214** 项 OK、发布门禁 **64** 项 OK、Node **42** 项 OK、23 个 workflow YAML 全可解析。
+
+> 经验：改发布链路后，**必须抓一次线上 `data/cloud.json` 与 `assets/app.js`** 才算验收完成，不能只看 workflow 绿灯。
+
 ## v6.6 ｜ 2026-11-08 ｜ 交易时段门禁：非交易时段与 NYSE 休市日不采集
 
 **用户问题**：非美股交易时间（北京 6–20 点）与美国法定节假日是否都不用采集更新？能否对接免费节假日接口、隔离并纳入策略？
