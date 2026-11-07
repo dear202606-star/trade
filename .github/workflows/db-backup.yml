@@ -1,0 +1,77 @@
+name: 整库备份与冻结巡检
+
+# 每日把在线库的完整业务状态落到可校验、可回本地的产物，并复核历史冻结边界。
+# 2026-11-07：仓库此前没有任何可执行整库备份，data_lock(962 条)、
+# series_pick(847 条)、pg_cron 配置只存在于库中，换项目即全丢。
+# 凭据表 data_source_secret 永不进入备份产物。
+
+on:
+  schedule:
+    - cron: "0 4 * * *"       # UTC 04:00，美股收盘后、采集高峰前
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: trade-db-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+
+      - name: 应用历史冻结策略（只读函数与视图，幂等）
+        run: |
+          python - <<'PY'
+          import db_sources
+          from pathlib import Path
+          sql = Path('sql/123_history_freeze_policy.sql').read_text(encoding='utf-8')
+          c = db_sources.db(); c.autocommit = True
+          try:
+              with c.cursor() as cur: cur.execute(sql)
+          finally: c.close()
+          print('freeze policy applied')
+          PY
+
+      - name: 整库逻辑备份（排除凭据表）
+        run: |
+          STAMP=$(date -u +%Y%m%d)
+          python db_backup.py --output "output/backups/trade-${STAMP}.tar.gz" > backup_manifest.json
+          python - <<'PY'
+          import json, pathlib
+          m = json.loads(pathlib.Path('backup_manifest.json').read_text())
+          assert m['total_tables'] > 0 and m['total_rows'] > 0, 'empty backup'
+          assert set(m['excluded_tables']) == {'data_source_secret'}, 'credential table leaked'
+          assert all('data_source_secret' not in t for t in m['tables']), 'credential table present'
+          print('backup OK: %d tables, %d rows, %d bytes, sha256=%s'
+                % (m['total_tables'], m['total_rows'], m['archive_bytes'], m['archive_sha256'][:16]))
+          PY
+
+      - name: 备份可读性与完整性复核
+        run: |
+          EXPECTED=$(python -c "import json;print(json.load(open('backup_manifest.json'))['archive_sha256'])")
+          python db_backup.py --verify "$(ls -1 output/backups/*.tar.gz | head -1)" --expected-sha256 "$EXPECTED"
+
+      - name: 历史冻结边界巡检
+        run: python verify_frozen_history.py
+
+      - name: 上传备份产物
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trade-db-backup
+          path: output/backups/*.tar.gz
+          retention-days: 90
+          if-no-files-found: warn

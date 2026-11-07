@@ -25,9 +25,11 @@ REQUIRED = {
     "strategy_history", "b/strategy_history", "name_zh", "sectors", "health",
 }
 
-# 各层的最大可接受陈旧度（小时）。镜像每天随数据管线刷新 3 次，
-# 因此 12 小时未更新即视为发布链路中断。
-MIRROR_MAX_AGE_H = 12
+# 各层的最大可接受陈旧度（小时）。镜像按 DAILY 策略每个交易日刷新 2 次，
+# 周末不发布，故 72 小时覆盖「周五盘后 → 周一盘前」的 62 小时间隔；
+# 工作日的真实停更由 published_dependency_problems 的 quote_version 检查兜住，
+# 因此放宽此阈值不会掩盖停更，只会消除周末误报。
+MIRROR_MAX_AGE_H = 72
 QUOTE_MAX_AGE_H = 72        # 覆盖周末与节假日
 RESULT_MAX_AGE_H = 96       # 净值/预览为日更计算结果
 

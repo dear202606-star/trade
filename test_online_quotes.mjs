@@ -15,21 +15,23 @@ function reader(reply,cloudReply) {
   return {dsh:context.window.DSH,calls};
 }
 
-test('static datasets read the mirrored snapshot and never touch the REST gateway',async()=>{
-  // 2026-11-07 分层改造：curve/name_zh/sectors 等结构稳定的数据集由 CI
-  // 从在线库直连导出同源镜像，浏览器读 Pages 即可，不消耗数据库出口流量。
-  const snap={schema:1,source:'postgres-direct',generated_at:'2026-11-07T07:00:00Z',
-    datasets:{curve:{points:[1,2,3]}},meta:{}};
+test('static datasets read the online database in normal mode, never the mirror',async()=>{
+  // 2026-11-07 二次审查：在线库是唯一常规数据源。镜像只在故障时兜底，
+  // 不参与常态读取，避免「文件 + 数据库」双套体系的一致性风险。
+  let hits=0;
   const {dsh,calls}=reader(async(url)=>{
-    if (url==='data/snapshot.json') return {ok:true,json:async()=>snap};
-    throw Error('unexpected REST call: '+url);
+    if (url.includes('v_site_dataset?key=eq.curve')) {
+      hits++;return {ok:true,json:async()=>[{payload:{points:[1,2,3]}}]};
+    }
+    throw Error('unexpected call: '+url);
   });
   assert.deepEqual(await dsh.json('curve',null),{points:[1,2,3]});
-  assert.equal(calls.some(c=>c.url.includes('/rest/v1/')),false);
-  // TTL 内重复读取直接命中内存缓存，不产生任何新请求
+  assert.equal(calls.some(c=>c.url==='data/snapshot.json'),false);
+  // 24h TTL 内重复读取命中内存缓存，不产生任何新请求
   const n=calls.length;
   assert.deepEqual(await dsh.json('curve',null),{points:[1,2,3]});
   assert.equal(calls.length,n);
+  assert.equal(hits,1);
 });
 
 test('a 402 gateway outage still serves complete data from the mirrored snapshot',async()=>{
@@ -50,7 +52,7 @@ test('a 402 gateway outage still serves complete data from the mirrored snapshot
 
 test('refresh cadence is tiered instead of a single 60-second full reload',()=>{
   const {dsh}=reader(async()=>({ok:false}));
-  assert.equal(dsh.ttlOf('curve'),6*3600*1000);
+  assert.equal(dsh.ttlOf('curve'),24*3600*1000);
   assert.equal(dsh.tierOf('curve'),0);
   assert.equal(dsh.ttlOf('equity'),30*60*1000);
   assert.equal(dsh.tierOf('equity'),1);
@@ -164,4 +166,34 @@ test('database failure and malformed snapshots never fall back to old quote file
     assert.equal(result,null);
     assert.equal(calls.some(c=>c.url.includes('data/quotes.json')),false);
   }
+});
+
+test('version probe expires only the layer whose data actually changed',async()=>{
+  const state={staticTs:'2026-11-07T00:00:00Z',quoteVer:'aaa',resultTs:'2026-11-06T21:00:00Z'};
+  const {dsh,calls}=reader(async(url)=>{
+    if (url.includes('v_site_dataset?select=key,updated_at'))
+      return {ok:true,json:async()=>[{key:'curve',updated_at:state.staticTs}]};
+    if (url.includes('live_quote_snapshot?singleton'))
+      return {ok:true,json:async()=>[{evidence_sha256:state.quoteVer}]};
+    if (url.includes('v_live_strategy_results?select=variant'))
+      return {ok:true,json:async()=>[{variant:'A',kind:'equity',source_as_of:state.resultTs}]};
+    if (url.includes('v_site_dataset?key=eq.curve'))
+      return {ok:true,json:async()=>[{payload:{points:[1,2,3]}}]};
+    if (url.includes('/rest/v1/'))
+      return {ok:true,json:async()=>[{payload:{ok:true,quotes:{SPY:{p:1}}}}]};
+    throw Error('unexpected call: '+url);
+  });
+  // 首次探测只建立基线；版本未变则完全不拉 payload
+  assert.equal((await dsh.syncIfChanged()).length,0);
+  const baseline=calls.length;
+  assert.equal((await dsh.syncIfChanged()).length,0);
+  assert.equal(calls.length,baseline+3);   // 每次仅 3 个极小探测请求
+  // 填充缓存后，只改静态数据集时间戳
+  await dsh.json('curve',null);
+  await dsh.json('quotes',{});
+  state.staticTs='2026-11-07T01:00:00Z';
+  const expired=await dsh.syncIfChanged();
+  assert.ok(expired.includes('curve'),'静态层应失效');
+  assert.ok(!expired.includes('quotes'),'行情版本未变，不应被连带失效');
+  assert.ok(!expired.includes('equity'),'计算结果未变，不应被连带失效');
 });

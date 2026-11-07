@@ -4,6 +4,12 @@ name: CI 采集（写暂存表，无需 secret）
 #   CI 采集 → REST 写 ingest_staging（anon 可写）→ 库内 pg_cron 每 10 分钟
 #   调用 promote_staging()：结构校验后合并进 prices_monthly。
 #   因此本工作流**不需要 SUPABASE_DB_PASSWORD**，也能真正把数据送进库。
+# 2026-11-07：与 collect-full 共用 trade-pipeline 互斥组，避免暂存合并与
+# 主力采集同时改写 prices_monthly。
+
+concurrency:
+  group: trade-pipeline
+  cancel-in-progress: false
 
 on:
   schedule:

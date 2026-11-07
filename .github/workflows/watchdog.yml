@@ -16,6 +16,7 @@ on:
 permissions:
   contents: read
   issues: write
+  actions: write
 
 jobs:
   watchdog:
@@ -39,6 +40,12 @@ jobs:
         if: always()
         id: check
         run: python watchdog_site_check.py
+
+      - name: 自动自愈（仅白名单幂等动作，带冷却）
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python selfheal.py --problems problems.txt
 
       - name: 开 Issue 告警
         if: failure()

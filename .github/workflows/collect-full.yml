@@ -3,6 +3,13 @@ name: 采集与锁定（CI 主力，写库）
 # 目标：采集全部在 GitHub Actions（美国出口）完成，直接写库。
 # 依赖：仓库 secret SUPABASE_DB_PASSWORD（已验证可用）
 # 顺序：补数 → 重建选源 → 校验 → 锁新达标的标的
+# 2026-11-07：加入 trade-pipeline 互斥组。此前本工作流与 collect-ci 无并发
+# 保护，而两者最终都写 prices_monthly（collect-ci 经 pg_cron promote_staging
+# 合并），存在并发 upsert 覆盖与锁判定竞态。
+
+concurrency:
+  group: trade-pipeline
+  cancel-in-progress: false
 
 on:
   schedule:

@@ -72,8 +72,9 @@ jobs:
         run: python crosscheck_eodhd.py
 
       - name: 数据质量验收
+        # 2026-11-07：质量门禁不得静默降级。此前 continue-on-error 会把
+        # 验收失败吞掉并继续提交行情，与 data-check.yml 的阻断式口径不一致。
         id: qa
-        continue-on-error: true
         run: python validate_prices.py
 
       - name: 提交行情与计划
@@ -85,5 +86,5 @@ jobs:
             echo "无新增"
           else
             git commit -m "chore: 每日补数 $(date -u +%Y-%m-%d)"
-            git push || echo "::warning::提交失败"
+            git push
           fi

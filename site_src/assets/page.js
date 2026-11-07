@@ -388,7 +388,9 @@
   /* 分层自动刷新：不同卡片按各自数据变更频率更新，不再一刀切 60 秒全量重拉。
      L2 行情：仅交易时段每 60 秒，且只拉 quotes，重绘行情条
      L1 净值/持仓/预览：每 30 分钟重取一次并重绘卡片
-     L0 曲线/历史/映射：TTL 6 小时，由数据层自行判定，不设独立定时器
+     L0 曲线/历史/映射：TTL 24 小时，由数据层自行判定，不设独立定时器
+     另有版本探测（app.js startVersionWatch）：数据库版本一变就精确失效并自动重绘，
+     不需人工触发；切回标签页时立即探测。
      全部定时器在页面隐藏时静默，避免后台标签页持续消耗出口流量。 */
   function startAutoRefresh() {
     var busy = false;
@@ -562,11 +564,17 @@
 
   async function boot() {
     initPills();
-    /* 先把 CI 导出的同源镜像备好：此后无论在线库是否可用，都有完整数据可渲染 */
-    if (DSH.snapshotReady) await DSH.snapshotReady();
+    /* 常态只读在线库；镜像由故障路径按需懒加载，不预先拉取（单一数据源） */
     await loadVariant();
     initVariants();
     startAutoRefresh();
+    /* 数据库版本变化 → 精确失效缓存 → 自动重绘，不依赖人工触发/手工调校 */
+    if (DSH.startVersionWatch) DSH.startVersionWatch(async function () {
+      await loadVariant(false);
+      if (!dataReady()) return;
+      checkFreshness();
+      renderAllCards();
+    });
 
     if (!dataReady()) {
       renderUnavailable("在线数据源暂不可用 · 正在重试");

@@ -109,21 +109,26 @@
   DSH.cls = (v) => (v == null || isNaN(v) ? "zero" : v >= 0 ? "up" : "down");
   DSH.esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-  /* ---------- 数据层：分层节奏 + 同源镜像兜底 ----------
-     2026-11-07：Supabase REST 网关曾因 exceed_egress_quota 返回 402，而页面
-     所有展示数据只走该网关，导致数据库完好却全站白屏；旧实现每 60 秒把
-     全部数据集清空重拉、且一律 cache:"no-store"，正是配额被打穿的放大器。
+  /* ---------- 数据层：常态单源 + 版本探测驱动 + 故障期兜底 ----------
+     2026-11-07 二次审查后确立：在线库是**唯一常规数据源**，镜像只在
+     数据库不可用时兜底，不参与常态读取——避免「文件 + 数据库」双套体系
+     带来的一致性风险。页面靠轻量版本探测自动感知数据库变更，
+     不再依赖人工触发或固定间隔全量重拉。
 
-     现按「数据实际变更频率」分三层，不再一刀切实时刷新：
-       L0 STATIC   name_zh / sectors / curve / strategy_history / health
-                   结构稳定或日更，直接读 CI 从在线库导出的同源镜像，零 REST 流量
-       L1 DAILY    equity / signal / preview（含 B 口径），在线库优先，TTL 30 分钟
-       L2 INTRADAY quotes，交易时段 TTL 60 秒，非交易时段 30 分钟
+     按数据实际变更频率分三层（与 data_lifecycle.py 策略一致）：
+       L0 STATIC    name_zh / sectors / curve / strategy_history / health
+                    冻结或事件驱动，TTL 24 小时；常态仍从在线库读，
+                    但一天最多一次，几乎不产生流量
+       L1 DAILY     equity / signal / preview（含 B 口径），TTL 30 分钟
+       L2 INTRADAY  quotes，交易时段 60 秒，非交易时段 30 分钟
 
-     在线库失败（402 / 5xx / 网络）时熔断 10 分钟，依次回退
-     localStorage 最近一次成功值 → 同源镜像，页面始终有数据，
-     只是标注「数据截至 X」而不是「数据未就绪」。
-     在线库仍是唯一主源与唯一写入口；镜像由 CI 直连数据库自动生成。
+     版本探测：每 60 秒（交易时段）/ 10 分钟（其余）只发两个极小请求
+     （静态数据集 updated_at 列表 + 行情 evidence_sha256），
+     版本没变就不拉任何数据；版本变化才让对应层过期并重绘。
+
+     在线库失败（402 / 5xx / 网络）时熔断 10 分钟，回退
+     localStorage 最近一次成功值 → CI 从库单向导出的同源镜像，
+     页面始终有数据，只标注「数据截至 X」而不是「数据未就绪」。
   */
   const cache = {};                 // name -> payload
   const cacheTs = {};               // name -> 本次成功取数的时间戳
@@ -133,6 +138,7 @@
   const SNAPSHOT_URL = "data/snapshot.json";
   const CIRCUIT_MS = 10 * 60 * 1000;
   let snapshot = null, snapshotInflight = null, circuitUntil = 0;
+  let versionStamp = "";            // 最近一次探测到的数据库版本指纹
 
   const STATIC_KEYS = ["curve", "b/curve", "strategy_history", "b/strategy_history",
                        "name_zh", "sectors", "health"];
@@ -143,7 +149,7 @@
     if (STATIC_KEYS.indexOf(name) >= 0) return TIER_STATIC;
     if (name === "quotes") return TIER_INTRADAY;
     if (DAILY_KEYS.indexOf(name) >= 0) return TIER_DAILY;
-    return TIER_STATIC;            // 未知 key 保守走镜像，避免打爆网关
+    return TIER_STATIC;            // 未知 key 用最长 TTL，避免打爆网关
   }
 
   /* 与 quotes.yml 的 UTC 13-21 周一至周五采集窗口对齐；非交易时段不轮询 */
@@ -154,7 +160,7 @@
 
   function ttlOf(name) {
     const t = tierOf(name);
-    if (t === TIER_STATIC) return 6 * 3600 * 1000;
+    if (t === TIER_STATIC) return 24 * 3600 * 1000;
     if (t === TIER_DAILY) return 30 * 60 * 1000;
     return isTradingHours() ? 60 * 1000 : 30 * 60 * 1000;
   }
@@ -284,20 +290,10 @@
 
     inflight[name] = (async function () {
       try {
-        const tier = tierOf(name);
-        /* L0：结构稳定，直接读同源镜像；不再为它消耗数据库出口流量 */
-        if (tier === TIER_STATIC) {
-          await loadSnapshot();
-          const m = mirrorValue(name);
-          if (m != null) {
-            cache[name] = m; cacheTs[name] = Date.now(); delete degraded[name];
-            return m;
-          }
-          const ls = lsGet(name);
-          if (ls) { cache[name] = ls.payload; cacheTs[name] = ls.ts; return ls.payload; }
-          /* 镜像与本地缓存都缺失（旧部署）：仍尝试在线库，保持兼容 */
+        if (Date.now() < circuitUntil) {
+          await loadSnapshot();     // 熔断期也要先备好镜像再兜底
+          return fallbackValue(name, fallback);
         }
-        if (Date.now() < circuitUntil) return fallbackValue(name, fallback);
         const cfg = await DSH.json("cloud", null);
         if (!cfg || !cfg.url || !cfg.key) {
           const ce = new Error("Online dataset configuration unavailable");
@@ -334,6 +330,84 @@
     delete cache[name]; delete cacheTs[name];
     return DSH.json(name, fallback);
   };
+
+  /* ---------- 版本探测：页面自动感知数据库变更 ----------
+     三个极小请求（静态数据集时间戳 / 行情版本 / 计算结果场次），合计不到
+     1KB；版本未变就不拉任何 payload。相比「每次全量重拉 9 个数据集」，
+     常态流量下降约两个数量级，同时把「数据一更新页面就知道」从人工触发
+     变成自动。探测失败只记录、不熔断，交给数据请求自身的容错路径。 */
+  let probeInflight = null;
+  const versions = { static: "", quote: "", result: "" };
+
+  async function probeVersion() {
+    if (probeInflight) return probeInflight;
+    probeInflight = (async function () {
+      if (Date.now() < circuitUntil) return null;
+      try {
+        const cfg = await DSH.json("cloud", null);
+        if (!cfg || !cfg.url || !cfg.key) return null;
+        const h = { apikey: cfg.key }, opt = { cache: "no-store", headers: h };
+        const [a, b, c] = await Promise.all([
+          fetch(cfg.url + "/rest/v1/v_site_dataset?select=key,updated_at", opt),
+          fetch(cfg.url + "/rest/v1/live_quote_snapshot?singleton=eq.true&select=evidence_sha256", opt),
+          fetch(cfg.url + "/rest/v1/v_live_strategy_results?select=variant,kind,source_as_of", opt)
+        ]);
+        if (!a.ok) { const e = new Error("HTTP " + a.status); e.status = a.status; throw e; }
+        const sa = (await a.json()).map(r => r.key + ":" + r.updated_at).sort().join("|");
+        let qv = "", rv = "";
+        if (b.ok) {
+          const qb = await b.json();
+          if (Array.isArray(qb) && qb.length) qv = qb[0].evidence_sha256 || "";
+        }
+        if (c.ok) rv = (await c.json())
+          .map(r => r.variant + "/" + r.kind + ":" + r.source_as_of).sort().join("|");
+        return { static: sa, quote: qv, result: rv };
+      } catch (e) {
+        noteErr("version-probe", e);
+        return null;
+      } finally { probeInflight = null; }
+    })();
+    return probeInflight;
+  }
+  DSH.probeVersion = probeVersion;
+
+  /* 返回本次变化导致失效的 key 列表；null = 探测不可用，[] = 无变化 */
+  DSH.syncIfChanged = async function () {
+    const v = await probeVersion();
+    if (!v) return null;
+    const changed = [];
+    for (const part of ["static", "quote", "result"]) {
+      if (versions[part] && versions[part] !== v[part]) changed.push(part);
+      versions[part] = v[part];
+    }
+    if (!changed.length) return [];
+    const groups = { static: STATIC_KEYS, quote: ["quotes"], result: DAILY_KEYS };
+    const expired = [];
+    for (const part of changed)
+      for (const k of groups[part])
+        if (cache[k] !== undefined) { delete cache[k]; delete cacheTs[k]; expired.push(k); }
+    return expired;
+  };
+
+  /* 页面可见期间持续感知；切回标签页立即探测一次（最典型的「及时」场景） */
+  DSH.startVersionWatch = function (onChange) {
+    let last = 0;
+    async function tick(force) {
+      if (document.hidden) return;
+      if (!force && Date.now() - last < (isTradingHours() ? 60000 : 600000)) return;
+      last = Date.now();
+      try {
+        const expired = await DSH.syncIfChanged();
+        if (expired && expired.length && typeof onChange === "function") await onChange(expired);
+      } catch (e) { noteErr("version-watch", e); }
+    }
+    setInterval(function () { tick(false); }, 30000);
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden) tick(true);
+    });
+    window.addEventListener("pageshow", function () { tick(true); });
+  };
+  DSH.versionStamp = function () { return Object.assign({}, versions); };
 
   /* 供页面显示数据来源与时效，不再用「数据未就绪」掩盖仍有价值的历史值 */
   DSH.dataStatus = function () {
