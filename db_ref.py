@@ -146,11 +146,55 @@ def load_sectors():
     return out
 
 
+def _resolution_digest(proof):
+    """Canonical digest; must match research/security_identity_resolutions.py."""
+    return hashlib.sha256(json.dumps(proof, ensure_ascii=False, sort_keys=True,
+                                    separators=(",", ":")).encode("utf-8")).hexdigest()
+
+
+def _reviewed_resolutions(cursor, symbols):
+    """Read append-only identity resolutions. Anything questionable is ignored.
+
+    Fail-closed on purpose: if the table is absent (i.e. before the user
+    approves the migration), unreadable, tampered with, or merely incomplete,
+    the caller behaves exactly as it always did and keeps blocking.
+    """
+    try:
+        cursor.execute(
+            "select symbol,resolution,proof,evidence_sha256 from "
+            "public.security_identity_resolution where symbol=any(%s)",
+            (symbols,))
+        rows = cursor.fetchall()
+    except Exception:
+        return {}
+    reviewed = {}
+    for row in rows:
+        try:
+            symbol, resolution, proof, sha = row
+        except (TypeError, ValueError):
+            continue
+        if (resolution != "exclude_reviewed" or not isinstance(proof, dict)
+                or proof.get("symbol") != symbol
+                or proof.get("resolution") != "exclude_reviewed"
+                or proof.get("full_history_accepted") is not False
+                or not isinstance(sha, str)
+                or sha != _resolution_digest(proof)):
+            continue
+        reviewed[symbol] = sha
+    return reviewed
+
+
 def require_unquarantined_candidates(symbols):
-    """An unknown original security cannot silently leave a ranking pool."""
+    """An unknown original security cannot silently leave a ranking pool.
+
+    A reviewed resolution turns an unknown exclusion into an explicit,
+    evidence-backed one. It never releases the quarantine and never changes
+    prices: the resolution table is append-only and its proof digest is
+    re-verified here on every read. Unresolved symbols still abort generation.
+    """
     symbols = sorted(set(symbols))
     if not symbols:
-        return
+        return []
     connection = None
     try:
         connection = db()
@@ -158,14 +202,29 @@ def require_unquarantined_candidates(symbols):
             cursor.execute('select symbol,reason from series_quarantine where symbol=any(%s) order by symbol',
                            (symbols,))
             unresolved = cursor.fetchall()
+            reviewed = (_reviewed_resolutions(
+                cursor, [symbol for symbol, reason in unresolved])
+                if unresolved else {})
     except Exception as exc:
         raise RuntimeError('在线证券身份隔离检查失败，禁止生成新策略结果') from exc
     finally:
         if connection is not None:
             connection.close()
     if unresolved:
-        raise RuntimeError('排名候选证券身份仍待核验，禁止静默剔除后发布：'+
-                           ', '.join(symbol for symbol,reason in unresolved))
+        blocked = [symbol for symbol, reason in unresolved if symbol not in reviewed]
+        if blocked:
+            raise RuntimeError('排名候选证券身份仍待核验，禁止静默剔除后发布：'+
+                               ', '.join(blocked))
+        # Explicit, greppable audit trail in CI logs. The durable record is
+        # the append-only resolution row itself, not a runtime write (the
+        # primary database is egress-limited and must not be written here).
+        print("IDENTITY_RESOLUTION_APPLIED " + json.dumps({
+            "reviewed": sorted(reviewed),
+            "count": len(reviewed),
+            "note": "隔离维持不变，仅显式排除；价格序列未解锁",
+        }, ensure_ascii=False), flush=True)
+        return sorted(reviewed)
+    return []
 
 
 def load_market_reference(as_of):
