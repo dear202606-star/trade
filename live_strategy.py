@@ -15,6 +15,7 @@ from psycopg2.extras import Json
 import db_sources
 import live_quotes
 import market_calendar
+import run_guard
 
 SITE='https://dear202606-star.github.io/trade/data/'
 API='https://push2his.eastmoney.com/api/qt/stock/kline/get'
@@ -389,7 +390,11 @@ def store(variant,kind,quotes,payload,evidence):
 
 def run_equity():
     from live_cash_dividends import load_proofs,spy_distributions,SSGA
-    quotes=live_quotes.load_snapshot();calendar=market_calendar.load()
+    quotes=live_quotes.load_snapshot()
+    # 场次幂等：盘中不重算、同一 session+quote_version+代码已算过则秒退。
+    # 这是 Egress 的主要削减点：本周期该作业被触发 288 次，实际只需收盘各一次。
+    if run_guard.should_skip('equity',quotes):return
+    calendar=market_calendar.load()
     if calendar.sha!=quotes['calendar_sha256']:raise RuntimeError('Exchange calendar advanced; retry current quote')
     connection=db_sources.db()
     try:
@@ -462,6 +467,7 @@ def run_equity():
             print(variant,'equity',result['last_session'],round(result['stats']['strategy']*100,4))
         except Exception as exc:failures.append(variant+': '+str(exc))
     if failures:raise RuntimeError('Independent account failures: '+'; '.join(failures))
+    run_guard.mark_done('equity',quotes)
 
 
 if __name__=='__main__':

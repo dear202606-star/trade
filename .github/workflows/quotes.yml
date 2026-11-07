@@ -4,10 +4,16 @@ concurrency:
   group: trade-live-quotes
   cancel-in-progress: false
 
+# 2026-11-07 Egress 收敛：本周期实测行情快照被触发 1139 次/10 天，
+# 其中 GitHub schedule 与 pg_cron 的 "*/5 13-21 * * 1-5" 是同一 cron
+# 双触发（见 sql/124_egress_schedule.sql，已停掉库内两个 dispatch 作业）。
+# 快照改为盘中 30 分钟 + 收盘 1 次；策略是年度持仓 + 日度净值，
+# 5 分钟级刷新既不改变结果，又是配额被打穿的直接放大器。
 on:
   schedule:
-    - cron: "*/5 13-21 * * 1-5"
-    - cron: "17 2 * * 2-6"
+    - cron: "*/30 13-20 * * 1-5"   # 盘中 30 分钟
+    - cron: "17 21 * * 1-5"        # 收盘后关键一次
+    - cron: "17 2 * * 2-6"         # 原有补跑
   workflow_dispatch:
   push:
     branches: [main]
@@ -20,7 +26,10 @@ on:
       - test_live_quotes.py
       - test_quote_repairs.py
       - watchdog_checks.py
+      - egress_budget.py
+      - run_guard.py
       - test_watchdog_checks.py
+      - test_egress_budget.py
       # 2026-11-05：原白名单漏了实际会跑的 test_quote_snapshot.py /
       # test_market_calendar.py，改这两个文件不触发任何 CI。改为通配。
       - 'test_*.py'
@@ -29,6 +38,7 @@ on:
 
 permissions:
   contents: read
+  actions: read        # 出口流量预算门禁需读本周期运行记录
 
 jobs:
   refresh:
@@ -47,5 +57,15 @@ jobs:
         run: python -m unittest test_live_quotes test_quote_repairs test_quote_snapshot test_market_calendar test_watchdog_checks
       - name: 检查在线写入凭据
         run: test -n "$SUPABASE_DB_PASSWORD"
+      - name: 出口流量预算门禁
+        id: egress
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ARGS=""
+          # 收盘那次是不可跳过的关键任务：预算进入 throttle 档时仍放行。
+          if [ "${{ github.event.schedule }}" = "17 21 * * 1-5" ]; then ARGS="--critical"; fi
+          python egress_budget.py --workflow "行情快照" --fast $ARGS
       - name: 刷新在线行情
+        if: steps.egress.outputs.allow == 'true'
         run: python live_quotes.py --write

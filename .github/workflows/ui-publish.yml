@@ -24,6 +24,10 @@ on:
       - test_closing_reconcile.py
       - test_ranking_factor_rebase.py
       - test_watchdog_gateway.py
+      - test_egress_budget.py
+      - egress_budget.py
+      - run_guard.py
+      - db_backup.py
       - realtime_check.py
       - watchdog_site_check.py
       - sql/122_site_dataset.sql
@@ -54,7 +58,7 @@ jobs:
           node-version: '20'
       - run: pip install -r requirements.txt
       - run: node --test test_daily_pnl.mjs test_online_quotes.mjs test_page_refresh.mjs
-      - run: python -m unittest test_closing_reconcile test_ranking_factor_rebase test_watchdog_gateway -v
+      - run: python -m unittest test_closing_reconcile test_ranking_factor_rebase test_watchdog_gateway test_egress_budget -v
       - name: 保留已部署数据并构建界面
         env:
           GH_TOKEN: ${{ github.token }}

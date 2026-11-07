@@ -8,6 +8,7 @@ import db_ref
 import db_sources
 import live_quotes
 import market_calendar
+import run_guard
 from live_strategy import sha,positive,store
 from prepare_live_ranking import normalized,prepare
 
@@ -207,8 +208,12 @@ def calculate(variant,q,pool,sectors,members,reviews,contexts,initial,terms,refe
 
 
 def run():
+    # 门禁必须先于 prepare()：采集增量 context 本身就要读已封存证据，
+    # 盘中或重复场次跳过它才能真正省下出口流量。
+    q=live_quotes.load_snapshot()
+    if run_guard.should_skip('preview',q):return
     prepare()
-    q=live_quotes.load_snapshot();pool,sectors,version=db_ref.load_market_reference(q['session'])
+    pool,sectors,version=db_ref.load_market_reference(q['session'])
     phase='intraday' if q['intraday'] else 'close';year=int(q['session'][:4])
     c=db_sources.db()
     try:
@@ -240,6 +245,7 @@ def run():
         store(variant,'preview',q,payload,evidence)
         print(variant,'preview',[(r['ticker'],round(100*r['ytd'],3)) for r in payload['top']],
               'pool',payload['universe'],'bounded',len(evidence['bounded_non_winners']),flush=True)
+    run_guard.mark_done('preview',q)
 
 
 if __name__=='__main__':run()

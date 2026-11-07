@@ -32,23 +32,57 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
 
-      - name: 应用历史冻结策略（只读函数与视图，幂等）
+      - name: 应用库内策略（冻结边界 + 出口流量调度收敛，幂等）
+        # 放在预算门禁之前：纯库内 DDL/函数调用，几乎不产生出口流量，
+        # 即使预算已耗尽也必须让「停掉重复 pg_cron 调度」生效。
         run: |
           python - <<'PY'
           import db_sources
           from pathlib import Path
-          sql = Path('sql/123_history_freeze_policy.sql').read_text(encoding='utf-8')
+          files = ('sql/123_history_freeze_policy.sql',
+                   'sql/124_egress_schedule.sql')
           c = db_sources.db(); c.autocommit = True
           try:
-              with c.cursor() as cur: cur.execute(sql)
-          finally: c.close()
-          print('freeze policy applied')
+              with c.cursor() as cur:
+                  for f in files:
+                      cur.execute(Path(f).read_text(encoding='utf-8'))
+                      print('applied', f)
+          finally:
+              c.close()
           PY
 
-      - name: 整库逻辑备份（排除凭据表）
+      - name: 下载上一份归档作为增量基线
+        id: baseline
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PREV=$(gh run list --workflow db-backup.yml --limit 10 \
+                 --json databaseId,conclusion \
+                 --jq '[.[] | select(.conclusion=="success")][0].databaseId // empty')
+          if [ -n "$PREV" ] && [ "$PREV" != "${{ github.run_id }}" ]; then
+            mkdir -p .baseline
+            if gh run download "$PREV" --name trade-db-backup --dir .baseline; then
+              F=$(ls -1 .baseline/*.tar.gz 2>/dev/null | head -1)
+              [ -n "$F" ] && echo "path=$F" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+          echo "baseline=${PREV:-none}"
+
+      - name: 出口流量预算门禁
+        id: egress
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TRADE_FORCE_BUDGET: ${{ github.event_name == 'workflow_dispatch' && '1' || '0' }}
+        run: python egress_budget.py --workflow "整库备份与冻结巡检" --fast --critical
+
+      - name: 整库逻辑备份（增量复用，排除凭据表）
+        if: steps.egress.outputs.allow == 'true'
         run: |
           STAMP=$(date -u +%Y%m%d)
-          python db_backup.py --output "output/backups/trade-${STAMP}.tar.gz" > backup_manifest.json
+          PREV="${{ steps.baseline.outputs.path }}"
+          ARGS=""
+          if [ -n "$PREV" ] && [ -f "$PREV" ]; then ARGS="--previous $PREV"; fi
+          python db_backup.py --output "output/backups/trade-${STAMP}.tar.gz" $ARGS > backup_manifest.json
           python - <<'PY'
           import json, pathlib
           m = json.loads(pathlib.Path('backup_manifest.json').read_text())
@@ -60,6 +94,7 @@ jobs:
           PY
 
       - name: 备份可读性与完整性复核
+        if: steps.egress.outputs.allow == 'true'
         run: |
           EXPECTED=$(python -c "import json;print(json.load(open('backup_manifest.json'))['archive_sha256'])")
           python db_backup.py --verify "$(ls -1 output/backups/*.tar.gz | head -1)" --expected-sha256 "$EXPECTED"
@@ -68,7 +103,7 @@ jobs:
         run: python verify_frozen_history.py
 
       - name: 上传备份产物
-        if: always()
+        if: steps.egress.outputs.allow == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: trade-db-backup

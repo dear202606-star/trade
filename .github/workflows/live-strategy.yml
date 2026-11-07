@@ -12,6 +12,9 @@ on:
       - live_ranking.py
       - live_cash_dividends.py
       - prepare_live_ranking.py
+      - run_guard.py
+      - egress_budget.py
+      - test_egress_budget.py
       - test_live_strategy.py
       - test_live_ranking.py
       - test_live_cash_dividends.py
@@ -19,6 +22,7 @@ on:
 
 permissions:
   contents: read
+  actions: read        # 出口流量预算门禁
 
 jobs:
   equity:
@@ -37,7 +41,14 @@ jobs:
           python-version: '3.12'
       - run: pip install -r requirements.txt
       - run: python -m unittest test_live_strategy test_live_cash_dividends
-      - run: python live_strategy.py
+      - name: 出口流量预算门禁
+        id: egress
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python egress_budget.py --workflow "在线净值与动态排名" --fast --critical
+      - name: 净值计算（含场次幂等）
+        if: steps.egress.outputs.allow == 'true'
+        run: python live_strategy.py
   ranking:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
@@ -54,4 +65,11 @@ jobs:
           python-version: '3.12'
       - run: pip install -r requirements.txt
       - run: python -m unittest test_live_ranking
-      - run: python live_ranking.py
+      - name: 出口流量预算门禁
+        id: egress
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python egress_budget.py --workflow "在线净值与动态排名" --fast --critical
+      - name: 动态排名与次年预览（含场次幂等）
+        if: steps.egress.outputs.allow == 'true'
+        run: python live_ranking.py

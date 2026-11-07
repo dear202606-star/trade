@@ -183,6 +183,49 @@ def _runtime_state(cur) -> dict:
     return state
 
 
+def _fingerprints(cur, tables):
+    """在库内计算轻量指纹，只回传 (行数, 哈希和)，不传任何表数据。
+
+    历史冻结表（prices_monthly / dataset_rows / nominal_monthly 等）永不
+    变化，它们占备份体积的 90% 以上。把这些表的「是否变化」判断下推到
+    数据库，每日整库备份就只需为运行时表付出口流量。
+    """
+    out = {}
+    for table in tables:
+        try:
+            cur.execute('select count(*), coalesce(sum(hashtext(t::text)::bigint),0) '
+                        'from public."%s" t' % table.replace('"', '""'))
+            n, h = cur.fetchone()
+            out[table] = {"rows": int(n), "hash": str(h)}
+        except Exception as exc:
+            # 指纹不可用不能让备份失败；标记后强制全量拉该表。
+            out[table] = {"rows": -1, "hash": "unavailable:" + type(exc).__name__}
+    return out
+
+
+def _previous_archive(path):
+    """读取上一次归档的指纹与表字节（已按 manifest sha256 逐个校验）。"""
+    p = Path(path)
+    if not p or not Path(p).exists():
+        return {}, {}
+    try:
+        with tarfile.open(p, "r:gz") as tar:
+            members = {m.name: tar.extractfile(m).read() for m in tar.getmembers()}
+        m = json.loads(members["manifest.json"])
+        fps = m.get("table_fingerprints") or {}
+        payload = {}
+        for t, meta in (m.get("tables") or {}).items():
+            raw = members.get("tables/%s.jsonl.gz" % t)
+            if raw and hashlib.sha256(raw).hexdigest() == meta["sha256"]:
+                payload[t] = {"rows": meta["rows"], "sha256": meta["sha256"],
+                              "bytes": len(raw), "data": raw}
+        return fps, payload
+    except Exception as exc:
+        print("WARN 上次归档不可复用，退化为全量：%s" % str(exc)[:120],
+              file=sys.stderr)
+        return {}, {}
+
+
 def _dump_table(cur, table):
     """返回 (行数, gzip 字节, sha256)。表名来自 information_schema，安全。"""
     cur.execute('select * from public."%s"' % table.replace('"', '""'))
@@ -203,23 +246,45 @@ def _dump_table(cur, table):
     return rows, data, hashlib.sha256(data).hexdigest()
 
 
-def build() -> dict:
+def build(previous=None) -> dict:
+    """生成自包含整库快照；previous 存在时复用未变化表的数据字节。
+
+    归档内容始终是完整的（复用字节也写进新归档），因此恢复流程不变；
+    只有「从 Supabase 传出来的字节」按变化量计费。
+    """
+    prev_fps, prev_payload = _previous_archive(previous) if previous else ({}, {})
     conn = connect()
     try:
         conn.autocommit = True
         with conn.cursor() as cur:
             cur.execute("set statement_timeout = '300s'")
             tables = _tables(cur)
+            fingerprints = _fingerprints(cur, tables)
             schema_sql = _schema_sql(cur)
             runtime = _runtime_state(cur)
-            payload = {}
+            payload, reused, fetched = {}, [], []
             for table in tables:
-                rows, data, sha = _dump_table(cur, table)
-                payload[table] = {"rows": rows, "sha256": sha, "bytes": len(data), "data": data}
+                fp = fingerprints[table]
+                reuse = (table in prev_payload and fp["rows"] >= 0
+                         and prev_fps.get(table) == fp)
+                if reuse:
+                    payload[table] = prev_payload[table]
+                    reused.append(table)
+                else:
+                    rows, data, sha = _dump_table(cur, table)
+                    payload[table] = {"rows": rows, "sha256": sha,
+                                      "bytes": len(data), "data": data}
+                    fetched.append(table)
     finally:
         conn.close()
+    fetched_rows = sum(payload[t]["rows"] for t in fetched)
+    print("[db-backup] 重新传输 %d 表 / %d 行，复用 %d 表（%s）"
+          % (len(fetched), fetched_rows, len(reused),
+             "有基线" if prev_payload else "首次全量"), file=sys.stderr, flush=True)
     return {"tables": tables, "schema_sql": schema_sql, "runtime": runtime,
-            "ddl_files": _ddl_files(), "payload": payload}
+            "ddl_files": _ddl_files(), "payload": payload,
+            "table_fingerprints": fingerprints,
+            "reused_tables": reused, "fetched_tables": fetched}
 
 
 def write_archive(target: Path, snapshot: dict) -> dict:
@@ -238,6 +303,11 @@ def write_archive(target: Path, snapshot: dict) -> dict:
                    for t in snapshot["tables"]},
         "total_tables": len(snapshot["tables"]),
         "total_rows": sum(snapshot["payload"][t]["rows"] for t in snapshot["tables"]),
+        "table_fingerprints": snapshot.get("table_fingerprints", {}),
+        "reused_tables": snapshot.get("reused_tables", []),
+        "fetched_tables": snapshot.get("fetched_tables", list(snapshot["tables"])),
+        "fetched_rows": sum(snapshot["payload"][t]["rows"]
+                            for t in snapshot.get("fetched_tables", snapshot["tables"])),
         "ddl_files": {name: hashlib.sha256(text.encode("utf-8")).hexdigest()
                       for name, text in snapshot["ddl_files"].items()},
         "runtime_objects": {"sequences": len(snapshot["runtime"]["sequences"]),
@@ -365,12 +435,14 @@ def main():
     p.add_argument("--output", default="output/backups/trade-backup.tar.gz")
     p.add_argument("--verify", metavar="FILE", help="只读校验既有备份")
     p.add_argument("--expected-sha256", help="归档文件整体 sha256（由生成步骤输出）")
+    p.add_argument("--previous", metavar="FILE",
+                   help="上一次归档；未变化表复用其字节，只从数据库传变化表")
     a = p.parse_args()
     if a.verify:
         result = verify_archive(Path(a.verify), a.expected_sha256)
         print(json.dumps(result, ensure_ascii=False))
         return 0 if result["ok"] else 1
-    manifest = write_archive(Path(a.output), build())
+    manifest = write_archive(Path(a.output), build(a.previous))
     print(json.dumps(manifest, ensure_ascii=False))
     return 0
 
