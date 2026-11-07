@@ -30,10 +30,14 @@ jobs:
           python-version: "3.12"
 
       - name: 实时层健康（5 分钟级）
+        id: realtime
         env:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
-          pip install psycopg2-binary requests
+          # realtime_check -> live_quotes -> quotes 依赖 pandas/openpyxl，
+          # 只装 psycopg2+requests 会在 import 阶段 ModuleNotFoundError 崩溃，
+          # 且写不出回执，让页面数据检查被误判为「监控缺失」。
+          pip install -r requirements.txt
           python realtime_check.py
 
       - name: 检查页面数据源与部署新鲜度
@@ -48,7 +52,10 @@ jobs:
         run: python selfheal.py --problems problems.txt
 
       - name: 开 Issue 告警
-        if: failure()
+        # 只在「页面数据源检查确实发现问题」时开数据告警。原先 if: failure()
+        # 是作业级判断：实时层任一步骤（如依赖安装）失败也会开一个
+        # 「页面数据不新鲜」的 Issue，即使 PROBLEMS=0，属误报。
+        if: always() && steps.check.outcome == 'failure'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -56,7 +63,8 @@ jobs:
           BODY="$(date -u '+%Y-%m-%d %H:%M UTC') 检查发现：
           $(cat problems.txt 2>/dev/null || echo '（无明细）')
 
-          可能原因：数据管线停跑 / 镜像发布失败 / 采集失败 / 数据库口令未配置。"
+          可能原因：数据管线停跑 / 镜像发布失败 / 采集失败 / 数据库口令未配置。
+          实时层健康检查：${{ steps.realtime.outcome }}"
           EXIST=$(gh issue list --label watchdog --state open --json number --jq '.[0].number' || true)
           if [ -n "$EXIST" ]; then
             gh issue comment "$EXIST" --body "$BODY"
