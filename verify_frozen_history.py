@@ -46,6 +46,22 @@ def inspect():
             cur.execute("select count(*) from public.v_frozen_month_boundaries")
             locked_symbols = cur.fetchone()[0]
 
+            # 缺口标的清单（最多 20 只）。退市/并购/代码复用标的由
+            # security_history_window 定义历史有效截止月，天然不会覆盖全区间，
+            # 因此只作为可观测信息，不阻断备份。
+            cur.execute("""
+                select b.symbol from public.v_frozen_month_boundaries b
+                 where exists (
+                   select 1 from generate_series(
+                     to_date(b.month_from,'YYYY-MM'),
+                     to_date(b.month_to,'YYYY-MM'), interval '1 month') g(m)
+                   where not exists (
+                     select 1 from public.prices_monthly p
+                      where p.symbol=b.symbol and p.month=to_char(g.m,'YYYY-MM')))
+                 order by b.symbol limit 20
+            """)
+            gap_samples = [r[0] for r in cur.fetchall()]
+
             # 冻结区外：2026 年之后是否仍有新增月数据（锁不能误伤）
             cur.execute("""
                 select count(distinct symbol), max(month), count(*)
@@ -71,14 +87,19 @@ def inspect():
     problems = []
     if locked_symbols == 0:
         problems.append("没有生效的历史锁")
-    if complete_symbols < locked_symbols:
-        problems.append("冻结区间存在月度缺口：%d/%d 只标的未覆盖全区间"
-                        % (locked_symbols - complete_symbols, locked_symbols))
     if not new_rows:
         problems.append("2026 年后无任何新增月数据，可能被「整只跳过」误伤")
     for c in checks:
         if not c["frozen_2025_12"] or c["frozen_2026_02"]:
             problems.append("冻结边界判定异常：%s" % c["symbol"])
+
+    warnings = []
+    if complete_symbols < locked_symbols:
+        warnings.append(
+            "%d/%d 只已锁标的在冻结区间存在月度缺口；多为退市/并购/代码复用"
+            "标的的历史有效截止边界（security_history_window），属既有状态，"
+            "库内 guard_frozen_prices 仍保证冻结区不可改写"
+            % (locked_symbols - complete_symbols, locked_symbols))
 
     return {
         "ok": not problems,
@@ -86,9 +107,11 @@ def inspect():
         "policy": policy,
         "locked_symbols": locked_symbols,
         "symbols_with_full_month_coverage": complete_symbols,
+        "gap_samples": gap_samples,
         "new_months_since_2026": {"symbols": new_symbols,
                                   "newest_month": newest_month, "rows": new_rows},
         "boundary_checks": checks,
+        "warnings": warnings,
         "problems": problems,
         "generated_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(),
     }
