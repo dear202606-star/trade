@@ -116,6 +116,18 @@
 - 数据侧仍保留 2010 起的完整年份（`strategy_history.json`），便于日后补齐数据后直接放开；
   展示区间由 `page.js` 的 `SHOW_FROM` 单点控制。
 
+## 换机 / 接续要点（2026-11-08）
+
+**完整交接文档不在本仓库内**：`../session-backup-20261108/HANDOFF.md`（含第 10 节「换机清单」），项目记忆在 `trade/.workbuddy/memory/`（被 `.git/info/exclude` 本地排除）。换机务必一并带走；整个 `2026-11-05-21-29-02/` 目录约 47MB，直接整体复制最省事。
+
+若只 clone 本仓库，至少要知道：
+
+- 所有 CI、定时同步与发布都在云端跑，凭据全在 GitHub Secrets，换机期间不中断；Secrets **读不回明文**，只能覆盖式重设。
+- 本机脚本 `verify_replication.py` / `sync_site_dataset.py` / `DB_TARGET=neon` 需要两个被 gitignore 的文件：`output/turso_site.local.json`、`output/neon_cold_backup.local.json`。丢失就去 Turso / Neon 控制台重新生成并按原名写回（Neon 连接串需去掉 `&channel_binding=require`）。
+- 不需要本地凭据：`failover_drill.mjs`（含 `--online`）、`e2e_check.py`、`watchdog_site_check.py`，以及全部 Python / Node 单测——它们只用公开只读 token。
+- 当前唯一待签字事项：13 条身份裁定的生产写入（append-only、不可撤销）。写入通道已 CI 化，命令见 `docs/SECURITY_IDENTITY_RESOLUTIONS.md` 第五节；默认 `DRY_RUN` 只演练不写库。线上目前**没有**裁定表，门禁行为与改造前完全一致，代码可以安全放着不写。
+- 第二道门 IR/JCI 让 B 口径持续报红是有意 fail-closed，不是待修 bug；回归基线与当前 HEAD 见 HANDOFF 第 5 / 第 2 节。
+
 ## G10 B 口径历史收益暂不可用于对外披露（2026-10-31 审计结论）
 
 四路独立审计（数据工程 / 量化合规 / SRE / 测试架构）一致结论：**代码实现忠实于规则，但输入价格不可靠**。
