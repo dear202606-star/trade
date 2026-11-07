@@ -217,7 +217,7 @@ def main():
         if a.prune:
             removed, keep = prune_files(a.source)
             print(json.dumps({"pruned": removed, "kept": keep}, ensure_ascii=False))
-            if keep != ["cloud.json"]:
+            if any(k not in MIRROR_FILES for k in keep):
                 raise RuntimeError("Pages 产物仍含非引导数据文件：%s" % keep)
         return 0
     missing = sorted(set(REQUIRED) - set(records))
