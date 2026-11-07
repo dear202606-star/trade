@@ -146,6 +146,57 @@ class TradingWindowTests(unittest.TestCase):
         self.assertEqual(len(r['calendar_sha256']), 64)
         json.dumps(r, ensure_ascii=False)   # 必须是可序列化的纯数据
 
+    def test_publish_gate_never_skips_the_deploy_chain(self):
+        """回归：calendar_gate 曾写 `if: github.event_name == 'schedule'`，
+        push 时被跳过后沿 needs 链把 deploy 一起跳过 —— build 成功但 Pages 没部署。
+        门禁 job 必须始终运行，由脚本对非 schedule 事件自行放行。
+        """
+        text = (BASE / '.github' / 'workflows' / 'ui-publish.yml').read_text(encoding='utf-8')
+        lines = text.splitlines()
+        start = next(i for i, line in enumerate(lines) if line.rstrip() == 'jobs:')
+        jobs, current = {}, None
+        for line in lines[start + 1:]:
+            m = re.match(r'^  ([A-Za-z_][A-Za-z0-9_]*):\s*$', line)
+            if m:
+                current = m.group(1)
+                jobs[current] = []
+            elif current is not None:
+                jobs[current].append(line)
+        body = {name: '\n'.join(rows) for name, rows in jobs.items()}
+
+        self.assertIn('calendar_gate', body)
+        self.assertIn('deploy', body)
+        # 1) 门禁 job 不能有 job 级 if：被跳过的 job 会连带跳过所有下游
+        self.assertIsNone(re.search(r'^    if:', body['calendar_gate'], re.M),
+                          'calendar_gate 必须始终运行，不能有 job 级 if')
+        self.assertIn('EVENT_NAME: ${{ github.event_name }}', body['calendar_gate'])
+        self.assertIn('--gate', body['calendar_gate'])
+        self.assertIn('allow: ${{ steps.gate.outputs.allow }}', body['calendar_gate'])
+
+        # 2) 遍历 deploy 的整条 needs 链，禁止「只在 schedule 运行」的 job 级 if
+        chain, pending = set(), ['deploy']
+        while pending:
+            name = pending.pop()
+            if name in chain or name not in body:
+                continue
+            chain.add(name)
+            needs = re.search(r'^    needs:\s*(.+)$', body[name], re.M)
+            if needs:
+                raw = needs.group(1).strip().strip("'\"")
+                if raw.startswith('['):
+                    pending += [x.strip().strip("'\"")
+                                for x in raw.strip('[]').split(',') if x.strip()]
+                else:
+                    pending.append(raw)
+            job_if = re.search(r'^    if:\s*(.+)$', body[name], re.M)
+            if job_if:
+                cond = job_if.group(1)
+                self.assertNotIn("github.event_name == 'schedule'", cond,
+                                 '%s 的 job 级 if 会在 push 被跳过，导致 deploy 掉链' % name)
+                self.assertIn('!cancelled()', cond,
+                              '%s 位于 deploy 依赖链，if 必须带 !cancelled() 兜底' % name)
+        self.assertEqual(chain, {'deploy', 'build', 'calendar_gate'})
+
 
 if __name__ == '__main__':
     unittest.main()

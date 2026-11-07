@@ -53,10 +53,11 @@ permissions:
   id-token: write
 
 jobs:
-  # 2026-11-08：定时发布只在 NYSE 交易日执行；push / 手动触发一律放行，
-  # 保证改代码后随时能发布。!cancelled() 兼容 gate job 被跳过的情况。
+  # 2026-11-08：定时发布只在 NYSE 交易日执行；push / 手动触发一律放行。
+  # 注意：本 job 不能写 `if: github.event_name == 'schedule'` —— 实测被跳过的
+  # job 会沿 needs 链把 deploy 也一起跳过，导致「build 成功但 Pages 没部署」。
+  # 改成始终运行、由门禁脚本自行放行非 schedule 触发（只多一次 checkout + 1 条命令）。
   calendar_gate:
-    if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
     outputs:
       allow: ${{ steps.gate.outputs.allow }}
@@ -65,6 +66,7 @@ jobs:
       - id: gate
         env:
           EVENT_NAME: ${{ github.event_name }}
+          SCHEDULE: ${{ github.event.schedule }}
         run: python3 trading_window.py --task publish --gate
   build:
     needs: calendar_gate
@@ -82,7 +84,7 @@ jobs:
           node-version: '20'
       - run: pip install -r requirements.txt
       - run: node --test test_daily_pnl.mjs test_online_quotes.mjs test_page_refresh.mjs
-      - run: python -m unittest test_closing_reconcile test_ranking_factor_rebase test_watchdog_gateway test_egress_budget test_replication -v
+      - run: python -m unittest test_closing_reconcile test_ranking_factor_rebase test_watchdog_gateway test_egress_budget test_replication test_trading_window -v
       - name: 保留已部署数据并构建界面
         env:
           GH_TOKEN: ${{ github.token }}
