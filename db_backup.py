@@ -14,7 +14,9 @@
 产物（单个 .tar.gz）
   manifest.json          备份时间、表清单、行数、sha256、排除清单、校验和
   tables/<table>.jsonl   每张表一行一个 JSON 对象，gzip 压缩
-  schema.sql             视图 / 函数 / 触发器定义（可重建数据库对象）
+  schema.sql             视图 / 函数定义（可重建数据库对象）
+  ddl/*.sql              sql/ 目录全部建表 DDL（表结构 / 约束 / 触发器 / RLS）
+  runtime.json           序列当前值、pg_cron 任务、RLS 开关、触发器清单
   README.txt             恢复方法与边界说明
 
 用法
@@ -47,9 +49,13 @@ README = """trade 数据库整库逻辑备份
 排除：{excluded}
 
 恢复边界
-  · 本备份是「数据 + 视图/函数/触发器定义」的逻辑快照，不是物理转储。
-  · 恢复前先执行 sql/ 目录下全部 DDL 建立表结构与守卫，再按 manifest
-    的表清单逐表导入 tables/*.jsonl。
+  · 本备份是「全量业务数据 + 全部建表 DDL + 视图/函数 + 运行时状态」的
+    逻辑快照，不是物理转储；Supabase 平台级对象（Auth 用户、Storage 文件、
+    API keys、角色口令、项目配置）不属于 public schema，SQL 备份无法覆盖。
+  · 恢复顺序：① 空库按编号执行 ddl/*.sql 建立表结构与守卫；
+    ② 按 manifest 表清单逐表导入 tables/*.jsonl；③ 执行 schema.sql 重建
+    视图与函数；④ 按 runtime.json 恢复序列值(setval)与 pg_cron 任务，
+    并核对 RLS 开关、触发器清单；⑤ 凭据由项目所有者重新注入。
   · 库内 append-only 守卫（data_lock / sys_event / live_*）会拒绝
     直接 UPDATE/DELETE；恢复演练应在独立空库进行，不要对生产库回放。
   · 凭据需由项目所有者重新注入，备份中刻意不含。
@@ -123,6 +129,60 @@ def _schema_sql(cur):
     return "\n".join(parts)
 
 
+def _ddl_files() -> dict:
+    """把仓库 sql/ 目录的权威建表 DDL 一并打包，使备份自包含。
+
+    表结构、约束、触发器、RLS policy 都由这些编号脚本定义；此前备份只带
+    数据，恢复时必须另找仓库对应版本，换项目/归档久了就对不上。
+    """
+    root = Path(__file__).resolve().parent / "sql"
+    return {p.name: p.read_text(encoding="utf-8")
+            for p in sorted(root.glob("*.sql"))}
+
+
+def _runtime_state(cur) -> dict:
+    """导出不属于 public 业务表、但换项目必然丢失的运行时状态。
+
+    重点是 pg_cron 任务（在 cron schema，_tables 只扫 public 会漏掉）与
+    序列当前值；RLS 开关、触发器/视图清单作为恢复后的核对依据。
+    """
+    state = {"sequences": [], "cron_jobs": [], "rls_enabled_tables": [],
+             "triggers": [], "views": [], "functions": []}
+    cur.execute("""select sequencename, last_value from pg_sequences
+                    where schemaname='public' order by sequencename""")
+    state["sequences"] = [{"name": r[0], "last_value": _encode(r[1])}
+                          for r in cur.fetchall()]
+    try:
+        cur.execute("select * from cron.job order by jobid")
+        cols = [d[0] for d in cur.description]
+        state["cron_jobs"] = [{c: _encode(v) for c, v in zip(cols, row)}
+                              for row in cur.fetchall()]
+    except Exception as exc:            # 无 pg_cron 扩展时留痕，不阻断备份
+        state["cron_jobs_error"] = str(exc)[:160]
+    cur.execute("""select c.relname from pg_class c
+                     join pg_namespace n on n.oid=c.relnamespace
+                    where n.nspname='public' and c.relkind='r'
+                      and c.relrowsecurity and not c.relname = any(%s)
+                    order by 1""", (sorted(EXCLUDE_TABLES),))
+    state["rls_enabled_tables"] = [r[0] for r in cur.fetchall()]
+    cur.execute("""select c.relname, t.tgname, pg_get_triggerdef(t.oid)
+                     from pg_trigger t join pg_class c on c.oid=t.tgrelid
+                     join pg_namespace n on n.oid=c.relnamespace
+                    where n.nspname='public' and not t.tgisinternal
+                    order by 1,2""")
+    state["triggers"] = [{"table": r[0], "name": r[1], "definition": r[2]}
+                         for r in cur.fetchall() if r[0] not in EXCLUDE_TABLES]
+    cur.execute("""select c.relname from pg_class c
+                     join pg_namespace n on n.oid=c.relnamespace
+                    where n.nspname='public' and c.relkind='v' order by 1""")
+    state["views"] = [r[0] for r in cur.fetchall()]
+    cur.execute("""select p.proname from pg_proc p
+                     join pg_namespace n on n.oid=p.pronamespace
+                    where n.nspname='public' order by 1""")
+    state["functions"] = [r[0] for r in cur.fetchall()]
+    return state
+
+
 def _dump_table(cur, table):
     """返回 (行数, gzip 字节, sha256)。表名来自 information_schema，安全。"""
     cur.execute('select * from public."%s"' % table.replace('"', '""'))
@@ -151,13 +211,15 @@ def build() -> dict:
             cur.execute("set statement_timeout = '300s'")
             tables = _tables(cur)
             schema_sql = _schema_sql(cur)
+            runtime = _runtime_state(cur)
             payload = {}
             for table in tables:
                 rows, data, sha = _dump_table(cur, table)
                 payload[table] = {"rows": rows, "sha256": sha, "bytes": len(data), "data": data}
     finally:
         conn.close()
-    return {"tables": tables, "schema_sql": schema_sql, "payload": payload}
+    return {"tables": tables, "schema_sql": schema_sql, "runtime": runtime,
+            "ddl_files": _ddl_files(), "payload": payload}
 
 
 def write_archive(target: Path, snapshot: dict) -> dict:
@@ -176,6 +238,14 @@ def write_archive(target: Path, snapshot: dict) -> dict:
                    for t in snapshot["tables"]},
         "total_tables": len(snapshot["tables"]),
         "total_rows": sum(snapshot["payload"][t]["rows"] for t in snapshot["tables"]),
+        "ddl_files": {name: hashlib.sha256(text.encode("utf-8")).hexdigest()
+                      for name, text in snapshot["ddl_files"].items()},
+        "runtime_objects": {"sequences": len(snapshot["runtime"]["sequences"]),
+                            "cron_jobs": len(snapshot["runtime"]["cron_jobs"]),
+                            "rls_enabled_tables": len(snapshot["runtime"]["rls_enabled_tables"]),
+                            "triggers": len(snapshot["runtime"]["triggers"]),
+                            "views": len(snapshot["runtime"]["views"]),
+                            "functions": len(snapshot["runtime"]["functions"])},
     }
     tmp_fd, tmp = tempfile.mkstemp(prefix=".dbbackup-", suffix=".tar.gz",
                                    dir=str(target.parent))
@@ -187,6 +257,10 @@ def write_archive(target: Path, snapshot: dict) -> dict:
             generated_at=generated,
             excluded=", ".join(sorted(EXCLUDE_TABLES))).encode("utf-8"))
         add("schema.sql", snapshot["schema_sql"].encode("utf-8"))
+        add("runtime.json", json.dumps(snapshot["runtime"], ensure_ascii=False,
+                                       indent=2, sort_keys=True).encode("utf-8"))
+        for name, text in snapshot["ddl_files"].items():
+            add("ddl/" + name, text.encode("utf-8"))
         for t in snapshot["tables"]:
             add("tables/%s.jsonl.gz" % t, snapshot["payload"][t]["data"])
         add("manifest.json", json.dumps(manifest, ensure_ascii=False,
@@ -253,6 +327,22 @@ def verify_archive(path: Path, expected_file_sha: str | None = None) -> dict:
             problems.append("归档整体校验和不符（文件可能被篡改或损坏）")
     if set(m.get("excluded_tables", [])) != EXCLUDE_TABLES:
         problems.append("排除表清单与当前策略不一致")
+    # 自包含恢复所需的 DDL 与运行时状态，缺一不可
+    if not m.get("ddl_files"):
+        problems.append("备份未包含建表 DDL（无法自包含恢复）")
+    for name, digest in m.get("ddl_files", {}).items():
+        key = "ddl/" + name
+        if key not in members:
+            problems.append("缺少 DDL：" + name)
+        elif hashlib.sha256(members[key]).hexdigest() != digest:
+            problems.append("DDL 校验和不符：" + name)
+    if "runtime.json" not in members:
+        problems.append("缺少 runtime.json（序列 / pg_cron / RLS 状态不可恢复）")
+    else:
+        try:
+            json.loads(members["runtime.json"])
+        except Exception:
+            problems.append("runtime.json 不可解析")
     for t, meta in m.get("tables", {}).items():
         key = "tables/%s.jsonl.gz" % t
         if key not in members:
