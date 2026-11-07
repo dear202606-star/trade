@@ -189,6 +189,46 @@ def close_enough(a,b):
     return abs(positive(a)-positive(b))<=max(.0011,abs(b)*1e-8)
 
 
+def reconcile_closing_prices(prices,quotes,symbols):
+    """收盘后逐标的用独立源复核主源当日收盘价，修掉单源数据污染导致的整口径停更。
+
+    2026-11-07：B 口径因 NEM 的「Closing quote disagrees」长期停在上一交易日，
+    而行情快照与 Yahoo 独立源的当日收盘价完全一致，说明是主源（东财日线 /
+    封存 context）当日记录滞后或污染。过去这种情况会让整个 variant 计算失败，
+    净值、次年预览、排名一起停更，且没有任何自愈路径。
+
+    安全边界（不放宽 fail-closed）：
+      · 只在收盘后（intraday=False）执行，盘中不做任何替换；
+      · 仅当「独立源当日收盘价与已封存行情快照一致」时才替换主源当日值；
+      · 独立源不可达 / 双源都不吻合 → 保持原值，由 calculate_equity 原有对账拒绝；
+      · 只改当日 raw/adjusted，历史封存证据不动；替换动作写入 evidence 留痕。
+    """
+    if quotes.get('intraday'):return prices,[]
+    end=quotes['session'];snapshot=quotes.get('quotes') or {};repairs=[]
+    for symbol in symbols:
+        expected=(snapshot.get(symbol) or {}).get('p')
+        source=prices.get(symbol) or {};raw=source.get('raw') or {}
+        if expected is None or end not in raw or close_enough(raw[end],expected):continue
+        try:
+            alt=fetch_daily_yahoo(symbol,min(raw),end)
+        except Exception as exc:
+            repairs.append(symbol+': 独立源不可达 '+type(exc).__name__);continue
+        if end not in alt['raw'] or not close_enough(alt['raw'][end],expected):
+            repairs.append(symbol+': 双源均不吻合，交由原对账拒绝');continue
+        adjusted=source.setdefault('adjusted',{})
+        ratio=(adjusted.get(end) or raw[end])/raw[end]   # 保留主源复权比例，避免破坏连续性
+        prior=raw[end]
+        raw[end]=alt['raw'][end]
+        adjusted[end]=alt['raw'][end]*ratio
+        source.setdefault('evidence',{})['closing_cross_check']={
+            'source':'yahoo','session':end,'expected':expected,
+            'primary':prior,'verified':alt['raw'][end],
+            'reason':'primary daily close disagrees with sealed quote snapshot'}
+        repairs.append('%s: 主源 %.4f → 独立源 %.4f（已核验）'%
+                       (symbol,prior,alt['raw'][end]))
+    return prices,repairs
+
+
 def market_advice(quotes,calendar):
     """Existing rule: nine prior month ends plus the current month's latest SPY."""
     month=dt.date.fromisoformat(quotes['session']).replace(day=1);dates=[]
@@ -392,6 +432,9 @@ def run_equity():
             symbol=futures[future]
             try:prices[symbol]=future.result()
             except Exception as exc:failures.append(symbol+': '+str(exc))
+    # 单源当日收盘价污染会拖垮整个口径的净值/预览推进；先做独立源交叉复核。
+    prices,cross_checks=reconcile_closing_prices(prices,quotes,symbols)
+    for note in cross_checks:print('[closing-cross-check]',note)
     # The benchmark publishes exact ordinary distribution amounts in its free workbook.
     spy=prices.get('SPY')
     if spy:
