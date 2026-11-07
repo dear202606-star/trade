@@ -30,8 +30,11 @@ REQUIRED = (
 # B 口径（页面默认）专有的数据集，仅在完整数据管线的构建产物中存在；
 # 本地 site_build.py 不带 variant_b 输出，故 dry-run 只提示、不阻断。
 REQUIRED_B = ("b/curve", "b/strategy_history")
-# 引导配置必须保留在 Pages 上，否则浏览器无从知道数据库地址与公开 key
-KEEP_STATIC = {"cloud"}
+# 引导配置 + CI 从在线库自动导出的同源展示镜像，二者都不是「待入库数据集」：
+# cloud.json 必须留在 Pages 上供浏览器找到数据库；snapshot.json 是只读兜底副本，
+# 主源仍是在线库，把它写回库里会造成自我复制。
+KEEP_STATIC = {"cloud", "snapshot"}
+MIRROR_FILES = ("cloud.json", "snapshot.json")
 
 
 def sector_dataset():
@@ -128,7 +131,7 @@ def publish(records, prune=False, source=None):
     if prune:
         removed, keep = prune_files(source)
         print(json.dumps({"pruned": removed, "kept": keep}, ensure_ascii=False))
-        if keep != ["cloud.json"]:
+        if any(k not in MIRROR_FILES for k in keep):
             raise RuntimeError("Pages 产物仍含非引导数据文件：%s" % keep)
 
 
@@ -148,6 +151,38 @@ def verify():
     return not missing
 
 
+def verify_direct():
+    """直连校验：绕过 PostgREST 网关。
+
+    2026-11-07：项目曾因 exceed_egress_quota 被限流，REST 一律返回 402，
+    但 PostgreSQL 直连读写完全正常。发布门禁不应被网关配额状态误伤。
+    """
+    conn = connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("select key from public.site_dataset")
+            online = {r[0] for r in cur.fetchall()}
+    finally:
+        conn.close()
+    missing = sorted((set(REQUIRED) | set(REQUIRED_B)) - online)
+    print(json.dumps({"mode": "postgres-direct", "online_keys": len(online),
+                      "required": len(REQUIRED) + len(REQUIRED_B),
+                      "missing": missing}, ensure_ascii=False))
+    return not missing
+
+
+def healthy_source():
+    """CI 有直连凭据时优先直连校验；本地无凭据才退回 REST。"""
+    has_pw = bool(os.environ.get("SUPABASE_DB_PASSWORD", "").strip()) or \
+             (BASE / "output" / "_supabase_dbpass.txt").exists()
+    if has_pw:
+        try:
+            return verify_direct()
+        except Exception as exc:
+            print("直连校验失败，回退 REST 校验：%s" % str(exc)[:120], file=sys.stderr)
+    return verify()
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--source", default="docs/data")
@@ -158,7 +193,7 @@ def main():
     a = p.parse_args()
 
     if a.verify:
-        return 0 if verify() else 1
+        return 0 if healthy_source() else 1
     records = collect(a.source)
     source_root = Path(a.source)
     artifact_keys = {p.relative_to(source_root).with_suffix("").as_posix()
@@ -166,7 +201,7 @@ def main():
     if artifact_keys <= KEEP_STATIC:
         # 稳态（在线单源）：上一轮发布已剔除产物中的数据 JSON，本产物仅含 cloud.json。
         # 此时唯一合法数据源是在线库——齐备则放行，不齐备才 fail-closed。
-        if not verify():
+        if not healthy_source():
             print("FATAL: Pages 产物已剔除静态数据，且在线库必需数据集不齐备", file=sys.stderr)
             return 1
         print(json.dumps({"mode": "online-only", "artifact_data_files": sorted(artifact_keys),

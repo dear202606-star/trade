@@ -1,12 +1,24 @@
 name: 网页发布
 
+# 发布职责（2026-11-07 起）：
+#   1) 构建前端并保留上一份已部署的数据基线
+#   2) 把构建期展示数据写入在线库（唯一主源），剔除 Pages 上的历史数据 JSON
+#   3) 通过 PostgreSQL 直连从在线库导出一份同源只读镜像 data/snapshot.json
+#      —— REST 网关被限流(402)时页面靠它完整渲染，且静态层读它可消除大部分出口流量
+#   4) 原子部署。镜像导出校验不通过即整体失败，绝不用半份数据上线。
+# 定时触发用于刷新镜像（数据管线每天 2~3 次产出，无需更高频）。
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "40 12,18,22 * * 1-5"
   push:
     branches: [main]
     paths:
       - site_src/**
       - publish_ui.py
+      - publish_site_dataset.py
+      - export_site_snapshot.py
+      - sql/122_site_dataset.sql
       - .github/workflows/ui-publish.yml
 
 concurrency:
@@ -22,7 +34,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -39,11 +51,31 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: python publish_ui.py
       - name: 展示数据入库并剔除 Pages 静态数据
-        # 2026-11-06：页面改为只连在线库。首轮发布先建表+写库，再删 Pages 产物中的
-        # 数据 JSON；后续稳态发布产物仅含 cloud.json，脚本校验在线库齐备后直接放行。
         env:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: python publish_site_dataset.py --install --source _site_release/data --prune
+      - name: 从在线库直连导出同源展示镜像
+        # 直连不经过 PostgREST 网关：即使网关因 egress 配额返回 402，
+        # 数据库本身可用时仍能导出，这是页面「绝对可靠」的兜底来源。
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: python export_site_snapshot.py --target _site_release/data/snapshot.json
+      - name: 镜像完整性复核
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          p = pathlib.Path('_site_release/data/snapshot.json')
+          d = json.loads(p.read_text(encoding='utf-8'))
+          assert d.get('schema') == 1, 'bad schema'
+          assert d.get('source') == 'postgres-direct', 'bad source'
+          need = {'quotes','equity','b/equity','signal','b/signal','preview','b/preview',
+                  'curve','b/curve','strategy_history','b/strategy_history',
+                  'name_zh','sectors','health'}
+          have = set(d['datasets'])
+          assert need <= have, 'missing datasets: %s' % sorted(need - have)
+          print('snapshot OK: %d keys, %d bytes, generated_at=%s'
+                % (len(have), p.stat().st_size, d['generated_at']))
+          PY
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site_release

@@ -168,6 +168,8 @@
 
   /* 数据停更检测：按用户当前时间算，不依赖构建时的健康快照 */
   function checkFreshness() {
+    /* 在线库不可用时展示的是最近一次同步快照，提示优先级高于行情超时 */
+    if (showSourceNotice()) return;
     if (DSH.quoteFreshness(Q) !== true) {
       var old = document.getElementById("freshBanner");
       if (old) old.remove();
@@ -383,22 +385,32 @@
     }
   }
 
-  /* 同时刷新依赖，报价时间不变也检查有效期和新发布的计算结果。 */
+  /* 分层自动刷新：不同卡片按各自数据变更频率更新，不再一刀切 60 秒全量重拉。
+     L2 行情：仅交易时段每 60 秒，且只拉 quotes，重绘行情条
+     L1 净值/持仓/预览：每 30 分钟重取一次并重绘卡片
+     L0 曲线/历史/映射：TTL 6 小时，由数据层自行判定，不设独立定时器
+     全部定时器在页面隐藏时静默，避免后台标签页持续消耗出口流量。 */
   function startAutoRefresh() {
     var busy = false;
+    setInterval(async function () {
+      if (busy || document.hidden || (DSH.isTradingHours && !DSH.isTradingHours())) return;
+      busy = true;
+      try {
+        var q = await DSH.jsonNoCache("quotes", {});
+        if (q && (q.ts || q.ts_local)) { Q = q; renderTick(); renderStamp(); }
+      } finally { busy = false; }
+    }, 60000);
+
     setInterval(async function () {
       if (busy || document.hidden) return;
       busy = true;
       try {
         await loadVariant(true);
-        if (!dataReady()) {
-          renderUnavailable("计算数据读取失败 · 正在重试");
-          return;
-        }
+        if (!dataReady()) { renderUnavailable("计算数据读取失败 · 正在重试"); return; }
         checkFreshness();
         renderAllCards();
       } finally { busy = false; }
-    }, 60000);
+    }, 30 * 60 * 1000);
   }
 
   /* ---------- 口径切换 ---------- */
@@ -461,7 +473,29 @@
   function renderStamp() {
     var foot = $("footStamp");
     if (foot) foot.textContent = "行情 " + (Q && Q.ts_local ? Q.ts_local.slice(5,16) : "暂无") +
-      " · 收益 " + (EQ && EQ.updated ? EQ.updated.slice(5,16) : "暂无") + "（北京）";
+      " · 收益 " + (EQ && EQ.updated ? EQ.updated.slice(5,16) : "暂无") + "（北京）" +
+      (DSH.dataStatus && DSH.dataStatus().mode === "mirror" ? " · 离线快照" : "");
+  }
+
+  /* 在线库熔断时页面仍用同源镜像完整渲染，只提示数据时效，绝不清空卡片。
+     返回 true 表示已接管 freshBanner，checkFreshness 不再覆盖它。 */
+  function showSourceNotice() {
+    var s = DSH.dataStatus ? DSH.dataStatus() : null;
+    if (!s || s.mode !== "mirror") return false;
+    var b = document.getElementById("freshBanner");
+    if (!b) {
+      b = document.createElement("div");
+      b.id = "freshBanner";
+      b.className = "data-alert";
+      document.body.insertBefore(b, document.body.firstChild);
+    }
+    var when = s.snapshotAt
+      ? new Date(s.snapshotAt).toLocaleString("zh-CN", { timeZone: "Asia/Shanghai", hour12: false })
+      : "最近一次同步";
+    b.textContent = "在线数据库暂不可用，正展示最近一次同步数据（截至 " + when +
+      " 北京）；连接恢复后自动更新";
+    b.style.display = "block";
+    return true;
   }
 
   function renderUnavailable(reason) {
@@ -528,6 +562,8 @@
 
   async function boot() {
     initPills();
+    /* 先把 CI 导出的同源镜像备好：此后无论在线库是否可用，都有完整数据可渲染 */
+    if (DSH.snapshotReady) await DSH.snapshotReady();
     await loadVariant();
     initVariants();
     startAutoRefresh();

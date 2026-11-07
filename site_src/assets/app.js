@@ -109,73 +109,240 @@
   DSH.cls = (v) => (v == null || isNaN(v) ? "zero" : v >= 0 ? "up" : "down");
   DSH.esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-  /* ---------- 数据 ---------- */
-  const cache = {};
-  /* 强制绕过内存缓存重新拉取（用于定时刷新） */
+  /* ---------- 数据层：分层节奏 + 同源镜像兜底 ----------
+     2026-11-07：Supabase REST 网关曾因 exceed_egress_quota 返回 402，而页面
+     所有展示数据只走该网关，导致数据库完好却全站白屏；旧实现每 60 秒把
+     全部数据集清空重拉、且一律 cache:"no-store"，正是配额被打穿的放大器。
+
+     现按「数据实际变更频率」分三层，不再一刀切实时刷新：
+       L0 STATIC   name_zh / sectors / curve / strategy_history / health
+                   结构稳定或日更，直接读 CI 从在线库导出的同源镜像，零 REST 流量
+       L1 DAILY    equity / signal / preview（含 B 口径），在线库优先，TTL 30 分钟
+       L2 INTRADAY quotes，交易时段 TTL 60 秒，非交易时段 30 分钟
+
+     在线库失败（402 / 5xx / 网络）时熔断 10 分钟，依次回退
+     localStorage 最近一次成功值 → 同源镜像，页面始终有数据，
+     只是标注「数据截至 X」而不是「数据未就绪」。
+     在线库仍是唯一主源与唯一写入口；镜像由 CI 直连数据库自动生成。
+  */
+  const cache = {};                 // name -> payload
+  const cacheTs = {};               // name -> 本次成功取数的时间戳
+  const inflight = {};              // 同名并发请求合并
+  const degraded = {};              // 当前使用兜底数据的 key
+  const LS_PREFIX = "dsh.data.v2.";
+  const SNAPSHOT_URL = "data/snapshot.json";
+  const CIRCUIT_MS = 10 * 60 * 1000;
+  let snapshot = null, snapshotInflight = null, circuitUntil = 0;
+
+  const STATIC_KEYS = ["curve", "b/curve", "strategy_history", "b/strategy_history",
+                       "name_zh", "sectors", "health"];
+  const DAILY_KEYS = ["equity", "b/equity", "signal", "b/signal", "preview", "b/preview"];
+  const TIER_STATIC = 0, TIER_DAILY = 1, TIER_INTRADAY = 2;
+
+  function tierOf(name) {
+    if (STATIC_KEYS.indexOf(name) >= 0) return TIER_STATIC;
+    if (name === "quotes") return TIER_INTRADAY;
+    if (DAILY_KEYS.indexOf(name) >= 0) return TIER_DAILY;
+    return TIER_STATIC;            // 未知 key 保守走镜像，避免打爆网关
+  }
+
+  /* 与 quotes.yml 的 UTC 13-21 周一至周五采集窗口对齐；非交易时段不轮询 */
+  function isTradingHours() {
+    const d = new Date(), w = d.getUTCDay(), h = d.getUTCHours();
+    return w >= 1 && w <= 5 && h >= 13 && h < 22;
+  }
+
+  function ttlOf(name) {
+    const t = tierOf(name);
+    if (t === TIER_STATIC) return 6 * 3600 * 1000;
+    if (t === TIER_DAILY) return 30 * 60 * 1000;
+    return isTradingHours() ? 60 * 1000 : 30 * 60 * 1000;
+  }
+  DSH.ttlOf = ttlOf;
+  DSH.tierOf = tierOf;
+  DSH.isTradingHours = isTradingHours;
+
+  function lsGet(name) {
+    try {
+      const raw = localStorage.getItem(LS_PREFIX + name);
+      if (!raw) return null;
+      const o = JSON.parse(raw);
+      return o && o.payload != null ? o : null;
+    } catch (e) { return null; }
+  }
+  function lsSet(name, payload) {
+    try { localStorage.setItem(LS_PREFIX + name,
+                               JSON.stringify({ ts: Date.now(), payload: payload })); }
+    catch (e) { /* 隐私模式 / 配额满：降级为纯内存缓存，不影响主流程 */ }
+  }
+  function noteErr(url, e) {
+    g.__dshErr = (g.__dshErr || []).concat(url + " -> " + e.message).slice(-20);
+  }
+
+  /* 同源镜像：整站一次请求，命中 CDN 缓存，不消耗数据库出口流量 */
+  function loadSnapshot() {
+    if (snapshot) return Promise.resolve(snapshot);
+    if (snapshotInflight) return snapshotInflight;
+    snapshotInflight = (async function () {
+      try {
+        const r = await fetch(SNAPSHOT_URL, { cache: "default" });
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        const d = await r.json();
+        if (!d || d.schema !== 1 || !d.datasets || typeof d.datasets !== "object")
+          throw new Error("Invalid snapshot schema");
+        snapshot = d;
+        return d;
+      } catch (e) {
+        noteErr(SNAPSHOT_URL, e);
+        return null;
+      } finally { snapshotInflight = null; }
+    })();
+    return snapshotInflight;
+  }
+  DSH.snapshot = function () { return snapshot; };
+  DSH.snapshotReady = loadSnapshot;
+
+  async function loadCloud(fallback) {
+    if (cache.cloud !== undefined) return cache.cloud;
+    const url = "data/cloud.json?t=" + Date.now();
+    try {
+      const r = await fetch(url, { cache: "no-store" });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const d = await r.json();
+      if (!d || typeof d.url !== "string" || !/^https:\/\//.test(d.url) ||
+          typeof d.key !== "string" || !d.key)
+        throw new Error("Invalid online configuration");
+      cache.cloud = d;
+    } catch (e) {
+      noteErr(url, e);
+      return fallback === undefined ? null : fallback;
+    }
+    return cache.cloud;
+  }
+
+  /* 在线库读取；仅 L1/L2 会走到这里 */
+  async function fetchOnline(name, cfg) {
+    let url;
+    const runtime = /^(b\/)?(equity|preview|signal)$/.exec(name);
+    if (name === "quotes" || runtime) {
+      if (runtime) {
+        const variant = runtime[1] ? "B" : "A", kind = runtime[2];
+        url = cfg.url + (kind === "signal"
+          ? "/rest/v1/live_strategy_anchor?variant=eq." + variant +
+            "&select=payload&order=hold_year.desc,revision.desc&limit=1"
+          : "/rest/v1/v_live_strategy_results?variant=eq." + variant +
+            "&kind=eq." + kind + "&select=payload");
+      } else url = cfg.url + "/rest/v1/v_live_quote_display?select=payload";
+    } else {
+      url = cfg.url + "/rest/v1/v_site_dataset?key=eq." +
+            encodeURIComponent(name).replace(/%2F/gi, "/") + "&select=payload";
+    }
+    const r = await fetch(url, { cache: "no-store", headers: { apikey: cfg.key } });
+    if (!r.ok) {
+      const e = new Error("HTTP " + r.status);
+      e.status = r.status;
+      throw e;
+    }
+    let d = await r.json();
+    if (name === "quotes") {
+      if (!Array.isArray(d) || d.length !== 1 || !d[0].payload ||
+          !d[0].payload.ok || !d[0].payload.quotes || !d[0].payload.quotes.SPY)
+        throw new Error("Online quote snapshot unavailable");
+      d = d[0].payload;
+    } else if (runtime) {
+      if (!Array.isArray(d) || d.length !== 1 || !d[0].payload)
+        throw new Error("Online strategy result unavailable");
+      d = runtime[2] === "signal" ? d[0].payload.signal : d[0].payload;
+      if (!d) throw new Error("Online strategy payload unavailable");
+    } else {
+      if (!Array.isArray(d) || d.length !== 1 || d[0].payload == null)
+        throw new Error("Online dataset unavailable: " + name);
+      d = d[0].payload;
+    }
+    if (name === "quotes" && d && d.quotes) d.quotes.__session = d.session || "";
+    return d;
+  }
+
+  function mirrorValue(name) {
+    return snapshot && snapshot.datasets ? snapshot.datasets[name] : undefined;
+  }
+
+  function fallbackValue(name, fallback) {
+    degraded[name] = true;
+    const m = mirrorValue(name);
+    if (m != null) { cache[name] = m; cacheTs[name] = Date.now() - ttlOf(name); return m; }
+    const ls = lsGet(name);
+    if (ls) { cache[name] = ls.payload; cacheTs[name] = ls.ts; return ls.payload; }
+    return fallback === undefined ? null : fallback;
+  }
+
+  DSH.json = async function (name, fallback) {
+    if (name === "cloud") return loadCloud(fallback);
+    if (cache[name] !== undefined &&
+        Date.now() - (cacheTs[name] || 0) < ttlOf(name)) return cache[name];
+    if (inflight[name]) return inflight[name];
+
+    inflight[name] = (async function () {
+      try {
+        const tier = tierOf(name);
+        /* L0：结构稳定，直接读同源镜像；不再为它消耗数据库出口流量 */
+        if (tier === TIER_STATIC) {
+          await loadSnapshot();
+          const m = mirrorValue(name);
+          if (m != null) {
+            cache[name] = m; cacheTs[name] = Date.now(); delete degraded[name];
+            return m;
+          }
+          const ls = lsGet(name);
+          if (ls) { cache[name] = ls.payload; cacheTs[name] = ls.ts; return ls.payload; }
+          /* 镜像与本地缓存都缺失（旧部署）：仍尝试在线库，保持兼容 */
+        }
+        if (Date.now() < circuitUntil) return fallbackValue(name, fallback);
+        const cfg = await DSH.json("cloud", null);
+        if (!cfg || !cfg.url || !cfg.key) {
+          const ce = new Error("Online dataset configuration unavailable");
+          ce.configFailure = true;     // 本地引导配置问题，不应熔断数据库
+          throw ce;
+        }
+        const v = await fetchOnline(name, cfg);
+        cache[name] = v; cacheTs[name] = Date.now();
+        lsSet(name, v);
+        delete degraded[name];
+        return v;
+      } catch (e) {
+        if (e.status === 401 || e.status === 403) {
+          /* 凭据可能已轮换：清掉引导配置让它重新加载，且不做熔断 */
+          delete cache.cloud;
+        } else if (!e.configFailure) {
+          /* 402 / 5xx / 网络异常一律熔断，避免故障期反复冲击被限流的网关 */
+          circuitUntil = Date.now() + CIRCUIT_MS;
+        }
+        await loadSnapshot();         // 确保镜像就绪后再兜底（整站仅一次请求，自动去重）
+        noteErr(name, e);
+        return fallbackValue(name, fallback);
+      } finally { delete inflight[name]; }
+    })();
+    return inflight[name];
+  };
+
+  /* 兼容旧调用：只在「该层已到期且未熔断」时才真正重新取数 */
   DSH.jsonNoCache = async function (name, fallback) {
-    delete cache[name];
+    if (Date.now() < circuitUntil)
+      return cache[name] !== undefined ? cache[name] : (fallback === undefined ? null : fallback);
+    if (Date.now() - (cacheTs[name] || 0) < ttlOf(name))
+      return cache[name] !== undefined ? cache[name] : DSH.json(name, fallback);
+    delete cache[name]; delete cacheTs[name];
     return DSH.json(name, fallback);
   };
 
-  DSH.json = async function (name, fallback) {
-    if (cache[name] !== undefined) return cache[name];
-    let url = "data/" + name + ".json";
-    try {
-      let headers = {};
-      const runtime = /^(b\/)?(equity|preview|signal)$/.exec(name);
-      if (name === 'quotes' || runtime) {
-        const cfg = await DSH.json('cloud', null);
-        if (!cfg || !cfg.url || !cfg.key) throw new Error('Online quote configuration unavailable');
-        if (runtime) {
-          const variant = runtime[1] ? 'B' : 'A', kind = runtime[2];
-          url = cfg.url + (kind === 'signal'
-            ? '/rest/v1/live_strategy_anchor?variant=eq.' + variant + '&select=payload&order=hold_year.desc,revision.desc&limit=1'
-            : '/rest/v1/v_live_strategy_results?variant=eq.' + variant + '&kind=eq.' + kind + '&select=payload');
-        } else url = cfg.url + '/rest/v1/v_live_quote_display?select=payload';
-        headers = { apikey: cfg.key };
-      } else if (name === 'cloud') {
-        // 唯一保留的线下文件：引导配置（数据库地址 + 可公开 key）。
-        url = "data/cloud.json?t=" + Date.now();
-      } else {
-        // 2026-11-06 单源改造：其余展示数据一律从在线库读取，
-        // 不再存在「在线视图 + 线下 JSON 快照」双源不一致的可能。
-        const cfg = await DSH.json('cloud', null);
-        if (!cfg || !cfg.url || !cfg.key) throw new Error('Online dataset configuration unavailable');
-        url = cfg.url + '/rest/v1/v_site_dataset?key=eq.' +
-              encodeURIComponent(name).replace(/%2F/gi, '/') + '&select=payload';
-        headers = { apikey: cfg.key };
-      }
-      const r = await fetch(url, { cache: "no-store", headers: headers });
-      if (!r.ok) {
-        if (name !== 'cloud' && (r.status===401 || r.status===403)) delete cache.cloud;
-        throw new Error("HTTP " + r.status);
-      }
-      let _d = await r.json();
-      if (name==='cloud' && (!_d || typeof _d.url!=='string' || !/^https:\/\//.test(_d.url) ||
-          typeof _d.key!=='string' || !_d.key)) throw new Error('Invalid online configuration');
-      if (name === 'quotes') {
-        if (!Array.isArray(_d) || _d.length !== 1 || !_d[0].payload ||
-            !_d[0].payload.ok || !_d[0].payload.quotes || !_d[0].payload.quotes.SPY)
-          throw new Error('Online quote snapshot unavailable');
-        _d = _d[0].payload;
-      } else if (runtime) {
-        if (!Array.isArray(_d) || _d.length !== 1 || !_d[0].payload)
-          throw new Error('Online strategy result unavailable');
-        _d = runtime[2] === 'signal' ? _d[0].payload.signal : _d[0].payload;
-        if (!_d) throw new Error('Online strategy payload unavailable');
-      } else if (name !== 'cloud') {
-        if (!Array.isArray(_d) || _d.length !== 1 || _d[0].payload == null)
-          throw new Error('Online dataset unavailable: ' + name);
-        _d = _d[0].payload;
-      }
-      // 行情：把「最近交易日」挂到报价表上，供各页面显示与判断新仓
-      if (name === 'quotes' && _d && _d.quotes) _d.quotes.__session = _d.session || '';
-      cache[name] = _d;
-    } catch (e) {
-      g.__dshErr = (g.__dshErr || []).concat(url + " -> " + e.message).slice(-20);
-      return fallback === undefined ? null : fallback;
-    }
-    return cache[name];
+  /* 供页面显示数据来源与时效，不再用「数据未就绪」掩盖仍有价值的历史值 */
+  DSH.dataStatus = function () {
+    return {
+      mode: Object.keys(degraded).length ? "mirror" : "live",
+      degradedKeys: Object.keys(degraded),
+      snapshotAt: snapshot ? snapshot.generated_at : "",
+      circuitOpen: Date.now() < circuitUntil
+    };
   };
 
   /* ---------- 存储：云端为准，本地只留同步码 ----------
@@ -396,8 +563,15 @@
   DSH.autoRefresh = function (minutes) {
     const ms = (minutes || 5) * 60000;
     setInterval(async function () {
+      if (document.hidden) return;                 // 后台标签页不产生任何流量
       try {
-        for (const k of Object.keys(cache)) delete cache[k];
+        /* 只让「已到本层 TTL」的数据过期；静态层不会被无谓重拉 */
+        for (const k of Object.keys(cache)) {
+          if (k === "cloud") continue;
+          if (Date.now() - (cacheTs[k] || 0) >= ttlOf(k)) {
+            delete cache[k]; delete cacheTs[k];
+          }
+        }
         await DSH.paintTick();
         if (DSH.stamp) await DSH.stamp();
         for (const fn of DSH._refreshers) { try { await fn(); } catch (e) {} }

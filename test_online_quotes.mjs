@@ -15,15 +15,47 @@ function reader(reply,cloudReply) {
   return {dsh:context.window.DSH,calls};
 }
 
-test('a transient online-dataset failure retries, while a successful response stays cached',async()=>{
-  let attempts=0;
-  const {dsh,calls}=reader(async()=>++attempts===1?{ok:false,status:503}:
-    {ok:true,json:async()=>[{payload:{points:[1]}}]});
-  assert.equal(await dsh.json('curve',null),null);
-  assert.equal((await dsh.json('curve',null)).points.length,1);
-  await dsh.json('curve',null);assert.equal(attempts,2);
-  // 2026-11-06：展示数据不再读线下 JSON，必须走在线库视图。
-  assert.match(calls.at(-1).url,/v_site_dataset\?key=eq\.curve/);
+test('static datasets read the mirrored snapshot and never touch the REST gateway',async()=>{
+  // 2026-11-07 分层改造：curve/name_zh/sectors 等结构稳定的数据集由 CI
+  // 从在线库直连导出同源镜像，浏览器读 Pages 即可，不消耗数据库出口流量。
+  const snap={schema:1,source:'postgres-direct',generated_at:'2026-11-07T07:00:00Z',
+    datasets:{curve:{points:[1,2,3]}},meta:{}};
+  const {dsh,calls}=reader(async(url)=>{
+    if (url==='data/snapshot.json') return {ok:true,json:async()=>snap};
+    throw Error('unexpected REST call: '+url);
+  });
+  assert.deepEqual(await dsh.json('curve',null),{points:[1,2,3]});
+  assert.equal(calls.some(c=>c.url.includes('/rest/v1/')),false);
+  // TTL 内重复读取直接命中内存缓存，不产生任何新请求
+  const n=calls.length;
+  assert.deepEqual(await dsh.json('curve',null),{points:[1,2,3]});
+  assert.equal(calls.length,n);
+});
+
+test('a 402 gateway outage still serves complete data from the mirrored snapshot',async()=>{
+  const equity={position:[{ticker:'X'}],stats:{strategy:0.4355}};
+  const snap={schema:1,source:'postgres-direct',generated_at:'2026-11-07T07:00:00Z',
+    datasets:{equity,curve:{points:[1]}},meta:{}};
+  const {dsh,calls}=reader(async(url)=>{
+    if (url==='data/snapshot.json') return {ok:true,json:async()=>snap};
+    return {ok:false,status:402};
+  });
+  assert.deepEqual(await dsh.json('equity',null),equity);
+  assert.equal(dsh.dataStatus().mode,'mirror');
+  // 熔断期内不再反复冲击被限流的网关
+  const before=calls.filter(c=>c.url.includes('/rest/v1/')).length;
+  assert.deepEqual(await dsh.json('equity',null),equity);
+  assert.equal(calls.filter(c=>c.url.includes('/rest/v1/')).length,before);
+});
+
+test('refresh cadence is tiered instead of a single 60-second full reload',()=>{
+  const {dsh}=reader(async()=>({ok:false}));
+  assert.equal(dsh.ttlOf('curve'),6*3600*1000);
+  assert.equal(dsh.tierOf('curve'),0);
+  assert.equal(dsh.ttlOf('equity'),30*60*1000);
+  assert.equal(dsh.tierOf('equity'),1);
+  assert.equal(dsh.tierOf('quotes'),2);
+  assert.ok([60*1000,30*60*1000].includes(dsh.ttlOf('quotes')));
 });
 
 test('failed or malformed cloud configuration cannot poison future refreshes',async()=>{
