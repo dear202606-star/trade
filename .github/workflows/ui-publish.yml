@@ -37,6 +37,9 @@ on:
       - realtime_check.py
       - watchdog_site_check.py
       - sql/122_site_dataset.sql
+      - trading_window.py
+      - research/exchange_calendar.json
+      - test_trading_window.py
       - .github/workflows/ui-publish.yml
 
 concurrency:
@@ -50,7 +53,22 @@ permissions:
   id-token: write
 
 jobs:
+  # 2026-11-08：定时发布只在 NYSE 交易日执行；push / 手动触发一律放行，
+  # 保证改代码后随时能发布。!cancelled() 兼容 gate job 被跳过的情况。
+  calendar_gate:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    outputs:
+      allow: ${{ steps.gate.outputs.allow }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: gate
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: python3 trading_window.py --task publish --gate
   build:
+    needs: calendar_gate
+    if: ${{ !cancelled() && (github.event_name != 'schedule' || needs.calendar_gate.outputs.allow == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:

@@ -9,24 +9,12 @@ sys.path.insert(0,str(BASE))
 import db_sources
 from market_calendar import Calendar, fingerprint
 
-CALENDAR = {
-    'market':'XNYS','coverage_from':'2025-12-29','coverage_to':'2028-12-31',
-    'timezone':'America/New_York','regular_open':'09:30','regular_close':'16:00',
-    'closed':[
-        '2026-01-01','2026-01-19','2026-02-16','2026-04-03','2026-05-25',
-        '2026-06-19','2026-07-03','2026-09-07','2026-11-26','2026-12-25',
-        '2027-01-01','2027-01-18','2027-02-15','2027-03-26','2027-05-31',
-        '2027-06-18','2027-07-05','2027-09-06','2027-11-25','2027-12-24',
-        '2028-01-17','2028-02-21','2028-04-14','2028-05-29','2028-06-19',
-        '2028-07-04','2028-09-04','2028-11-23','2028-12-25'],
-    'early_close':{'2026-11-27':'13:00','2026-12-24':'13:00',
-                   '2027-11-26':'13:00','2028-07-03':'13:00','2028-11-24':'13:00'},
-    'sources':[
-        'https://www.nyse.com/markets/hours-calendars',
-        'https://ir.theice.com/press/news-details/2025/NYSE-Group-Announces-2026-2027-and-2028-Holiday-and-Early-Closings-Calendar/',
-        'https://ir.theice.com/press/news-details/2024/NYSE-Group-Announces-2025-2026-and-2027-Holiday-and-Early-Closings-Calendar/default.aspx'],
-    'scope':'NYSE cash-equity regular sessions only; emergency closure revisions require new reviewed evidence',
-}
+# 2026-11-08：日历数据抽成纯 JSON，让「交易时段门禁」能在 pip install 之前
+# 用系统 Python 零依赖读取，同时供公开 cloud.json 生成同一份日历。内容与原先
+# 的内嵌字典逐字一致（证据 sha256 7ae1e5716877...），数据库证据哈希不变。
+# 修改日历必须人工复核 NYSE 官方公告后重新发布证据，任何自动任务都不得写入。
+CALENDAR = json.loads(
+    (Path(__file__).with_name('exchange_calendar.json')).read_text(encoding='utf-8'))
 
 
 def run(write=False):

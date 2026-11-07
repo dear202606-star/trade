@@ -1,0 +1,45 @@
+name: 交易日历年度核对
+
+# 免费公共假日接口（Nager.Date，开源、免密钥、无需注册）只做「漂移核对」：
+#   · 生产判定永远只用已人工复核的 research/exchange_calendar.json（NYSE 口径）
+#   · 本工作流每季度把两者对齐一次，发现新联邦假日 / 日历快过期时失败提醒
+#   · 不连任何数据库、不写任何生产数据、不消耗 Supabase egress，仅 3 个 HTTP 请求
+# 注意：联邦假日 != NYSE 休市日（Good Friday / Columbus Day / Veterans Day / 半日），
+# 详见 research/check_public_holidays.py 的文档字符串。
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 6 1 1,4,7,10 *"      # 每季度首日 06:30 UTC（北京 14:30，低频）
+  push:
+    branches: [main]
+    paths:
+      - research/check_public_holidays.py
+      - research/exchange_calendar.json
+      - trading_window.py
+      - test_public_holidays.py
+      - .github/workflows/calendar-check.yml
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: 漂移核对回归（纯标准库，无需安装依赖）
+        run: python -m unittest test_public_holidays -v
+      - name: 拉取免费公共假日并核对已复核日历
+        # 退出码 1 = 出现未知差异或日历覆盖不足，需人工去 NYSE 官方公告复核；
+        # 脚本绝不自动改写证据。
+        run: python research/check_public_holidays.py --output output/calendar_drift.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: calendar-drift
+          path: output/calendar_drift.json
+          if-no-files-found: ignore

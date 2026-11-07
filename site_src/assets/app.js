@@ -142,6 +142,7 @@
   let preferredKey = "";
   let activeType = "supabase", activeUrl = "";
   let versionStamp = "";            // 最近一次探测到的数据库版本指纹
+  let exchangeCalendar = null;      // 公开 cloud.json 里的已复核 NYSE 日历（可选）
 
   const STATIC_KEYS = ["curve", "b/curve", "strategy_history", "b/strategy_history",
                        "name_zh", "sectors", "health"];
@@ -155,11 +156,47 @@
     return TIER_STATIC;            // 未知 key 用最长 TTL，避免打爆网关
   }
 
-  /* 与 quotes.yml 的 UTC 13-21 周一至周五采集窗口对齐；非交易时段不轮询 */
-  function isTradingHours() {
-    const d = new Date(), w = d.getUTCDay(), h = d.getUTCHours();
+  /* 2026-11-08：与交易时段门禁共用同一份已复核 NYSE 日历。
+     cloud.json 带 calendar 时按美东时间判定，能识别：
+       全日休市（感恩节、Good Friday…）/ 半日 13:00 收盘 / DST 切换。
+     联邦法定假日 ≠ NYSE 休市日，所以绝不在前端另算一套「节假日」。
+     日历缺失、超出覆盖范围或 Intl 不可用时一律 fail-open 回退旧 UTC 逻辑，
+     保证日历问题永远不会让页面停止刷新。 */
+  function legacyTradingHours(d) {
+    const w = d.getUTCDay(), h = d.getUTCHours();
     return w >= 1 && w <= 5 && h >= 13 && h < 22;
   }
+
+  function easternParts(d) {
+    const f = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+    });
+    const p = {};
+    for (const x of f.formatToParts(d)) p[x.type] = x.value;
+    return { date: p.year + "-" + p.month + "-" + p.day,
+             minutes: Number(p.hour) * 60 + Number(p.minute) };
+  }
+
+  function isTradingHours(now) {
+    const d = now || new Date();
+    const c = exchangeCalendar;
+    if (!c || !Array.isArray(c.closed) || !c.coverage_from || !c.coverage_to ||
+        !c.regular_open || !c.regular_close) return legacyTradingHours(d);
+    try {
+      const et = easternParts(d);
+      if (et.date < c.coverage_from || et.date > c.coverage_to)
+        return legacyTradingHours(d);
+      const weekday = new Date(et.date + "T12:00:00Z").getUTCDay();
+      if (weekday === 0 || weekday === 6 || c.closed.indexOf(et.date) >= 0) return false;
+      const oh = Number(c.regular_open.slice(0, 2)), om = Number(c.regular_open.slice(3));
+      const closeText = (c.early_close && c.early_close[et.date]) || c.regular_close;
+      const ch = Number(closeText.slice(0, 2)), cm = Number(closeText.slice(3));
+      // 收盘后 20 分钟仍算交易窗口，与服务端 refresh_due 口径一致
+      return et.minutes >= oh * 60 + om && et.minutes <= ch * 60 + cm + 20;
+    } catch (e) { return legacyTradingHours(d); }
+  }
+  DSH.setExchangeCalendar = function (cal) { exchangeCalendar = cal; };
 
   function ttlOf(name) {
     const t = tierOf(name);
@@ -261,6 +298,7 @@
       });
       if (!valid) throw new Error("Invalid online configuration");
       cache.cloud = d;
+      if (d.calendar && Array.isArray(d.calendar.closed)) exchangeCalendar = d.calendar;
       try {
         const saved = localStorage.getItem(LS_ENDPOINT);
         if (saved) preferredKey = saved;

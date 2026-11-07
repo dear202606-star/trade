@@ -184,6 +184,26 @@ def write_cloud_config(data_dir=None):
             print("FATAL: cloud.json 缺少 url")
             raise SystemExit(1)
         payload = {"url": cfg["url"], "key": key, "endpoints": endpoints}
+
+        # 2026-11-08：把已人工复核的 NYSE 日历随公开引导配置一起发布，
+        # 前端据此在非交易日 / 半日交易自动降频（不必再发一个请求）。
+        # 它是可选增强：日历不可用时只告警、不影响发布，前端会 fail-open
+        # 回退到旧的 UTC 时段逻辑，绝不因为日历问题导致页面停更。
+        # 注意必须放在端点校验之后，保证「校验先于产出」的 fail-closed 语义。
+        try:
+            from pathlib import Path as _Path
+            import trading_window as _tw
+            cal = _tw.load_calendar(_Path(BASE) / "research" / "exchange_calendar.json")
+            payload["calendar"] = {
+                "market": cal["market"], "timezone": cal["timezone"],
+                "coverage_from": cal["coverage_from"], "coverage_to": cal["coverage_to"],
+                "regular_open": cal["regular_open"], "regular_close": cal["regular_close"],
+                "closed": cal["closed"], "early_close": cal["early_close"],
+                "evidence_sha256": _tw.fingerprint(cal),
+            }
+        except Exception as exc:
+            print("WARN: 交易日历不可用，本次 cloud.json 不含日历（前端 fail-open 回退）：%s"
+                  % str(exc)[:120])
         targets = (os.path.join(data, "cloud.json"),
                    os.path.join(os.path.dirname(os.path.abspath(data)), "cloud.json"))
         for path in targets:

@@ -11,15 +11,20 @@ concurrency:
 # 5 分钟级刷新既不改变结果，又是配额被打穿的直接放大器。
 on:
   schedule:
-    - cron: "*/30 13-20 * * 1-5"   # 盘中 30 分钟
+    - cron: "*/30 13-20 * * 1-5"   # 盘中 30 分钟（再由 NYSE 日历门禁精确收窄）
     - cron: "17 21 * * 1-5"        # 收盘后关键一次
-    - cron: "17 2 * * 2-6"         # 原有补跑
+    # 2026-11-08：原 02:17 UTC 补跑 = 北京 10:17，落在非交易时段。
+    # 迁入收盘窗口作二次兜底（北京 05:50），保留容错且完全避开北京 6-20 点。
+    - cron: "50 21 * * 1-5"        # 收盘兜底
   workflow_dispatch:
   push:
     branches: [main]
     paths:
       - live_quotes.py
       - market_calendar.py
+      - trading_window.py
+      - research/exchange_calendar.json
+      - research/install_exchange_calendar.py
       - quotes.py
       - db_ref.py
       - db_sources.py
@@ -48,24 +53,44 @@ jobs:
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
+      # 2026-11-08：GitHub cron 只认「周一到周五」，认不出 NYSE 休市日。
+      # 门禁用已复核的 XNYS 日历在 pip install 之前秒退：感恩节、Good Friday、
+      # 独立日、圣诞等全天不连库；周末与北京 6-20 点同样不采集。
+      # 纯标准库、只读、失败一律 fail-open；手动 / push 触发不受约束。
+      - name: 交易时段门禁（NYSE 已复核日历）
+        id: gate
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          SCHEDULE: ${{ github.event.schedule }}
+        run: |
+          case "$SCHEDULE" in
+            "17 21 * * 1-5"|"50 21 * * 1-5") TASK=closing ;;
+            *) TASK=intraday ;;
+          esac
+          python3 trading_window.py --task "$TASK" --gate
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
           cache: pip
       - run: pip install -r requirements.txt
       - name: 在线报价与失败保护回归
-        run: python -m unittest test_live_quotes test_quote_repairs test_quote_snapshot test_market_calendar test_watchdog_checks
+        run: python -m unittest test_live_quotes test_quote_repairs test_quote_snapshot test_market_calendar test_watchdog_checks test_trading_window
       - name: 检查在线写入凭据
+        if: steps.gate.outputs.allow == 'true'
         run: test -n "$SUPABASE_DB_PASSWORD"
       - name: 出口流量预算门禁
         id: egress
+        if: steps.gate.outputs.allow == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           ARGS=""
-          # 收盘那次是不可跳过的关键任务：预算进入 throttle 档时仍放行。
-          if [ "${{ github.event.schedule }}" = "17 21 * * 1-5" ]; then ARGS="--critical"; fi
+          # 收盘两次是不可跳过的关键任务：预算进入 throttle 档时仍放行。
+          case "${{ github.event.schedule }}" in
+            "17 21 * * 1-5"|"50 21 * * 1-5") ARGS="--critical" ;;
+          esac
           python egress_budget.py --workflow "行情快照" --fast $ARGS
       - name: 刷新在线行情
-        if: steps.egress.outputs.allow == 'true'
+        if: steps.gate.outputs.allow == 'true' && steps.egress.outputs.allow == 'true'
         run: python live_quotes.py --write

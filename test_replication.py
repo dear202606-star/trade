@@ -221,8 +221,21 @@ class TestPublicConfig(unittest.TestCase):
         for rel in paths:
             with open(os.path.join(BASE, rel), encoding="utf-8") as fh:
                 configs.append(json.load(fh))
+        # 2026-11-08：calendar 是发布时从 research/exchange_calendar.json
+        # 派生的可选增强字段，源配置（site_src/static）本来就不含它。
+        # 比较端点与凭据时剔除该字段，其余字段仍逐字段严格比对。
+        def endpoint_view(cfg):
+            return {k: v for k, v in cfg.items() if k != "calendar"}
         for rel, cfg in zip(paths[1:], configs[1:]):
-            self.assertEqual(cfg, configs[0], "%s 与发布配置不一致" % rel)
+            self.assertEqual(endpoint_view(cfg), endpoint_view(configs[0]),
+                             "%s 与发布配置不一致" % rel)
+        # 生成物若带日历，证据哈希必须与已复核版本一致，不能发布未复核日历
+        import trading_window
+        reviewed = trading_window.fingerprint(trading_window.load_calendar())
+        for rel, cfg in zip(paths, configs):
+            if "calendar" in cfg:
+                self.assertEqual(cfg["calendar"]["evidence_sha256"], reviewed,
+                                 "%s 的日历不是已复核版本" % rel)
 
     def test_no_write_token_in_public_text(self):
         """扫描所有会随仓库/Pages 公开的文本，任何可解码 JWT 都不得带 a=rw。"""
@@ -295,6 +308,32 @@ class TestPublicConfig(unittest.TestCase):
                 self.assertEqual(a, b)
                 self.assertEqual(len(a["endpoints"]), 2)
                 self.assertEqual(a["endpoints"][1]["table"], "site_dataset")
+            finally:
+                site_build.BASE = saved
+
+    def test_write_cloud_config_embeds_reviewed_calendar_when_available(self):
+        import site_build
+        import trading_window
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "site_src"))
+            os.makedirs(os.path.join(d, "research"))
+            with open(os.path.join(d, "site_src", "cloud.json"), "w", encoding="utf-8") as fh:
+                json.dump(self._sample_config("ro"), fh)
+            cal = trading_window.load_calendar()
+            with open(os.path.join(d, "research", "exchange_calendar.json"), "w",
+                      encoding="utf-8") as fh:
+                json.dump(cal, fh)
+            saved = site_build.BASE
+            site_build.BASE = d
+            try:
+                self.assertTrue(site_build.write_cloud_config(os.path.join(d, "out", "data")))
+                with open(os.path.join(d, "out", "data", "cloud.json"), encoding="utf-8") as fh:
+                    c = json.load(fh)["calendar"]
+                self.assertEqual(c["market"], "XNYS")
+                self.assertEqual(c["evidence_sha256"], trading_window.fingerprint(cal))
+                self.assertIn("2026-11-26", c["closed"])
+                self.assertEqual(c["early_close"]["2026-11-27"], "13:00")
+                self.assertNotIn("sources", c, "内部证据 URL 清单不应公开")
             finally:
                 site_build.BASE = saved
 

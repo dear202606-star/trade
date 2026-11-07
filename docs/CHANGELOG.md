@@ -1,5 +1,30 @@
 # 变更日志
 
+## v6.6 ｜ 2026-11-08 ｜ 交易时段门禁：非交易时段与 NYSE 休市日不采集
+
+**用户问题**：非美股交易时间（北京 6–20 点）与美国法定节假日是否都不用采集更新？能否对接免费节假日接口、隔离并纳入策略？
+
+**调研结论**
+
+- 项目**已有**权威口径：`market_calendar.py` + `sql/111_verified_exchange_calendar.sql`，人工复核的 NYSE 官方 2026–2028 日历，带 `evidence_sha256`、append-only 证据、含全日休市与 13:00 半日交易，DST 由 `zoneinfo` 处理。策略计算一直用它。
+- **缺口在调度层**：`quotes.yml` / `db-sync.yml` 的 cron 只写 `1-5`（只排周末），认不出 NYSE 休市日；`live_quotes.collect()` 也不检查 `refresh_due`。感恩节、Good Friday 等照样每 30 分钟连库、照样唤醒 Neon。另有 `02:17 UTC` 补跑（北京 10:17）与周末 `05:00 UTC` 心跳（北京 13:00）落在北京白天；前端 `isTradingHours()` 只看 UTC 星期与小时，节假日仍按 60 秒轮询。
+- **免费接口不能直接当生产数据源**：实测 Nager.Date `api/v3/PublicHolidays/{year}/US` 免密钥可用，但它是联邦 / 州公共假日，与 NYSE 系统性不同：
+  - Good Friday（2026-04-03）NYSE 休市、联邦不放假
+  - Columbus Day（10-12）/ Veterans Day（11-11）联邦放假、NYSE 照常开市
+  - 13:00 半日交易（11-27、12-24）联邦日历完全没有
+  - 年末 12-31 遇周六元旦，NYSE Rule 7.2 通常不补休
+  直接拿来跳过会漏采两个完整交易日，又漏掉 Good Friday 休市。
+
+**设计口径（勿回退）**：日历判定与策略计算**完全隔离**；生产判定只用已复核 NYSE 日历；免费接口只做年度漂移核对。
+
+- 新增 `research/exchange_calendar.json`：把已复核日历抽成纯数据，内容逐字一致（证据 sha256 `7ae1e571…` 不变），`install_exchange_calendar.py` 改读它，成为「数据库证据 / 调度门禁 / 前端配置」的单一来源。
+- 新增 `trading_window.py`（纯标准库、只读、零数据库依赖）：按美东时间判定交易日与时段，支持 `intraday / closing / catchup / publish / heartbeat` 窗口，`--gate` 输出 GitHub Actions 变量。**fail-open**：日历缺失、损坏、超出覆盖范围一律照常采集；手动 / push / dispatch 不受约束；`TRADE_FORCE_COLLECT=1` 可强制放行。
+- **调度接入（只隔离实时链路）**：`quotes.yml`、`db-sync.yml` 前置门禁（仅 schedule 生效），非交易日不连主库、不唤醒 Neon；`ui-publish.yml` 新增 `calendar_gate` job，定时发布只在交易日跑，push / 手动照常。原 `02:17 UTC` 补跑迁到 `21:50 UTC`（北京 05:50）并入收盘兜底，周末心跳迁到 `21:00 UTC`（北京 05:00）。
+- **刻意保留、不停**：历史回填（`collect-*.yml` / `daily-backfill.yml` / `backfill-prices.yml`）、整库备份、看门狗、数据校验、月度选股——这些不依赖实时行情，且刻意安排在非交易时段避开高峰；一律停掉会造成历史数据缺口与监控失明。周末低频心跳保留（数据不变时 0 行写入的复制一致性校验）。
+- 新增 `research/check_public_holidays.py` + `.github/workflows/calendar-check.yml`：每季度拉 Nager.Date 当年 + 未来 2 年，与已复核日历对齐，白名单化已知差异（用复活节算法识别 Good Friday），未知差异或日历覆盖不足时退出码 1 提醒人工去 NYSE 官方复核，**绝不自动改写证据**。本地实测 2026–2028 `status=ok`、零待复核。
+- 前端：`site_build.write_cloud_config()` 把日历（含证据哈希）随公开 `cloud.json` 发布；`app.js` 的 `isTradingHours()` 改用美东 + NYSE 日历判定，节假日与半日自动降频；日历不可用时 fail-open 回退旧 UTC 逻辑。
+- 回归：Python 189 → **213**、CI 门禁 50 → **51**、Node 40 → **42**、YAML 22 → **23**；门禁自检 10/10，并与 `market_calendar` 逐点对拍；`verify_replication.py` `PROBLEMS=0`；E2E 失败 0；线上故障演练 OK。
+
 ## v6.5 ｜ 2026-11-08 ｜ 访客提示语义治理：冗余切换不再误报故障
 
 **问题**：移动端顶部常驻红条「主数据库暂不可用，已自动切换到备用数据库（turso）」。主库免费额度耗尽返回 402、浏览器自动改读 Turso 实时备库，是设计内的计划路径，但页面把「用了哪个端点」直接当成「是否故障」，于是每次正常访问都弹故障告警。

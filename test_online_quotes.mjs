@@ -367,3 +367,34 @@ test('a missing auxiliary health key never marks the whole page offline',async()
   assert.equal(dsh.dataStatus().level,'healthy');
   assert.equal(Object.keys(dsh.notices()).length,0);
 });
+
+/* ---------- 2026-11-08：前端刷新节奏共用已复核 NYSE 日历 ---------- */
+test('published calendar stops polling on NYSE holidays but keeps federal-only trading days',async()=>{
+  const cal={market:'XNYS',timezone:'America/New_York',
+    coverage_from:'2025-12-29',coverage_to:'2028-12-31',
+    regular_open:'09:30',regular_close:'16:00',
+    closed:['2026-11-26','2026-04-03','2026-12-25'],
+    early_close:{'2026-11-27':'13:00'}};
+  const {dsh}=reader(async()=>({ok:false,status:503}),
+    async()=>({ok:true,json:async()=>({url:'https://example.supabase.co',
+      key:'public-test-key',calendar:cal})}));
+  await dsh.json('cloud',null);
+  assert.equal(dsh.isTradingHours(new Date('2026-11-26T16:00:00Z')),false,'感恩节休市');
+  assert.equal(dsh.isTradingHours(new Date('2026-04-03T15:00:00Z')),false,'Good Friday 休市');
+  assert.equal(dsh.isTradingHours(new Date('2026-10-12T15:00:00Z')),true,'Columbus Day 照常开市');
+  assert.equal(dsh.isTradingHours(new Date('2026-11-11T15:00:00Z')),true,'Veterans Day 照常开市');
+  assert.equal(dsh.isTradingHours(new Date('2026-11-27T17:00:00Z')),true,'半日盘中');
+  assert.equal(dsh.isTradingHours(new Date('2026-11-27T18:30:00Z')),false,'半日已收盘');
+  assert.equal(dsh.isTradingHours(new Date('2026-11-10T02:00:00Z')),false,'北京 10:00');
+  const beyond=new Date('2029-01-02T15:00:00Z');
+  const legacy=beyond.getUTCDay()>=1&&beyond.getUTCDay()<=5&&
+               beyond.getUTCHours()>=13&&beyond.getUTCHours()<22;
+  assert.equal(dsh.isTradingHours(beyond),legacy,'超出覆盖范围应 fail-open 回退旧逻辑');
+});
+
+test('missing published calendar keeps the legacy UTC window instead of freezing the page',async()=>{
+  const {dsh}=reader(async()=>({ok:false,status:503}));
+  await dsh.json('cloud',null);
+  assert.equal(dsh.isTradingHours(new Date('2026-11-09T15:00:00Z')),true);
+  assert.equal(dsh.isTradingHours(new Date('2026-11-08T15:00:00Z')),false,'周日');
+});

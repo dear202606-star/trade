@@ -21,9 +21,10 @@ on:
           - 'neon'
           - 'turso,neon'
   schedule:
-    - cron: "*/30 13-20 * * 1-5"   # 交易时段：仅 Turso
+    - cron: "*/30 13-20 * * 1-5"   # 交易时段：仅 Turso（再由 NYSE 日历门禁收窄）
     - cron: "10 21 * * 1-5"        # 收盘关键：Turso + Neon（Neon 唯一唤醒点）
-    - cron: "0 5 * * 0,6"          # 周末心跳：仅 Turso，数据不变时 0 行写入
+    # 2026-11-08：原 05:00 UTC = 北京 13:00，迁到北京 05:00，避开非交易时段。
+    - cron: "0 21 * * 0,6"         # 周末低频心跳：仅 Turso，数据不变时 0 行写入
   push:
     branches: [main]
     paths:
@@ -31,6 +32,9 @@ on:
       - export_site_snapshot.py
       - db_sources.py
       - egress_budget.py
+      - trading_window.py
+      - research/exchange_calendar.json
+      - test_trading_window.py
       - .github/workflows/db-sync.yml
 
 concurrency:
@@ -47,6 +51,21 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
+      # 2026-11-08：休市日不再做 30 分钟 Turso 同步，更不唤醒 Neon 计算实例。
+      # 周末低频心跳保留（task=heartbeat），用于复制一致性校验，0 行写入。
+      - name: 交易时段门禁（NYSE 已复核日历）
+        id: gate
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          SCHEDULE: ${{ github.event.schedule }}
+        run: |
+          case "$SCHEDULE" in
+            "0 21 * * 0,6") TASK=heartbeat ;;
+            "10 21 * * 1-5") TASK=closing ;;
+            *) TASK=intraday ;;
+          esac
+          python3 trading_window.py --task "$TASK" --gate
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -55,6 +74,7 @@ jobs:
 
       - name: 按调度选择同步目标（免费额度规划）
         id: plan
+        if: steps.gate.outputs.allow == 'true'
         shell: bash
         run: |
           MANUAL="${{ github.event.inputs.targets }}"
@@ -75,13 +95,14 @@ jobs:
 
       - name: 出口流量门禁
         id: egress
+        if: steps.gate.outputs.allow == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           TRADE_FORCE_BUDGET: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
         run: python egress_budget.py --workflow "备库同步" --fast
 
       - name: 增量同步展示数据
-        if: steps.egress.outputs.allow == 'true'
+        if: steps.gate.outputs.allow == 'true' && steps.egress.outputs.allow == 'true'
         env:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
           TURSO_HTTP_URL: ${{ secrets.TURSO_HTTP_URL }}
