@@ -182,10 +182,13 @@ def validate(datasets):
         if not isinstance(v, (dict, list)) or not v:
             problems.append("%s 为空" % key)
 
-    for key in ("name_zh", "sectors"):
+    # 映射类只设「防空」下限，不按经验值卡具体数量：
+    # name_zh 仅覆盖有中文名的标的（天然稀疏），sectors 才是全量行业映射。
+    for key, floor in (("name_zh", 10), ("sectors", 400)):
         v = datasets[key]
-        if not isinstance(v, dict) or len(v) < 100:
-            problems.append("%s 映射条目异常偏少 (%s)" % (key, type(v).__name__))
+        if not isinstance(v, dict) or len(v) < floor:
+            problems.append("%s 映射条目异常偏少 (%s / %d 条)" %
+                            (key, type(v).__name__, len(v) if isinstance(v, dict) else 0))
 
     if not isinstance(datasets["health"], dict):
         problems.append("health 非对象")
