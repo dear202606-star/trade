@@ -4,6 +4,7 @@
 不访问网络、不依赖本地凭据，可在 CI 与本机无条件运行。
 """
 import base64
+import datetime as dt
 import hashlib
 import json
 import os
@@ -69,6 +70,42 @@ class TestReplicationContract(unittest.TestCase):
             self.assertEqual(sync.neon_dsn(), "postgresql://u:p@host/db?sslmode=require")
         finally:
             os.environ.pop("NEON_DSN", None)
+
+
+class TestReplicationLagPolicy(unittest.TestCase):
+    """Neon 日更副本的滞后分级：盘中不误报，长期不追平仍要报警。"""
+
+    def test_no_diff_is_silent(self):
+        self.assertEqual(verify.classify_diff([], 1.0), ([], []))
+
+    def test_intraday_lag_is_warning_not_problem(self):
+        problems, warnings = verify.classify_diff(["quotes"], 2.0)
+        self.assertEqual(problems, [])
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("quotes", warnings[0])
+
+    def test_weekend_lag_stays_warning(self):
+        problems, _warnings = verify.classify_diff(
+            ["quotes", "equity"], verify.NEON_LAG_OK_HOURS - 1)
+        self.assertEqual(problems, [])
+
+    def test_stale_lag_is_problem(self):
+        problems, warnings = verify.classify_diff(
+            ["quotes"], verify.NEON_LAG_OK_HOURS + 1)
+        self.assertEqual(len(problems), 1)
+        self.assertEqual(warnings, [])
+
+    def test_missing_timestamp_is_conservatively_a_problem(self):
+        problems, _warnings = verify.classify_diff(["quotes"], None)
+        self.assertEqual(len(problems), 1)
+
+    def test_neon_age_hours_parses_aware_naive_and_missing(self):
+        recent = {"quotes": {"updated_at": str(dt.datetime.now(dt.timezone.utc))}}
+        age = verify.neon_age_hours(recent)
+        self.assertIsNotNone(age)
+        self.assertLess(abs(age), 0.1)
+        self.assertIsNone(verify.neon_age_hours({}))
+        self.assertIsNone(verify.neon_age_hours({"quotes": {"updated_at": "not-a-date"}}))
 
 
 class TestPublishMigration(unittest.TestCase):

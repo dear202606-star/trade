@@ -24,6 +24,11 @@ import sync_site_dataset as sync  # noqa: E402
 
 RECEIPT = BASE / "output" / "replication_check.json"
 REQUIRED = set(ess.ALL_KEYS)
+# Neon 是「日更持久副本」：db-sync.yml 每工作日收盘后（21:10 UTC）才唤醒一次。
+# 盘中 Turso 已追平而 Neon 仍滞后属于设计内状态，不能误报成故障，否则看门狗
+# 每次行情更新都会开 Issue 并触发自愈。超过此窗口仍未追平才升级为 problem
+# （4 天足以覆盖周末与单日假期）。
+NEON_LAG_OK_HOURS = 96
 
 
 def _utcnow():
@@ -54,6 +59,42 @@ def neon_state():
     return ({r[0]: {"sha256": r[1], "updated_at": str(r[2])} for r in rows}, len(rows))
 
 
+def neon_age_hours(state):
+    """Neon 镜像最近一次写入距今小时数；无有效时间戳时返回 None。
+
+    注：payload 未变化时 upsert 不会刷新 updated_at，因此这里量到的是
+    「最近一次内容变化」。只有在 A/B 出现哈希差异时才用它判断是否超时。
+    """
+    stamps = []
+    for info in state.values():
+        raw = str(info.get("updated_at") or "").strip()
+        if not raw:
+            continue
+        try:
+            moment = dt.datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        except ValueError:
+            continue
+        if moment.tzinfo is None:
+            moment = moment.replace(tzinfo=dt.timezone.utc)
+        stamps.append(moment)
+    if not stamps:
+        return None
+    return (dt.datetime.now(dt.timezone.utc) - max(stamps)).total_seconds() / 3600.0
+
+
+def classify_diff(diff, age_hours):
+    """A/B 哈希差异定性：短期滞后是 warning，长期不追平才是 problem。"""
+    if not diff:
+        return [], []
+    keys = ", ".join(diff)
+    if age_hours is None:
+        return (["Neon 副本缺少有效写入时间戳且哈希不一致：%s" % keys], [])
+    if age_hours > NEON_LAG_OK_HOURS:
+        return (["Neon 副本超过 %.0f 小时未追平：%s" % (age_hours, keys)], [])
+    return ([], ["Neon 为日更持久副本，按设计允许滞后"
+                 "（每工作日 21:10 UTC 由 db-sync.yml 追平）：%s" % keys])
+
+
 def primary_state():
     datasets, meta = ess.collect()
     problems = ess.validate(datasets)
@@ -69,6 +110,7 @@ def main():
     args = ap.parse_args()
 
     problems, warnings, states = [], [], {}
+    neon_age = None
     for name, fn in (("turso", turso_state), ("neon", neon_state)):
         try:
             states[name] = fn()
@@ -85,8 +127,10 @@ def main():
             problems.append("Neon 缺失展示 key：%s" % ", ".join(missing_n))
         diff = sorted(k for k in REQUIRED
                       if k in t and k in n and t[k]["sha256"] != n[k]["sha256"])
-        if diff:
-            problems.append("主备 payload 哈希不一致：%s" % ", ".join(diff))
+        neon_age = neon_age_hours(n)
+        lag_problems, lag_warnings = classify_diff(diff, neon_age)
+        problems.extend(lag_problems)
+        warnings.extend(lag_warnings)
         extra = sorted((set(t) | set(n)) - REQUIRED)
         if extra:
             warnings.append("备库含非展示 key（忽略）：%s" % ", ".join(extra))
@@ -113,6 +157,7 @@ def main():
         "turso_rows": states.get("turso", ({}, None))[1],
         "neon_rows": states.get("neon", ({}, None))[1],
         "primary_compared": primary is not None,
+        "neon_last_write_age_hours": round(neon_age, 1) if neon_age is not None else None,
         "digest": {name: sorted((k, v["sha256"][:12]) for k, v in states[name][0].items())
                    for name in states},
         "problems": problems,

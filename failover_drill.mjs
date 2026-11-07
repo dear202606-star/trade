@@ -4,9 +4,10 @@
  * 这里只把「主库」模拟成 402（Supabase egress 超额限服，真实发生过的故障），
  * 备库则打真实 Turso HTTPS 端点、读真实数据，验证端到端确实能切过去。
  *
- * 用法：node failover_drill.mjs
- * 依赖：site_src/cloud.json 里的公开只读 token（无需任何私密凭据）；
- *       需要能访问公网。发布后可用同一命令复验线上配置。
+ * 用法：node failover_drill.mjs              # 用仓库里的 site_src/cloud.json
+ *       node failover_drill.mjs --online      # 用线上 Pages 的 data/cloud.json
+ * 依赖：公开只读 token（无需任何私密凭据），需要能访问公网。
+ *       发布后用 --online 复验线上配置是否真的带上了备库端点。
  *
  * 断言覆盖：备库返回真实行情 / 自动切换 / 主库独立熔断 /
  *           端点记忆 / 无 snapshot.json 本地文件兜底。
@@ -18,7 +19,18 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const BASE = path.dirname(fileURLToPath(import.meta.url));
-const cfg = JSON.parse(readFileSync(path.join(BASE, 'site_src', 'cloud.json'), 'utf8'));
+const ONLINE_URL = 'https://dear202606-star.github.io/trade/data/cloud.json';
+const useOnline = process.argv.includes('--online');
+const cfg = useOnline
+  ? await (await realConfig()).json()
+  : JSON.parse(readFileSync(path.join(BASE, 'site_src', 'cloud.json'), 'utf8'));
+
+async function realConfig() {
+  const r = await fetch(ONLINE_URL + '?drill=' + Date.now(), { cache: 'no-store' });
+  if (!r.ok) throw new Error('线上 cloud.json HTTP ' + r.status);
+  return r;
+}
+
 const eps = cfg.endpoints || [];
 const primary = eps.find((e) => e.type === 'supabase');
 const turso = eps.find((e) => e.type === 'turso');
@@ -59,8 +71,12 @@ const backupCalls = () => calls.filter((c) => c.url.includes('/v2/pipeline')).le
 const quotes = await dsh.json('quotes', null);
 assert.ok(quotes && typeof quotes === 'object', '备库未返回 quotes');
 assert.ok(quotes.quotes && quotes.quotes.SPY, '备库 quotes 缺少真实 SPY 行情');
-assert.ok(Object.keys(quotes.quotes).length > 100, '备库行情标的数异常');
-assert.ok(quotes.ts, '备库 quotes 缺少时间戳');
+// 行情快照在非交易时段会产出 display_only 精简版（仅展示标的、count 仍是全量覆盖数），
+// 因此不能把标的数写死；按数据契约校验可用性、覆盖数与场次即可。
+assert.ok(Object.keys(quotes.quotes).length >= 1, '备库行情标的为空');
+assert.equal(quotes.ok, true, '备库 quotes 标记为不可用');
+assert.ok(quotes.count > 0, '备库 quotes 覆盖数为 0');
+assert.ok(quotes.ts && quotes.session, '备库 quotes 缺少时间戳或场次');
 assert.equal(dsh.dataStatus().mode, 'backup', '未切换到备库模式');
 assert.equal(dsh.dataStatus().activeEndpoint, 'turso');
 assert.equal(primaryCalls(), 1, '主库应只请求一次后即被独立熔断');
@@ -81,12 +97,15 @@ const saved = store.get('dsh.endpoint.v1.');
 assert.ok(saved && saved.startsWith('turso|'), '未把最优端点写入 localStorage');
 
 console.log('FAILOVER_DRILL_OK ' + JSON.stringify({
+  configSource: useOnline ? ONLINE_URL : 'site_src/cloud.json',
   mode: dsh.dataStatus().mode,
   activeEndpoint: dsh.dataStatus().activeEndpoint,
   primaryCalls: primaryCalls(),
   backupCalls: backupCalls(),
-  quotesSymbols: Object.keys(quotes.quotes).length,
+  quotesDisplayEntries: Object.keys(quotes.quotes).length,
+  quotesCoverageCount: quotes.count,
   quotesTs: quotes.ts,
+  quotesSession: quotes.session,
   errors: 0,
   fileMirrorRequests: calls.filter((c) => c.url.includes('snapshot.json')).length
 }));
