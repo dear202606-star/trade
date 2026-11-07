@@ -1,6 +1,7 @@
 """Current-year ranking, independent of historical backfills and site deployment."""
 import datetime as dt
 import hashlib
+import json
 from pathlib import Path
 
 import db_ref
@@ -89,12 +90,27 @@ def calculate(variant,q,pool,sectors,members,reviews,contexts,initial,terms,refe
     rows=[];bounded=[];excluded=[];audit=[]
     session=q['session'];year=int(session[:4]);base=str(year-1)+'-12-31'
     selected_pool={s for s in pool if variant=='A' or continuous_member(s,session,members,reviews)}
+    # 观测性：封存报价与归档日线不一致时，先打印全量差异再 fail-closed。
+    # 只看首个标的的报错无法区分「单只供应商精度差」与「整批基准漂移」。
+    mismatches=[]
+    for symbol in sorted(selected_pool):
+        if symbol not in contexts:continue
+        quote=q['quotes'].get(symbol)
+        if not quote or q['intraday']:continue
+        raw=contexts[symbol]['raw'].get(session)
+        if raw is None or close_enough(positive(quote['p']),raw):continue
+        mismatches.append({'symbol':symbol,'quote':quote['p'],'context':float(raw),
+                           'delta':round(float(quote['p'])-float(raw),6)})
+    if mismatches:
+        print('CLOSING_PRICE_MISMATCH count=%d %s'
+              %(len(mismatches),json.dumps(mismatches[:25],ensure_ascii=False)),flush=True)
     def current_value(symbol):
         body=contexts[symbol];day=max(body['raw']);quote=q['quotes'].get(symbol)
         price=positive(quote['p'] if quote else body['raw'][day])
         if day!=session:raise ValueError('Source context session mismatch: '+symbol)
         if quote and not q['intraday'] and not close_enough(price,body['raw'][day]):
-            raise ValueError('Independent closing prices disagree: '+symbol)
+            raise ValueError('Independent closing prices disagree: %s (quote=%s context=%s)'
+                             %(symbol,price,body['raw'][day]))
         return normalized(body)[day]*price/body['raw'][day]
     def growth(symbol,day):return current_value(symbol)/normalized(initial[symbol])[day]
     for symbol in sorted(selected_pool):
