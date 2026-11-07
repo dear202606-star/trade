@@ -2,7 +2,8 @@ import copy
 import datetime as dt
 import unittest
 
-from live_ranking import select,joined_interval,continuous_member,calculate
+from live_ranking import (select,joined_interval,continuous_member,calculate,
+                          independent_close_ok)
 from prepare_live_ranking import normalized
 
 
@@ -55,6 +56,13 @@ class IndependentRankingTests(unittest.TestCase):
         q['quotes']['D']['p']=21
         with self.assertRaises(ValueError):calculate('A',q,pool,sectors,[],{},bodies,bodies,{},'ref')
 
+    def test_small_cross_source_close_drift_does_not_block_ranking(self):
+        q,pool,sectors,bodies=self.fixture()
+        for symbol,body in bodies.items():
+            q['quotes'][symbol]['p']=round(float(body['raw']['2026-11-04'])*1.0002,4)
+        payload,_=calculate('A',q,pool,sectors,[],{},bodies,bodies,{},'ref')
+        self.assertTrue(payload['top'])
+
     def test_incremental_normalization_uses_sealed_scalar_instead_of_replaying_year(self):
         body={'raw':{'2026-11-03':100.,'2026-11-04':110.},
               'adjusted':{'2026-11-03':100.,'2026-11-04':110.},
@@ -74,6 +82,34 @@ class IndependentRankingTests(unittest.TestCase):
         payload,_=calculate('A',q,pool,sectors,[],reviews,bodies,bodies,terms,'ref')
         self.assertEqual(payload['ranked'],4)
         self.assertEqual(payload['top'][0]['ytd'],7)
+
+
+class IndependentCloseToleranceTests(unittest.TestCase):
+    """2026-11-07: 278/504 symbols had two independent readings of the same
+    2026-11-06 close differing by a few cents; the fixed 0.0011 absolute
+    tolerance rejected all of them and froze the next-year preview."""
+
+    def test_measured_cross_source_drifts_are_accepted(self):
+        measured=[(174.76,174.755),(291.31,291.235),(109.93,109.95),
+                  (260.5,260.475),(501.49,501.63),(14.87,14.885),
+                  (304.84,304.775),(69.97,69.98),(99.25,99.245)]
+        for quote,context in measured:
+            with self.subTest(quote=quote,context=context):
+                self.assertTrue(independent_close_ok(quote,context))
+
+    def test_wrong_symbol_stale_session_or_basis_shift_still_rejected(self):
+        self.assertFalse(independent_close_ok(21.,20.))      # 5% (existing fixture)
+        self.assertFalse(independent_close_ok(110.,100.))    # 10%
+        self.assertFalse(independent_close_ok(100.5,100.))   # 0.5%
+
+    def test_sub_cent_floor_is_preserved(self):
+        self.assertTrue(independent_close_ok(20.,20.))
+        self.assertTrue(independent_close_ok(20.0005,20.))
+        self.assertFalse(independent_close_ok(20.05,20.))   # 0.25%
+
+    def test_tolerance_scales_with_price(self):
+        self.assertTrue(independent_close_ok(500.4,500.))    # 0.08%
+        self.assertFalse(independent_close_ok(501.0,500.))  # 0.2%
 
 
 if __name__=='__main__':unittest.main()

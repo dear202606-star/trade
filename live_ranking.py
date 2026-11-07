@@ -8,8 +8,27 @@ import db_ref
 import db_sources
 import live_quotes
 import market_calendar
-from live_strategy import sha,positive,close_enough,store
+from live_strategy import sha,positive,store
 from prepare_live_ranking import normalized,prepare
+
+
+def independent_close_ok(quote_price,context_price,rel_tol=1e-3):
+    """Compare two *independent* readings of the same closing bar.
+
+    `close_enough` uses a fixed 0.0011 absolute tolerance and is correct for
+    replaying one archived series against itself. Here the quote snapshot and
+    the ranking context come from different collection passes (and sometimes
+    different vendors), so the same 2026-11-06 close legitimately differs by
+    a few cents. Measured 2026-11-07: 278/504 symbols drifted by 0.005-0.14
+    (~0.003%-0.03%), which the absolute tolerance rejected wholesale.
+
+    A 0.1% relative tolerance with a 0.02 absolute floor admits that noise
+    (the floor covers low-priced bars where a 0.015 rounding difference is
+    already 0.1%), while still rejecting a wrong symbol, a stale session or a
+    wrong price basis -- the existing test uses a 5% mismatch and still fails.
+    """
+    q=positive(quote_price);c=float(context_price)
+    return abs(q-c)<=max(0.02,abs(c)*rel_tol)
 
 
 def joined_interval(review,current,initial,quote_price):
@@ -90,25 +109,32 @@ def calculate(variant,q,pool,sectors,members,reviews,contexts,initial,terms,refe
     rows=[];bounded=[];excluded=[];audit=[]
     session=q['session'];year=int(session[:4]);base=str(year-1)+'-12-31'
     selected_pool={s for s in pool if variant=='A' or continuous_member(s,session,members,reviews)}
-    # 观测性：封存报价与归档日线不一致时，先打印全量差异再 fail-closed。
-    # 只看首个标的的报错无法区分「单只供应商精度差」与「整批基准漂移」。
-    mismatches=[]
+    # 观测性：把「跨源精度漂移」与「真正阻断的错价」分开统计。
+    # 只看首个标的的报错无法区分零星精度差与整批基准漂移。
+    drifts=[];blocking=[]
     for symbol in sorted(selected_pool):
         if symbol not in contexts:continue
         quote=q['quotes'].get(symbol)
         if not quote or q['intraday']:continue
         raw=contexts[symbol]['raw'].get(session)
-        if raw is None or close_enough(positive(quote['p']),raw):continue
-        mismatches.append({'symbol':symbol,'quote':quote['p'],'context':float(raw),
-                           'delta':round(float(quote['p'])-float(raw),6)})
-    if mismatches:
-        print('CLOSING_PRICE_MISMATCH count=%d %s'
-              %(len(mismatches),json.dumps(mismatches[:25],ensure_ascii=False)),flush=True)
+        if raw is None:continue
+        delta=float(quote['p'])-float(raw)
+        if abs(delta)>1e-9 and quote['p']:
+            drifts.append(abs(delta)/abs(float(quote['p'])))
+        if not independent_close_ok(quote['p'],raw):
+            blocking.append({'symbol':symbol,'quote':quote['p'],'context':float(raw),
+                             'delta':round(delta,6)})
+    if drifts or blocking:
+        drifts.sort(reverse=True)
+        print('CLOSING_PRICE_DRIFT count=%d max_rel=%.6f p95_rel=%.6f blocking=%d %s'
+              %(len(drifts),drifts[0] if drifts else 0,
+                drifts[min(int(len(drifts)*0.05),len(drifts)-1)] if drifts else 0,
+                len(blocking),json.dumps(blocking[:10],ensure_ascii=False)),flush=True)
     def current_value(symbol):
         body=contexts[symbol];day=max(body['raw']);quote=q['quotes'].get(symbol)
         price=positive(quote['p'] if quote else body['raw'][day])
         if day!=session:raise ValueError('Source context session mismatch: '+symbol)
-        if quote and not q['intraday'] and not close_enough(price,body['raw'][day]):
+        if quote and not q['intraday'] and not independent_close_ok(price,body['raw'][day]):
             raise ValueError('Independent closing prices disagree: %s (quote=%s context=%s)'
                              %(symbol,price,body['raw'][day]))
         return normalized(body)[day]*price/body['raw'][day]
