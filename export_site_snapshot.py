@@ -15,8 +15,14 @@
      并且**先写临时文件、校验通过后才原子替换**已有镜像，
      绝不用半份或坏数据覆盖上一份可用镜像。
 
+现状（2026-11-08）
+  CI 已不再生成本地文件镜像：页面兜底改为 Turso 在线备库 +
+  浏览器 localStorage。本脚本的 collect() / validate() / ALL_KEYS 由
+  sync_site_dataset.py 复用为「14 个展示 key」的唯一数据契约；
+  下面的 --target 导出仅保留作人工本地诊断，不参与任何发布流程。
+
 用法
-  python export_site_snapshot.py --target _site_release/data/snapshot.json
+  python export_site_snapshot.py --target output/site_snapshot.local.json
   python export_site_snapshot.py --dry-run          # 只校验，不落盘
 """
 import argparse
@@ -223,7 +229,7 @@ def write_atomic(target, document):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--target", default="_site_release/data/snapshot.json")
+    p.add_argument("--target", default="output/site_snapshot.local.json")
     p.add_argument("--dry-run", action="store_true", help="只校验不落盘")
     a = p.parse_args()
 

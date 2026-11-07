@@ -83,13 +83,16 @@ COST_MB = dict(LEGACY_COST_MB)
 COST_MB.update({
     "在线净值与动态排名": 3.0,    # 触发 17 次/日，仅收盘 1 次约 35MB
     "整库备份与冻结巡检": 25.0,   # 增量：只传变化表，首次全量摊薄
+    "备库同步": 0.2,             # 只传 14 个展示 key 中变化的行（典型 0~3 行）
 })
 
 DEFAULT_COST_MB_LEGACY = 3.0
 DEFAULT_COST_MB = 1.0
 
-# throttle 档只放行这些「不可跳过」的收盘/日终任务，其余一律延后。
-CRITICAL_WORKFLOWS = {"整库备份与冻结巡检", "在线净值与动态排名"}
+# throttle / freeze 档只放行这些「不可跳过」的关键任务。
+# 备库同步单次仅约 0.2MB，却是 Supabase 网关 402 期间页面可用性的唯一
+# 数据通路，因此与收盘任务同列关键：跳过它反而会让备库数据停更。
+CRITICAL_WORKFLOWS = {"整库备份与冻结巡检", "在线净值与动态排名", "备库同步"}
 
 
 def cycle_bounds(now: dt.datetime) -> tuple[dt.datetime, dt.datetime]:

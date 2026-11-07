@@ -120,12 +120,66 @@ SEED = [
 ]
 
 
-def db():
+def neon_dsn():
+    """Neon 持久副本连接串：CI 用 NEON_DSN secret，本机用 gitignore 的本地文件。"""
+    dsn = (os.environ.get("NEON_DSN") or "").strip()
+    if not dsn:
+        path = os.path.join(BASE, "output", "neon_cold_backup.local.json")
+        with io.open(path, encoding="utf-8-sig") as fh:
+            dsn = json.load(fh)["connection_string"]
+    # psycopg2/libpq 不识别 channel_binding 参数（restore_to_neon.py 同款处理）
+    return dsn.replace("&channel_binding=require", "").replace("channel_binding=require&", "")
+
+
+def current_target():
+    """实际使用的写入目标；未设置 DB_TARGET 时保持历史行为 = supabase。"""
+    return (os.environ.get("DB_TARGET") or "supabase").strip().lower()
+
+
+def probe(target, timeout=8):
+    """返回 (ok, detail)，不抛异常。用于 DB_TARGET=auto 的健康探测。"""
+    try:
+        if target == "neon":
+            conn = psycopg2.connect(neon_dsn(), connect_timeout=timeout)
+        else:
+            conn = _connect_supabase(timeout)
+        try:
+            with conn.cursor() as cur:
+                cur.execute("set statement_timeout = '5s'")
+                cur.execute("select 1")
+                cur.fetchone()
+        finally:
+            conn.close()
+        return True, "select 1 ok"
+    except Exception as exc:
+        return False, str(exc)[:160]
+
+
+def _connect_supabase(timeout=20):
     pw = os.environ.get("SUPABASE_DB_PASSWORD", "").strip()
     if not pw:
         pw = io.open(os.path.join(BASE, "output", "_supabase_dbpass.txt"), encoding="utf-8").read().strip()
     return psycopg2.connect(host=HOST, port=6543, user="postgres." + REF, password=pw,
-                            dbname="postgres", connect_timeout=20, sslmode="require")
+                            dbname="postgres", connect_timeout=timeout, sslmode="require")
+
+
+def db(target=None):
+    """连接工厂（一主一备写入路由）。
+
+    默认 target 取自 DB_TARGET，未设置时为 supabase —— 约 30 个既有调用方
+    行为完全不变。设置 DB_TARGET=auto 时先探测主库，主库不可达才自动提升到
+    Neon；回切必须人工执行单向回放（见 db_failover.py），绝不双向合并，
+    避免两套写入产生冲突。
+    """
+    t = (target or current_target()).strip().lower()
+    if t == "auto":
+        ok, _detail = probe("supabase")
+        t = "supabase" if ok else "neon"
+    if t == "neon":
+        return psycopg2.connect(neon_dsn(), connect_timeout=20)
+    if t == "supabase":
+        return _connect_supabase()
+    raise ValueError("未知 DB_TARGET：%s（仅支持 supabase / neon / auto）" % t)
 
 
 def init():
@@ -177,7 +231,16 @@ if __name__ == "__main__":
     ap.add_argument("--set", default="")
     ap.add_argument("--status", default=None)
     ap.add_argument("--tested", default=None)
+    ap.add_argument("--target", default="", help="覆盖 DB_TARGET：supabase | neon | auto")
+    ap.add_argument("--probe", action="store_true", help="探测主备库连通性与当前写入路由")
     a = ap.parse_args()
+    if a.target:
+        os.environ["DB_TARGET"] = a.target
+    if a.probe:
+        for t in ("supabase", "neon"):
+            ok, detail = probe(t)
+            print("%-10s %-4s %s" % (t, "OK" if ok else "FAIL", detail))
+        print("DB_TARGET=%s -> %s" % (os.environ.get("DB_TARGET") or "(unset)", current_target()))
     if a.init:
         init()
     if a.list:

@@ -1,1 +1,17 @@
-{"url": "https://fnvahsyrzmmxwovbsqpc.supabase.co", "key": "sb_publishable_XPT13jXtatGpTkFG0EznZA_W2spKFy9"}
+{
+ "url": "https://fnvahsyrzmmxwovbsqpc.supabase.co",
+ "key": "sb_publishable_XPT13jXtatGpTkFG0EznZA_W2spKFy9",
+ "endpoints": [
+  {
+   "type": "supabase",
+   "url": "https://fnvahsyrzmmxwovbsqpc.supabase.co",
+   "key": "sb_publishable_XPT13jXtatGpTkFG0EznZA_W2spKFy9"
+  },
+  {
+   "type": "turso",
+   "url": "https://trade-site-dear202606-star.aws-ap-northeast-1.turso.io",
+   "key": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicm8iLCJpYXQiOjE3OTQwNjk4ODcsImlkIjoiMDFhMWI2ZTQtMzAwMS03ZGVhLWJlODktMmZkMzEzM2QzZDJlIiwia2lkIjoibUFkREpOZW8zblZ2b1hIV1hiclVvQVgzdmtuZ0pOaVZieWVJR0MtWkpqMCIsInJpZCI6IjI1MzkyYzRiLTAwZTgtNDJlMC05OGJiLWMyNTNjOGUzYWUxMiJ9.7xN7UzN7XipmiQh1AZMHZUOloynh_mVNHOn88JHKZ-gU4DrxzN0yaKboietDSBfrkry31YVGNEeByrLMRDmIDw",
+   "table": "site_dataset"
+  }
+ ]
+}

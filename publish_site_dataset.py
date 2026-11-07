@@ -30,11 +30,17 @@ REQUIRED = (
 # B 口径（页面默认）专有的数据集，仅在完整数据管线的构建产物中存在；
 # 本地 site_build.py 不带 variant_b 输出，故 dry-run 只提示、不阻断。
 REQUIRED_B = ("b/curve", "b/strategy_history")
-# 引导配置 + CI 从在线库自动导出的同源展示镜像，二者都不是「待入库数据集」：
-# cloud.json 必须留在 Pages 上供浏览器找到数据库；snapshot.json 是只读兜底副本，
-# 主源仍是在线库，把它写回库里会造成自我复制。
-KEEP_STATIC = {"cloud", "snapshot"}
-MIRROR_FILES = ("cloud.json", "snapshot.json")
+# 引导配置必须留在 Pages 上供浏览器找到在线数据库端点。
+# 2026-11-08 起取消一切本地文件形态的展示镜像（snapshot.json 已退场）：
+# 页面兜底改为「Turso 在线备库 + 浏览器 localStorage」，二者都不是仓库里的
+# 静态 JSON，绝不参与入库，避免「文件 + 数据库」双套体系自我复制。
+KEEP_STATIC = {"cloud"}
+MIRROR_FILES = ("cloud.json",)
+# 2026-11-08 迁移期：上一份 Pages artifact 里仍有旧版 CI 导出的 snapshot.json。
+# 它是「14 个 key 打包成的一个大对象」，绝不能按单个 dataset 写回在线库
+# （会造成文件/数据库自我复制），稳态判定也必须先扣掉它，否则会被误判成
+# 「构建产物缺少必需数据集」而阻断发布。prune_files() 会在本轮发布时清理它。
+LEGACY_MIRRORS = {"snapshot"}
 
 
 def sector_dataset():
@@ -60,7 +66,7 @@ def collect(source):
     result = {}
     for path in sorted(root.rglob("*.json")):
         key = path.relative_to(root).with_suffix("").as_posix()
-        if key in KEEP_STATIC:
+        if key in KEEP_STATIC or key in LEGACY_MIRRORS:
             continue
         try:
             result[key] = json.loads(path.read_text(encoding="utf-8"))
@@ -198,7 +204,9 @@ def main():
     source_root = Path(a.source)
     artifact_keys = {p.relative_to(source_root).with_suffix("").as_posix()
                      for p in source_root.rglob("*.json") if p.is_file()}
-    if artifact_keys <= KEEP_STATIC:
+    # 稳态 = 产物里没有任何「数据集」文件（引导配置与待清理的历史镜像不算）。
+    # 只看 <= KEEP_STATIC 会在迁移首轮因残留 snapshot.json 误判为缺数据。
+    if not (artifact_keys - KEEP_STATIC - LEGACY_MIRRORS):
         # 稳态（在线单源）：上一轮发布已剔除产物中的数据 JSON，本产物仅含 cloud.json。
         # 此时唯一合法数据源是在线库——齐备则放行，不齐备才 fail-closed。
         if not healthy_source():

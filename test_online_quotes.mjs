@@ -9,7 +9,7 @@ function reader(reply,cloudReply) {
     localStorage:{getItem(){return null;}},fetch:async(url,options)=>{
       calls.push({url,options});
       if (url.startsWith('data/cloud.json')) return cloudReply ? cloudReply() : {ok:true,json:async()=>({url:'https://example.supabase.co',key:'public-test-key'})};
-      return reply(url);
+      return reply(url, options);
     }});
   vm.runInContext(readFileSync(new URL('./site_src/assets/app.js',import.meta.url),'utf8'),context);
   return {dsh:context.window.DSH,calls};
@@ -32,22 +32,43 @@ test('static datasets read the online database in normal mode, never the mirror'
   assert.deepEqual(await dsh.json('curve',null),{points:[1,2,3]});
   assert.equal(calls.length,n);
   assert.equal(hits,1);
+  assert.equal(dsh.snapshot,undefined,'文件镜像接口必须彻底退场');
 });
 
-test('a 402 gateway outage still serves complete data from the mirrored snapshot',async()=>{
+test('a 402 on the primary endpoint fails over to the Turso backup, no file mirror',async()=>{
   const equity={position:[{ticker:'X'}],stats:{strategy:0.4355}};
-  const snap={schema:1,source:'postgres-direct',generated_at:'2026-11-07T07:00:00Z',
-    datasets:{equity,curve:{points:[1]}},meta:{}};
-  const {dsh,calls}=reader(async(url)=>{
-    if (url==='data/snapshot.json') return {ok:true,json:async()=>snap};
-    return {ok:false,status:402};
-  });
-  assert.deepEqual(await dsh.json('equity',null),equity);
-  assert.equal(dsh.dataStatus().mode,'mirror');
-  // 熔断期内不再反复冲击被限流的网关
-  const before=calls.filter(c=>c.url.includes('/rest/v1/')).length;
-  assert.deepEqual(await dsh.json('equity',null),equity);
-  assert.equal(calls.filter(c=>c.url.includes('/rest/v1/')).length,before);
+  const quotes={ok:true,ts:'2026-11-08T00:00:00Z',session:'2026-11-07',quotes:{SPY:{p:100}}};
+  const payloads={equity,quotes};
+  const cfg={url:'https://example.supabase.co',key:'public-test-key',endpoints:[
+    {type:'supabase',url:'https://example.supabase.co',key:'public-test-key'},
+    {type:'turso',url:'https://backup.example',key:'readonly-token'}]};
+  let primaryHits=0,backupHits=0;
+  const {dsh,calls}=reader(async(url,options)=>{
+    if (url.startsWith('https://example.supabase.co/rest/v1/')) {primaryHits++;return {ok:false,status:402};}
+    if (url==='https://backup.example/v2/pipeline') {
+      backupHits++;
+      const key=JSON.parse(options.body).requests[0].stmt.args[0].value;
+      return {ok:true,json:async()=>({results:[
+        {type:'ok',response:{type:'execute',result:{rows:[[{type:'text',value:JSON.stringify(payloads[key])}]]}}},
+        {type:'ok',response:{type:'close'}}]})};
+    }
+    throw Error('unexpected call: '+url);
+  },async()=>({ok:true,json:async()=>cfg}));
+  const got=await dsh.json('equity',null);
+  // payload 经 vm 沙箱内 JSON.parse 生成，原型与宿主对象不同，逐字段比对
+  assert.equal(got.position[0].ticker,'X');
+  assert.equal(got.stats.strategy,0.4355);
+  assert.equal(primaryHits,1);
+  assert.equal(backupHits,1);
+  assert.equal(dsh.dataStatus().mode,'backup');
+  assert.equal(dsh.dataStatus().activeEndpoint,'turso');
+  assert.equal(calls.some(c=>c.url.includes('snapshot.json')),false,'不得读取任何本地镜像文件');
+  // 主库被独立熔断 10 分钟：另一个 key 直接走备库，主库请求数不再增加
+  assert.equal((await dsh.json('quotes',null)).ts,quotes.ts);
+  assert.equal(primaryHits,1);
+  assert.equal(backupHits,2);
+  const primary=dsh.dataStatus().endpoints.find(e=>e.id.startsWith('supabase|'));
+  assert.equal(primary.circuitOpen,true);
 });
 
 test('refresh cadence is tiered instead of a single 60-second full reload',()=>{
@@ -196,4 +217,59 @@ test('version probe expires only the layer whose data actually changed',async()=
   assert.ok(expired.includes('curve'),'静态层应失效');
   assert.ok(!expired.includes('quotes'),'行情版本未变，不应被连带失效');
   assert.ok(!expired.includes('equity'),'计算结果未变，不应被连带失效');
+});
+
+test('all endpoints down falls back to the caller value, never to a file mirror',async()=>{
+  const cfg={url:'https://example.supabase.co',key:'public-test-key',endpoints:[
+    {type:'supabase',url:'https://example.supabase.co',key:'public-test-key'},
+    {type:'turso',url:'https://backup.example',key:'readonly-token'}]};
+  const {dsh,calls}=reader(async()=>({ok:false,status:503}),async()=>({ok:true,json:async()=>cfg}));
+  const fallback={position:[{ticker:'cached'}]};
+  assert.deepEqual(await dsh.json('equity',fallback),fallback);
+  assert.equal(dsh.dataStatus().mode,'stale');
+  assert.equal(dsh.dataStatus().circuitOpen,true);
+  assert.equal(calls.some(c=>c.url.includes('snapshot.json')),false);
+  const n=calls.length;
+  assert.deepEqual(await dsh.json('equity',fallback),fallback);
+  assert.equal(calls.length,n,'全端点熔断期内不再产生在线请求');
+});
+
+test('backup endpoint version probe stays lightweight and expires only the changed layer',async()=>{
+  const cfg={url:'https://example.supabase.co',key:'public-test-key',
+    endpoints:[{type:'turso',url:'https://backup.example',key:'readonly-token'}]};
+  const state={staticTs:'2026-11-07T00:00:00Z',quoteTs:'2026-11-07T21:00:00Z',
+    resultTs:'2026-11-07T21:30:00Z'};
+  const payloads={curve:{points:[1,2,3]},
+    quotes:{ok:true,ts:'2026-11-07T21:00:00Z',session:'2026-11-07',quotes:{SPY:{p:100}}}};
+  const {dsh,calls}=reader(async(url,options)=>{
+    if (url!=='https://backup.example/v2/pipeline') throw Error('unexpected call: '+url);
+    const req=JSON.parse(options.body).requests[0];
+    const rows=[];
+    if (req.stmt.sql.includes('select key, updated_at')) {
+      const map={curve:state.staticTs,'b/curve':state.staticTs,
+        strategy_history:state.staticTs,'b/strategy_history':state.staticTs,
+        name_zh:state.staticTs,sectors:state.staticTs,health:state.staticTs,
+        quotes:state.quoteTs,equity:state.resultTs,'b/equity':state.resultTs,
+        signal:state.resultTs,'b/signal':state.resultTs,
+        preview:state.resultTs,'b/preview':state.resultTs};
+      for (const k of Object.keys(map))
+        rows.push([{type:'text',value:k},{type:'text',value:map[k]}]);
+    } else {
+      const key=req.stmt.args[0].value;
+      rows.push([{type:'text',value:JSON.stringify(payloads[key])}]);
+    }
+    return {ok:true,json:async()=>({results:[
+      {type:'ok',response:{type:'execute',result:{rows}}},
+      {type:'ok',response:{type:'close'}}]})};
+  },async()=>({ok:true,json:async()=>cfg}));
+  assert.equal((await dsh.syncIfChanged()).length,0);
+  const baseline=calls.length;
+  assert.equal((await dsh.syncIfChanged()).length,0);
+  assert.equal(calls.length,baseline+1,'备库版本探测每次只需 1 个请求');
+  await dsh.json('curve',null);
+  await dsh.json('quotes',{});
+  state.staticTs='2026-11-08T00:00:00Z';
+  const expired=await dsh.syncIfChanged();
+  assert.ok(expired.includes('curve'),'静态层应失效');
+  assert.ok(!expired.includes('quotes'),'行情时间戳未变，不应被连带失效');
 });

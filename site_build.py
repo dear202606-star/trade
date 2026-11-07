@@ -33,6 +33,11 @@ def copy_site():
         dst = DOCS if rel == "." else os.path.join(DOCS, rel)
         os.makedirs(dst, exist_ok=True)
         for fn in files:
+            # 2026-11-08：cloud.json 是公开引导配置，绝不允许原样复制。
+            # 站点里的两份（根目录 / data/）统一由 write_cloud_config()
+            # 在校验 publishable key 与 Turso 只读 token 之后写出。
+            if rel == "." and fn == "cloud.json":
+                continue
             shutil.copy2(os.path.join(root, fn), os.path.join(dst, fn))
             n += 1
     return n
@@ -125,6 +130,73 @@ def with_validity(rec):
     return rec
 
 
+def write_cloud_config(data_dir=None):
+    """把 site_src/cloud.json 校验后写入目标 data 目录（单一来源）。
+
+    2026-11-08：publish_ui.py 直接复用本函数把多端点配置写进
+    _site_release/data/cloud.json —— 发布流程沿用上一份 Pages artifact，
+    若不显式重写，线上会一直保留旧的单端点配置，备库永远不生效。
+    站点根目录与 data/ 各有一份 cloud.json，两份都写同一份已校验内容：
+    根目录那份同样公开可读，绝不能是 site_src 的原样拷贝。公开配置只允许
+    Supabase publishable key 与 Turso 只读 token（JWT a=ro）；任何异常一律
+    fail-closed，绝不发布半套配置。
+    """
+    data = data_dir or DATA
+    os.makedirs(data, exist_ok=True)
+    cfgp = os.path.join(BASE, "site_src", "cloud.json")
+    if not os.path.exists(cfgp):
+        raise RuntimeError("缺少 site_src/cloud.json")
+    try:
+        import base64 as _b64
+        with open(cfgp, encoding="utf-8") as f:
+            cfg = json.load(f)
+        key = cfg.get("key") or cfg.get("publishable_key") or ""
+        if not str(key).startswith("sb_publishable_") or "service_role" in str(key):
+            print("FATAL: cloud.json 不是 publishable key，拒绝写入公开站点")
+            raise SystemExit(1)
+        eps = cfg.get("endpoints") or [{"type": "supabase", "url": cfg.get("url"), "key": key}]
+        endpoints = []
+        for ep in eps:
+            typ = str(ep.get("type") or "")
+            url = str(ep.get("url") or "")
+            ekey = str(ep.get("key") or "")
+            if not url.startswith("https://") or not ekey:
+                print("FATAL: 端点缺少合法 url/key")
+                raise SystemExit(1)
+            if typ == "supabase":
+                if not ekey.startswith("sb_publishable_") or "service_role" in ekey:
+                    print("FATAL: Supabase 端点不是 publishable key")
+                    raise SystemExit(1)
+            elif typ == "turso":
+                part = ekey.split(".")[1]
+                claims = json.loads(_b64.urlsafe_b64decode(part + "=" * (-len(part) % 4)))
+                if claims.get("a") != "ro":
+                    print("FATAL: Turso 端点不是只读 token，拒绝写入公开站点")
+                    raise SystemExit(1)
+            else:
+                print("FATAL: 未知端点类型 %s" % typ)
+                raise SystemExit(1)
+            clean = {"type": typ, "url": url, "key": ekey}
+            if ep.get("table"):
+                clean["table"] = str(ep["table"])
+            endpoints.append(clean)
+        if not cfg.get("url"):
+            print("FATAL: cloud.json 缺少 url")
+            raise SystemExit(1)
+        payload = {"url": cfg["url"], "key": key, "endpoints": endpoints}
+        targets = (os.path.join(data, "cloud.json"),
+                   os.path.join(os.path.dirname(os.path.abspath(data)), "cloud.json"))
+        for path in targets:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(payload, f, ensure_ascii=False)
+        return True
+    except SystemExit:
+        raise
+    except Exception as exc:
+        raise RuntimeError("多端点引导配置写入失败：%s" % exc) from exc
+
+
 def main():
     hist = []
     if os.path.exists(HIST):
@@ -132,29 +204,9 @@ def main():
             hist = json.load(f)
 
     os.makedirs(DATA, exist_ok=True)
+    # 先校验再产出：公开配置一旦不合法就直接停工，绝不留下半套产物。
+    write_cloud_config()
     n = copy_site()
-
-    # 云同步配置：只发布随源码入库的 publishable key。
-    # 2026-11-05：原逻辑在 site_src/cloud.json 缺失时回退读取本地私密的
-    # output/_supabase.json，且不区分 publishable / service key，存在把高权限
-    # 凭据写进公开 docs/data/cloud.json 的风险。此处改为单一来源 + 类型校验。
-    cfgp = os.path.join(BASE, "site_src", "cloud.json")
-    if os.path.exists(cfgp):
-        try:
-            cfg = json.load(open(cfgp, encoding="utf-8"))
-            key = cfg.get("key") or cfg.get("publishable_key") or ""
-            if not str(key).startswith("sb_publishable_") or "service_role" in str(key):
-                print("FATAL: cloud.json 不是 publishable key，拒绝写入公开站点")
-                raise SystemExit(1)
-            if cfg.get("url"):
-                with open(os.path.join(DATA, "cloud.json"), "w", encoding="utf-8") as f:
-                    json.dump({"url": cfg["url"], "key": key}, f, ensure_ascii=False)
-            else:
-                print("WARN: cloud.json 缺少 url")
-        except SystemExit:
-            raise
-        except Exception as e:
-            print("WARN: 云同步配置写入失败", e)
 
     if hist:
         with open(os.path.join(DATA, "signal.json"), "w", encoding="utf-8") as f:

@@ -24,11 +24,17 @@ def is_gateway_outage(exc):
 def public_snapshot():
     response=requests.get(SITE+'cloud.json',params={'monitor':dt.datetime.now(dt.timezone.utc).timestamp()},timeout=20)
     response.raise_for_status();cfg=response.json()
-    if cfg.get('url','').rstrip('/')!='https://'+db_sources.REF+'.supabase.co' or not cfg.get('key'):
+    # 2026-11-08：cloud.json 改为多端点格式 {url,key,endpoints:[...]}，
+    # 同时兼容只带 url/key 的老配置；主库地址仍强制锁定，绝不跟随备库。
+    eps=cfg.get('endpoints') or []
+    primary=next((e for e in eps if (e.get('type') or 'supabase')=='supabase'),None) or {}
+    url=primary.get('url') or cfg.get('url') or ''
+    key=primary.get('key') or cfg.get('key') or ''
+    if url.rstrip('/')!='https://'+db_sources.REF+'.supabase.co' or not key:
         raise RuntimeError('正式网页在线库配置不一致')
-    response=requests.get(cfg['url']+'/rest/v1/live_quote_snapshot',
+    response=requests.get(url+'/rest/v1/live_quote_snapshot',
         params={'singleton':'eq.true','select':'source_as_of,collected_at,evidence_sha256,payload'},
-        headers={'apikey':cfg['key'],'Cache-Control':'no-cache'},timeout=20)
+        headers={'apikey':key,'Cache-Control':'no-cache'},timeout=20)
     response.raise_for_status();rows=response.json()
     if len(rows)!=1:raise RuntimeError('公开报价快照缺失或不唯一')
     return rows[0]

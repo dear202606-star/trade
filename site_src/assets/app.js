@@ -109,35 +109,35 @@
   DSH.cls = (v) => (v == null || isNaN(v) ? "zero" : v >= 0 ? "up" : "down");
   DSH.esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-  /* ---------- 数据层：常态单源 + 版本探测驱动 + 故障期兜底 ----------
-     2026-11-07 二次审查后确立：在线库是**唯一常规数据源**，镜像只在
-     数据库不可用时兜底，不参与常态读取——避免「文件 + 数据库」双套体系
-     带来的一致性风险。页面靠轻量版本探测自动感知数据库变更，
-     不再依赖人工触发或固定间隔全量重拉。
+  /* ---------- 数据层：多在线端点（一主一备）+ 版本探测 ----------
+     2026-11-08 改造：**不再使用任何本地文件形态的镜像**。页面按 cloud.json
+     的 endpoints 有序数组访问在线数据库：
+       [0] Supabase PostgREST（主，publishable key）
+       [1] Turso libsql HTTP（备，只读 token，site_dataset 单表）
+     每个端点独立熔断 10 分钟；成功后记住最优端点，后续请求优先走它；
+     主库失败自动切备库，页面服务不中断。全部端点不可用时才退回
+     localStorage 最近一次成功值（浏览器内存态，不是仓库里的静态文件）。
 
      按数据实际变更频率分三层（与 data_lifecycle.py 策略一致）：
-       L0 STATIC    name_zh / sectors / curve / strategy_history / health
-                    冻结或事件驱动，TTL 24 小时；常态仍从在线库读，
-                    但一天最多一次，几乎不产生流量
-       L1 DAILY     equity / signal / preview（含 B 口径），TTL 30 分钟
-       L2 INTRADAY  quotes，交易时段 60 秒，非交易时段 30 分钟
+       L0 STATIC    name_zh / sectors / curve / strategy_history / health  TTL 24h
+       L1 DAILY     equity / signal / preview（含 B 口径）              TTL 30min
+       L2 INTRADAY  quotes       交易时段 60s，非交易时段 30min
 
-     版本探测：每 60 秒（交易时段）/ 10 分钟（其余）只发两个极小请求
-     （静态数据集 updated_at 列表 + 行情 evidence_sha256），
-     版本没变就不拉任何数据；版本变化才让对应层过期并重绘。
-
-     在线库失败（402 / 5xx / 网络）时熔断 10 分钟，回退
-     localStorage 最近一次成功值 → CI 从库单向导出的同源镜像，
-     页面始终有数据，只标注「数据截至 X」而不是「数据未就绪」。
+     版本探测每 60 秒（交易时段）/ 10 分钟（其余）只发 <1KB 请求，
+     版本变化才精确失效并重绘；探测失败只记录、不熔断。
   */
   const cache = {};                 // name -> payload
   const cacheTs = {};               // name -> 本次成功取数的时间戳
   const inflight = {};              // 同名并发请求合并
   const degraded = {};              // 当前使用兜底数据的 key
   const LS_PREFIX = "dsh.data.v2.";
-  const SNAPSHOT_URL = "data/snapshot.json";
-  const CIRCUIT_MS = 10 * 60 * 1000;
-  let snapshot = null, snapshotInflight = null, circuitUntil = 0;
+  const LS_ENDPOINT = "dsh.endpoint.v1.";
+  const CIRCUIT_MS = 10 * 60 * 1000;       // 单端点独立熔断
+  const GLOBAL_COOLDOWN_MS = 60 * 1000;    // 全端点失败后的重试冷却
+  const endpointHealth = {};        // id -> {circuitUntil, failures, lastOk}
+  let circuitUntil = 0;
+  let preferredKey = "";
+  let activeType = "supabase", activeUrl = "";
   let versionStamp = "";            // 最近一次探测到的数据库版本指纹
 
   const STATIC_KEYS = ["curve", "b/curve", "strategy_history", "b/strategy_history",
@@ -185,28 +185,47 @@
     g.__dshErr = (g.__dshErr || []).concat(url + " -> " + e.message).slice(-20);
   }
 
-  /* 同源镜像：整站一次请求，命中 CDN 缓存，不消耗数据库出口流量 */
-  function loadSnapshot() {
-    if (snapshot) return Promise.resolve(snapshot);
-    if (snapshotInflight) return snapshotInflight;
-    snapshotInflight = (async function () {
-      try {
-        const r = await fetch(SNAPSHOT_URL, { cache: "default" });
-        if (!r.ok) throw new Error("HTTP " + r.status);
-        const d = await r.json();
-        if (!d || d.schema !== 1 || !d.datasets || typeof d.datasets !== "object")
-          throw new Error("Invalid snapshot schema");
-        snapshot = d;
-        return d;
-      } catch (e) {
-        noteErr(SNAPSHOT_URL, e);
-        return null;
-      } finally { snapshotInflight = null; }
-    })();
-    return snapshotInflight;
+  /* ---------- 端点注册与独立熔断 ----------
+     cloud.json 既可以是新格式 {url,key,endpoints:[...]}，也可以只有
+     {url,key}（老部署 / 单库场景），后者自动退化成一个 supabase 端点。 */
+  function endpointId(ep) { return (ep.type || "supabase") + "|" + ep.url; }
+
+  function endpointList(cfg) {
+    if (cfg && Array.isArray(cfg.endpoints) && cfg.endpoints.length) return cfg.endpoints;
+    return cfg && cfg.url && cfg.key
+      ? [{ type: "supabase", url: cfg.url, key: cfg.key }] : [];
   }
-  DSH.snapshot = function () { return snapshot; };
-  DSH.snapshotReady = loadSnapshot;
+
+  function healthOf(ep) {
+    const id = endpointId(ep);
+    return endpointHealth[id] ||
+      (endpointHealth[id] = { circuitUntil: 0, failures: 0, lastOk: 0 });
+  }
+
+  function orderedEndpoints(eps) {
+    const now = Date.now();
+    const healthy = eps.filter(function (ep) {
+      return ep && ep.url && ep.key && healthOf(ep).circuitUntil <= now;
+    });
+    if (!healthy.length) return [];
+    const pref = healthy.find(function (ep) { return endpointId(ep) === preferredKey; });
+    return pref ? [pref].concat(healthy.filter(function (ep) { return ep !== pref; })) : healthy;
+  }
+
+  function rememberEndpoint(ep) {
+    preferredKey = endpointId(ep);
+    activeType = ep.type || "supabase";
+    activeUrl = ep.url;
+    try { localStorage.setItem(LS_ENDPOINT, preferredKey); } catch (e) {}
+  }
+
+  function failEndpoint(ep, err) {
+    const h = healthOf(ep);
+    h.failures++;
+    /* 401/403 属凭据轮换，清配置重载即可，不熔断数据库 */
+    if (!(err && (err.status === 401 || err.status === 403)))
+      h.circuitUntil = Date.now() + CIRCUIT_MS;
+  }
 
   async function loadCloud(fallback) {
     if (cache.cloud !== undefined) return cache.cloud;
@@ -215,10 +234,17 @@
       const r = await fetch(url, { cache: "no-store" });
       if (!r.ok) throw new Error("HTTP " + r.status);
       const d = await r.json();
-      if (!d || typeof d.url !== "string" || !/^https:\/\//.test(d.url) ||
-          typeof d.key !== "string" || !d.key)
-        throw new Error("Invalid online configuration");
+      const eps = endpointList(d);
+      const valid = d && eps.length && eps.every(function (ep) {
+        return ep && typeof ep.url === "string" && /^https:\/\//.test(ep.url) &&
+               typeof ep.key === "string" && ep.key;
+      });
+      if (!valid) throw new Error("Invalid online configuration");
       cache.cloud = d;
+      try {
+        const saved = localStorage.getItem(LS_ENDPOINT);
+        if (saved) preferredKey = saved;
+      } catch (e) {}
     } catch (e) {
       noteErr(url, e);
       return fallback === undefined ? null : fallback;
@@ -226,24 +252,24 @@
     return cache.cloud;
   }
 
-  /* 在线库读取；仅 L1/L2 会走到这里 */
-  async function fetchOnline(name, cfg) {
+  /* Supabase PostgREST 端点：静态层走 v_site_dataset，日内层走专用视图 */
+  async function fetchSupabase(name, ep) {
     let url;
     const runtime = /^(b\/)?(equity|preview|signal)$/.exec(name);
     if (name === "quotes" || runtime) {
       if (runtime) {
         const variant = runtime[1] ? "B" : "A", kind = runtime[2];
-        url = cfg.url + (kind === "signal"
+        url = ep.url + (kind === "signal"
           ? "/rest/v1/live_strategy_anchor?variant=eq." + variant +
             "&select=payload&order=hold_year.desc,revision.desc&limit=1"
           : "/rest/v1/v_live_strategy_results?variant=eq." + variant +
             "&kind=eq." + kind + "&select=payload");
-      } else url = cfg.url + "/rest/v1/v_live_quote_display?select=payload";
+      } else url = ep.url + "/rest/v1/v_live_quote_display?select=payload";
     } else {
-      url = cfg.url + "/rest/v1/v_site_dataset?key=eq." +
+      url = ep.url + "/rest/v1/v_site_dataset?key=eq." +
             encodeURIComponent(name).replace(/%2F/gi, "/") + "&select=payload";
     }
-    const r = await fetch(url, { cache: "no-store", headers: { apikey: cfg.key } });
+    const r = await fetch(url, { cache: "no-store", headers: { apikey: ep.key } });
     if (!r.ok) {
       const e = new Error("HTTP " + r.status);
       e.status = r.status;
@@ -265,20 +291,49 @@
         throw new Error("Online dataset unavailable: " + name);
       d = d[0].payload;
     }
+    return d;
+  }
+
+  /* Turso libsql HTTP 端点：14 个展示 key 统一落在 site_dataset(key,payload)。
+     与前端消费模型完全对齐，备库不需要复刻任何 PostgREST 视图。 */
+  async function fetchTurso(name, ep) {
+    const body = { baton: null, requests: [
+      { type: "execute", stmt: {
+        sql: "select payload from site_dataset where key = ?",
+        args: [{ type: "text", value: name }] } },
+      { type: "close" }
+    ] };
+    const r = await fetch(ep.url + "/v2/pipeline", {
+      method: "POST", cache: "no-store",
+      headers: { Authorization: "Bearer " + ep.key, "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) { const e = new Error("HTTP " + r.status); e.status = r.status; throw e; }
+    const raw = await r.json();
+    const item = (raw && raw.results || [])[0];
+    if (!item || item.type !== "ok") throw new Error("Backup query failed: " + name);
+    const rows = ((item.response || {}).result || {}).rows || [];
+    if (rows.length !== 1 || !rows[0][0] || typeof rows[0][0].value !== "string")
+      throw new Error("Backup dataset unavailable: " + name);
+    let d;
+    try { d = JSON.parse(rows[0][0].value); }
+    catch (e2) { throw new Error("Backup payload invalid: " + name); }
+    if (name === "quotes" && (!d.ok || !d.quotes || !d.quotes.SPY))
+      throw new Error("Backup quote snapshot unavailable");
+    return d;
+  }
+
+  async function fetchFromEndpoint(name, ep) {
+    const d = (ep.type === "turso") ? await fetchTurso(name, ep) : await fetchSupabase(name, ep);
     if (name === "quotes" && d && d.quotes) d.quotes.__session = d.session || "";
     return d;
   }
 
-  function mirrorValue(name) {
-    return snapshot && snapshot.datasets ? snapshot.datasets[name] : undefined;
-  }
-
   function fallbackValue(name, fallback) {
     degraded[name] = true;
-    const m = mirrorValue(name);
-    if (m != null) { cache[name] = m; cacheTs[name] = Date.now() - ttlOf(name); return m; }
     const ls = lsGet(name);
-    if (ls) { cache[name] = ls.payload; cacheTs[name] = ls.ts; return ls.payload; }
+    /* 立即过期：端点恢复后下一次读取就会重新尝试，不会长时间停留在旧值 */
+    if (ls) { cache[name] = ls.payload; cacheTs[name] = Date.now() - ttlOf(name); return ls.payload; }
     return fallback === undefined ? null : fallback;
   }
 
@@ -290,30 +345,35 @@
 
     inflight[name] = (async function () {
       try {
-        if (Date.now() < circuitUntil) {
-          await loadSnapshot();     // 熔断期也要先备好镜像再兜底
-          return fallbackValue(name, fallback);
-        }
         const cfg = await DSH.json("cloud", null);
-        if (!cfg || !cfg.url || !cfg.key) {
+        const eps = cfg ? endpointList(cfg) : [];
+        if (!eps.length) {
           const ce = new Error("Online dataset configuration unavailable");
           ce.configFailure = true;     // 本地引导配置问题，不应熔断数据库
           throw ce;
         }
-        const v = await fetchOnline(name, cfg);
-        cache[name] = v; cacheTs[name] = Date.now();
-        lsSet(name, v);
-        delete degraded[name];
-        return v;
-      } catch (e) {
-        if (e.status === 401 || e.status === 403) {
-          /* 凭据可能已轮换：清掉引导配置让它重新加载，且不做熔断 */
-          delete cache.cloud;
-        } else if (!e.configFailure) {
-          /* 402 / 5xx / 网络异常一律熔断，避免故障期反复冲击被限流的网关 */
-          circuitUntil = Date.now() + CIRCUIT_MS;
+        const order = orderedEndpoints(eps);
+        if (!order.length) return fallbackValue(name, fallback);  // 全部端点熔断中
+        let lastErr = null;
+        for (const ep of order) {
+          try {
+            const v = await fetchFromEndpoint(name, ep);
+            const h = healthOf(ep);
+            h.circuitUntil = 0; h.failures = 0; h.lastOk = Date.now();
+            rememberEndpoint(ep);
+            cache[name] = v; cacheTs[name] = Date.now();
+            lsSet(name, v);
+            delete degraded[name];
+            return v;
+          } catch (e) {
+            failEndpoint(ep, e);      // 主库 402/5xx 只熔断主库，继续尝试备库
+            lastErr = e;
+            if (e.status === 401 || e.status === 403) delete cache.cloud;
+          }
         }
-        await loadSnapshot();         // 确保镜像就绪后再兜底（整站仅一次请求，自动去重）
+        circuitUntil = Date.now() + GLOBAL_COOLDOWN_MS;
+        throw lastErr || new Error("All online endpoints unavailable");
+      } catch (e) {
         noteErr(name, e);
         return fallbackValue(name, fallback);
       } finally { delete inflight[name]; }
@@ -345,12 +405,37 @@
       if (Date.now() < circuitUntil) return null;
       try {
         const cfg = await DSH.json("cloud", null);
-        if (!cfg || !cfg.url || !cfg.key) return null;
-        const h = { apikey: cfg.key }, opt = { cache: "no-store", headers: h };
+        const order = orderedEndpoints(cfg ? endpointList(cfg) : []);
+        if (!order.length) return null;
+        const ep = order[0];
+        if (ep.type === "turso") {
+          /* 备库一条 SQL 拿全部 key 的时间戳，按前端三层拆成同一组指纹，
+             备库同步后依然能精确触发「哪一层变了就失效哪一层」。 */
+          const body = { baton: null, requests: [
+            { type: "execute", stmt: {
+              sql: "select key, updated_at from site_dataset", args: [] } },
+            { type: "close" }
+          ] };
+          const r = await fetch(ep.url + "/v2/pipeline", {
+            method: "POST", cache: "no-store",
+            headers: { Authorization: "Bearer " + ep.key, "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+          });
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          const raw = await r.json();
+          const item = (raw && raw.results || [])[0];
+          if (!item || item.type !== "ok") throw new Error("Backup version probe failed");
+          const map = {};
+          for (const row of ((item.response || {}).result || {}).rows || [])
+            map[row[0].value] = (row[1] && row[1].value) || "";
+          const fp = keys => keys.map(k => k + ":" + (map[k] || "")).sort().join("|");
+          return { static: fp(STATIC_KEYS), quote: map.quotes || "", result: fp(DAILY_KEYS) };
+        }
+        const h = { apikey: ep.key }, opt = { cache: "no-store", headers: h };
         const [a, b, c] = await Promise.all([
-          fetch(cfg.url + "/rest/v1/v_site_dataset?select=key,updated_at", opt),
-          fetch(cfg.url + "/rest/v1/live_quote_snapshot?singleton=eq.true&select=evidence_sha256", opt),
-          fetch(cfg.url + "/rest/v1/v_live_strategy_results?select=variant,kind,source_as_of", opt)
+          fetch(ep.url + "/rest/v1/v_site_dataset?select=key,updated_at", opt),
+          fetch(ep.url + "/rest/v1/live_quote_snapshot?singleton=eq.true&select=evidence_sha256", opt),
+          fetch(ep.url + "/rest/v1/v_live_strategy_results?select=variant,kind,source_as_of", opt)
         ]);
         if (!a.ok) { const e = new Error("HTTP " + a.status); e.status = a.status; throw e; }
         const sa = (await a.json()).map(r => r.key + ":" + r.updated_at).sort().join("|");
@@ -409,12 +494,18 @@
   };
   DSH.versionStamp = function () { return Object.assign({}, versions); };
 
-  /* 供页面显示数据来源与时效，不再用「数据未就绪」掩盖仍有价值的历史值 */
+  /* 供页面显示当前激活端点与健康状态：live（主）/ backup（备）/ stale（兜底） */
   DSH.dataStatus = function () {
+    const stale = Object.keys(degraded).length > 0;
     return {
-      mode: Object.keys(degraded).length ? "mirror" : "live",
+      mode: stale ? "stale" : (activeType === "turso" ? "backup" : "live"),
       degradedKeys: Object.keys(degraded),
-      snapshotAt: snapshot ? snapshot.generated_at : "",
+      activeEndpoint: activeType,
+      activeUrl: activeUrl,
+      endpoints: Object.keys(endpointHealth).map(function (k) {
+        return { id: k, circuitOpen: endpointHealth[k].circuitUntil > Date.now(),
+                 failures: endpointHealth[k].failures, lastOk: endpointHealth[k].lastOk };
+      }),
       circuitOpen: Date.now() < circuitUntil
     };
   };
@@ -523,7 +614,14 @@
       async init() {
         if (cfg) return true;
         try { cfg = await DSH.json("cloud", null); } catch (e) { cfg = null; }
-        if (!cfg || !cfg.url || !cfg.key) return false;
+        if (!cfg) return false;
+        /* 持仓写入只能走 Supabase（备库 token 只读）；老格式缺顶层
+           url/key 时从 endpoints 里取主库端点，保持云同步可用。 */
+        if (!cfg.url || !cfg.key) {
+          const primary = (cfg.endpoints || []).find(e => (e.type || "supabase") === "supabase");
+          if (!primary) return false;
+          cfg = Object.assign({}, cfg, { url: primary.url, key: primary.key });
+        }
         api.auto = api.bound;
         return true;
       },

@@ -69,6 +69,10 @@ def run(archive=None):
                 local = json.loads((target/relative).read_text())
                 if local != deployed:
                     raise RuntimeError('Pages baseline differs from current deployed data: '+relative)
+        # 2026-11-08：引导配置必须来自 site_src/cloud.json 单一来源，而不能
+        # 沿用上一份 Pages artifact —— 否则新增的 Turso 备库端点永远不会
+        # 发布到线上。放在 before 之前，使 data_hashes 前后比对包含同一份配置。
+        site_build.write_cloud_config(str(target / "data"))
         before = data_hashes(target)
         if not before:
             raise RuntimeError('No financial snapshot to preserve')

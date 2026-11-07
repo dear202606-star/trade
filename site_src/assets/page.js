@@ -473,17 +473,19 @@
   }
 
   function renderStamp() {
+    var s = DSH.dataStatus ? DSH.dataStatus() : null;
+    var tag = s && s.mode === "backup" ? " · 备用数据库"
+      : (s && s.mode === "stale" ? " · 最近缓存" : "");
     var foot = $("footStamp");
     if (foot) foot.textContent = "行情 " + (Q && Q.ts_local ? Q.ts_local.slice(5,16) : "暂无") +
-      " · 收益 " + (EQ && EQ.updated ? EQ.updated.slice(5,16) : "暂无") + "（北京）" +
-      (DSH.dataStatus && DSH.dataStatus().mode === "mirror" ? " · 离线快照" : "");
+      " · 收益 " + (EQ && EQ.updated ? EQ.updated.slice(5,16) : "暂无") + "（北京）" + tag;
   }
 
-  /* 在线库熔断时页面仍用同源镜像完整渲染，只提示数据时效，绝不清空卡片。
+  /* 主库故障自动切备库；全部端点不可用时才用最近一次成功值，页面始终完整渲染。
      返回 true 表示已接管 freshBanner，checkFreshness 不再覆盖它。 */
   function showSourceNotice() {
     var s = DSH.dataStatus ? DSH.dataStatus() : null;
-    if (!s || s.mode !== "mirror") return false;
+    if (!s || (s.mode !== "backup" && s.mode !== "stale")) return false;
     var b = document.getElementById("freshBanner");
     if (!b) {
       b = document.createElement("div");
@@ -491,11 +493,9 @@
       b.className = "data-alert";
       document.body.insertBefore(b, document.body.firstChild);
     }
-    var when = s.snapshotAt
-      ? new Date(s.snapshotAt).toLocaleString("zh-CN", { timeZone: "Asia/Shanghai", hour12: false })
-      : "最近一次同步";
-    b.textContent = "在线数据库暂不可用，正展示最近一次同步数据（截至 " + when +
-      " 北京）；连接恢复后自动更新";
+    b.textContent = s.mode === "backup"
+      ? "主数据库暂不可用，已自动切换到备用数据库（" + s.activeEndpoint + "），数据持续更新"
+      : "在线数据库暂不可用，正展示最近一次成功读取的数据；连接恢复后自动更新";
     b.style.display = "block";
     return true;
   }

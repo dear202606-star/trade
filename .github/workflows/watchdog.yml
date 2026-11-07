@@ -3,10 +3,11 @@ name: 看门狗（停更告警）
 # 覆盖「压根没跑」这个盲区：定时检查页面真正读到的数据是否新鲜完整，
 # 超时就在 Issue 里喊，不再依赖「失败才告警」。
 #
-# 2026-11-07：改为校验 data/snapshot.json（CI 从在线库直连导出的同源镜像），
-# 不再检查已下线的 health.json / b/strategy_history.json / quality.json（恒 404），
-# 也不再经 PostgREST 读在线视图（egress 超额时恒 402）。这样网关故障时
-# 看门狗仍能准确判断「页面数据是否可用」，而不是把基础设施告警误报成数据停更。
+# 2026-11-08：页面取消本地文件镜像，主库 402 时自动切 Turso 在线备库。
+# 看门狗改为「三层校验」：① 直接读浏览器实际使用的 Turso 数据；
+# ② verify_replication.py 比对 Turso / Neon 的 key 数与 payload 哈希；
+# ③ realtime_check.py 直连主库的实时报价回执。三者都不经 PostgREST，
+# 因此 egress 超额时限服不会让监控失效，也不会把网关告警误报成数据停更。
 
 on:
   schedule:
@@ -39,6 +40,15 @@ jobs:
           # 且写不出回执，让页面数据检查被误判为「监控缺失」。
           pip install -r requirements.txt
           python realtime_check.py
+
+      - name: 三库一致性与端点健康（Turso + Neon）
+        if: always()
+        id: replication
+        env:
+          TURSO_HTTP_URL: ${{ secrets.TURSO_HTTP_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+          NEON_DSN: ${{ secrets.NEON_DSN }}
+        run: python verify_replication.py
 
       - name: 检查页面数据源与部署新鲜度
         if: always()

@@ -1,13 +1,13 @@
 name: 网页发布
 
-# 发布职责（2026-11-07 起）：
+# 发布职责（2026-11-08 起）：
 #   1) 构建前端并保留上一份已部署的数据基线
-#   2) 把构建期展示数据写入在线库（唯一主源），剔除 Pages 上的历史数据 JSON
-#   3) 通过 PostgreSQL 直连从在线库导出一份同源只读镜像 data/snapshot.json
-#      —— REST 网关被限流(402)时页面靠它完整渲染，且静态层读它可消除大部分出口流量
-#   4) 原子部署。镜像导出校验不通过即整体失败，绝不用半份数据上线。
-# 定时触发用于刷新镜像：按 data_lifecycle.py 的 DAILY 策略，数据管线每日
-# 收盘后产出，故只保留「盘前 + 盘后」两次，去掉原先无新数据的盘中第三次。
+#   2) 把构建期展示数据写入在线主库，剔除 Pages 上的历史数据 JSON
+#   3) 把 14 个展示 key 增量同步到 Turso 在线备库（浏览器可直读）；
+#      Neon 持久副本由 db-sync.yml 每日低频同步，避免反复唤醒其计算实例
+#   4) 原子部署。**不再生成任何本地文件形态的镜像**：页面兜底改为
+#      「Turso 在线备库 → 浏览器 localStorage」，两者都不是仓库静态文件。
+# 定时触发保持「盘前 + 盘后」两次，与 DAILY 数据产出节奏对齐。
 on:
   workflow_dispatch:
   schedule:
@@ -19,6 +19,12 @@ on:
       - publish_ui.py
       - publish_site_dataset.py
       - export_site_snapshot.py
+      - sync_site_dataset.py
+      - verify_replication.py
+      - db_failover.py
+      - test_replication.py
+      - site_build.py
+      - .github/workflows/db-sync.yml
       - live_strategy.py
       - prepare_live_ranking.py
       - test_closing_reconcile.py
@@ -58,7 +64,7 @@ jobs:
           node-version: '20'
       - run: pip install -r requirements.txt
       - run: node --test test_daily_pnl.mjs test_online_quotes.mjs test_page_refresh.mjs
-      - run: python -m unittest test_closing_reconcile test_ranking_factor_rebase test_watchdog_gateway test_egress_budget -v
+      - run: python -m unittest test_closing_reconcile test_ranking_factor_rebase test_watchdog_gateway test_egress_budget test_replication -v
       - name: 保留已部署数据并构建界面
         env:
           GH_TOKEN: ${{ github.token }}
@@ -67,28 +73,20 @@ jobs:
         env:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: python publish_site_dataset.py --install --source _site_release/data --prune
-      - name: 从在线库直连导出同源展示镜像
-        # 直连不经过 PostgREST 网关：即使网关因 egress 配额返回 402，
-        # 数据库本身可用时仍能导出，这是页面「绝对可靠」的兜底来源。
+      - name: 出口流量门禁（备库同步属关键链路）
+        id: egress
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python egress_budget.py --workflow "备库同步" --fast
+      - name: 发布后增量同步展示数据到 Turso 在线备库
+        # 页面在主库 REST 402 时自动改读 Turso；这一步保证备库与主库同源。
+        # 只写 Turso：Neon 计算实例由 db-sync.yml 每日唤醒一次，避免过度消耗免费额度。
+        if: steps.egress.outputs.allow == 'true'
         env:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-        run: python export_site_snapshot.py --target _site_release/data/snapshot.json
-      - name: 镜像完整性复核
-        run: |
-          python - <<'PY'
-          import json, pathlib
-          p = pathlib.Path('_site_release/data/snapshot.json')
-          d = json.loads(p.read_text(encoding='utf-8'))
-          assert d.get('schema') == 1, 'bad schema'
-          assert d.get('source') == 'postgres-direct', 'bad source'
-          need = {'quotes','equity','b/equity','signal','b/signal','preview','b/preview',
-                  'curve','b/curve','strategy_history','b/strategy_history',
-                  'name_zh','sectors','health'}
-          have = set(d['datasets'])
-          assert need <= have, 'missing datasets: %s' % sorted(need - have)
-          print('snapshot OK: %d keys, %d bytes, generated_at=%s'
-                % (len(have), p.stat().st_size, d['generated_at']))
-          PY
+          TURSO_HTTP_URL: ${{ secrets.TURSO_HTTP_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: python sync_site_dataset.py --targets turso
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site_release
