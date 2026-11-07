@@ -27,7 +27,7 @@ BASE = (sys.argv[1] if len(sys.argv) > 1 else
 H = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)", "Cache-Control": "no-store"}
 CB = str(int(time.time()))
 
-fails, oks = [], []
+fails, oks, skips = [], [], []
 
 
 def ok(msg):
@@ -36,6 +36,10 @@ def ok(msg):
 
 def bad(msg):
     fails.append(msg)
+
+
+def skip(msg):
+    skips.append(msg)
 
 
 def get(path, timeout=40):
@@ -130,6 +134,41 @@ def _cloud():
         return None
 
 
+_TURSO_CACHE = None
+
+
+def _turso_dataset(cfg):
+    """主库 PostgREST 402（egress 限服）时页面真正读取的在线备库。
+
+    2026-11-08：E2E 声称校验「用户真正看到的那份数据」，但主库限服期间
+    页面已自动切到 Turso，若 E2E 仍逐项打主库 REST，就会把基础设施限流
+    误报成 5 个数据故障。优先从备库一次取回 14 个展示 key，既和页面同源，
+    也把 5 个 REST 请求降为 1 个 HTTP 请求。
+    """
+    global _TURSO_CACHE
+    if _TURSO_CACHE is not None:
+        return _TURSO_CACHE
+    ep = next((e for e in (cfg.get('endpoints') or [])
+               if e.get('type') == 'turso'), None)
+    if not ep or not ep.get('url') or not ep.get('key'):
+        return None
+    body = {"baton": None, "requests": [
+        {"type": "execute", "stmt": {
+            "sql": "select key, payload from site_dataset", "args": []}},
+        {"type": "close"}]}
+    try:
+        r = requests.post(ep['url'].rstrip('/') + '/v2/pipeline',
+                          data=json.dumps(body), timeout=30,
+                          headers={**H, "Authorization": "Bearer " + ep['key'],
+                                   "Content-Type": "application/json"})
+        r.raise_for_status()
+        rows = r.json()['results'][0]['response']['result'].get('rows') or []
+        _TURSO_CACHE = {row[0]['value']: json.loads(row[1]['value']) for row in rows}
+        return _TURSO_CACHE
+    except Exception:
+        return None
+
+
 def _online(cfg,path,params=None):
     response = requests.get(cfg['url'].rstrip('/')+'/rest/v1/'+path,
         params=params or {},headers={**H,'apikey':cfg['key']},timeout=20)
@@ -140,11 +179,16 @@ def _online(cfg,path,params=None):
     return rows[0]
 
 
-def data(name):
+def data(name, optional=False):
     """与页面同一数据源：实时类走在线视图，历史类走 v_site_dataset。
+
+    optional=True 用于「取不到也不影响页面」的附加校验（如冻结选股快照），
+    主库 402 时只记跳过，不把基础设施限流误报成线上数据故障。
 
     2026-11-06 起 Pages 不再发布 data/*.json（仅保留 cloud.json 引导配置），
     E2E 必须校验「用户真正看到的那份在线数据」，而不是已下线的静态快照。
+    2026-11-08 起优先读 Turso 在线备库（页面在主库 402 时的实际数据源），
+    主库 REST 仅作回退；老配置没有备库端点时行为与从前一致。
     """
     key = name[:-5] if name.endswith('.json') else name
     if key == 'cloud':
@@ -152,6 +196,17 @@ def data(name):
     cfg = _cloud()
     if not cfg:
         return None
+    backup = _turso_dataset(cfg)
+    if backup and key in backup:
+        payload = backup[key]
+        if payload is None:
+            bad('备库数据集为空：' + key)
+            return None
+        if key == 'quotes' and (not payload.get('ok') or
+                                not payload.get('quotes', {}).get('SPY')):
+            bad('备库 quotes 数据不完整')
+            return None
+        return payload
     try:
         if key == 'quotes':
             row = _online(cfg,'live_quote_snapshot',{'singleton':'eq.true','select':'payload'})
@@ -176,7 +231,10 @@ def data(name):
         if payload is None:raise ValueError('empty online dataset: '+key)
         return payload
     except Exception as exc:
-        bad('在线数据 %s 读取失败：%s' % (name,type(exc).__name__))
+        if optional:
+            skip('可选数据 %s 不可读（%s），跳过附加校验' % (name, type(exc).__name__))
+        else:
+            bad('在线数据 %s 读取失败：%s' % (name,type(exc).__name__))
         return None
 
 def main():
@@ -291,7 +349,7 @@ def main():
 
     # 分年表与曲线必须用同一批持仓
     if sh and cv:
-        picks = (data("backtest_picks.json") or {}).get("years") or {}
+        picks = (data("backtest_picks.json", optional=True) or {}).get("years") or {}
         if picks:
             ok("选股快照已冻结（%d 年）" % len(picks))
             for r in (sh.get("years") or []):
@@ -303,9 +361,11 @@ def main():
     print("=== 线上 E2E 校验 · %s ===" % BASE)
     for m in oks:
         print("  ✅", m)
+    for m in skips:
+        print("  [跳过]", m)
     for m in fails:
         print("  ❌", m)
-    print("通过 %d · 失败 %d" % (len(oks), len(fails)))
+    print("通过 %d · 失败 %d · 跳过 %d" % (len(oks), len(fails), len(skips)))
     return 1 if fails else 0
 
 
