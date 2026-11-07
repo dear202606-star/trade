@@ -92,7 +92,9 @@ class IndependentCloseToleranceTests(unittest.TestCase):
     def test_measured_cross_source_drifts_are_accepted(self):
         measured=[(174.76,174.755),(291.31,291.235),(109.93,109.95),
                   (260.5,260.475),(501.49,501.63),(14.87,14.885),
-                  (304.84,304.775),(69.97,69.98),(99.25,99.245)]
+                  (304.84,304.775),(69.97,69.98),(99.25,99.245),
+                  # CI 诊断中四只超过 0.1% 的相对容差边界（max 0.1775%）
+                  (99.44,99.54),(20.26,20.285),(433.74,432.97),(272.13,271.81)]
         for quote,context in measured:
             with self.subTest(quote=quote,context=context):
                 self.assertTrue(independent_close_ok(quote,context))
@@ -101,15 +103,16 @@ class IndependentCloseToleranceTests(unittest.TestCase):
         self.assertFalse(independent_close_ok(21.,20.))      # 5% (existing fixture)
         self.assertFalse(independent_close_ok(110.,100.))    # 10%
         self.assertFalse(independent_close_ok(100.5,100.))   # 0.5%
+        self.assertFalse(independent_close_ok(100.4,100.))   # 0.4%
 
     def test_sub_cent_floor_is_preserved(self):
         self.assertTrue(independent_close_ok(20.,20.))
         self.assertTrue(independent_close_ok(20.0005,20.))
-        self.assertFalse(independent_close_ok(20.05,20.))   # 0.25%
+        self.assertFalse(independent_close_ok(20.08,20.))  # 0.4%
 
     def test_tolerance_scales_with_price(self):
         self.assertTrue(independent_close_ok(500.4,500.))    # 0.08%
-        self.assertFalse(independent_close_ok(501.0,500.))  # 0.2%
+        self.assertFalse(independent_close_ok(502.0,500.))  # 0.4%
 
 
 if __name__=='__main__':unittest.main()

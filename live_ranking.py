@@ -12,20 +12,25 @@ from live_strategy import sha,positive,store
 from prepare_live_ranking import normalized,prepare
 
 
-def independent_close_ok(quote_price,context_price,rel_tol=1e-3):
+def independent_close_ok(quote_price,context_price,rel_tol=3e-3):
     """Compare two *independent* readings of the same closing bar.
 
     `close_enough` uses a fixed 0.0011 absolute tolerance and is correct for
     replaying one archived series against itself. Here the quote snapshot and
     the ranking context come from different collection passes (and sometimes
     different vendors), so the same 2026-11-06 close legitimately differs by
-    a few cents. Measured 2026-11-07: 278/504 symbols drifted by 0.005-0.14
-    (~0.003%-0.03%), which the absolute tolerance rejected wholesale.
+    a few cents. Measured 2026-11-07 across the live universe: 287/504
+    symbols drifted, p95 relative 0.077%, maximum 0.1775% (HUM 433.74 vs
+    432.97). The absolute tolerance rejected all of them and froze the
+    next-year preview.
 
-    A 0.1% relative tolerance with a 0.02 absolute floor admits that noise
-    (the floor covers low-priced bars where a 0.015 rounding difference is
-    already 0.1%), while still rejecting a wrong symbol, a stale session or a
-    wrong price basis -- the existing test uses a 5% mismatch and still fails.
+    A 0.3% relative tolerance (1.7x headroom over the observed maximum) plus
+    a 0.02 absolute floor admits that noise (the floor covers low-priced
+    bars where a 0.015 rounding difference is already 0.1%). Wrong symbols,
+    stale sessions or a shifted price basis are still rejected: the existing
+    test uses a 5% mismatch, and the new boundary tests pin 0.4%-10% down.
+    Every drift stays observable via CLOSING_PRICE_DRIFT, so a future
+    systematic basis shift is reported even while small noise is tolerated.
     """
     q=positive(quote_price);c=float(context_price)
     return abs(q-c)<=max(0.02,abs(c)*rel_tol)
