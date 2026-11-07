@@ -53,9 +53,14 @@ def run(now=None):
             problems.extend('公开读取：'+p for p in quote_problems(public,heartbeat,calendar,now))
             if row['evidence_sha256']!=public['evidence_sha256']:
                 problems.append('公开报价与库内版本不一致')
-            cursor.execute("select jobname,schedule,active from cron.job where jobname='trade-dispatch-market'")
+            # 2026-11-07：调度权统一收归 GitHub Actions，两个 pg_cron
+            # dispatch 作业（trade-dispatch / trade-dispatch-market）已由
+            # sql/124_egress_schedule.sql 停用。它们若重新出现，就会与
+            # GitHub schedule 双触发并再次打穿 5GB Egress 配额，属真实故障。
+            cursor.execute("select jobname,schedule,active from cron.job where jobname like 'trade-dispatch%'")
             jobs=cursor.fetchall()
-            if len(jobs)!=1 or not jobs[0][2]:warnings.append('备用五分钟派发任务未启用')
+            if jobs:problems.append('检测到重复的 pg_cron 派发作业 %s（双触发会打穿 Egress 配额）'
+                                    % [j[0] for j in jobs])
             report.update(calendar_sha256=calendar.sha,expected_session=str(state['session']),
                 minimum_source_time=state['minimum_source_time'].isoformat(),refresh_due=state['refresh_due'],
                 source_as_of=str(row['source_as_of']),collected_at=str(row['collected_at']),

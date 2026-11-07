@@ -31,7 +31,7 @@ ARTIFACT = "trade-db-backup"
 def run(args, binary=False, timeout=900):
     p = subprocess.run(args, capture_output=True, text=not binary, timeout=timeout)
     if p.returncode != 0:
-        err = (p.stderr if not binary else b"").decode("utf-8", "ignore") \
+        err = p.stderr.decode("utf-8", "ignore") \
             if isinstance(p.stderr, bytes) else str(p.stderr)
         raise RuntimeError("命令失败 %s：%s" % (args[:3], err[:200]))
     return p.stdout
