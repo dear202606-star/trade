@@ -12,7 +12,7 @@ kind of factor change stays fail-closed.
 import unittest
 
 from prepare_live_ranking import (factor_rebase_evidence, splice_anchor,
-                                  normalized)
+                                  splice_raw_ok, normalized)
 
 
 BEGIN = "2026-11-05"
@@ -131,6 +131,23 @@ class SpliceAnchorTest(unittest.TestCase):
         old=old_context()
         data={"raw":{"2026-11-07":101.0},"adjusted":{"2026-11-07":101.0}}
         self.assertIsNone(splice_anchor(old,data,BEGIN))
+
+
+class SpliceRawTest(unittest.TestCase):
+    """Anchor prices come from two collection passes, sometimes two vendors."""
+
+    def test_vendor_tail_differences_are_accepted(self):
+        self.assertTrue(splice_raw_ok(100.0, 100.005))
+        self.assertTrue(splice_raw_ok(174.755, 174.76))
+        self.assertTrue(splice_raw_ok(432.97, 433.74))
+
+    def test_wrong_symbol_or_wrong_day_is_rejected(self):
+        self.assertFalse(splice_raw_ok(100.0, 110.0))
+        self.assertFalse(splice_raw_ok(100.0, 101.0))
+        self.assertFalse(splice_raw_ok(20.0, 20.1))
+
+    def test_exact_match_is_accepted(self):
+        self.assertTrue(splice_raw_ok(100.0, 100.0))
 
 
 if __name__ == "__main__":

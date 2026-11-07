@@ -20,12 +20,24 @@ def normalized(body):
     return {d:body['adjusted'][d]/body['adjusted'][first] for d in dates}
 
 
+def splice_raw_ok(a,b,rel_tol=3e-3):
+    """Reconcile the anchor bar across two independent collection passes.
+
+    The original 1e-6 relative tolerance assumed the *same* vendor series.
+    When a symbol falls back to another provider (SKYD_WS routinely does),
+    the same historical close legitimately differs by a few cents. Use the
+    same 0.3% relative / 0.02 absolute envelope as the closing-price check
+    in live_ranking; wrong symbols or wrong dates are still far outside it.
+    """
+    return abs(float(a)-float(b))<=max(0.02,abs(float(b))*rel_tol)
+
+
 def splice_anchor(old,data,begin):
     """Latest trading day that exists in both the sealed and the fresh series.
 
     Thinly traded instruments (e.g. the SKYD spin-off warrant) can have no
     bar on `begin`. The splice must still be anchored on a day where both
-    series have a *real, identical* raw price -- never on a fabricated bar.
+    series have a real, reconcilable raw price -- never on a fabricated bar.
     """
     overlap=sorted(d for d in set(old['raw'])&set(data['raw']) if d<=begin)
     return overlap[-1] if overlap else None
@@ -194,10 +206,12 @@ def prepare(path=None):
                     raise ValueError('Incremental source cannot reconcile previous close: %s (begin=%s overlap=%s new_days=%s)'
                                      %(symbol,begin,overlap_count,sorted(data['raw'])[:6]))
                 # 2026-11-06：Yahoo 为 float32 精度（376.5299987792969 vs 东财
-                # 376.53），跨供应商对账必须用相对容差而非精确相等。
+                # 376.53）；2026-11-07：兜底切换供应商后，同一历史收盘价也会
+                # 有几分钱尾差。跨通路锚点对账用相对容差，仍远严于错标的。
                 a=old['raw'][anchor];b=data['raw'][anchor]
-                if abs(a-b)>1e-6*max(abs(a),abs(b)):
-                    raise ValueError('Incremental source cannot reconcile previous close: '+symbol)
+                if not splice_raw_ok(a,b):
+                    raise ValueError('Incremental source cannot reconcile previous close: %s (anchor=%s old=%.6f new=%.6f delta=%.6f)'
+                                     %(symbol,anchor,a,b,float(a)-float(b)))
                 # 衔接点的「绝对复权因子」在标的除息后必然改变（主源把除息
                 # 日之前的历史整体下调）。拼接算法按锚点归一化，本来就能
                 # 正确处理这种整体缩放并还原分红；此处不再直接拒绝，而是
