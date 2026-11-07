@@ -3,8 +3,8 @@ import vm from 'node:vm';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-function page(read) {
-  const calls=[], paints=[], elements=new Map();
+function page(read, opts={}) {
+  const calls=[], paints=[], elements=new Map(), notices=[];
   const document={readyState:'loading',hidden:false,addEventListener(){},querySelectorAll(){return [];},
     getElementById(id){
       if (!elements.has(id)) elements.set(id,{textContent:'',className:'',innerHTML:'',style:{}});
@@ -13,19 +13,23 @@ function page(read) {
   let tick;
   const context=vm.createContext({document,window:{},localStorage:{getItem(){return null;},setItem(){}},
     DSH:{jsonNoCache:async(name,fallback)=>{calls.push(name);return read(name,fallback);},
-      json:async(name,fallback)=>read(name,fallback),previewCurrent:()=>false},
+      json:async(name,fallback)=>read(name,fallback),previewCurrent:()=>false,
+      reportNotice:(id,level,text)=>notices.push({id,level,text}),
+      dataStatus:()=>opts.status||{level:'healthy',mode:'backup'},
+      quoteFreshness:()=>opts.staleQuotes===true},
     setInterval(fn){tick=fn;},console});
   const source=readFileSync(new URL('./site_src/assets/page.js',import.meta.url),'utf8');
   vm.runInContext(source.replace('  if (document.readyState === "loading")',`
-    window.testPage = {startAutoRefresh, loadVariant, renderYear,
-      state:()=>({EQ,PV,Q}), switchTo:v=>{VARIANT=v;}};
+    window.testPage = {startAutoRefresh, loadVariant, renderYear, renderServiceNotice,
+      state:()=>({EQ,PV,Q}), switchTo:v=>{VARIANT=v;},
+      seed:(eq,sig,q)=>{EQ=eq;SIG=sig;Q=q;}};
     renderAllCards=()=>window.paint({EQ,PV,Q});
     checkFreshness=()=>window.checked++;
     renderQuality=()=>{};
     if (document.readyState === "loading")`),context);
   context.window.paint=s=>paints.push(s);
   context.window.checked=0;
-  return {api:context.window.testPage,context,calls,paints,elements,tick:()=>tick()};
+  return {api:context.window.testPage,context,calls,paints,elements,notices,tick:()=>tick()};
 }
 
 test('unchanged quotes still refresh dependent artifacts and recheck deadlines',async()=>{
@@ -60,4 +64,60 @@ test('a failed account refresh clears the prior variant positions instead of lea
   await p.tick();
   assert.equal(positions.innerHTML,'');assert.equal(daily.textContent,'—');
   assert.equal(p.context.document.getElementById('verdict').textContent,'数据未就绪');
+});
+
+/* ---------- 2026-11-08：顶部提示按数据健康度分级，备库路由不再误报 ---------- */
+const readyData=()=>[{position:[{ticker:'X'}],stats:{strategy:0.1}},{official:[{}]},{}];
+
+test('healthy backup routing shows no visitor-facing banner at all',()=>{
+  const p=page(()=>null,{status:{level:'healthy',mode:'backup',activeEndpoint:'turso'}});
+  p.api.seed(...readyData());
+  p.api.renderServiceNotice();
+  assert.deepEqual(p.notices.filter(n=>n.text),[],'备库正常供数必须零提示');
+});
+
+test('quote staleness still warns while the healthy link stays quiet',()=>{
+  const p=page(()=>null,{status:{level:'healthy',mode:'backup'},staleQuotes:true});
+  p.api.seed(...readyData());
+  p.api.renderServiceNotice();
+  assert.equal(p.notices.find(n=>n.id==='quotes').level,'warn');
+  assert.equal(p.notices.find(n=>n.id==='quotes').text,'行情更新超时');
+  assert.equal(p.notices.find(n=>n.id==='link').text,'');
+});
+
+test('offline link gets a neutral notice, never a primary-outage alarm',()=>{
+  const p=page(()=>null,{status:{level:'offline',mode:'stale'}});
+  p.api.seed(...readyData());
+  p.api.renderServiceNotice();
+  const link=p.notices.find(n=>n.id==='link');
+  assert.equal(link.level,'info');
+  assert.match(link.text,/最近一次成功读取/);
+  assert.doesNotMatch(link.text,/主数据库|故障/);
+});
+
+test('missing core data raises an error instead of silently showing advice',()=>{
+  const p=page(()=>null,{status:{level:'healthy'}});
+  p.api.renderServiceNotice();
+  const errNotice=p.notices.find(n=>n.id==='page');
+  assert.equal(errNotice.level,'error');
+  assert.match(errNotice.text,/在线数据源暂不可用/);
+});
+
+test('recovery clears every registered notice',()=>{
+  const opts={status:{level:'offline',mode:'stale'},staleQuotes:true};
+  const p=page(()=>null,opts);
+  p.api.seed(...readyData());
+  p.api.renderServiceNotice();
+  assert.ok(p.notices.some(n=>n.text),'异常时应有提示');
+  p.notices.length=0;
+  opts.status.level='healthy';opts.staleQuotes=false;
+  p.api.renderServiceNotice();
+  assert.deepEqual(p.notices.filter(n=>n.text),[],'恢复后所有提示必须被清除');
+});
+
+test('the obsolete primary-outage copy is gone from the page source',()=>{
+  const src=readFileSync(new URL('./site_src/assets/page.js',import.meta.url),'utf8');
+  assert.doesNotMatch(src,/主数据库暂不可用|自动切换到备用数据库/);
+  assert.doesNotMatch(src,/showSourceNotice/);
+  assert.doesNotMatch(src,/mode === "backup"/,'不得再把备库路由当成故障条件');
 });

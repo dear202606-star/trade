@@ -166,24 +166,9 @@
     } catch (e) { box.innerHTML = ""; }
   }
 
-  /* 数据停更检测：按用户当前时间算，不依赖构建时的健康快照 */
-  function checkFreshness() {
-    /* 在线库不可用时展示的是最近一次同步快照，提示优先级高于行情超时 */
-    if (showSourceNotice()) return;
-    if (DSH.quoteFreshness(Q) !== true) {
-      var old = document.getElementById("freshBanner");
-      if (old) old.remove();
-      return;
-    }
-    var bar = document.getElementById("freshBanner");
-    if (!bar) {
-      bar = document.createElement("div");
-      bar.id = "freshBanner";
-      bar.className = "data-alert";
-      document.body.insertBefore(bar, document.body.firstChild);
-    }
-    bar.textContent = "⚠ 行情更新超时";
-  }
+  /* 顶部提示的唯一入口：按数据健康度决定显示什么，正常态不显示任何东西。
+     原来这里会先看「是否切到备库」，把计划内冗余当成故障弹红条，已废除。 */
+  function checkFreshness() { renderServiceNotice(); }
 
   /* 中文名优先（行情源带中文），否则回退英文 */
   function zhName(ticker, fallback) {
@@ -474,30 +459,64 @@
 
   function renderStamp() {
     var s = DSH.dataStatus ? DSH.dataStatus() : null;
-    var tag = s && s.mode === "backup" ? " · 备用数据库"
-      : (s && s.mode === "stale" ? " · 最近缓存" : "");
+    /* 计划内的备库路由不在页脚标注「备用数据库」，避免被误读为故障；
+       只有真的退回最近缓存时才说明数据出处。 */
+    var tag = s && s.level && s.level !== "healthy" ? " · 最近缓存" : "";
     var foot = $("footStamp");
     if (foot) foot.textContent = "行情 " + (Q && Q.ts_local ? Q.ts_local.slice(5,16) : "暂无") +
       " · 收益 " + (EQ && EQ.updated ? EQ.updated.slice(5,16) : "暂无") + "（北京）" + tag;
   }
 
-  /* 主库故障自动切备库；全部端点不可用时才用最近一次成功值，页面始终完整渲染。
-     返回 true 表示已接管 freshBanner，checkFreshness 不再覆盖它。 */
-  function showSourceNotice() {
-    var s = DSH.dataStatus ? DSH.dataStatus() : null;
-    if (!s || (s.mode !== "backup" && s.mode !== "stale")) return false;
+  /* ---------- 访客提示状态机（2026-11-08） ----------
+     架构原则：多数据库冗余对访客应当「无感」。主库免费额度限服（402）后
+     自动改读 Turso 实时备库是设计内的正常路径，不是故障，不得弹任何告警。
+     只有以下真实异常才提示：
+       ① 核心数据缺失、无法给出操作建议（error）
+       ② 行情更新超时 / 云端 health 判定数据异常（warn）
+       ③ 全部端点不可用且只能展示最近一次成功读取的数据（info，中性色）
+     所有来源登记到 app.js 的统一状态中心，任一来源恢复都会重算并自动
+     移除横幅，杜绝多处自建横幅互相覆盖、或故障恢复后红条残留。 */
+  function setNotice(id, level, text) {
+    if (DSH.reportNotice) { DSH.reportNotice(id, level, text); return; }
+    /* 无状态中心的运行环境（如单测沙箱）：退化为本地横幅且不抛错 */
+    if (typeof document === "undefined" || !document.body) return;
     var b = document.getElementById("freshBanner");
+    if (!text) { if (b) { b.textContent = ""; b.style.display = "none"; } return; }
     if (!b) {
       b = document.createElement("div");
       b.id = "freshBanner";
-      b.className = "data-alert";
       document.body.insertBefore(b, document.body.firstChild);
     }
-    b.textContent = s.mode === "backup"
-      ? "主数据库暂不可用，已自动切换到备用数据库（" + s.activeEndpoint + "），数据持续更新"
-      : "在线数据库暂不可用，正展示最近一次成功读取的数据；连接恢复后自动更新";
+    b.className = level === "info" ? "data-notice" : "data-alert";
+    b.textContent = text;
     b.style.display = "block";
-    return true;
+  }
+
+  function linkNotice() {
+    var s = DSH.dataStatus ? DSH.dataStatus() : null;
+    /* level 才是唯一依据；mode=backup 只是路由快照，绝不触发提示 */
+    if (!s || !s.level || s.level === "healthy") {
+      setNotice("link", "info", "");
+      return;
+    }
+    setNotice("link", "info", s.level === "offline"
+      ? "在线连接暂时中断，正展示最近一次成功读取的数据；连接恢复后自动更新"
+      : "部分数据暂由最近缓存补全，在线连接恢复后自动更新");
+  }
+
+  function renderServiceNotice() {
+    if (!dataReady()) {
+      var lastErr = (window.__dshErr || []).slice(-1)[0] || "";
+      setNotice("page", "error", "在线数据源暂不可用，已隐藏操作建议" +
+        (lastErr ? "（" + lastErr.split(" -> ").slice(-1)[0] + "）" : ""));
+      linkNotice();
+      return;
+    }
+    setNotice("page", "error", "");
+    if (DSH.quoteFreshness && DSH.quoteFreshness(Q) === true)
+      setNotice("quotes", "warn", "行情更新超时");
+    else setNotice("quotes", "warn", "");
+    linkNotice();
   }
 
   function renderUnavailable(reason) {
@@ -549,17 +568,7 @@
     $("yearSpark").innerHTML = "";
     $("posMeta").textContent = "账户数据暂不可用";
     $("yearTitle").textContent = "当期策略收益";
-    var b = document.getElementById("freshBanner");
-    if (!b) {
-      b = document.createElement("div");
-      b.id = "freshBanner";
-      b.className = "data-alert";
-      document.body.insertBefore(b, document.body.firstChild);
-    }
-    var lastErr = (window.__dshErr || []).slice(-1)[0] || "";
-    b.textContent = "⚠ 在线数据源暂不可用，已隐藏操作建议" +
-      (lastErr ? "（" + lastErr.split(" -> ").slice(-1)[0] + "）" : "");
-    b.style.display = "block";
+    renderServiceNotice();   // 统一登记，避免与行情/健康提示叠成多条横幅
   }
 
   async function boot() {

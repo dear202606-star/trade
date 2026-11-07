@@ -130,12 +130,15 @@
   const cacheTs = {};               // name -> 本次成功取数的时间戳
   const inflight = {};              // 同名并发请求合并
   const degraded = {};              // 当前使用兜底数据的 key
+  const degradedAt = {};            // key -> 最近一次退回兜底值的时间
   const LS_PREFIX = "dsh.data.v2.";
   const LS_ENDPOINT = "dsh.endpoint.v1.";
+  const LS_CIRCUIT = "dsh.circuit.v1.";    // 跨刷新保留主库额度熔断，见 failEndpoint
   const CIRCUIT_MS = 10 * 60 * 1000;       // 单端点独立熔断
   const GLOBAL_COOLDOWN_MS = 60 * 1000;    // 全端点失败后的重试冷却
   const endpointHealth = {};        // id -> {circuitUntil, failures, lastOk}
   let circuitUntil = 0;
+  let lastOnlineOkAt = 0;           // 最近一次端点成功返回的时间（判定链路是否健康）
   let preferredKey = "";
   let activeType = "supabase", activeUrl = "";
   let versionStamp = "";            // 最近一次探测到的数据库版本指纹
@@ -198,8 +201,22 @@
 
   function healthOf(ep) {
     const id = endpointId(ep);
-    return endpointHealth[id] ||
-      (endpointHealth[id] = { circuitUntil: 0, failures: 0, lastOk: 0 });
+    if (!endpointHealth[id]) {
+      /* 主库免费额度耗尽（402）时，熔断必须跨页面刷新保留；否则每次打开
+         页面都会先撞一次 402 再降级，既浪费 egress 又拖慢首屏。 */
+      let until = 0;
+      try {
+        until = Number(localStorage.getItem(LS_CIRCUIT + id)) || 0;
+        if (until && until <= Date.now()) {
+          localStorage.removeItem(LS_CIRCUIT + id);
+          until = 0;
+        } else if (until > Date.now() + CIRCUIT_MS) {
+          until = 0;               // 拒绝被篡改的超长熔断
+        }
+      } catch (e) { until = 0; }
+      endpointHealth[id] = { circuitUntil: until, failures: 0, lastOk: 0 };
+    }
+    return endpointHealth[id];
   }
 
   function orderedEndpoints(eps) {
@@ -223,8 +240,11 @@
     const h = healthOf(ep);
     h.failures++;
     /* 401/403 属凭据轮换，清配置重载即可，不熔断数据库 */
-    if (!(err && (err.status === 401 || err.status === 403)))
+    if (!(err && (err.status === 401 || err.status === 403))) {
       h.circuitUntil = Date.now() + CIRCUIT_MS;
+      try { localStorage.setItem(LS_CIRCUIT + endpointId(ep), String(h.circuitUntil)); }
+      catch (e) { /* 隐私模式：退化为本次会话内熔断 */ }
+    }
   }
 
   async function loadCloud(fallback) {
@@ -331,6 +351,7 @@
 
   function fallbackValue(name, fallback) {
     degraded[name] = true;
+    degradedAt[name] = Date.now();
     const ls = lsGet(name);
     /* 立即过期：端点恢复后下一次读取就会重新尝试，不会长时间停留在旧值 */
     if (ls) { cache[name] = ls.payload; cacheTs[name] = Date.now() - ttlOf(name); return ls.payload; }
@@ -360,10 +381,14 @@
             const v = await fetchFromEndpoint(name, ep);
             const h = healthOf(ep);
             h.circuitUntil = 0; h.failures = 0; h.lastOk = Date.now();
+            try { localStorage.removeItem(LS_CIRCUIT + endpointId(ep)); }
+            catch (e) { /* 隐私模式下无持久化熔断可清 */ }
             rememberEndpoint(ep);
             cache[name] = v; cacheTs[name] = Date.now();
             lsSet(name, v);
             delete degraded[name];
+            delete degradedAt[name];
+            lastOnlineOkAt = Date.now();
             return v;
           } catch (e) {
             failEndpoint(ep, e);      // 主库 402/5xx 只熔断主库，继续尝试备库
@@ -494,19 +519,79 @@
   };
   DSH.versionStamp = function () { return Object.assign({}, versions); };
 
-  /* 供页面显示当前激活端点与健康状态：live（主）/ backup（备）/ stale（兜底） */
+  /* ---------- 站点提示状态中心（2026-11-08） ----------
+     端点类型只是路由结果，不是故障：主库免费额度限服（402）后浏览器自动
+     读 Turso 实时备库，属计划内冗余，绝不能向访客弹主库故障告警。
+     只有真实异常才登记提示；所有来源共用一个横幅，恢复后自动移除，
+     避免多处各自建条、互相覆盖或故障恢复后残留。 */
+  const notices = {};                    // id -> {level, text, ts}
+  const NOTICE_TTL_MS = 60 * 60 * 1000;
+  const NOTICE_RANK = { info: 1, warn: 2, error: 3 };
+
+  DSH.reportNotice = function (id, level, text) {
+    if (!text) delete notices[id];
+    else notices[id] = { level: NOTICE_RANK[level] ? level : "warn",
+                         text: String(text), ts: Date.now() };
+    return DSH.renderNotices();
+  };
+  DSH.clearNotice = function (id) { delete notices[id]; return DSH.renderNotices(); };
+  DSH.notices = function () { return Object.assign({}, notices); };
+  DSH.renderNotices = function () {
+    if (typeof document === "undefined" || !document.body) return null;
+    const now = Date.now();
+    const live = Object.keys(notices)
+      .filter(function (k) { return now - notices[k].ts < NOTICE_TTL_MS; })
+      .map(function (k) { return notices[k]; });
+    let bar = document.getElementById("serviceBanner");
+    if (!live.length) {
+      if (!bar) return null;
+      if (typeof bar.remove === "function") bar.remove();
+      else if (bar.parentNode) bar.parentNode.removeChild(bar);
+      return null;
+    }
+    live.sort(function (a, b) { return NOTICE_RANK[b.level] - NOTICE_RANK[a.level]; });
+    const top = live[0];
+    if (!bar) {
+      bar = document.createElement("div");
+      bar.id = "serviceBanner";
+      document.body.insertBefore(bar, document.body.firstChild);
+    }
+    /* info 是「暂时用最近缓存」这类非故障告知，用中性色而非红色告警 */
+    bar.className = top.level === "info" ? "data-notice" : "data-alert";
+    bar.textContent = (top.level === "info" ? "" : "⚠ ") + top.text;
+    bar.style.display = "block";
+    return bar;
+  };
+
+  /* mode 是诊断用的路由快照（live/backup/stale），不代表故障；
+     level 才是访客提示的唯一依据：healthy / degraded / offline。 */
   DSH.dataStatus = function () {
-    const stale = Object.keys(degraded).length > 0;
+    const now = Date.now();
+    /* 一次瞬时失败若已在后续请求中恢复，degraded 会被删除；这里再对
+       长期无人重新请求的辅助 key 做时间衰减，避免告警永久常驻。 */
+    const activeDegraded = Object.keys(degraded).filter(function (k) {
+      /* health 只是辅助诊断数据，取不到应由 health notice / 看门狗负责，
+         不能让整个页面被判定为「离线」而弹出访客提示。 */
+      return k !== "health" && k !== "cloud" &&
+             now - (degradedAt[k] || 0) < NOTICE_TTL_MS;
+    });
+    const online = lastOnlineOkAt > 0 && now - lastOnlineOkAt < NOTICE_TTL_MS;
+    const allDown = now < circuitUntil;
     return {
-      mode: stale ? "stale" : (activeType === "turso" ? "backup" : "live"),
-      degradedKeys: Object.keys(degraded),
+      mode: activeDegraded.length ? "stale" : (activeType === "turso" ? "backup" : "live"),
+      level: !activeDegraded.length ? "healthy"
+           : (allDown || !online ? "offline" : "degraded"),
+      online: online,
+      allDown: allDown,
+      lastOnlineOkAt: lastOnlineOkAt,
+      degradedKeys: activeDegraded,
       activeEndpoint: activeType,
       activeUrl: activeUrl,
       endpoints: Object.keys(endpointHealth).map(function (k) {
         return { id: k, circuitOpen: endpointHealth[k].circuitUntil > Date.now(),
                  failures: endpointHealth[k].failures, lastOk: endpointHealth[k].lastOk };
       }),
-      circuitOpen: Date.now() < circuitUntil
+      circuitOpen: allDown
     };
   };
 
@@ -1288,17 +1373,20 @@
   };
 })(window);
 
-  /* ---------- 数据健康状态（异常时顶部红条，避免停更无人知） ---------- */
+  /* ---------- 云端健康数据 ----------
+     真实数据异常照样告警，但不再自建横幅：统一交给状态中心，
+     恢复后能自动移除，也不会和页面自身的提示叠成两条。 */
   (function () {
     if (location.pathname.indexOf("report.html") >= 0) return;
-    DSH.json("health", null)
+    /* 显式取 window.DSH：不依赖「window 属性自动成为全局变量」的隐式行为，
+       在严格模式、模块化和测试沙箱里都一致。 */
+    var api = window.DSH;
+    if (!api) return;
+    api.json("health", null)
       .then(function (h) {
-        if (!h || h.status === "ok") return;
-        var bar = document.createElement("div");
-        bar.id = "healthBanner";
-        bar.className = "data-alert";
-        bar.textContent = "⚠ 数据异常：" + (h.issues || []).join("；") +
-          (h.quotes_ts ? "（行情 " + h.quotes_ts + " UTC）" : "");
-        document.body.insertBefore(bar, document.body.firstChild);
+        if (!h || h.status === "ok") { api.clearNotice("health"); return; }
+        api.reportNotice("health", "warn",
+          "数据异常：" + (h.issues || []).join("；") +
+          (h.quotes_ts ? "（行情 " + h.quotes_ts + " UTC）" : ""));
       });
   })();

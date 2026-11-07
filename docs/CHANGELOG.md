@@ -1,5 +1,24 @@
 # 变更日志
 
+## v6.5 ｜ 2026-11-08 ｜ 访客提示语义治理：冗余切换不再误报故障
+
+**问题**：移动端顶部常驻红条「主数据库暂不可用，已自动切换到备用数据库（turso）」。主库免费额度耗尽返回 402、浏览器自动改读 Turso 实时备库，是设计内的计划路径，但页面把「用了哪个端点」直接当成「是否故障」，于是每次正常访问都弹故障告警。
+
+**根因（三处）**
+- `DSH.dataStatus()` 只按 `activeType === "turso"` 得出 `mode=backup`，`showSourceNotice()` 据此无条件建红色横幅；`degraded` 又是「曾经失败过」的残留标记，未随恢复清理。
+- 横幅逻辑分散在 `showSourceNotice` / `checkFreshness` / `showDegraded` / `health` 四处，各自 `createElement`，互相覆盖且恢复后无法移除。
+- 熔断只存在内存里，刷新页面就重新撞一次主库 402，白白消耗免费 egress 并拖慢首屏。
+
+**设计口径（勿回退）**：**冗余对访客应当无感**。端点类型只是路由诊断信息，不构成访客可见状态；唯一依据是数据健康度。
+
+- `app.js` 新增 `level`（`healthy` / `degraded` / `offline`）与统一提示状态中心 `reportNotice` / `clearNotice` / `renderNotices`；`mode` 保留为诊断用的路由快照。所有来源共用一个 `#serviceBanner`，任一来源恢复即重算并自动移除；`health` 这类辅助 key 取不到不再把整页判为离线。
+- `page.js` 删除 `showSourceNotice()`，改为单一 `renderServiceNotice()`：核心数据缺失（`error`）、行情停更与云端健康异常（`warn`）、全部端点不可用且只能展示最近缓存（`info`）才提示；正常态零横幅。页脚不再标注「备用数据库」，仅真用缓存时标注「最近缓存」。
+- `dashboard.css` 新增 `.data-notice` 中性蓝灰样式，非故障告知不再借用红色告警色。
+- `402/429/5xx` 熔断带过期时间写入 `localStorage`，成功即清除：额度耗尽期间跨刷新不再重复撞主库，也不永久锁死主库。
+- 顺手把 `health` 检查改为显式 `window.DSH`，不再依赖「window 属性自动成为全局变量」的隐式行为（严格模式/模块化/测试沙箱一致）。
+
+**回归**：Node 40 项（新增 10 项覆盖「备库健康零提示 / 真实异常仍告警 / 恢复后清除 / 熔断跨刷新 / 旧文案退场」）；Python 189 项、CI 门禁 50 项、22 个 YAML 全绿；`verify_replication.py` `PROBLEMS=0`；线上 E2E 失败 0；`failover_drill.mjs --online` 仍 `FAILOVER_DRILL_OK`。
+
 ## v6.4 ｜ 2026-11-06 ｜ 在线单源、排名管线修复与失效项清理
 
 **在线管线故障修复（P0）**

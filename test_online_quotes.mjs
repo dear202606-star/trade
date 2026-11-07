@@ -3,16 +3,21 @@ import vm from 'node:vm';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-function reader(reply,cloudReply) {
+function reader(reply,cloudReply,opts={}) {
   const calls=[];
-  const context=vm.createContext({window:{addEventListener(){}},location:{pathname:'/report.html'},
-    localStorage:{getItem(){return null;}},fetch:async(url,options)=>{
+  const store=opts.store || {getItem(){return null;},setItem(){},removeItem(){}};
+  const sandbox={window:{addEventListener(){}},
+    location:{pathname:opts.pathname || '/report.html'},
+    localStorage:store,console,
+    fetch:async(url,options)=>{
       calls.push({url,options});
       if (url.startsWith('data/cloud.json')) return cloudReply ? cloudReply() : {ok:true,json:async()=>({url:'https://example.supabase.co',key:'public-test-key'})};
       return reply(url, options);
-    }});
+    }};
+  if (opts.document) sandbox.document=opts.document;
+  const context=vm.createContext(sandbox);
   vm.runInContext(readFileSync(new URL('./site_src/assets/app.js',import.meta.url),'utf8'),context);
-  return {dsh:context.window.DSH,calls};
+  return {dsh:context.window.DSH,calls,store};
 }
 
 test('static datasets read the online database in normal mode, never the mirror',async()=>{
@@ -62,6 +67,10 @@ test('a 402 on the primary endpoint fails over to the Turso backup, no file mirr
   assert.equal(backupHits,1);
   assert.equal(dsh.dataStatus().mode,'backup');
   assert.equal(dsh.dataStatus().activeEndpoint,'turso');
+  // 2026-11-08：主库 402（免费额度限服）→ Turso 正常供数是计划内路由，
+  // 绝不能被判定为故障，更不能向访客弹「主数据库暂不可用」。
+  assert.equal(dsh.dataStatus().level,'healthy');
+  assert.equal(Object.keys(dsh.notices()).length,0,'备库健康时不得登记任何访客提示');
   assert.equal(calls.some(c=>c.url.includes('snapshot.json')),false,'不得读取任何本地镜像文件');
   // 主库被独立熔断 10 分钟：另一个 key 直接走备库，主库请求数不再增加
   assert.equal((await dsh.json('quotes',null)).ts,quotes.ts);
@@ -227,6 +236,7 @@ test('all endpoints down falls back to the caller value, never to a file mirror'
   const fallback={position:[{ticker:'cached'}]};
   assert.deepEqual(await dsh.json('equity',fallback),fallback);
   assert.equal(dsh.dataStatus().mode,'stale');
+  assert.equal(dsh.dataStatus().level,'offline','全部端点不可用时才是访客可见的异常');
   assert.equal(dsh.dataStatus().circuitOpen,true);
   assert.equal(calls.some(c=>c.url.includes('snapshot.json')),false);
   const n=calls.length;
@@ -272,4 +282,88 @@ test('backup endpoint version probe stays lightweight and expires only the chang
   const expired=await dsh.syncIfChanged();
   assert.ok(expired.includes('curve'),'静态层应失效');
   assert.ok(!expired.includes('quotes'),'行情时间戳未变，不应被连带失效');
+});
+
+/* ---------- 2026-11-08：访客提示 = 数据健康度，而不是「用了哪个端点」 ---------- */
+function noticeDom(){
+  const nodes={};
+  const body={firstChild:null,
+    insertBefore(node){nodes[node.id]=node;body.firstChild=node;},
+    removeChild(node){delete nodes[node.id];body.firstChild=null;}};
+  const document={body,
+    createElement(){return {id:'',className:'',textContent:'',style:{},parentNode:body,
+      remove(){body.removeChild(this);}};},
+    getElementById(id){return nodes[id]||null;}};
+  return {document,nodes};
+}
+
+test('primary 402 circuit survives a reload so the free egress quota is not wasted',async()=>{
+  const saved={};
+  const store={getItem:k=>saved[k]||null,setItem:(k,v)=>{saved[k]=String(v);},
+               removeItem:k=>{delete saved[k];}};
+  const cfg={url:'https://example.supabase.co',key:'public-test-key',endpoints:[
+    {type:'supabase',url:'https://example.supabase.co',key:'public-test-key'},
+    {type:'turso',url:'https://backup.example',key:'readonly-token'}]};
+  let primaryHits=0;
+  const handler=async(url,options)=>{
+    if (url.startsWith('https://example.supabase.co/rest/v1/')) {
+      primaryHits++;return {ok:false,status:402};
+    }
+    if (url==='https://backup.example/v2/pipeline') {
+      const key=JSON.parse(options.body).requests[0].stmt.args[0].value;
+      return {ok:true,json:async()=>({results:[
+        {type:'ok',response:{type:'execute',result:{rows:[[{type:'text',value:JSON.stringify({ok:true,key}) }]]}}},
+        {type:'ok',response:{type:'close'}}]})};
+    }
+    throw Error('unexpected call: '+url);
+  };
+  const first=reader(handler,async()=>({ok:true,json:async()=>cfg}),{store});
+  await first.dsh.json('equity',null);
+  assert.equal(primaryHits,1);
+  const circuitKey=Object.keys(saved).find(k=>k.startsWith('dsh.circuit.v1.')&&k.includes('supabase|'));
+  assert.ok(circuitKey,'402 熔断必须跨刷新持久化');
+  assert.ok(Number(saved[circuitKey])>Date.now(),'熔断必须带过期时间，不能永久锁死主库');
+  delete saved['dsh.endpoint.v1.'];   // 模拟不记得上次成功端点的最坏情况
+  const second=reader(handler,async()=>({ok:true,json:async()=>cfg}),{store});
+  await second.dsh.json('equity',null);
+  assert.equal(primaryHits,1,'刷新后不得再撞一次 402');
+  assert.equal(second.dsh.dataStatus().level,'healthy');
+});
+
+test('notice center renders one neutral bar and removes it after recovery',()=>{
+  const {document,nodes}=noticeDom();
+  const {dsh}=reader(async()=>({ok:false,status:503}),null,{document});
+  dsh.reportNotice('link','info','最近缓存');
+  assert.equal(nodes.serviceBanner.className,'data-notice','非故障告知不用红色告警色');
+  assert.equal(nodes.serviceBanner.textContent,'最近缓存');
+  dsh.reportNotice('quotes','warn','行情更新超时');
+  assert.equal(nodes.serviceBanner.className,'data-alert','真实异常优先级更高');
+  assert.equal(nodes.serviceBanner.textContent,'⚠ 行情更新超时');
+  assert.equal(Object.keys(nodes).length,1,'所有来源共用一个横幅，不叠加');
+  dsh.clearNotice('quotes');
+  assert.equal(nodes.serviceBanner.className,'data-notice');
+  dsh.clearNotice('link');
+  assert.equal(nodes.serviceBanner,undefined,'恢复后横幅必须自动移除');
+});
+
+test('genuine data-health issues still surface a warning instead of being silenced',async()=>{
+  const {document,nodes}=noticeDom();
+  const cfg={url:'https://example.supabase.co',key:'public-test-key',endpoints:[
+    {type:'supabase',url:'https://example.supabase.co',key:'public-test-key'}]};
+  reader(async(url)=>{
+    if (url.includes('v_site_dataset?key=eq.health'))
+      return {ok:true,json:async()=>[{payload:{status:'degraded',
+        issues:['行情 30 小时未更新'],quotes_ts:'2026-11-06T21:00:00Z'}}]};
+    throw Error('unexpected call: '+url);
+  },async()=>({ok:true,json:async()=>cfg}),{document,pathname:'/index.html'});
+  await new Promise(r=>setTimeout(r,10));
+  assert.ok(nodes.serviceBanner,'真实数据异常必须保留可见告警');
+  assert.match(nodes.serviceBanner.textContent,/数据异常/);
+});
+
+test('a missing auxiliary health key never marks the whole page offline',async()=>{
+  const {dsh}=reader(async()=>({ok:false,status:503}),null,{pathname:'/index.html'});
+  await new Promise(r=>setTimeout(r,10));
+  assert.equal(dsh.dataStatus().level,'healthy');
+  assert.equal(Object.keys(dsh.notices()).length,0);
 });

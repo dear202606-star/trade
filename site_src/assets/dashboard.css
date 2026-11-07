@@ -40,6 +40,15 @@
   font-size:12.5px;font-weight:600;padding:9px 16px;text-align:center;
   backdrop-filter:blur(8px)}
 @media(max-width:760px){.data-alert{font-size:12px;padding:10px 14px}}
+
+/* 2026-11-08：非故障告知（例如暂时展示最近缓存）用中性蓝灰，
+   不再借用红色告警色。计划内的主库→备库路由完全不显示横幅。 */
+:root{--notice-fg:#2c4a63;--notice-bg:#eef4f9;--notice-border:#c7d9e8}
+.data-notice{position:sticky;top:0;z-index:99;background:var(--notice-bg);
+  border-bottom:1px solid var(--notice-border);color:var(--notice-fg);
+  font-size:12.5px;font-weight:600;padding:9px 16px;text-align:center;
+  backdrop-filter:blur(8px)}
+@media(max-width:760px){.data-notice{font-size:12px;padding:10px 14px}}
 .curve-note{margin:10px 0 0;padding:8px 12px;border-radius:8px;
   background:#fff7e8;border:1px solid #f0dcae;color:#7a5a1e;font-size:11px;line-height:1.7}
 .curve-note[hidden]{display:none}
