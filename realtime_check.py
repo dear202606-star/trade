@@ -11,6 +11,14 @@ from live_quotes import read_snapshot
 
 BASE=Path(__file__).resolve().parent
 SITE='https://dear202606-star.github.io/trade/data/'
+# 网关侧不可用（配额/鉴权/限流/服务故障）不等于「页面数据不新鲜」：
+# 页面已由 CI 直连导出的同源镜像兜底。这类异常记入 warnings 而非 problems。
+GATEWAY_STATUS={402,403,429}
+
+
+def is_gateway_outage(exc):
+    status=getattr(getattr(exc,'response',None),'status_code',None)
+    return status in GATEWAY_STATUS or (isinstance(status,int) and 500<=status<600)
 
 
 def public_snapshot():
@@ -55,7 +63,11 @@ def run(now=None):
                 evidence_sha256=row['evidence_sha256'],public_read_matches=row['evidence_sha256']==public['evidence_sha256'],
                 dispatcher_jobs=jobs)
     except Exception as exc:
-        problems.append('在线报价监控失败：'+type(exc).__name__+': '+str(exc)[:140])
+        line='在线报价监控失败：'+type(exc).__name__+': '+str(exc)[:140]
+        if is_gateway_outage(exc):
+            warnings.append(line+'（在线网关不可用，已由 Pages 同源镜像兜底）')
+        else:
+            problems.append(line)
     finally:
         if connection is not None:connection.close()
     report.update(problems=list(dict.fromkeys(problems)),warnings=warnings)

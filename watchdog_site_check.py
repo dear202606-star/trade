@@ -144,17 +144,22 @@ def main():
         problems = snapshot_problems(load())
     except Exception as exc:
         problems = ["镜像读取失败：%s" % str(exc)[:120]]
+    warnings=[]
     # 实时层（直连）回执与镜像检查合并，避免两处告警口径不一致
     try:
         with open("output/realtime_check.json", encoding="utf-8") as fh:
-            problems.extend(json.load(fh).get("problems") or [])
+            receipt=json.load(fh)
+        problems.extend(receipt.get("problems") or [])
+        warnings=receipt.get("warnings") or []
     except Exception as exc:
         problems.append("在线报价监控回执缺失：%s" % str(exc)[:100])
     with open("problems.txt", "w", encoding="utf-8") as fh:
         fh.write("\n".join(problems))
-    print("PROBLEMS=%d" % len(problems))
+    print("PROBLEMS=%d WARNINGS=%d" % (len(problems),len(warnings)))
     for p in problems:
         print(" -", p)
+    for w in warnings:
+        print(" ~", w)
     return 1 if problems else 0
 
 
