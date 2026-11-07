@@ -20,6 +20,17 @@ def normalized(body):
     return {d:body['adjusted'][d]/body['adjusted'][first] for d in dates}
 
 
+def splice_anchor(old,data,begin):
+    """Latest trading day that exists in both the sealed and the fresh series.
+
+    Thinly traded instruments (e.g. the SKYD spin-off warrant) can have no
+    bar on `begin`. The splice must still be anchored on a day where both
+    series have a *real, identical* raw price -- never on a fabricated bar.
+    """
+    overlap=sorted(d for d in set(old['raw'])&set(data['raw']) if d<=begin)
+    return overlap[-1] if overlap else None
+
+
 def factor_rebase_evidence(symbol,old,data,begin,quote,prev_raw,prev_adj,session):
     """Audit a change of the adjustment basis at the splice point.
 
@@ -60,7 +71,7 @@ def factor_rebase_evidence(symbol,old,data,begin,quote,prev_raw,prev_adj,session
             and close_enough(prev_adj,quote['pc'])
             and not close_enough(prev_raw,quote['pc'])):
         problems.append('quote snapshot does not confirm ex-dividend')
-    days=sorted(data['raw'])
+    days=sorted(d for d in data['raw'] if d>=begin)
     factors=[data['adjusted'][d]/data['raw'][d] for d in days]
     jumps=[days[i] for i in range(1,len(factors))
            if abs(factors[i]-factors[i-1])>1e-6]
@@ -75,17 +86,6 @@ def factor_rebase_evidence(symbol,old,data,begin,quote,prev_raw,prev_adj,session
     return {'begin':begin,'session':session,'f_old':f_old,'f_new':f_new,
             'ratio':ratio,'gap':gap,'ex_dividend_days':jumps,
             'verified_by':'sealed_quote_snapshot_pc'}
-
-
-def classify_errors(errors,pool):
-    """Split failures into blocking (ranking universe) and advisory (auxiliary codes).
-
-    Ranking only consumes symbols in `pool`. Legacy helper / warrant codes are
-    collected as a convenience, so their failure is recorded but must not stop
-    the whole pipeline. Nothing is dropped: advisory entries stay in the event.
-    """
-    return ([e for e in errors if e['symbol'] in pool],
-            [e for e in errors if e['symbol'] not in pool])
 
 
 def directory(connection,path=None):
@@ -145,14 +145,25 @@ def prepare(path=None):
             # 2026-11-06：东方财富对 CI 出口 IP 间歇断连，增加 Yahoo 日线兜底。
             # 只在「网络故障」与「目录身份不匹配」两类错误时切换；schema/空数据
             # 等数据性错误仍然 fail-closed，防止用兜底掩盖真实源损坏。
-            try:
-                data=fetch_daily(provider_symbol,market,begin,session)
-                data['provider']='eastmoney'
-            except (requests.RequestException,ValueError) as exc:
-                if isinstance(exc,ValueError) and 'Daily source identity mismatch' not in str(exc):
-                    raise
-                data=fetch_daily_yahoo(provider_symbol,begin,session)
-                data['fallback_reason']=str(exc)[:120]
+            def fetch_window(start):
+                try:
+                    d=fetch_daily(provider_symbol,market,start,session)
+                    d['provider']='eastmoney'
+                except (requests.RequestException,ValueError) as exc:
+                    if isinstance(exc,ValueError) and 'Daily source identity mismatch' not in str(exc):
+                        raise
+                    d=fetch_daily_yahoo(provider_symbol,start,session)
+                    d['fallback_reason']=str(exc)[:120]
+                return d
+            data=fetch_window(begin)
+            # 低流动性证券（如 SKYD_WS 分拆权证）在衔接日可能无成交，新窗口
+            # 里就没有 begin 这根 bar。往前扩 20 个自然日重取一次，让新旧
+            # 序列至少有一个共同交易日可作拼接锚点；只影响确有缺口的标的。
+            if previous and begin not in data['raw']:
+                wide=max(base,(dt.date.fromisoformat(begin)-dt.timedelta(days=20)).isoformat())
+                data=fetch_window(wide)
+                data['splice_window']={'requested':begin,'used':wide,
+                                       'reason':'no bar on splice begin'}
             quote=q['quotes'].get(symbol)
             prev_raw=prev_adj=None
             if quote:
@@ -169,25 +180,34 @@ def prepare(path=None):
                     raise ValueError('Previous close not settled; retry collection: '+symbol)
                 if phase=='close' and (session not in data['raw'] or not close_enough(data['raw'][session],quote['p'])):
                     raise ValueError('Closing bar not settled; retry collection: '+symbol)
-            body={'symbol':symbol,'provider_symbol':provider_symbol,'market':market,'source_start':begin,'source_end':session,**data}
+            body={'symbol':symbol,'provider_symbol':provider_symbol,'market':market,
+                  'source_start':min(data['raw']),'source_end':session,
+                  'splice_begin':begin,**data}
             if previous:
                 old,digest=previous;values=normalized(old)
-                if begin not in values or begin not in data['raw']:
-                    raise ValueError('Incremental source cannot reconcile previous close: '+symbol)
+                # 拼接锚点取「新旧序列共有、且不晚于 begin」的最近交易日。
+                # 稀疏标的 begin 当日可能无成交，但锚点必须真实存在，且两侧
+                # raw 完全一致——绝不捏造价格或放宽对账。
+                overlap_count=len(set(old['raw'])&set(data['raw']))
+                anchor=splice_anchor(old,data,begin)
+                if anchor is None or anchor not in values or anchor not in data['adjusted']:
+                    raise ValueError('Incremental source cannot reconcile previous close: %s (begin=%s overlap=%s new_days=%s)'
+                                     %(symbol,begin,overlap_count,sorted(data['raw'])[:6]))
                 # 2026-11-06：Yahoo 为 float32 精度（376.5299987792969 vs 东财
                 # 376.53），跨供应商对账必须用相对容差而非精确相等。
-                a=old['raw'][begin];b=data['raw'][begin]
+                a=old['raw'][anchor];b=data['raw'][anchor]
                 if abs(a-b)>1e-6*max(abs(a),abs(b)):
                     raise ValueError('Incremental source cannot reconcile previous close: '+symbol)
                 # 衔接点的「绝对复权因子」在标的除息后必然改变（主源把除息
-                # 日之前的历史整体下调）。拼接算法按 begin 锚定，本来就能
+                # 日之前的历史整体下调）。拼接算法按锚点归一化，本来就能
                 # 正确处理这种整体缩放并还原分红；此处不再直接拒绝，而是
                 # 要求行情快照独立佐证除息 + 新序列形状自洽 + 缩放幅度合理，
                 # 三项全过才放行并写入可审计证据，其余情况仍 fail-closed。
-                rebase=factor_rebase_evidence(symbol,old,data,begin,quote,
+                rebase=factor_rebase_evidence(symbol,old,data,anchor,quote,
                                               prev_raw,prev_adj,session)
-                body['normalized']={d:values[begin]*v/data['adjusted'][begin] for d,v in data['adjusted'].items()}
+                body['normalized']={d:values[anchor]*v/data['adjusted'][anchor] for d,v in data['adjusted'].items()}
                 if rebase:body['factor_rebase']=rebase
+                body['splice_anchor']=anchor
                 body['base_day']=old.get('base_day',min(old['raw']))
                 body['base_raw']=old.get('base_raw',old['raw'][min(old['raw'])])
                 body['previous_context_sha256']=digest
@@ -204,19 +224,18 @@ def prepare(path=None):
                 if len(pending)>=25:
                     flush();print('Online ranking inputs',success,'/',len(targets),flush=True)
         flush()
-        # pool 之外的符号是历史遗留的辅助/权证代码（如 SKYD_WS），排名计算
-        # 只消费 pool 内标的；它们采集失败不该让整条链停摆。但仍完整记录并
-        # 标记 status=warn，绝不静默降级。pool 内任何失败仍然 fail-closed。
-        blocking,advisory=classify_errors(errors,pool)
+        # targets 里的每个符号都是 calculate 的实际输入：pool 之外还包括
+        # FDXF/HONA/SPY 等基准，以及 SKYD 分拆权证 SKYD_WS（calculate 直接
+        # 索引 contexts[warrant]）。因此任何采集失败都必须 fail-closed，
+        # 绝不因「不在 pool」而降级放行——否则只会把故障推迟成 KeyError。
         summary={'session':session,'requested':len(targets),'stored':success,
-                 'already_online':len(done),'errors':blocking,
-                 'advisory_errors':advisory}
+                 'already_online':len(done),'errors':errors}
         with connection.cursor() as cursor:
             cursor.execute("""insert into sys_event(kind,source,subject,status,metrics,finished_at)
                 values('fetch','live_ranking_context',%s,%s,%s,now())""",
-                (session,'fail' if blocking else ('warn' if advisory else 'ok'),Json(summary)))
+                (session,'fail' if errors else 'ok',Json(summary)))
         connection.commit();print(json.dumps(summary,ensure_ascii=False),flush=True)
-        return not blocking
+        return not errors
     finally:connection.close()
 
 

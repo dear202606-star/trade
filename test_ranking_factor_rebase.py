@@ -11,7 +11,8 @@ kind of factor change stays fail-closed.
 """
 import unittest
 
-from prepare_live_ranking import factor_rebase_evidence, classify_errors, normalized
+from prepare_live_ranking import (factor_rebase_evidence, splice_anchor,
+                                  normalized)
 
 
 BEGIN = "2026-11-05"
@@ -74,14 +75,17 @@ class FactorRebaseTest(unittest.TestCase):
                                    None, 100.0, 99.0, SESSION)
 
     def test_unstable_factor_shape_is_rejected(self):
-        # Two jumps inside the window => not a single re-base (corrupt / mixed source).
-        raw = {"2026-11-04": 99.0, BEGIN: 100.0, SESSION: 98.0}
-        adjusted = {"2026-11-04": 98.01, BEGIN: 98.0, SESSION: 98.0}
-        data = {"raw": raw, "adjusted": adjusted}
+        # 锚点之后出现多次因子跳变 => 不是单次除息重基准（混源/损坏）。
+        begin='2026-11-02'
+        raw={'2026-11-02':90.0,'2026-11-03':91.0,'2026-11-04':92.0,SESSION:98.0}
+        adjusted={'2026-11-02':89.1,'2026-11-03':89.18,
+                  '2026-11-04':91.08,SESSION:98.0}
+        old={'raw':{begin:90.0},'adjusted':{begin:90.0}}
+        data={'raw':raw,'adjusted':adjusted}
         with self.assertRaisesRegex(ValueError, "unstable factor shape"):
-            factor_rebase_evidence("MAS", old_context(), data, BEGIN,
-                                   {"pc": 98.0, "p": 98.0},
-                                   100.0, 98.0, SESSION)
+            factor_rebase_evidence("MAS", old, data, begin,
+                                   {"pc": 89.1, "p": 98.0},
+                                   90.0, 89.1, SESSION)
 
     def test_gross_factor_ratio_is_rejected(self):
         # A wrong symbol / methodology break produces a huge scaling.
@@ -104,25 +108,29 @@ class FactorRebaseTest(unittest.TestCase):
                 self.assertIsNotNone(ev)
 
 
-class AdvisoryTest(unittest.TestCase):
+class SpliceAnchorTest(unittest.TestCase):
+    """A thinly traded warrant can have no bar on the nominal splice day."""
 
-    def test_only_universe_failures_block_the_pipeline(self):
-        errors = [{"symbol": "SKYD_WS", "error": "unavailable"},
-                  {"symbol": "PFE", "error": "mismatch"}]
-        blocking, advisory = classify_errors(errors, {"PFE", "SPY"})
-        self.assertEqual([e["symbol"] for e in blocking], ["PFE"])
-        self.assertEqual([e["symbol"] for e in advisory], ["SKYD_WS"])
+    def test_uses_begin_when_both_series_have_it(self):
+        old=old_context()
+        data={"raw":{BEGIN:100.0,SESSION:98.0},"adjusted":{BEGIN:99.0,SESSION:98.0}}
+        self.assertEqual(splice_anchor(old,data,BEGIN),BEGIN)
 
-    def test_all_universe_failures_still_block(self):
-        errors = [{"symbol": "PFE", "error": "mismatch"}]
-        blocking, advisory = classify_errors(errors, {"PFE"})
-        self.assertEqual(len(blocking), 1)
-        self.assertEqual(advisory, [])
+    def test_falls_back_to_the_latest_common_day_before_begin(self):
+        old=old_context()
+        data={"raw":{"2026-11-03":98.0,"2026-11-04":99.0,SESSION:98.0},
+              "adjusted":{"2026-11-03":98.0,"2026-11-04":99.0,SESSION:98.0}}
+        self.assertEqual(splice_anchor(old,data,BEGIN),"2026-11-04")
 
-    def test_no_error_is_dropped(self):
-        errors = [{"symbol": s, "error": "x"} for s in ("A", "B", "C")]
-        blocking, advisory = classify_errors(errors, {"A"})
-        self.assertEqual(len(blocking) + len(advisory), 3)
+    def test_returns_none_when_there_is_no_common_day(self):
+        old=old_context()
+        data={"raw":{SESSION:98.0},"adjusted":{SESSION:98.0}}
+        self.assertIsNone(splice_anchor(old,data,BEGIN))
+
+    def test_never_anchors_on_a_future_bar(self):
+        old=old_context()
+        data={"raw":{"2026-11-07":101.0},"adjusted":{"2026-11-07":101.0}}
+        self.assertIsNone(splice_anchor(old,data,BEGIN))
 
 
 if __name__ == "__main__":
