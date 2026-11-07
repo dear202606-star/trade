@@ -59,19 +59,35 @@ historical_lineage.require_complete_history()  # 仍会抛 IR,JCI
 
 ## 五、待用户签字
 
-代码、SQL、回归测试与 dry-run 演练已完成，**尚未写入任何数据库**。按 `PROJECT_GOAL`（「对已锁历史发现错误时记录影响并提交用户决策，不静默覆盖或自动解锁」）与 SUN 的既有先例，写入须单独决策：
+代码、SQL、回归测试与 dry-run 演练已完成，**尚未写入任何数据库**。按 `PROJECT_GOAL`（「对已锁历史发现错误时记录影响并提交用户决策，不静默覆盖或自动解锁」）与 SUN 的既有先例，写入须单独决策。裁定表 append-only（触发器拒绝 `UPDATE`/`DELETE`/`TRUNCATE`），**写入是单向、不可撤销的**，这是必须签字的原因。
+
+### 推荐：云端一键写入（不依赖任何本地凭据，换机后同样可用）
+
+`.github/workflows/identity-resolution-apply.yml` 仅 `workflow_dispatch`，默认 `DRY_RUN` 只演练不写库；写入需同时满足 `confirm=WRITE` + 非空 `decided_by` + `ref=main`。凭据只取 GitHub Secrets 的 `SUPABASE_DB_PASSWORD`，本机无需主库密码。
 
 ```bash
-# 1. 复核演练回执（默认 rollback，不写库；本机用 Neon 冷备即可）
-DB_TARGET=neon py -3.11 research/security_identity_resolutions.py
-cat output/security_identity_resolutions_rollback.json
+# 1. 先跑默认演练（回滚、不写库，同时验证 CI 直连主库是否可用）
+gh workflow run identity-resolution-apply.yml --repo dear202606-star/trade \
+  --ref main -f confirm=DRY_RUN
 
-# 2. 用户批准后，仅在主库执行；必须显式记录批准人
+# 2. 用户批准后执行写入（唯一一条真正写库的命令）
+gh workflow run identity-resolution-apply.yml --repo dear202606-star/trade \
+  --ref main -f confirm=WRITE -f decided_by="用户批准/2026-11-08"
+```
+
+也可在 GitHub Actions 网页手动 Run workflow 填同样两个参数。工作流会在写入后在线复核 13 条裁定的证据哈希，并让真实 `db_ref.require_unquarantined_candidates()` 放行一次，回执上传为 artifact。
+
+### 备选：本机直连（需先补齐主库密码）
+
+```bash
+# 默认 dry-run，只生成 output/*rollback*.json 回执
+DB_TARGET=neon py -3.11 research/security_identity_resolutions.py
+# 主库写入：需先有 output/_supabase_dbpass.txt（本机当前没有，CI 里才有对应 Secret）
 DB_TARGET=supabase py -3.11 research/security_identity_resolutions.py \
   --write --decided-by "<批准人/日期>"
 ```
 
-`--write` 有两道自我保护：拒绝在 Neon 冷备上执行（避免只写进副本），拒绝未传 `--decided-by` 的调用。写入前会再次校验既有裁定无冲突、以及五张金融数据表的哈希未变。
+`--write` 有两道自我保护：拒绝在 Neon 冷备上执行（避免只写进副本），拒绝未传 `--decided-by` 的调用。写入前会再次校验既有裁定无冲突、以及五张金融数据表的哈希未变；重复执行会得到 `already_online` 而不会覆盖。
 
 ## 六、仍待补齐（不影响裁定，但影响证据完备度）
 

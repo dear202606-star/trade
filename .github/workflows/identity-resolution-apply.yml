@@ -1,0 +1,120 @@
+name: 身份裁定写入（需显式批准）
+
+# 一次性、单向、append-only 的生产写入（2026-11-08）。
+#   · 仅 workflow_dispatch，绝不定时、绝不随 push 触发；
+#   · 只用 GitHub Secrets 的 SUPABASE_DB_PASSWORD，不需要任何本地凭据，
+#     因此换机 / 换会话后仍可用同一条命令执行；
+#   · 默认 DRY_RUN：只跑回滚演练并上传回执，不写任何数据；
+#   · 只有 confirm == WRITE + decided_by 非空 + ref == main 才真正写入；
+#   · 写入前后都验证 13 条裁定的证据哈希，并让真实门禁代码放行一次。
+#
+# 触发（在任意装有 gh 的机器上，或 GitHub Actions 网页手动 Run workflow）：
+#   gh workflow run identity-resolution-apply.yml --repo dear202606-star/trade \
+#     --ref main -f confirm=DRY_RUN
+#   gh workflow run identity-resolution-apply.yml --repo dear202606-star/trade \
+#     --ref main -f confirm=WRITE -f decided_by="用户批准/2026-11-08"
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: '输入 WRITE 才真正写入主库；其它值只做 DRY_RUN 演练'
+        required: true
+        default: 'DRY_RUN'
+        type: string
+      decided_by:
+        description: '批准人/日期（WRITE 时必填，写进 append-only 裁定表）'
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: trade-identity-resolution
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+
+      - name: 写入前置校验（分支与批准人）
+        if: inputs.confirm == 'WRITE'
+        env:
+          DECIDED_BY: ${{ inputs.decided_by }}
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "FATAL: 身份裁定只能在 main 分支写入，当前 $GITHUB_REF"; exit 1
+          fi
+          if [ -z "$DECIDED_BY" ]; then
+            echo "FATAL: 写入必须提供 decided_by（批准人/日期）"; exit 1
+          fi
+
+      - name: 回滚演练（默认路径，不写库）
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: python research/security_identity_resolutions.py
+
+      - name: 门禁回归（写入前复核 fail-closed 约束）
+        run: python -m unittest test_identity_resolution test_identity_generation_guard
+
+      - name: 写入 13 条已核验裁定（append-only）
+        if: inputs.confirm == 'WRITE'
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          DECIDED_BY: ${{ inputs.decided_by }}
+        run: |
+          python research/security_identity_resolutions.py \
+            --write --decided-by "$DECIDED_BY"
+
+      - name: 写入后在线复核（哈希 + 真实门禁放行）
+        if: inputs.confirm == 'WRITE'
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, '.')
+          import db_sources, db_ref
+          from research import security_identity_resolutions as R
+
+          conn = db_sources.db()
+          cur = conn.cursor()
+          cur.execute(
+              "select symbol,resolution,proof,evidence_sha256,decided_by "
+              "from public.security_identity_resolution "
+              "where symbol=any(%s) order by symbol", (list(R.SYMBOLS),))
+          rows = cur.fetchall()
+          assert len(rows) == len(R.SYMBOLS), "裁定行数不符：%d" % len(rows)
+          for sym, resolution, proof, sha, who in rows:
+              assert resolution == 'exclude_reviewed', sym
+              assert proof.get('symbol') == sym, sym
+              assert proof.get('full_history_accepted') is False, sym
+              assert sha == R.digest(proof), "证据哈希不符：" + sym
+              assert who, "缺少批准人：" + sym
+          cur.close(); conn.close()
+
+          # 真实门禁：13 只都由裁定显式排除，不再报「待核验」；
+          # 混入两个正常标的用于确认非隔离候选不受影响。
+          released = db_ref.require_unquarantined_candidates(
+              sorted(R.SYMBOLS) + ['AAPL', 'SPY'])
+          assert released == sorted(R.SYMBOLS), released
+          print("IDENTITY_RESOLUTION_VERIFIED rows=%d released=%d"
+                % (len(rows), len(released)))
+          PY
+
+      - name: 上传演练/写入回执
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: identity-resolution-receipt
+          path: output/security_identity_resolutions_*.json
+          if-no-files-found: warn
