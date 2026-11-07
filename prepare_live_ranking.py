@@ -20,6 +20,74 @@ def normalized(body):
     return {d:body['adjusted'][d]/body['adjusted'][first] for d in dates}
 
 
+def factor_rebase_evidence(symbol,old,data,begin,quote,prev_raw,prev_adj,session):
+    """Audit a change of the adjustment basis at the splice point.
+
+    A dividend/split makes the provider re-base its whole forward-adjusted
+    history: bars before the ex-date are scaled down while the latest bar
+    stays at factor 1.0. A context sealed before the ex-date therefore has
+    f_old = adj[begin]/raw[begin] ~ 1.0, while the freshly fetched window
+    has f_new < 1.0. The splice itself
+
+        normalized[d] = values[begin] * adjusted[d] / adjusted[begin]
+
+    is anchored at `begin` and only depends on the *relative shape* of the
+    new window, so a pure re-base is already handled correctly -- it even
+    restores the dividend into the total return. Requiring f_old == f_new
+    rejects every ex-dividend day, which is a false positive, not a guard.
+
+    We do NOT simply loosen the tolerance. A re-base is accepted only when
+    three independent facts hold; anything else keeps the original
+    fail-closed rejection (wrong symbol, corrupted source, method change):
+
+      1. The sealed quote snapshot independently proves an ex-dividend:
+         `pc` equals the forward-adjusted previous close (adjusted[begin])
+         but not the unadjusted previous close (raw[begin]).
+      2. The new window's adjusted/raw factor jumps at most once, and only
+         on the latest session (the ex-date), i.e. the window is a single
+         constant scaling of the raw series.
+      3. The scaling ratio stays within 5%, catching gross mismatches.
+
+    Returns the evidence dict to be written into the context, or None when
+    no re-base occurred.
+    """
+    a=old['raw'][begin];b=data['raw'][begin]
+    f_old=old['adjusted'][begin]/a;f_new=data['adjusted'][begin]/b
+    gap=abs(f_old-f_new)/max(f_old,f_new)
+    if gap<=0.001:return None
+    problems=[]
+    if not (quote and prev_raw is not None and prev_adj is not None
+            and close_enough(prev_adj,quote['pc'])
+            and not close_enough(prev_raw,quote['pc'])):
+        problems.append('quote snapshot does not confirm ex-dividend')
+    days=sorted(data['raw'])
+    factors=[data['adjusted'][d]/data['raw'][d] for d in days]
+    jumps=[days[i] for i in range(1,len(factors))
+           if abs(factors[i]-factors[i-1])>1e-6]
+    if len(jumps)>1 or (jumps and jumps[0]!=session):
+        problems.append('unstable factor shape: %s' % jumps)
+    ratio=f_new/f_old
+    if not 0.95<=ratio<=1.05:
+        problems.append('gross factor ratio %.6f' % ratio)
+    if problems:
+        raise ValueError('Incremental source adjustment factor discontinuity: %s (%s)'
+                         %(symbol,'; '.join(problems)))
+    return {'begin':begin,'session':session,'f_old':f_old,'f_new':f_new,
+            'ratio':ratio,'gap':gap,'ex_dividend_days':jumps,
+            'verified_by':'sealed_quote_snapshot_pc'}
+
+
+def classify_errors(errors,pool):
+    """Split failures into blocking (ranking universe) and advisory (auxiliary codes).
+
+    Ranking only consumes symbols in `pool`. Legacy helper / warrant codes are
+    collected as a convenience, so their failure is recorded but must not stop
+    the whole pipeline. Nothing is dropped: advisory entries stay in the event.
+    """
+    return ([e for e in errors if e['symbol'] in pool],
+            [e for e in errors if e['symbol'] not in pool])
+
+
 def directory(connection,path=None):
     with connection.cursor() as cursor:
         cursor.execute("select metrics from sys_event where source='live_security_directory' and status='pass' order by id desc limit 1")
@@ -86,6 +154,7 @@ def prepare(path=None):
                 data=fetch_daily_yahoo(provider_symbol,begin,session)
                 data['fallback_reason']=str(exc)[:120]
             quote=q['quotes'].get(symbol)
+            prev_raw=prev_adj=None
             if quote:
                 previous_session=q['previous_session']
                 # 2026-11-06：除息日供应商的「昨收」是除息调整后口径（实测 SYF
@@ -110,12 +179,15 @@ def prepare(path=None):
                 a=old['raw'][begin];b=data['raw'][begin]
                 if abs(a-b)>1e-6*max(abs(a),abs(b)):
                     raise ValueError('Incremental source cannot reconcile previous close: '+symbol)
-                # 复权因子（adjusted/raw）在供应商切换点必须连续：容忍方法论
-                # 微差（<0.1%），拦截 gross 错配（如错标的、口径跳变）。
-                f_old=old['adjusted'][begin]/a;f_new=data['adjusted'][begin]/b
-                if abs(f_old-f_new)>0.001*max(f_old,f_new):
-                    raise ValueError('Incremental source adjustment factor discontinuity: '+symbol)
+                # 衔接点的「绝对复权因子」在标的除息后必然改变（主源把除息
+                # 日之前的历史整体下调）。拼接算法按 begin 锚定，本来就能
+                # 正确处理这种整体缩放并还原分红；此处不再直接拒绝，而是
+                # 要求行情快照独立佐证除息 + 新序列形状自洽 + 缩放幅度合理，
+                # 三项全过才放行并写入可审计证据，其余情况仍 fail-closed。
+                rebase=factor_rebase_evidence(symbol,old,data,begin,quote,
+                                              prev_raw,prev_adj,session)
                 body['normalized']={d:values[begin]*v/data['adjusted'][begin] for d,v in data['adjusted'].items()}
+                if rebase:body['factor_rebase']=rebase
                 body['base_day']=old.get('base_day',min(old['raw']))
                 body['base_raw']=old.get('base_raw',old['raw'][min(old['raw'])])
                 body['previous_context_sha256']=digest
@@ -132,13 +204,19 @@ def prepare(path=None):
                 if len(pending)>=25:
                     flush();print('Online ranking inputs',success,'/',len(targets),flush=True)
         flush()
-        summary={'session':session,'requested':len(targets),'stored':success,'already_online':len(done),'errors':errors}
+        # pool 之外的符号是历史遗留的辅助/权证代码（如 SKYD_WS），排名计算
+        # 只消费 pool 内标的；它们采集失败不该让整条链停摆。但仍完整记录并
+        # 标记 status=warn，绝不静默降级。pool 内任何失败仍然 fail-closed。
+        blocking,advisory=classify_errors(errors,pool)
+        summary={'session':session,'requested':len(targets),'stored':success,
+                 'already_online':len(done),'errors':blocking,
+                 'advisory_errors':advisory}
         with connection.cursor() as cursor:
             cursor.execute("""insert into sys_event(kind,source,subject,status,metrics,finished_at)
                 values('fetch','live_ranking_context',%s,%s,%s,now())""",
-                (session,'fail' if errors else 'ok',Json(summary)))
+                (session,'fail' if blocking else ('warn' if advisory else 'ok'),Json(summary)))
         connection.commit();print(json.dumps(summary,ensure_ascii=False),flush=True)
-        return not errors
+        return not blocking
     finally:connection.close()
 
 
