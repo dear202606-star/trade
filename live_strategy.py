@@ -415,7 +415,12 @@ def run_equity():
         return (prior and prior[1]==quotes['version'] and prior[2].get('calculator_sha256')==code_version
                 and prior[2].get('root_anchor_sha256')==root)
     if all(current(previous_results.get(v),digest) for v,_,digest in anchors):
-        print('Both account results already match this online quote; no collection');return
+        print('Both account results already match this online quote; no collection')
+        # 2026-11-11：结果已齐也要记到账本。原先这里直接 return，
+        # should_skip 永远查不到记录，每轮都白连一次主库重做这串比对；
+        # 加上 mark_done 后下一轮在门禁处就秒退。
+        run_guard.mark_done('equity',quotes)
+        return
     active=[]
     for variant,body,digest in anchors:
         if sha(body)!=digest:raise RuntimeError('Online account anchor hash mismatch')

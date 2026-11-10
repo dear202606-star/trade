@@ -7,6 +7,7 @@ load_snapshot()：30 分钟采集节奏下「报价刷新任务超过 15 分钟�
 确定要重算（收盘场次）时再严格复核，fail-closed 门禁不变。
 """
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 import live_ranking
@@ -59,6 +60,22 @@ class SkipOrderTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "strict-guard-blocked"):
                 live_ranking.run()
         self.assertEqual(calls, [False, True])
+
+
+class LedgerContractTests(unittest.TestCase):
+    """2026-11-11：场次幂等账本两处线上缺陷的结构回归。"""
+
+    def test_no_collection_branch_still_marks_ledger(self):
+        text = Path(__file__).with_name("live_strategy.py").read_text(encoding="utf-8")
+        marker = "Both account results already match this online quote; no collection"
+        self.assertIn(marker, text)
+        branch = text.split(marker, 1)[1].split("active=[]", 1)[0]
+        self.assertIn("run_guard.mark_done('equity',quotes)", branch)
+
+    def test_ledger_kind_is_allowed_by_sys_event_check(self):
+        text = Path(__file__).with_name("run_guard.py").read_text(encoding="utf-8")
+        self.assertIn("values('validation'", text)
+        self.assertNotIn("values('compute'", text)
 
 
 if __name__ == "__main__":
