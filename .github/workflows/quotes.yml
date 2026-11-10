@@ -160,15 +160,20 @@ jobs:
         # 把「采集 → 同步」变成严格顺序，定时同步仍保留作兜底。
         # 开盘后 30 分钟那次同样立刻推 Turso：访客读的就是 Turso，
         # 不能让「开盘一次」只在主库落地、页面要等 30 分钟后才看到。
-        # 只有收盘任务才唤醒 Neon（免费额度每工作日仅一次）。
+        # 看门狗自愈 / 人工派发（workflow_dispatch）补采成功后也必须立即推，
+        # 否则自愈闭环在「主库已更新、Turso 仍旧」这里断掉，页面继续告警。
+        # 只有「定时收盘」才唤醒 Neon（免费额度每工作日仅一次）；盘中补采
+        # 即便复用 closing 任务，也只推 Turso，绝不误唤醒 Neon。
         if: >-
           success() && steps.refresh.outcome == 'success' &&
-          (steps.gate.outputs.task == 'closing' || steps.gate.outputs.task == 'opening')
+          (github.event_name == 'workflow_dispatch' ||
+           steps.gate.outputs.task == 'closing' || steps.gate.outputs.task == 'opening')
         env:
           GH_TOKEN: ${{ github.token }}
           TASK: ${{ steps.gate.outputs.task }}
+          EVENT: ${{ github.event_name }}
         run: |
-          if [ "$TASK" = "closing" ]; then
+          if [ "$TASK" = "closing" ] && [ "$EVENT" = "schedule" ]; then
             gh workflow run db-sync.yml -f targets=turso,neon || true
           else
             gh workflow run db-sync.yml -f targets=turso || true

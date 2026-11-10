@@ -206,6 +206,37 @@ class WatchdogEarlyDetectionTests(unittest.TestCase):
         self.assertFalse(any("收盘数据缺失" in p for p in problems),
                          "数据已到位仍误报: %r" % problems)
 
+    def _dependency_doc(self, intraday):
+        q = {"ts": "2026-11-10T14:33:00Z", "session": "2026-11-10",
+             "previous_session": "2026-11-09", "version": "v-test",
+             "ok": True, "intraday": intraday,
+             "quotes": {"SPY": {"as_of": "2026-11-10T14:33:00+00:00"}}}
+        datasets = {k: {"ok": True} for k in watchdog_site_check.REQUIRED}
+        datasets.update({"quotes": q, "equity": {}, "b/equity": {},
+                         "preview": {}, "b/preview": {}})
+        meta = {k: {"updated_at": "2026-11-10T14:33:00+00:00"}
+                for k in ("equity", "b/equity", "preview", "b/preview")}
+        return {"schema": 1, "source": "turso-http",
+                "generated_at": "2026-11-10T14:33:00+00:00",
+                "datasets": datasets, "meta": meta}
+
+    def test_intraday_snapshot_does_not_flag_equity_version_gap(self):
+        # 盘中 run-guard 明确跳过净值/预览，版本落后是设计而非故障
+        problems = watchdog_site_check.snapshot_problems(
+            self._dependency_doc(True), at("2026-11-10T15:00:00+00:00"))
+        self.assertFalse(any("收益基准落后" in p or "次年预览未跟随" in p
+                             for p in problems),
+                         "盘中误判净值停更会触发告警+无效自愈空转: %r" % problems)
+
+    def test_closed_snapshot_still_flags_equity_version_gap(self):
+        # 收盘后净值没跟上就是真故障，必须保留告警与自愈能力
+        problems = watchdog_site_check.snapshot_problems(
+            self._dependency_doc(False), at("2026-11-10T22:00:00+00:00"))
+        self.assertTrue(any("收益基准落后" in p for p in problems),
+                        "收盘后漏报净值未更新: %r" % problems)
+        self.assertTrue(any("次年预览未跟随" in p for p in problems),
+                        "收盘后漏报预览未更新: %r" % problems)
+
 
 class WorkflowContractTests(unittest.TestCase):
     """防止工作流层面的三处断点回退（纯文本解析，不依赖 PyYAML）。"""
@@ -235,6 +266,14 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("steps.gate.outputs.task == 'opening'", self.quotes)
         self.assertIn("db-sync.yml -f targets=turso || true", self.quotes)
         self.assertIn("db-sync.yml -f targets=turso,neon || true", self.quotes)
+
+    def test_selfheal_backfill_also_pushes_turso_without_waking_neon(self):
+        # 自愈补采成功后若不同步，闭环断在「主库已更新、Turso 仍旧」，
+        # 页面继续告警；但盘中补采不能误唤醒 Neon（每日一次额度）。
+        self.assertIn("(github.event_name == 'workflow_dispatch' ||", self.quotes)
+        self.assertIn('EVENT: ${{ github.event_name }}', self.quotes)
+        self.assertIn('[ "$TASK" = "closing" ] && [ "$EVENT" = "schedule" ]',
+                      self.quotes)
 
     def test_manual_dispatch_without_as_of_is_calendar_gated(self):
         # 带 as_of 的补采放行；不带 as_of 的实时验证必须借日历裁决，

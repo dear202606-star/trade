@@ -7,7 +7,7 @@
 写成现价、涨跌额置 0）。页面因此仍显示「截至 11/06」+「行情更新超时」。本版把
 **「开盘后 30 分钟」与「每日收盘」两次关键采集**剩下的三个结构性漏洞补齐。
 
-**本版三处修复**
+**本版五处修复**
 
 1. **手动派发不再无条件绕过日历门禁**。`quotes.yml` 的 `workflow_dispatch` 分两种：
    带 `as_of` 是看门狗自愈的延迟补跑（逻辑时间由 `live_quotes.logical_time` 用
@@ -25,6 +25,35 @@
    开盘那次只在主库落地，访客（读 Turso）要等下一次 30 分钟定时同步才看到。
    现在 `opening` 成功后立即派发 `db-sync.yml -f targets=turso`，
    `closing` 才派发 `turso,neon`（Neon 每工作日只唤醒一次的额度约束不变）。
+4. **自愈 / 人工补采成功后也必须立即同步**。第 3 点初版只放行 `opening`/`closing`
+   两种 schedule 任务；看门狗派发的 `workflow_dispatch` 走 `intraday` 任务，
+   会出现「主库快照已更新、Turso 仍旧、页面继续告警、自愈反复重采」的断链。
+   现在同步条件加上 `github.event_name == 'workflow_dispatch'`，且只有
+   **定时收盘**（`TASK=closing && EVENT=schedule`）才推 `turso,neon`，
+   盘中补采只推 Turso，绝不误唤醒 Neon。
+5. **看门狗不再把盘中「净值版本落后」判为故障**。`watchdog_site_check` 调用
+   `published_dependency_problems()` 时，盘中快照的 `equity`/`preview` 因
+   `run-guard` 明确「净值/预览只在收盘场次计算」必然落后于刚写入的盘中报价，
+   于是 A/B 两组共 4 条 problem → 每小时告警 + 开 Issue + 派发必定被 SKIP 的
+   `live-strategy.yml` 空转。现在 `quotes.intraday=True` 时把这两类「版本落后」
+   降级（其它依赖错误仍告警），收盘场次 `intraday=False` 照常严格校验——
+   那时净值没跟上就是真故障。新增盘中/收盘正反两组回归。
+
+**线上实证（2026-11-10 14:32~14:35 UTC，真实交易时段）**
+
+- 盘前 14:19 UTC：`gb_spy` 为 `p=pc=752.69`、`chg=0`（09:10AM EST），
+  盘前 push 触发的行情工作流被新门禁判 `before_window`，采集步骤全部 skipped。
+- 开盘后 14:32 UTC：`p=747.48`、`pc=752.69`、`chg=-0.69`（09:32AM EST），
+  数据源恢复正常；752.69 即 11/09 收盘价。
+- 派发实时采集 run `42835142288`：`{"write":true,"changed":true,"count":510,
+  "session":"2026-11-10","source_as_of":"2026-11-10T14:33:00Z"}`，
+  510 只标的全通过校验，第一次尝试失败由自动重试救回。
+- 同步 run `42835405683`：`{"ok":true,"read_source":"supabase","degraded":false,
+  "changed":1,"keys":["quotes"],"event_written":true}`；Turso `quotes` 从
+  11/06 前进到 11/10 14:33 UTC。
+- 无头 Chrome 真实渲染线上首页：「行情更新超时」「建议待更新」「大盘验证不可用」
+  「主数据库暂不可用」「备用数据库」全部归零，`#serviceBanner` 为空。
+- `在线净值与动态排名` 由采集成功自动触发并 success（run `42835325033`）。
 
 **根因澄清**：`每日全量更新` / `在线净值与动态排名` / `线上 E2E` 的失败是同一个源头的
 连锁反应——线上报价快照停在 11/06，`watchdog_checks.quote_problems()` 的
@@ -33,11 +62,15 @@
 
 **已知限制（不掩盖）**：11/09 的收盘快照无法从在线挂牌补回，这是数据源只保留最近
 场次的物理限制，不是代码缺陷；净值曲线中 11/09 这个点需由已封存日线事实另行
-重建，本版没有伪造或回填任何历史价格。
+重建，本版没有伪造或回填任何历史价格。另外收益卡片的「截至 11/06」来自
+`equity` / `preview`，`run-guard` 明确输出「盘中快照，净值/预览只在收盘场次计算」，
+该日期要到 11/10 收盘采集后才会推进——这是正确的策略口径而非停更故障，
+盘中拿瞬时价计算年度收益反而是错的。
 
-**回归**：Python 258 / 发布门禁 64 / Node 42 / YAML 23 全绿；`trading_window.py
+**回归**：Python 261 / 发布门禁 64 / Node 42 / YAML 23 全绿；`trading_window.py
 --self-test` 15 项 OK。新增 `test_backfill` 对盘前 / 盘中 / 收盘后 / 周末四种时段的
-派发断言，以及工作流层「开盘即同步」「不带 as_of 的 dispatch 必须过日历」的结构守卫。
+派发断言、盘中与收盘告警正反两组断言，以及工作流层「开盘即同步」
+「自愈补采也同步且盘中不唤醒 Neon」「不带 as_of 的 dispatch 必须过日历」的结构守卫。
 
 ## v6.8 ｜ 2026-11-10 ｜ 关键采集自愈闭环、身份裁定入库、读源自动降级
 
