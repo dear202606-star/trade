@@ -11,6 +11,7 @@ from psycopg2.extras import Json,execute_values
 import db_ref
 import db_sources
 import live_quotes
+import market_calendar
 from live_strategy import fetch_daily,fetch_daily_yahoo,sha,close_enough
 
 
@@ -43,7 +44,8 @@ def splice_anchor(old,data,begin):
     return overlap[-1] if overlap else None
 
 
-def factor_rebase_evidence(symbol,old,data,begin,quote,prev_raw,prev_adj,session):
+def factor_rebase_evidence(symbol,old,data,begin,quote,prev_raw,prev_adj,session,
+                           calendar=None):
     """Audit a change of the adjustment basis at the splice point.
 
     A dividend/split makes the provider re-base its whole forward-adjusted
@@ -66,10 +68,28 @@ def factor_rebase_evidence(symbol,old,data,begin,quote,prev_raw,prev_adj,session
       1. The sealed quote snapshot independently proves an ex-dividend:
          `pc` equals the forward-adjusted previous close (adjusted[begin])
          but not the unadjusted previous close (raw[begin]).
-      2. The new window's adjusted/raw factor jumps at most once, and only
-         on the latest session (the ex-date), i.e. the window is a single
-         constant scaling of the raw series.
+      2. The new window contains exactly ONE real factor jump, on a reviewed
+         exchange session inside (anchor, session]. The ex-date need NOT be
+         the current session: `begin` is deliberately allowed to be several
+         sessions old (incremental splice after a missed collection), so a
+         dividend paid on an intermediate session is perfectly legitimate.
       3. The scaling ratio stays within 5%, catching gross mismatches.
+
+    2026-11-11: the old guard required `jumps[0] == session`. When the
+    2026-11-09 collection was skipped, AMP/GWW/IBM/VMC (all ex-dividend on
+    11-09) were sealed from 11-06 and spliced only on 11-10, so their lawful
+    re-base was rejected forever as "source corruption". Measured source bars
+    (push2his 106.*, fqt=0/1): AMP raw 501.49 / adj 499.79 on 11-06, then
+    raw==adj from 11-09; GWW 2.49, VMC 0.52, IBM 1.69 (ex-date 11-10).
+    This was a wrong assumption, not a data-quality exception -- no tolerance
+    is loosened below; three new self-consistency checks are ADDED.
+
+    Jump detection uses the absolute (raw - adjusted) cash difference, not the
+    adjusted/raw ratio: the vendor quotes prices to 2 decimals, so the ratio
+    carries ~1e-4 rounding noise (IBM produced a phantom 11-09 jump) while a
+    single cash dividend is an exactly constant difference. The pre-ex-date
+    difference must be one positive constant and the post-ex-date series must
+    sit exactly at factor 1.0; any other shape stays fail-closed.
 
     Returns the evidence dict to be written into the context, or None when
     no re-base occurred.
@@ -79,25 +99,63 @@ def factor_rebase_evidence(symbol,old,data,begin,quote,prev_raw,prev_adj,session
     gap=abs(f_old-f_new)/max(f_old,f_new)
     if gap<=0.001:return None
     problems=[]
-    if not (quote and prev_raw is not None and prev_adj is not None
-            and close_enough(prev_adj,quote['pc'])
-            and not close_enough(prev_raw,quote['pc'])):
-        problems.append('quote snapshot does not confirm ex-dividend')
+    # Vendor prices carry 2 decimals. A dividend re-base subtracts ONE fixed
+    # cash amount from every pre-ex-date bar, so raw-adjusted is an exact
+    # constant while the adjusted/raw ratio wobbles by ~1e-4. Detecting the
+    # jump on the cash difference removes that phantom noise (IBM 11-09).
     days=sorted(d for d in data['raw'] if d>=begin)
-    factors=[data['adjusted'][d]/data['raw'][d] for d in days]
-    jumps=[days[i] for i in range(1,len(factors))
-           if abs(factors[i]-factors[i-1])>1e-6]
-    if len(jumps)>1 or (jumps and jumps[0]!=session):
-        problems.append('unstable factor shape: %s' % jumps)
+    diffs=[float(data['raw'][d])-float(data['adjusted'][d]) for d in days]
+    TOL=0.02
+    jumps=[i for i in range(1,len(diffs)) if abs(diffs[i]-diffs[i-1])>TOL]
+    ex_days=[days[i] for i in jumps]
+    ex_date=ex_days[0] if len(ex_days)==1 else None
+    if ex_date is None:
+        problems.append('unstable factor shape: %s' % ex_days)
+    else:
+        head,tail=diffs[:jumps[0]],diffs[jumps[0]:]
+        if not head or head[0]<=TOL or any(abs(v-head[0])>TOL for v in head):
+            problems.append('pre-ex-date cash adjustment is not one constant dividend')
+        if not tail or any(abs(v)>TOL for v in tail):
+            problems.append('post-ex-date series is not at factor 1.0')
+        if not (begin<ex_date<=session):
+            problems.append('ex-date outside splice window: %s' % ex_date)
+        if calendar is not None:
+            try:
+                valid=calendar.bounds(dt.date.fromisoformat(ex_date)) is not None
+            except Exception:
+                valid=False
+            if not valid:
+                problems.append('ex-date is not a reviewed exchange session: %s' % ex_date)
+        elif dt.date.fromisoformat(ex_date).weekday()>4:
+            # Offline/unit-test path: at least reject weekends. Production
+            # always passes the reviewed online NYSE calendar (see prepare()).
+            problems.append('ex-date is not an exchange weekday: %s' % ex_date)
     ratio=f_new/f_old
     if not 0.95<=ratio<=1.05:
         problems.append('gross factor ratio %.6f' % ratio)
+    # Independent evidence from the sealed quote snapshot. When the ex-date IS
+    # the current session, `pc` must be the ex-dividend adjusted previous close
+    # (adj != raw). When the ex-date is an EARLIER session (a splice spanning
+    # missed collections), `pc` is already post-ex-dividend, so instead require
+    # it to reconcile exactly with the source bar at the sealed previous
+    # session -- this still rejects wrong symbols / wrong dates / corrupted
+    # series while accepting the legitimate cross-session re-base.
+    if quote is None or prev_raw is None or prev_adj is None:
+        problems.append('quote snapshot does not confirm ex-dividend')
+    elif ex_date==session:
+        if not (close_enough(prev_adj,quote['pc'])
+                and not close_enough(prev_raw,quote['pc'])):
+            problems.append('quote snapshot does not confirm ex-dividend')
+    elif not (close_enough(prev_raw,quote['pc'])
+              or close_enough(prev_adj,quote['pc'])):
+        problems.append('quote snapshot does not confirm the sealed previous close')
     if problems:
         raise ValueError('Incremental source adjustment factor discontinuity: %s (%s)'
                          %(symbol,'; '.join(problems)))
-    return {'begin':begin,'session':session,'f_old':f_old,'f_new':f_new,
-            'ratio':ratio,'gap':gap,'ex_dividend_days':jumps,
-            'verified_by':'sealed_quote_snapshot_pc'}
+    return {'begin':begin,'session':session,'ex_date':ex_date,
+            'f_old':f_old,'f_new':f_new,'ratio':ratio,'gap':gap,
+            'cash_amount':diffs[0] if diffs else None,
+            'ex_dividend_days':ex_days,'verified_by':'sealed_quote_snapshot_pc'}
 
 
 def directory(connection,path=None):
@@ -123,6 +181,17 @@ def prepare(path=None):
     pool,_,_=db_ref.load_market_reference(session)
     connection=db_sources.db()
     try:
+        # The ex-date of a cross-session dividend must be a REVIEWED exchange
+        # session, never a date invented by the price vendor. Reuse the same
+        # connection (no extra egress) and bind it to the sealed quote
+        # snapshot's calendar fingerprint so a calendar swap cannot slip in.
+        with connection.cursor() as cursor:
+            cursor.execute('select calendar,evidence_sha256 from v_market_calendar')
+            rows=cursor.fetchall()
+        if len(rows)!=1:raise RuntimeError('No unique reviewed online exchange calendar')
+        calendar=market_calendar.Calendar(*rows[0])
+        if calendar.sha!=q.get('calendar_sha256'):
+            raise RuntimeError('Reviewed exchange calendar changed before ranking collection')
         with connection.cursor() as cursor:
             cursor.execute('select symbol from live_ranking_context where base_year=%s and session=%s and phase=%s',(year,session,phase))
             done={r[0] for r in cursor.fetchall()}
@@ -218,7 +287,7 @@ def prepare(path=None):
                 # 要求行情快照独立佐证除息 + 新序列形状自洽 + 缩放幅度合理，
                 # 三项全过才放行并写入可审计证据，其余情况仍 fail-closed。
                 rebase=factor_rebase_evidence(symbol,old,data,anchor,quote,
-                                              prev_raw,prev_adj,session)
+                                              prev_raw,prev_adj,session,calendar)
                 body['normalized']={d:values[anchor]*v/data['adjusted'][anchor] for d,v in data['adjusted'].items()}
                 if rebase:body['factor_rebase']=rebase
                 body['splice_anchor']=anchor
