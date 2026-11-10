@@ -127,6 +127,20 @@ def snapshot_problems(doc, now=None):
             problems.append("行情缺少有效时间戳")
         elif qa > QUOTE_MAX_AGE_H:
             problems.append("行情停更 %.1f 小时（阈值 %d）" % (qa, QUOTE_MAX_AGE_H))
+        # 72 小时阈值只用于兜底，太慢：11-09 收盘数据没采到时，直到 11-12
+        # 才会告警。按已复核 NYSE 日历算出「最近一个已收盘交易日」，收盘后
+        # 90 分钟仍没有该场次数据就立即告警，让 selfheal 当场补采。
+        # 周末/节假日 latest 仍是上一个交易日且 q.session 已匹配，不误报。
+        try:
+            import trading_window as tw
+            latest = tw.latest_closed_session(now, tw.load_calendar())
+            if latest and now >= latest["close"] + dt.timedelta(minutes=90):
+                expected, got = latest["session"], str(q.get("session") or "")
+                if got and got < expected:
+                    problems.append("行情停更：%s 收盘数据缺失（当前 %s）"
+                                   % (expected, got))
+        except Exception:
+            pass  # 日历不可用时不额外告警，保留 72 小时兜底
         if not q.get("ok") or not (q.get("quotes") or {}).get("SPY"):
             problems.append("行情快照缺少 SPY 基准")
 

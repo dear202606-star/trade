@@ -12,11 +12,30 @@ concurrency:
 on:
   schedule:
     - cron: "*/30 13-20 * * 1-5"   # 盘中 30 分钟（再由 NYSE 日历门禁精确收窄）
+    # 2026-11-10：开盘后 30 分钟是「必须有」的关键一次。美东开盘随 DST 在
+    # 13:30 / 14:30 UTC 之间切换，故两条 cron 都列出，由 trading_window
+    # 的 opening 任务按已复核日历挑出真正落在开盘后 25~45 分钟的那一条。
+    - cron: "0 14 * * 1-5"         # 开盘后 30 分钟（EDT）
+    - cron: "0 15 * * 1-5"         # 开盘后 30 分钟（EST）
     - cron: "17 21 * * 1-5"        # 收盘后关键一次
     # 2026-11-08：原 02:17 UTC 补跑 = 北京 10:17，落在非交易时段。
     # 迁入收盘窗口作二次兜底（北京 05:50），保留容错且完全避开北京 6-20 点。
     - cron: "50 21 * * 1-5"        # 收盘兜底
   workflow_dispatch:
+    # 看门狗自愈会带 as_of 派发：GitHub 把收盘任务延迟数小时，甚至拖到
+    # 次日盘前，此时在线报价仍挂着上一场次收盘价，用逻辑时间即可补回。
+    inputs:
+      critical:
+        description: '关键任务（额度 freeze 档仍放行）'
+        required: false
+        default: 'true'
+        type: choice
+        options: ['true', 'false']
+      as_of:
+        description: '补采逻辑时间 ISO 8601（留空=实时）'
+        required: false
+        default: ''
+        type: string
   push:
     branches: [main]
     paths:
@@ -43,7 +62,7 @@ on:
 
 permissions:
   contents: read
-  actions: read        # 出口流量预算门禁需读本周期运行记录
+  actions: write       # 读运行记录 + 采集成功后派发备库同步（gh workflow run）
 
 jobs:
   refresh:
@@ -64,11 +83,18 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           SCHEDULE: ${{ github.event.schedule }}
         run: |
+          EXTRA=""
           case "$SCHEDULE" in
-            "17 21 * * 1-5"|"50 21 * * 1-5") TASK=closing ;;
+            "17 21 * * 1-5"|"50 21 * * 1-5") TASK=closing; EXTRA="--late-ok" ;;
+            "0 14 * * 1-5"|"0 15 * * 1-5") TASK=opening ;;
             *) TASK=intraday ;;
           esac
-          python3 trading_window.py --task "$TASK" --gate
+          # 自愈派发没有 schedule，默认用 closing 以便复用延迟补采判定；
+          # 若调用方显式给了 as_of，则任务类型不影响，逻辑时间由下游使用。
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] || [ "$EVENT_NAME" = "push" ]; then
+            TASK=closing; EXTRA="--late-ok"
+          fi
+          python3 trading_window.py --task "$TASK" $EXTRA --gate
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -84,13 +110,33 @@ jobs:
         if: steps.gate.outputs.allow == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          # 2026-11-10：原先只有收盘 cron 带 --critical，看门狗派发的
+          # workflow_dispatch 补跑在 freeze 档被拒，自愈链条被截断，
+          # 页面数据因此连续 4 天停更。dispatch 与关键 cron 一律放行。
+          TRADE_FORCE_BUDGET: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
         run: |
           ARGS=""
-          # 收盘两次是不可跳过的关键任务：预算进入 throttle 档时仍放行。
-          case "${{ github.event.schedule }}" in
-            "17 21 * * 1-5"|"50 21 * * 1-5") ARGS="--critical" ;;
-          esac
+          if [ "${{ steps.gate.outputs.critical }}" = "true" ] || \
+             [ "${{ github.event.inputs.critical }}" = "true" ]; then
+            ARGS="--critical"
+          fi
           python egress_budget.py --workflow "行情快照" --fast $ARGS
       - name: 刷新在线行情
+        id: refresh
         if: steps.gate.outputs.allow == 'true' && steps.egress.outputs.allow == 'true'
-        run: python live_quotes.py --write
+        env:
+          AS_OF: ${{ steps.gate.outputs.as_of || github.event.inputs.as_of }}
+        run: |
+          if [ -n "$AS_OF" ]; then
+            python live_quotes.py --write --as-of "$AS_OF"
+          else
+            python live_quotes.py --write
+          fi
+      - name: 收盘采集成功后立即同步备库
+        # 原 db-sync 收盘 cron 是 21:10 UTC，比 21:17 的采集还早，
+        # 当天收盘数据要等到第二天才进 Turso。采集成功后直接派发，
+        # 把「采集 → 同步」变成严格顺序，定时同步仍保留作兜底。
+        if: success() && steps.refresh.outcome == 'success' && steps.gate.outputs.task == 'closing'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run db-sync.yml -f targets=turso,neon || true

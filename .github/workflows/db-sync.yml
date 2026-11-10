@@ -22,7 +22,9 @@ on:
           - 'turso,neon'
   schedule:
     - cron: "*/30 13-20 * * 1-5"   # 交易时段：仅 Turso（再由 NYSE 日历门禁收窄）
-    - cron: "10 21 * * 1-5"        # 收盘关键：Turso + Neon（Neon 唯一唤醒点）
+    # 2026-11-10：原 21:10 UTC 比 quotes.yml 的 21:17 收盘采集还早，
+    # 会把「前一日」数据同步到备库；移到 21:55（晚于 21:50 兜底采集）。
+    - cron: "55 21 * * 1-5"        # 收盘关键：Turso + Neon（Neon 唯一唤醒点）
     # 2026-11-08：原 05:00 UTC = 北京 13:00，迁到北京 05:00，避开非交易时段。
     - cron: "0 21 * * 0,6"         # 周末低频心跳：仅 Turso，数据不变时 0 行写入
   push:
@@ -62,7 +64,7 @@ jobs:
         run: |
           case "$SCHEDULE" in
             "0 21 * * 0,6") TASK=heartbeat ;;
-            "10 21 * * 1-5") TASK=closing ;;
+            "55 21 * * 1-5") TASK=closing ;;
             *) TASK=intraday ;;
           esac
           python3 trading_window.py --task "$TASK" --gate
@@ -82,7 +84,7 @@ jobs:
           if [ -n "$MANUAL" ]; then
             TARGETS="$MANUAL"
             REASON="手动触发"
-          elif [ "$SCHEDULE" = "10 21 * * 1-5" ]; then
+          elif [ "$SCHEDULE" = "55 21 * * 1-5" ]; then
             TARGETS="turso,neon"
             REASON="收盘关键同步：Turso + Neon 持久副本"
           else

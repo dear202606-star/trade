@@ -1,4 +1,10 @@
-"""Publish current quotes to the online singleton; never process historical prices."""
+"""Publish current quotes to the online singleton; never process historical prices.
+
+--as-of 只用于「GitHub 把收盘任务延迟了数小时」的补跑：它把**逻辑时间**
+固定到目标交易日收盘后 17 分钟，于是日历校验、成分股参考日、报价时间戳
+判定全部按该场次执行；数据源仍是在线挂牌的当前报价（盘前仍返回上一场次
+收盘价，不读取任何历史行情）。collected_at 始终用真实时间留审计证据。
+"""
 import argparse
 import datetime as dt
 import hashlib
@@ -18,6 +24,36 @@ ET = ZoneInfo('America/New_York')
 SOURCE_TIME = re.compile(r'([A-Z][a-z]{2}) (\d{1,2}) (\d{2}:\d{2}[AP]M) (EST|EDT)')
 MONTHS = {name:i for i,name in enumerate(
     ('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'),1)}
+
+MAX_BACKFILL_HOURS = 96       # 只允许补最近 4 天，绝不回填历史
+MAX_CLOSING_AGE_MIN = 12 * 60  # 与 trading_window 的延迟容忍上限一致
+
+
+def logical_time(spec=None, now=None):
+    """解析 --as-of 为逻辑时间；任何可疑输入一律 fail-closed 抛错。
+
+    默认（spec 为空）返回真实时间，正常路径行为完全不变。
+    """
+    real = now or dt.datetime.now(UTC)
+    if not spec:
+        return real
+    as_of = dt.datetime.fromisoformat(str(spec).replace('Z', '+00:00'))
+    if as_of.tzinfo is None:
+        raise ValueError('as-of 缺少时区')
+    as_of = as_of.astimezone(UTC)
+    if as_of > real + dt.timedelta(minutes=5):
+        raise ValueError('as-of 不能是未来时刻')
+    if real - as_of > dt.timedelta(hours=MAX_BACKFILL_HOURS):
+        raise ValueError('as-of 超出 %d 小时补采上限' % MAX_BACKFILL_HOURS)
+    import trading_window
+    cal = trading_window.load_calendar()
+    info = trading_window.session_info(as_of, cal)
+    if not info['trading_day']:
+        raise ValueError('as-of 不是已复核交易日')
+    age = (as_of - info['close']).total_seconds() / 60
+    if age < 0 or age > MAX_CLOSING_AGE_MIN:
+        raise ValueError('as-of 必须落在收盘后 0~%d 分钟窗口' % MAX_CLOSING_AGE_MIN)
+    return as_of
 
 
 def read_snapshot(cursor):
@@ -157,7 +193,9 @@ def collect(now):
         raw.update(quotes.sina_batch(['gb_'+s.replace('.','$').lower() for s in batch]))
         time.sleep(.2)
     fx = quotes.fetch_fx()
-    collected=dt.datetime.now(UTC)
+    # 逻辑时间贯穿日历 / 成分股 / 报价时间戳校验；补跑时由 --as-of 固定到
+    # 目标场次，正常运行时 now 就是真实时间。collected_at 另用真实时间。
+    collected=now
     supplements=repair_quotes(tickers,raw,collected,calendar)
     return build_snapshot(tickers,raw,fx,collected,calendar,reference,supplements)
 
@@ -274,16 +312,21 @@ def publish(payload, sha, collected_at):
         connection.close()
 
 
-def run(write=False):
+def run(write=False, as_of=None):
     started = dt.datetime.now(UTC)
-    payload,sha = collect(started)
+    logical = logical_time(as_of, started)
+    payload,sha = collect(logical)
     changed = publish(payload,sha,dt.datetime.now(UTC)) if write else False
     print(json.dumps({'write':write,'changed':changed,'count':payload['count'],
         'session':payload['session'],'source_as_of':payload['ts'],'evidence_sha256':sha,
+        'logical_as_of':logical.isoformat(),'backfill':bool(as_of),
         'duration_seconds':round((dt.datetime.now(UTC)-started).total_seconds(),2)}))
 
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--write',action='store_true')
-    run(parser.parse_args().write)
+    parser.add_argument('--as-of',dest='as_of',default=None,
+        help='延迟补跑的目标场次逻辑时间（ISO 8601，收盘后 17 分钟）')
+    args=parser.parse_args()
+    run(args.write, args.as_of)

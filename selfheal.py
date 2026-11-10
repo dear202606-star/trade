@@ -44,9 +44,15 @@ def gh(*args):
 
 
 def recently_active(workflow: str) -> bool:
-    """同工作流在途、或冷却期内刚跑过 → 不再派发。"""
+    """同工作流在途、或冷却期内刚跑过 → 不再派发。
+
+    只统计 workflow_dispatch：quotes.yml 盘中每 30 分钟有一次 schedule，
+    若把它们算进冷却，看门狗（每小时 :05）几乎永远命中「刚跑过」，
+    自愈会被自己的正常调度永久饿死。
+    """
     try:
-        rows = json.loads(gh("run", "list", "--workflow", workflow, "--limit", "5",
+        rows = json.loads(gh("run", "list", "--workflow", workflow,
+                             "--event", "workflow_dispatch", "--limit", "5",
                              "--json", "status,createdAt") or "[]")
     except (ValueError, TypeError):
         return False
@@ -63,6 +69,26 @@ def recently_active(workflow: str) -> bool:
         if (now - created).total_seconds() < COOLDOWN_MIN * 60:
             return True
     return False
+
+
+def dispatch_args(workflow: str, now: dt.datetime) -> list:
+    """派发参数。行情补跑必须带 critical（freeze 档放行）+ as_of（逻辑时间）。
+
+    as_of 取「最近一个已收盘交易日的收盘后 17 分钟」，由纯标准库的
+    trading_window 从已复核 NYSE 日历算出；算不出就只留空（实时采集），
+    绝不猜测日期。
+    """
+    if workflow != "quotes.yml":
+        return []
+    args = ["-f", "critical=true"]
+    try:
+        import trading_window
+        as_of = trading_window.closing_as_of(now)
+        if as_of:
+            args += ["-f", "as_of=" + as_of]
+    except Exception:
+        pass
+    return args
 
 
 def main():
@@ -91,15 +117,16 @@ def main():
                               "reason": "冷却期内或已有在途运行", "matched": matched})
             used.add(workflow)
             continue
+        args = dispatch_args(workflow, dt.datetime.now(dt.timezone.utc))
         if a.dry_run:
             decisions.append({"workflow": workflow, "action": "would_dispatch",
-                              "reason": reason, "matched": matched})
+                              "reason": reason, "matched": matched, "args": args})
         else:
-            out = gh("workflow", "run", workflow)
+            out = gh("workflow", "run", workflow, *args)
             ok = bool(out)
             decisions.append({"workflow": workflow,
                               "action": "dispatched" if ok else "dispatch_failed",
-                              "reason": reason, "matched": matched})
+                              "reason": reason, "matched": matched, "args": args})
             if ok:
                 dispatched += 1
         used.add(workflow)
