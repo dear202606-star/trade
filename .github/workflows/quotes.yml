@@ -67,7 +67,10 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 4
+    # 500+ 只标的分批抓取 + 缺失报价的独立佐证修复，实测 4 分钟会被 job
+    # 级超时硬砍（2026-11-10 两次补采都在采集途中被 canceled）。留足预算，
+    # 并允许一次自动重试，避免单次网络抖动就丢掉一整天的收盘数据。
+    timeout-minutes: 20
     env:
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
     steps:
@@ -124,14 +127,20 @@ jobs:
       - name: 刷新在线行情
         id: refresh
         if: steps.gate.outputs.allow == 'true' && steps.egress.outputs.allow == 'true'
+        timeout-minutes: 14
         env:
           AS_OF: ${{ steps.gate.outputs.as_of || github.event.inputs.as_of }}
         run: |
-          if [ -n "$AS_OF" ]; then
-            python live_quotes.py --write --as-of "$AS_OF"
-          else
-            python live_quotes.py --write
-          fi
+          for attempt in 1 2; do
+            if [ -n "$AS_OF" ]; then
+              python live_quotes.py --write --as-of "$AS_OF" && exit 0
+            else
+              python live_quotes.py --write && exit 0
+            fi
+            echo "采集第 $attempt 次失败，20 秒后重试"
+            sleep 20
+          done
+          exit 1
       - name: 收盘采集成功后立即同步备库
         # 原 db-sync 收盘 cron 是 21:10 UTC，比 21:17 的采集还早，
         # 当天收盘数据要等到第二天才进 Turso。采集成功后直接派发，

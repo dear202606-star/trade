@@ -205,6 +205,12 @@ class WorkflowContractTests(unittest.TestCase):
                      '"17 21 * * 1-5"', '"50 21 * * 1-5"'):
             self.assertIn(cron, self.quotes)
 
+    def test_collection_has_enough_timeout_and_one_retry(self):
+        # 4 分钟 job 超时实测把 500+ 标的采集腰斩，两次补采都被 canceled
+        self.assertIn("timeout-minutes: 20", self.quotes)
+        self.assertIn("timeout-minutes: 14", self.quotes)
+        self.assertIn("for attempt in 1 2", self.quotes)
+
     def test_sync_close_cron_runs_after_collection(self):
         # 21:55 UTC > 21:17 / 21:50 两次收盘采集，否则同步的永远是旧数据
         self.assertIn('"55 21 * * 1-5"', self.sync)
