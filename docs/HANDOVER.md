@@ -1,7 +1,35 @@
 # 交接说明（给下一个 agent）
 
-> 最后更新：2026-11-01 18:10（北京）
+> 最后更新：2026-11-01 18:10（北京）｜ 调度章节补于 2026-11-10 23:xx（v6.10）
 > 仓库：`dear202606-star/trade`（分支 `main`）｜ 站点：<https://dear202606-star.github.io/trade/>
+
+---
+
+## 零、先看这条：自动执行为什么不稳，以及现在的容错骨架
+
+**不要再把「修某条 cron」当作解法。** GitHub Actions 免费版 `schedule` 是
+尽力而为，实测可延迟约 6 小时甚至整批丢弃；而 11-06 为收敛 egress 执行
+`sql/124_egress_schedule.sql` 时，把 Supabase `pg_cron` 的
+`trade-dispatch` / `trade-dispatch-market` 也一起停了，调度权从此 100%
+落在 GitHub cron 上。看门狗（原唯一自愈入口）自己也是 schedule 触发，
+于是「被兜底者 + 兜底者」共模故障。
+
+现在的判定基准是**数据状态而不是时钟**：`reconcile_sessions.py` 只读浏览器
+同源的 Turso 端点，用已复核 NYSE 日历算出应有场次，缺就补（盘中实时 /
+收盘按 `as_of` 逻辑时间）。`reconcile.yml` 由 `workflow_run` + 错峰 cron +
+`repository_dispatch: reconcile-tick` 三重独立源唤起，带冷却、在途、
+同场次 3 次上限防自激。`quotes.yml` 每次采集成功都立即派发 `db-sync.yml`
+推 Turso，定时同步只作兜底。完整实证与可选「平台外心跳」恢复步骤见
+`docs/EXTERNAL_CRON.md` 与 `docs/CHANGELOG.md` v6.10。
+
+⚠️ 勿回退：`quotes.yml` 的同步条件、`db-sync.yml` 的
+`cancel-in-progress: false`、`publish_ui.py` 的 5xx 重试降级。
+⚠️ 勿恢复：`trade-dispatch` / `trade-dispatch-market` 两个高频派发采集的作业
+（1139 次 / 10 天、egress 399% 超额的放大器）。
+
+`collect-full.yml` / `collect-ci.yml` / `backfill-prices.yml` 是历史回填链路，
+因 Yahoo 补缺未完成 / HTTP 402 付费墙 / Alpha Vantage 25 次每日限流而
+周期性失败，**与日更链路无关**，不要为了「让 CI 全绿」去绕过数据门禁。
 
 ---
 

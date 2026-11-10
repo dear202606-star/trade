@@ -117,7 +117,7 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - name: 在线报价与失败保护回归
-        run: python -m unittest test_live_quotes test_quote_repairs test_quote_snapshot test_market_calendar test_watchdog_checks test_trading_window
+        run: python -m unittest test_live_quotes test_quote_repairs test_quote_snapshot test_market_calendar test_watchdog_checks test_trading_window test_reconcile_sessions test_publish_ui
       - name: 检查在线写入凭据
         if: steps.gate.outputs.allow == 'true'
         run: test -n "$SUPABASE_DB_PASSWORD"
@@ -154,27 +154,26 @@ jobs:
             sleep 20
           done
           exit 1
-      - name: 关键采集成功后立即同步备库
-        # 原 db-sync 收盘 cron 是 21:10 UTC，比 21:17 的采集还早，
-        # 当天收盘数据要等到第二天才进 Turso。采集成功后直接派发，
-        # 把「采集 → 同步」变成严格顺序，定时同步仍保留作兜底。
-        # 开盘后 30 分钟那次同样立刻推 Turso：访客读的就是 Turso，
-        # 不能让「开盘一次」只在主库落地、页面要等 30 分钟后才看到。
-        # 看门狗自愈 / 人工派发（workflow_dispatch）补采成功后也必须立即推，
-        # 否则自愈闭环在「主库已更新、Turso 仍旧」这里断掉，页面继续告警。
-        # 只有「定时收盘」才唤醒 Neon（免费额度每工作日仅一次）；盘中补采
+      - name: 采集成功后立即同步备库
+        # 2026-11-10 复盘：原先只有 closing / opening / dispatch 才推 Turso，
+        # 盘中 30 分钟那次采集完全依赖 db-sync.yml 的另一条定时 cron 落地。
+        # 两条独立的 schedule 都可能被 GitHub 延迟或丢弃，于是出现「主库已
+        # 更新、页面读的 Turso 仍旧」的停更。改为**每一次采集成功都立即派发**
+        # 同步，把「采集 → 同步」变成严格顺序链，定时同步降级为纯兜底。
+        # 只有「定时收盘」才唤醒 Neon（免费额度每工作日仅一次）；盘中与补采
         # 即便复用 closing 任务，也只推 Turso，绝不误唤醒 Neon。
-        if: >-
-          success() && steps.refresh.outcome == 'success' &&
-          (github.event_name == 'workflow_dispatch' ||
-           steps.gate.outputs.task == 'closing' || steps.gate.outputs.task == 'opening')
+        # 派发失败不把成功采集判成失败（否则下游 workflow_run 会误判），
+        # 由 reconcile.yml 的独立对账在下一轮补齐。
+        if: success() && steps.refresh.outcome == 'success'
         env:
           GH_TOKEN: ${{ github.token }}
           TASK: ${{ steps.gate.outputs.task }}
           EVENT: ${{ github.event_name }}
         run: |
           if [ "$TASK" = "closing" ] && [ "$EVENT" = "schedule" ]; then
-            gh workflow run db-sync.yml -f targets=turso,neon || true
+            gh workflow run db-sync.yml -f targets=turso,neon || \
+              echo "::warning::备库同步派发失败，场次对账将在下一轮兜底"
           else
-            gh workflow run db-sync.yml -f targets=turso || true
+            gh workflow run db-sync.yml -f targets=turso || \
+              echo "::warning::备库同步派发失败，场次对账将在下一轮兜底"
           fi

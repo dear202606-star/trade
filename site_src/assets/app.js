@@ -17,6 +17,20 @@
     return now >= limit;
   };
 
+  /* 展示层专用：横幅只看「采集是否真的停了」，不用数据源刷新周期当闹钟。
+     fresh_until 是行情源 20 分钟的时效口径（业务判断、净值依赖校验都靠它，
+     不能改），而生产采集是盘中 30 分钟一次。若直接拿 fresh_until 判横幅，
+     每轮采集后的 14:53~15:03 这类窗口必然短暂弹出「行情更新超时」，
+     数据其实完全正常。盘中快照额外给 45 分钟（30 分钟节奏 + 15 分钟
+     GitHub 排队容错）；收盘版仍按 fresh_until 严格判定，不掩盖真停更。 */
+  DSH.quoteStaleForDisplay = function (q, now) {
+    const at = now == null ? Date.now() : now;
+    if (DSH.quoteFreshness(q, at) !== true) return false;
+    if (!q || q.intraday !== true) return true;
+    const limit = Date.parse(q.fresh_until), grace = 45 * 60 * 1000;
+    return !(Number.isFinite(limit) && Number.isFinite(at) && at < limit + grace);
+  };
+
   DSH.previewCurrent = function (preview, quotes) {
     return !!(preview && quotes && preview.quote_version && quotes.version &&
       (preview.quote_version === quotes.version ||
@@ -1368,7 +1382,7 @@
         parts.push("行情时间(北京) <b style=\"color:var(--txt-2)\">" +
           DSH.esc(d.toLocaleString('zh-CN', {timeZone:'Asia/Shanghai', hour12:false})) + "</b>");
       }
-      if (DSH.quoteFreshness(q) === true) {
+      if (DSH.quoteStaleForDisplay(q) === true) {
         parts.push("<b style=\"color:#FFAB6B\">⚠ 行情更新超时</b>");
       }
     }
@@ -1379,7 +1393,7 @@
     if (!parts.length) return;
 
     // 行情过旧时，顶部通栏提醒（不能只缩在页脚）
-    if (DSH.quoteFreshness(q) === true && !document.getElementById("staleBar")) {
+    if (DSH.quoteStaleForDisplay(q) === true && !document.getElementById("staleBar")) {
       const bar = document.createElement("div");
       bar.id = "staleBar";
       bar.style.cssText = "position:sticky;top:0;z-index:60;background:#7A4A12;color:#FFE7C2;" +
@@ -1387,7 +1401,7 @@
       bar.textContent = "⚠ 行情更新超时，最近行情所属交易日为 " + (q.session || "未知");
       document.body.insertBefore(bar, document.body.firstChild);
     }
-    if (DSH.quoteFreshness(q) !== true) {
+    if (DSH.quoteStaleForDisplay(q) !== true) {
       const old = document.getElementById("staleBar");
       if (old) old.remove();
     }

@@ -283,16 +283,21 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("gh workflow run db-sync.yml", self.quotes)
         self.assertIn("actions: write", self.quotes)
 
-    def test_opening_collection_also_pushes_turso_immediately(self):
-        # 访客读的是 Turso：开盘那次不能只在主库落地等下一次定时同步
-        self.assertIn("steps.gate.outputs.task == 'opening'", self.quotes)
-        self.assertIn("db-sync.yml -f targets=turso || true", self.quotes)
-        self.assertIn("db-sync.yml -f targets=turso,neon || true", self.quotes)
+    def test_every_successful_collection_pushes_turso_immediately(self):
+        # 2026-11-10：盘中采集原先只在主库落地，要等 db-sync.yml 的另一条
+        # 独立 cron 才推 Turso；两条 schedule 都可能被 GitHub 丢弃，于是
+        # 「采到了但页面停更」。契约收敛为：任何一次采集成功都立即派发同步。
+        self.assertIn("if: success() && steps.refresh.outcome == 'success'", self.quotes)
+        self.assertIn("db-sync.yml -f targets=turso", self.quotes)
+        self.assertIn("db-sync.yml -f targets=turso,neon", self.quotes)
+        # 派发失败不能把成功采集判成失败（否则下游 workflow_run 误判），
+        # 但要留下告警，由场次对账在下一轮兜底。
+        self.assertIn("场次对账将在下一轮兜底", self.quotes)
 
     def test_selfheal_backfill_also_pushes_turso_without_waking_neon(self):
         # 自愈补采成功后若不同步，闭环断在「主库已更新、Turso 仍旧」，
         # 页面继续告警；但盘中补采不能误唤醒 Neon（每日一次额度）。
-        self.assertIn("(github.event_name == 'workflow_dispatch' ||", self.quotes)
+        self.assertIn("if: success() && steps.refresh.outcome == 'success'", self.quotes)
         self.assertIn('EVENT: ${{ github.event_name }}', self.quotes)
         self.assertIn('[ "$TASK" = "closing" ] && [ "$EVENT" = "schedule" ]',
                       self.quotes)

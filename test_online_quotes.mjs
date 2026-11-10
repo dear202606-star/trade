@@ -168,6 +168,23 @@ test('freshness follows the reviewed deadline across weekends and recovers after
   assert.equal(dsh.quoteFreshness({...friday,fresh_until:friday.ts},Date.now()),null);
 });
 
+test('intraday banner follows the 30-minute collection cadence, closing banner stays strict',()=>{
+  const {dsh}=reader(async()=>({ok:false}));
+  const intraday={ts:'2026-11-10T14:33:00Z',fresh_until:'2026-11-10T14:53:00Z',intraday:true};
+  // 数据源 20 分钟时效刚过，但下一轮 30 分钟采集还在路上：业务口径已判过期，
+  // 展示层不应弹「行情更新超时」，否则每次采集后都会短暂误报。
+  assert.equal(dsh.quoteFreshness(intraday,Date.parse('2026-11-10T14:58:00Z')),true);
+  assert.equal(dsh.quoteStaleForDisplay(intraday,Date.parse('2026-11-10T14:58:00Z')),false);
+  // 宽限 45 分钟后仍无新快照：真停更，必须告警。
+  assert.equal(dsh.quoteStaleForDisplay(intraday,Date.parse('2026-11-10T15:40:00Z')),true);
+  // 收盘版不享受宽限，fresh_until 一到即报；周末/夜间由日历口径兜住。
+  const closing={ts:'2026-11-10T21:17:00Z',fresh_until:'2026-11-11T14:50:00Z',intraday:false};
+  assert.equal(dsh.quoteStaleForDisplay(closing,Date.parse('2026-11-11T14:49:00Z')),false);
+  assert.equal(dsh.quoteStaleForDisplay(closing,Date.parse('2026-11-11T14:51:00Z')),true);
+  // 无法核验时效时不误报
+  assert.equal(dsh.quoteStaleForDisplay({ts:intraday.ts},Date.now()),false);
+});
+
 test('quotes read the online database instead of a deployment snapshot',async()=>{
   const payload={ok:true,ts:'2026-11-03T21:00:00Z',session:'2026-11-03',quotes:{SPY:{p:100}}};
   const {dsh,calls}=reader(async()=>({ok:true,json:async()=>[{payload}]}));

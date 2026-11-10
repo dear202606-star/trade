@@ -1,0 +1,95 @@
+name: 场次对账（自动补采）
+
+# 2026-11-10：把「自动执行」从依赖 cron 准点，改成依赖「数据齐不齐」。
+#
+# 共模故障复盘：GitHub 免费版 scheduled events 是尽力而为，实测 21:17 / 21:50
+# 的收盘任务被延迟到次日 03:35 / 03:49（约 6 小时），11-10 整个盘中
+# 13:00~15:13 UTC 一次都没触发；而原自愈挂在看门狗里，看门狗自己也是
+# schedule 触发 —— 被兜底者与兜底者同时哑火，页面连续停更数天。
+#
+# 本工作流用三条互相独立的触发源破除单点：
+#   ① workflow_run：上游「跑完了」就对账，成功/失败都触发，不依赖准点；
+#   ② 独立错峰 cron：所有上游都没跑时仍能自主发现缺口；
+#   ③ 手动 / push：随时可验证。
+# 对账只读浏览器同源的 Turso 公开端点，纯标准库、不装依赖、不连主库，
+# 单次约 10 秒，不消耗 Supabase egress；数据已齐绝不派发，避免自激循环。
+
+on:
+  workflow_run:
+    # 「行情快照」只在失败时纳入对账（见下方 job 级 if）：它成功后会异步
+    # 派发备库同步，此刻 Turso 可能还没落地，对账会把「同步在途」误判成
+    # 「采集缺失」而重复补采。成功的那一次交给备库同步完成事件来对账，
+    # 看到的就是访客真正读到的那份数据。
+    workflows: ["行情快照", "备库同步", "网页发布", "看门狗（停更告警）"]
+    types: [completed]
+  schedule:
+    - cron: "17,47 * * * *"     # 每小时两次，与看门狗 :05 错峰
+    - cron: "25 22 * * 1-5"     # 收盘后独立兜底（不依赖任何上游）
+  workflow_dispatch:
+  # 预留「平台外」的独立时钟：任何免费外部定时器（Supabase pg_cron /
+  # Cloudflare Workers Cron / cron-job.org）只需 POST 一个 repository_dispatch
+  # 就能唤起对账，不需要改本文件。2026-11-06 为收敛 egress 把库内
+  # trade-dispatch / trade-dispatch-market 一并停掉后，调度权 100% 落回
+  # GitHub schedule，这正是「cron 一延迟、整条链全哑」的共模故障来源。
+  # 对账只读 Turso 公开端点、不碰 Supabase 出口流量，故外部心跳即使
+  # 高频也不会重演 1139 次/10 天、egress 399% 超额的事故。
+  repository_dispatch:
+    types: [reconcile-tick]
+  push:
+    branches: [main]
+    paths:
+      - reconcile_sessions.py
+      - trading_window.py
+      - research/exchange_calendar.json
+      - test_reconcile_sessions.py
+      - .github/workflows/reconcile.yml
+
+concurrency:
+  group: trade-reconcile
+  cancel-in-progress: true      # 只读幂等；重复触发只保留最新一次
+
+permissions:
+  contents: read
+  actions: write                # 读运行历史 + 派发补采
+
+jobs:
+  reconcile:
+    # 行情快照成功时对账延后到「备库同步完成」事件，避免同步在途被误判为
+    # 数据缺口；行情快照失败则立即对账并补采，不等任何 cron。
+    if: >-
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.name != '行情快照' ||
+      github.event.workflow_run.conclusion != 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: 对账器离线自检
+        run: python3 -m unittest test_reconcile_sessions
+      - name: 场次对账（只读，标准库）
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 reconcile_sessions.py --gate
+      - name: 派发缺口补采
+        # 三重闸门：数据确实缺失 + 不在冷却/在途 + 同场次未超上限。
+        # quotes.yml 的 workflow_dispatch 走 TRADE_FORCE_BUDGET=1，
+        # egress freeze 档也不会截断这条关键补采。
+        if: steps.check.outputs.dispatch_allowed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          AS_OF: ${{ steps.check.outputs.as_of }}
+          MODE: ${{ steps.check.outputs.mode }}
+          EXPECTED: ${{ steps.check.outputs.expected_session }}
+        run: |
+          echo "对账判定：$MODE 场次 $EXPECTED as_of=${AS_OF:-（实时）}"
+          # 对账是「尽力补采」：派发失败不把对账判成失败（否则又多一条
+          # 红色运行、还会让上游误判），下一轮独立触发会重试。
+          if [ -n "$AS_OF" ]; then
+            gh workflow run quotes.yml -f critical=true -f as_of="$AS_OF" || \
+              echo "::warning::补采派发失败，下一轮对账重试"
+          else
+            gh workflow run quotes.yml -f critical=true || \
+              echo "::warning::补采派发失败，下一轮对账重试"
+          fi
+          echo "已处理缺口（补采成功后 quotes.yml 会立即同步 Turso）"

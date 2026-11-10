@@ -6,6 +6,7 @@ from pathlib import Path
 import subprocess
 import tarfile
 import tempfile
+import time
 import urllib.request
 import urllib.error
 
@@ -14,10 +15,44 @@ import site_build
 BASE = Path(__file__).resolve().parent
 REPO = 'dear202606-star/trade'
 SITE = 'https://dear202606-star.github.io/trade/'
+RETRYABLE_HTTP = (429, 500, 502, 503, 504)
 
 
-def gh(*args):
-    return subprocess.run(['gh',*args],check=True,capture_output=True,text=True).stdout
+def gh(*args, attempts=3):
+    """GitHub API / artifact 下载偶发 5xx 时退避重试，避免整条发布链被抖动打断。"""
+    last = ''
+    for attempt in range(attempts):
+        done = subprocess.run(['gh',*args],capture_output=True,text=True)
+        if done.returncode == 0:
+            return done.stdout
+        last = (done.stderr or done.stdout).strip()[-300:]
+        if attempt < attempts - 1:
+            time.sleep(2 ** attempt)
+    raise RuntimeError('gh %s 失败（%d 次）：%s' % (' '.join(args[:2]), attempts, last))
+
+
+def fetch_json(url, timeout=20, attempts=4):
+    """读取 Pages 基线；404 或重试耗尽返回 None，由调用方降级为「跳过比对」。
+
+    2026-11-10：实测 Pages 偶发 503 会让 build 直接抛 HTTPError，deploy 沿
+    needs 链被跳过，线上界面因此停在旧版本。静态金融数据早已迁到在线库，
+    Pages 上的旧 JSON 只是迁移源；基线短暂不可读不应阻断发布。真正读到
+    且内容不一致时仍然 fail-closed（见下方比对）。
+    """
+    for attempt in range(attempts):
+        try:
+            with urllib.request.urlopen(url,timeout=timeout) as response:
+                return json.load(response)
+        except urllib.error.HTTPError as exc:
+            if exc.code == 404:
+                return None
+            if exc.code not in RETRYABLE_HTTP:
+                raise
+        except (urllib.error.URLError, TimeoutError, ValueError):
+            pass
+        if attempt < attempts - 1:
+            time.sleep(2 ** attempt)
+    return None
 
 
 def data_hashes(target):
@@ -57,15 +92,12 @@ def run(archive=None):
         for name in ('equity','signal'):
             for variant in ('','b/'):
                 relative = 'data/'+variant+name+'.json'
-                try:
-                    with urllib.request.urlopen(SITE+relative+'?ui_baseline=1',timeout=20) as response:
-                        deployed = json.load(response)
-                except urllib.error.HTTPError as exc:
-                    # 2026-11-06 起静态数据不再发布到 Pages，改由在线库承载；
-                    # 线上已移除时跳过逐字节比对，仍保留本地快照作为迁移源。
-                    if exc.code == 404:
-                        continue
-                    raise
+                deployed = fetch_json(SITE+relative+'?ui_baseline=1')
+                if deployed is None:
+                    # 静态数据已迁出 Pages（404）或 Pages 短暂 5xx：两者都
+                    # 不构成「基线不一致」，跳过逐字节比对，保留本地快照。
+                    print('::warning::Pages 基线不可读，跳过比对：'+relative)
+                    continue
                 local = json.loads((target/relative).read_text())
                 if local != deployed:
                     raise RuntimeError('Pages baseline differs from current deployed data: '+relative)

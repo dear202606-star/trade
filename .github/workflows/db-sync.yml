@@ -41,7 +41,10 @@ on:
 
 concurrency:
   group: trade-db-sync
-  cancel-in-progress: true
+  # 2026-11-10：采集成功后会立即派发一次同步；若此时定时同步启动并
+  # cancel-in-progress，恰好把「刚采到的数据」那一次砍掉，页面继续停更。
+  # 改为排队执行（增量同步幂等，重复跑 0 行写入），绝不取消在途同步。
+  cancel-in-progress: false
 
 permissions:
   contents: read
