@@ -51,8 +51,8 @@ class HeartbeatContract(unittest.TestCase):
         cmd = eh.build_command("repository_dispatch")
         self.assertIn("reconcile-tick", cmd)
         self.assertIn("event_type", cmd)
-        self.assertEqual(eh.BODIES["repository_dispatch"],
-                         {"event_type": "reconcile-tick"})
+        self.assertEqual(eh.BODIES["repository_dispatch"]["event_type"], "reconcile-tick")
+        self.assertEqual(eh.BODIES["repository_dispatch"]["client_payload"]["source"], "pg-cron")
         wf = eh.BODIES["workflow_dispatch"]
         self.assertEqual(wf["ref"], "main")
         self.assertEqual(wf["inputs"]["source"], "pg-cron")
@@ -91,6 +91,25 @@ class HeartbeatContract(unittest.TestCase):
         self.assertIn("repository_dispatch:", text)
         self.assertIn("types: [reconcile-tick]", text)
         self.assertIn("workflow_dispatch:", text)
+        self.assertIn("run-name:", text)
+        self.assertIn("github.event.inputs.source", text)
+        self.assertIn("external_heartbeat.py --health", text)
+
+    def test_health_only_counts_real_heartbeats(self):
+        now = "2026-11-10T16:00:00+00:00"
+        freshest = [{"displayTitle": "场次对账 · pg-cron",
+                     "event": "workflow_dispatch",
+                     "createdAt": "2026-11-10T15:40:00Z"}]
+        self.assertTrue(eh.health(freshest, now)["healthy"])
+        manual = [{"displayTitle": "场次对账 · manual",
+                   "event": "workflow_dispatch",
+                   "createdAt": "2026-11-10T15:59:00Z"}]
+        self.assertFalse(eh.health(manual, now)["healthy"])
+        self.assertTrue(eh.is_tick_run({"displayTitle": "场次对账 · pg-cron",
+                                        "event": "workflow_dispatch"}))
+        self.assertFalse(eh.is_tick_run({"displayTitle": "场次对账 · schedule",
+                                         "event": "schedule"}))
+        self.assertTrue(eh.is_tick_run({"event": "repository_dispatch"}))
 
 
 if __name__ == "__main__":

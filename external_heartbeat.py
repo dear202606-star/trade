@@ -54,7 +54,8 @@ ENDPOINTS = {
     "workflow_dispatch": "https://api.github.com/repos/%s/actions/workflows/reconcile.yml/dispatches" % REPO,
 }
 BODIES = {
-    "repository_dispatch": {"event_type": EVENT_TYPE},
+    "repository_dispatch": {"event_type": EVENT_TYPE,
+                            "client_payload": {"source": "pg-cron"}},
     "workflow_dispatch": {"ref": "main", "inputs": {"source": "pg-cron"}},
 }
 
@@ -248,6 +249,17 @@ def disable(conn):
     return {"enabled": False, "job": JOB}
 
 
+def is_tick_run(run):
+    """识别「平台外心跳」运行，不把手动 workflow_dispatch 误算成心跳。
+
+    reconcile.yml 的 run-name 带上 source=pg-cron；老数据没有 displayTitle
+    时退回按事件类型判断（repository_dispatch 只可能来自平台外）。
+    """
+    if "displayTitle" in (run or {}):
+        return "pg-cron" in str(run.get("displayTitle") or "")
+    return (run or {}).get("event") in ("repository_dispatch", "workflow_dispatch")
+
+
 def health(runs, now, max_age_min=90):
     """纯函数：判断平台外心跳是否仍在到达，供 CI 输出告警（绝不阻断主流程）。"""
     now = now if isinstance(now, dt.datetime) else dt.datetime.fromisoformat(str(now).replace("Z", "+00:00"))
@@ -255,7 +267,7 @@ def health(runs, now, max_age_min=90):
         now = now.replace(tzinfo=dt.timezone.utc)
     ticks = []
     for r in runs or []:
-        if r.get("event") not in ("repository_dispatch", "workflow_dispatch"):
+        if not is_tick_run(r):
             continue
         try:
             at = dt.datetime.fromisoformat(str(r["createdAt"]).replace("Z", "+00:00"))
@@ -277,7 +289,7 @@ def github_health():
     try:
         raw = subprocess.run(
             ["gh", "run", "list", "--workflow", "reconcile.yml", "--limit", "60",
-             "--json", "event,createdAt"],
+             "--json", "event,createdAt,displayTitle"],
             check=False, capture_output=True, text=True, timeout=40).stdout.strip()
         runs = json.loads(raw or "[]")
     except Exception:                             # noqa: BLE001
@@ -309,10 +321,10 @@ def verify(conn):
     try:
         raw = subprocess.run(
             ["gh", "run", "list", "--workflow", "reconcile.yml", "--limit", "50",
-             "--json", "databaseId,event,createdAt,conclusion"],
+             "--json", "databaseId,event,createdAt,displayTitle,conclusion"],
             check=False, capture_output=True, text=True, timeout=40).stdout.strip()
         runs = json.loads(raw or "[]")
-        ticks = [r for r in runs if r.get("event") in ("repository_dispatch", "workflow_dispatch")]
+        ticks = [r for r in runs if is_tick_run(r)]
         out["last_tick_run"] = ticks[0] if ticks else None
         out["tick_run_count"] = len(ticks)
     except Exception as exc:                      # noqa: BLE001
@@ -376,6 +388,16 @@ def self_test():
     check("查不到运行历史也只告警", not health(None, now)["healthy"])
     check("忽略无关事件", not health(
         [{"event": "schedule", "createdAt": "2026-11-10T15:59:00Z"}], now)["healthy"])
+    check("标题含 pg-cron 才算心跳", is_tick_run({"displayTitle": "场次对账 · pg-cron",
+                                        "event": "workflow_dispatch"}))
+    check("手动派发不算心跳", not is_tick_run({"displayTitle": "场次对账 · manual",
+                                      "event": "workflow_dispatch"}))
+    check("无标题时按事件兜底", is_tick_run({"event": "repository_dispatch"}))
+    check("schedule 运行不算心跳", not is_tick_run({"displayTitle": "场次对账 · schedule",
+                                          "event": "schedule"}))
+    check("手动运行不会掩盖心跳失联", not health(
+        [{"displayTitle": "场次对账 · manual", "event": "workflow_dispatch",
+          "createdAt": "2026-11-10T15:59:00Z"}], now)["healthy"])
 
     failed = [label for label, ok in cases if not ok]
     print(json.dumps({"self_test": "FAIL" if failed else "OK",

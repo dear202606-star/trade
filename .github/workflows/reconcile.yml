@@ -1,4 +1,7 @@
 name: 场次对账（自动补采）
+# 运行标题带触发来源，让「平台外心跳存活」监控能精确识别 pg-cron，
+# 不会把手动 workflow_dispatch 误算成心跳（external_heartbeat.is_tick_run）。
+run-name: "场次对账 · ${{ github.event.inputs.source || github.event.client_payload.source || github.event_name }}"
 
 # 2026-11-10：把「自动执行」从依赖 cron 准点，改成依赖「数据齐不齐」。
 #
