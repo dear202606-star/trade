@@ -1,5 +1,63 @@
 # 变更日志
 
+## v6.12 ｜ 2026-11-11 ｜ 修复「页面没刷新」：配额分桶、计算后同步、输出对账自愈
+
+**现象**：用户反馈数据没刷新。北京时间 11-11 05:23（UTC 11-10 21:23）实测，
+现网 `quotes` 只有 `20:46` 的**盘中版**（`intraday=True`），页面
+「净值截至(北京)」停在 `2026-11-07 05:00`（UTC 11-06 21:00），
+`equity` / `preview` / `signal` 分别停在 11-06 / 11-06 / 11-05。
+
+**四处串联根因（均为线上实证，不是推测）**
+
+1. **共用配额吃光收盘补采**：`reconcile_sessions.dispatch_allowed` 把同一场次
+   所有 `workflow_dispatch` 补采一起计数。11-10 的 `01:58 / 09:37 / 13:23 /
+   14:32 / 15:44` 五次盘中/手工补采超过「每场次 3 次」上限，于是 21:20 的
+   对账虽然正确判定 `need_action=true, mode=closing`，却被
+   `dispatch_allowed=false「场次 2026-11-10 已补采 5 次，达上限」` 永久拒发。
+   收盘版是每日必须产出的一次，不该和盘中临时补采抢配额。
+2. **场次幂等账本一直写不进去**：`run_guard.mark_done` 插入
+   `sys_event(kind='compute')`，违反生产上的 `sys_event_kind_check`，日志
+   `WARN 账本写入失败`，`should_skip` 永远查不到记录，每轮重复计算白耗 egress。
+3. **同步顺序反了**：`db-sync.yml` 只由 `quotes.yml` 采集成功派发，而净值 /
+   排名是在 `workflow_run` 之后才计算的。同步跑在计算前面，算完的
+   `equity` / `preview` 要等下一次定时同步才进 Turso。
+4. **输出链失败后没有任何重试**：21:27 的 `42905163113` 里 `equity` success、
+   `ranking` failure，报 19 只标的 `Closing bar not settled` /
+   `Previous close not settled` / `adjustment factor discontinuity` →
+   `Incomplete current universe context`。quotes 对账只看行情，
+   完全看不见「净值/预览落后」，唯一补救是下一次 push 或人工派发，
+   这就是连续 4 天停更的直接原因。
+
+**本版五处修复**
+
+- `quotes.yml` 增加 `run-name`，把补采类型写进运行标题
+  （`backfill-closing` / `backfill-intraday`）；`reconcile_sessions.py`
+  按类型**分桶计数**：盘中上限 3 / 冷却 30 分钟，收盘独立上限 6 /
+  冷却 10 分钟（短于 20 分钟心跳一拍）；加 run-name 之前的老运行归盘中桶。
+- `run_guard.py` 账本 kind 改用生产已验证合法的 `validation`（查询只按
+  source/subject/status/metrics，去重语义不变）。
+- `live-strategy.yml` 新增 `sync_outputs` job，`needs: [equity, ranking]`，
+  任一计算成功即派发 `db-sync.yml -f targets=turso`；ranking 失败也不拖住
+  已成功的 equity。权限从 `actions: read` 升到 `write`。
+- 新增 `reconcile_outputs.py`：只读 Turso 比较 `quotes.session`（须为收盘版）
+  与 `preview.session`，落后即派发 `live-strategy.yml` 重算；冷却 30 分钟、
+  当日 6 次上限、在途阻断、网络异常 fail-open。由心跳 / workflow_run /
+  错峰 cron 任一对账运行唤起，数据源 settle 后下一拍自动补回。
+- `reconcile.yml` 接入输出对账与自检；本轮已派发行情补采时跳过输出检查，
+  避免两处同时写主库。
+
+**线上实证**：手动派发收盘逻辑时间补采 `42904997163`（`as_of=21:17`）→
+`刷新在线行情` success → `42905141858` 同步 success → 现网 `quotes` 变为
+`ts=2026-11-10T21:00:00Z, session=2026-11-10, intraday=False`。
+本地用真实 Turso 跑两个对账器：`reconcile_sessions` 判「收盘 2026-11-10
+快照已在线」零动作；`reconcile_outputs` 判「预览场次 2026-11-06 落后于
+收盘场次 2026-11-10，需重算」。
+
+**边界**：19 只标的的收盘 bar / 前收价结算来自外部数据源，本版不伪造、
+不绕过 `live_ranking` 的 fail-closed 校验；自动重试会持续到数据源给出
+可核验的收盘价为止。11-09 历史缺口导致的 `adjustment factor discontinuity`
+仍属历史回填链路，未绕过 `historical_lineage` 第二道门禁。
+
 ## v6.11 ｜ 2026-11-10 ｜ 平台外心跳已接入：兜住 GitHub 整体故障
 
 用户授权「全面操作实现」后，把第 4 层冗余从「预留接口」变成**线上实际运行**

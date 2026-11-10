@@ -112,8 +112,14 @@ def mark_done(kind: str, quotes: dict) -> None:
         try:
             with conn.cursor() as cur:
                 cur.execute(
+                    # 2026-11-11：sys_event_kind_check 不接受 'compute'，
+                    # 账本一直写入失败（线上 WARN：violates check constraint），
+                    # 场次幂等形同虚设、每轮都重算白耗 egress。改用生产里
+                    # 已验证合法的 'validation'（prepare_live_ranking.py /
+                    # publish_pipeline_status.py 同样用它）。should_skip 只按
+                    # source/subject/status/metrics 查询，kind 变更不影响去重。
                     """insert into sys_event(kind,source,subject,status,metrics,finished_at)
-                       values('compute',%s,%s,'pass',%s,now())""",
+                       values('validation',%s,%s,'pass',%s,now())""",
                     (SOURCE, kind, Json(metrics)))
             conn.commit()
         finally:

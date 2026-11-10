@@ -49,10 +49,12 @@ on:
     branches: [main]
     paths:
       - reconcile_sessions.py
+      - reconcile_outputs.py
       - external_heartbeat.py
       - trading_window.py
       - research/exchange_calendar.json
       - test_reconcile_sessions.py
+      - test_reconcile_outputs.py
       - test_external_heartbeat.py
       - .github/workflows/reconcile.yml
 
@@ -77,7 +79,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: 对账器离线自检
-        run: python3 -m unittest test_reconcile_sessions test_external_heartbeat
+        run: python3 -m unittest test_reconcile_sessions test_reconcile_outputs test_external_heartbeat
       - name: 平台外心跳存活检查（只告警，不阻断）
         env:
           GH_TOKEN: ${{ github.token }}
@@ -109,3 +111,24 @@ jobs:
               echo "::warning::补采派发失败，下一轮对账重试"
           fi
           echo "已处理缺口（补采成功后 quotes.yml 会立即同步 Turso）"
+      # 2026-11-11：quotes 有场次对账，但净值/预览没有。ranking 一旦因收盘
+      # bar 未结算而失败，输出链就此停住（页面「净值截至」4 天不动），
+      # 而所有 quotes 对账都显示「数据已齐」。这里按「预览场次是否落后于
+      # 收盘场次」自动派发重算，数据源 settle 后下一拍即补回。
+      - name: 展示输出对账（净值 / 预览）
+        id: derived
+        # 本轮已派发行情补采时跳过：此刻 Turso 仍是旧数据，且两处都会写主库。
+        if: steps.check.outputs.dispatch_allowed != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 reconcile_outputs.py --gate
+      - name: 派发净值 / 排名重算
+        if: >-
+          steps.derived.outputs.need_recompute == 'true' &&
+          steps.derived.outputs.dispatch_allowed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "输出对账：${{ steps.derived.outputs.reason }}"
+          gh workflow run live-strategy.yml || \
+            echo "::warning::重算派发失败，下一轮对账重试"

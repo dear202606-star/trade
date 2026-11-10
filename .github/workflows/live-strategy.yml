@@ -24,7 +24,9 @@ on:
 
 permissions:
   contents: read
-  actions: read        # 出口流量预算门禁
+  # 2026-11-11：计算完成后要派发 db-sync.yml 把结果推进 Turso，
+  # actions: read 只够 egress_budget 读运行记录，派发需要 write。
+  actions: write
 
 jobs:
   equity:
@@ -75,3 +77,23 @@ jobs:
       - name: 动态排名与次年预览（含场次幂等）
         if: steps.egress.outputs.allow == 'true'
         run: python live_ranking.py
+
+  sync_outputs:
+    # 2026-11-11：备库同步原先只由 quotes.yml 采集成功派发，发生在净值
+    # 计算之前；算完的 equity / preview 要等下一轮定时同步才进 Turso，
+    # 页面「净值截至」因此连续 4 天停更。任一计算 job 成功就立即推一次
+    # 增量同步（只推 Turso、不唤醒 Neon），把「计算 → 落地」变成顺序链。
+    # ranking 失败时也照样推 equity，不让一条失败拖住另一条已成功的结果。
+    if: >-
+      always() &&
+      (needs.equity.result == 'success' || needs.ranking.result == 'success')
+    needs: [equity, ranking]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          gh workflow run db-sync.yml -f targets=turso || \
+            echo "::warning::计算后同步派发失败，输出对账将在下一轮兜底"

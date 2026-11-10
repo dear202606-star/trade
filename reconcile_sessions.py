@@ -46,6 +46,12 @@ MAX_BACKFILL_HOURS = 20
 INTRADAY_GRACE_MIN = 35
 # 同一场次最多补采派发次数（防止上游持续失败时无限自激）。
 MAX_DISPATCH_PER_SESSION = 3
+# 收盘版是每交易日「必须产出」的一次，与盘中临时补采分开计数。
+# 盘中一次快照只影响展示，收盘版缺失会让净值/预览整场不重算。
+MAX_CLOSING_DISPATCH = 6
+# 心跳 20 分钟一拍，收盘重试的冷却必须短于一拍，否则下一拍总被挡。
+CLOSING_COOLDOWN_MIN = 10
+DEFAULT_COOLDOWN_MIN = 30
 # 收盘后多久开始要求「收盘版」快照（盘中版 intraday=True 不算齐）。
 CLOSE_GRACE_MIN = 20
 
@@ -175,24 +181,51 @@ def read_quotes(cloud_url=SITE_CLOUD, timeout=20):
     return json.loads(value) if isinstance(value, str) else (value or {})
 
 
-def dispatch_allowed(expected_session, runs, now, cooldown_min=30):
+def run_kind(run):
+    """从运行标题识别补采类型；加 run-name 之前的老运行算 legacy。
+
+    quotes.yml 的 run-name 会带 backfill-closing / backfill-intraday。
+    legacy 归入盘中桶（保守），绝不占用收盘版的独立配额。
+    """
+    title = str((run or {}).get("displayTitle") or "")
+    if "backfill-closing" in title:
+        return "closing"
+    if "backfill-intraday" in title:
+        return "intraday"
+    return "legacy"
+
+
+def dispatch_allowed(expected_session, runs, now, mode="intraday"):
     """冷却 / 在途 / 每场次派发上限；runs 为 gh run list 的 JSON 列表。
 
-    纯函数，便于离线测试。runs 里只应包含 workflow_dispatch 的行情快照运行。
+    2026-11-11：盘中补采与收盘补采**分桶计数**。收盘版是每日必须产出的
+    一次（缺了净值/预览整场不重算），不能因为盘中已补 5 次就被挡住。
+    收盘桶冷却 10 分钟 < 心跳一拍 20 分钟，且上限单独放宽到 6 次。
     """
     now = _parse(now)
     if runs is None:
         return True, "无运行记录，允许派发"
-    active = 0
+    closing = mode == "closing"
+    cooldown_min = CLOSING_COOLDOWN_MIN if closing else DEFAULT_COOLDOWN_MIN
+    cap = MAX_CLOSING_DISPATCH if closing else MAX_DISPATCH_PER_SESSION
+    # 在途检查对所有类型生效，避免并发派发；其余判定只看本桶运行。
     for r in runs or []:
         if str(r.get("status") or "").lower() in ("in_progress", "queued", "pending", "waiting"):
             return False, "行情快照补采仍在途"
+    active = 0
+    for r in runs or []:
+        kind = run_kind(r)
+        if closing and kind != "closing":
+            continue
+        if not closing and kind == "closing":
+            continue
         created = _parse(r.get("createdAt"))
         if created is None:
             continue
         age_min = (now - created).total_seconds() / 60
         if 0 <= age_min < cooldown_min:
-            return False, "冷却期内（%.0f 分钟 < %d）" % (age_min, cooldown_min)
+            return False, "%s 冷却期内（%.0f 分钟 < %d）" % (
+                "收盘" if closing else "盘中", age_min, cooldown_min)
         # 只统计同一目标场次窗口内的补采（场次当日 00:00 UTC 起 24 小时）
         if expected_session:
             try:
@@ -202,9 +235,11 @@ def dispatch_allowed(expected_session, runs, now, cooldown_min=30):
             start = dt.datetime.combine(day, dt.time(0), UTC)
             if start - dt.timedelta(hours=6) <= created <= start + dt.timedelta(hours=30):
                 active += 1
-    if active >= MAX_DISPATCH_PER_SESSION:
-        return False, "场次 %s 已补采 %d 次，达上限" % (expected_session, active)
-    return True, "允许派发（本场次已补 %d 次）" % active
+    if active >= cap:
+        return False, "场次 %s 的 %s 补采已派发 %d 次，达上限 %d" % (
+            expected_session, "收盘" if closing else "盘中", active, cap)
+    return True, "允许派发（本场次 %s 已补 %d 次）" % (
+        "收盘" if closing else "盘中", active)
 
 
 def _recent_runs():
@@ -213,7 +248,8 @@ def _recent_runs():
     try:
         out = subprocess.run(
             ["gh", "run", "list", "--workflow", "quotes.yml", "--event",
-             "workflow_dispatch", "--limit", "20", "--json", "status,createdAt"],
+             "workflow_dispatch", "--limit", "30", "--json",
+             "status,createdAt,displayTitle"],
             check=False, capture_output=True, text=True, timeout=30).stdout.strip()
         return json.loads(out or "[]")
     except Exception:
@@ -251,7 +287,8 @@ def main():
 
     if result["need_action"]:
         runs = None if args.no_history else _recent_runs()
-        allowed, why = dispatch_allowed(result["expected_session"], runs, now)
+        allowed, why = dispatch_allowed(result["expected_session"], runs, now,
+                                        result["mode"])
         result["dispatch_allowed"] = allowed
         result["dispatch_reason"] = why
         if not allowed:
@@ -318,8 +355,32 @@ def self_test():
             for h in (1, 3, 5, 7)]
     if dispatch_allowed("2026-11-10", many, now)[0]:
         failed.append("超过每场次上限仍派发")
+    # 11-10 真实事故：盘中补采 5 次把配额吃光，收盘补采被永久拒发。
+    intraday_many = [
+        {"status": "completed", "createdAt": "2026-11-10T%02d:00:00Z" % h,
+         "displayTitle": "行情快照 · backfill-intraday"} for h in (1, 3, 5, 7, 9)]
+    if not dispatch_allowed("2026-11-10", intraday_many, now, "closing")[0]:
+        failed.append("盘中补采不应吃掉收盘版配额")
+    closing_many = [
+        {"status": "completed", "createdAt": "2026-11-10T%02d:00:00Z" % h,
+         "displayTitle": "行情快照 · backfill-closing"}
+        for h in (1, 2, 3, 4, 5, 6, 7)]
+    if dispatch_allowed("2026-11-10", closing_many, now, "closing")[0]:
+        failed.append("收盘补采超过独立上限仍派发")
+    if dispatch_allowed("2026-11-10", [
+            {"status": "completed", "createdAt": "2026-11-10T14:55:00Z",
+             "displayTitle": "行情快照 · backfill-closing"}], now, "closing")[0]:
+        failed.append("收盘 5 分钟内不应重复派发")
+    if not dispatch_allowed("2026-11-10", [
+            {"status": "completed", "createdAt": "2026-11-10T14:48:00Z",
+             "displayTitle": "行情快照 · backfill-closing"}], now, "closing")[0]:
+        failed.append("收盘 12 分钟后应允许下一拍重试")
+    if dispatch_allowed("2026-11-10", [{"status": "in_progress",
+                                        "displayTitle": "行情快照 · backfill-intraday"}],
+                        now, "closing")[0]:
+        failed.append("在途运行对所有类型都应阻断")
     print(json.dumps({"self_test": "FAIL" if failed else "OK",
-                      "cases": len(cases) + 4, "failed": failed}, ensure_ascii=False))
+                      "cases": len(cases) + 9, "failed": failed}, ensure_ascii=False))
     return 1 if failed else 0
 
 

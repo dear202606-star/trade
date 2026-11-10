@@ -108,6 +108,45 @@ class DispatchGuardTests(unittest.TestCase):
         allowed, _ = rs.dispatch_allowed("2026-11-10", None, self.NOW)
         self.assertTrue(allowed)
 
+    def test_intraday_dispatches_never_consume_closing_quota(self):
+        """11-10 事故：盘中补采 5 次把共用配额吃光，收盘补采被永久拒发。"""
+        runs = [{"status": "completed",
+                 "createdAt": "2026-11-10T%02d:00:00Z" % h,
+                 "displayTitle": "行情快照 · backfill-intraday"}
+                for h in (1, 3, 5, 7, 9)]
+        allowed, why = rs.dispatch_allowed("2026-11-10", runs, self.NOW, "closing")
+        self.assertTrue(allowed, why)
+        self.assertIn("收盘", why)
+
+    def test_legacy_runs_do_not_consume_closing_quota(self):
+        """加 run-name 之前的老运行无法识别类型，按盘中桶处理。"""
+        runs = [{"status": "completed", "createdAt": "2026-11-10T%02d:00:00Z" % h}
+                for h in (1, 3, 5, 7, 9)]
+        self.assertTrue(rs.dispatch_allowed("2026-11-10", runs, self.NOW, "closing")[0])
+
+    def test_closing_has_its_own_cap(self):
+        runs = [{"status": "completed",
+                 "createdAt": "2026-11-10T%02d:00:00Z" % h,
+                 "displayTitle": "行情快照 · backfill-closing"}
+                for h in (1, 2, 3, 4, 5, 6, 7)]
+        allowed, why = rs.dispatch_allowed("2026-11-10", runs, self.NOW, "closing")
+        self.assertFalse(allowed)
+        self.assertIn("上限", why)
+
+    def test_closing_cooldown_is_shorter_than_heartbeat_tick(self):
+        """心跳 20 分钟一拍；30 分钟冷却会让下一拍永远被挡。"""
+        recent = [{"status": "completed", "createdAt": "2026-11-10T15:25:00Z",
+                   "displayTitle": "行情快照 · backfill-closing"}]
+        self.assertFalse(rs.dispatch_allowed("2026-11-10", recent, self.NOW, "closing")[0])
+        older = [{"status": "completed", "createdAt": "2026-11-10T15:15:00Z",
+                  "displayTitle": "行情快照 · backfill-closing"}]
+        self.assertTrue(rs.dispatch_allowed("2026-11-10", older, self.NOW, "closing")[0])
+
+    def test_in_flight_blocks_every_kind(self):
+        runs = [{"status": "in_progress",
+                 "displayTitle": "行情快照 · backfill-intraday"}]
+        self.assertFalse(rs.dispatch_allowed("2026-11-10", runs, self.NOW, "closing")[0])
+
 
 class FailOpenTests(unittest.TestCase):
     def test_unreachable_turso_never_fails_the_pipeline(self):
@@ -175,6 +214,14 @@ class WorkflowContractTests(unittest.TestCase):
 
     def test_in_flight_sync_is_never_cancelled(self):
         self.assertIn("cancel-in-progress: false", self.sync)
+
+    def test_quotes_run_name_marks_backfill_kind(self):
+        """分桶计数的依据；删掉 run-name 就会退回共用配额的旧缺陷。"""
+        text = (Path(__file__).resolve().parent / ".github" / "workflows"
+                / "quotes.yml").read_text(encoding="utf-8")
+        self.assertIn("run-name:", text)
+        self.assertIn("backfill-closing", text)
+        self.assertIn("backfill-intraday", text)
 
 
 if __name__ == "__main__":

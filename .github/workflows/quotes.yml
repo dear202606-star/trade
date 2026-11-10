@@ -1,5 +1,12 @@
 name: 行情快照
 
+# 2026-11-11：把「补采类型」写进运行标题，供 reconcile_sessions 按类型
+# 独立计数。此前盘中/手工补采与收盘必需补采共用同一个「每场次 3 次」
+# 配额，11-10 盘中补了 5 次就直接把当日收盘补采永久挡在门外，页面
+# 只剩 intraday=True 的盘中版、净值连续 4 天停在 11-06。
+run-name: >-
+  行情快照 · ${{ github.event.inputs.as_of != '' && 'backfill-closing' || 'backfill-intraday' }}
+
 concurrency:
   group: trade-live-quotes
   cancel-in-progress: false
