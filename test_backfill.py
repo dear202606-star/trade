@@ -206,6 +206,28 @@ class WatchdogEarlyDetectionTests(unittest.TestCase):
         self.assertFalse(any("收盘数据缺失" in p for p in problems),
                          "数据已到位仍误报: %r" % problems)
 
+    def test_missing_intraday_snapshot_is_detected_early(self):
+        # GitHub 15:00 UTC 的 opening cron 实测整批不触发；若页面仍停在昨日，
+        # 看门狗必须在盘中就发现并让 selfheal 派发实时补采。
+        problems = watchdog_site_check.snapshot_problems(
+            self._doc("2026-11-06"), at("2026-11-10T15:10:00+00:00"))
+        self.assertTrue(any("盘中快照缺失" in p and "行情停更" in p
+                            for p in problems),
+                        "盘中停更未早发现: %r" % problems)
+
+    def test_current_intraday_snapshot_is_not_flagged(self):
+        problems = watchdog_site_check.snapshot_problems(
+            self._doc("2026-11-10"), at("2026-11-10T15:10:00+00:00"))
+        self.assertFalse(any("盘中快照缺失" in p for p in problems),
+                         "当日快照已到位仍误报: %r" % problems)
+
+    def test_opening_grace_period_is_not_flagged(self):
+        # 开盘后 35 分钟宽限，避免采集排队延迟被误判成故障
+        problems = watchdog_site_check.snapshot_problems(
+            self._doc("2026-11-06"), at("2026-11-10T14:35:00+00:00"))
+        self.assertFalse(any("盘中快照缺失" in p for p in problems),
+                         "开盘宽限期内误报: %r" % problems)
+
     def _dependency_doc(self, intraday):
         q = {"ts": "2026-11-10T14:33:00Z", "session": "2026-11-10",
              "previous_session": "2026-11-09", "version": "v-test",
