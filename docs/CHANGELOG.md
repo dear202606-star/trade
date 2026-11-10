@@ -31,6 +31,19 @@ fine-grained PAT 只有 `actions:write`，缺 `contents:write`），
 - `verify` 增查 `cron.job_run_details` 与 `net._http_response`，便于确认
   每一拍真的发出并收到 2xx。
 
+**线上验收（全链实证，非推测）**
+- 安装 `42851393635`：jobid `8`、`*/20 * * * *`、mode `workflow_dispatch`，
+  即时拍点 `net.http_post` 返回 request id `885`。
+- 即时回执 `verify 42851482104`：`net._http_response` **204**，
+  GitHub 运行 `42851433101`「场次对账 · pg-cron」success。
+- **自动拍点** `16:20 UTC`：`cron.job_run_details` `16:20:00.257 succeeded`
+  → `net._http_response` `16:20:00.356` 返回 **204** → GitHub `42853461788`
+  success；该次对账判定 `need_action=false`「盘中 2026-11-10 快照已在线」，
+  **零派发补采**，证明心跳不会制造冗余采集。
+- `verify 42853618466`：`command_contains_plaintext_token=false`、
+  `command_references_vault=true`；CI 内 `--health` 输出
+  `{"healthy": true, "age_min": 0}`。
+
 **边界**：GitHub 整体故障期间 pg_cron 的请求同样失败；价值在于 GitHub
 恢复后 ≤20 分钟必有下一拍到达，不依赖 GitHub 调度器自愈，随后状态驱动
 对账补齐 20 小时窗口内缺失场次。它不能「GitHub 宕机时继续产数据」。

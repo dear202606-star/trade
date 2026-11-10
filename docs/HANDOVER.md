@@ -22,7 +22,7 @@
 定时同步只作兜底。
 
 **平台外心跳已上线（v6.11，勿当「待办」）**：Supabase `cron.job`
-`trade-reconcile-tick`（jobid 7，`*/20 * * * *`）用 `pg_net` 打 GitHub API
+`trade-reconcile-tick`（当前 jobid 8，重装会变，`*/20 * * * *`）用 `pg_net` 打 GitHub API
 唤醒对账。因 Vault 的 `gh_dispatch_token` 只有 `actions:write`
 （`repository_dispatch` 实测 403），实际走
 `workflow_dispatch + inputs.source=pg-cron`（204）。安装 / 探查 / 摘除 /

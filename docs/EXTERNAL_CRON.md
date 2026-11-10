@@ -61,12 +61,27 @@ Vault 里的 fine-grained PAT 只有 `actions:write`，没有 `contents:write`�
 会自动探测并降级，无需人工判断；将来换成有 `contents:write` 的 PAT，
 下一次 `enable` 会自动优先切回 `repository_dispatch`。
 
-安装结果（`42850731333`）：
+安装 / 重装（`42850731333` / `42851393635`；重装会 unschedule 再 schedule，
+jobid 会变，以 `cron.job` 实际记录为准）：
 
 ```
-jobid=7  job=trade-reconcile-tick  schedule=*/20 * * * *
+jobid=8  job=trade-reconcile-tick  schedule=*/20 * * * *  active=true
 mode=workflow_dispatch  body={ref: main, inputs: {source: pg-cron}}
 ```
+
+**自动拍点闭环实证（16:20 UTC，不是手动探测）**：
+
+```
+cron.job_run_details  16:20:00.257  status=succeeded  "1 row"
+net._http_response    16:20:00.356  status=204
+GitHub run            16:20:02  「场次对账 · pg-cron」 42853461788  success
+  └ 对账判定 need_action=false「盘中 2026-11-10 快照已在线」，零派发
+```
+
+`verify`（`42853618466`）同时确认 `command_contains_plaintext_token=false`、
+`command_references_vault=true`；CI 内 `--health` 输出
+`{"healthy": true, "age_min": 0}`。即：数据库时钟按时发拍 → GitHub 收到 →
+对账确认数据已齐 → 不多做一次采集，整链无冗余动作。
 
 - **只唤起场次对账**，绝不派发采集 / 净值 / 回填；单次出站约 300 字节，
   72 次/天，与 11-06 每 5 分钟拉整条采集链的高频作业完全不同。
