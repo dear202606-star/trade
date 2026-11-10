@@ -1,6 +1,6 @@
 # 交接说明（给下一个 agent）
 
-> 最后更新：2026-11-01 18:10（北京）｜ 调度章节更新于 2026-11-11 00:xx（v6.11）
+> 最后更新：2026-11-01 18:10（北京）｜ 调度章节更新于 2026-11-11 05:40（v6.12）
 > 仓库：`dear202606-star/trade`（分支 `main`）｜ 站点：<https://dear202606-star.github.io/trade/>
 
 ---
@@ -17,9 +17,23 @@
 现在的判定基准是**数据状态而不是时钟**：`reconcile_sessions.py` 只读浏览器
 同源的 Turso 端点，用已复核 NYSE 日历算出应有场次，缺就补（盘中实时 /
 收盘按 `as_of` 逻辑时间）。`reconcile.yml` 由 `workflow_run` + 错峰 cron +
-手动 / push + **平台外心跳**四重独立源唤起，带冷却、在途、同场次 3 次
-上限防自激。`quotes.yml` 每次采集成功都立即派发 `db-sync.yml` 推 Turso，
-定时同步只作兜底。
+手动 / push + **平台外心跳**四重独立源唤起，带冷却、在途、按补采类型
+**分桶**的派发上限防自激（盘中 3 次 / 30 分钟，收盘独立 6 次 / 10 分钟；
+`quotes.yml` 的 `run-name` 是分桶依据，勿删）。`quotes.yml` 每次采集成功都
+立即派发 `db-sync.yml` 推 Turso，定时同步只作兜底。
+
+**v6.12（2026-11-11，页面停更复盘，勿当「已修好就不必看」）**：
+那套机制只盯 `quotes`，看不见「净值 / 预览落后」。11-10 的页面
+「净值截至(北京)」停在 11-07 05:00 四天，四处串联根因：
+① 盘中补采 5 次吃光共用配额 → 收盘补采被永久拒发；
+② `run_guard` 账本 `kind='compute'` 违反 `sys_event_kind_check`；
+③ `db-sync` 跑在净值计算**之前**，算完的结果要等下一轮才进 Turso；
+④ `ranking` 因收盘 bar 未结算失败且**无任何重试**。
+现在新增 `reconcile_outputs.py`：只读 Turso 比较 `quotes.session`（须收盘版）
+与 `preview.session`，落后即派发 `live-strategy.yml` 重算（30 分钟冷却、
+当日 6 次、fail-open）；`live-strategy.yml` 新增 `sync_outputs` job，任一计算
+成功立即推 Turso。详见 `docs/CHANGELOG.md` v6.12。
+⚠️ 勿删 `run-name` / 分桶计数 / `sync_outputs` / 输出对账这四处。
 
 **平台外心跳已上线（v6.11，勿当「待办」）**：Supabase `cron.job`
 `trade-reconcile-tick`（当前 jobid 8，重装会变，`*/20 * * * *`）用 `pg_net` 打 GitHub API
