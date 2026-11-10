@@ -26,22 +26,31 @@ on:
     - cron: "17,47 * * * *"     # 每小时两次，与看门狗 :05 错峰
     - cron: "25 22 * * 1-5"     # 收盘后独立兜底（不依赖任何上游）
   workflow_dispatch:
-  # 预留「平台外」的独立时钟：任何免费外部定时器（Supabase pg_cron /
-  # Cloudflare Workers Cron / cron-job.org）只需 POST 一个 repository_dispatch
-  # 就能唤起对账，不需要改本文件。2026-11-06 为收敛 egress 把库内
-  # trade-dispatch / trade-dispatch-market 一并停掉后，调度权 100% 落回
-  # GitHub schedule，这正是「cron 一延迟、整条链全哑」的共模故障来源。
-  # 对账只读 Turso 公开端点、不碰 Supabase 出口流量，故外部心跳即使
-  # 高频也不会重演 1139 次/10 天、egress 399% 超额的事故。
+    inputs:
+      source:
+        description: 触发来源（manual / pg-cron）
+        required: false
+        default: manual
+        type: string
+  # 「平台外」独立时钟：Supabase pg_cron 每 20 分钟 POST 一个
+  # repository_dispatch（Vault PAT 无 contents:write 时自动降级为
+  # workflow_dispatch + source=pg-cron）。安装入口是 heartbeat-setup.yml，
+  # 凭据只在 Supabase Vault、明文不进本仓库。2026-11-06 为收敛 egress 把
+  # 库内 trade-dispatch / trade-dispatch-market 一并停掉后，调度权 100%
+  # 落回 GitHub schedule，这正是「cron 一延迟、整条链全哑」的共模故障来源。
+  # 心跳只唤起只读对账、不派发采集，20 分钟一拍、单次约 300 字节，
+  # 不会重演 1139 次/10 天、egress 399% 超额的事故。
   repository_dispatch:
     types: [reconcile-tick]
   push:
     branches: [main]
     paths:
       - reconcile_sessions.py
+      - external_heartbeat.py
       - trading_window.py
       - research/exchange_calendar.json
       - test_reconcile_sessions.py
+      - test_external_heartbeat.py
       - .github/workflows/reconcile.yml
 
 concurrency:
@@ -65,7 +74,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: 对账器离线自检
-        run: python3 -m unittest test_reconcile_sessions
+        run: python3 -m unittest test_reconcile_sessions test_external_heartbeat
+      - name: 平台外心跳存活检查（只告警，不阻断）
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 external_heartbeat.py --health
       - name: 场次对账（只读，标准库）
         id: check
         env:

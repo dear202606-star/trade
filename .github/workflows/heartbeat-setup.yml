@@ -1,0 +1,67 @@
+name: 外部心跳安装与自检
+
+# 平台外时钟的唯一安装入口：在 Supabase 数据库侧装 / 摘一个低频 pg_cron
+# 作业，用 pg_net 向 GitHub 发 repository_dispatch（或 workflow_dispatch）
+# 唤醒「场次对账」。GitHub 整体故障恢复后最多一个心跳周期就会被补齐，
+# 不再依赖 GitHub 自己的调度器恢复。
+#
+# 凭据：只用 GitHub Secret SUPABASE_DB_PASSWORD 连库；GitHub PAT 从
+# Supabase Vault 读取，明文不进本仓库、不进日志、不进 cron.job.command。
+# 本工作流默认不自动运行，必须手动 workflow_dispatch，避免误改线上调度。
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: inspect（只读探查）| enable（安装）| disable（摘除）| verify（回执）
+        required: true
+        default: inspect
+        type: choice
+        options: [inspect, enable, disable, verify]
+      tick_minutes:
+        description: 心跳间隔分钟（5..60，仅 enable 生效；默认 20）
+        required: false
+        default: "20"
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  heartbeat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 只装数据库驱动
+        run: pip install -q psycopg2-binary
+      - name: 离线自测
+        run: python -m unittest test_external_heartbeat -v
+      - name: 注入数据库口令（临时文件，gitignored）
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          mkdir -p output
+          test -n "$SUPABASE_DB_PASSWORD" || { echo "::error::缺少 SUPABASE_DB_PASSWORD"; exit 1; }
+          printf '%s' "$SUPABASE_DB_PASSWORD" > output/_supabase_dbpass.txt
+      - name: 执行动作
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          GH_TOKEN: ${{ github.token }}
+          ACTION: ${{ inputs.action }}
+          TICK_MINUTES: ${{ inputs.tick_minutes }}
+        run: |
+          case "$ACTION" in
+            inspect) python external_heartbeat.py --inspect ;;
+            enable)  python external_heartbeat.py --enable --tick-minutes "$TICK_MINUTES" ;;
+            disable) python external_heartbeat.py --disable ;;
+            verify)  python external_heartbeat.py --verify ;;
+            *) echo "::error::未知动作 $ACTION"; exit 1 ;;
+          esac
+      - name: 清理临时口令
+        if: always()
+        run: rm -f output/_supabase_dbpass.txt
