@@ -110,6 +110,14 @@ class LogicalTimeTests(unittest.TestCase):
             live_quotes.logical_time("2026-11-26T21:17:00+00:00",
                                     at("2026-11-27T13:00:00+00:00"))
 
+    def test_backfill_window_is_capped_at_20_hours(self):
+        # 在线挂牌只保留最近一个场次；更旧的场次字段已被改写，补不回来
+        self.assertTrue(live_quotes.logical_time(
+            "2026-11-09T21:17:00+00:00", at("2026-11-10T13:20:00+00:00")))
+        with self.assertRaises(ValueError):
+            live_quotes.logical_time("2026-11-09T21:17:00+00:00",
+                                    at("2026-11-10T18:00:00+00:00"))
+
 
 class SelfHealDispatchTests(unittest.TestCase):
     def test_quotes_dispatch_carries_critical_and_as_of(self):
@@ -121,6 +129,14 @@ class SelfHealDispatchTests(unittest.TestCase):
 
     def test_other_workflows_get_no_extra_args(self):
         self.assertEqual(selfheal.dispatch_args("ui-publish.yml", self_heal_now()), [])
+
+    def test_expired_session_skips_useless_backfill_dispatch(self):
+        self.assertIsNone(selfheal.dispatch_args(
+            "quotes.yml", at("2026-11-10T18:00:00+00:00")))
+
+    def test_fresh_session_still_dispatches(self):
+        self.assertIsNotNone(selfheal.dispatch_args(
+            "quotes.yml", at("2026-11-10T13:20:00+00:00")))
 
     def test_cooldown_only_counts_dispatch_runs(self):
         with patch.object(selfheal, "gh", return_value="[]") as gh:
@@ -204,6 +220,11 @@ class WorkflowContractTests(unittest.TestCase):
         for cron in ('"0 14 * * 1-5"', '"0 15 * * 1-5"',
                      '"17 21 * * 1-5"', '"50 21 * * 1-5"'):
             self.assertIn(cron, self.quotes)
+
+    def test_push_does_not_bypass_the_trading_window(self):
+        # push 只跑回归；盘前无条件采集会因 SPY 前收字段被改写而整轮失败
+        self.assertIn('if [ "$EVENT_NAME" = "workflow_dispatch" ]', self.quotes)
+        self.assertNotIn('[ "$EVENT_NAME" = "push" ]', self.quotes)
 
     def test_collection_has_enough_timeout_and_one_retry(self):
         # 4 分钟 job 超时实测把 500+ 标的采集腰斩，两次补采都被 canceled

@@ -25,7 +25,10 @@ SOURCE_TIME = re.compile(r'([A-Z][a-z]{2}) (\d{1,2}) (\d{2}:\d{2}[AP]M) (EST|EDT
 MONTHS = {name:i for i,name in enumerate(
     ('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'),1)}
 
-MAX_BACKFILL_HOURS = 96       # 只允许补最近 4 天，绝不回填历史
+# 在线挂牌接口只保留「最近一个场次」的报价；超过约 20 小时后其字段
+# 已被下一场次改写（实测盘前 SPY 前收价被写成现价），继续补采只会反复
+# 失败并触发无效自愈。收紧到 20 小时 = 当晚延迟 + 次日盘前的兜底窗口。
+MAX_BACKFILL_HOURS = 20
 MAX_CLOSING_AGE_MIN = 12 * 60  # 与 trading_window 的延迟容忍上限一致
 
 

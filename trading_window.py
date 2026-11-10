@@ -178,7 +178,13 @@ def gate(task: str, now: dt.datetime | None = None, calendar: dict | None = None
     def skip(phase, reason):
         return dict(base, allow=False, phase=phase, reason=reason)
 
-    if event_name != "schedule":
+    if event_name == "workflow_dispatch":
+        return allow("manual", "手动/自愈派发，门禁放行以便随时补采与验证")
+    # push 与 schedule 同等按日历窗口判定。2026-11-10 实测：push 若在
+    # 盘前无条件放行，新浪 gb_spy 的「前收盘价」字段被写成现价，整轮
+    # 采集报 No verified SPY source timestamp 而失败。改代码只跑回归，
+    # 不在非交易时段误采集；需要立即验证请用 workflow_dispatch。
+    if event_name not in ("schedule", "push"):
         return allow("manual", "非定时触发（%s），门禁放行以便随时验证" % event_name)
     if os.environ.get("TRADE_FORCE_COLLECT") == "1":
         return allow("forced", "TRADE_FORCE_COLLECT=1 人工强制放行")

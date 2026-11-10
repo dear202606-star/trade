@@ -130,14 +130,20 @@ class TradingWindowTests(unittest.TestCase):
         with patch.object(tw, 'load_calendar', side_effect=OSError('missing')):
             self.assertTrue(tw.gate('intraday', at('2026-11-09T15:00:00+00:00'))['allow'])
 
-    def test_manual_force_and_heartbeat_are_never_blocked(self):
-        self.assertTrue(tw.gate('intraday', at('2026-11-26T16:00:00+00:00'), self.cal,
-                               event_name='push')['allow'])
-        self.assertTrue(tw.gate('intraday', at('2026-11-26T16:00:00+00:00'), self.cal,
-                               event_name='workflow_dispatch')['allow'])
+    def test_manual_dispatch_force_and_heartbeat_are_never_blocked(self):
+        # 2026-11-10：push 不再无条件放行，与 schedule 同等按日历裁决。
+        # 改代码只跑回归；休市日、盘前绝不误采集（SPY 前收字段会被改写）。
+        holiday = at('2026-11-26T16:00:00+00:00')
+        self.assertFalse(tw.gate('intraday', holiday, self.cal,
+                                 event_name='push')['allow'])
+        self.assertTrue(tw.gate('intraday', holiday, self.cal,
+                                event_name='workflow_dispatch')['allow'])
+        # 交易时段内的 push 仍按窗口正常放行
+        self.assertTrue(tw.gate('intraday', at('2026-11-09T15:00:00+00:00'), self.cal,
+                                event_name='push')['allow'])
         self.assertTrue(tw.gate('heartbeat', at('2026-11-08T05:00:00+00:00'), self.cal)['allow'])
         with patch.dict('os.environ', {'TRADE_FORCE_COLLECT': '1'}):
-            self.assertTrue(tw.gate('intraday', at('2026-11-26T16:00:00+00:00'), self.cal)['allow'])
+            self.assertTrue(tw.gate('intraday', holiday, self.cal)['allow'])
 
     def test_gate_result_contract(self):
         r = tw.gate('intraday', at('2026-11-09T15:00:00+00:00'), self.cal)

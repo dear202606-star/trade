@@ -169,13 +169,16 @@ def collect_from_archive(archive):
 
 
 def collect_from_neon(dsn):
-    """主库不可达且 Neon 已被提升为写主库时，从 Neon 原始表还原同一组展示 key。
+    """主库不可达时，从 Neon 原始表还原同一组展示 key。
 
     Neon 冷备只导入实体表（不含 PostgREST 视图），因此这里读的是
     site_dataset / live_quote_snapshot / live_strategy_current /
     live_strategy_anchor，与 export_site_snapshot.collect() 的视图语义等价。
-    仅供运维显式启用（--from-neon），默认绝不自动回退，避免用旧冷备
-    数据反向覆盖较新的 Turso 备库。
+
+    2026-11-10 起可由 --read-source auto 自动降级调用，但必须过
+    resolve_datasets() 的**防回退守卫**：Neon 是日更冷备，滞后于 Turso，
+    绝不允许用更旧的行情反向覆盖访客正在读的备库。显式 --from-neon
+    仍按运维意图执行（人工已确认要回放）。
     """
     if not dsn:
         raise RuntimeError("缺少 NEON_DSN")
@@ -218,6 +221,60 @@ def collect_from_neon(dsn):
     finally:
         conn.close()
     return datasets, meta
+
+
+def turso_quotes_ts(url, token):
+    """读取 Turso 当前 quotes 的业务时间戳，用于降级防回退守卫。"""
+    rows = turso_execute(url, token, [
+        ("select payload from site_dataset where key='quotes'", [])])
+    if not rows or not rows[0] or not rows[0][0]:
+        return None
+    payload = rows[0][0][0]
+    if isinstance(payload, str):
+        payload = json.loads(payload)
+    return str((payload or {}).get("ts") or "") or None
+
+
+def _quote_ts(datasets):
+    return str((datasets.get("quotes") or {}).get("ts") or "") or None
+
+
+def resolve_datasets(args, t_url, t_token):
+    """读源自动切换：主库 → Neon 持久副本（带防回退守卫）。
+
+    返回 (datasets, meta, source, degraded, reason)。
+    绝不做「主库写」的自动切换：两库同时接受同一批次写入会产生无法
+    合并的分叉，提升/回切必须人工单向回放（见 db_failover.py）。
+    """
+    if args.from_archive:
+        d, m = collect_from_archive(args.from_archive)
+        return d, m, "archive", True, "显式指定整库归档"
+    if args.from_neon:
+        d, m = collect_from_neon(neon_dsn())
+        return d, m, "neon", True, "显式指定 Neon"
+    if args.read_source == "neon":
+        d, m = collect_from_neon(neon_dsn())
+        return d, m, "neon", True, "显式指定读源 neon"
+    if args.read_source == "supabase":
+        d, m = ess.collect()
+        return d, m, "supabase", False, ""
+
+    # auto（默认）：主库优先；不可读才降级，且必须证明不会让数据倒退。
+    try:
+        d, m = ess.collect()
+        return d, m, "supabase", False, ""
+    except Exception as exc:
+        reason = "主库不可读，自动降级 Neon：%s" % str(exc)[:160]
+    d, m = collect_from_neon(neon_dsn())
+    current = turso_quotes_ts(t_url, t_token)   # 读不到就抛错，fail-closed
+    candidate = _quote_ts(d)
+    if current and candidate and candidate <= current:
+        raise RuntimeError(
+            "拒绝用滞后的 Neon 副本覆盖 Turso（Turso=%s / Neon=%s）；"
+            "保留现有数据并告警，不做回退写入" % (current, candidate))
+    if current and not candidate:
+        raise RuntimeError("Neon 副本缺少可核验的行情时间戳，拒绝自动降级")
+    return d, m, "neon", True, reason
 
 
 def build_rows(datasets, meta):
@@ -307,16 +364,23 @@ def main():
     ap.add_argument("--from-archive", default="", help="冷启动：从整库备份归档构造展示数据")
     ap.add_argument("--from-neon", action="store_true",
                     help="主库长期不可用且已提升 Neon 为写主库时，从 Neon 原始表取数")
+    ap.add_argument("--read-source", default="auto",
+                    choices=("auto", "supabase", "neon"),
+                    help="展示数据读源：auto=主库优先、不可读自动降级 Neon（防回退）")
     ap.add_argument("--dry-run", action="store_true", help="只校验并打印计划")
     ap.add_argument("--force", action="store_true", help="忽略指纹，强制全量重写")
     args = ap.parse_args()
 
-    if args.from_archive:
-        datasets, meta = collect_from_archive(args.from_archive)
-    elif args.from_neon:
-        datasets, meta = collect_from_neon(neon_dsn())
-    else:
-        datasets, meta = ess.collect()
+    # 凭据只在真正需要（写备库 / 降级防回退）时才是硬性依赖；主库健康的
+    # --dry-run 不应因为本机没放 Turso token 而失败。
+    try:
+        t_url, t_token = turso_credentials()
+    except Exception as exc:
+        t_url, t_token = None, None
+        print("WARN: Turso 凭据不可用，降级守卫将 fail-closed：%s"
+              % str(exc)[:120], file=sys.stderr)
+    datasets, meta, read_source, degraded, fallback_reason = resolve_datasets(
+        args, t_url, t_token)
     problems = ess.validate(datasets)
     if problems:
         print(json.dumps({"ok": False, "stage": "validate", "problems": problems},
@@ -325,7 +389,8 @@ def main():
     rows = build_rows(datasets, meta)
     report = {"ok": True, "generated_at": _utcnow(), "keys": len(rows),
               "digest": hashlib.sha256("".join(r[3] for r in rows).encode()).hexdigest(),
-              "targets": {}}
+              "read_source": read_source, "degraded": degraded,
+              "fallback_reason": fallback_reason, "targets": {}}
     if args.dry_run:
         report["dry_run"] = True
         report["plan"] = [{"key": r[0], "sha256": r[3][:12], "bytes": len(r[1].encode("utf-8"))}
@@ -334,8 +399,7 @@ def main():
         return 0
 
     targets = [t.strip() for t in args.targets.split(",") if t.strip()]
-    warnings = []
-    t_url, t_token = turso_credentials()
+    warnings = [fallback_reason] if fallback_reason else []
     if "turso" in targets:
         try:
             report["targets"]["turso"] = sync_turso(t_url, t_token, rows, args.force)
@@ -351,7 +415,9 @@ def main():
 
     report["warnings"] = warnings
     status = "ok" if not warnings else "warn"
-    offline = bool(args.from_archive or args.from_neon)
+    # 降级读源时不写主库 sys_event 回执：主库此刻可能不可达，且不能伪造
+    # 「主库健康」的证据；看门狗会从 warnings / read_source 看到真实状态。
+    offline = degraded
     report["event_written"] = False if offline else write_event(status, {
         "keys": len(rows), "digest": report["digest"], "targets": report["targets"],
         "warnings": warnings, "dry_run": False})

@@ -1,5 +1,36 @@
 # 变更日志
 
+## v6.8 ｜ 2026-11-10 ｜ 关键采集自愈闭环、身份裁定入库、读源自动降级
+
+**线上症状**：移动端顶部「行情更新超时」、主卡片「建议待更新」、收益「截至 11/06」。Turso 14 个 key 全部停在 11/05~11/06，11/09 周一整天数据一次都没采到。
+
+**四个串联断点（实测，非推测）**
+
+1. GitHub scheduled 事件大幅延迟：`50 21 * * 1-5`（计划 UTC 21:50）实际 11/10 03:49 UTC 才跑；`trading_window` 按**实际执行时刻**判定，输出 `已收盘 410 分钟，超出 closing 采集窗口` → `allow=false`。
+2. 看门狗确实检测到 `行情停更 84.6 小时` 并派发了 `quotes.yml` 自愈补跑（run `42792327630`），但该 dispatch 没有 `--critical`，`egress_budget.py` 处于 `freeze` 档（`19784.7 / 3000 MB`）→ `allow=false` → 采集步骤 skipped。
+3. `db-sync.yml` 收盘同步在 **21:10 UTC**，比 `quotes.yml` 的 **21:17** 收盘采集还早，同步的永远是前一天数据。
+4. 采集 job 只有 `timeout-minutes: 4`；500+ 标的分批抓取 + 缺失报价佐证修复实测跑到 4 分钟被硬砍（两次补采都在采集途中 `canceled`）。
+
+**修复（勿回退）**
+
+- `trading_window.py`：新增 `opening` 任务（按已复核日历的开盘时刻 +25~45 分钟，DST 自动）、`latest_closed_session()` / `closing_as_of()`；`closing --late-ok` 允许 GitHub 延迟 12 小时内按目标场次补采并输出 `as_of`；`--gate` 增写 `task` / `as_of` / `critical`。**`late_ok` 默认关闭**，保持「北京 6-20 点不采集」原语义。
+- `live_quotes.py`：新增 `--as-of` 逻辑时间（贯穿日历/成分股/报价时间戳校验，`collected_at` 仍用真实时间留审计）；边界 fail-closed：未来、无时区、非交易日、非收盘后窗口、超过 20 小时一律拒绝。
+- `quotes.yml`：新增 `0 14` / `0 15` 两条开盘后 30 分钟关键 cron（覆盖 EDT/EST）；关键 cron 与 dispatch 一律 `--critical` 且 dispatch 带 `TRADE_FORCE_BUDGET=1`；采集透传 `as_of`；job 超时 20 分钟、采集步骤 14 分钟并自动重试一次；收盘采集成功后立即 `gh workflow run db-sync.yml -f targets=turso,neon`（`permissions.actions: write`）；**push 不再无条件放行**，只跑回归，避免盘前误采集。
+- `db-sync.yml`：收盘同步 `10 21` → `55 21`（晚于 21:50 采集兜底）。
+- `selfheal.py`：派发行情补跑带 `critical=true` + `as_of`；冷却只统计 `workflow_dispatch`（原先盘中每 30 分钟的 schedule 会把自愈永久饿死）；目标场次超过 20 小时不再派发无效补跑。
+- `watchdog_site_check.py`：除 72 小时兜底外，按已复核日历在**收盘后 90 分钟**即发现当日数据缺失（周末不误报），让自愈当场介入。
+- **身份裁定入库**：13 条 `exclude_reviewed` append-only 写入主库（run `42827414517`），`IDENTITY_RESOLUTION_VERIFIED rows=13 released=13`；DRY_RUN 复核 `financial_data_changed=false`、6 张金融表哈希不变、26 项门禁回归 OK；随后 DRY_RUN 返回 `already_online`，证明幂等未重复写。6 只（CBE/COV/PARA/PCL/SBNY/TIE）外部 SEC 佐证仍标 `partial`，仅影响文档完备度，不改变「不解锁价格序列」的裁定范围。
+- **读源自动降级**：`sync_site_dataset.py --read-source auto`（默认）在主库不可读时自动切 Neon 持久副本；`turso_quotes_ts()` 防回退守卫——候选行情时间戳不比 Turso 现有数据新、或时间戳缺失、或 Turso 读不到，一律 fail-closed；降级时跳过主库 `sys_event` 回执，不伪造健康证据。**写侧仍绝不自动切换**：`DB_TARGET` 默认 `supabase`，双主写入会产生无法合并的分叉，提升/回切必须人工单向回放。
+
+**回归**：Python 254、Node 42、YAML 23、发布门禁 64 全绿；新增 `test_backfill.py`（24 项）与 `test_read_failover.py`（12 项）。
+
+**已知限制（不可称为 100%）**
+
+- 11/09 收盘数据缺口**无法用实时接口补回**：11/10 盘前新浪 `gb_spy` 的 `f26`（前收价）被写成现价 752.69，而涨跌额仍为 17.40，`parse_us` 的三字段一致性校验拒绝 → `No verified SPY source timestamp`。在线挂牌只保留最近一个场次，历史快照需从已封存的日线事实另行重建。页面会一直显示到 11/10 收盘采集成功为止。
+- Supabase PostgREST 仍 402 `exceed_egress_quota`，须等 2026-11-28 计费周期重置；当前访客读 Turso、写走 CI 的 PG 直连。
+- `每日全量更新` 的 IR/JCI `historical_lineage.require_complete_history()` 第二道 fail-closed 门禁仍在，与本次 13 条裁定的 `db_ref.require_unquarantined_candidates()` 是两回事。
+- GitHub Actions 平台级 schedule 延迟无法消除，只能靠「多关键时刻 + 延迟补跑 + 自愈 + 看门狗早发现」缩小窗口。
+
 ## v6.7 ｜ 2026-11-08 ｜ 修复发布门禁跳过导致 Pages 未部署
 
 **问题**：`18a1517`（v6.6）push 后，「网页发布」run `42415082350` 显示 **`build` success / `calendar_gate` skipped / `deploy` skipped**。job 级 `if: github.event_name == 'schedule'` 让门禁 job 在 push 事件被跳过；GitHub Actions 中「被跳过」会沿 `needs` 链传播给下游，于是 `deploy` 不执行、Pages 没部署。更具迷惑性的是 workflow 总体结论仍为 `success`，单看绿灯完全发现不了。线上复核确认：`data/cloud.json` 不含 `calendar`，`assets/app.js` 不含 `easternParts` / `setExchangeCalendar` —— 改动只在仓库里，没到访客端。

@@ -37,6 +37,9 @@ RULES = (
 
 COOLDOWN_MIN = 30
 MAX_ACTIONS = 2
+# 在线报价只保留最近一个场次；超过这个时数再去补采只会反复撞上已被
+# 改写的字段（盘前 SPY 前收价 = 现价），不如等下一场次自动采集。
+MAX_BACKFILL_HOURS = 20
 
 
 def gh(*args):
@@ -71,24 +74,26 @@ def recently_active(workflow: str) -> bool:
     return False
 
 
-def dispatch_args(workflow: str, now: dt.datetime) -> list:
-    """派发参数。行情补跑必须带 critical（freeze 档放行）+ as_of（逻辑时间）。
+def dispatch_args(workflow: str, now: dt.datetime):
+    """派发参数；返回 None 代表「这个缺口补不回来，不要派发无效补跑」。
 
-    as_of 取「最近一个已收盘交易日的收盘后 17 分钟」，由纯标准库的
-    trading_window 从已复核 NYSE 日历算出；算不出就只留空（实时采集），
-    绝不猜测日期。
+    行情补跑必须带 critical（freeze 档放行）+ as_of（逻辑时间）。as_of
+    取「最近一个已收盘交易日的收盘后 17 分钟」，由纯标准库的
+    trading_window 从已复核 NYSE 日历算出，绝不猜测日期。
     """
     if workflow != "quotes.yml":
         return []
-    args = ["-f", "critical=true"]
     try:
-        import trading_window
-        as_of = trading_window.closing_as_of(now)
-        if as_of:
-            args += ["-f", "as_of=" + as_of]
+        import trading_window as tw
+        as_of = tw.closing_as_of(now)
+        if not as_of:
+            return None
+        age_h = (now - dt.datetime.fromisoformat(as_of)).total_seconds() / 3600
+        if age_h > MAX_BACKFILL_HOURS:
+            return None
     except Exception:
-        pass
-    return args
+        return None
+    return ["-f", "critical=true", "-f", "as_of=" + as_of]
 
 
 def main():
@@ -118,6 +123,14 @@ def main():
             used.add(workflow)
             continue
         args = dispatch_args(workflow, dt.datetime.now(dt.timezone.utc))
+        if args is None:
+            decisions.append({"workflow": workflow, "action": "skip",
+                              "reason": "目标场次已超出 %d 小时补采窗口，"
+                                        "在线报价字段已被改写；等下一场次自动采集"
+                                        % MAX_BACKFILL_HOURS,
+                              "matched": matched})
+            used.add(workflow)
+            continue
         if a.dry_run:
             decisions.append({"workflow": workflow, "action": "would_dispatch",
                               "reason": reason, "matched": matched, "args": args})
