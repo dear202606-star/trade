@@ -129,6 +129,22 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("db-sync.yml -f targets=turso", self.strategy)
         self.assertIn("actions: write", self.strategy)
 
+    def test_settlement_review_is_bounded_to_once_per_close(self):
+        """收盘结算复核：不能变成每 20 分钟一次的采集放大器。"""
+        self.assertIn("收盘结算复核（每日一次", self.reconcile)
+        self.assertIn("derived.outputs.need_recompute == 'true'", self.reconcile)
+        self.assertIn('"backfill-closing" in (r.get("displayTitle") or "")',
+                      self.reconcile)
+        self.assertIn('.startswith(t)', self.reconcile)
+        self.assertIn('[ "$DONE" != "0" ]', self.reconcile)
+
+    def test_settlement_review_only_runs_after_that_days_close(self):
+        self.assertIn('[ "$SESSION" != "$TODAY" ]', self.reconcile)
+        self.assertIn('[ "$H" -lt 21 ] || [ "$H" -gt 23 ]', self.reconcile)
+        self.assertIn('[ "$M" -lt 30 ]', self.reconcile)
+        self.assertIn('-f critical=true', self.reconcile)
+        self.assertIn('as_of="${TODAY}T21:17:00+00:00"', self.reconcile)
+
 
 if __name__ == "__main__":
     unittest.main()

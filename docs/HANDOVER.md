@@ -1,6 +1,6 @@
 # 交接说明（给下一个 agent）
 
-> 最后更新：2026-11-01 18:10（北京）｜ 调度章节更新于 2026-11-11 05:40（v6.12）
+> 最后更新：2026-11-01 18:10（北京）｜ 调度章节更新于 2026-11-11 06:05（v6.13）
 > 仓库：`dear202606-star/trade`（分支 `main`）｜ 站点：<https://dear202606-star.github.io/trade/>
 
 ---
@@ -34,6 +34,21 @@
 当日 6 次、fail-open）；`live-strategy.yml` 新增 `sync_outputs` job，任一计算
 成功立即推 Turso。详见 `docs/CHANGELOG.md` v6.12。
 ⚠️ 勿删 `run-name` / 分桶计数 / `sync_outputs` / 输出对账这四处。
+
+**v6.13（2026-11-11，11-09 停更真因翻案，必读）**：v6.12 末尾说 4 只
+`adjustment factor discontinuity` 是「11-09 历史缺口」——**这个结论是错的**，
+不要据此去补历史价格或碰 `historical_lineage`。源站实测那 4 只（AMP /
+GWW / VMC / IBM）是合法除息，根因是 `factor_rebase_evidence()` 硬编码
+「除息日必须=当前 session」与跨场次增量拼接能力自相矛盾。现已改为用
+`raw − adjusted` 现金差额判定、按已复核 NYSE 日历校验窗口内唯一除息日，
+并新增三项更严的自洽校验；既有 fail-closed 门禁一条未松。
+另新增「收盘结算复核」：21:17/21:50 收盘 cron 被 GitHub 丢弃时，由对账
+在当日收盘窗口每日最多一次派发关键补采，补齐尚未结算的报价快照。
+⚠️ 勿删 `test_cross_session_dividend.py` 与 `reconcile.yml` 的结算复核步骤。
+**当前 `preview` 仍可能落后**：12 只 11-10 除息标的等东财日线重算前复权
+历史（报价源已调整、日线源未重算）。放行会少计股息、污染策略口径，
+故保持 fail-closed，由 `reconcile_outputs` 自动重试到源更新为止，
+**不要为了「让 CI 变绿」绕过它**。详见 `docs/CHANGELOG.md` v6.13。
 
 **平台外心跳已上线（v6.11，勿当「待办」）**：Supabase `cron.job`
 `trade-reconcile-tick`（当前 jobid 8，重装会变，`*/20 * * * *`）用 `pg_net` 打 GitHub API

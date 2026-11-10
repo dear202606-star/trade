@@ -132,3 +132,41 @@ jobs:
           echo "输出对账：${{ steps.derived.outputs.reason }}"
           gh workflow run live-strategy.yml || \
             echo "::warning::重算派发失败，下一轮对账重试"
+      - name: 收盘结算复核（每日一次，补齐未结算报价）
+        # 2026-11-11 实证：21:17 的收盘快照固化时部分标的还没结算完，
+        # 而 21:50 的收盘兜底 cron 当天被 GitHub 整批丢弃（今天只有
+        # 20:08 / 20:45 / 21:08 三次 schedule）。状态对账只问 quotes.session
+        # 齐不齐，看不见「快照内容是否已结算」，于是 AAPL/NVDA/AKAM 一直
+        # 报 Closing bar not settled；收盘后重采一次即全部通过。
+        # 严格限定：目标场次=今天、UTC 21:30~23:59、当日尚无其他收盘复核
+        # 运行，每日最多一次。只派发既有的关键补采，不改任何数据门禁，
+        # 也不会唤醒 Neon（quotes.yml 只对定时收盘 schedule 带 Neon）。
+        if: steps.derived.outputs.need_recompute == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SESSION: ${{ steps.derived.outputs.target_session }}
+        run: |
+          export TODAY="$(date -u +%Y-%m-%d)"
+          H="$(date -u +%H)"; M="$(date -u +%M)"
+          if [ "$SESSION" != "$TODAY" ]; then
+            echo "目标场次 $SESSION 不是今天，跳过结算复核"; exit 0
+          fi
+          if [ "$H" -lt 21 ] || [ "$H" -gt 23 ] || { [ "$H" = "21" ] && [ "$M" -lt 30 ]; }; then
+            echo "当前 ${H}:${M} UTC 不在收盘后 30~180 分钟窗口，跳过"; exit 0
+          fi
+          DONE="$(gh run list --workflow=quotes.yml --event workflow_dispatch --limit 30 \
+            --json createdAt,displayTitle | python3 -c '
+          import sys,json,os
+          t=os.environ["TODAY"]
+          runs=json.load(sys.stdin)
+          print(sum(1 for r in runs
+                    if "backfill-closing" in (r.get("displayTitle") or "")
+                    and (r.get("createdAt") or "").startswith(t)))
+          ')"
+          if [ "$DONE" != "0" ]; then
+            echo "当日已有 $DONE 次收盘复核，跳过（防重复采集）"; exit 0
+          fi
+          echo "派发收盘结算复核：as_of=${TODAY}T21:17:00+00:00"
+          gh workflow run quotes.yml -f critical=true \
+            -f as_of="${TODAY}T21:17:00+00:00" || \
+            echo "::warning::结算复核派发失败，下一轮对账重试"
