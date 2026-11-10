@@ -74,7 +74,8 @@ python strategy_history.py --refresh     # 全量重算，约 2 分钟
 
 | 凭据 | 存放 | 轮换 |
 |---|---|---|
-| GitHub PAT（Supabase 调度用） | Supabase Vault `gh_dispatch_token` | 到期前更新；本地 `output/_pat_token.txt`（gitignored） |
+| GitHub PAT（平台外心跳用） | Supabase Vault `gh_dispatch_token` | 旧记录到期 2027-01-26；到期后在 Vault 覆盖同名项并重跑 `heartbeat-setup.yml` 的 `enable`。只有 `actions:write`，故心跳走 `workflow_dispatch` |
+| Supabase PG 口令 | GitHub Secret `SUPABASE_DB_PASSWORD` | `heartbeat-setup.yml` 注入临时文件，用后即删 |
 | Supabase service key | GitHub Secrets | 泄露即换 |
 | 匿名 key | `docs/data/cloud.json`（公开可读） | 无需轮换 |
 

@@ -65,14 +65,20 @@ gh run list -R dear202606-star/trade -L 5
 gh run view <run_id> -R dear202606-star/trade
 ```
 
-## 7. Supabase 定时
+## 7. Supabase 定时（2026-11-10 现状）
 
-| job | 时间 | 作用 |
+| job | 时间 | 状态 / 作用 |
 |---|---|---|
-| `trade-dispatch-market` | `*/5 13-21 * * 1-5`（UTC） | 盘中每 5 分钟触发 |
-| `trade-dispatch` | `20 */2 * * *` | 其余时段每 2 小时兜底 |
+| `trade-dispatch-market` | `*/5 13-21 * * 1-5`（UTC） | **11-06 已停，勿恢复**：每 5 分钟拉整条采集链，egress 超额放大器 |
+| `trade-dispatch` | `20 */2 * * *` | **11-06 已停，勿恢复** |
+| `promote_staging` | `*/10 * * * *` | 保留，纯库内合并，不发网络请求 |
+| `trade-reconcile-tick` | `*/20 * * * *` | **11-10 新增，已上线**：只唤起场次对账，不派发采集 |
 
-函数：`public.dispatch_trade_pipeline()`，token 存 Vault `gh_dispatch_token`。
+旧函数 `public.dispatch_trade_pipeline()` 属于高频采集作业，勿再调用。
+新心跳由 `external_heartbeat.py` 生成 SQL，token 仍存 Vault
+`gh_dispatch_token`，但 SQL 里只有 `vault.decrypted_secrets` 子查询引用。
+安装 / 检查 / 摘除统一用 `gh workflow run heartbeat-setup.yml -f action=...`，
+详见 `docs/EXTERNAL_CRON.md`。
 
 ## 8. 失效自愈
 

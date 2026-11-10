@@ -1,6 +1,6 @@
 # 交接说明（给下一个 agent）
 
-> 最后更新：2026-11-01 18:10（北京）｜ 调度章节补于 2026-11-10 23:xx（v6.10）
+> 最后更新：2026-11-01 18:10（北京）｜ 调度章节更新于 2026-11-11 00:xx（v6.11）
 > 仓库：`dear202606-star/trade`（分支 `main`）｜ 站点：<https://dear202606-star.github.io/trade/>
 
 ---
@@ -17,10 +17,21 @@
 现在的判定基准是**数据状态而不是时钟**：`reconcile_sessions.py` 只读浏览器
 同源的 Turso 端点，用已复核 NYSE 日历算出应有场次，缺就补（盘中实时 /
 收盘按 `as_of` 逻辑时间）。`reconcile.yml` 由 `workflow_run` + 错峰 cron +
-`repository_dispatch: reconcile-tick` 三重独立源唤起，带冷却、在途、
-同场次 3 次上限防自激。`quotes.yml` 每次采集成功都立即派发 `db-sync.yml`
-推 Turso，定时同步只作兜底。完整实证与可选「平台外心跳」恢复步骤见
-`docs/EXTERNAL_CRON.md` 与 `docs/CHANGELOG.md` v6.10。
+手动 / push + **平台外心跳**四重独立源唤起，带冷却、在途、同场次 3 次
+上限防自激。`quotes.yml` 每次采集成功都立即派发 `db-sync.yml` 推 Turso，
+定时同步只作兜底。
+
+**平台外心跳已上线（v6.11，勿当「待办」）**：Supabase `cron.job`
+`trade-reconcile-tick`（jobid 7，`*/20 * * * *`）用 `pg_net` 打 GitHub API
+唤醒对账。因 Vault 的 `gh_dispatch_token` 只有 `actions:write`
+（`repository_dispatch` 实测 403），实际走
+`workflow_dispatch + inputs.source=pg-cron`（204）。安装 / 探查 / 摘除 /
+验证**只用** `gh workflow run heartbeat-setup.yml -f action=...`，
+不要手工去 SQL Editor 粘 SQL，也不要把 PAT 写进仓库。凭据在 Supabase
+Vault，轮换后重跑一次 `enable`。每次对账会顺带跑
+`external_heartbeat.py --health`，心跳 >90 分钟未到达只出 warning。
+完整实证、操作手册与失效边界见 `docs/EXTERNAL_CRON.md`、
+`docs/CHANGELOG.md` v6.11。
 
 ⚠️ 勿回退：`quotes.yml` 的同步条件、`db-sync.yml` 的
 `cancel-in-progress: false`、`publish_ui.py` 的 5xx 重试降级。

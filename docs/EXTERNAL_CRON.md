@@ -1,102 +1,128 @@
-# 外部定时触发（当前状态与恢复方案）
+# 平台外心跳（2026-11-10 已上线）
 
-> **2026-11-10 更正**：本文旧版结论「Supabase 定时触发已配置好、无需任何操作」
-> **已经失效**，不要按旧说明操作。
+> **2026-11-10 二次更正**：本文第一版称「Supabase 定时触发已配置好」是错的；
+> 第二版称「外部心跳是可选增强、尚未接入」也已过期。**现在心跳已实际安装并运行**，
+> 不要再按旧版的「二选一方案」操作，也不要手工去 SQL Editor 粘贴 SQL。
 
-## 一、真实状态：外部时钟在 11-06 被一起停掉了
+## 一、为什么必须有平台外时钟
 
-`sql/124_egress_schedule.sql` 为收敛出口流量，停掉了库内两个 dispatch 作业：
+`sql/124_egress_schedule.sql` 为收敛出口流量，在 11-06 停掉了库内两个 dispatch 作业：
 
 | 作业 | 原频率 | 现状 |
 |---|---|---|
-| `trade-dispatch-market` | `*/5 13-21 * * 1-5` | **已 unschedule** |
-| `trade-dispatch` | `20 */2 * * *`（每小时 :15 那份文档描述的是早期版本） | **已 unschedule** |
-| `promote_staging` | 纯库内合并 | 保留，不发网络请求 |
+| `trade-dispatch-market` | `*/5 13-21 * * 1-5` | 已停，**不要恢复** |
+| `trade-dispatch` | `20 */2 * * *` | 已停，**不要恢复** |
+| `promote_staging` | `*/10 * * * *` | 保留（纯库内合并，不发网络请求） |
+| `trade-reconcile-tick` | `*/20 * * * *` | **11-10 新增，见下文** |
 
-当时的决策是「调度权统一收归 GitHub Actions（有日志、可版本化、可预算门禁）」。
-出发点没错：2026-10 计费周期行情快照被触发 **1139 次 / 10 天**，
-Egress 19.928 / 5 GB（Free 档 Fair Use 限额被击穿，REST 网关返回 402）。
-
-但副作用是：**唯一一个不依赖 GitHub cron 的准点时钟也没了**。
-`gh run list` 实证后续变化：
+出发点没错：2026-10 计费周期行情快照被触发 **1139 次 / 10 天**，Egress
+19.928 / 5 GB，Free 档 Fair Use 被击穿，REST 网关返回 402。但副作用是
+**唯一不依赖 GitHub cron 的时钟也没了**。`gh run list` 实证：
 
 - 11-06 还有每 5 分钟规律的 `workflow_dispatch`（pg_cron 在跑）；
-- 11-07 变成每 2 小时一次；
-- 11-08 起只剩零星手动 / 看门狗派发，**11-10 盘中 13:00~15:13 UTC
+- 11-08 起只剩零星手动 / 看门狗派发；**11-10 盘中 13:00~15:13 UTC
   `行情快照` 一次 `schedule` 都没触发**；
 - 11-10 仅有的两次 `schedule` 落在 `03:35` / `03:49 UTC`，是前一日
-  `21:17` / `21:50` 收盘任务**延迟约 6 小时**到达；`备库同步 21:55`
-  被拖到次日 `03:26`。
+  `21:17` / `21:50` 收盘任务**延迟约 6 小时**到达。
 
-结论：**GitHub Actions 免费版 scheduled events 是尽力而为，延迟 / 丢弃无法
-通过仓库内配置消除**。把全部调度权交给它，就形成了「cron 一延迟、采集与
-自愈一起哑」的共模故障 —— 因为看门狗（唯一自愈入口）自己也是 schedule 触发。
+GitHub Actions 免费版 scheduled events 是**尽力而为**，延迟 / 丢弃无法通过
+仓库内配置消除。而看门狗（原唯一自愈入口）自己也是 schedule 触发 ——
+被兜底者与兜底者同时哑火，是典型共模故障。
 
-## 二、当前可靠性架构（已落地，v6.10）
+## 二、现在线上的四层触发源（v6.11）
 
-`reconcile.yml` + `reconcile_sessions.py` 把判定从「现在几点」改成「数据齐不齐」，
-并用互相独立的触发源破除单点：
+| 层 | 触发源 | 频率 | 是否依赖 GitHub cron |
+|---|---|---|---|
+| 1 | `reconcile.yml` 的 `workflow_run`（行情快照失败 / 备库同步 / 网页发布 / 看门狗完成） | 上游跑完即触发 | 否 |
+| 2 | `reconcile.yml` 独立错峰 `schedule` | 每小时 `:17,:47` + 收盘 `22:25` | 是（多条相互独立） |
+| 3 | `push` / `workflow_dispatch` | 随时 | 否 |
+| 4 | **Supabase pg_cron → GitHub API → 对账** | **每 20 分钟** | **否（平台外时钟）** |
 
-| 触发源 | 频率 | 是否依赖 GitHub cron 准点 |
-|---|---|---|
-| `workflow_run`（行情快照失败 / 备库同步 / 网页发布 / 看门狗完成） | 上游跑完即触发 | 否 |
-| 独立错峰 `schedule` | 每小时 `:17,:47` + 收盘 `22:25` | 是（但多条错峰，丢弃相互独立） |
-| `push` / `workflow_dispatch` | 随时 | 否 |
-| `repository_dispatch: reconcile-tick` | 由外部定时器决定 | **否（平台外时钟）** |
+判定逻辑统一在 `reconcile_sessions.py`：**不问「现在几点」，只问「浏览器真正
+读到的那份 quotes 里有没有应有的场次」**。缺就补，cron 迟到数小时照样补齐；
+数据已齐则零动作。对账只读浏览器同源的 **Turso 公开端点**，不连 Supabase、
+不消耗 egress。
 
-对账只读浏览器同源的 **Turso 公开端点**（不连 Supabase、不消耗 egress），
-数据已齐时零动作；缺场次才派发补采，且有 30 分钟冷却 + 同场次最多 3 次
-的防自激约束。即使一整天的 GitHub schedule 全被丢弃，只要任意一次运行
-（或外部心跳）到达，缺口就会被补齐。
+## 三、第 4 层的实际配置（已实测）
 
-## 三、可选增强：恢复一个「平台外」的心跳
+线上只读探查（`heartbeat-setup.yml` → `inspect`，运行 `42850361187`）结论：
 
-仓库内已经把接口留好，**不需要改代码**。若希望连「GitHub 整体故障」也能兜住，
-二选一即可。注意心跳只唤起**对账**，绝大多数轮次零动作，不会重演 egress 事故。
+```
+extensions: pg_cron, pg_net, supabase_vault   ← 三者均可用
+cron.job（安装前）: promote_staging  */10 * * * *  active
+vault: gh_dispatch_token                       ← 仍在有效期
+probes: repository_dispatch = 403
+        workflow_dispatch   = 204             ← 可用
+```
 
-### 方案 A（推荐）：repository_dispatch，完全不碰 Supabase
+**因此心跳走 `workflow_dispatch` 而非 `repository_dispatch`**：
+Vault 里的 fine-grained PAT 只有 `actions:write`，没有 `contents:write`，
+而 `POST /repos/{owner}/{repo}/dispatches` 需要后者。`external_heartbeat.py`
+会自动探测并降级，无需人工判断；将来换成有 `contents:write` 的 PAT，
+下一次 `enable` 会自动优先切回 `repository_dispatch`。
 
-任何免费外部定时器每 15~30 分钟执行一次：
+安装结果（`42850731333`）：
+
+```
+jobid=7  job=trade-reconcile-tick  schedule=*/20 * * * *
+mode=workflow_dispatch  body={ref: main, inputs: {source: pg-cron}}
+```
+
+- **只唤起场次对账**，绝不派发采集 / 净值 / 回填；单次出站约 300 字节，
+  72 次/天，与 11-06 每 5 分钟拉整条采集链的高频作业完全不同。
+- PAT 只以 `vault.decrypted_secrets` 子查询的形式出现在 `cron.job.command`，
+  明文不进仓库、不进日志、不进运行输出；CI 临时数据库口令用完即删。
+- `reconcile.yml` 的 `run-name` 带 `source`，所以每次心跳运行的标题是
+  `场次对账 · pg-cron`，可与手动派发区分。
+
+## 四、操作手册（全部通过 GitHub Actions，无需 SQL Editor）
 
 ```bash
-curl -X POST \
-  -H "Accept: application/vnd.github+json" \
-  -H "Authorization: Bearer <具备 actions:write 的 GitHub PAT>" \
-  https://api.github.com/repos/dear202606-star/trade/dispatches \
-  -d '{"event_type":"reconcile-tick"}'
+# 只读探查：扩展、cron.job、Vault 名称、两个端点的实测状态码
+gh workflow run heartbeat-setup.yml -f action=inspect
+
+# 幂等安装 / 重建（间隔硬限 5..60 分钟，默认 20）
+gh workflow run heartbeat-setup.yml -f action=enable -f tick_minutes=20
+
+# 查看作业状态、pg_cron 执行明细、pg_net HTTP 回执、最近心跳运行
+gh workflow run heartbeat-setup.yml -f action=verify
+
+# 摘除（只摘 trade-reconcile-tick，不碰 promote_staging）
+gh workflow run heartbeat-setup.yml -f action=disable
 ```
 
-可用 Cloudflare Workers Cron（免费额度充足）、cron-job.org 或本机计划任务。
-PAT 只存外部定时器，不进仓库、不进前端。
+`heartbeat-setup.yml` **只能手动 workflow_dispatch**，没有 schedule，
+不会随 cron 误改线上调度。换机或重建时，只需在 Actions 里跑一次 `enable`。
 
-### 方案 B：Supabase pg_cron + pg_net
+`external_heartbeat.py --health` 已挂进 `reconcile.yml`：每次对账顺带检查
+最近一次标题含 `pg-cron` 的运行，超过 90 分钟未到达就输出
+`::warning::平台外心跳疑似失联`，**只告警不阻断**主流程。
 
-前提：Vault 里的 `gh_dispatch_token` 仍在有效期内（旧文档记录到 2027-01-26）。
-在 SQL Editor 执行（**低频、幂等**）：
+## 五、凭据轮换与失效路径
 
-```sql
-select cron.schedule(
-  'trade-reconcile-tick', '15,45 * * * *',
-  $$select net.http_post(
-      url := 'https://api.github.com/repos/dear202606-star/trade/dispatches',
-      headers := jsonb_build_object(
-        'Accept', 'application/vnd.github+json',
-        'Authorization', 'Bearer ' ||
-          (select decrypted_secret from vault.decrypted_secrets
-           where name = 'gh_dispatch_token' limit 1),
-        'Content-Type', 'application/json'),
-      body := '{"event_type":"reconcile-tick"}'::jsonb
-    )$$
-);
--- 停用：select cron.unschedule('trade-reconcile-tick');
--- 查看：select jobid, jobname, schedule, active from cron.job;
-```
+| 项 | 位置 | 说明 |
+|---|---|---|
+| GitHub PAT | Supabase Vault `gh_dispatch_token` | 旧文档记录有效期至 **2027-01-26**；到期后 `inspect` 会显示两个端点 401，`enable` 会拒绝安装 |
+| Supabase PG 口令 | GitHub Secret `SUPABASE_DB_PASSWORD` | 安装 / 检查时注入，临时文件 `output/_supabase_dbpass.txt` 用后即删 |
+| 额度档 | `egress_budget.py` | 心跳不消耗它；补采仍走 `--critical` 白名单 |
 
-**不要**恢复 `trade-dispatch` / `trade-dispatch-market` 这两个高频派发采集的作业，
-那正是 1139 次 / 10 天事故的直接放大器。
+轮换 PAT：在 GitHub 生成新 PAT（推荐加 `contents:write` 以便用
+`repository_dispatch`），到 Supabase Vault 覆盖同名 `gh_dispatch_token`，
+再跑一次 `enable`。**不要把 PAT 写进仓库或本文件。**
 
-## 四、边界（不夸大）
+心跳可能失效的原因：Supabase 免费项目暂停、Vault token 过期、`pg_net`
+background worker 停用、GitHub API 全局不可达。任一情况下，前 3 层触发源
+仍然工作，`--health` 会在 GitHub 侧留下 warning，`verify` 可查
+`cron.job_run_details` 与 `net._http_response` 定位。
 
-GitHub cron 仍不保证字面准点，本方案也不承诺「某分某秒必跑」。
-可靠性来自「任意一次运行都对账 → 缺什么补什么 → 幂等去重 → 失败自动重试」，
-而不是某一条定时器更准。外部心跳属于可选的第 4 层冗余，不是必需项。
+## 六、边界（不夸大）
+
+- GitHub **整体故障期间**，pg_cron 发出的请求同样会失败；本方案的价值是
+  **GitHub 恢复后最多 20 分钟必然有下一拍到达**，不依赖 GitHub 自己的
+  调度器恢复，随后状态驱动对账会补齐 20 小时窗口内的缺失场次。
+  它不能「在 GitHub 宕机时继续产出数据」，任何方案都做不到。
+- GitHub cron 仍不保证字面准点；可靠性来自
+  「任意一次运行都对账 → 缺什么补什么 → 幂等去重 → 失败重试」，
+  而不是某一条定时器更准。
+- `collect-full.yml` / `collect-ci.yml` / `backfill-prices.yml` 的周期失败
+  属历史回填链路（数据源限流 / 付费墙 / 完整历史门禁），与日更和心跳无关。

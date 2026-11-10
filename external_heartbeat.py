@@ -85,12 +85,12 @@ def _sq(value):
     return "'" + str(value).replace("'", "''") + "'"
 
 
-def build_command(mode):
-    """生成 pg_cron 的 command；只引用 Vault，绝不含明文 token。"""
+def build_post_expr(mode):
+    """一次心跳的 SQL 表达式：可放进 cron.job.command，也可立即执行一次。"""
     if mode not in ENDPOINTS:
         raise ValueError("未知心跳模式: %r" % mode)
     return (
-        "$$select net.http_post(\n"
+        "select net.http_post(\n"
         "  url := %s,\n"
         "  headers := jsonb_build_object(\n"
         "    'Accept', 'application/vnd.github+json',\n"
@@ -100,9 +100,14 @@ def build_command(mode):
         "       from vault.decrypted_secrets where name = %s limit 1)),\n"
         "  body := %s::jsonb,\n"
         "  timeout_milliseconds := 10000\n"
-        ")$$" % (_sq(ENDPOINTS[mode]), _sq(VAULT_SECRET),
-                 _sq(json.dumps(BODIES[mode], separators=(",", ":"))))
+        ")" % (_sq(ENDPOINTS[mode]), _sq(VAULT_SECRET),
+               _sq(json.dumps(BODIES[mode], separators=(",", ":"))))
     )
+
+
+def build_command(mode):
+    """生成 pg_cron 的 command；只引用 Vault，绝不含明文 token。"""
+    return "$$" + build_post_expr(mode) + "$$"
 
 
 def build_enable_sql(mode, tick_minutes):
@@ -223,7 +228,7 @@ def inspect(conn, probe=True):
     return out
 
 
-def enable(conn, tick_minutes, mode=None, probe=True):
+def enable(conn, tick_minutes, mode=None, probe=True, immediate=True):
     info = inspect(conn, probe=probe)
     mode = mode or info.get("recommended_mode")
     if not mode:
@@ -232,14 +237,21 @@ def enable(conn, tick_minutes, mode=None, probe=True):
     if VAULT_SECRET not in (info.get("vault_secret_names") or []):
         # SQL 里写死引用 gh_dispatch_token；若用的是备用项，改成同名引用会拿不到。
         raise RuntimeError("缺少 Vault 项 %s，拒绝安装（SQL 只引用该名称）" % VAULT_SECRET)
-    sql = build_enable_sql(mode, tick_minutes)
+    immediate_id = None
     with conn.cursor() as cur:
-        cur.execute(sql)
+        cur.execute(build_enable_sql(mode, tick_minutes))
         jobid = cur.fetchone()[0]
+        if immediate:
+            # 当场从数据库 pg_net 发一拍，验证 Vault 子查询 / pg_net 出站 /
+            # 函数签名都真的可用，不必等下一个 cron 拍点才发现配置错误。
+            cur.execute(build_post_expr(mode))
+            row = cur.fetchone()
+            immediate_id = row[0] if row else None
     conn.commit()
     return {"enabled": True, "jobid": jobid, "mode": mode,
             "schedule": cron_expression(tick_minutes), "job": JOB,
-            "vault_secret": VAULT_SECRET, "probes": info.get("probes")}
+            "vault_secret": VAULT_SECRET, "probes": info.get("probes"),
+            "immediate_tick_request_id": immediate_id}
 
 
 def disable(conn):
@@ -316,6 +328,25 @@ def verify(conn):
                                              "order by id desc limit 8")]
     except Exception as exc:                      # noqa: BLE001
         out["recent_http_error"] = type(exc).__name__
+    try:
+        out["job_runs"] = [{"status": r[0], "message": str(r[1] or "")[:160], "at": str(r[2])}
+                           for r in _rows(conn,
+                                          "select status, return_message, start_time "
+                                          "from cron.job_run_details where jobid in "
+                                          "(select jobid from cron.job where jobname = %s) "
+                                          "order by start_time desc limit 8", (JOB,))]
+    except Exception as exc:                      # noqa: BLE001
+        out["job_runs_error"] = type(exc).__name__
+    try:
+        commands = [r[0] or "" for r in _rows(
+            conn, "select command from cron.job where jobname = %s", (JOB,))]
+        # 只回传布尔结论，不回传 command 内容，避免任何凭据形态进入日志。
+        out["command_contains_plaintext_token"] = any(
+            marker in c for c in commands for marker in ("github_pat_", "ghp_"))
+        out["command_references_vault"] = all(
+            "vault.decrypted_secrets" in c for c in commands) if commands else False
+    except Exception as exc:                      # noqa: BLE001
+        out["command_error"] = type(exc).__name__
     # GitHub 侧回执：最近一次由外部心跳唤起的对账运行
     import subprocess
     try:
@@ -371,6 +402,11 @@ def self_test():
               "vault.decrypted_secrets" in cmd and VAULT_SECRET in cmd)
         check("%s 不带 Bearer 明文" % mode, "Bearer ' ||" in cmd)
         check("%s 指向对账端点" % mode, ENDPOINTS[mode] in cmd)
+    check("立即心跳与 cron command 同源",
+          build_post_expr("repository_dispatch")
+          == build_command("repository_dispatch")[2:-2])
+    check("立即心跳同样不含明文 token",
+          "github_pat_" not in build_post_expr("workflow_dispatch"))
     sql = build_enable_sql("repository_dispatch", 20)
     check("安装 SQL 幂等", "cron.unschedule" in sql and "cron.schedule" in sql)
     check("安装 SQL 不含采集工作流", "quotes.yml" not in sql)
@@ -415,6 +451,8 @@ def main():
     ap.add_argument("--tick-minutes", type=int, default=DEFAULT_TICK_MIN)
     ap.add_argument("--mode", choices=sorted(ENDPOINTS), help="强制指定端点（一般自动选择）")
     ap.add_argument("--no-probe", action="store_true", help="enable 时跳过端点实测")
+    ap.add_argument("--no-immediate-tick", action="store_true",
+                    help="enable 时不从 pg_net 立即发一拍验证")
     ap.add_argument("--self-test", action="store_true", help="离线纯函数自测")
     args = ap.parse_args()
 
@@ -432,7 +470,9 @@ def main():
         if action == "inspect":
             result = inspect(conn, probe=not args.no_probe)
         elif action == "enable":
-            result = enable(conn, args.tick_minutes, args.mode, probe=not args.no_probe)
+            result = enable(conn, args.tick_minutes, args.mode,
+                            probe=not args.no_probe,
+                            immediate=not args.no_immediate_tick)
         elif action == "disable":
             result = disable(conn)
         else:

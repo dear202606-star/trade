@@ -1,5 +1,47 @@
 # 变更日志
 
+## v6.11 ｜ 2026-11-10 ｜ 平台外心跳已接入：兜住 GitHub 整体故障
+
+用户授权「全面操作实现」后，把第 4 层冗余从「预留接口」变成**线上实际运行**
+的独立时钟。提交：`f6ad964`、`c3a369c`；安装运行：`42850731333`（jobid `7`）。
+
+**线上探查实证**（`heartbeat-setup.yml` → `inspect`，`42850361187`）：
+`pg_cron` / `pg_net` / `supabase_vault` 三个扩展均可用；Vault 的
+`gh_dispatch_token` 仍有效；`repository_dispatch` 实测 **403**（该
+fine-grained PAT 只有 `actions:write`，缺 `contents:write`），
+`workflow_dispatch` 实测 **204**。安装器据此自动降级为
+`workflow_dispatch + inputs.source=pg-cron`，无需人工判断。
+
+**落地内容**
+- 新增 `external_heartbeat.py`：`inspect / enable / disable / verify / health /
+  self-test`。`enable` 幂等装 `cron.job` = `trade-reconcile-tick`，
+  `*/20 * * * *`，用 `net.http_post` 打 GitHub API 唤醒场次对账。
+- 新增 `heartbeat-setup.yml` 作为**唯一安装入口**，只能手动
+  `workflow_dispatch`，不随 cron 自动改线上调度；CI 临时口令用完即删。
+- **额度安全**：只唤起只读对账，绝不派发采集；间隔硬限 `5..60` 分钟，
+  默认 20；不恢复 `trade-dispatch` / `trade-dispatch-market` 两个高频作业。
+  单次出站约 300 字节、72 次/天，与 11-06 事故的高频整链派发不同量级。
+- **凭据安全**：`cron.job.command` 里只写 `vault.decrypted_secrets` 子查询
+  引用，明文 PAT 不进仓库 / 日志 / 运行输出；`verify` 回传布尔结论而不回传
+  command 内容。
+- `reconcile.yml` 增加 `run-name` 来源标记（心跳运行标题
+  `场次对账 · pg-cron`）、`workflow_dispatch.source` 输入、每次对账的
+  `external_heartbeat.py --health` 存活检查（>90 分钟未到达只 warning，
+  不阻断）。`is_tick_run` 按标题识别，手动派发不再被误算成心跳。
+- `verify` 增查 `cron.job_run_details` 与 `net._http_response`，便于确认
+  每一拍真的发出并收到 2xx。
+
+**边界**：GitHub 整体故障期间 pg_cron 的请求同样失败；价值在于 GitHub
+恢复后 ≤20 分钟必有下一拍到达，不依赖 GitHub 调度器自愈，随后状态驱动
+对账补齐 20 小时窗口内缺失场次。它不能「GitHub 宕机时继续产数据」。
+失效路径（Supabase 暂停 / token 2027-01-26 到期 / pg_net 停用）下前 3 层
+触发源仍工作，并由 `--health` 留 warning。操作手册与轮换步骤见
+`docs/EXTERNAL_CRON.md`。
+
+**回归**：Python 305 / Node 43 / YAML 25 / 自检 `30+15+13` 全绿。
+
+---
+
 ## v6.10 ｜ 2026-11-10 ｜ 破除「cron 单点」：状态驱动场次对账 + 多触发源容错
 
 **背景 / 根因复盘**（用 `gh run list` 实证，不是推测）：用户反复看到「流水线不自动执行」。
@@ -27,6 +69,7 @@ GitHub Actions。运行记录完全吻合：11-06 还有每 5 分钟规律的 di
 独立时钟也关掉，才让「GitHub 一延迟就全哑」变成必然而非偶发。
 本版不恢复那两个高频采集作业（那是超额放大器），而是把 `repository_dispatch`
 接口留好，供低频「只唤起对账、不触发采集」的外部心跳使用，详见该文档。
+（**v6.11 已把该心跳实际接入并上线**，以下为当时状态的历史记录。）
 
 **本版六处修复**
 
