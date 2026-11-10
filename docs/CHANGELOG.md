@@ -54,6 +54,14 @@
 - 无头 Chrome 真实渲染线上首页：「行情更新超时」「建议待更新」「大盘验证不可用」
   「主数据库暂不可用」「备用数据库」全部归零，`#serviceBanner` 为空。
 - `在线净值与动态排名` 由采集成功自动触发并 success（run `42835325033`）。
+- 最终网页发布 run `42836749622` 三 job 全绿；E2E run `42836760056` 全绿；
+  看门狗 run `42836486928` 得 `PROBLEMS=0`、开 Issue **skipped**、
+  `actions_dispatched=0`、三库一致性 `PROBLEMS=0`。
+- `每日全量更新` 复验 run `42837509245`：旧报价导致的「更新在线 A/B 动态排名」
+  失败已消失，日志出现 `IDENTITY_RESOLUTION_APPLIED`（12 只显式排除、价格序列未解锁）；
+  仍停在第二道**有意保留**的 fail-closed 门禁
+  `historical_lineage.require_complete_history(): IR,JCI`。这是既有的历史证券身份
+  完整性人工决策事项，与本次行情停更无关，**本版没有绕过**。
 
 **根因澄清**：`每日全量更新` / `在线净值与动态排名` / `线上 E2E` 的失败是同一个源头的
 连锁反应——线上报价快照停在 11/06，`watchdog_checks.quote_problems()` 的
