@@ -390,10 +390,13 @@ def store(variant,kind,quotes,payload,evidence):
 
 def run_equity():
     from live_cash_dividends import load_proofs,spy_distributions,SSGA
-    quotes=live_quotes.load_snapshot()
-    # 场次幂等：盘中不重算、同一 session+quote_version+代码已算过则秒退。
-    # 这是 Egress 的主要削减点：本周期该作业被触发 288 次，实际只需收盘各一次。
+    # 先「不校验时效」读一次，让 run-guard 有机会在盘中 / 已算过场次秒退。
+    # 盘中报价在 30 分钟采集节奏下必然超过 15 分钟心跳阈值，若先跑严格
+    # 校验就会抛错，把本应秒退的作业变成红色失败（2026-11-10 实测）。
+    quotes=live_quotes.load_snapshot(strict=False)
     if run_guard.should_skip('equity',quotes):return
+    # 真要重算（收盘场次）时重新严格复核报价时效，写库前的门禁不变。
+    quotes=live_quotes.load_snapshot()
     calendar=market_calendar.load()
     if calendar.sha!=quotes['calendar_sha256']:raise RuntimeError('Exchange calendar advanced; retry current quote')
     connection=db_sources.db()

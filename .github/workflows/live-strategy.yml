@@ -10,9 +10,11 @@ on:
     paths:
       - live_strategy.py
       - live_ranking.py
+      - live_quotes.py
+      - run_guard.py
+      - test_intraday_skip.py
       - live_cash_dividends.py
       - prepare_live_ranking.py
-      - run_guard.py
       - egress_budget.py
       - test_egress_budget.py
       - test_live_strategy.py
@@ -40,7 +42,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
-      - run: python -m unittest test_live_strategy test_live_cash_dividends
+      - run: python -m unittest test_live_strategy test_live_cash_dividends test_intraday_skip
       - name: 出口流量预算门禁
         id: egress
         env:
@@ -64,7 +66,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
-      - run: python -m unittest test_live_ranking
+      - run: python -m unittest test_live_ranking test_intraday_skip
       - name: 出口流量预算门禁
         id: egress
         env:

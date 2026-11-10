@@ -28,7 +28,7 @@ GitHub Actions。运行记录完全吻合：11-06 还有每 5 分钟规律的 di
 本版不恢复那两个高频采集作业（那是超额放大器），而是把 `repository_dispatch`
 接口留好，供低频「只唤起对账、不触发采集」的外部心跳使用，详见该文档。
 
-**本版五处修复**
+**本版六处修复**
 
 1. **状态驱动取代时间驱动**：新增 `reconcile_sessions.py`。只读浏览器同源的
    Turso 公开端点，用已复核 NYSE 日历算出「当前应有的场次」，只问「线上有没有」，
@@ -59,9 +59,27 @@ GitHub Actions。运行记录完全吻合：11-06 还有每 5 分钟规律的 di
    `fresh_until` 严格判定。`DSH.quoteFreshness` 业务口径一字未改，净值依赖 /
    `todayUnavailable` 等判断不受影响。
 
-**回归**：Python `292` 项全绿（新增 `test_reconcile_sessions` 20 项、
-`test_publish_ui` 8 项）、Node `43` 项全绿、工作流 YAML `24` 份解析通过、
-`trading_window` 自检 `15` 项 + `reconcile_sessions` 自检 `13` 项全 OK。
+6. **盘中「本应秒退」却天天变红**：`live_strategy.run_equity()` /
+   `live_ranking.run()` 原先第一行就是严格的 `load_snapshot()`，报价核验
+   （`watchdog_checks.quote_problems`）在 `run_guard.should_skip()` **之前**执行。
+   生产采集是 30 分钟一次，而心跳阈值是 15 分钟，于是「报价刷新任务超过
+   15 分钟未成功」必然命中，作业还没走到「盘中快照不重算净值」就抛错，
+   `在线净值与动态排名` 每次盘中触发都是红色 failure。现在先用
+   `load_snapshot(strict=False)` 轻量取 payload 让 run-guard 秒退，
+   **真要写净值（收盘场次）时再严格复核报价时效**，fail-closed 门禁一字未松。
+   新增 `test_intraday_skip.py` 4 项锁定调用顺序与「收盘仍严格」两条边界。
+
+**关于 `freeze` 档（不是故障，是刻意保护）**：本周期 `estimated_mb≈20417`
+/ `budget_mb=3000`，`egress_budget` 判 `freeze`，盘中非关键刷新一律跳过
+（`allow=false`），跑出来是 `skipped` 而非 `failure`。关键任务带
+`--critical` 仍放行，`workflow_dispatch` 补采有 `TRADE_FORCE_BUDGET=1`
+强制放行 —— 所以收盘 / 开盘 / 自愈补采三条链路不会因超额而断。
+这是「已超额就不再做无意义的盘中重复刷新」的额度策略，不是流水线停摆。
+
+**回归**：Python `296` 项全绿（新增 `test_reconcile_sessions` 20 项、
+`test_publish_ui` 8 项、`test_intraday_skip` 4 项）、Node `43` 项全绿、
+工作流 YAML `24` 份解析通过、`trading_window` 自检 `15` 项 +
+`reconcile_sessions` 自检 `13` 项全 OK。
 
 **边界（不夸大）**：GitHub cron 仍不保证字面准点，本版也不承诺「某分某秒必跑」。
 可靠性来自「任意一次运行都对账 → 缺什么补什么 → 幂等去重 → 失败自动重试」，

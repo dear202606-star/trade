@@ -70,8 +70,16 @@ def read_snapshot(cursor):
     return result,dict(zip(('finished_at','metrics'),event)) if event else None
 
 
-def load_snapshot(now=None):
-    """Read one consistent online quote/calendar/worker version; no file fallback."""
+def load_snapshot(now=None, strict=True):
+    """Read one consistent online quote/calendar/worker version; no file fallback.
+
+    strict=False 只取 payload，跳过报价时效门禁，专供 run_guard 判断
+    「盘中 / 幂等是否要跳过」。2026-11-10 实测：盘中本来不重算净值，
+    但 run_equity / live_ranking.run 原先先做严格校验 —— 30 分钟采集节奏下
+    「报价刷新任务超过 15 分钟未成功」必然命中，作业还没走到 should_skip
+    就抛错，本应秒退的盘中运行天天变红。真正要写净值时必须再用
+    strict=True 复核，数据质量门禁仍是 fail-closed，没有被绕过。
+    """
     from watchdog_checks import quote_problems
     now=now or dt.datetime.now(UTC)
     connection=db_sources.db()
@@ -79,6 +87,9 @@ def load_snapshot(now=None):
         connection.set_session(isolation_level='REPEATABLE READ',readonly=True)
         with connection.cursor() as cursor:
             cursor.execute("set local statement_timeout='20s'")
+            if not strict:
+                row,_=read_snapshot(cursor)
+                return row['payload']
             cursor.execute('select calendar,evidence_sha256 from v_market_calendar')
             rows=cursor.fetchall()
             if len(rows)!=1:raise RuntimeError('No unique reviewed online exchange calendar')

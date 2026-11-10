@@ -117,7 +117,7 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - name: 在线报价与失败保护回归
-        run: python -m unittest test_live_quotes test_quote_repairs test_quote_snapshot test_market_calendar test_watchdog_checks test_trading_window test_reconcile_sessions test_publish_ui
+        run: python -m unittest test_live_quotes test_quote_repairs test_quote_snapshot test_market_calendar test_watchdog_checks test_trading_window test_reconcile_sessions test_publish_ui test_intraday_skip
       - name: 检查在线写入凭据
         if: steps.gate.outputs.allow == 'true'
         run: test -n "$SUPABASE_DB_PASSWORD"
