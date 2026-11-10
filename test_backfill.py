@@ -120,23 +120,35 @@ class LogicalTimeTests(unittest.TestCase):
 
 
 class SelfHealDispatchTests(unittest.TestCase):
-    def test_quotes_dispatch_carries_critical_and_as_of(self):
-        args = selfheal.dispatch_args("quotes.yml", at("2026-11-10T13:20:00+00:00"))
-        self.assertIn("-f", args)
+    def test_after_close_dispatch_carries_critical_and_as_of(self):
+        # 11-10 22:00 UTC = 17:00 EST，当日收盘后 60 分钟
+        args = selfheal.dispatch_args("quotes.yml", at("2026-11-10T22:00:00+00:00"))
         self.assertIn("critical=true", args)
-        self.assertTrue(any(a.startswith("as_of=2026-11-09T21:17") for a in args),
-                        "补跑必须带目标场次逻辑时间: %r" % args)
+        self.assertTrue(any(a.startswith("as_of=2026-11-10T21:17") for a in args),
+                        "收盘后补跑必须带当日收盘逻辑时间: %r" % args)
+
+    def test_intraday_dispatch_has_no_as_of(self):
+        # 盘中若仍带上一场次的 as_of，逻辑时间被固定到昨日，而在线报价
+        # 已是今日时间戳 → source_time 判 Future source quote，必然失败。
+        args = selfheal.dispatch_args("quotes.yml", at("2026-11-10T15:00:00+00:00"))
+        self.assertEqual(args, ["-f", "critical=true"])
+
+    def test_preopen_does_not_dispatch(self):
+        # 盘前 SPY 前收价被写成现价、涨跌 0，放行会把假报价写进生产
+        self.assertIsNone(selfheal.dispatch_args(
+            "quotes.yml", at("2026-11-10T13:20:00+00:00")))
 
     def test_other_workflows_get_no_extra_args(self):
         self.assertEqual(selfheal.dispatch_args("ui-publish.yml", self_heal_now()), [])
 
     def test_expired_session_skips_useless_backfill_dispatch(self):
+        # 周六 18:00 UTC：最近已收盘场次是周五，已超 20 小时窗口
         self.assertIsNone(selfheal.dispatch_args(
-            "quotes.yml", at("2026-11-10T18:00:00+00:00")))
+            "quotes.yml", at("2026-11-14T18:00:00+00:00")))
 
     def test_fresh_session_still_dispatches(self):
         self.assertIsNotNone(selfheal.dispatch_args(
-            "quotes.yml", at("2026-11-10T13:20:00+00:00")))
+            "quotes.yml", at("2026-11-10T15:00:00+00:00")))
 
     def test_cooldown_only_counts_dispatch_runs(self):
         with patch.object(selfheal, "gh", return_value="[]") as gh:
@@ -147,17 +159,19 @@ class SelfHealDispatchTests(unittest.TestCase):
 
     def test_dry_run_reports_args_without_dispatching(self):
         path = os.path.join(os.path.dirname(__file__), "_problems.tmp")
+        stub = ["-f", "critical=true", "-f", "as_of=2026-11-10T21:17:00+00:00"]
         try:
             with open(path, "w", encoding="utf-8") as fh:
                 fh.write("行情停更 84.6 小时（阈值 72）\n")
             with patch.object(selfheal, "gh", return_value="[]"), \
+                 patch.object(selfheal, "dispatch_args", return_value=stub), \
                  patch.object(selfheal.sys, "argv",
                               ["selfheal.py", "--problems", path, "--dry-run"]), \
                  contextlib.redirect_stdout(io.StringIO()) as captured:
                 selfheal.main()
             report = json.loads(captured.getvalue())
             self.assertIn("critical=true", report["decisions"][0]["args"])
-            self.assertTrue(any(a.startswith("as_of=2026-11-09")
+            self.assertTrue(any(a.startswith("as_of=")
                                 for a in report["decisions"][0]["args"]))
         finally:
             if os.path.exists(path):
@@ -215,6 +229,20 @@ class WorkflowContractTests(unittest.TestCase):
     def test_quotes_dispatches_sync_after_closing_collection(self):
         self.assertIn("gh workflow run db-sync.yml", self.quotes)
         self.assertIn("actions: write", self.quotes)
+
+    def test_opening_collection_also_pushes_turso_immediately(self):
+        # 访客读的是 Turso：开盘那次不能只在主库落地等下一次定时同步
+        self.assertIn("steps.gate.outputs.task == 'opening'", self.quotes)
+        self.assertIn("db-sync.yml -f targets=turso || true", self.quotes)
+        self.assertIn("db-sync.yml -f targets=turso,neon || true", self.quotes)
+
+    def test_manual_dispatch_without_as_of_is_calendar_gated(self):
+        # 带 as_of 的补采放行；不带 as_of 的实时验证必须借日历裁决，
+        # 否则盘前 p=pc / 涨跌 0 的假报价会被写进生产。
+        self.assertIn("AS_OF_INPUT: ${{ github.event.inputs.as_of }}", self.quotes)
+        self.assertIn('if [ -n "$AS_OF_INPUT" ]', self.quotes)
+        self.assertIn('GATE_EVENT="schedule"', self.quotes)
+        self.assertIn('EVENT_NAME="$GATE_EVENT" python3 trading_window.py', self.quotes)
 
     def test_opening_and_closing_are_explicit_critical_crons(self):
         for cron in ('"0 14 * * 1-5"', '"0 15 * * 1-5"',

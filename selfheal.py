@@ -77,19 +77,36 @@ def recently_active(workflow: str) -> bool:
 def dispatch_args(workflow: str, now: dt.datetime):
     """派发参数；返回 None 代表「这个缺口补不回来，不要派发无效补跑」。
 
-    行情补跑必须带 critical（freeze 档放行）+ as_of（逻辑时间）。as_of
-    取「最近一个已收盘交易日的收盘后 17 分钟」，由纯标准库的
-    trading_window 从已复核 NYSE 日历算出，绝不猜测日期。
+    必须按当前所处时段选补跑方式（2026-11-10 实测修正）：
+      · 盘中（开盘 ~ 收盘后 20 分钟）：抓实时价，**不带 as_of**。
+        原先无条件带「上一交易日收盘后 17 分钟」的逻辑时间，而在线挂牌
+        此时已是当日盘中时间戳，source_time 会判 Future source quote，
+        整轮补跑必然失败，形成「告警 → 派发 → 再告警」的无效循环。
+      · 收盘后 / 次日凌晨：用 closing_as_of 的逻辑时间补最近一次收盘，
+        且必须落在 20 小时窗口内（在线挂牌只保留最近一个场次）。
+      · 当日盘前（尚未开盘）：不派发，交给开盘关键 cron 自动采集，
+        避免盘前 p=pc、涨跌 0 的假报价被写进生产。
+    所有行情补跑都带 critical=true，确保 egress freeze 档仍放行。
     """
     if workflow != "quotes.yml":
         return []
     try:
         import trading_window as tw
-        as_of = tw.closing_as_of(now)
+        cal = tw.load_calendar()
+        info = tw.session_info(now, cal)
+        if info["trading_day"] and info["open"] and info["close"]:
+            if info["open"] <= now <= info["close"] + dt.timedelta(minutes=20):
+                return ["-f", "critical=true"]
+            if now < info["open"]:
+                return None
+    except Exception:
+        return None
+    try:
+        as_of = tw.closing_as_of(now, cal)
         if not as_of:
             return None
         age_h = (now - dt.datetime.fromisoformat(as_of)).total_seconds() / 3600
-        if age_h > MAX_BACKFILL_HOURS:
+        if age_h < 0 or age_h > MAX_BACKFILL_HOURS:
             return None
     except Exception:
         return None

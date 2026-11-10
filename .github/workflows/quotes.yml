@@ -85,19 +85,32 @@ jobs:
         env:
           EVENT_NAME: ${{ github.event_name }}
           SCHEDULE: ${{ github.event.schedule }}
+          AS_OF_INPUT: ${{ github.event.inputs.as_of }}
         run: |
           EXTRA=""
+          GATE_EVENT="$EVENT_NAME"
           case "$SCHEDULE" in
             "17 21 * * 1-5"|"50 21 * * 1-5") TASK=closing; EXTRA="--late-ok" ;;
             "0 14 * * 1-5"|"0 15 * * 1-5") TASK=opening ;;
             *) TASK=intraday ;;
           esac
-          # 只有手动/自愈派发才无条件放行；push 保持 intraday 由日历裁决，
-          # 避免改代码时在盘前或休市日误采集（SPY 前收字段脏数据）。
+          # 手动派发分两种，不能一律无条件放行：
+          #   · 带 as_of = 看门狗自愈的延迟补跑，逻辑时间由
+          #     live_quotes.logical_time 严格校验（20h 上限 / 日历场次 / 收盘窗口），
+          #     按 closing --late-ok 放行；
+          #   · 不带 as_of = 人工实时验证，必须按 intraday 日历窗口裁决。
+          #     实测盘前新浪把 gb_spy 的前收价写成现价、涨跌额置 0，三字段
+          #     自洽但语义是假的；若放行会把整轮假报价写进生产并污染净值。
+          #     需要非交易时段强制验证请用 TRADE_FORCE_COLLECT=1。
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
-            TASK=closing; EXTRA="--late-ok"
+            if [ -n "$AS_OF_INPUT" ]; then
+              TASK=closing; EXTRA="--late-ok"
+            else
+              TASK=intraday; EXTRA=""
+              GATE_EVENT="schedule"   # 借日历裁决，不再无条件放行
+            fi
           fi
-          python3 trading_window.py --task "$TASK" $EXTRA --gate
+          EVENT_NAME="$GATE_EVENT" python3 trading_window.py --task "$TASK" $EXTRA --gate
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -141,11 +154,22 @@ jobs:
             sleep 20
           done
           exit 1
-      - name: 收盘采集成功后立即同步备库
+      - name: 关键采集成功后立即同步备库
         # 原 db-sync 收盘 cron 是 21:10 UTC，比 21:17 的采集还早，
         # 当天收盘数据要等到第二天才进 Turso。采集成功后直接派发，
         # 把「采集 → 同步」变成严格顺序，定时同步仍保留作兜底。
-        if: success() && steps.refresh.outcome == 'success' && steps.gate.outputs.task == 'closing'
+        # 开盘后 30 分钟那次同样立刻推 Turso：访客读的就是 Turso，
+        # 不能让「开盘一次」只在主库落地、页面要等 30 分钟后才看到。
+        # 只有收盘任务才唤醒 Neon（免费额度每工作日仅一次）。
+        if: >-
+          success() && steps.refresh.outcome == 'success' &&
+          (steps.gate.outputs.task == 'closing' || steps.gate.outputs.task == 'opening')
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh workflow run db-sync.yml -f targets=turso,neon || true
+          TASK: ${{ steps.gate.outputs.task }}
+        run: |
+          if [ "$TASK" = "closing" ]; then
+            gh workflow run db-sync.yml -f targets=turso,neon || true
+          else
+            gh workflow run db-sync.yml -f targets=turso || true
+          fi
