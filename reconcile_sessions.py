@@ -44,8 +44,19 @@ SITE_CLOUD = "https://dear202606-star.github.io/trade/data/cloud.json"
 MAX_BACKFILL_HOURS = 20
 # 开盘后多久才认为「当日盘中快照本应存在」，避免把正常排队延迟误判成故障。
 INTRADAY_GRACE_MIN = 35
-# 同一场次最多补采派发次数（防止上游持续失败时无限自激）。
-MAX_DISPATCH_PER_SESSION = 3
+# 2026-11-12：盘中报价的业务时间戳最长允许落后多久。
+# 旧逻辑盘中只问「当日有没有快照」，有就判「已在线」。而 egress freeze
+# 档会把每 30 分钟的定时采集整批 skip（run 仍报 success），11-11 15:21
+# 之后 5 小时零刷新、所有监控全绿。改以访客真正读到的 quotes.ts 年龄
+# 为准：cron 丢拍、额度冻结、门禁跳过、备库同步落后都会暴露出来。
+# 40 = 30 分钟采集节奏 + 10 分钟容错；平台外心跳 20 分钟一拍，最坏
+# 端到端延迟约 60 分钟（旧逻辑无上限）。
+MAX_QUOTE_AGE_MIN = 40
+# 盘中桶上限：freeze 档会一直持续到计费周期结束，整个交易日可能全靠
+# 对账补采刷新（6.5 小时 / 30 分钟冷却 ≈ 13 次）。旧上限 3 次会在上午
+# 就用光，下午重新停更——这正是 11-10 收盘补采被挡的同型缺陷。
+# 12 次 × 约 2MB 采集，相对 17GB 的周期用量可忽略。
+MAX_DISPATCH_PER_SESSION = 12
 # 收盘版是每交易日「必须产出」的一次，与盘中临时补采分开计数。
 # 盘中一次快照只影响展示，收盘版缺失会让净值/预览整场不重算。
 MAX_CLOSING_DISPATCH = 6
@@ -96,14 +107,24 @@ def evaluate(now, calendar, quotes, max_backfill_hours=MAX_BACKFILL_HOURS):
     if info["trading_day"] and info["open"] and info["close"]:
         opened, closed = info["open"], info["close"]
         session = info["session"]
-        # A. 当日盘中（含收盘后 20 分钟宽限）：只要求当日场次存在。
-        #    策略是年度持仓 + 日度净值，盘中一次有效快照即可，不强求 30 分钟级。
+        # A. 当日盘中（含收盘后 20 分钟宽限）：场次存在 + 报价足够新鲜。
+        #    2026-11-12：不再「当日一次即算齐」。补齐「定时采集被额度门禁
+        #    整批跳过、run 却判 success」的盲区，直接以访客读到的
+        #    quotes.ts 年龄为准，与采集是否跑过完全解耦。
         if opened + dt.timedelta(minutes=INTRADAY_GRACE_MIN) <= now \
                 <= closed + dt.timedelta(minutes=CLOSE_GRACE_MIN):
             if current != session or not have_ts:
                 return need("intraday", "", session,
                             "盘中应有 %s 快照，线上为 %s，实时补采" % (session, current or "无"))
-            return ok("盘中 %s 快照已在线" % session, session)
+            stamp = _parse(q.get("ts") or q.get("ts_local"))
+            age_min = (now - stamp).total_seconds() / 60
+            # 未来时间戳只可能来自时钟偏差，不能据此反复派发补采。
+            if age_min > MAX_QUOTE_AGE_MIN:
+                return need("intraday", "", session,
+                            "盘中 %s 报价已 %.0f 分钟未刷新（上限 %d），实时补采"
+                            % (session, age_min, MAX_QUOTE_AGE_MIN))
+            return ok("盘中 %s 报价新鲜（%.0f 分钟）" % (session, max(age_min, 0)),
+                      session)
         # B. 当日收盘后：必须有该场次的收盘版（intraday=False）。
         #    GitHub 把收盘 cron 延迟数小时也走这里，用逻辑时间补回收盘价。
         if now > closed + dt.timedelta(minutes=CLOSE_GRACE_MIN):
@@ -315,8 +336,12 @@ def self_test():
         # (label, now, quotes, need_action, mode)
         ("盘中当日快照缺失", "2026-11-10T15:30:00+00:00",
          {"session": "2026-11-09", "ts": "2026-11-09T21:17:00Z", "intraday": False}, True, "intraday"),
-        ("盘中当日快照已在线", "2026-11-10T15:30:00+00:00",
-         {"session": "2026-11-10", "ts": "2026-11-10T14:33:00Z", "intraday": True}, False, "none"),
+        ("盘中当日新鲜快照不补采", "2026-11-10T15:30:00+00:00",
+         {"session": "2026-11-10", "ts": "2026-11-10T15:10:00Z", "intraday": True}, False, "none"),
+        ("盘中同场次但报价陈旧必须补采", "2026-11-10T15:30:00+00:00",
+         {"session": "2026-11-10", "ts": "2026-11-10T14:33:00Z", "intraday": True}, True, "intraday"),
+        ("未来时间戳不触发自激补采", "2026-11-10T15:30:00+00:00",
+         {"session": "2026-11-10", "ts": "2026-11-10T16:10:00Z", "intraday": True}, False, "none"),
         ("开盘宽限内不误判", "2026-11-10T14:40:00+00:00",
          {"session": "2026-11-09", "ts": "2026-11-09T21:17:00Z", "intraday": False}, False, "none"),
         ("收盘后仍只有盘中版", "2026-11-10T22:00:00+00:00",
@@ -352,9 +377,14 @@ def self_test():
     if dispatch_allowed("2026-11-10", [{"status": "in_progress"}], now)[0]:
         failed.append("在途运行不应重复派发")
     many = [{"status": "completed", "createdAt": "2026-11-10T%02d:00:00Z" % h}
-            for h in (1, 3, 5, 7)]
+            for h in range(0, 13)]
     if dispatch_allowed("2026-11-10", many, now)[0]:
         failed.append("超过每场次上限仍派发")
+    # freeze 档整日靠补采刷新，11 次仍在预算内，不能被旧上限 3 次挡住。
+    eleven = [{"status": "completed", "createdAt": "2026-11-10T%02d:00:00Z" % h}
+              for h in range(0, 11)]
+    if not dispatch_allowed("2026-11-10", eleven, now)[0]:
+        failed.append("freeze 档整日补采被旧上限误挡")
     # 11-10 真实事故：盘中补采 5 次把配额吃光，收盘补采被永久拒发。
     intraday_many = [
         {"status": "completed", "createdAt": "2026-11-10T%02d:00:00Z" % h,
@@ -380,7 +410,7 @@ def self_test():
                         now, "closing")[0]:
         failed.append("在途运行对所有类型都应阻断")
     print(json.dumps({"self_test": "FAIL" if failed else "OK",
-                      "cases": len(cases) + 9, "failed": failed}, ensure_ascii=False))
+                      "cases": len(cases) + 10, "failed": failed}, ensure_ascii=False))
     return 1 if failed else 0
 
 

@@ -28,9 +28,37 @@ class EvaluateTests(unittest.TestCase):
         self.assertEqual(got["as_of"], "")
         self.assertEqual(got["expected_session"], "2026-11-10")
 
-    def test_intraday_present_snapshot_is_idempotent(self):
+    def test_fresh_intraday_snapshot_is_idempotent(self):
+        """20 分钟前的报价：不重复派发，避免自激打穿额度。"""
         got = rs.evaluate(dt.datetime.fromisoformat("2026-11-10T15:30:00+00:00"),
-                          CAL, quotes("2026-11-10", "2026-11-10T14:33:00Z", True))
+                          CAL, quotes("2026-11-10", "2026-11-10T15:10:00Z", True))
+        self.assertFalse(got["need_action"])
+        self.assertIn("新鲜", got["reason"])
+
+    def test_stale_intraday_snapshot_triggers_refresh(self):
+        """11-11 事故：同场次已有快照，但 5 小时没刷新，必须补采。
+
+        egress freeze 档把定时采集整批 skip、run 仍报 success，旧的
+        「当日有快照即算齐」判定会让页面永久停在早上 10:21。
+        """
+        got = rs.evaluate(dt.datetime.fromisoformat("2026-11-11T20:30:00+00:00"),
+                          CAL, quotes("2026-11-11", "2026-11-11T15:21:00Z", True))
+        self.assertTrue(got["need_action"])
+        self.assertEqual(got["mode"], "intraday")
+        self.assertEqual(got["as_of"], "")
+        self.assertEqual(got["expected_session"], "2026-11-11")
+        self.assertIn("未刷新", got["reason"])
+
+    def test_stale_boundary_is_exactly_forty_minutes(self):
+        now = dt.datetime.fromisoformat("2026-11-10T15:30:00+00:00")
+        fresh = rs.evaluate(now, CAL, quotes("2026-11-10", "2026-11-10T14:51:00Z", True))
+        stale = rs.evaluate(now, CAL, quotes("2026-11-10", "2026-11-10T14:49:00Z", True))
+        self.assertFalse(fresh["need_action"])
+        self.assertTrue(stale["need_action"])
+
+    def test_future_timestamp_does_not_loop(self):
+        got = rs.evaluate(dt.datetime.fromisoformat("2026-11-10T15:30:00+00:00"),
+                          CAL, quotes("2026-11-10", "2026-11-10T16:10:00Z", True))
         self.assertFalse(got["need_action"])
 
     def test_opening_grace_window_does_not_misfire(self):
@@ -95,10 +123,18 @@ class DispatchGuardTests(unittest.TestCase):
 
     def test_per_session_cap_blocks_endless_retry(self):
         runs = [{"status": "completed", "createdAt": "2026-11-10T%02d:00:00Z" % h}
-                for h in (1, 3, 5, 7)]
+                for h in range(0, 13)]
         allowed, why = rs.dispatch_allowed("2026-11-10", runs, self.NOW)
         self.assertFalse(allowed)
         self.assertIn("上限", why)
+
+    def test_intraday_cap_covers_a_full_frozen_trading_day(self):
+        """freeze 档整日无定时采集，11 次补采仍在预算内，不能被旧上限 3 挡住。"""
+        runs = [{"status": "completed", "createdAt": "2026-11-10T%02d:00:00Z" % h,
+                 "displayTitle": "行情快照 · backfill-intraday"}
+                for h in range(0, 11)]
+        allowed, why = rs.dispatch_allowed("2026-11-10", runs, self.NOW)
+        self.assertTrue(allowed, why)
 
     def test_clean_history_allows_dispatch(self):
         allowed, _ = rs.dispatch_allowed("2026-11-10", [], self.NOW)
@@ -222,6 +258,17 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("run-name:", text)
         self.assertIn("backfill-closing", text)
         self.assertIn("backfill-intraday", text)
+
+    def test_freshness_contract_is_not_removed(self):
+        """11-11 停更真因：freeze 档定时采集全被 skip，场次对账却判「已在线」。"""
+        src = (Path(__file__).resolve().parent
+               / "reconcile_sessions.py").read_text(encoding="utf-8")
+        self.assertIn("MAX_QUOTE_AGE_MIN", src)
+        self.assertIn("age_min > MAX_QUOTE_AGE_MIN", src)
+        self.assertIn("MAX_DISPATCH_PER_SESSION = 12", src)
+        text = (Path(__file__).resolve().parent / ".github" / "workflows"
+                / "quotes.yml").read_text(encoding="utf-8")
+        self.assertIn("门禁拒绝时显式留痕", text)
 
 
 if __name__ == "__main__":

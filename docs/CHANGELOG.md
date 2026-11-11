@@ -1,5 +1,87 @@
 # 变更日志
 
+## v6.14 ｜ 2026-11-12 ｜ 自动更新彻底翻案：从「场次齐不齐」改为「报价新不新」
+
+### 现象（用户第 N 次反馈「还是不能自动更新」）
+
+UTC 11-11 20:36 实测现网 Turso：`quotes.session=2026-11-11`、
+`intraday=True`、`ts=2026-11-11T15:21:00Z`（美东 10:21），
+即访客已经 **5 小时 15 分钟**没看到新报价；`equity/preview` 停在
+11-10 收盘版。与此同时 `场次对账 · pg-cron` 每 20 分钟全绿、
+`网页发布` success、`看门狗` 无告警——**全链监控看不见停更**。
+
+### 三层串联真因（全部有线上实证，不是推测）
+
+1. **额度冻结把定时采集整批跳过**：本计费周期（10-28~11-28）
+   `egress_budget.py --workflow 行情快照 --fast` 返回
+   `{"allow": false, "mode": "freeze", "estimated_mb": 17228, "budget_mb": 3000}`。
+   freeze 档只放行 `--critical`；而盘中 `*/30` schedule 不带
+   `--critical`（只有 opening / closing 带），于是 11-11 全天盘中
+   采集 100% 被跳过。运行 `43091849935` 的作业摘要显示
+   「刷新在线行情 = **skipped**」，但整个 run 仍是 **success**。
+2. **对账只问「当日有没有快照」**：`evaluate()` 盘中分支注释写着
+   「盘中一次有效快照即可，不强求 30 分钟级」，只要
+   `current == session` 就返回「盘中快照已在线」。心跳再勤也永远不会
+   派发补采，这是把「状态驱动」做成了半截。
+3. **被跳过的采集伪装成成功**：`workflow_run` 看到 quotes success
+   就以为链路健康；`reconcile.yml` 对 quotes 成功还会延后到
+   「备库同步完成」再对账，而 skipped 的采集根本没派发同步 →
+   这条触发源也消失。
+
+叠加结果是：15:20 那次 `workflow_dispatch`（带
+`TRADE_FORCE_BUDGET=1`，唯一能穿 freeze 的通道）留下 15:21 的报价后，
+系统就再没有任何力量推动数据前进。
+
+### 修复：一条明确的新鲜度契约
+
+- `reconcile_sessions.evaluate()` 盘中改为按**访客实际读到的
+  `quotes.ts` 年龄**判定：`now - ts > MAX_QUOTE_AGE_MIN(40)` 即
+  `need_action=True / mode=intraday`，理由打印具体分钟数。
+  「当日有快照」不再是充分条件；未来时间戳不触发自激。
+  收盘版 / 盘前 / 周末 / 迟到补采逻辑一律不动。
+- 盘中补采上限 `3 → 12`、冷却仍 30 分钟：freeze 档会一直持续到
+  11-28 新周期，整个交易日可能全靠对账补采刷新（6.5 小时约 13 次），
+  旧上限 3 次会在上午用光、下午重新停更（11-10 收盘被挡的同型缺陷）。
+  12 次 × 约 2MB 相对 17GB 周期用量可忽略；收盘桶仍是独立 6 次。
+- `quotes.yml` 新增「门禁拒绝时显式留痕」步骤，把
+  `gate.allow` / `egress.allow` / `mode` 钉进运行日志，并声明
+  「success 不代表报价已刷新」，杜绝假健康。
+- **不绕过 freeze**：正确解法不是给每 30 分钟采集开 `--critical`
+  白名单（那会废掉额度保护、重演超额），而是让 freeze 档下的刷新
+  正式由「平台外 pg_cron 心跳 → 新鲜度对账 → `critical=true` 补采 →
+  立即同步 Turso」承担。补采的 `workflow_dispatch` 本来就有
+  `TRADE_FORCE_BUDGET=1`，闭环不受额度档位影响。
+
+### 线上实证（修复后、现网真实数据）
+
+```
+python reconcile_sessions.py --no-history
+{"need_action": true, "mode": "intraday",
+ "reason": "盘中 2026-11-11 报价已 323 分钟未刷新（上限 40），实时补采",
+ "source": "turso-http", "dispatch_allowed": true}
+```
+
+同一份数据、旧代码会输出「盘中 2026-11-11 快照已在线」而零动作。
+
+### 回归
+
+Python **352** / Node **43** / YAML **25** / 自检
+`21 + 9 + 32 + 15` / `bash -n` 全绿；新增 5 项对账单测
+（陈旧触发、40 分钟边界、未来时间戳、整日配额、契约防删）。
+
+### 边界（如实）
+
+- freeze 档到 **11-28** 才随新计费周期重置；期间盘中刷新间隔约
+  30~60 分钟（心跳 20 分钟一拍 + 40 分钟阈值），不是 30 分钟准点。
+  新周期后 `*/30` schedule 恢复，补采自动退化为纯兜底。
+- GitHub Actions 整体故障期间 pg_cron 的 `workflow_dispatch`
+  同样失败；恢复后 ≤20 分钟必有下一拍，这是免费额度下的上限。
+  本次 20:20 的运行即出现 `startup_failure`（排队 14 分钟）。
+- `preview` 的 12 只除息标的仍等东财日线重算前复权历史，
+  保持 fail-closed，勿为「CI 变绿」绕过 `historical_lineage`。
+
+---
+
 ## v6.13 ｜ 2026-11-11 ｜ 11-09 停更真因翻案：跨场次除息审计 + 收盘结算复核
 
 **先纠正 v6.12 的错误结论**：上一版把 AMP/GWW/IBM/VMC 的

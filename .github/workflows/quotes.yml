@@ -184,3 +184,14 @@ jobs:
             gh workflow run db-sync.yml -f targets=turso || \
               echo "::warning::备库同步派发失败，场次对账将在下一轮兜底"
           fi
+      - name: 门禁拒绝时显式留痕（杜绝「success 但没采集」的假健康）
+        # 2026-11-12：egress freeze 档会拦掉盘中定时采集，被 skip 的 step
+        # 不算失败，整个 run 仍报 success；下游 workflow_run 因此以为数据
+        # 已更新、场次对账也只看「当日有没有快照」，页面连续 5 小时停更
+        # 而全链监控全绿。这里不改变结论（门禁生效是设计内行为），但把
+        # 拒绝原因钉在运行日志里，并明确声明「本 run 不代表数据已刷新」，
+        # 真正的保底由平台外心跳 + 新鲜度对账承担。
+        if: steps.gate.outputs.allow != 'true' || steps.egress.outputs.allow != 'true'
+        run: |
+          echo "::warning::本轮未采集：gate.allow=${{ steps.gate.outputs.allow }} egress.allow=${{ steps.egress.outputs.allow }} mode=${{ steps.egress.outputs.mode }}"
+          echo "本 run 的 success 仅表示门禁按设计生效，不代表报价已刷新；新鲜度对账会在下一拍按 quotes.ts 年龄判定是否补采。"
