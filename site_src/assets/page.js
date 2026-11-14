@@ -357,7 +357,7 @@
       if (!stamp && Q.ts && !isNaN(Date.parse(Q.ts))) {
         stamp = new Date(Q.ts).toLocaleString("zh-CN", { timeZone: "Asia/Shanghai", hour12: false });
       }
-      updated.textContent = stamp ? "行情更新 " + stamp + "（北京）" : "行情更新时间暂无";
+      updated.textContent = stamp ? "行情时点 " + stamp + "（北京）" : "行情更新时间暂无";
     }
   }
 
