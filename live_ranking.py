@@ -196,7 +196,7 @@ def calculate(variant,q,pool,sectors,members,reviews,contexts,initial,terms,refe
               'calculator_sha256':sha({name:hashlib.sha256((Path(__file__).resolve().parent/name).read_bytes()).hexdigest()
                   for name in ('live_ranking.py','prepare_live_ranking.py','live_strategy.py')})}
     payload={'variant':variant,'final':False,'as_of':q['ts_local'],'as_of_ts':q['ts'],
-             'fresh_until':q['fresh_until'],
+             'fresh_until':q['fresh_until'],'intraday':q['intraday'],
              'session':session,'base_month':str(year-1)+'-12','hold_year':year+1,
              'quote_version':q['version'],'reference_version':reference_version,
              'universe':len(selected_pool),'ranked':len(rows)+len(bounded),
@@ -209,12 +209,13 @@ def calculate(variant,q,pool,sectors,members,reviews,contexts,initial,terms,refe
 
 def run():
     # 门禁必须先于 prepare()：采集增量 context 本身就要读已封存证据，
-    # 盘中或重复场次跳过它才能真正省下出口流量。
+    # 相同报价版本已完成时无需再读取排名的输入证据。
     q=live_quotes.load_snapshot(strict=False)
     if run_guard.should_skip('preview',q):return
-    # 收盘场次真要重算时再严格复核报价时效，盘中跳过不受 15 分钟心跳误伤。
+    # 各场次的候选证据复用，同一场次的新盘中快照只重估收益和排序。
     q=live_quotes.load_snapshot()
-    prepare()
+    if not prepare(snapshot=q):
+        raise ValueError("Current ranking inputs failed verification; retry the next snapshot")
     pool,sectors,version=db_ref.load_market_reference(q['session'])
     phase='intraday' if q['intraday'] else 'close';year=int(q['session'][:4])
     c=db_sources.db()

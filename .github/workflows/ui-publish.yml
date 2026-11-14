@@ -88,7 +88,7 @@ jobs:
           node-version: '20'
       - run: pip install -r requirements.txt
       - run: node --test test_daily_pnl.mjs test_online_quotes.mjs test_page_refresh.mjs
-      - run: python -m unittest test_closing_reconcile test_ranking_factor_rebase test_cross_session_dividend test_watchdog_gateway test_egress_budget test_replication test_trading_window test_reconcile_sessions test_publish_ui -v
+      - run: python -m unittest test_live_strategy test_live_ranking test_intraday_skip test_reconcile_outputs test_closing_reconcile test_ranking_factor_rebase test_cross_session_dividend test_watchdog_gateway test_egress_budget test_replication test_trading_window test_reconcile_sessions test_publish_ui -v
       - name: 保留已部署数据并构建界面
         env:
           GH_TOKEN: ${{ github.token }}

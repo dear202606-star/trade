@@ -59,3 +59,59 @@
   line-height:1.6;vertical-align:middle;white-space:nowrap}
 .chip em{font-style:normal;margin:0 5px;color:#4d7a63;font-size:10px;white-space:nowrap}
 @media(max-width:760px){.sec-tag{font-size:9.5px;padding:1px 5px;margin-left:4px}.tk-cell{display:flex;flex-direction:column;align-items:flex-start;gap:2px}.tk-cell .sec-tag,.pv-main .sec-tag{margin-left:0;margin-top:1px}.pv-id{display:flex;align-items:baseline;gap:6px}.quiet-tag .radar-dot{width:6px;height:6px;background:#f3aa72;box-shadow:0 0 0 3px #fff3e7;margin-right:6px;vertical-align:-1px}}
+
+/* 持仓和历年收益保持在视口内，次要持仓指标在窄屏换行。 */
+.pr,.yr{width:100%;min-width:0;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.pr th,.pr td,.yr th,.yr td{padding:12px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+.pr th,.yr th{text-align:left}
+.pr th.r,.yr th.r{text-align:right}
+.pr thead,.yr thead{font-size:11px;color:var(--muted)}
+.pr tbody,.yr tbody{font-size:12px}
+.pr-row,.yr-row{display:table-row}
+.pr-return,.yr-return,.yr-drawdown{font-weight:700;white-space:nowrap}
+.yr th:nth-child(2),.yr th:nth-child(3){width:15%}
+.yr th:last-child{width:48%;padding-left:20px}
+.yr td:last-child{padding-left:20px}
+.mobile-field{display:none}
+.annual summary{min-height:44px}
+.annual .card-title{margin:0}
+#todayStamp{line-height:1.55}
+@media(min-width:901px) and (max-width:1250px){
+  .pr .tk-cell{display:flex;flex-direction:column;align-items:flex-start;gap:3px}
+  .pr .sec-tag{margin-left:0}
+}
+@media(max-width:900px){
+  html{scroll-padding-top:116px}
+  .dashboard-grid{display:flex;flex-direction:column}
+  .top-in{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 8px;padding-top:10px}
+  .section-nav{display:flex;grid-column:1/-1;grid-row:2;gap:0;justify-content:space-around}
+  .section-nav a{display:flex;align-items:center;justify-content:center;min-height:44px;flex:1;padding:0 5px}
+  .tick{grid-column:2;grid-row:1;font-size:11px;margin:0;justify-self:end}
+  .page-heading{margin-bottom:16px}
+  .page-heading .eyebrow,.page-heading p,.signal-bottom{display:none}
+  .vtabs{margin-top:12px;width:100%}
+  .vtab{flex:1}
+  .wrap{padding-top:16px}
+  .positions .row-split,.watchlist .row-split{margin-bottom:12px}
+  .pr thead,.pr tbody{display:block}
+  .pr thead tr,.pr tbody tr{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));align-items:center}
+  .pr th,.pr td{grid-column:span 4;padding:7px 0;border:0}
+  .pr tbody tr,.pr thead tr{border-bottom:1px solid var(--line)}
+  .pr tbody tr:last-child{border:0}
+  .pr tbody tr{padding:7px 0;row-gap:2px}
+  .pr thead .pr-detail{display:none}
+  .pr tbody .pr-detail{grid-column:span 3;text-align:left;font-size:11px;white-space:nowrap}
+  .pr tbody .pr-detail:last-child{text-align:right}
+  .pr-return{font-size:15px}
+  .mobile-field{display:block;color:var(--muted);font-size:10px}
+  .yr{margin-top:8px}
+  .yr th,.yr td{padding:11px 3px}
+  .yr th:first-child{width:16%}
+  .yr th:nth-child(2),.yr th:nth-child(3){width:21%}
+  .yr th:last-child{width:auto}
+  .yr th:last-child,.yr td:last-child{padding-left:10px}
+  .yr .h{gap:3px 5px}
+  .yr .chip{padding:1px 3px;gap:3px}
+  .yr .chip i{display:none}
+  .data-alert,.data-notice{position:static}
+}

@@ -13,7 +13,7 @@ function page(read, opts={}) {
   let tick;
   const context=vm.createContext({document,window:{},localStorage:{getItem(){return null;},setItem(){}},
     DSH:{jsonNoCache:async(name,fallback)=>{calls.push(name);return read(name,fallback);},
-      json:async(name,fallback)=>read(name,fallback),previewCurrent:()=>false,
+      json:async(name,fallback)=>read(name,fallback),previewCurrent:()=>false,previewVerified:()=>false,
       reportNotice:(id,level,text)=>notices.push({id,level,text}),
       dataStatus:()=>opts.status||{level:'healthy',mode:'backup'},
       quoteFreshness:()=>opts.staleQuotes===true},

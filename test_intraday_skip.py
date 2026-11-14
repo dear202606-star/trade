@@ -1,14 +1,7 @@
-"""盘中秒退必须先于报价时效校验（2026-11-10 线上红色失败复盘）。
-
-live_strategy.run_equity / live_ranking.run 原先第一行就是严格的
-load_snapshot()：30 分钟采集节奏下「报价刷新任务超过 15 分钟未成功」
-必然命中，作业还没走到 run_guard.should_skip('盘中不重算') 就抛错，
-本应秒退的盘中运行天天变红。修复后先用 strict=False 轻量读一次，
-确定要重算（收盘场次）时再严格复核，fail-closed 门禁不变。
-"""
+"""重复报价版本跳过计算，新的盘中及收盘结果都须严格校验。"""
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import live_ranking
 import live_strategy
@@ -26,21 +19,21 @@ class SkipOrderTests(unittest.TestCase):
             return payload
         return load
 
-    def test_equity_skips_intraday_before_strict_validation(self):
+    def test_equity_skips_completed_version_before_strict_validation(self):
         calls = []
         with patch.object(live_strategy.live_quotes, "load_snapshot",
                           side_effect=self._loader(INTRADAY, calls)), \
              patch.object(live_strategy.run_guard, "should_skip", return_value=True):
             self.assertIsNone(live_strategy.run_equity())
-        self.assertEqual(calls, [False], "盘中不应触发严格报价校验")
+        self.assertEqual(calls, [False], "已计算的盘中版本不应重复做严格报价校验")
 
-    def test_preview_skips_intraday_before_strict_validation(self):
+    def test_preview_skips_completed_version_before_strict_validation(self):
         calls = []
         with patch.object(live_ranking.live_quotes, "load_snapshot",
                           side_effect=self._loader(INTRADAY, calls)), \
              patch.object(live_ranking.run_guard, "should_skip", return_value=True):
             self.assertIsNone(live_ranking.run())
-        self.assertEqual(calls, [False], "盘中不应触发严格报价校验")
+        self.assertEqual(calls, [False], "已计算的盘中版本不应重复做严格报价校验")
 
     def test_equity_close_session_still_requires_strict_validation(self):
         """真要写净值时门禁仍是 fail-closed，没有被这次修复绕过。"""
@@ -60,6 +53,19 @@ class SkipOrderTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "strict-guard-blocked"):
                 live_ranking.run()
         self.assertEqual(calls, [False, True])
+
+    def test_new_intraday_snapshot_uses_the_same_ledger_and_strict_validation(self):
+        for entry, kind in ((live_strategy.run_equity, 'equity'), (live_ranking.run, 'preview')):
+            connection = MagicMock()
+            cursor = connection.cursor.return_value.__enter__.return_value
+            cursor.fetchone.return_value = None
+            calls = []
+            with self.subTest(kind=kind), patch('run_guard.db_sources.db', return_value=connection), \
+                    patch('live_quotes.load_snapshot', side_effect=self._loader(INTRADAY, calls)), \
+                    self.assertRaisesRegex(RuntimeError, '报价未通过核验'):
+                entry()
+            self.assertEqual(calls, [False, True])
+            self.assertIn(kind, cursor.execute.call_args.args[1])
 
 
 class LedgerContractTests(unittest.TestCase):

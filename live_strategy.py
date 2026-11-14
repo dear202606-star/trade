@@ -290,12 +290,16 @@ def calculate_equity(anchor,quotes,prices,calendar,cash_proofs=None):
     while day<=dt.date.fromisoformat(end):
         if calendar.bounds(day):sessions.append(day.isoformat())
         day+=dt.timedelta(days=1)
-    if not quotes.get('intraday'):required.update(sessions)
+    required.update(sessions)
     symbols=[p['ticker'] for p in equity['position']]+['SPY']
     for symbol in symbols:
         source=prices[symbol];raw,adj=source['raw'],source['adjusted'];q=quotes['quotes'][symbol]
         if not required<=set(raw):raise ValueError('Missing required daily prices: '+symbol)
-        if not close_enough(raw[previous],q['pc']):raise ValueError('Previous close disagrees: '+symbol)
+        if not close_enough(raw[previous],q['pc']):
+            if not close_enough(adj[previous],q['pc']):
+                raise ValueError('Previous close disagrees: '+symbol)
+            factor=(adj[end]/raw[end])/(adj[previous]/raw[previous])
+            check_adjustment(symbol,end,raw[previous],raw[end],factor,cash_proofs or {})
         if not quotes.get('intraday') and not close_enough(raw[end],q['p']):
             raise ValueError('Closing quote disagrees: '+symbol)
         # An unreviewed unit change must not be hidden in a source adjustment.
@@ -390,12 +394,9 @@ def store(variant,kind,quotes,payload,evidence):
 
 def run_equity():
     from live_cash_dividends import load_proofs,spy_distributions,SSGA
-    # 先「不校验时效」读一次，让 run-guard 有机会在盘中 / 已算过场次秒退。
-    # 盘中报价在 30 分钟采集节奏下必然超过 15 分钟心跳阈值，若先跑严格
-    # 校验就会抛错，把本应秒退的作业变成红色失败（2026-11-10 实测）。
+    # 重复快照先查账本，只有新版本才重读并严格验价。
     quotes=live_quotes.load_snapshot(strict=False)
     if run_guard.should_skip('equity',quotes):return
-    # 真要重算（收盘场次）时重新严格复核报价时效，写库前的门禁不变。
     quotes=live_quotes.load_snapshot()
     calendar=market_calendar.load()
     if calendar.sha!=quotes['calendar_sha256']:raise RuntimeError('Exchange calendar advanced; retry current quote')

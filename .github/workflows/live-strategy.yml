@@ -54,7 +54,14 @@ jobs:
         run: python egress_budget.py --workflow "在线净值与动态排名" --fast --critical
       - name: 净值计算（含场次幂等）
         if: steps.egress.outputs.allow == 'true'
+        id: compute
         run: python live_strategy.py
+      - name: 将可用净值立即同步到 Turso
+        if: >-
+          !cancelled() && (steps.compute.outcome == 'success' || steps.compute.outcome == 'failure')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run db-sync.yml -f targets=turso || echo "::warning::净值同步派发失败，由定时同步兜底"
   ranking:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
@@ -78,24 +85,11 @@ jobs:
         run: python egress_budget.py --workflow "在线净值与动态排名" --fast --critical
       - name: 动态排名与次年预览（含场次幂等）
         if: steps.egress.outputs.allow == 'true'
+        id: compute
         run: python live_ranking.py
-
-  sync_outputs:
-    # 2026-11-11：备库同步原先只由 quotes.yml 采集成功派发，发生在净值
-    # 计算之前；算完的 equity / preview 要等下一轮定时同步才进 Turso，
-    # 页面「净值截至」因此连续 4 天停更。任一计算 job 成功就立即推一次
-    # 增量同步（只推 Turso、不唤醒 Neon），把「计算 → 落地」变成顺序链。
-    # ranking 失败时也照样推 equity，不让一条失败拖住另一条已成功的结果。
-    if: >-
-      always() &&
-      (needs.equity.result == 'success' || needs.ranking.result == 'success')
-    needs: [equity, ranking]
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    env:
-      GH_TOKEN: ${{ github.token }}
-    steps:
-      - uses: actions/checkout@v4
-      - run: |
-          gh workflow run db-sync.yml -f targets=turso || \
-            echo "::warning::计算后同步派发失败，输出对账将在下一轮兜底"
+      - name: 将可用排名立即同步到 Turso
+        if: >-
+          !cancelled() && (steps.compute.outcome == 'success' || steps.compute.outcome == 'failure')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run db-sync.yml -f targets=turso || echo "::warning::排名同步派发失败，由定时同步兜底"

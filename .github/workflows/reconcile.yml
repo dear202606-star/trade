@@ -141,7 +141,7 @@ jobs:
         # 严格限定：目标场次=今天、UTC 21:30~23:59、当日尚无其他收盘复核
         # 运行，每日最多一次。只派发既有的关键补采，不改任何数据门禁，
         # 也不会唤醒 Neon（quotes.yml 只对定时收盘 schedule 带 Neon）。
-        if: steps.derived.outputs.need_recompute == 'true'
+        if: steps.derived.outputs.need_recompute == 'true' && steps.derived.outputs.phase == 'close'
         env:
           GH_TOKEN: ${{ github.token }}
           SESSION: ${{ steps.derived.outputs.target_session }}

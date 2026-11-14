@@ -223,7 +223,7 @@ test('version probe expires only the layer whose data actually changed',async()=
     if (url.includes('live_quote_snapshot?singleton'))
       return {ok:true,json:async()=>[{evidence_sha256:state.quoteVer}]};
     if (url.includes('v_live_strategy_results?select=variant'))
-      return {ok:true,json:async()=>[{variant:'A',kind:'equity',source_as_of:state.resultTs}]};
+      return {ok:true,json:async()=>[{variant:'A',kind:'equity',quote_version:"fixed",created_at:state.resultTs}]};
     if (url.includes('v_site_dataset?key=eq.curve'))
       return {ok:true,json:async()=>[{payload:{points:[1,2,3]}}]};
     if (url.includes('/rest/v1/'))
@@ -238,11 +238,14 @@ test('version probe expires only the layer whose data actually changed',async()=
   // 填充缓存后，只改静态数据集时间戳
   await dsh.json('curve',null);
   await dsh.json('quotes',{});
+  await dsh.json('equity',null);
   state.staticTs='2026-11-07T01:00:00Z';
   const expired=await dsh.syncIfChanged();
   assert.ok(expired.includes('curve'),'静态层应失效');
   assert.ok(!expired.includes('quotes'),'行情版本未变，不应被连带失效');
   assert.ok(!expired.includes('equity'),'计算结果未变，不应被连带失效');
+  state.resultTs='2026-11-07T01:05:00Z';
+  assert.deepEqual(Array.from(await dsh.syncIfChanged()), ['equity']);
 });
 
 test('all endpoints down falls back to the caller value, never to a file mirror',async()=>{

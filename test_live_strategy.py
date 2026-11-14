@@ -63,6 +63,9 @@ class IndependentEquityTests(unittest.TestCase):
     def test_verified_cash_distribution_updates_intraday_asset_units(self):
         self.quotes['intraday']=True
         self.prices['X']['adjusted'].update({'2026-11-02':120*131/132,'2026-11-03':131})
+        self.quotes['quotes']['X']['pc']=131.
+        with self.assertRaisesRegex(ValueError, 'Unreviewed distribution'):
+            calculate_equity(self.anchor,self.quotes,self.prices,self.calendar)
         proofs={'X':{'2026-11-04':{'amount':1.}}}
         result=calculate_equity(self.anchor,self.quotes,self.prices,self.calendar,proofs)
         expected=1.2*144/(120*131/132)

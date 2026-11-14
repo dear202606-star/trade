@@ -31,6 +31,45 @@
     return !(Number.isFinite(limit) && Number.isFinite(at) && at < limit + grace);
   };
 
+  DSH.sessionStamp = function (session, asOf, intraday) {
+    const day = /^\d{4}-\d{2}-\d{2}$/.test(session || '') ? "美股 " + session.slice(5).replace('-', '/') : "";
+    const time = Date.parse(asOf);
+    if (!Number.isFinite(time)) return day;
+    const parts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Shanghai', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+    }).formatToParts(time);
+    const fields = Object.fromEntries(parts.map(part => [part.type, part.value]));
+    const phase = intraday === true ? '盘中' : intraday === false ? '收盘' : '';
+    return [day, phase, `北京 ${fields.month}/${fields.day} ${fields.hour}:${fields.minute}`].filter(Boolean).join(' · ');
+  };
+
+  DSH.snapshotIntraday = function (preview, quotes) {
+    if (typeof preview.intraday === 'boolean') return preview.intraday;
+    if (quotes && preview.quote_version === quotes.version) return quotes.intraday;
+    // Previously published previews on this release line were closing-only.
+    return false;
+  };
+
+  DSH.previewVerified = function (preview) {
+    return !!(preview && preview.quote_version && preview.reference_version &&
+      /^\d{4}-\d{2}-\d{2}$/.test(preview.session || '') && Number.isFinite(Date.parse(preview.as_of_ts)) &&
+      Date.parse(preview.as_of_ts) <= Date.now() && Array.isArray(preview.top) && preview.top.length === 3 &&
+      preview.top.every(row => row && row.ticker && Number.isFinite(row.ytd)));
+  };
+
+  DSH.lastVerifiedDay = function (equity) {
+    const day = equity && equity.today;
+    const amount = +(localStorage.getItem("dsh.amt") || 100000);
+    if (!equity || equity.runtime_verified !== true || !day || !equity.quote_version ||
+        day.quote_version !== equity.quote_version || !/^\d{4}-\d{2}-\d{2}$/.test(day.session || '') ||
+        !Number.isFinite(Date.parse(equity.source_as_of)) || Date.parse(equity.source_as_of) > Date.now() ||
+        !Number.isFinite(day.pct) || day.pct <= -1 || !Number.isFinite(day.per_dollar) ||
+        !Number.isFinite(amount) || amount <= 0) return null;
+    return {amount: amount * day.per_dollar, pct: day.pct, session: day.session,
+      sourceAsOf: equity.source_as_of, live: equity.quote_intraday === true};
+  };
+
   DSH.previewCurrent = function (preview, quotes) {
     return !!(preview && quotes && preview.quote_version && quotes.version &&
       (preview.quote_version === quotes.version ||
@@ -512,7 +551,7 @@
         const [a, b, c] = await Promise.all([
           fetch(ep.url + "/rest/v1/v_site_dataset?select=key,updated_at", opt),
           fetch(ep.url + "/rest/v1/live_quote_snapshot?singleton=eq.true&select=evidence_sha256", opt),
-          fetch(ep.url + "/rest/v1/v_live_strategy_results?select=variant,kind,source_as_of", opt)
+          fetch(ep.url + "/rest/v1/v_live_strategy_results?select=variant,kind,quote_version,created_at", opt)
         ]);
         if (!a.ok) { const e = new Error("HTTP " + a.status); e.status = a.status; throw e; }
         const sa = (await a.json()).map(r => r.key + ":" + r.updated_at).sort().join("|");
@@ -522,7 +561,7 @@
           if (Array.isArray(qb) && qb.length) qv = qb[0].evidence_sha256 || "";
         }
         if (c.ok) rv = (await c.json())
-          .map(r => r.variant + "/" + r.kind + ":" + r.source_as_of).sort().join("|");
+          .map(r => r.variant + "/" + r.kind + ":" + r.quote_version + ":" + r.created_at).sort().join("|");
         return { static: sa, quote: qv, result: rv };
       } catch (e) {
         noteErr("version-probe", e);
@@ -1028,7 +1067,7 @@
           day.session !== quotes.session || !Number.isFinite(day.pct) || day.pct <= -1 ||
           !Number.isFinite(day.per_dollar) || !Number.isFinite(amount) || amount <= 0) return null;
       return {amount:amount*day.per_dollar,pct:day.pct,session:day.session,
-        asOf:equity.updated,live:typeof equity.quote_intraday==='boolean' ? equity.quote_intraday : quotes.intraday === true,
+        asOf:equity.updated,sourceAsOf:equity.source_as_of || quotes.ts,live:typeof equity.quote_intraday==='boolean' ? equity.quote_intraday : quotes.intraday === true,
         label:"今日",lagging:lagging};
     }
     // 口径：day = Σ 股数×(最新价−昨收)，基数 = 当前市值（不是目标权重）
@@ -1079,6 +1118,7 @@
       pct: totalMv - day > 0 ? day / (totalMv - day) : null,
       session: (quotes && quotes.session) || "",
       asOf: (quotes && quotes.ts_local) || "",
+      sourceAsOf: quotes && quotes.ts,
       live: live,
       label: "今日",
     };

@@ -8,14 +8,8 @@
 整条输出链就此停住，页面「净值截至」连续 4 天停在 11-06，而所有
 quotes 对账都显示「数据已齐」。唯一能救它的只有下一次 push 或人工派发。
 
-本模块只读浏览器同源的 Turso 公开端点，比较：
-
-    quotes.session（必须是收盘版 intraday=False）
-      vs preview.session / b/preview.session
-
-落后就派发 `live-strategy.yml` 重算；由 reconcile.yml 的每 20 分钟心跳、
-workflow_run、错峰 cron 任一对账运行唤起。数据源 settle 后下一拍即自动
-补回，不需要人工干预，也不会为「让 CI 全绿」绕过任何数据质量门禁。
+直接读取浏览器使用的 Turso 端点，核对 A/B 的净值与预览。
+盘中只对仍具计算价值的报价重试；收盘核对正式结算结果。
 
 限流（纯函数，可离线测试）
   · 冷却 30 分钟（心跳 20 分钟一拍，避免每拍都撞同一次未结算的数据源）
@@ -79,27 +73,33 @@ def read_outputs(cloud_url=rs.SITE_CLOUD, timeout=20):
     return out
 
 
-def evaluate(quotes, preview, now=None):
-    """纯函数：比较收盘行情场次与预览场次，判断要不要重算。"""
-    q = quotes if isinstance(quotes, dict) else {}
-    p = preview if isinstance(preview, dict) else {}
+def evaluate(quotes, outputs, now=None):
+    """Detect missing/outdated A/B consumer outputs for a usable snapshot."""
+    q = quotes or {}
     target = str(q.get("session") or "")
-    pv = str(p.get("session") or "")
-
-    def ok(reason):
-        return {"need_recompute": False, "target_session": target,
-                "preview_session": pv, "reason": reason}
-
-    if not target:
-        return ok("行情场次未知，不做输出对账")
-    if bool(q.get("intraday")):
-        return ok("行情仍是盘中版，净值/预览只在收盘场次计算")
-    if pv < target:
-        return {"need_recompute": True, "target_session": target,
-                "preview_session": pv or "无",
-                "reason": "预览场次 %s 落后于收盘场次 %s，需重算净值/排名"
-                          % (pv or "无", target)}
-    return ok("预览场次与收盘场次一致（%s）" % pv)
+    version = q.get("version")
+    quote_stamp = rs._parse(q.get("ts"))
+    intraday = q.get("intraday") is True
+    preview = outputs.get("preview") or {}
+    result = {"need_recompute": False, "target_session": target,
+              "preview_session": preview.get("session") or "", "phase": "intraday" if intraday else "close"}
+    if not target or not version:
+        return {**result, "reason": "行情场次或版本未知"}
+    if intraday:
+        deadline = rs._parse(q.get("fresh_until"))
+        now = rs._parse(now or dt.datetime.now(UTC))
+        if not quote_stamp or not deadline or not quote_stamp <= now < deadline:
+            return {**result, "reason": "盘中报价已不可用于重算，等待下一次行情"}
+    missing = []
+    for key in OUTPUT_KEYS[1:]:
+        row = outputs.get(key) or {}
+        day = row.get("session") if key.endswith("preview") else (row.get("today") or {}).get("session")
+        stamp = rs._parse(row.get("source_as_of") or row.get("as_of_ts"))
+        if (row.get("quote_version") != version and not (day and stamp and quote_stamp and
+                (day > target or (day == target and stamp > quote_stamp)))):
+            missing.append(key)
+    return {**result, "need_recompute": bool(missing),
+            "reason": "展示结果待更新：" + ", ".join(missing) if missing else "四项结果已对应报价版本"}
 
 
 def dispatch_allowed(runs, now, cooldown_min=RECOMPUTE_COOLDOWN_MIN,
@@ -162,7 +162,7 @@ def main():
             result["source"] = "fixture"
         else:
             data = read_outputs()
-            q, p = data.get("quotes") or {}, data.get("preview") or {}
+            q, p = data.get("quotes") or {}, data
         result.update(evaluate(q, p, now))
     except Exception as exc:                 # noqa: BLE001
         # 和场次对账一致：监控链路抖动绝不变成红色运行或假告警。
@@ -187,22 +187,22 @@ def main():
         if out:
             with open(out, "a", encoding="utf-8") as fh:
                 for key in ("need_recompute", "dispatch_allowed", "target_session",
-                            "preview_session", "reason", "source"):
+                            "preview_session", "reason", "source", "phase"):
                     fh.write("%s=%s\n" % (key, str(result.get(key, "")).replace("\n", " ")))
     return 0
 
 
 def self_test():
     now = dt.datetime.fromisoformat("2026-11-10T22:00:00+00:00")
+    close = {"session": "2026-11-10", "version": "v1", "intraday": False}
+    live = {**close, "intraday": True, "ts": "2026-11-10T21:55:00Z", "fresh_until": "2026-11-10T22:15:00Z"}
+    current = {key: {"quote_version": "v1"} for key in OUTPUT_KEYS[1:]}
     cases = [
-        ("收盘版但预览落后", {"session": "2026-11-10", "intraday": False},
-         {"session": "2026-11-06"}, True),
-        ("预览与收盘一致", {"session": "2026-11-10", "intraday": False},
-         {"session": "2026-11-10"}, False),
-        ("盘中版不重算", {"session": "2026-11-10", "intraday": True},
-         {"session": "2026-11-06"}, False),
-        ("预览缺场次", {"session": "2026-11-10", "intraday": False}, {}, True),
-        ("行情缺场次不误判", {}, {"session": "2026-11-10"}, False),
+        ("收盘版但结果缺失", close, {}, True),
+        ("四项收盘结果齐全", close, current, False),
+        ("新鲜盘中版缺结果", live, {}, True),
+        ("过期盘中版等待下次行情", {**live, "fresh_until": "2026-11-10T21:59:00Z"}, {}, False),
+        ("行情缺场次不误判", {}, current, False),
     ]
     failed = []
     for label, q, p, expect in cases:

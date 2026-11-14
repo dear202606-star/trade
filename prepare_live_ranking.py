@@ -175,8 +175,9 @@ def directory(connection,path=None):
     connection.commit();return body
 
 
-def prepare(path=None):
-    q=live_quotes.load_snapshot();session=q['session'];year=int(session[:4]);base=str(year-1)+'-12-31'
+def prepare(path=None, *, snapshot=None):
+    q=snapshot if snapshot is not None else live_quotes.load_snapshot()
+    session=q['session'];year=int(session[:4]);base=str(year-1)+'-12-31'
     phase='intraday' if q['intraday'] else 'close'
     pool,_,_=db_ref.load_market_reference(session)
     connection=db_sources.db()
@@ -202,7 +203,8 @@ def prepare(path=None):
         for r in records:mapping.setdefault(r['code'],[]).append(r['market'])
         with connection.cursor() as cursor:
             cursor.execute('''select distinct on(symbol) symbol,payload,evidence_sha256 from live_ranking_context
-                where base_year=%s order by symbol,session desc,created_at desc''',(year,))
+                where base_year=%s and session<%s and phase='close'
+                order by symbol,session desc,created_at desc''',(year,session))
             prior={s:(p,h) for s,p,h in cursor.fetchall()}
         errors=[];success=0;pending=[]
         def flush():
@@ -259,7 +261,9 @@ def prepare(path=None):
                          or (prev_adj is not None and close_enough(prev_adj,quote['pc'])))
                 if not settled:
                     raise ValueError('Previous close not settled; retry collection: '+symbol)
-                if phase=='close' and (session not in data['raw'] or not close_enough(data['raw'][session],quote['p'])):
+                if session not in data['raw'] or session not in data['adjusted']:
+                    raise ValueError('Session raw/adjusted pair unavailable; retry collection: '+symbol)
+                if phase=='close' and not close_enough(data['raw'][session],quote['p']):
                     raise ValueError('Closing bar not settled; retry collection: '+symbol)
             body={'symbol':symbol,'provider_symbol':provider_symbol,'market':market,
                   'source_start':min(data['raw']),'source_end':session,

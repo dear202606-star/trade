@@ -2,7 +2,7 @@
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var EQ = null, SIG = null, Q = null, CV = null, SH = null, PV = null, ZH = {}, SEC = {};
-  /* GICS 行业中文名：持仓、次年预览、逐年明细共用一套口径 */
+  /* GICS 行业中文名：持仓、次年预览共用一套口径 */
   var SECTOR_ZH = {
     "Information Technology": "信息技术", "Communication Services": "通信服务",
     "Consumer Discretionary": "可选消费", "Consumer Staples": "必需消费",
@@ -32,9 +32,8 @@
     return v > 0 ? "up" : "down";
   }
 
-  /* ---------- ① 今日 ---------- */
+  /* ---------- ① 单日表现 ---------- */
   function renderNow() {
-    var off = (SIG && SIG.official) || [];
     var advice = DSH.marketAdvice(EQ, Q);
     var trend = advice ? advice.trend : "—";
     var hold = trend === "满仓";
@@ -44,20 +43,15 @@
       ? "下次换仓 " + ((SIG && SIG.rebalance_hint) || "12 月末")
       : "大盘跌破均线 · 建议减仓";
 
-    var t = DSH.quoteFreshness(Q) === false ? DSH.today(SIG, Q, EQ) : null;
-    if (t) {
-      $("todayPct").textContent = pct2(t.pct);
-      $("todayPct").className = "num num-lg " + cls(t.pct);
-      $("todayAmt").textContent = yuan(t.amount);
-      $("todayAmt").className = "sub " + cls(t.amount);
-      $("todayLabel").textContent = t.lagging ? "今日表现 · " + String(t.asOf || "").slice(11,16) : "策略今日表现";
-    } else {
-      $("todayPct").textContent = "—";
-      $("todayPct").className = "num num-lg";
-      $("todayAmt").textContent = "—";
-      $("todayAmt").className = "sub";
-      $("todayLabel").textContent = DSH.todayUnavailable(Q, EQ);
-    }
+    var current = DSH.quoteFreshness(Q) === false ? DSH.today(SIG, Q, EQ) : null;
+    var t = current || DSH.lastVerifiedDay(EQ);
+    $("todayLabel").textContent = "单日策略表现";
+    $("todayPct").textContent = t ? pct2(t.pct) : "—";
+    $("todayPct").className = "num num-lg " + (t ? cls(t.pct) : "");
+    $("todayAmt").textContent = t ? yuan(t.amount) : "";
+    $("todayAmt").className = "sub " + (t ? cls(t.amount) : "");
+    $("todayStamp").textContent = t ? DSH.sessionStamp(t.session, t.sourceAsOf, t.live) +
+      (current && !current.lagging ? "" : " · 最近核验") : DSH.todayUnavailable(Q, EQ);
 
     $("switchTxt").textContent = trend;
     var _spy = advice ? advice.spy.toFixed(0) : "—", _ma = advice ? advice.ma.toFixed(0) : "—";
@@ -129,30 +123,28 @@
 
     var bdTxt = (EQ && EQ.base_date)
       ? EQ.base_date.slice(0, 4) + "-" + EQ.base_date.slice(4, 6) + "-" + EQ.base_date.slice(6, 8) : "—";
-    $("posTitle").textContent = "当年策略明细";
     var pm = $("posMeta");
-    if (pm) pm.textContent = (y ? (y - 1) + "-12 选出 · " : "") + (bdTxt ? "建仓 " + bdTxt : "") +
-      (EQ && EQ.updated ? " · 估值 " + EQ.updated.slice(5,16) + "（北京）" : "");
-    $("posRows").innerHTML = c.rows.map(function (r, i) {
-      var eraw = (r.entry_raw != null) ? r.entry_raw : r.entry;
-      var lraw = (r.last_raw != null) ? r.last_raw : r.last;
-      // 使用账户统一校验后的价格，禁止另行拼接未校验报价。
-      var liveRaw = lraw;
-      var liveAdj = r.last;
-      var mvAdj = r.shares * liveAdj;
-      var pnlAdj = mvAdj - r.cost;
-      return '<div class="pr-row">' +
-        '<div class="tk-cell"><span class="tk">' + DSH.esc(r.ticker) + '</span>' +
-          '<span class="sec-tag" title="GICS 行业：' + DSH.esc(sectorOf(r.ticker, r.sector).raw) + '">' +
-          DSH.esc(sectorOf(r.ticker, r.sector).zh) + '</span>' +
-          '</div>' +
-        '<div class="r">' + Math.round(r.weight * 100) + '%</div>' +
-        '<div class="r">' + eraw.toFixed(2) + '</div>' +
-        '<div class="r">' + liveRaw.toFixed(2) + '</div>' +
-        '<div class="r">' + yuan(mvAdj) + '</div>' +
-        '<div class="r ' + cls(liveAdj - r.entry) + '">' + pct2(liveAdj / r.entry - 1) + '</div>' +
-        '<div class="r ' + cls(pnlAdj) + '">' + yuan(pnlAdj) + '</div>' +
-        '</div>';
+    if (pm) {
+      var quoteTime = yearResult.bridged ? (EQ.runtime_verified ? EQ.source_as_of : Q.ts) :
+        (EQ && EQ.quote_intraday !== true ? EQ.source_as_of : null);
+      pm.textContent = (y ? (y - 1) + "-12 选出 · " : "") + "建仓 " + bdTxt +
+        (yearResult.asOf ? " · 估值 " + DSH.sessionStamp(yearResult.asOf, quoteTime, yearResult.bridged ? (EQ.runtime_verified ? EQ.quote_intraday : Q.intraday) : false) : "");
+    }
+    var posRows = $("posRows");
+    posRows.innerHTML = c.rows.map(function (r) {
+      var eraw = r.entry_raw != null ? r.entry_raw : r.entry;
+      var lraw = r.last_raw != null ? r.last_raw : r.last;
+      var ret = r.entry > 0 ? r.last / r.entry - 1 : null;
+      var pnl = r.mv - r.cost;
+      return '<tr class="pr-row">' +
+        '<th scope="row"><span class="tk-cell"><span class="tk">' + DSH.esc(r.ticker) + '</span>' +
+          '<span class="sec-tag">' + DSH.esc(sectorOf(r.ticker).zh) + '</span></span></th>' +
+        '<td class="r pr-return ' + cls(ret) + '">' + pct2(ret) + '</td>' +
+        '<td class="r ' + cls(pnl) + '">' + yuan(pnl) + '</td>' +
+        '<td class="r pr-detail"><span class="mobile-field" aria-hidden="true">权重</span>' + Math.round(r.weight * 100) + '%</td>' +
+        '<td class="r pr-detail"><span class="mobile-field" aria-hidden="true">建仓价</span>' + eraw.toFixed(2) + '</td>' +
+        '<td class="r pr-detail"><span class="mobile-field" aria-hidden="true">市场价</span>' + lraw.toFixed(2) + '</td>' +
+        '<td class="r pr-detail"><span class="mobile-field" aria-hidden="true">市值</span>' + yuan(r.mv) + '</td></tr>';
     }).join("");
   }
 
@@ -224,17 +216,18 @@
   function renderPreview() {
     var box = $("previewRows");
     if (!box) return;
-    if (!DSH.previewCurrent(PV, Q)) {
-      box.textContent = "排名待更新与核验";
-      $("previewNote").textContent = PV && PV.as_of
-        ? "上次计算 " + PV.as_of + "（北京） · 暂不展示过期排名"
-        : "当前排名尚未通过校验";
+    var status = $("previewStatus");
+    var current = DSH.previewCurrent(PV, Q);
+    var verified = current || DSH.previewVerified(PV);
+    status.hidden = !verified;
+    if (!verified) {
+      box.textContent = "暂无已核验排名";
+      $("previewNote").textContent = "候选及收益核验通过后更新";
       return;
     }
-    var y = PV.hold_year || "";
-    $("nextYearTitle").textContent = "次年策略预览";
-    $("previewNote").textContent = PV.final ? "已定稿 · 与正式持仓一致" :
-      "年初至今涨幅 · 截至 " + String(PV.as_of || "").slice(5,16) + "（北京）";
+    var intraday = DSH.snapshotIntraday(PV, Q);
+    status.textContent = PV.final ? "已定稿" : current ? (intraday ? "盘中快照" : "收盘快照") : "最近核验";
+    $("previewNote").textContent = "年初至今收益 · " + DSH.sessionStamp(PV.session, PV.as_of_ts, intraday);
     box.innerHTML = (PV.top || []).map(function (r) {
       var sec = sectorOf(r.ticker, r.sector).zh;
       return '<div class="pv-row">' +
@@ -314,19 +307,17 @@
 
   function renderYears() {
     var years = ((SH && SH.years) || []).filter(function (x) { return x.year >= SHOW_FROM; });
-    $("yearRows").innerHTML = years.slice().reverse().map(function (r) {
+    $("yearRows").innerHTML = years.slice().sort(function (a, b) { return b.year - a.year; }).map(function (r) {
       var holds = (r.holdings || []).map(function (h) {
-        return '<span class="chip" title="GICS 行业：' + DSH.esc(sectorOf(h.ticker, h.sector).raw) + '">' +
-          '<b>' + DSH.esc(h.ticker) + '</b><em>' +
-          DSH.esc(sectorOf(h.ticker, h.sector).zh) + '</em><i>' +
+        return '<span class="chip"><b>' + DSH.esc(h.ticker) + '</b><i>' +
           Math.round((h.weight || 0) * 100) + '%</i></span>';
       }).join('');
-      return '<div class="yr-row">' +
-        '<div>' + r.year + '</div>' +
-        '<div class="h">' + holds + '</div>' +
-        '<div class="r ' + cls(r.ret) + '">' + pct2(r.ret, 1) + '</div>' +
-        '<div class="r down">-' + (Math.abs(r.dd || 0) * 100).toFixed(1) + '%</div>' +
-        '</div>';
+      return '<tr class="yr-row">' +
+        '<th scope="row">' + DSH.esc(r.year) + '</th>' +
+        '<td class="r yr-return ' + cls(r.ret) + '">' + pct2(r.ret, 1) + '</td>' +
+        '<td class="r yr-drawdown ' + cls(r.dd == null ? null : -Math.abs(r.dd)) + '">' +
+          pct2(r.dd == null ? null : -Math.abs(r.dd), 1) + '</td>' +
+        '<td><div class="h">' + holds + '</div></td></tr>';
     }).join("");
   }
 
@@ -384,7 +375,10 @@
       busy = true;
       try {
         var q = await DSH.jsonNoCache("quotes", {});
-        if (q && (q.ts || q.ts_local)) { Q = q; renderTick(); renderStamp(); }
+        if (q && (q.ts || q.ts_local)) {
+          Q = q; renderTick(); renderStamp(); checkFreshness();
+          if (dataReady()) { renderNow(); renderYear(); renderPreview(); }
+        }
       } finally { busy = false; }
     }, 60000);
 
@@ -513,7 +507,7 @@
       return;
     }
     setNotice("page", "error", "");
-    if (DSH.quoteFreshness && DSH.quoteFreshness(Q) === true)
+    if (DSH.quoteStaleForDisplay ? DSH.quoteStaleForDisplay(Q) : DSH.quoteFreshness(Q) === true)
       setNotice("quotes", "warn", "行情更新超时");
     else setNotice("quotes", "warn", "");
     linkNotice();
@@ -562,7 +556,8 @@
     ["todayPct", "todayAmt", "switchTxt"].forEach(function (id) {
       var el = $(id); if (el) el.textContent = "—";
     });
-    $("todayLabel").textContent = "收益数据待更新";
+    $("todayLabel").textContent = "单日策略表现";
+    $("todayStamp").textContent = "收益数据待更新";
     $("switchSub").textContent = "大盘建议暂不可用";
     $("posRows").innerHTML = "";
     $("yearSpark").innerHTML = "";
@@ -580,18 +575,13 @@
     /* 数据库版本变化 → 精确失效缓存 → 自动重绘，不依赖人工触发/手工调校 */
     if (DSH.startVersionWatch) DSH.startVersionWatch(async function () {
       await loadVariant(false);
-      if (!dataReady()) return;
+      if (!dataReady()) { renderUnavailable("计算数据读取失败 · 正在重试"); return; }
       checkFreshness();
       renderAllCards();
     });
 
-    if (!dataReady()) {
-      renderUnavailable("在线数据源暂不可用 · 正在重试");
-      return;
-    }
-
-    checkFreshness();
-    renderAllCards();
+    if (dataReady()) { checkFreshness(); renderAllCards(); }
+    else renderUnavailable("在线数据源暂不可用 · 正在重试");
 
     var _rt = null;
     window.addEventListener("resize", function () {
@@ -617,7 +607,10 @@
     });
   }
   links.forEach(function (link) {
-    link.addEventListener('click', function () { activate(link.hash.slice(1)); });
+    link.addEventListener('click', function () {
+      activate(link.hash.slice(1));
+      if (link.hash === '#annual') document.querySelector('#annual details').open = true;
+    });
   });
   if ('IntersectionObserver' in window) {
     var observer = new IntersectionObserver(function (entries) {

@@ -129,7 +129,7 @@ def main():
            "今日涨跌与行情方向一致（页面 %+.2f / 加权 %+.2f）" % (tv or 0, exp),
            "页面 %s" % t)
         lbl = pg.inner_text("#todayLabel")
-        ck("策略今日表现" in lbl, "今日卡标题为「策略今日表现」（%s）" % lbl.strip(),
+        ck("单日策略表现" in lbl, "单日卡标题为「单日策略表现」（%s）" % lbl.strip(),
            "标题异常：%s" % lbl)
         foot = pg.inner_text("#footStamp")
         ck("盘中" in foot or "收盘" in foot, "页脚标注盘中/收盘（%s）" % foot.strip(),
@@ -194,7 +194,7 @@ def main():
            "状态异常：%s" % foot)
 
         titles = pg.evaluate("() => [...document.querySelectorAll('.card-title')].map(e => e.innerText)")
-        ck(any("当年" in t for t in titles), "存在「当年策略明细」卡片",
+        ck(any("当年" in t for t in titles), "存在「当年策略表现」卡片",
            "缺少当年卡：%s" % titles)
         ck(any("次年" in t for t in titles), "存在「次年策略预览」卡片",
            "缺少次年预览卡：%s" % titles)

@@ -17,35 +17,28 @@ NOW = dt.datetime.fromisoformat("2026-11-10T22:00:00+00:00")
 
 
 class EvaluateTests(unittest.TestCase):
-    def test_closing_quotes_with_stale_preview_needs_recompute(self):
-        got = ro.evaluate({"session": "2026-11-10", "intraday": False},
-                          {"session": "2026-11-06"}, NOW)
-        self.assertTrue(got["need_recompute"])
-        self.assertEqual(got["target_session"], "2026-11-10")
-        self.assertEqual(got["preview_session"], "2026-11-06")
+    close = {"session": "2026-11-10", "version": "current", "intraday": False}
+    live = {**close, "intraday": True, "ts": "2026-11-10T21:55:00Z",
+            "fresh_until": "2026-11-10T22:15:00Z"}
+    current = {key: {"quote_version": "current"} for key in ro.OUTPUT_KEYS[1:]}
 
-    def test_matching_preview_is_clean(self):
-        self.assertFalse(ro.evaluate(
-            {"session": "2026-11-10", "intraday": False},
-            {"session": "2026-11-10"}, NOW)["need_recompute"])
+    def test_any_variant_or_kind_lagging_requires_recompute(self):
+        for key in self.current:
+            with self.subTest(key=key):
+                got = ro.evaluate(self.close, {**self.current, key: {"quote_version": "old"}}, NOW)
+                self.assertTrue(got["need_recompute"])
+                self.assertIn(key, got["reason"])
 
-    def test_intraday_quote_never_triggers_recompute(self):
-        """盘中版本来就不该算净值，不能因为预览落后而反复重算。"""
-        self.assertFalse(ro.evaluate(
-            {"session": "2026-11-10", "intraday": True},
-            {"session": "2026-11-06"}, NOW)["need_recompute"])
+    def test_matching_results_are_clean(self):
+        for quote in [self.close, self.live]:
+            self.assertFalse(ro.evaluate(quote, self.current, NOW)["need_recompute"])
 
-    def test_missing_preview_session_counts_as_stale(self):
-        self.assertTrue(ro.evaluate(
-            {"session": "2026-11-10", "intraday": False}, {}, NOW)["need_recompute"])
+    def test_intraday_quote_retries_only_within_source_deadline(self):
+        self.assertTrue(ro.evaluate(self.live, {}, NOW)["need_recompute"])
+        self.assertFalse(ro.evaluate(self.live, {}, NOW + dt.timedelta(minutes=15))["need_recompute"])
 
     def test_missing_quotes_session_never_recomputes(self):
-        self.assertFalse(ro.evaluate({}, {"session": "2026-11-10"}, NOW)["need_recompute"])
-
-    def test_string_session_comparison_handles_iso_dates(self):
-        self.assertTrue(ro.evaluate(
-            {"session": "2026-11-10", "intraday": False},
-            {"session": "2026-11-09"}, NOW)["need_recompute"])
+        self.assertFalse(ro.evaluate({}, self.current, NOW)["need_recompute"])
 
 
 class DispatchGuardTests(unittest.TestCase):
@@ -91,7 +84,7 @@ class FailOpenTests(unittest.TestCase):
     def test_gate_writes_actionable_outputs(self):
         with tempfile.TemporaryDirectory() as d:
             q, p = Path(d) / "q.json", Path(d) / "p.json"
-            q.write_text(json.dumps({"session": "2026-11-10", "intraday": False}),
+            q.write_text(json.dumps(EvaluateTests.close),
                          encoding="utf-8")
             p.write_text(json.dumps({"session": "2026-11-06"}), encoding="utf-8")
             out = Path(d) / "out.txt"
@@ -124,9 +117,8 @@ class WorkflowContractTests(unittest.TestCase):
 
     def test_strategy_pushes_turso_after_compute(self):
         """净值算完必须立刻进 Turso，否则页面要等下一次同步才刷新。"""
-        self.assertIn("sync_outputs:", self.strategy)
-        self.assertIn("needs: [equity, ranking]", self.strategy)
-        self.assertIn("db-sync.yml -f targets=turso", self.strategy)
+        self.assertEqual(self.strategy.count("db-sync.yml -f targets=turso"), 2)
+        self.assertEqual(self.strategy.count("steps.compute.outcome == 'success'"), 2)
         self.assertIn("actions: write", self.strategy)
 
     def test_settlement_review_is_bounded_to_once_per_close(self):

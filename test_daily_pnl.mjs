@@ -122,3 +122,19 @@ test('invalid position or capital cannot silently omit a holding', () => {
   assert.equal(calculator()(null, quotes, { position: {} }), null);
   assert.equal(calculator()(null, quotes, { position: [null] }), null);
 });
+
+
+test('US session and Beijing quote timestamp are distinct after Beijing midnight',()=>{
+  const stamp=calculator('100000','sessionStamp');
+  assert.equal(stamp('2026-11-13','2026-11-13T21:00:00Z',false),'美股 11/13 · 收盘 · 北京 11/14 05:00');
+  assert.equal(stamp('2026-06-15','2026-06-15T16:00:00Z',true),'美股 06/15 · 盘中 · 北京 06/16 00:00');
+});
+
+test('last verified daily return stays dated and rejects unverified data',()=>{
+  const previous={runtime_verified:true,quote_version:'v1',source_as_of:'2026-11-13T21:00:00Z',
+    quote_intraday:false,today:{session:'2026-11-13',quote_version:'v1',pct:.01,per_dollar:.02}};
+  const get=calculator('100000','lastVerifiedDay');
+  assert.equal(get(previous).amount,2000);
+  assert.equal(get(previous).session,'2026-11-13');
+  assert.equal(get({...previous,quote_version:'split'}),null);
+});

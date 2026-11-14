@@ -73,12 +73,8 @@ def read_snapshot(cursor):
 def load_snapshot(now=None, strict=True):
     """Read one consistent online quote/calendar/worker version; no file fallback.
 
-    strict=False 只取 payload，跳过报价时效门禁，专供 run_guard 判断
-    「盘中 / 幂等是否要跳过」。2026-11-10 实测：盘中本来不重算净值，
-    但 run_equity / live_ranking.run 原先先做严格校验 —— 30 分钟采集节奏下
-    「报价刷新任务超过 15 分钟未成功」必然命中，作业还没走到 should_skip
-    就抛错，本应秒退的盘中运行天天变红。真正要写净值时必须再用
-    strict=True 复核，数据质量门禁仍是 fail-closed，没有被绕过。
+    strict=False 只读当前 payload，供计算作业先检查同版本是否已成功。
+    新版本始终用 strict=True 复核报价、交易所场次和采集回执后再计算。
     """
     from watchdog_checks import quote_problems
     now=now or dt.datetime.now(UTC)
