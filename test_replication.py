@@ -63,6 +63,19 @@ class TestReplicationContract(unittest.TestCase):
             self.assertEqual(row[3], expected)
             self.assertEqual(json.loads(row[1]), {"a": 1, "b": 2})
 
+    def test_copy_requires_four_results_for_the_same_quoted_close(self):
+        q = {"session": "2026-11-13", "version": "close13", "intraday": False}
+        equity = {"quote_version": "close13", "last_session": "20261113"}
+        preview = {"quote_version": "close13", "session": "2026-11-13"}
+        batch = {"quotes": q, "equity": equity, "b/equity": equity,
+                 "preview": preview, "b/preview": preview}
+        self.assertTrue(sync.settled_outputs_match(batch))
+        self.assertFalse(sync.settled_outputs_match({**batch, "b/preview":
+            {**preview, "quote_version": "close12", "session": "2026-11-12"}}))
+        self.assertFalse(sync.settled_outputs_match({**batch, "equity":
+            {**equity, "last_session": "20261112"}}))
+        self.assertFalse(sync.settled_outputs_match({**batch, "quotes": {**q, "intraday": True}}))
+
     def test_neon_dsn_drops_unsupported_channel_binding(self):
         os.environ["NEON_DSN"] = (
             "postgresql://u:p@host/db?sslmode=require&channel_binding=require")

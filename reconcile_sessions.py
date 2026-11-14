@@ -42,29 +42,8 @@ SITE_CLOUD = "https://dear202606-star.github.io/trade/data/cloud.json"
 # 与 selfheal.MAX_BACKFILL_HOURS 同口径：在线挂牌只保留最近一个场次，
 # 超过这个时数再去补采只会撞上已被改写的前收价字段。
 MAX_BACKFILL_HOURS = 20
-# 开盘后多久才认为「当日盘中快照本应存在」，避免把正常排队延迟误判成故障。
-INTRADAY_GRACE_MIN = 35
-# 2026-11-12：盘中报价的业务时间戳最长允许落后多久。
-# 旧逻辑盘中只问「当日有没有快照」，有就判「已在线」。而 egress freeze
-# 档会把每 30 分钟的定时采集整批 skip（run 仍报 success），11-11 15:21
-# 之后 5 小时零刷新、所有监控全绿。改以访客真正读到的 quotes.ts 年龄
-# 为准：cron 丢拍、额度冻结、门禁跳过、备库同步落后都会暴露出来。
-# 40 = 30 分钟采集节奏 + 10 分钟容错；平台外心跳 20 分钟一拍，最坏
-# 端到端延迟约 60 分钟（旧逻辑无上限）。
-MAX_QUOTE_AGE_MIN = 40
-# 盘中桶上限：freeze 档会一直持续到计费周期结束，整个交易日可能全靠
-# 对账补采刷新（6.5 小时 / 30 分钟冷却 ≈ 13 次）。旧上限 3 次会在上午
-# 就用光，下午重新停更——这正是 11-10 收盘补采被挡的同型缺陷。
-# 12 次 × 约 2MB 采集，相对 17GB 的周期用量可忽略。
-MAX_DISPATCH_PER_SESSION = 12
-# 收盘版是每交易日「必须产出」的一次，与盘中临时补采分开计数。
-# 盘中一次快照只影响展示，收盘版缺失会让净值/预览整场不重算。
 MAX_CLOSING_DISPATCH = 6
-# 心跳 20 分钟一拍，收盘重试的冷却必须短于一拍，否则下一拍总被挡。
 CLOSING_COOLDOWN_MIN = 10
-DEFAULT_COOLDOWN_MIN = 30
-# 收盘后多久开始要求「收盘版」快照（盘中版 intraday=True 不算齐）。
-CLOSE_GRACE_MIN = 20
 
 
 def _parse(value):
@@ -80,81 +59,23 @@ def _parse(value):
 
 
 def evaluate(now, calendar, quotes, max_backfill_hours=MAX_BACKFILL_HOURS):
-    """纯函数：给定「现在 / 日历 / 线上 quotes」，返回要不要补采。
-
-    返回 {need_action, mode, as_of, expected_session, current_session, reason}。
-    mode: intraday（抓实时价，不带 as_of）| closing（按收盘逻辑时间补采）| none
-    """
+    """Check the settled session that should already be visible to readers."""
     now = _parse(now)
     if now is None:
         raise ValueError("时刻无效")
-    q = quotes if isinstance(quotes, dict) else {}
-    current = str(q.get("session") or "")
-    have_ts = _parse(q.get("ts") or q.get("ts_local")) is not None
-    intraday_snapshot = bool(q.get("intraday"))
-
-    def ok(reason, expected=""):
-        return {"need_action": False, "mode": "none", "as_of": "",
-                "expected_session": expected, "current_session": current,
-                "reason": reason}
-
-    def need(mode, as_of, expected, reason):
-        return {"need_action": True, "mode": mode, "as_of": as_of,
-                "expected_session": expected, "current_session": current,
-                "reason": reason}
-
-    info = tw.session_info(now, calendar)
-    if info["trading_day"] and info["open"] and info["close"]:
-        opened, closed = info["open"], info["close"]
-        session = info["session"]
-        # A. 当日盘中（含收盘后 20 分钟宽限）：场次存在 + 报价足够新鲜。
-        #    2026-11-12：不再「当日一次即算齐」。补齐「定时采集被额度门禁
-        #    整批跳过、run 却判 success」的盲区，直接以访客读到的
-        #    quotes.ts 年龄为准，与采集是否跑过完全解耦。
-        if opened + dt.timedelta(minutes=INTRADAY_GRACE_MIN) <= now \
-                <= closed + dt.timedelta(minutes=CLOSE_GRACE_MIN):
-            if current != session or not have_ts:
-                return need("intraday", "", session,
-                            "盘中应有 %s 快照，线上为 %s，实时补采" % (session, current or "无"))
-            stamp = _parse(q.get("ts") or q.get("ts_local"))
-            age_min = (now - stamp).total_seconds() / 60
-            # 未来时间戳只可能来自时钟偏差，不能据此反复派发补采。
-            if age_min > MAX_QUOTE_AGE_MIN:
-                return need("intraday", "", session,
-                            "盘中 %s 报价已 %.0f 分钟未刷新（上限 %d），实时补采"
-                            % (session, age_min, MAX_QUOTE_AGE_MIN))
-            return ok("盘中 %s 报价新鲜（%.0f 分钟）" % (session, max(age_min, 0)),
-                      session)
-        # B. 当日收盘后：必须有该场次的收盘版（intraday=False）。
-        #    GitHub 把收盘 cron 延迟数小时也走这里，用逻辑时间补回收盘价。
-        if now > closed + dt.timedelta(minutes=CLOSE_GRACE_MIN):
-            as_of = (closed + dt.timedelta(minutes=tw.CLOSING_AS_OF_MIN)).isoformat()
-            age_h = (now - _parse(as_of)).total_seconds() / 3600
-            if age_h < 0 or age_h > max_backfill_hours:
-                return ok("超出 %d 小时补采窗口，在线挂牌已被改写，等下一场次"
-                          % max_backfill_hours, session)
-            stale = current < session or (current == session and intraday_snapshot)
-            if stale:
-                return need("closing", as_of, session,
-                            "收盘应有 %s 收盘版，线上为 %s%s，按逻辑时间补采"
-                            % (session, current or "无",
-                               "（盘中版）" if intraday_snapshot else ""))
-            return ok("收盘 %s 快照已在线" % session, session)
-
-    # C. 盘前 / 周末 / 休市日：检查「最近一个已收盘交易日」有没有漏。
-    #    这样即使整个交易日的 cron 全被丢弃，次日凌晨/周末到达的对账器也能补齐。
-    latest = tw.latest_closed_session(now, calendar)
-    if latest:
-        as_of = (latest["close"] + dt.timedelta(minutes=tw.CLOSING_AS_OF_MIN)).isoformat()
-        age_h = (now - _parse(as_of)).total_seconds() / 3600
-        if 0 <= age_h <= max_backfill_hours:
-            expected = latest["session"]
-            stale = current < expected or (current == expected and intraday_snapshot)
-            if stale:
-                return need("closing", as_of, expected,
-                            "最近收盘场次 %s 缺失（线上 %s），按逻辑时间补采"
-                            % (expected, current or "无"))
-    return ok("无需补采（盘前 / 休市 / 数据已齐）", latest["session"] if latest else "")
+    q = quotes or {}
+    current = str(q.get('session') or '')
+    target = tw.closing_collection_gate(now, calendar)
+    expected = target['session']
+    age = now - _parse(target['as_of']) if target['allow'] else None
+    stamp = _parse(q.get('ts'))
+    closing = tw.latest_closed_session(now, calendar)
+    covered = bool(closing and stamp and stamp <= now and stamp >= closing['close'] and
+                   current == closing['session'] and q.get('intraday') is False)
+    missing = bool(target['allow'] and age <= dt.timedelta(hours=max_backfill_hours) and not covered)
+    return dict(need_action=missing, mode='closing' if missing else 'none',
+                as_of=target['as_of'] if missing else '', expected_session=expected,
+                current_session=current, reason='缺少 %s 收盘快照' % expected if missing else '无需补采')
 
 
 def _urlopen_json(url, data=None, headers=None, timeout=20, attempts=3):
@@ -202,77 +123,42 @@ def read_quotes(cloud_url=SITE_CLOUD, timeout=20):
     return json.loads(value) if isinstance(value, str) else (value or {})
 
 
-def run_kind(run):
-    """从运行标题识别补采类型；加 run-name 之前的老运行算 legacy。
-
-    quotes.yml 的 run-name 会带 backfill-closing / backfill-intraday。
-    legacy 归入盘中桶（保守），绝不占用收盘版的独立配额。
-    """
-    title = str((run or {}).get("displayTitle") or "")
-    if "backfill-closing" in title:
-        return "closing"
-    if "backfill-intraday" in title:
-        return "intraday"
-    return "legacy"
-
-
-def dispatch_allowed(expected_session, runs, now, mode="intraday"):
-    """冷却 / 在途 / 每场次派发上限；runs 为 gh run list 的 JSON 列表。
-
-    2026-11-11：盘中补采与收盘补采**分桶计数**。收盘版是每日必须产出的
-    一次（缺了净值/预览整场不重算），不能因为盘中已补 5 次就被挡住。
-    收盘桶冷却 10 分钟 < 心跳一拍 20 分钟，且上限单独放宽到 6 次。
-    """
+def dispatch_allowed(expected_session, runs, now):
+    """Allow limited retries without overlapping scheduled collections."""
     now = _parse(now)
-    if runs is None:
-        return True, "无运行记录，允许派发"
-    closing = mode == "closing"
-    cooldown_min = CLOSING_COOLDOWN_MIN if closing else DEFAULT_COOLDOWN_MIN
-    cap = MAX_CLOSING_DISPATCH if closing else MAX_DISPATCH_PER_SESSION
-    # 在途检查对所有类型生效，避免并发派发；其余判定只看本桶运行。
-    for r in runs or []:
-        if str(r.get("status") or "").lower() in ("in_progress", "queued", "pending", "waiting"):
-            return False, "行情快照补采仍在途"
+    day = dt.date.fromisoformat(expected_session)
+    start = dt.datetime.combine(day, dt.time(0), UTC)
     active = 0
-    for r in runs or []:
-        kind = run_kind(r)
-        if closing and kind != "closing":
+    for run in runs or []:
+        if str(run.get('status') or '').lower() in ('in_progress', 'queued', 'pending', 'waiting'):
+            return False, '行情采集仍在途'
+        if 'backfill-closing' not in str(run.get('displayTitle') or ''):
             continue
-        if not closing and kind == "closing":
-            continue
-        created = _parse(r.get("createdAt"))
+        created = _parse(run.get('createdAt'))
         if created is None:
             continue
-        age_min = (now - created).total_seconds() / 60
-        if 0 <= age_min < cooldown_min:
-            return False, "%s 冷却期内（%.0f 分钟 < %d）" % (
-                "收盘" if closing else "盘中", age_min, cooldown_min)
-        # 只统计同一目标场次窗口内的补采（场次当日 00:00 UTC 起 24 小时）
-        if expected_session:
-            try:
-                day = dt.date.fromisoformat(expected_session)
-            except ValueError:
-                continue
-            start = dt.datetime.combine(day, dt.time(0), UTC)
-            if start - dt.timedelta(hours=6) <= created <= start + dt.timedelta(hours=30):
-                active += 1
-    if active >= cap:
-        return False, "场次 %s 的 %s 补采已派发 %d 次，达上限 %d" % (
-            expected_session, "收盘" if closing else "盘中", active, cap)
-    return True, "允许派发（本场次 %s 已补 %d 次）" % (
-        "收盘" if closing else "盘中", active)
+        if dt.timedelta(0) <= now - created < dt.timedelta(minutes=CLOSING_COOLDOWN_MIN):
+            return False, '收盘补采冷却期内'
+        if start <= created <= start + dt.timedelta(hours=44):
+            active += 1
+    if active >= MAX_CLOSING_DISPATCH:
+        return False, '收盘补采达到场次上限'
+    return True, '允许收盘补采'
 
 
 def _recent_runs():
-    """查最近 20 次手动补采运行；gh 不可用时返回 None（视为允许）。"""
+    """Check pending collectors and downstream jobs before dispatching a repair."""
     import subprocess
     try:
-        out = subprocess.run(
-            ["gh", "run", "list", "--workflow", "quotes.yml", "--event",
-             "workflow_dispatch", "--limit", "30", "--json",
-             "status,createdAt,displayTitle"],
-            check=False, capture_output=True, text=True, timeout=30).stdout.strip()
-        return json.loads(out or "[]")
+        runs = []
+        for workflow in ("quotes.yml", "live-strategy.yml", "db-sync.yml"):
+            limit = "30" if workflow == "quotes.yml" else "4"
+            process = subprocess.run(
+                ["gh", "run", "list", "--workflow", workflow, "--limit", limit, "--json",
+                 "status,createdAt,displayTitle"],
+                check=True, capture_output=True, text=True, timeout=15)
+            runs.extend(json.loads(process.stdout or "[]"))
+        return runs
     except Exception:
         return None
 
@@ -308,8 +194,7 @@ def main():
 
     if result["need_action"]:
         runs = None if args.no_history else _recent_runs()
-        allowed, why = dispatch_allowed(result["expected_session"], runs, now,
-                                        result["mode"])
+        allowed, why = dispatch_allowed(result["expected_session"], runs, now)
         result["dispatch_allowed"] = allowed
         result["dispatch_reason"] = why
         if not allowed:
@@ -333,85 +218,16 @@ def main():
 def self_test():
     cal = tw.load_calendar()
     cases = [
-        # (label, now, quotes, need_action, mode)
-        ("盘中当日快照缺失", "2026-11-10T15:30:00+00:00",
-         {"session": "2026-11-09", "ts": "2026-11-09T21:17:00Z", "intraday": False}, True, "intraday"),
-        ("盘中当日新鲜快照不补采", "2026-11-10T15:30:00+00:00",
-         {"session": "2026-11-10", "ts": "2026-11-10T15:10:00Z", "intraday": True}, False, "none"),
-        ("盘中同场次但报价陈旧必须补采", "2026-11-10T15:30:00+00:00",
-         {"session": "2026-11-10", "ts": "2026-11-10T14:33:00Z", "intraday": True}, True, "intraday"),
-        ("未来时间戳不触发自激补采", "2026-11-10T15:30:00+00:00",
-         {"session": "2026-11-10", "ts": "2026-11-10T16:10:00Z", "intraday": True}, False, "none"),
-        ("开盘宽限内不误判", "2026-11-10T14:40:00+00:00",
-         {"session": "2026-11-09", "ts": "2026-11-09T21:17:00Z", "intraday": False}, False, "none"),
-        ("收盘后仍只有盘中版", "2026-11-10T22:00:00+00:00",
-         {"session": "2026-11-10", "ts": "2026-11-10T20:00:00Z", "intraday": True}, True, "closing"),
-        ("收盘版已在线", "2026-11-10T22:00:00+00:00",
-         {"session": "2026-11-10", "ts": "2026-11-10T21:17:00Z", "intraday": False}, False, "none"),
-        ("cron 迟到 6 小时仍补采", "2026-11-10T03:49:00+00:00",
-         {"session": "2026-11-06", "ts": "2026-11-06T21:17:00Z", "intraday": False}, True, "closing"),
-        ("周末 20 小时内可补周五缺口", "2026-11-14T12:00:00+00:00",
-         {"session": "2026-11-06", "ts": "2026-11-06T21:17:00Z", "intraday": False}, True, "closing"),
-        ("周末超出补采窗口不补", "2026-11-16T12:00:00+00:00",
-         {"session": "2026-11-06", "ts": "2026-11-06T21:17:00Z", "intraday": False}, False, "none"),
-        ("感恩节休市不误判", "2026-11-26T15:00:00+00:00",
-         {"session": "2026-11-25", "ts": "2026-11-25T21:17:00Z", "intraday": False}, False, "none"),
+        ('盘中', '2026-11-10T16:00:00+00:00', False),
+        ('结算宽限', '2026-11-10T21:44:00+00:00', False),
+        ('收盘', '2026-11-10T21:46:00+00:00', True),
+        ('半日市', '2026-11-27T18:46:00+00:00', True),
+        ('休市日', '2026-11-26T20:00:00+00:00', False),
     ]
-    failed = []
-    for label, stamp, quotes, expected_need, expected_mode in cases:
-        got = evaluate(dt.datetime.fromisoformat(stamp), cal, quotes)
-        if got["need_action"] != expected_need or got["mode"] != expected_mode:
-            failed.append("%s expect=(%s,%s) got=(%s,%s) %s"
-                          % (label, expected_need, expected_mode,
-                             got["need_action"], got["mode"], got["reason"]))
-    # as_of 必须落在目标场次收盘后 17 分钟
-    got = evaluate(dt.datetime.fromisoformat("2026-11-10T03:49:00+00:00"), cal,
-                   {"session": "2026-11-06", "ts": "2026-11-06T21:17:00Z"})
-    if got.get("as_of") != "2026-11-09T21:17:00+00:00":
-        failed.append("延迟补采 as_of 错误: %r" % got.get("as_of"))
-    # 冷却 / 上限
-    now = dt.datetime.fromisoformat("2026-11-10T15:00:00+00:00")
-    if dispatch_allowed("2026-11-10", [{"status": "completed",
-                                        "createdAt": "2026-11-10T14:50:00Z"}], now)[0]:
-        failed.append("冷却期内不应派发")
-    if dispatch_allowed("2026-11-10", [{"status": "in_progress"}], now)[0]:
-        failed.append("在途运行不应重复派发")
-    many = [{"status": "completed", "createdAt": "2026-11-10T%02d:00:00Z" % h}
-            for h in range(0, 13)]
-    if dispatch_allowed("2026-11-10", many, now)[0]:
-        failed.append("超过每场次上限仍派发")
-    # freeze 档整日靠补采刷新，11 次仍在预算内，不能被旧上限 3 次挡住。
-    eleven = [{"status": "completed", "createdAt": "2026-11-10T%02d:00:00Z" % h}
-              for h in range(0, 11)]
-    if not dispatch_allowed("2026-11-10", eleven, now)[0]:
-        failed.append("freeze 档整日补采被旧上限误挡")
-    # 11-10 真实事故：盘中补采 5 次把配额吃光，收盘补采被永久拒发。
-    intraday_many = [
-        {"status": "completed", "createdAt": "2026-11-10T%02d:00:00Z" % h,
-         "displayTitle": "行情快照 · backfill-intraday"} for h in (1, 3, 5, 7, 9)]
-    if not dispatch_allowed("2026-11-10", intraday_many, now, "closing")[0]:
-        failed.append("盘中补采不应吃掉收盘版配额")
-    closing_many = [
-        {"status": "completed", "createdAt": "2026-11-10T%02d:00:00Z" % h,
-         "displayTitle": "行情快照 · backfill-closing"}
-        for h in (1, 2, 3, 4, 5, 6, 7)]
-    if dispatch_allowed("2026-11-10", closing_many, now, "closing")[0]:
-        failed.append("收盘补采超过独立上限仍派发")
-    if dispatch_allowed("2026-11-10", [
-            {"status": "completed", "createdAt": "2026-11-10T14:55:00Z",
-             "displayTitle": "行情快照 · backfill-closing"}], now, "closing")[0]:
-        failed.append("收盘 5 分钟内不应重复派发")
-    if not dispatch_allowed("2026-11-10", [
-            {"status": "completed", "createdAt": "2026-11-10T14:48:00Z",
-             "displayTitle": "行情快照 · backfill-closing"}], now, "closing")[0]:
-        failed.append("收盘 12 分钟后应允许下一拍重试")
-    if dispatch_allowed("2026-11-10", [{"status": "in_progress",
-                                        "displayTitle": "行情快照 · backfill-intraday"}],
-                        now, "closing")[0]:
-        failed.append("在途运行对所有类型都应阻断")
-    print(json.dumps({"self_test": "FAIL" if failed else "OK",
-                      "cases": len(cases) + 10, "failed": failed}, ensure_ascii=False))
-    return 1 if failed else 0
+    failures = [label for label, now, expected in cases
+                if evaluate(now, cal, {})['need_action'] != expected]
+    print(json.dumps({'cases': len(cases), 'failures': failures}, ensure_ascii=False))
+    return bool(failures)
 
 
 if __name__ == "__main__":

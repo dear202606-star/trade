@@ -20,6 +20,7 @@ from pathlib import Path
 
 BASE = Path(__file__).resolve().parent
 DDL = BASE / "sql" / "122_site_dataset.sql"
+HISTORY_LOCK = BASE / "sql" / "126_frozen_site_history.sql"
 
 # 前端实际会读取的数据集（runtime 4 类走专用在线视图，不在此列）
 # 说明：history.json 由 site_build.py 在构建期生成、用于 signals.html 渲染，
@@ -90,10 +91,13 @@ def connection():
         raise RuntimeError("缺少 SUPABASE_DB_PASSWORD：在线数据发布只能在 CI 或配置凭据后执行")
 
 
-def install(cur):
+def install(cur, *, freeze_history=False):
     cur.execute("set statement_timeout = '120s'")
     cur.execute(DDL.read_text(encoding="utf-8"))
     print("DDL 已执行：", DDL.name)
+    if freeze_history:
+        cur.execute(HISTORY_LOCK.read_text(encoding="utf-8"))
+        print("DDL 已执行：", HISTORY_LOCK.name)
 
 
 def prune_files(source):
@@ -219,7 +223,10 @@ def main():
             try:
                 conn.autocommit = True
                 with conn.cursor() as cur:
-                    install(cur)
+                    install(cur, freeze_history=True)
+                for notice in conn.notices:
+                    if "Published history fingerprints:" in notice:
+                        print(notice.strip())
             finally:
                 conn.close()
         if a.prune:

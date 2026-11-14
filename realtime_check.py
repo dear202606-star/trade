@@ -55,8 +55,8 @@ def run(now=None):
                 # Publication can finish between the two reads. Reconcile once.
                 row,heartbeat=read_snapshot(cursor)
                 if public['evidence_sha256']!=row['evidence_sha256']:public=public_snapshot()
-            problems.extend(quote_problems(row,heartbeat,calendar,now))
-            problems.extend('公开读取：'+p for p in quote_problems(public,heartbeat,calendar,now))
+            problems.extend(quote_problems(row,heartbeat,calendar,now,closing_only=True))
+            problems.extend('公开读取：'+p for p in quote_problems(public,heartbeat,calendar,now,closing_only=True))
             if row['evidence_sha256']!=public['evidence_sha256']:
                 problems.append('公开报价与库内版本不一致')
             # 2026-11-07：调度权统一收归 GitHub Actions，两个 pg_cron

@@ -101,8 +101,9 @@ def main():
         m = re.search(r"同期标普\s*([+\-]?[\d.]+)%", vs)
         ck(bool(m) and abs(float(m.group(1)) - bench) <= 0.05,
            "同期标普 = 数据源（%.2f%%）" % bench, vs[:40])
-        foot = pg.inner_text("#footStamp")
-        ck("（北京）" in foot, "页脚标注时区（%s）" % foot.strip(), "缺时区")
+        foot = pg.inner_text("#tickUpdated")
+        ck(bool(re.fullmatch(r"美股 \d{2}/\d{2} 收盘", foot.strip())),
+           "顶栏标注收盘场次（%s）" % foot.strip(), "缺收盘日期")
         body = pg.inner_text("body")
         _ts = re.findall(r"\d{2}-\d{2}\s+\d{2}:\d{2}", body)
         ck(len(_ts) <= 1, "全页仅一个时间戳（%s）" % (_ts or "无"),
@@ -131,8 +132,8 @@ def main():
         lbl = pg.inner_text("#todayLabel")
         ck("单日策略表现" in lbl, "单日卡标题为「单日策略表现」（%s）" % lbl.strip(),
            "标题异常：%s" % lbl)
-        foot = pg.inner_text("#footStamp")
-        ck("盘中" in foot or "收盘" in foot, "页脚标注盘中/收盘（%s）" % foot.strip(),
+        foot = pg.inner_text("#tickUpdated")
+        ck("盘中" in foot or "收盘" in foot, "顶栏标注盘中/收盘（%s）" % foot.strip(),
            "状态缺失：%s" % foot)
 
         print("\n[全周期]")
@@ -189,8 +190,8 @@ def main():
         ck(not unknown, "页面上所有日期均来自数据源（%d 个）" % len(shown),
            "无法追溯：%s" % unknown)
 
-        foot = pg.inner_text("#footStamp")
-        ck(any(k in foot for k in ("盘中", "收盘")), "页脚标注盘中/收盘（%s）" % foot.strip(),
+        foot = pg.inner_text("#tickUpdated")
+        ck(any(k in foot for k in ("盘中", "收盘")), "顶栏标注盘中/收盘（%s）" % foot.strip(),
            "状态异常：%s" % foot)
 
         titles = pg.evaluate("() => [...document.querySelectorAll('.card-title')].map(e => e.innerText)")

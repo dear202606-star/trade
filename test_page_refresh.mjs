@@ -16,7 +16,9 @@ function page(read, opts={}) {
       json:async(name,fallback)=>read(name,fallback),previewCurrent:()=>false,previewVerified:()=>false,
       reportNotice:(id,level,text)=>notices.push({id,level,text}),
       dataStatus:()=>opts.status||{level:'healthy',mode:'backup'},
-      quoteFreshness:()=>opts.staleQuotes===true},
+      closingQuoteOverdue:()=>opts.staleQuotes===true,
+      inClosingRefreshWindow:()=>opts.windowOpen!==false,
+      syncIfChanged:async()=>opts.changed||['quotes','b/preview']},
     setInterval(fn){tick=fn;},console});
   const source=readFileSync(new URL('./site_src/assets/page.js',import.meta.url),'utf8');
   vm.runInContext(source.replace('  if (document.readyState === "loading")',`
@@ -38,7 +40,8 @@ test('unchanged quotes still refresh dependent artifacts and recheck deadlines',
     name.endsWith('equity')?{position:[{}],stats:{strategy:revision},revision}:
     name.endsWith('signal')?{official:[{}]}:{revision});
   p.api.startAutoRefresh();
-  await p.tick();revision=1;await p.tick();
+  await new Promise(resolve=>setImmediate(resolve));
+  revision=1;await p.tick();
   assert.equal(p.paints.length,2);
   assert.equal(p.paints[1].EQ.revision,1);
   assert.equal(p.paints[1].PV.revision,1);
@@ -46,6 +49,13 @@ test('unchanged quotes still refresh dependent artifacts and recheck deadlines',
   for(const name of ['b/equity','b/signal','b/preview','quotes'])
     assert.equal(p.calls.filter(n=>n===name).length,2);
   assert.equal(p.calls.some(n=>['b/curve','b/strategy_history','name_zh'].includes(n)),false);
+});
+
+test('an open dashboard does not fetch outside the closing window',async()=>{
+  const p=page(()=>null,{windowOpen:false});
+  p.api.startAutoRefresh();
+  await p.tick();
+  assert.deepEqual(p.calls,[]);
 });
 
 test('an old variant response cannot overwrite a newly selected variant',async()=>{
@@ -58,7 +68,9 @@ test('an old variant response cannot overwrite a newly selected variant',async()
 });
 
 test('a failed account refresh clears the prior variant positions instead of leaving ghost values',async()=>{
-  const p=page(()=>null);p.api.startAutoRefresh();
+  const opts={windowOpen:false};
+  const p=page(()=>null,opts);p.api.startAutoRefresh();
+  opts.windowOpen=true;
   const positions=p.context.document.getElementById('posRows');positions.innerHTML='old variant holdings';
   const daily=p.context.document.getElementById('todayPct');daily.textContent='+9%';
   await p.tick();
@@ -91,7 +103,7 @@ test('offline link gets a neutral notice, never a primary-outage alarm',()=>{
   p.api.renderServiceNotice();
   const link=p.notices.find(n=>n.id==='link');
   assert.equal(link.level,'info');
-  assert.match(link.text,/最近一次成功读取/);
+  assert.match(link.text,/最近缓存/);
   assert.doesNotMatch(link.text,/主数据库|故障/);
 });
 

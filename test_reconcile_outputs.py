@@ -33,8 +33,8 @@ class EvaluateTests(unittest.TestCase):
         for quote in [self.close, self.live]:
             self.assertFalse(ro.evaluate(quote, self.current, NOW)["need_recompute"])
 
-    def test_intraday_quote_retries_only_within_source_deadline(self):
-        self.assertTrue(ro.evaluate(self.live, {}, NOW)["need_recompute"])
+    def test_intraday_quote_never_recomputes_results(self):
+        self.assertFalse(ro.evaluate(self.live, {}, NOW)["need_recompute"])
         self.assertFalse(ro.evaluate(self.live, {}, NOW + dt.timedelta(minutes=15))["need_recompute"])
 
     def test_missing_quotes_session_never_recomputes(self):
@@ -115,27 +115,16 @@ class WorkflowContractTests(unittest.TestCase):
         """本轮已派发补采时不再重算，避免两写主库。"""
         self.assertIn("steps.check.outputs.dispatch_allowed != 'true'", self.reconcile)
 
-    def test_strategy_pushes_turso_after_compute(self):
-        """净值算完必须立刻进 Turso，否则页面要等下一次同步才刷新。"""
-        self.assertEqual(self.strategy.count("db-sync.yml -f targets=turso"), 2)
-        self.assertEqual(self.strategy.count("steps.compute.outcome == 'success'"), 2)
-        self.assertIn("actions: write", self.strategy)
+    def test_strategy_publishes_once_after_both_calculations(self):
+        self.assertEqual(self.strategy.count("db-sync.yml"), 2)  # comment and command
+        self.assertIn("needs: [equity, ranking]", self.strategy)
+        self.assertIn("needs.equity.result == 'success' && needs.ranking.result == 'success'", self.strategy)
 
-    def test_settlement_review_is_bounded_to_once_per_close(self):
-        """收盘结算复核：不能变成每 20 分钟一次的采集放大器。"""
+    def test_settlement_review_is_bounded_to_exchange_close(self):
         self.assertIn("收盘结算复核（每日一次", self.reconcile)
-        self.assertIn("derived.outputs.need_recompute == 'true'", self.reconcile)
-        self.assertIn('"backfill-closing" in (r.get("displayTitle") or "")',
-                      self.reconcile)
-        self.assertIn('.startswith(t)', self.reconcile)
-        self.assertIn('[ "$DONE" != "0" ]', self.reconcile)
-
-    def test_settlement_review_only_runs_after_that_days_close(self):
-        self.assertIn('[ "$SESSION" != "$TODAY" ]', self.reconcile)
-        self.assertIn('[ "$H" -lt 21 ] || [ "$H" -gt 23 ]', self.reconcile)
-        self.assertIn('[ "$M" -lt 30 ]', self.reconcile)
-        self.assertIn('-f critical=true', self.reconcile)
-        self.assertIn('as_of="${TODAY}T21:17:00+00:00"', self.reconcile)
+        self.assertIn("trading_window.py --closing-only", self.reconcile)
+        self.assertIn('CLOSE_AS_OF', self.reconcile)
+        self.assertIn("-f critical=true", self.reconcile)
 
 
 if __name__ == "__main__":

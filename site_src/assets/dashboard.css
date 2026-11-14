@@ -115,3 +115,5 @@
   .yr .chip i{display:none}
   .data-alert,.data-notice{position:static}
 }
+
+#posMeta:empty { display: none; }

@@ -397,7 +397,7 @@ def run_equity():
     # 重复快照先查账本，只有新版本才重读并严格验价。
     quotes=live_quotes.load_snapshot(strict=False)
     if run_guard.should_skip('equity',quotes):return
-    quotes=live_quotes.load_snapshot()
+    quotes=live_quotes.load_snapshot(closing_only=True)
     calendar=market_calendar.load()
     if calendar.sha!=quotes['calendar_sha256']:raise RuntimeError('Exchange calendar advanced; retry current quote')
     connection=db_sources.db()

@@ -288,6 +288,20 @@ def build_rows(datasets, meta):
     return rows
 
 
+def settled_outputs_match(datasets):
+    q = datasets["quotes"]
+    session, version = q.get("session"), q.get("version")
+    if not isinstance(session, str) or not session or not version or q.get("intraday") is not False:
+        return False
+    for key in ("equity", "b/equity", "preview", "b/preview"):
+        result = datasets[key]
+        result_session = (result.get("last_session") or "") if key.endswith("equity") else result.get("session")
+        if (str(result_session).replace("-", "") != session.replace("-", "") or
+                result.get("quote_version") != version):
+            return False
+    return True
+
+
 def sync_turso(url, token, rows, force=False):
     turso_execute(url, token, [(DDL_TURSO, [])])
     try:
@@ -301,11 +315,12 @@ def sync_turso(url, token, rows, force=False):
             ("select key, payload_sha256 from site_dataset", [])])[0])
     todo = rows if force else [r for r in rows if current.get(r[0]) != r[3]]
     if todo:
-        sql = ("insert into site_dataset(key,payload,updated_at,payload_sha256) "
-               "values(?,?,?,?) on conflict(key) do update set "
+        values = ",".join(["(?,?,?,?)"] * len(todo))
+        sql = ("insert into site_dataset(key,payload,updated_at,payload_sha256) values " +
+               values + " on conflict(key) do update set "
                "payload=excluded.payload, updated_at=excluded.updated_at, "
                "payload_sha256=excluded.payload_sha256")
-        turso_execute(url, token, [(sql, [r[0], r[1], r[2], r[3]]) for r in todo])
+        turso_execute(url, token, [(sql, [field for row in todo for field in row[:4]])])
     return {"total": len(rows), "changed": len(todo), "keys": [r[0] for r in todo]}
 
 
@@ -387,6 +402,10 @@ def main():
                          ensure_ascii=False))
         return 1
     rows = build_rows(datasets, meta)
+    if not settled_outputs_match(datasets):
+        runtime = set(ess.RUNTIME_KEYS)
+        rows = [row for row in rows if row[0] not in runtime]
+        print("收盘行情、净值和排名尚未对齐，备库保留上一份完整快照。")
     report = {"ok": True, "generated_at": _utcnow(), "keys": len(rows),
               "digest": hashlib.sha256("".join(r[3] for r in rows).encode()).hexdigest(),
               "read_source": read_source, "degraded": degraded,

@@ -20,168 +20,55 @@ def quotes(session, ts, intraday=False):
 
 
 class EvaluateTests(unittest.TestCase):
-    def test_intraday_missing_session_requests_realtime_backfill(self):
-        got = rs.evaluate(dt.datetime.fromisoformat("2026-11-10T15:30:00+00:00"),
-                          CAL, quotes("2026-11-09", "2026-11-09T21:17:00Z"))
-        self.assertTrue(got["need_action"])
-        self.assertEqual(got["mode"], "intraday")
-        self.assertEqual(got["as_of"], "")
-        self.assertEqual(got["expected_session"], "2026-11-10")
+    def check(self, stamp, snapshot=None):
+        return rs.evaluate(dt.datetime.fromisoformat(stamp + "+00:00"), CAL, snapshot)
 
-    def test_fresh_intraday_snapshot_is_idempotent(self):
-        """20 分钟前的报价：不重复派发，避免自激打穿额度。"""
-        got = rs.evaluate(dt.datetime.fromisoformat("2026-11-10T15:30:00+00:00"),
-                          CAL, quotes("2026-11-10", "2026-11-10T15:10:00Z", True))
-        self.assertFalse(got["need_action"])
-        self.assertIn("新鲜", got["reason"])
+    def test_no_collection_during_trading(self):
+        for stamp in ("2026-07-01T14:00:00", "2026-11-10T15:30:00", "2026-11-10T21:44:00"):
+            with self.subTest(stamp=stamp):
+                self.assertFalse(self.check(stamp)["need_action"])
 
-    def test_stale_intraday_snapshot_triggers_refresh(self):
-        """11-11 事故：同场次已有快照，但 5 小时没刷新，必须补采。
+    def test_regular_and_early_closes_use_exchange_time(self):
+        for stamp in ("2026-07-01T20:45:00", "2026-11-10T21:45:00", "2026-11-27T18:45:00"):
+            with self.subTest(stamp=stamp):
+                result = self.check(stamp)
+                self.assertTrue(result["need_action"])
+                self.assertEqual(result["mode"], "closing")
+                self.assertEqual(result["as_of"], stamp + "+00:00")
 
-        egress freeze 档把定时采集整批 skip、run 仍报 success，旧的
-        「当日有快照即算齐」判定会让页面永久停在早上 10:21。
-        """
-        got = rs.evaluate(dt.datetime.fromisoformat("2026-11-11T20:30:00+00:00"),
-                          CAL, quotes("2026-11-11", "2026-11-11T15:21:00Z", True))
-        self.assertTrue(got["need_action"])
-        self.assertEqual(got["mode"], "intraday")
-        self.assertEqual(got["as_of"], "")
-        self.assertEqual(got["expected_session"], "2026-11-11")
-        self.assertIn("未刷新", got["reason"])
+    def test_delayed_close_retry_never_targets_the_next_open(self):
+        self.assertEqual(self.check("2026-11-11T03:30:00")["expected_session"], "2026-11-10")
+        self.assertFalse(self.check("2026-11-11T14:30:00")["need_action"])
+        self.assertFalse(self.check("2026-11-14T18:00:00")["need_action"])
+        self.assertFalse(self.check("2026-11-26T22:00:00")["need_action"])
 
-    def test_stale_boundary_is_exactly_forty_minutes(self):
-        now = dt.datetime.fromisoformat("2026-11-10T15:30:00+00:00")
-        fresh = rs.evaluate(now, CAL, quotes("2026-11-10", "2026-11-10T14:51:00Z", True))
-        stale = rs.evaluate(now, CAL, quotes("2026-11-10", "2026-11-10T14:49:00Z", True))
-        self.assertFalse(fresh["need_action"])
-        self.assertTrue(stale["need_action"])
-
-    def test_future_timestamp_does_not_loop(self):
-        got = rs.evaluate(dt.datetime.fromisoformat("2026-11-10T15:30:00+00:00"),
-                          CAL, quotes("2026-11-10", "2026-11-10T16:10:00Z", True))
-        self.assertFalse(got["need_action"])
-
-    def test_opening_grace_window_does_not_misfire(self):
-        got = rs.evaluate(dt.datetime.fromisoformat("2026-11-10T14:40:00+00:00"),
-                          CAL, quotes("2026-11-09", "2026-11-09T21:17:00Z"))
-        self.assertFalse(got["need_action"])
-
-    def test_after_close_intraday_snapshot_requires_closing_version(self):
-        got = rs.evaluate(dt.datetime.fromisoformat("2026-11-10T22:00:00+00:00"),
-                          CAL, quotes("2026-11-10", "2026-11-10T20:00:00Z", True))
-        self.assertTrue(got["need_action"])
-        self.assertEqual(got["mode"], "closing")
-        self.assertEqual(got["as_of"], "2026-11-10T21:17:00+00:00")
-
-    def test_closing_version_online_is_idempotent(self):
-        got = rs.evaluate(dt.datetime.fromisoformat("2026-11-10T22:00:00+00:00"),
-                          CAL, quotes("2026-11-10", "2026-11-10T21:17:00Z"))
-        self.assertFalse(got["need_action"])
-
-    def test_cron_delayed_six_hours_still_backfills(self):
-        """GitHub 把 21:17 收盘任务拖到次日 03:49，仍按逻辑时间补回。"""
-        got = rs.evaluate(dt.datetime.fromisoformat("2026-11-10T03:49:00+00:00"),
-                          CAL, quotes("2026-11-06", "2026-11-06T21:17:00Z"))
-        self.assertTrue(got["need_action"])
-        self.assertEqual(got["mode"], "closing")
-        self.assertEqual(got["as_of"], "2026-11-09T21:17:00+00:00")
-        self.assertEqual(got["expected_session"], "2026-11-09")
-
-    def test_weekend_within_20h_backfills_but_expired_gap_does_not(self):
-        recent = rs.evaluate(dt.datetime.fromisoformat("2026-11-14T12:00:00+00:00"),
-                             CAL, quotes("2026-11-06", "2026-11-06T21:17:00Z"))
-        self.assertTrue(recent["need_action"])
-        expired = rs.evaluate(dt.datetime.fromisoformat("2026-11-16T12:00:00+00:00"),
-                              CAL, quotes("2026-11-06", "2026-11-06T21:17:00Z"))
-        self.assertFalse(expired["need_action"])
-
-    def test_exchange_holiday_does_not_misfire(self):
-        got = rs.evaluate(dt.datetime.fromisoformat("2026-11-26T15:00:00+00:00"),
-                          CAL, quotes("2026-11-25", "2026-11-25T21:17:00Z"))
-        self.assertFalse(got["need_action"])
-
-    def test_missing_timestamp_counts_as_gap(self):
-        got = rs.evaluate(dt.datetime.fromisoformat("2026-11-10T15:30:00+00:00"),
-                          CAL, {"session": "2026-11-10"})
-        self.assertTrue(got["need_action"])
+    def test_only_settled_quote_covers_target(self):
+        base = quotes("2026-11-10", "2026-11-10T21:00:00Z")
+        for patch in ({}, {"intraday": True}, {"ts": None}, {"ts": "2026-11-10T23:00:00Z"},
+                      {"session": "2026-11-09"}):
+            with self.subTest(patch=patch):
+                self.assertEqual(self.check("2026-11-10T22:00:00", {**base, **patch})["need_action"],
+                                 bool(patch))
 
 
 class DispatchGuardTests(unittest.TestCase):
-    NOW = dt.datetime.fromisoformat("2026-11-10T15:30:00+00:00")
+    day = "2026-11-10"
+    now = dt.datetime.fromisoformat("2026-11-10T23:00:00+00:00")
 
-    def test_in_flight_run_blocks_duplicate_dispatch(self):
-        allowed, why = rs.dispatch_allowed("2026-11-10",
-                                           [{"status": "in_progress"}], self.NOW)
-        self.assertFalse(allowed)
-        self.assertIn("在途", why)
+    def test_in_flight_scheduled_run_blocks_duplicate(self):
+        self.assertFalse(rs.dispatch_allowed(self.day, [{"status": "queued"}], self.now)[0])
 
-    def test_cooldown_blocks_duplicate_dispatch(self):
-        runs = [{"status": "completed", "createdAt": "2026-11-10T15:10:00Z"}]
-        allowed, why = rs.dispatch_allowed("2026-11-10", runs, self.NOW)
-        self.assertFalse(allowed)
-        self.assertIn("冷却", why)
+    def test_recent_dispatch_has_cooldown(self):
+        run = {"status": "completed", "displayTitle": "行情快照 · backfill-closing",
+               "createdAt": "2026-11-10T22:55:00Z"}
+        self.assertFalse(rs.dispatch_allowed(self.day, [run], self.now)[0])
 
-    def test_per_session_cap_blocks_endless_retry(self):
-        runs = [{"status": "completed", "createdAt": "2026-11-10T%02d:00:00Z" % h}
-                for h in range(0, 13)]
-        allowed, why = rs.dispatch_allowed("2026-11-10", runs, self.NOW)
-        self.assertFalse(allowed)
-        self.assertIn("上限", why)
-
-    def test_intraday_cap_covers_a_full_frozen_trading_day(self):
-        """freeze 档整日无定时采集，11 次补采仍在预算内，不能被旧上限 3 挡住。"""
-        runs = [{"status": "completed", "createdAt": "2026-11-10T%02d:00:00Z" % h,
-                 "displayTitle": "行情快照 · backfill-intraday"}
-                for h in range(0, 11)]
-        allowed, why = rs.dispatch_allowed("2026-11-10", runs, self.NOW)
-        self.assertTrue(allowed, why)
-
-    def test_clean_history_allows_dispatch(self):
-        allowed, _ = rs.dispatch_allowed("2026-11-10", [], self.NOW)
-        self.assertTrue(allowed)
-
-    def test_missing_history_defaults_to_allow(self):
-        allowed, _ = rs.dispatch_allowed("2026-11-10", None, self.NOW)
-        self.assertTrue(allowed)
-
-    def test_intraday_dispatches_never_consume_closing_quota(self):
-        """11-10 事故：盘中补采 5 次把共用配额吃光，收盘补采被永久拒发。"""
-        runs = [{"status": "completed",
-                 "createdAt": "2026-11-10T%02d:00:00Z" % h,
-                 "displayTitle": "行情快照 · backfill-intraday"}
-                for h in (1, 3, 5, 7, 9)]
-        allowed, why = rs.dispatch_allowed("2026-11-10", runs, self.NOW, "closing")
-        self.assertTrue(allowed, why)
-        self.assertIn("收盘", why)
-
-    def test_legacy_runs_do_not_consume_closing_quota(self):
-        """加 run-name 之前的老运行无法识别类型，按盘中桶处理。"""
-        runs = [{"status": "completed", "createdAt": "2026-11-10T%02d:00:00Z" % h}
-                for h in (1, 3, 5, 7, 9)]
-        self.assertTrue(rs.dispatch_allowed("2026-11-10", runs, self.NOW, "closing")[0])
-
-    def test_closing_has_its_own_cap(self):
-        runs = [{"status": "completed",
-                 "createdAt": "2026-11-10T%02d:00:00Z" % h,
-                 "displayTitle": "行情快照 · backfill-closing"}
-                for h in (1, 2, 3, 4, 5, 6, 7)]
-        allowed, why = rs.dispatch_allowed("2026-11-10", runs, self.NOW, "closing")
-        self.assertFalse(allowed)
-        self.assertIn("上限", why)
-
-    def test_closing_cooldown_is_shorter_than_heartbeat_tick(self):
-        """心跳 20 分钟一拍；30 分钟冷却会让下一拍永远被挡。"""
-        recent = [{"status": "completed", "createdAt": "2026-11-10T15:25:00Z",
-                   "displayTitle": "行情快照 · backfill-closing"}]
-        self.assertFalse(rs.dispatch_allowed("2026-11-10", recent, self.NOW, "closing")[0])
-        older = [{"status": "completed", "createdAt": "2026-11-10T15:15:00Z",
-                  "displayTitle": "行情快照 · backfill-closing"}]
-        self.assertTrue(rs.dispatch_allowed("2026-11-10", older, self.NOW, "closing")[0])
-
-    def test_in_flight_blocks_every_kind(self):
-        runs = [{"status": "in_progress",
-                 "displayTitle": "行情快照 · backfill-intraday"}]
-        self.assertFalse(rs.dispatch_allowed("2026-11-10", runs, self.NOW, "closing")[0])
+    def test_per_session_cap_blocks_endless_retries(self):
+        run = {"status": "completed", "displayTitle": "行情快照 · backfill-closing",
+               "createdAt": "2026-11-10T21:50:00Z"}
+        self.assertFalse(rs.dispatch_allowed(self.day, [run] * rs.MAX_CLOSING_DISPATCH, self.now)[0])
+        self.assertTrue(rs.dispatch_allowed(self.day, [run], self.now)[0])
+        self.assertTrue(rs.dispatch_allowed(self.day, [], self.now)[0])
 
 
 class FailOpenTests(unittest.TestCase):
@@ -209,13 +96,13 @@ class FailOpenTests(unittest.TestCase):
                  patch.dict(os.environ, {"GITHUB_OUTPUT": str(out)}), \
                  patch("sys.argv", ["reconcile_sessions.py", "--gate",
                                     "--no-history",
-                                    "--at", "2026-11-10T15:30:00+00:00",
+                                    "--at", "2026-11-10T22:00:00+00:00",
                                     "--quotes-json", str(fixture)]):
                 self.assertEqual(rs.main(), 0)
             text = out.read_text(encoding="utf-8")
             self.assertIn("need_action=True", text)
             self.assertIn("dispatch_allowed=True", text)
-            self.assertIn("mode=intraday", text)
+            self.assertIn("mode=closing", text)
             self.assertIn("expected_session=2026-11-10", text)
 
 
@@ -226,6 +113,7 @@ class WorkflowContractTests(unittest.TestCase):
     def setUpClass(cls):
         root = Path(__file__).resolve().parent / ".github" / "workflows"
         cls.reconcile = (root / "reconcile.yml").read_text(encoding="utf-8")
+        cls.quotes = (root / "quotes.yml").read_text(encoding="utf-8")
         cls.sync = (root / "db-sync.yml").read_text(encoding="utf-8")
 
     def test_independent_triggers_break_the_common_mode_failure(self):
@@ -251,24 +139,9 @@ class WorkflowContractTests(unittest.TestCase):
     def test_in_flight_sync_is_never_cancelled(self):
         self.assertIn("cancel-in-progress: false", self.sync)
 
-    def test_quotes_run_name_marks_backfill_kind(self):
-        """分桶计数的依据；删掉 run-name 就会退回共用配额的旧缺陷。"""
-        text = (Path(__file__).resolve().parent / ".github" / "workflows"
-                / "quotes.yml").read_text(encoding="utf-8")
-        self.assertIn("run-name:", text)
-        self.assertIn("backfill-closing", text)
-        self.assertIn("backfill-intraday", text)
-
-    def test_freshness_contract_is_not_removed(self):
-        """11-11 停更真因：freeze 档定时采集全被 skip，场次对账却判「已在线」。"""
-        src = (Path(__file__).resolve().parent
-               / "reconcile_sessions.py").read_text(encoding="utf-8")
-        self.assertIn("MAX_QUOTE_AGE_MIN", src)
-        self.assertIn("age_min > MAX_QUOTE_AGE_MIN", src)
-        self.assertIn("MAX_DISPATCH_PER_SESSION = 12", src)
-        text = (Path(__file__).resolve().parent / ".github" / "workflows"
-                / "quotes.yml").read_text(encoding="utf-8")
-        self.assertIn("门禁拒绝时显式留痕", text)
+    def test_workflow_names_closing_retries(self):
+        self.assertIn("backfill-closing", self.quotes)
+        self.assertIn("--closing-only", self.quotes)
 
 
 if __name__ == "__main__":

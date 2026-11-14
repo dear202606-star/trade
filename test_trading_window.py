@@ -97,27 +97,12 @@ class TradingWindowTests(unittest.TestCase):
             self.assertEqual(tw.gate('intraday', now, self.cal)['allow'],
                              self.reviewed.state(now)['refresh_due'], stamp)
 
-    def test_every_collection_cron_stays_outside_beijing_daytime(self):
-        """真实调度时刻必须避开北京 6-20 点，而不只是 gate 函数返回 False。"""
-        for name in ('quotes.yml', 'db-sync.yml'):
-            text = (BASE / '.github' / 'workflows' / name).read_text(encoding='utf-8')
-            crons = re.findall(r'cron:\s*"([^"]+)"', text)
-            self.assertTrue(crons, name + ' 缺少 schedule')
-            for cron in crons:
-                hour_field = cron.split()[1]
-                hours = []
-                for part in hour_field.split(','):
-                    if '-' in part:
-                        lo, hi = part.split('-')
-                        hours += list(range(int(lo), int(hi) + 1))
-                    elif part.isdigit():
-                        hours.append(int(part))
-                    elif part.startswith('*/'):
-                        continue          # 分钟位，小时位在下一字段
-                for h in hours:
-                    beijing = (h + 8) % 24
-                    self.assertFalse(6 <= beijing < 20,
-                                     '%s cron %s 落在北京 %d 点' % (name, cron, beijing))
+    def test_beijing_regular_close_refresh_time_varies_with_dst(self):
+        for stamp, hour in (("2026-07-01T20:45:00+00:00", 4), ("2026-11-10T21:45:00+00:00", 5)):
+            now = at(stamp)
+            self.assertTrue(tw.closing_collection_gate(now, self.cal)["allow"])
+            local = now.astimezone(dt.timezone(dt.timedelta(hours=8)))
+            self.assertEqual((local.hour, local.minute), (hour, 45))
 
     def test_fail_open_on_unavailable_or_tampered_calendar(self):
         """日历坏了只能多采一次，绝不能造成行情缺口。"""

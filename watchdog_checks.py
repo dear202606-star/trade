@@ -13,7 +13,7 @@ def timestamp(value):
     return result.astimezone(dt.timezone.utc)
 
 
-def quote_problems(row, heartbeat, calendar, now):
+def quote_problems(row, heartbeat, calendar, now, *, closing_only=False):
     """Check the current source session and real worker proof, not history writes."""
     if not isinstance(row,dict) or not isinstance(row.get('payload'),dict):
         raise ValueError('缺少在线报价快照')
@@ -29,10 +29,20 @@ def quote_problems(row, heartbeat, calendar, now):
     source=timestamp(row['source_as_of'])
     if source!=timestamp(payload['ts']):raise ValueError('报价源时间与快照不一致')
     state=calendar.state(now);problems=[]
+    minimum = state['minimum_source_time']
+    if closing_only:
+        from trading_window import due_close
+        close = due_close(now, calendar.body)
+        if not close or payload.get('intraday') is not False:
+            problems.append('有效收盘行情缺失')
+        else:
+            minimum = close['close']
+            if str(payload.get('session') or '') < close['session']:
+                problems.append('行情停更：最新收盘场次缺失')
     if payload.get('calendar_sha256')!=calendar.sha:
         problems.append('报价日历版本与在线核验版本不一致')
     if source>now+dt.timedelta(minutes=5):problems.append('报价源时间来自未来')
-    if source<state['minimum_source_time']:problems.append('报价未达到交易所应有时点')
+    if source<minimum:problems.append('报价未达到交易所应有时点')
     if payload.get('session')!=source.astimezone(ZoneInfo('America/New_York')).date().isoformat():
         problems.append('报价场次与源时间不一致')
     elif payload.get('previous_session')!=calendar.previous(dt.date.fromisoformat(payload['session'])).isoformat():
@@ -52,7 +62,7 @@ def quote_problems(row, heartbeat, calendar, now):
         if stamp.astimezone(ZoneInfo('America/New_York')).date().isoformat()!=payload.get('session'):
             problems.append('成分报价场次不一致：'+symbol)
         if stamp>now+dt.timedelta(minutes=5):problems.append('成分报价时间来自未来：'+symbol)
-        if stamp<state['minimum_source_time']:problems.append('成分报价未达到应有时点：'+symbol)
+        if stamp<minimum:problems.append('成分报价未达到应有时点：'+symbol)
         if symbol=='SPY' and stamp!=source:problems.append('基准成分时间与快照不一致')
     try:
         deadline=timestamp(payload.get('fresh_until'))
@@ -66,12 +76,12 @@ def quote_problems(row, heartbeat, calendar, now):
             problems.append('刷新回执与当前报价版本不一致')
         finished=timestamp(heartbeat['finished_at'])
         if finished>now+dt.timedelta(minutes=5):problems.append('刷新回执时间来自未来')
-        if state['refresh_due'] and now>=state['open']+dt.timedelta(minutes=15) and now-finished>dt.timedelta(minutes=15):
+        if not closing_only and state['refresh_due'] and now>=state['open']+dt.timedelta(minutes=15) and now-finished>dt.timedelta(minutes=15):
             problems.append('报价刷新任务超过 15 分钟未成功')
     return problems
 
 
-def history_problems(report, now):
+def history_problems(report, now, *, frozen=False):
     """Frozen history may stay unchanged; validate content and annual coverage."""
     if not isinstance(report,dict) or not isinstance(report.get('years'),list) or not report['years']:
         raise ValueError('历史产物缺少年度记录')
@@ -80,7 +90,7 @@ def history_problems(report, now):
         raise ValueError('历史年度记录无效或重复')
     problems=[]
     if sorted(years)!=list(range(min(years),max(years)+1)):problems.append('历史产物缺少区间内年度')
-    if max(years)<now.year-1:problems.append('历史产物缺少新增的已结束年度')
+    if not frozen and max(years)<now.year-1:problems.append('历史产物缺少新增的已结束年度')
     generated=report.get('generated_at')
     if generated and timestamp(generated)>now+dt.timedelta(minutes=5):
         problems.append('历史生成时间来自未来')

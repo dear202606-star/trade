@@ -1,13 +1,6 @@
 name: 备库同步
 
-# 「一主两备」的复制链路（2026-11-08）
-#   A 层 Turso（libsql HTTP，浏览器可直读）：交易时段 30 分钟一次，
-#     与 quotes.yml 的盘中采集节奏对齐；只传变化的展示行，典型 0~3 行。
-#   B 层 Neon（PostgreSQL 持久副本）：**每工作日只唤醒一次**（收盘后），
-#     Neon Free 的计算时长/自动休眠是稀缺资源，绝不能按 30 分钟频率连接。
-#     全 24 表的灾难恢复另由 db-backup.yml + restore_to_neon.py 负责。
-#   主库读取走 PostgreSQL 直连，单次约 150KB；按 egress_budget 门禁受控，
-#   且「备库同步」已登记为关键链路，freeze 档也放行（否则备库会停更）。
+# 收盘计算结束触发 Turso 增量复制。每天收盘后另有一次备库兜底。
 on:
   workflow_dispatch:
     inputs:
@@ -21,23 +14,8 @@ on:
           - 'neon'
           - 'turso,neon'
   schedule:
-    - cron: "*/30 13-20 * * 1-5"   # 交易时段：仅 Turso（再由 NYSE 日历门禁收窄）
-    # 2026-11-10：原 21:10 UTC 比 quotes.yml 的 21:17 收盘采集还早，
-    # 会把「前一日」数据同步到备库；移到 21:55（晚于 21:50 兜底采集）。
-    - cron: "55 21 * * 1-5"        # 收盘关键：Turso + Neon（Neon 唯一唤醒点）
-    # 2026-11-08：原 05:00 UTC = 北京 13:00，迁到北京 05:00，避开非交易时段。
-    - cron: "0 21 * * 0,6"         # 周末低频心跳：仅 Turso，数据不变时 0 行写入
-  push:
-    branches: [main]
-    paths:
-      - sync_site_dataset.py
-      - export_site_snapshot.py
-      - db_sources.py
-      - egress_budget.py
-      - trading_window.py
-      - research/exchange_calendar.json
-      - test_trading_window.py
-      - .github/workflows/db-sync.yml
+    - cron: "55 16 * * 1-5"
+      timezone: "America/New_York"
 
 concurrency:
   group: trade-db-sync
@@ -56,21 +34,16 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
-      # 2026-11-08：休市日不再做 30 分钟 Turso 同步，更不唤醒 Neon 计算实例。
-      # 周末低频心跳保留（task=heartbeat），用于复制一致性校验，0 行写入。
-      - name: 交易时段门禁（NYSE 已复核日历）
+      - name: 收盘场次门禁
         id: gate
-        shell: bash
         env:
           EVENT_NAME: ${{ github.event_name }}
-          SCHEDULE: ${{ github.event.schedule }}
         run: |
-          case "$SCHEDULE" in
-            "0 21 * * 0,6") TASK=heartbeat ;;
-            "55 21 * * 1-5") TASK=closing ;;
-            *) TASK=intraday ;;
-          esac
-          python3 trading_window.py --task "$TASK" --gate
+          if [ "$EVENT_NAME" = "schedule" ]; then
+            python3 trading_window.py --closing-only --gate
+          else
+            echo 'allow=true' >> "$GITHUB_OUTPUT"
+          fi
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -83,20 +56,8 @@ jobs:
         shell: bash
         run: |
           MANUAL="${{ github.event.inputs.targets }}"
-          SCHEDULE="${{ github.event.schedule }}"
-          if [ -n "$MANUAL" ]; then
-            TARGETS="$MANUAL"
-            REASON="手动触发"
-          elif [ "$SCHEDULE" = "55 21 * * 1-5" ]; then
-            TARGETS="turso,neon"
-            REASON="收盘关键同步：Turso + Neon 持久副本"
-          else
-            TARGETS="turso"
-            REASON="交易时段/周末心跳：仅 Turso，不唤醒 Neon"
-          fi
+          TARGETS="${MANUAL:-turso,neon}"
           echo "targets=$TARGETS" >> "$GITHUB_OUTPUT"
-          echo "reason=$REASON" >> "$GITHUB_OUTPUT"
-          echo "计划：$REASON -> $TARGETS"
 
       - name: 出口流量门禁
         id: egress
@@ -104,7 +65,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TRADE_FORCE_BUDGET: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
-        run: python egress_budget.py --workflow "备库同步" --fast
+        run: python egress_budget.py --workflow "备库同步" --fast --critical
 
       - name: 增量同步展示数据
         if: steps.gate.outputs.allow == 'true' && steps.egress.outputs.allow == 'true'

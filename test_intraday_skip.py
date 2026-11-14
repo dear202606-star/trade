@@ -12,7 +12,7 @@ CLOSING = {"intraday": False, "session": "2026-11-10", "version": "v1"}
 
 class SkipOrderTests(unittest.TestCase):
     def _loader(self, payload, calls, strict_error="在线报价未通过核验：报价刷新任务超过 15 分钟未成功"):
-        def load(strict=True):
+        def load(strict=True, *, closing_only=False):
             calls.append(strict)
             if strict:
                 raise RuntimeError(strict_error)
@@ -54,18 +54,14 @@ class SkipOrderTests(unittest.TestCase):
                 live_ranking.run()
         self.assertEqual(calls, [False, True])
 
-    def test_new_intraday_snapshot_uses_the_same_ledger_and_strict_validation(self):
-        for entry, kind in ((live_strategy.run_equity, 'equity'), (live_ranking.run, 'preview')):
-            connection = MagicMock()
-            cursor = connection.cursor.return_value.__enter__.return_value
-            cursor.fetchone.return_value = None
+    def test_intraday_never_writes_strategy_outputs(self):
+        for entry in (live_strategy.run_equity, live_ranking.run):
             calls = []
-            with self.subTest(kind=kind), patch('run_guard.db_sources.db', return_value=connection), \
-                    patch('live_quotes.load_snapshot', side_effect=self._loader(INTRADAY, calls)), \
-                    self.assertRaisesRegex(RuntimeError, '报价未通过核验'):
-                entry()
-            self.assertEqual(calls, [False, True])
-            self.assertIn(kind, cursor.execute.call_args.args[1])
+            with patch('run_guard.db_sources.db') as database, \
+                    patch('live_quotes.load_snapshot', side_effect=self._loader(INTRADAY, calls)):
+                self.assertIsNone(entry())
+            self.assertEqual(calls, [False])
+            database.assert_not_called()
 
 
 class LedgerContractTests(unittest.TestCase):

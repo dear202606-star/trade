@@ -136,31 +136,13 @@ def snapshot_problems(doc, now=None):
             latest = tw.latest_closed_session(now, tw.load_calendar())
             if latest and now >= latest["close"] + dt.timedelta(minutes=90):
                 expected, got = latest["session"], str(q.get("session") or "")
-                if got and got < expected:
+                if got < expected or q.get("intraday") is True:
                     problems.append("行情停更：%s 收盘数据缺失（当前 %s）"
                                    % (expected, got))
         except Exception:
             pass  # 日历不可用时不额外告警，保留 72 小时兜底
         if not q.get("ok") or not (q.get("quotes") or {}).get("SPY"):
             problems.append("行情快照缺少 SPY 基准")
-
-        # 交易时段内「当日快照缺失」也要早发现。GitHub scheduled 事件实测会
-        # 整批延迟数小时甚至整点不触发（2026-11-10 15:00 UTC 的 opening /
-        # 盘中 cron 到 15:04 仍未到达）。原先只看「收盘后 90 分钟」与 72 小时，
-        # 会让开盘到收盘这大半天完全失明。命中时带「行情停更」字样，
-        # selfheal 会派发 quotes.yml 盘中实时补采（不带 as_of），
-        # 补采成功后由 quotes.yml 立即同步 Turso，闭环不依赖 cron 是否准时。
-        # 开盘后 35 分钟宽限，避免把正常的采集排队延迟误判成故障。
-        try:
-            import trading_window as tw
-            info = tw.session_info(now, tw.load_calendar())
-            if (info["trading_day"] and info["open"] and info["close"]
-                    and info["open"] + dt.timedelta(minutes=35) <= now < info["close"]
-                    and str(q.get("session") or "") != info["session"]):
-                problems.append("行情停更：%s 盘中快照缺失（当前 %s）"
-                               % (info["session"], q.get("session") or "无"))
-        except Exception:
-            pass  # 日历不可用时不额外告警，保留 72 小时兜底
 
         # 净值与预览时效（meta 来自库内 source_as_of / created_at）
         meta = doc.get("meta") or {}
@@ -193,7 +175,7 @@ def snapshot_problems(doc, now=None):
         if h.get("status") not in ("ok", "degraded"):
             problems.append("health.status=%s" % h.get("status"))
         try:
-            problems.extend(history_problems(datasets["b/strategy_history"], now))
+            problems.extend(history_problems(datasets["b/strategy_history"], now, frozen=True))
         except Exception as exc:
             problems.append("历史年度校验失败：%s" % str(exc)[:100])
         try:

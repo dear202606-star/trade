@@ -1,17 +1,9 @@
 name: 网页发布
 
-# 发布职责（2026-11-08 起）：
-#   1) 构建前端并保留上一份已部署的数据基线
-#   2) 把构建期展示数据写入在线主库，剔除 Pages 上的历史数据 JSON
-#   3) 把 14 个展示 key 增量同步到 Turso 在线备库（浏览器可直读）；
-#      Neon 持久副本由 db-sync.yml 每日低频同步，避免反复唤醒其计算实例
-#   4) 原子部署。**不再生成任何本地文件形态的镜像**：页面兜底改为
-#      「Turso 在线备库 → 浏览器 localStorage」，两者都不是仓库静态文件。
-# 定时触发保持「盘前 + 盘后」两次，与 DAILY 数据产出节奏对齐。
+# 页面发布复用在线数据，验收并锁定已发布历史后部署。
+# 每日收盘数据由净值与排名工作流更新。
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "40 12,22 * * 1-5"
   push:
     branches: [main]
     paths:
@@ -41,6 +33,7 @@ on:
       - realtime_check.py
       - watchdog_site_check.py
       - sql/122_site_dataset.sql
+      - sql/126_frozen_site_history.sql
       - trading_window.py
       - research/exchange_calendar.json
       - test_trading_window.py
@@ -88,7 +81,7 @@ jobs:
           node-version: '20'
       - run: pip install -r requirements.txt
       - run: node --test test_daily_pnl.mjs test_online_quotes.mjs test_page_refresh.mjs
-      - run: python -m unittest test_live_strategy test_live_ranking test_intraday_skip test_reconcile_outputs test_closing_reconcile test_ranking_factor_rebase test_cross_session_dividend test_watchdog_gateway test_egress_budget test_replication test_trading_window test_reconcile_sessions test_publish_ui -v
+      - run: python -m unittest test_live_strategy test_live_ranking test_live_quotes test_watchdog_checks test_backfill test_external_heartbeat test_intraday_skip test_reconcile_outputs test_closing_reconcile test_ranking_factor_rebase test_cross_session_dividend test_watchdog_gateway test_egress_budget test_replication test_trading_window test_reconcile_sessions test_publish_ui -v
       - name: 保留已部署数据并构建界面
         env:
           GH_TOKEN: ${{ github.token }}
@@ -97,20 +90,6 @@ jobs:
         env:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: python publish_site_dataset.py --install --source _site_release/data --prune
-      - name: 出口流量门禁（备库同步属关键链路）
-        id: egress
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python egress_budget.py --workflow "备库同步" --fast
-      - name: 发布后增量同步展示数据到 Turso 在线备库
-        # 页面在主库 REST 402 时自动改读 Turso；这一步保证备库与主库同源。
-        # 只写 Turso：Neon 计算实例由 db-sync.yml 每日唤醒一次，避免过度消耗免费额度。
-        if: steps.egress.outputs.allow == 'true'
-        env:
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-          TURSO_HTTP_URL: ${{ secrets.TURSO_HTTP_URL }}
-          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
-        run: python sync_site_dataset.py --targets turso
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site_release

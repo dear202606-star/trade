@@ -212,8 +212,7 @@ def run():
     # 相同报价版本已完成时无需再读取排名的输入证据。
     q=live_quotes.load_snapshot(strict=False)
     if run_guard.should_skip('preview',q):return
-    # 各场次的候选证据复用，同一场次的新盘中快照只重估收益和排序。
-    q=live_quotes.load_snapshot()
+    q=live_quotes.load_snapshot(closing_only=True)
     if not prepare(snapshot=q):
         raise ValueError("Current ranking inputs failed verification; retry the next snapshot")
     pool,sectors,version=db_ref.load_market_reference(q['session'])

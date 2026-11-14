@@ -84,10 +84,10 @@ test('refresh cadence is tiered instead of a single 60-second full reload',()=>{
   const {dsh}=reader(async()=>({ok:false}));
   assert.equal(dsh.ttlOf('curve'),24*3600*1000);
   assert.equal(dsh.tierOf('curve'),0);
-  assert.equal(dsh.ttlOf('equity'),30*60*1000);
+  assert.equal(dsh.ttlOf('equity'),15*60*1000);
   assert.equal(dsh.tierOf('equity'),1);
   assert.equal(dsh.tierOf('quotes'),2);
-  assert.ok([60*1000,30*60*1000].includes(dsh.ttlOf('quotes')));
+  assert.equal(dsh.ttlOf('quotes'),15*60*1000);
 });
 
 test('failed or malformed cloud configuration cannot poison future refreshes',async()=>{
@@ -245,7 +245,7 @@ test('version probe expires only the layer whose data actually changed',async()=
   assert.ok(!expired.includes('quotes'),'行情版本未变，不应被连带失效');
   assert.ok(!expired.includes('equity'),'计算结果未变，不应被连带失效');
   state.resultTs='2026-11-07T01:05:00Z';
-  assert.deepEqual(Array.from(await dsh.syncIfChanged()), ['equity']);
+  assert.deepEqual(Array.from(await dsh.syncIfChanged()), ['equity','b/equity','signal','b/signal','preview','b/preview']);
 });
 
 test('all endpoints down falls back to the caller value, never to a file mirror',async()=>{
@@ -275,7 +275,7 @@ test('backup endpoint version probe stays lightweight and expires only the chang
     if (url!=='https://backup.example/v2/pipeline') throw Error('unexpected call: '+url);
     const req=JSON.parse(options.body).requests[0];
     const rows=[];
-    if (req.stmt.sql.includes('select key, updated_at')) {
+    if (req.stmt.sql.includes('select key, coalesce')) {
       const map={curve:state.staticTs,'b/curve':state.staticTs,
         strategy_history:state.staticTs,'b/strategy_history':state.staticTs,
         name_zh:state.staticTs,sectors:state.staticTs,health:state.staticTs,
@@ -417,4 +417,17 @@ test('missing published calendar keeps the legacy UTC window instead of freezing
   await dsh.json('cloud',null);
   assert.equal(dsh.isTradingHours(new Date('2026-11-09T15:00:00Z')),true);
   assert.equal(dsh.isTradingHours(new Date('2026-11-08T15:00:00Z')),false,'周日');
+});
+
+test('closing refresh and overdue warnings follow the exchange calendar',()=>{
+  const {dsh}=reader(async()=>({ok:false}));
+  const at=stamp=>new Date(stamp);
+  dsh.setExchangeCalendar({coverage_from:'2026-01-01',coverage_to:'2026-12-31',
+    closed:['2026-11-26'],early_close:{'2026-11-27':'13:00'},regular_close:'16:00'});
+  assert.equal(dsh.inClosingRefreshWindow(at('2026-11-27T18:44:00Z')),false);
+  assert.equal(dsh.inClosingRefreshWindow(at('2026-11-27T18:45:00Z')),true);
+  assert.equal(dsh.inClosingRefreshWindow(at('2026-11-26T22:00:00Z')),false);
+  const q={intraday:false,session:'2026-11-25'};
+  assert.equal(dsh.closingQuoteOverdue(q,at('2026-11-27T19:29:00Z')),false);
+  assert.equal(dsh.closingQuoteOverdue(q,at('2026-11-27T19:30:00Z')),true);
 });

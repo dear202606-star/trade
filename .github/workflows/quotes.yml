@@ -1,123 +1,43 @@
 name: 行情快照
-
-# 2026-11-11：把「补采类型」写进运行标题，供 reconcile_sessions 按类型
-# 独立计数。此前盘中/手工补采与收盘必需补采共用同一个「每场次 3 次」
-# 配额，11-10 盘中补了 5 次就直接把当日收盘补采永久挡在门外，页面
-# 只剩 intraday=True 的盘中版、净值连续 4 天停在 11-06。
 run-name: >-
-  行情快照 · ${{ github.event.inputs.as_of != '' && 'backfill-closing' || 'backfill-intraday' }}
+  行情快照 · ${{ github.event_name == 'workflow_dispatch' && 'backfill-closing' || 'closing' }}
 
 concurrency:
   group: trade-live-quotes
   cancel-in-progress: false
 
-# 2026-11-07 Egress 收敛：本周期实测行情快照被触发 1139 次/10 天，
-# 其中 GitHub schedule 与 pg_cron 的 "*/5 13-21 * * 1-5" 是同一 cron
-# 双触发（见 sql/124_egress_schedule.sql，已停掉库内两个 dispatch 作业）。
-# 快照改为盘中 30 分钟 + 收盘 1 次；策略是年度持仓 + 日度净值，
-# 5 分钟级刷新既不改变结果，又是配额被打穿的直接放大器。
 on:
   schedule:
-    - cron: "*/30 13-20 * * 1-5"   # 盘中 30 分钟（再由 NYSE 日历门禁精确收窄）
-    # 2026-11-10：开盘后 30 分钟是「必须有」的关键一次。美东开盘随 DST 在
-    # 13:30 / 14:30 UTC 之间切换，故两条 cron 都列出，由 trading_window
-    # 的 opening 任务按已复核日历挑出真正落在开盘后 25~45 分钟的那一条。
-    - cron: "0 14 * * 1-5"         # 开盘后 30 分钟（EDT）
-    - cron: "0 15 * * 1-5"         # 开盘后 30 分钟（EST）
-    - cron: "17 21 * * 1-5"        # 收盘后关键一次
-    # 2026-11-08：原 02:17 UTC 补跑 = 北京 10:17，落在非交易时段。
-    # 迁入收盘窗口作二次兜底（北京 05:50），保留容错且完全避开北京 6-20 点。
-    - cron: "50 21 * * 1-5"        # 收盘兜底
+    - cron: "45 16 * * 1-5"
+      timezone: "America/New_York"
   workflow_dispatch:
-    # 看门狗自愈会带 as_of 派发：GitHub 把收盘任务延迟数小时，甚至拖到
-    # 次日盘前，此时在线报价仍挂着上一场次收盘价，用逻辑时间即可补回。
     inputs:
       critical:
-        description: '关键任务（额度 freeze 档仍放行）'
-        required: false
-        default: 'true'
+        description: 保留兼容的收盘补采参数
         type: choice
         options: ['true', 'false']
+        default: 'true'
       as_of:
-        description: '补采逻辑时间 ISO 8601（留空=实时）'
-        required: false
-        default: ''
+        description: 补采场次的逻辑时间（ISO 8601）
         type: string
-  push:
-    branches: [main]
-    paths:
-      - live_quotes.py
-      - market_calendar.py
-      - trading_window.py
-      - research/exchange_calendar.json
-      - research/install_exchange_calendar.py
-      - quotes.py
-      - db_ref.py
-      - db_sources.py
-      - test_live_quotes.py
-      - test_quote_repairs.py
-      - watchdog_checks.py
-      - egress_budget.py
-      - run_guard.py
-      - test_watchdog_checks.py
-      - test_egress_budget.py
-      # 2026-11-05：原白名单漏了实际会跑的 test_quote_snapshot.py /
-      # test_market_calendar.py，改这两个文件不触发任何 CI。改为通配。
-      - 'test_*.py'
-      - 'test_*.mjs'
-      - .github/workflows/quotes.yml
 
 permissions:
   contents: read
-  actions: write       # 读运行记录 + 采集成功后派发备库同步（gh workflow run）
+  actions: read
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    # 500+ 只标的分批抓取 + 缺失报价的独立佐证修复，实测 4 分钟会被 job
-    # 级超时硬砍（2026-11-10 两次补采都在采集途中被 canceled）。留足预算，
-    # 并允许一次自动重试，避免单次网络抖动就丢掉一整天的收盘数据。
     timeout-minutes: 20
     env:
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
-      # 2026-11-08：GitHub cron 只认「周一到周五」，认不出 NYSE 休市日。
-      # 门禁用已复核的 XNYS 日历在 pip install 之前秒退：感恩节、Good Friday、
-      # 独立日、圣诞等全天不连库；周末与北京 6-20 点同样不采集。
-      # 纯标准库、只读、失败一律 fail-open；手动 / push 触发不受约束。
-      - name: 交易时段门禁（NYSE 已复核日历）
+      - name: 收盘场次门禁
         id: gate
-        shell: bash
         env:
-          EVENT_NAME: ${{ github.event_name }}
-          SCHEDULE: ${{ github.event.schedule }}
           AS_OF_INPUT: ${{ github.event.inputs.as_of }}
-        run: |
-          EXTRA=""
-          GATE_EVENT="$EVENT_NAME"
-          case "$SCHEDULE" in
-            "17 21 * * 1-5"|"50 21 * * 1-5") TASK=closing; EXTRA="--late-ok" ;;
-            "0 14 * * 1-5"|"0 15 * * 1-5") TASK=opening ;;
-            *) TASK=intraday ;;
-          esac
-          # 手动派发分两种，不能一律无条件放行：
-          #   · 带 as_of = 看门狗自愈的延迟补跑，逻辑时间由
-          #     live_quotes.logical_time 严格校验（20h 上限 / 日历场次 / 收盘窗口），
-          #     按 closing --late-ok 放行；
-          #   · 不带 as_of = 人工实时验证，必须按 intraday 日历窗口裁决。
-          #     实测盘前新浪把 gb_spy 的前收价写成现价、涨跌额置 0，三字段
-          #     自洽但语义是假的；若放行会把整轮假报价写进生产并污染净值。
-          #     需要非交易时段强制验证请用 TRADE_FORCE_COLLECT=1。
-          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
-            if [ -n "$AS_OF_INPUT" ]; then
-              TASK=closing; EXTRA="--late-ok"
-            else
-              TASK=intraday; EXTRA=""
-              GATE_EVENT="schedule"   # 借日历裁决，不再无条件放行
-            fi
-          fi
-          EVENT_NAME="$GATE_EVENT" python3 trading_window.py --task "$TASK" $EXTRA --gate
+        run: python3 trading_window.py --closing-only --as-of "$AS_OF_INPUT" --gate
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -153,45 +73,14 @@ jobs:
         run: |
           for attempt in 1 2; do
             if [ -n "$AS_OF" ]; then
-              python live_quotes.py --write --as-of "$AS_OF" && exit 0
+              python live_quotes.py --write --closing-only --as-of "$AS_OF" && exit 0
             else
-              python live_quotes.py --write && exit 0
+              python live_quotes.py --write --closing-only && exit 0
             fi
             echo "采集第 $attempt 次失败，20 秒后重试"
             sleep 20
           done
           exit 1
-      - name: 采集成功后立即同步备库
-        # 2026-11-10 复盘：原先只有 closing / opening / dispatch 才推 Turso，
-        # 盘中 30 分钟那次采集完全依赖 db-sync.yml 的另一条定时 cron 落地。
-        # 两条独立的 schedule 都可能被 GitHub 延迟或丢弃，于是出现「主库已
-        # 更新、页面读的 Turso 仍旧」的停更。改为**每一次采集成功都立即派发**
-        # 同步，把「采集 → 同步」变成严格顺序链，定时同步降级为纯兜底。
-        # 只有「定时收盘」才唤醒 Neon（免费额度每工作日仅一次）；盘中与补采
-        # 即便复用 closing 任务，也只推 Turso，绝不误唤醒 Neon。
-        # 派发失败不把成功采集判成失败（否则下游 workflow_run 会误判），
-        # 由 reconcile.yml 的独立对账在下一轮补齐。
-        if: success() && steps.refresh.outcome == 'success'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TASK: ${{ steps.gate.outputs.task }}
-          EVENT: ${{ github.event_name }}
-        run: |
-          if [ "$TASK" = "closing" ] && [ "$EVENT" = "schedule" ]; then
-            gh workflow run db-sync.yml -f targets=turso,neon || \
-              echo "::warning::备库同步派发失败，场次对账将在下一轮兜底"
-          else
-            gh workflow run db-sync.yml -f targets=turso || \
-              echo "::warning::备库同步派发失败，场次对账将在下一轮兜底"
-          fi
-      - name: 门禁拒绝时显式留痕（杜绝「success 但没采集」的假健康）
-        # 2026-11-12：egress freeze 档会拦掉盘中定时采集，被 skip 的 step
-        # 不算失败，整个 run 仍报 success；下游 workflow_run 因此以为数据
-        # 已更新、场次对账也只看「当日有没有快照」，页面连续 5 小时停更
-        # 而全链监控全绿。这里不改变结论（门禁生效是设计内行为），但把
-        # 拒绝原因钉在运行日志里，并明确声明「本 run 不代表数据已刷新」，
-        # 真正的保底由平台外心跳 + 新鲜度对账承担。
+      - name: 门禁拒绝时显式留痕
         if: steps.gate.outputs.allow != 'true' || steps.egress.outputs.allow != 'true'
-        run: |
-          echo "::warning::本轮未采集：gate.allow=${{ steps.gate.outputs.allow }} egress.allow=${{ steps.egress.outputs.allow }} mode=${{ steps.egress.outputs.mode }}"
-          echo "本 run 的 success 仅表示门禁按设计生效，不代表报价已刷新；新鲜度对账会在下一拍按 quotes.ts 年龄判定是否补采。"
+        run: echo "本轮没有写入收盘行情"

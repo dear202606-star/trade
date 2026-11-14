@@ -10,7 +10,7 @@
   同一场次、同一报价版本、同一份代码，算 200 次结果完全相同。
 
 规则（全部 fail-safe，不会掩盖真实问题）
-  1. 盘中和收盘均计算，重复报价版本复用已成功结果。
+  1. 只计算收盘快照，重复报价版本复用已成功结果。
   2. 收盘场次若「session + quote_version + 计算代码指纹」已有成功记录，
      跳过；三者任一变化都自动重算（改代码、换报价场次不会漏算）。
   3. 账本写在 sys_event（append-only，单条 <1KB），不新增表、不改
@@ -67,6 +67,9 @@ def identity(quotes: dict) -> dict:
 
 def should_skip(kind: str, quotes: dict) -> bool:
     """kind: 'equity' | 'preview'。返回 True 表示本轮无需重算。"""
+    if quotes.get("intraday") is not False:
+        print("[run-guard] SKIP %s: 等待收盘行情" % kind, flush=True)
+        return True
     if os.environ.get("TRADE_FORCE_RECOMPUTE") == "1":
         print("[run-guard] force recompute", kind, flush=True)
         return False

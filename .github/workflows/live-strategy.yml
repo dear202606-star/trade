@@ -32,7 +32,7 @@ permissions:
 
 jobs:
   equity:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     concurrency:
@@ -56,14 +56,8 @@ jobs:
         if: steps.egress.outputs.allow == 'true'
         id: compute
         run: python live_strategy.py
-      - name: 将可用净值立即同步到 Turso
-        if: >-
-          !cancelled() && (steps.compute.outcome == 'success' || steps.compute.outcome == 'failure')
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run db-sync.yml -f targets=turso || echo "::warning::净值同步派发失败，由定时同步兜底"
   ranking:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     concurrency:
@@ -87,9 +81,12 @@ jobs:
         if: steps.egress.outputs.allow == 'true'
         id: compute
         run: python live_ranking.py
-      - name: 将可用排名立即同步到 Turso
-        if: >-
-          !cancelled() && (steps.compute.outcome == 'success' || steps.compute.outcome == 'failure')
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run db-sync.yml -f targets=turso || echo "::warning::排名同步派发失败，由定时同步兜底"
+  sync_outputs:
+    needs: [equity, ranking]
+    if: ${{ needs.equity.result == 'success' && needs.ranking.result == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: 同步已结算的净值与排名
+        run: gh workflow run db-sync.yml --repo "$GITHUB_REPOSITORY" -f targets=turso

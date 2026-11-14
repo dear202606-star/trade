@@ -82,7 +82,11 @@
 
   DSH.marketAdvice = function (equity, quotes) {
     const basis=equity && equity.market_advice, spy=quotes && quotes.quotes && quotes.quotes.SPY;
-    if (!basis || !spy || DSH.quoteFreshness(quotes)!==false || !Number.isFinite(spy.p) || spy.p<=0 ||
+    const current = quotes && (quotes.intraday === false
+      ? equity && equity.quote_version === quotes.version &&
+        Number.isFinite(Date.parse(quotes.ts)) && !DSH.closingQuoteOverdue(quotes)
+      : DSH.quoteFreshness(quotes) === false);
+    if (!basis || !spy || !current || !Number.isFinite(spy.p) || spy.p<=0 ||
         !/^\d{4}-(0[1-9]|1[0-2])$/.test(basis.month) ||
         basis.month!==String(quotes.session || '').slice(0,7) || basis.window!==10 ||
         !basis.calendar_sha256 || basis.calendar_sha256!==quotes.calendar_sha256 ||
@@ -195,6 +199,8 @@
   let preferredKey = "";
   let activeType = "supabase", activeUrl = "";
   let versionStamp = "";            // 最近一次探测到的数据库版本指纹
+  let preferClosingDataset = false;
+  DSH.useClosingDataset = function () { preferClosingDataset = true; };
   let exchangeCalendar = null;      // 公开 cloud.json 里的已复核 NYSE 日历（可选）
 
   const STATIC_KEYS = ["curve", "b/curve", "strategy_history", "b/strategy_history",
@@ -251,11 +257,40 @@
   }
   DSH.setExchangeCalendar = function (cal) { exchangeCalendar = cal; };
 
+  function closeMinutes(day) {
+    const weekday = new Date(day + "T12:00:00Z").getUTCDay();
+    const c = exchangeCalendar;
+    const covered = c && day >= c.coverage_from && day <= c.coverage_to;
+    if (weekday === 0 || weekday === 6 || (covered && (c.closed || []).includes(day))) return null;
+    const stamp = (covered && ((c.early_close || {})[day] || c.regular_close)) || "16:00";
+    return Number(stamp.slice(0, 2)) * 60 + Number(stamp.slice(3));
+  }
+
+  function latestClose(now, grace) {
+    const et = easternParts(now);
+    const d = new Date(et.date + "T12:00:00Z");
+    for (let days = 0; days < 14; days++, d.setUTCDate(d.getUTCDate() - 1)) {
+      const date = d.toISOString().slice(0, 10);
+      const close = closeMinutes(date);
+      if (close != null && (days || et.minutes >= close + grace))
+        return { date, elapsed: days * 1440 + et.minutes - close };
+    }
+    return null;
+  }
+
+  DSH.inClosingRefreshWindow = function (now) {
+    const close = latestClose(now || new Date(), 45);
+    return !!close && close.elapsed <= 8 * 60;
+  };
+
+  DSH.closingQuoteOverdue = function (quotes, now) {
+    const close = latestClose(now || new Date(), 90);
+    return !!close && (!quotes || quotes.intraday === true ||
+      String(quotes.session || "") < close.date);
+  };
+
   function ttlOf(name) {
-    const t = tierOf(name);
-    if (t === TIER_STATIC) return 24 * 3600 * 1000;
-    if (t === TIER_DAILY) return 30 * 60 * 1000;
-    return isTradingHours() ? 60 * 1000 : 30 * 60 * 1000;
+    return (tierOf(name) === TIER_STATIC ? 24 * 60 : 15) * 60 * 1000;
   }
   DSH.ttlOf = ttlOf;
   DSH.tierOf = tierOf;
@@ -309,13 +344,14 @@
     return endpointHealth[id];
   }
 
-  function orderedEndpoints(eps) {
+  function orderedEndpoints(eps, closing = false) {
     const now = Date.now();
     const healthy = eps.filter(function (ep) {
       return ep && ep.url && ep.key && healthOf(ep).circuitUntil <= now;
     });
     if (!healthy.length) return [];
-    const pref = healthy.find(function (ep) { return endpointId(ep) === preferredKey; });
+    const pref = (closing && healthy.find(ep => ep.type === "turso")) ||
+      healthy.find(ep => endpointId(ep) === preferredKey);
     return pref ? [pref].concat(healthy.filter(function (ep) { return ep !== pref; })) : healthy;
   }
 
@@ -464,7 +500,7 @@
           ce.configFailure = true;     // 本地引导配置问题，不应熔断数据库
           throw ce;
         }
-        const order = orderedEndpoints(eps);
+        const order = orderedEndpoints(eps, preferClosingDataset && tierOf(name) !== TIER_STATIC);
         if (!order.length) return fallbackValue(name, fallback);  // 全部端点熔断中
         let lastErr = null;
         for (const ep of order) {
@@ -515,13 +551,14 @@
   let probeInflight = null;
   const versions = { static: "", quote: "", result: "" };
 
-  async function probeVersion() {
+  async function probeVersion(parts = ["static", "quote", "result"]) {
+    const includeStatic = parts.includes("static");
     if (probeInflight) return probeInflight;
     probeInflight = (async function () {
       if (Date.now() < circuitUntil) return null;
       try {
         const cfg = await DSH.json("cloud", null);
-        const order = orderedEndpoints(cfg ? endpointList(cfg) : []);
+        const order = orderedEndpoints(cfg ? endpointList(cfg) : [], preferClosingDataset);
         if (!order.length) return null;
         const ep = order[0];
         if (ep.type === "turso") {
@@ -529,7 +566,9 @@
              备库同步后依然能精确触发「哪一层变了就失效哪一层」。 */
           const body = { baton: null, requests: [
             { type: "execute", stmt: {
-              sql: "select key, updated_at from site_dataset", args: [] } },
+              sql: "select key, coalesce(nullif(payload_sha256, ''), updated_at) from site_dataset" +
+                (includeStatic ? "" : " where key in ('quotes','equity','b/equity','signal','b/signal','preview','b/preview')"),
+              args: [] } },
             { type: "close" }
           ] };
           const r = await fetch(ep.url + "/v2/pipeline", {
@@ -549,12 +588,13 @@
         }
         const h = { apikey: ep.key }, opt = { cache: "no-store", headers: h };
         const [a, b, c] = await Promise.all([
-          fetch(ep.url + "/rest/v1/v_site_dataset?select=key,updated_at", opt),
+          includeStatic ? fetch(ep.url + "/rest/v1/v_site_dataset?select=key,updated_at", opt) : null,
           fetch(ep.url + "/rest/v1/live_quote_snapshot?singleton=eq.true&select=evidence_sha256", opt),
           fetch(ep.url + "/rest/v1/v_live_strategy_results?select=variant,kind,quote_version,created_at", opt)
         ]);
-        if (!a.ok) { const e = new Error("HTTP " + a.status); e.status = a.status; throw e; }
-        const sa = (await a.json()).map(r => r.key + ":" + r.updated_at).sort().join("|");
+        const failure = [a, b, c].find(response => response && !response.ok);
+        if (failure) throw new Error("HTTP " + failure.status);
+        const sa = a ? (await a.json()).map(r => r.key + ":" + r.updated_at).sort().join("|") : "";
         let qv = "", rv = "";
         if (b.ok) {
           const qb = await b.json();
@@ -573,11 +613,11 @@
   DSH.probeVersion = probeVersion;
 
   /* 返回本次变化导致失效的 key 列表；null = 探测不可用，[] = 无变化 */
-  DSH.syncIfChanged = async function () {
-    const v = await probeVersion();
+  DSH.syncIfChanged = async function (parts = ["static", "quote", "result"]) {
+    const v = await probeVersion(parts);
     if (!v) return null;
     const changed = [];
-    for (const part of ["static", "quote", "result"]) {
+    for (const part of parts) {
       if (versions[part] && versions[part] !== v[part]) changed.push(part);
       versions[part] = v[part];
     }
@@ -585,8 +625,11 @@
     const groups = { static: STATIC_KEYS, quote: ["quotes"], result: DAILY_KEYS };
     const expired = [];
     for (const part of changed)
-      for (const k of groups[part])
-        if (cache[k] !== undefined) { delete cache[k]; delete cacheTs[k]; expired.push(k); }
+      for (const k of groups[part]) {
+        delete cache[k];
+        delete cacheTs[k];
+        expired.push(k);
+      }
     return expired;
   };
 

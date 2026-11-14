@@ -124,19 +124,16 @@ class SelfHealDispatchTests(unittest.TestCase):
         # 11-10 22:00 UTC = 17:00 EST，当日收盘后 60 分钟
         args = selfheal.dispatch_args("quotes.yml", at("2026-11-10T22:00:00+00:00"))
         self.assertIn("critical=true", args)
-        self.assertTrue(any(a.startswith("as_of=2026-11-10T21:17") for a in args),
+        self.assertTrue(any(a.startswith("as_of=2026-11-10T21:45") for a in args),
                         "收盘后补跑必须带当日收盘逻辑时间: %r" % args)
 
-    def test_intraday_dispatch_has_no_as_of(self):
-        # 盘中若仍带上一场次的 as_of，逻辑时间被固定到昨日，而在线报价
-        # 已是今日时间戳 → source_time 判 Future source quote，必然失败。
+    def test_no_dispatch_during_market_hours(self):
         args = selfheal.dispatch_args("quotes.yml", at("2026-11-10T15:00:00+00:00"))
-        self.assertEqual(args, ["-f", "critical=true"])
+        self.assertIsNone(args)
 
-    def test_preopen_does_not_dispatch(self):
-        # 盘前 SPY 前收价被写成现价、涨跌 0，放行会把假报价写进生产
-        self.assertIsNone(selfheal.dispatch_args(
-            "quotes.yml", at("2026-11-10T13:20:00+00:00")))
+    def test_preopen_repair_is_bound_to_yesterdays_close(self):
+        args = selfheal.dispatch_args("quotes.yml", at("2026-11-10T13:20:00+00:00"))
+        self.assertIn("as_of=2026-11-09T21:45:00+00:00", args)
 
     def test_other_workflows_get_no_extra_args(self):
         self.assertEqual(selfheal.dispatch_args("ui-publish.yml", self_heal_now()), [])
@@ -148,7 +145,7 @@ class SelfHealDispatchTests(unittest.TestCase):
 
     def test_fresh_session_still_dispatches(self):
         self.assertIsNotNone(selfheal.dispatch_args(
-            "quotes.yml", at("2026-11-10T15:00:00+00:00")))
+            "quotes.yml", at("2026-11-10T22:00:00+00:00")))
 
     def test_cooldown_only_counts_dispatch_runs(self):
         with patch.object(selfheal, "gh", return_value="[]") as gh:
@@ -206,14 +203,10 @@ class WatchdogEarlyDetectionTests(unittest.TestCase):
         self.assertFalse(any("收盘数据缺失" in p for p in problems),
                          "数据已到位仍误报: %r" % problems)
 
-    def test_missing_intraday_snapshot_is_detected_early(self):
-        # GitHub 15:00 UTC 的 opening cron 实测整批不触发；若页面仍停在昨日，
-        # 看门狗必须在盘中就发现并让 selfheal 派发实时补采。
+    def test_no_intraday_gap_alert_for_latest_settled_close(self):
         problems = watchdog_site_check.snapshot_problems(
-            self._doc("2026-11-06"), at("2026-11-10T15:10:00+00:00"))
-        self.assertTrue(any("盘中快照缺失" in p and "行情停更" in p
-                            for p in problems),
-                        "盘中停更未早发现: %r" % problems)
+            self._doc("2026-11-09"), at("2026-11-10T15:10:00+00:00"))
+        self.assertFalse(any("盘中快照缺失" in problem for problem in problems))
 
     def test_current_intraday_snapshot_is_not_flagged(self):
         problems = watchdog_site_check.snapshot_problems(
@@ -279,46 +272,19 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("--as-of", self.quotes)
         self.assertIn("steps.gate.outputs.as_of || github.event.inputs.as_of", self.quotes)
 
-    def test_quotes_dispatches_sync_after_closing_collection(self):
-        self.assertIn("gh workflow run db-sync.yml", self.quotes)
-        self.assertIn("actions: write", self.quotes)
+    def test_no_sync_before_calculations(self):
+        self.assertNotIn("gh workflow run db-sync.yml", self.quotes)
 
-    def test_every_successful_collection_pushes_turso_immediately(self):
-        # 2026-11-10：盘中采集原先只在主库落地，要等 db-sync.yml 的另一条
-        # 独立 cron 才推 Turso；两条 schedule 都可能被 GitHub 丢弃，于是
-        # 「采到了但页面停更」。契约收敛为：任何一次采集成功都立即派发同步。
-        self.assertIn("if: success() && steps.refresh.outcome == 'success'", self.quotes)
-        self.assertIn("db-sync.yml -f targets=turso", self.quotes)
-        self.assertIn("db-sync.yml -f targets=turso,neon", self.quotes)
-        # 派发失败不能把成功采集判成失败（否则下游 workflow_run 误判），
-        # 但要留下告警，由场次对账在下一轮兜底。
-        self.assertIn("场次对账将在下一轮兜底", self.quotes)
+    def test_all_collection_is_calendar_gated(self):
+        self.assertIn('AS_OF_INPUT: ${{ github.event.inputs.as_of }}', self.quotes)
+        self.assertIn('trading_window.py --closing-only --as-of "$AS_OF_INPUT" --gate', self.quotes)
+        self.assertIn('live_quotes.py --write --closing-only', self.quotes)
+        self.assertNotIn('  push:', self.quotes)
 
-    def test_selfheal_backfill_also_pushes_turso_without_waking_neon(self):
-        # 自愈补采成功后若不同步，闭环断在「主库已更新、Turso 仍旧」，
-        # 页面继续告警；但盘中补采不能误唤醒 Neon（每日一次额度）。
-        self.assertIn("if: success() && steps.refresh.outcome == 'success'", self.quotes)
-        self.assertIn('EVENT: ${{ github.event_name }}', self.quotes)
-        self.assertIn('[ "$TASK" = "closing" ] && [ "$EVENT" = "schedule" ]',
-                      self.quotes)
-
-    def test_manual_dispatch_without_as_of_is_calendar_gated(self):
-        # 带 as_of 的补采放行；不带 as_of 的实时验证必须借日历裁决，
-        # 否则盘前 p=pc / 涨跌 0 的假报价会被写进生产。
-        self.assertIn("AS_OF_INPUT: ${{ github.event.inputs.as_of }}", self.quotes)
-        self.assertIn('if [ -n "$AS_OF_INPUT" ]', self.quotes)
-        self.assertIn('GATE_EVENT="schedule"', self.quotes)
-        self.assertIn('EVENT_NAME="$GATE_EVENT" python3 trading_window.py', self.quotes)
-
-    def test_opening_and_closing_are_explicit_critical_crons(self):
-        for cron in ('"0 14 * * 1-5"', '"0 15 * * 1-5"',
-                     '"17 21 * * 1-5"', '"50 21 * * 1-5"'):
-            self.assertIn(cron, self.quotes)
-
-    def test_push_does_not_bypass_the_trading_window(self):
-        # push 只跑回归；盘前无条件采集会因 SPY 前收字段被改写而整轮失败
-        self.assertIn('if [ "$EVENT_NAME" = "workflow_dispatch" ]', self.quotes)
-        self.assertNotIn('[ "$EVENT_NAME" = "push" ]', self.quotes)
+    def test_single_routine_close_cron(self):
+        self.assertEqual(self.quotes.count("cron:"), 1)
+        self.assertIn('"45 16 * * 1-5"', self.quotes)
+        self.assertIn('timezone: "America/New_York"', self.quotes)
 
     def test_collection_has_enough_timeout_and_one_retry(self):
         # 4 分钟 job 超时实测把 500+ 标的采集腰斩，两次补采都被 canceled
@@ -328,7 +294,7 @@ class WorkflowContractTests(unittest.TestCase):
 
     def test_sync_close_cron_runs_after_collection(self):
         # 21:55 UTC > 21:17 / 21:50 两次收盘采集，否则同步的永远是旧数据
-        self.assertIn('"55 21 * * 1-5"', self.sync)
+        self.assertIn('"55 16 * * 1-5"', self.sync)
         self.assertNotIn('"10 21 * * 1-5"', self.sync)
 
 

@@ -160,6 +160,36 @@ def closing_as_of(now: dt.datetime | None = None,
     return (info["close"] + dt.timedelta(minutes=CLOSING_AS_OF_MIN)).isoformat()
 
 
+CLOSING_SETTLE_MIN = 45
+
+
+def due_close(now, calendar):
+    """The latest regular or early close after its settlement grace."""
+    return latest_closed_session(now - dt.timedelta(minutes=CLOSING_SETTLE_MIN), calendar)
+
+
+def closing_collection_gate(now, calendar, as_of=None):
+    info = session_info(now, calendar)
+    latest = due_close(now, calendar)
+    # Once the next session opens, the vendor can no longer supply the previous close snapshot.
+    if latest and info['trading_day'] and info['session'] > latest['session'] and now >= info['open']:
+        latest = None
+    allow = bool(latest and now - latest['close'] <= dt.timedelta(hours=20))
+    if as_of:
+        try:
+            requested = dt.datetime.fromisoformat(as_of.replace('Z', '+00:00'))
+            allow = bool(allow and requested.tzinfo is not None and requested <= now and
+                         requested.astimezone(ET).date().isoformat() == latest['session'] and
+                         requested >= latest['close'])
+        except ValueError:
+            allow = False
+    return {
+        'allow': allow,
+        'session': latest['session'] if allow else '',
+        'as_of': (latest['close'] + dt.timedelta(minutes=CLOSING_SETTLE_MIN)).isoformat() if allow else '',
+    }
+
+
 def gate(task: str, now: dt.datetime | None = None, calendar: dict | None = None,
          event_name: str = "schedule", late_ok: bool = False) -> dict:
     """返回 {allow, reason, task, session, phase, calendar_sha256[, as_of]}。
@@ -264,14 +294,19 @@ def main() -> int:
     p.add_argument("--task", default="intraday", choices=TASKS)
     p.add_argument("--at", help="ISO 8601 时刻，便于离线演练")
     p.add_argument("--gate", action="store_true", help="把结果写入 $GITHUB_OUTPUT")
+    p.add_argument("--closing-only", action="store_true", help="按已结算场次运行")
+    p.add_argument("--as-of")
     p.add_argument("--late-ok", action="store_true",
                    help="仅收盘关键 cron 使用：允许 GitHub 延迟到达时按目标场次补采")
     p.add_argument("--self-test", action="store_true")
     args = p.parse_args()
 
     now = dt.datetime.fromisoformat(args.at) if args.at else dt.datetime.now(UTC)
-    result = gate(args.task, now, event_name=os.environ.get("EVENT_NAME", "schedule"),
-                  late_ok=args.late_ok)
+    if args.closing_only:
+        result = closing_collection_gate(now, load_calendar(), args.as_of)
+        result.update(task='closing', reason='收盘场次可采集' if result['allow'] else '收盘采集窗口未到或已结束')
+    else:
+        result = gate(args.task, now, event_name=os.environ.get("EVENT_NAME", "schedule"), late_ok=args.late_ok)
     if args.gate:
         out = os.environ.get("GITHUB_OUTPUT")
         if out:

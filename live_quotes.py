@@ -70,7 +70,7 @@ def read_snapshot(cursor):
     return result,dict(zip(('finished_at','metrics'),event)) if event else None
 
 
-def load_snapshot(now=None, strict=True):
+def load_snapshot(now=None, strict=True, *, closing_only=False):
     """Read one consistent online quote/calendar/worker version; no file fallback.
 
     strict=False 只读当前 payload，供计算作业先检查同版本是否已成功。
@@ -91,7 +91,7 @@ def load_snapshot(now=None, strict=True):
             if len(rows)!=1:raise RuntimeError('No unique reviewed online exchange calendar')
             calendar=market_calendar.Calendar(*rows[0])
             row,heartbeat=read_snapshot(cursor)
-            problems=quote_problems(row,heartbeat,calendar,now)
+            problems=quote_problems(row,heartbeat,calendar,now,closing_only=closing_only)
             if problems:raise RuntimeError('在线报价未通过核验：'+'；'.join(problems))
             return row['payload']
     finally:
@@ -322,10 +322,32 @@ def publish(payload, sha, collected_at):
         connection.close()
 
 
-def run(write=False, as_of=None):
+def close_already_calculated(session):
+    from contextlib import closing
+    with closing(db_sources.db()) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("""select count(*) from live_quote_snapshot q
+                join live_strategy_current r on r.quote_version=q.evidence_sha256
+                where q.singleton and q.payload->>'session'=%s
+                  and q.payload->>'intraday'='false'""", (session,))
+            return cursor.fetchone()[0] == 4
+
+
+def run(write=False, as_of=None, *, closing_only=False):
     started = dt.datetime.now(UTC)
     logical = logical_time(as_of, started)
+    if closing_only:
+        import trading_window
+        decision = trading_window.closing_collection_gate(started, trading_window.load_calendar(), as_of)
+        if not decision['allow']:
+            raise RuntimeError('Outside the verified closing collection window')
+        if write and close_already_calculated(decision['session']):
+            print(json.dumps({'session': decision['session'], 'status': 'close_already_calculated'}))
+            return
+        logical = logical_time(decision['as_of'], started)
     payload,sha = collect(logical)
+    if closing_only and (payload['intraday'] or payload['session'] != decision['session']):
+        raise RuntimeError('Quote does not belong to the target closing session')
     changed = publish(payload,sha,dt.datetime.now(UTC)) if write else False
     print(json.dumps({'write':write,'changed':changed,'count':payload['count'],
         'session':payload['session'],'source_as_of':payload['ts'],'evidence_sha256':sha,
@@ -337,6 +359,7 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--write',action='store_true')
     parser.add_argument('--as-of',dest='as_of',default=None,
-        help='延迟补跑的目标场次逻辑时间（ISO 8601，收盘后 17 分钟）')
+        help='延迟补跑的目标场次逻辑时间（ISO 8601）')
+    parser.add_argument('--closing-only',action='store_true')
     args=parser.parse_args()
-    run(args.write, args.as_of)
+    run(args.write, args.as_of, closing_only=args.closing_only)

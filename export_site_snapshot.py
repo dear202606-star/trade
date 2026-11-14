@@ -80,7 +80,7 @@ def collect():
     datasets, meta = {}, {}
     conn = connect()
     try:
-        conn.autocommit = True      # 纯只读查询；不设 readonly，兼容连接池事务模式
+        conn.set_session(isolation_level="REPEATABLE READ", readonly=True)
         with conn.cursor() as cur:
             cur.execute("set statement_timeout = '60s'")
 

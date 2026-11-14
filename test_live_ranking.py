@@ -56,6 +56,22 @@ class IndependentRankingTests(unittest.TestCase):
         q['quotes']['D']['p']=21
         with self.assertRaises(ValueError):calculate('A',q,pool,sectors,[],{},bodies,bodies,{},'ref')
 
+    def test_new_close_updates_ytd_even_when_rank_order_is_unchanged(self):
+        q, pool, sectors, bodies = self.fixture()
+        earlier, _ = calculate('A', q, pool, sectors, [], {}, bodies, bodies, {}, 'ref')
+        session = '2026-11-05'
+        q.update(session=session, previous_session='2026-11-04', version='next',
+                 ts='2026-11-05T21:00:00Z', ts_local='2026-11-06 05:00')
+        for symbol, body in bodies.items():
+            price = body['raw']['2026-11-04'] + 1
+            body['raw'][session] = body['adjusted'][session] = price
+            q['quotes'][symbol]['p'] = price
+        later, _ = calculate('A', q, pool, sectors, [], {}, bodies, bodies, {}, 'ref')
+        self.assertEqual([r['ticker'] for r in earlier['top']], [r['ticker'] for r in later['top']])
+        for previous, current in zip(earlier['top'], later['top']):
+            self.assertAlmostEqual(current['ytd'] - previous['ytd'], 0.1)
+        self.assertEqual(later['quote_version'], 'next')
+
     def test_small_cross_source_close_drift_does_not_block_ranking(self):
         q,pool,sectors,bodies=self.fixture()
         for symbol,body in bodies.items():

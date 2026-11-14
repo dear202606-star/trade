@@ -9,7 +9,7 @@
 quotes 对账都显示「数据已齐」。唯一能救它的只有下一次 push 或人工派发。
 
 直接读取浏览器使用的 Turso 端点，核对 A/B 的净值与预览。
-盘中只对仍具计算价值的报价重试；收盘核对正式结算结果。
+仅对已结算报价核对四项结果。
 
 限流（纯函数，可离线测试）
   · 冷却 30 分钟（心跳 20 分钟一拍，避免每拍都撞同一次未结算的数据源）
@@ -86,10 +86,7 @@ def evaluate(quotes, outputs, now=None):
     if not target or not version:
         return {**result, "reason": "行情场次或版本未知"}
     if intraday:
-        deadline = rs._parse(q.get("fresh_until"))
-        now = rs._parse(now or dt.datetime.now(UTC))
-        if not quote_stamp or not deadline or not quote_stamp <= now < deadline:
-            return {**result, "reason": "盘中报价已不可用于重算，等待下一次行情"}
+        return {**result, "reason": "等待收盘报价"}
     missing = []
     for key in OUTPUT_KEYS[1:]:
         row = outputs.get(key) or {}
@@ -200,7 +197,7 @@ def self_test():
     cases = [
         ("收盘版但结果缺失", close, {}, True),
         ("四项收盘结果齐全", close, current, False),
-        ("新鲜盘中版缺结果", live, {}, True),
+        ("盘中版不重算", live, {}, False),
         ("过期盘中版等待下次行情", {**live, "fresh_until": "2026-11-10T21:59:00Z"}, {}, False),
         ("行情缺场次不误判", {}, current, False),
     ]
