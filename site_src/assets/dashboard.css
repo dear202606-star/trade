@@ -87,7 +87,7 @@
   .section-nav{display:flex;grid-column:1/-1;grid-row:2;gap:0;justify-content:space-around}
   .section-nav a{display:flex;align-items:center;justify-content:center;min-height:44px;flex:1;padding:0 5px}
   .tick{grid-column:2;grid-row:1;font-size:11px;margin:0;justify-self:end}
-  .page-heading{margin-bottom:16px}
+  .page-heading{display:block;margin-bottom:16px}
   .page-heading .eyebrow,.page-heading p,.signal-bottom{display:none}
   .vtabs{margin-top:12px;width:100%}
   .vtab{flex:1}
