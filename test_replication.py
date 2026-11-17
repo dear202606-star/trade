@@ -76,6 +76,28 @@ class TestReplicationContract(unittest.TestCase):
             {**equity, "last_session": "20261112"}}))
         self.assertFalse(sync.settled_outputs_match({**batch, "quotes": {**q, "intraday": True}}))
 
+    def test_intraday_sync_keeps_quote_but_holds_unsettled_returns(self):
+        """2026-11-17：盘中报价必须能推进备库，否则整页空白。
+        净值/预览版本没对齐时仍要扣下，避免把错配收益当真。"""
+        close_q = {"session": "2026-11-16", "version": "close16", "intraday": False}
+        eq = {"quote_version": "close16", "last_session": "20261116"}
+        pv = {"quote_version": "close16", "session": "2026-11-16"}
+        aligned = {"quotes": close_q, "equity": eq, "b/equity": eq,
+                   "preview": pv, "b/preview": pv,
+                   "signal": {}, "b/signal": {},
+                   "curve": [], "b/curve": [], "strategy_history": {},
+                   "b/strategy_history": {}, "name_zh": {}, "sectors": {}, "health": {}}
+        self.assertEqual(sync.keys_to_hold_back(aligned), set())
+        intraday = {**aligned, "quotes": {**close_q, "session": "2026-11-17",
+                                          "version": "intra17", "intraday": True}}
+        held = sync.keys_to_hold_back(intraday)
+        self.assertNotIn("quotes", held, "盘中报价必须放行，否则访客整页空白")
+        for key in ("equity", "b/equity", "preview", "b/preview", "signal", "b/signal"):
+            self.assertIn(key, held, "未对齐的收益/信号数据必须扣下")
+        # 收盘版未对齐时：整批 fail-closed，连报价也不推。
+        stale = {**aligned, "equity": {**eq, "quote_version": "close15"}}
+        self.assertIn("quotes", sync.keys_to_hold_back(stale))
+
     def test_neon_dsn_drops_unsupported_channel_binding(self):
         os.environ["NEON_DSN"] = (
             "postgresql://u:p@host/db?sslmode=require&channel_binding=require")

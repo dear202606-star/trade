@@ -302,6 +302,21 @@ def settled_outputs_match(datasets):
     return True
 
 
+def keys_to_hold_back(datasets):
+    """未对齐时要扣下的 key。收盘整批 fail-closed；盘中只扣收益数据、放行报价。
+
+    2026-11-17：盘中 quotes 是独立可信的实时快照；净值/预览是收盘产物，
+    版本没对齐必须扣下避免把错配收益当真。旧逻辑连报价一起挡掉，导致
+    盘中数据永远推不到访客实际读的备库、整页变空。
+    """
+    if settled_outputs_match(datasets):
+        return set()
+    runtime = set(ess.RUNTIME_KEYS)
+    if datasets["quotes"].get("intraday") is True:
+        runtime.discard("quotes")
+    return runtime
+
+
 def sync_turso(url, token, rows, force=False):
     turso_execute(url, token, [(DDL_TURSO, [])])
     try:
@@ -402,10 +417,13 @@ def main():
                          ensure_ascii=False))
         return 1
     rows = build_rows(datasets, meta)
-    if not settled_outputs_match(datasets):
-        runtime = set(ess.RUNTIME_KEYS)
-        rows = [row for row in rows if row[0] not in runtime]
-        print("收盘行情、净值和排名尚未对齐，备库保留上一份完整快照。")
+    held = keys_to_hold_back(datasets)
+    if held:
+        intraday_quote = datasets["quotes"].get("intraday") is True
+        rows = [row for row in rows if row[0] not in held]
+        print("收盘行情、净值和排名尚未对齐，备库%s。" %
+              ("仅同步盘中报价、保留上一份净值/排名" if intraday_quote
+               else "保留上一份完整快照"))
     report = {"ok": True, "generated_at": _utcnow(), "keys": len(rows),
               "digest": hashlib.sha256("".join(r[3] for r in rows).encode()).hexdigest(),
               "read_source": read_source, "degraded": degraded,
