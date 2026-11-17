@@ -69,9 +69,9 @@
 .pr tbody,.yr tbody{font-size:12px}
 .pr-row,.yr-row{display:table-row}
 .pr-return,.yr-return,.yr-drawdown{font-weight:700;white-space:nowrap}
-.yr th:nth-child(2),.yr th:nth-child(3){width:15%}
-.yr th:last-child{width:48%;padding-left:20px}
-.yr td:last-child{padding-left:20px}
+.yr th:nth-child(2){width:48%;padding-left:20px}
+.yr td:nth-child(2){padding-left:20px}
+.yr th:nth-child(3),.yr th:nth-child(4){width:15%}
 .mobile-field{display:none}
 .annual summary{min-height:44px}
 .annual .card-title{margin:0}
@@ -107,9 +107,9 @@
   .yr{margin-top:8px}
   .yr th,.yr td{padding:11px 3px}
   .yr th:first-child{width:16%}
-  .yr th:nth-child(2),.yr th:nth-child(3){width:21%}
-  .yr th:last-child{width:auto}
-  .yr th:last-child,.yr td:last-child{padding-left:10px}
+  .yr th:nth-child(3),.yr th:nth-child(4){width:21%}
+  .yr th:nth-child(2){width:auto}
+  .yr th:nth-child(2),.yr td:nth-child(2){padding-left:10px}
   .yr .h{gap:3px 5px}
   .yr .chip{padding:1px 3px;gap:3px}
   .yr .chip i{display:none}

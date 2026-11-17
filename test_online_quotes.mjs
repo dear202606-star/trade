@@ -431,3 +431,23 @@ test('closing refresh and overdue warnings follow the exchange calendar',()=>{
   assert.equal(dsh.closingQuoteOverdue(q,at('2026-11-27T19:29:00Z')),false);
   assert.equal(dsh.closingQuoteOverdue(q,at('2026-11-27T19:30:00Z')),true);
 });
+
+test('intraday quotes stay visible in ticker and advice instead of being blanked',()=>{
+  const src=readFileSync(new URL('./site_src/assets/page.js',import.meta.url),'utf8');
+  assert.match(src,/Q\s*=\s*q\s*\|\|\s*null/, '盘中不得再把 Q 置空（会让 SPY ticker 与仓位建议显示为空）');
+  assert.doesNotMatch(src,/Q\s*=\s*q\s*&&\s*q\.intraday\s*!==\s*true\s*\?\s*q\s*:\s*null/,
+    '旧的盘中置空逻辑已移除');
+  assert.match(src,/Q\.intraday\s*\?\s*["'] 盘中["']/, 'ticker 时间标注需区分盘中/收盘');
+  const dsh=reader(async()=>({ok:false})).dsh;
+  const now=Date.now();
+  const intraday={intraday:true,session:'2026-11-17',
+    ts:new Date(now-60000).toISOString(),fresh_until:new Date(now+600000).toISOString(),
+    calendar_sha256:'c',quotes:{SPY:{p:742,pc:739.95}}};
+  const closes=Array.from({length:9},(_,i)=>{
+    const d=new Date(Date.UTC(2026,1+i,1));
+    return {date:d.toISOString().slice(0,7)+'-01',price:700+i};
+  });
+  const eq={market_advice:{month:'2026-11',window:10,calendar_sha256:'c',closes:closes}};
+  assert.ok(dsh.marketAdvice(eq,intraday),'新鲜盘中快照必须能算出仓位建议');
+  assert.equal(dsh.quoteFreshness(intraday,now),false);
+});

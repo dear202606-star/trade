@@ -273,10 +273,10 @@
       }).join('');
       return '<tr class="yr-row">' +
         '<th scope="row">' + DSH.esc(r.year) + '</th>' +
+        '<td><div class="h">' + holds + '</div></td>' +
         '<td class="r yr-return ' + cls(r.ret) + '">' + pct2(r.ret, 1) + '</td>' +
         '<td class="r yr-drawdown ' + cls(r.dd == null ? null : -Math.abs(r.dd)) + '">' +
-          pct2(r.dd == null ? null : -Math.abs(r.dd), 1) + '</td>' +
-        '<td><div class="h">' + holds + '</div></td></tr>';
+          pct2(r.dd == null ? null : -Math.abs(r.dd), 1) + '</td></tr>';
     }).join("");
   }
 
@@ -303,7 +303,8 @@
     $("tickPx").textContent = q ? "SPY " + q.p.toFixed(2) : "SPY —";
     $("tickChg").textContent = q ? pct2(q.chg) : "—";
     $("tickChg").className = "chg " + (q ? cls(q.chg) : "");
-    $("tickUpdated").textContent = q && closeDate(Q.session) ? "美股 " + closeDate(Q.session) + " 收盘" : "";
+    $("tickUpdated").textContent = q && closeDate(Q.session)
+      ? "美股 " + closeDate(Q.session) + (Q.intraday ? " 盘中" : " 收盘") : "";
   }
 
   /* 页面常驻时只在收盘窗口检查，重开页面正常读取最新已发布快照。 */
@@ -360,7 +361,12 @@
     } else if (last) {
       [equity, signal, q, preview] = last;
     }
-    EQ = equity; SIG = signal; Q = q && q.intraday !== true ? q : null; PV = preview;
+    /* 盘中不再把 Q 置空。顶部 SPY ticker、仓位建议（marketAdvice 原生支持
+       盘中快照）都只读 Q，置空会让它们在盘中显示「SPY —」「建议待更新」，
+       被误读成「没数据」。收益归属仍由 lastVerifiedDay（只看 equity 且带
+       收盘日期标注）与 today()/yearResult() 的 session 校验独立把关，与
+       Q 的展示用途解耦。 */
+    EQ = equity; SIG = signal; Q = q || null; PV = preview;
     SEC = arr[4] || {};
     CV = arr[5][0]; SH = arr[5][1];
     if (CV && SH) histories[variant] = arr[5];
