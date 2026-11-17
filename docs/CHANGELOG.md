@@ -1,5 +1,25 @@
 # 变更日志
 
+## v6.16 ｜ 2026-11-17 ｜ 微信转发分享卡片（og:image）
+
+### 微信转发只有纯文字空白卡片
+
+根因：所有页面 `<head>` 只有 `<title>` + favicon，**没有任何 Open Graph / meta description
+标签**，微信抓取不到标题、描述和缩略图，只能退化为纯文字。
+
+改动：
+- 新增 `site_src/assets/og-card.png`：1200×630、67KB 的高级分享图。深墨绿渐变 + 金色顶线 +
+  青绿上升净值曲线 + 品牌字标 +「趋势与纪律」主标语；不写实时数字，转发链接长期有效。
+  生成器 `make_og_image.py`（Pillow，可重复运行）。
+- 5 个页面（index/portfolio/strategy/signals/report）全部补齐 `og:type / og:site_name /
+  og:title / og:description / og:image（绝对 HTTPS URL）/ og:image:type/width/height/alt /
+  og:url` 以及 `twitter:card=summary_large_image`。跳转空壳页也带 og，`og:url` 统一指向首页，
+  转发任意页面都显示同一张主卡片。
+- 新增 `test_share_meta.mjs`（11 项）：锁定每页 og 标签齐全、图片绝对 HTTPS、PNG 尺寸 1200×630
+  且体积合规，防止站点重构再次丢失分享卡片。
+
+回归：Python 332 / Node 59 / YAML 25 全绿。
+
 ## v6.15 ｜ 2026-11-17 ｜ 盘中呈现修复 + 历年表格持仓列前移
 
 ### 盘中「没数据」真相：显示层把正常数据藏了，不是数据缺
