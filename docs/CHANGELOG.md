@@ -1,5 +1,23 @@
 # 变更日志
 
+## v6.17 ｜ 2026-11-17 ｜ 持仓表与预览卡行业标签对齐
+
+用户截图反馈：「当年策略表现」与「次年策略预览」两卡的行业标签（信息技术/医疗健康等）
+样式和位置不齐。两卡本就共用 `.sec-tag`（字体/底色/圆角一致），真因是**布局规则不统一**：
+- 持仓表 `.tk-cell` 在 901–1250px 断点竖排且 `.sec-tag{margin-left:0}`；
+- 预览卡 `.pv-main` 桌面端清不掉 `.sec-tag` 默认 `margin-left:6px` → 标签右偏 6px，
+  且 gap 一边 3px 一边 2px。
+
+改动：
+- `site_src/assets/dashboard.css`：新增统一规则 `.tk-cell,.pv-main{display:flex;
+  flex-direction:column;align-items:flex-start;gap:2px}` 与 `.tk-cell .sec-tag,
+  .pv-main .sec-tag{margin-left:0;margin-top:0}`；删掉 901–1250px 断点的冲突覆盖；
+  两卡 ticker 字距统一为 `-.4px`。移动端规则去掉冗余的 sec-tag 覆盖。
+- 新增 `test_label_alignment.mjs`（4 项）：锁定两卡共用竖排规则、标签无缩进、
+  ticker 排版一致、无残留断点覆盖。
+
+回归：Python 332 / Node 63 / YAML 25 全绿。
+
 ## v6.16 ｜ 2026-11-17 ｜ 微信转发分享卡片（og:image）
 
 ### 微信转发只有纯文字空白卡片
