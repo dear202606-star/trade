@@ -1,1469 +1,1567 @@
 {
   "stats": {
-    "sina": 492,
-    "yahoo": 8,
-    "both": 490,
+    "sina": 498,
+    "yahoo": 2,
+    "both": 496,
     "quarantine": 1,
     "fail": 2
   },
-  "total": 490,
+  "total": 496,
   "bad": 7,
   "rows": [
-    {
-      "ticker": "AMD",
-      "ok": true,
-      "common_months": 143,
-      "month_diff": 0.0004527706697866618,
-      "ret_diff": 0.0011291468919032432
-    },
     {
       "ticker": "AOS",
       "ok": true,
       "common_months": 279,
       "month_diff": 9.319953853115237e-08,
-      "ret_diff": 8.191324607498274e-08
+      "ret_diff": 2.614774563536315e-08
+    },
+    {
+      "ticker": "ABBV",
+      "ok": true,
+      "common_months": 161,
+      "month_diff": 9.101216791318478e-08,
+      "ret_diff": 3.6272788328517436e-08
     },
     {
       "ticker": "ACN",
       "ok": true,
       "common_months": 207,
       "month_diff": 9.930469890839788e-08,
-      "ret_diff": 2.197265636105783e-08
-    },
-    {
-      "ticker": "ADBE",
-      "ok": true,
-      "common_months": 286,
-      "month_diff": 6.08434687077164e-08,
-      "ret_diff": 5.8618234710650086e-09
+      "ret_diff": 1.2207031163669058e-08
     },
     {
       "ticker": "ABT",
       "ok": true,
       "common_months": 286,
       "month_diff": 5.312728446060788e-08,
-      "ret_diff": 1.3821359390320254e-08
+      "ret_diff": 1.5795839192200845e-08
     },
     {
-      "ticker": "MMM",
+      "ticker": "AMD",
       "ok": true,
-      "common_months": 286,
-      "month_diff": 6.47630429284618e-08,
-      "ret_diff": 2.350582839483195e-09
+      "common_months": 143,
+      "month_diff": 0.0004527706697866618,
+      "ret_diff": 0.0010661789535242328
     },
     {
       "ticker": "AES",
       "ok": true,
       "common_months": 286,
       "month_diff": 7.758344988673116e-08,
-      "ret_diff": 4.250160601237951e-08
+      "ret_diff": 6.155737719559795e-08
     },
     {
-      "ticker": "ABNB",
+      "ticker": "MMM",
       "ok": true,
-      "common_months": 72,
-      "month_diff": 6.544305497513392e-08,
-      "ret_diff": 1.871859689472899e-08
-    },
-    {
-      "ticker": "A",
-      "ok": true,
-      "common_months": 280,
-      "month_diff": 6.617070102965528e-08,
-      "ret_diff": 4.373854833872315e-08
+      "common_months": 286,
+      "month_diff": 6.47630429284618e-08,
+      "ret_diff": 6.13007244965047e-08
     },
     {
       "ticker": "AFL",
       "ok": true,
       "common_months": 256,
       "month_diff": 3.590021435684321e-08,
-      "ret_diff": 3.113630175910487e-08
+      "ret_diff": 4.229671612954178e-08
     },
     {
-      "ticker": "AKAM",
+      "ticker": "ABNB",
       "ok": true,
-      "common_months": 256,
-      "month_diff": 1.1253213672013374e-07,
-      "ret_diff": 5.281854020822152e-08
+      "common_months": 72,
+      "month_diff": 6.544305497513392e-08,
+      "ret_diff": 4.9929265166781533e-08
     },
     {
-      "ticker": "ARE",
+      "ticker": "ADBE",
       "ok": true,
-      "common_months": 312,
-      "month_diff": 5.8345763997991185e-08,
-      "ret_diff": 3.071126108977751e-08
+      "common_months": 286,
+      "month_diff": 6.08434687077164e-08,
+      "ret_diff": 1.1720668879888763e-08
     },
     {
-      "ticker": "ALB",
+      "ticker": "A",
       "ok": true,
-      "common_months": 279,
-      "month_diff": 4.069590731070605e-08,
-      "ret_diff": 3.979634743966898e-08
+      "common_months": 280,
+      "month_diff": 6.18712694411272e-08,
+      "ret_diff": 1.1928694920726457e-08
     },
     {
       "ticker": "APD",
       "ok": true,
       "common_months": 256,
       "month_diff": 8.67531189108206e-08,
-      "ret_diff": 5.2023154228919566e-08
+      "ret_diff": 3.2847536912683495e-08
     },
     {
-      "ticker": "ALGN",
+      "ticker": "AKAM",
       "ok": true,
-      "common_months": 255,
-      "month_diff": 7.641692523208121e-08,
-      "ret_diff": 3.07924046261121e-08
+      "common_months": 256,
+      "month_diff": 1.1253213672013374e-07,
+      "ret_diff": 5.2294924612894533e-08
     },
     {
       "ticker": "ALLE",
       "ok": true,
       "common_months": 151,
       "month_diff": 8.725077083049371e-08,
-      "ret_diff": 1.7231617910340447e-08
+      "ret_diff": 1.5809026976398854e-08
     },
     {
-      "ticker": "ALL",
+      "ticker": "ALGN",
       "ok": true,
-      "common_months": 286,
-      "month_diff": 7.571956883722919e-08,
-      "ret_diff": 9.398722644604618e-08
-    },
-    {
-      "ticker": "GOOGL",
-      "ok": true,
-      "common_months": 237,
-      "month_diff": 5.780557832402167e-08,
-      "ret_diff": 1.3181635116765733e-08
+      "common_months": 255,
+      "month_diff": 7.641692523208121e-08,
+      "ret_diff": 4.7731044450216586e-08
     },
     {
       "ticker": "LNT",
       "ok": true,
       "common_months": 95,
       "month_diff": 1.1654504250557807e-07,
-      "ret_diff": 1.4180381535666697e-08
+      "ret_diff": 3.427320716120619e-08
+    },
+    {
+      "ticker": "ALL",
+      "ok": true,
+      "common_months": 286,
+      "month_diff": 6.782109962522043e-08,
+      "ret_diff": 8.917685700993161e-09
+    },
+    {
+      "ticker": "GOOGL",
+      "ok": true,
+      "common_months": 237,
+      "month_diff": 5.780557832402167e-08,
+      "ret_diff": 2.408297838929485e-08
     },
     {
       "ticker": "GOOG",
       "ok": true,
       "common_months": 152,
       "month_diff": 7.650101951917065e-08,
-      "ret_diff": 2.0381420773318837e-08
+      "ret_diff": 4.390760788286485e-08
+    },
+    {
+      "ticker": "ARE",
+      "ok": true,
+      "common_months": 312,
+      "month_diff": 5.8345763997991185e-08,
+      "ret_diff": 4.926515417835731e-09
+    },
+    {
+      "ticker": "AEP",
+      "ok": true,
+      "common_months": 74,
+      "month_diff": 7.934196477599187e-08,
+      "ret_diff": 1.245085812229263e-09
+    },
+    {
+      "ticker": "ALB",
+      "ok": true,
+      "common_months": 279,
+      "month_diff": 4.069590731070605e-08,
+      "ret_diff": 4.876339332327007e-10
     },
     {
       "ticker": "AMCR",
       "ok": true,
       "common_months": 90,
       "month_diff": 6.10807100454025e-08,
-      "ret_diff": 1.891835643696993e-08
-    },
-    {
-      "ticker": "AMZN",
-      "ok": true,
-      "common_months": 286,
-      "month_diff": 6.466928237358616e-08,
-      "ret_diff": 9.717764148930996e-09
-    },
-    {
-      "ticker": "AEP",
-      "ok": true,
-      "common_months": 74,
-      "month_diff": 1.0740324485336572e-07,
-      "ret_diff": 3.0868169575981597e-08
-    },
-    {
-      "ticker": "MO",
-      "ok": true,
-      "common_months": 312,
-      "month_diff": 1.0168164565893534e-07,
-      "ret_diff": 2.7562556459415077e-08
-    },
-    {
-      "ticker": "AIG",
-      "ok": true,
-      "common_months": 286,
-      "month_diff": 6.332807878095537e-08,
-      "ret_diff": 4.4300463075686025e-08
+      "ret_diff": 4.75481356509988e-08
     },
     {
       "ticker": "AEE",
       "ok": true,
       "common_months": 280,
       "month_diff": 4.479963988668345e-08,
-      "ret_diff": 1.6081306952742125e-08
+      "ret_diff": 1.541350092004734e-08
+    },
+    {
+      "ticker": "AMZN",
+      "ok": true,
+      "common_months": 286,
+      "month_diff": 6.466928237358616e-08,
+      "ret_diff": 5.784650980444894e-09
+    },
+    {
+      "ticker": "MO",
+      "ok": true,
+      "common_months": 312,
+      "month_diff": 1.0168164565893534e-07,
+      "ret_diff": 6.388904205678614e-08
+    },
+    {
+      "ticker": "AWK",
+      "ok": true,
+      "common_months": 200,
+      "month_diff": 5.64959756754746e-08,
+      "ret_diff": 6.083418857549816e-08
     },
     {
       "ticker": "AMP",
       "ok": true,
       "common_months": 231,
       "month_diff": 7.669205270843804e-08,
-      "ret_diff": 8.351603186795842e-09
-    },
-    {
-      "ticker": "AWK",
-      "ok": true,
-      "common_months": 200,
-      "month_diff": 7.732364792900626e-08,
-      "ret_diff": 1.7839885124715238e-08
-    },
-    {
-      "ticker": "AMT",
-      "ok": true,
-      "common_months": 280,
-      "month_diff": 4.9551124092772625e-08,
-      "ret_diff": 2.8285039421760416e-08
+      "ret_diff": 1.881314681817514e-08
     },
     {
       "ticker": "AXP",
       "ok": true,
       "common_months": 286,
       "month_diff": 7.914730959512895e-08,
-      "ret_diff": 4.31086376595502e-08
+      "ret_diff": 7.147795244577537e-09
     },
     {
-      "ticker": "AME",
+      "ticker": "AIG",
       "ok": true,
-      "common_months": 279,
-      "month_diff": 3.460040143288268e-08,
-      "ret_diff": 6.857803436233212e-09
+      "common_months": 286,
+      "month_diff": 6.332807878095537e-08,
+      "ret_diff": 5.224508270451622e-08
     },
     {
-      "ticker": "APA",
+      "ticker": "AMT",
       "ok": true,
-      "common_months": 78,
-      "month_diff": 8.383478022899737e-08,
-      "ret_diff": 1.6519114964808068e-09
-    },
-    {
-      "ticker": "ADI",
-      "ok": true,
-      "common_months": 173,
-      "month_diff": 0.0008467940771774707,
-      "ret_diff": 0.001242557440448433
+      "common_months": 280,
+      "month_diff": 4.9551124092772625e-08,
+      "ret_diff": 5.502835742632328e-09
     },
     {
       "ticker": "APH",
       "ok": true,
       "common_months": 280,
       "month_diff": 9.300264558476101e-08,
-      "ret_diff": 9.575168569142534e-08
-    },
-    {
-      "ticker": "APO",
-      "ok": true,
-      "common_months": 188,
-      "month_diff": 9.248616272827803e-08,
-      "ret_diff": 3.409094206929808e-08
-    },
-    {
-      "ticker": "AMGN",
-      "ok": true,
-      "common_months": 286,
-      "month_diff": 4.177795709381371e-08,
-      "ret_diff": 7.221108178079305e-08
-    },
-    {
-      "ticker": "APP",
-      "ok": true,
-      "common_months": 68,
-      "month_diff": 6.866872637179e-08,
-      "ret_diff": 3.241496804307076e-08
-    },
-    {
-      "ticker": "APTV",
-      "ok": true,
-      "common_months": 108,
-      "month_diff": 8.583382093974024e-08,
-      "ret_diff": 1.966337914716121e-08
+      "ret_diff": 5.071196196304584e-08
     },
     {
       "ticker": "AON",
       "ok": true,
       "common_months": 240,
       "month_diff": 9.465028627531069e-08,
-      "ret_diff": 4.316482882238404e-08
+      "ret_diff": 5.057864449486971e-08
+    },
+    {
+      "ticker": "AME",
+      "ok": true,
+      "common_months": 279,
+      "month_diff": 3.460040143288268e-08,
+      "ret_diff": 3.674379911444703e-09
+    },
+    {
+      "ticker": "ADI",
+      "ok": true,
+      "common_months": 173,
+      "month_diff": 0.0008467940771774707,
+      "ret_diff": 0.0011963944801149928
+    },
+    {
+      "ticker": "AMGN",
+      "ok": true,
+      "common_months": 286,
+      "month_diff": 4.177795709381371e-08,
+      "ret_diff": 5.4303429086743904e-08
+    },
+    {
+      "ticker": "APO",
+      "ok": true,
+      "common_months": 188,
+      "month_diff": 9.248616272827803e-08,
+      "ret_diff": 1.666365956332072e-08
+    },
+    {
+      "ticker": "APP",
+      "ok": true,
+      "common_months": 68,
+      "month_diff": 6.866872637179e-08,
+      "ret_diff": 2.460249537428183e-08
+    },
+    {
+      "ticker": "APTV",
+      "ok": true,
+      "common_months": 108,
+      "month_diff": 8.583382093974024e-08,
+      "ret_diff": 1.4779248935781197e-09
     },
     {
       "ticker": "AAPL",
       "ok": true,
       "common_months": 286,
       "month_diff": 9.184030114184338e-08,
-      "ret_diff": 6.736390623096611e-08
+      "ret_diff": 3.206889265250368e-08
     },
     {
       "ticker": "AMAT",
       "ok": true,
       "common_months": 256,
       "month_diff": 0.0004036826578550645,
-      "ret_diff": 0.0005820412012120801
+      "ret_diff": 0.0005502292327246305
     },
     {
-      "ticker": "ANET",
+      "ticker": "APA",
       "ok": true,
-      "common_months": 150,
-      "month_diff": 6.866740798194826e-08,
-      "ret_diff": 3.323875752414551e-08
+      "common_months": 78,
+      "month_diff": 8.383478022899737e-08,
+      "ret_diff": 2.1536030958557717e-08
     },
     {
       "ticker": "ACGL",
       "ok": true,
       "common_months": 255,
       "month_diff": 3.593337816187869e-08,
-      "ret_diff": 2.9251457922541135e-08
-    },
-    {
-      "ticker": "ARES",
-      "ok": true,
-      "common_months": 151,
-      "month_diff": 5.479160170018815e-08,
-      "ret_diff": 2.9504221510379125e-08
+      "ret_diff": 1.651989500750517e-08
     },
     {
       "ticker": "ADM",
       "ok": true,
       "common_months": 280,
       "month_diff": 7.965770432161179e-08,
-      "ret_diff": 8.044333865697695e-09
+      "ret_diff": 1.309013697436967e-08
     },
     {
-      "ticker": "AJG",
+      "ticker": "ANET",
       "ok": true,
-      "common_months": 279,
-      "month_diff": 5.5116693209456e-08,
-      "ret_diff": 3.2391135995624154e-08
+      "common_months": 150,
+      "month_diff": 6.866740798194826e-08,
+      "ret_diff": 1.1290455392831689e-07
     },
     {
-      "ticker": "AIZ",
+      "ticker": "ARES",
       "ok": true,
-      "common_months": 242,
-      "month_diff": 6.129586216374605e-08,
-      "ret_diff": 8.686229979737448e-08
-    },
-    {
-      "ticker": "ADP",
-      "ok": true,
-      "common_months": 191,
-      "month_diff": 4.961809851877774e-08,
-      "ret_diff": 4.320016611103483e-08
-    },
-    {
-      "ticker": "T",
-      "ok": true,
-      "common_months": 286,
-      "month_diff": 5.6441444962196385e-08,
-      "ret_diff": 3.267935366757513e-09
-    },
-    {
-      "ticker": "AXON",
-      "ok": true,
-      "common_months": 89,
-      "month_diff": 8.163090581270183e-08,
-      "ret_diff": 2.9397169143408064e-08
-    },
-    {
-      "ticker": "ADSK",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 5.120455526252954e-08,
-      "ret_diff": 5.478993037044688e-08
+      "common_months": 151,
+      "month_diff": 6.743724711988364e-08,
+      "ret_diff": 1.6733737506768875e-08
     },
     {
       "ticker": "ATO",
       "ok": true,
       "common_months": 255,
       "month_diff": 5.399817382123473e-08,
-      "ret_diff": 4.497722161378448e-08
+      "ret_diff": 4.841587719628393e-08
     },
     {
-      "ticker": "AVY",
+      "ticker": "AIZ",
+      "ok": true,
+      "common_months": 242,
+      "month_diff": 6.129586216374605e-08,
+      "ret_diff": 7.628077502985775e-08
+    },
+    {
+      "ticker": "ADSK",
       "ok": true,
       "common_months": 256,
-      "month_diff": 8.803329776263524e-08,
-      "ret_diff": 2.3819215932974203e-08
+      "month_diff": 4.467825853726737e-08,
+      "ret_diff": 6.543615871379416e-09
+    },
+    {
+      "ticker": "ADP",
+      "ok": true,
+      "common_months": 191,
+      "month_diff": 4.961809851877774e-08,
+      "ret_diff": 4.336404235694147e-08
+    },
+    {
+      "ticker": "AJG",
+      "ok": true,
+      "common_months": 279,
+      "month_diff": 5.5116693209456e-08,
+      "ret_diff": 2.2854962589136107e-08
+    },
+    {
+      "ticker": "T",
+      "ok": true,
+      "common_months": 286,
+      "month_diff": 5.6441444962196385e-08,
+      "ret_diff": 8.338870038926416e-09
+    },
+    {
+      "ticker": "AZO",
+      "ok": true,
+      "common_months": 280,
+      "month_diff": 2.208662341907086e-08,
+      "ret_diff": 8.927831252059093e-09
+    },
+    {
+      "ticker": "AXON",
+      "ok": true,
+      "common_months": 89,
+      "month_diff": 8.163090581270183e-08,
+      "ret_diff": 1.0865990329733677e-08
     },
     {
       "ticker": "BKR",
       "ok": true,
       "common_months": 60,
       "month_diff": 4.231319428171787e-08,
-      "ret_diff": 4.232430184103464e-08
+      "ret_diff": 4.187017854651032e-08
     },
     {
-      "ticker": "AZO",
+      "ticker": "BAC",
       "ok": true,
-      "common_months": 280,
-      "month_diff": 3.758125766140097e-08,
-      "ret_diff": 2.863429204857937e-08
+      "common_months": 286,
+      "month_diff": 7.022337511486398e-08,
+      "ret_diff": 7.580827965369963e-09
     },
     {
-      "ticker": "BALL",
+      "ticker": "AVY",
       "ok": true,
-      "common_months": 55,
-      "month_diff": 6.613926339937848e-08,
-      "ret_diff": 5.7223082938762104e-08
-    },
-    {
-      "ticker": "TECH",
-      "ok": true,
-      "common_months": 255,
-      "month_diff": 8.77179942015971e-08,
-      "ret_diff": 9.93654203362837e-09
+      "common_months": 256,
+      "month_diff": 8.803329776263524e-08,
+      "ret_diff": 3.433192286017572e-08
     },
     {
       "ticker": "BDX",
       "ok": false,
       "common_months": 280,
       "month_diff": 0.2359079866530377,
-      "ret_diff": 0.3056600099576503
+      "ret_diff": 0.30347303505397805
     },
     {
-      "ticker": "BRK.B",
+      "ticker": "BALL",
       "ok": true,
-      "common_months": 312,
-      "month_diff": 4.6318977320325416e-08,
-      "ret_diff": 1.023492024465611e-08
+      "common_months": 55,
+      "month_diff": 6.613926339937848e-08,
+      "ret_diff": 2.0214675933161175e-08
     },
     {
-      "ticker": "BAC",
+      "ticker": "TECH",
       "ok": true,
-      "common_months": 286,
-      "month_diff": 4.339389692020745e-08,
-      "ret_diff": 1.8514714539286103e-08
-    },
-    {
-      "ticker": "BIIB",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 0.00010611836132456975,
-      "ret_diff": 0.00015287195978563872
+      "common_months": 255,
+      "month_diff": 8.77179942015971e-08,
+      "ret_diff": 2.3173041929780425e-08
     },
     {
       "ticker": "BAX",
       "ok": true,
       "common_months": 286,
       "month_diff": 7.143302149792419e-08,
-      "ret_diff": 1.1676948741268234e-08
+      "ret_diff": 6.549953579515488e-08
+    },
+    {
+      "ticker": "BRK.B",
+      "ok": true,
+      "common_months": 312,
+      "month_diff": 4.6318977320325416e-08,
+      "ret_diff": 4.203322645501828e-08
     },
     {
       "ticker": "BBY",
       "ok": true,
       "common_months": 280,
       "month_diff": 8.620766633882226e-08,
-      "ret_diff": 1.6362614374543227e-08
-    },
-    {
-      "ticker": "BLK",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 8.028454057118495e-08,
-      "ret_diff": 2.180452352007478e-08
+      "ret_diff": 8.254139594043863e-10
     },
     {
       "ticker": "XYZ",
       "ok": true,
       "common_months": 23,
       "month_diff": 9.93375081081993e-08,
-      "ret_diff": 3.0433866538004395e-08
+      "ret_diff": 7.044243255371896e-08
     },
     {
-      "ticker": "BX",
-      "ok": true,
-      "common_months": 231,
-      "month_diff": 5.557588789173451e-08,
-      "ret_diff": 2.693922840357743e-08
-    },
-    {
-      "ticker": "AVGO",
-      "ok": true,
-      "common_months": 130,
-      "month_diff": 7.377098376615265e-08,
-      "ret_diff": 4.249579599324704e-08
-    },
-    {
-      "ticker": "BSX",
+      "ticker": "BIIB",
       "ok": true,
       "common_months": 256,
-      "month_diff": 4.5866826114959736e-08,
-      "ret_diff": 6.366149163383739e-09
-    },
-    {
-      "ticker": "BMY",
-      "ok": true,
-      "common_months": 286,
-      "month_diff": 5.6969506889714694e-08,
-      "ret_diff": 1.3789163366695334e-08
+      "month_diff": 0.00010611836132456975,
+      "ret_diff": 0.0001518164456932869
     },
     {
       "ticker": "BKNG",
       "ok": true,
       "common_months": 106,
       "month_diff": 7.937804702429219e-08,
-      "ret_diff": 6.390684093027232e-09
-    },
-    {
-      "ticker": "BR",
-      "ok": true,
-      "common_months": 207,
-      "month_diff": 6.114663886336302e-08,
-      "ret_diff": 1.671793814495004e-10
+      "ret_diff": 9.095413311399625e-09
     },
     {
       "ticker": "BA",
       "ok": true,
       "common_months": 286,
       "month_diff": 3.000905723915537e-08,
-      "ret_diff": 0.0
+      "ret_diff": 6.4587467596410875e-09
+    },
+    {
+      "ticker": "BMY",
+      "ok": true,
+      "common_months": 286,
+      "month_diff": 5.6969506889714694e-08,
+      "ret_diff": 1.3631572981509521e-08
+    },
+    {
+      "ticker": "BX",
+      "ok": true,
+      "common_months": 231,
+      "month_diff": 5.557588789173451e-08,
+      "ret_diff": 2.458338033139995e-08
+    },
+    {
+      "ticker": "BR",
+      "ok": true,
+      "common_months": 207,
+      "month_diff": 5.520064716435513e-08,
+      "ret_diff": 3.782651103456658e-08
+    },
+    {
+      "ticker": "BLK",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 8.028454057118495e-08,
+      "ret_diff": 8.130398443384479e-08
+    },
+    {
+      "ticker": "BNY",
+      "ok": true,
+      "common_months": 286,
+      "month_diff": 5.885874410083147e-08,
+      "ret_diff": 4.019781463249217e-08
+    },
+    {
+      "ticker": "BSX",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 4.5866826114959736e-08,
+      "ret_diff": 2.1272253958315446e-08
+    },
+    {
+      "ticker": "AVGO",
+      "ok": true,
+      "common_months": 130,
+      "month_diff": 6.756101433857964e-08,
+      "ret_diff": 2.398153009508519e-09
     },
     {
       "ticker": "BLDR",
       "ok": true,
       "common_months": 65,
       "month_diff": 9.775767662034696e-08,
-      "ret_diff": 1.3453048008926771e-08
-    },
-    {
-      "ticker": "BXP",
-      "ok": true,
-      "common_months": 280,
-      "month_diff": 8.035387288884976e-08,
-      "ret_diff": 2.430462930913535e-08
-    },
-    {
-      "ticker": "BG",
-      "ok": true,
-      "common_months": 272,
-      "month_diff": 5.7110517204250755e-08,
-      "ret_diff": 1.9244093873993506e-08
-    },
-    {
-      "ticker": "BF.B",
-      "ok": true,
-      "common_months": 312,
-      "month_diff": 6.685334019707057e-08,
-      "ret_diff": 3.542892201835457e-09
-    },
-    {
-      "ticker": "CHRW",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 6.298433752327526e-08,
-      "ret_diff": 6.8272470787889e-08
-    },
-    {
-      "ticker": "BRO",
-      "ok": true,
-      "common_months": 279,
-      "month_diff": 4.822865395937015e-08,
-      "ret_diff": 4.009893528333919e-10
-    },
-    {
-      "ticker": "CDNS",
-      "ok": true,
-      "common_months": 312,
-      "month_diff": 4.6951084908819496e-08,
-      "ret_diff": 4.3480342437618447e-08
+      "ret_diff": 2.4349956495584024e-09
     },
     {
       "ticker": "CPT",
       "ok": true,
       "common_months": 279,
       "month_diff": 7.469826024397719e-08,
-      "ret_diff": 4.645835149919009e-08
+      "ret_diff": 6.655027295909832e-08
     },
     {
-      "ticker": "COF",
+      "ticker": "CHRW",
       "ok": true,
-      "common_months": 312,
-      "month_diff": 5.8828540483446545e-08,
-      "ret_diff": 2.1413706141615307e-08
+      "common_months": 256,
+      "month_diff": 6.298433752327526e-08,
+      "ret_diff": 1.4527472669279007e-08
     },
     {
-      "ticker": "CBOE",
+      "ticker": "BG",
       "ok": true,
-      "common_months": 99,
-      "month_diff": 5.491883436903322e-08,
-      "ret_diff": 2.3621312239541226e-08
+      "common_months": 272,
+      "month_diff": 5.7110517204250755e-08,
+      "ret_diff": 3.166843831614585e-08
     },
     {
-      "ticker": "CCL",
+      "ticker": "BXP",
       "ok": true,
       "common_months": 280,
-      "month_diff": 6.456615375682873e-08,
-      "ret_diff": 4.7955750703820854e-08
+      "month_diff": 8.035387288884976e-08,
+      "ret_diff": 9.558655089669799e-09
+    },
+    {
+      "ticker": "BF.B",
+      "ok": true,
+      "common_months": 312,
+      "month_diff": 6.685334019707057e-08,
+      "ret_diff": 1.1582531822540432e-08
+    },
+    {
+      "ticker": "BRO",
+      "ok": true,
+      "common_months": 279,
+      "month_diff": 4.822865395937015e-08,
+      "ret_diff": 2.3092269763047568e-08
     },
     {
       "ticker": "CVNA",
       "ok": true,
       "common_months": 116,
       "month_diff": 6.924249373874147e-08,
-      "ret_diff": 1.6985911899247697e-08
-    },
-    {
-      "ticker": "CBRE",
-      "ok": true,
-      "common_months": 105,
-      "month_diff": 8.683425622990626e-08,
-      "ret_diff": 3.9479840840961344e-08
-    },
-    {
-      "ticker": "CARR",
-      "ok": true,
-      "common_months": 80,
-      "month_diff": 6.16089472771364e-08,
-      "ret_diff": 5.319626739108685e-09
+      "ret_diff": 4.776182760402037e-08
     },
     {
       "ticker": "CASY",
       "ok": true,
       "common_months": 255,
       "month_diff": 6.295260512878542e-08,
-      "ret_diff": 1.812160599357071e-08
+      "ret_diff": 9.900676190000013e-08
     },
     {
-      "ticker": "CAT",
+      "ticker": "CDNS",
       "ok": true,
       "common_months": 312,
-      "month_diff": 5.96433222810333e-08,
-      "ret_diff": 3.5203429060715052e-09
+      "month_diff": 6.449711043021722e-08,
+      "ret_diff": 1.1834310420510974e-08
     },
     {
-      "ticker": "COR",
+      "ticker": "CCL",
       "ok": true,
-      "common_months": 172,
-      "month_diff": 9.791897470634581e-08,
-      "ret_diff": 1.6011099779333904e-08
-    },
-    {
-      "ticker": "CDW",
-      "ok": true,
-      "common_months": 161,
-      "month_diff": 8.667556938846133e-08,
-      "ret_diff": 5.239488953812099e-08
-    },
-    {
-      "ticker": "CNC",
-      "ok": true,
-      "common_months": 222,
-      "month_diff": 1.2601685361879333e-07,
-      "ret_diff": 9.235811426755447e-08
+      "common_months": 280,
+      "month_diff": 6.456615375682873e-08,
+      "ret_diff": 3.3577634006576318e-09
     },
     {
       "ticker": "CAH",
       "ok": true,
       "common_months": 280,
       "month_diff": 4.4123950715402316e-08,
-      "ret_diff": 6.302750743536478e-08
+      "ret_diff": 6.336279612106921e-08
     },
     {
-      "ticker": "SCHW",
+      "ticker": "COF",
       "ok": true,
-      "common_months": 240,
-      "month_diff": 6.690738396653018e-08,
-      "ret_diff": 9.759837382716796e-11
+      "common_months": 312,
+      "month_diff": 5.8828540483446545e-08,
+      "ret_diff": 2.3915946112396114e-08
     },
     {
-      "ticker": "CRL",
+      "ticker": "CAT",
       "ok": true,
-      "common_months": 279,
-      "month_diff": 8.377915405866077e-08,
-      "ret_diff": 1.335282151515571e-08
+      "common_months": 312,
+      "month_diff": 5.96433222810333e-08,
+      "ret_diff": 3.37673053962817e-08
     },
     {
-      "ticker": "CF",
+      "ticker": "CARR",
       "ok": true,
-      "common_months": 231,
-      "month_diff": 1.0048418985775243e-07,
-      "ret_diff": 1.5101882633317132e-08
+      "common_months": 80,
+      "month_diff": 6.16089472771364e-08,
+      "ret_diff": 5.168903915997447e-08
     },
     {
-      "ticker": "CHTR",
+      "ticker": "CDW",
       "ok": true,
-      "common_months": 191,
-      "month_diff": 7.817384051200804e-08,
-      "ret_diff": 1.3823129418888414e-08
+      "common_months": 161,
+      "month_diff": 9.46958131908815e-08,
+      "ret_diff": 4.105317863434266e-08
+    },
+    {
+      "ticker": "COR",
+      "ok": true,
+      "common_months": 172,
+      "month_diff": 9.791897470634581e-08,
+      "ret_diff": 2.582493308089795e-08
+    },
+    {
+      "ticker": "CBRE",
+      "ok": true,
+      "common_months": 105,
+      "month_diff": 8.376387072850378e-08,
+      "ret_diff": 2.0625536611973416e-08
+    },
+    {
+      "ticker": "CNC",
+      "ok": true,
+      "common_months": 222,
+      "month_diff": 1.2601685361879333e-07,
+      "ret_diff": 9.270319378806846e-08
     },
     {
       "ticker": "CNP",
       "ok": true,
       "common_months": 280,
       "month_diff": 7.229679666043154e-08,
-      "ret_diff": 2.2553103606881564e-08
+      "ret_diff": 1.9283500130029552e-08
     },
     {
-      "ticker": "CMG",
+      "ticker": "CRL",
       "ok": true,
-      "common_months": 231,
-      "month_diff": 1.0811485351425176e-07,
-      "ret_diff": 4.891497673575884e-08
+      "common_months": 279,
+      "month_diff": 8.377915405866077e-08,
+      "ret_diff": 5.521923163165354e-08
     },
     {
-      "ticker": "CIEN",
+      "ticker": "SCHW",
       "ok": true,
-      "common_months": 145,
-      "month_diff": 7.264600321299497e-08,
-      "ret_diff": 3.3223999107434565e-09
+      "common_months": 240,
+      "month_diff": 6.690738396653018e-08,
+      "ret_diff": 9.95502591472075e-09
+    },
+    {
+      "ticker": "CBOE",
+      "ok": true,
+      "common_months": 99,
+      "month_diff": 5.491883436903322e-08,
+      "ret_diff": 7.605155971646127e-08
     },
     {
       "ticker": "CVX",
       "ok": true,
       "common_months": 286,
       "month_diff": 6.793563933626956e-08,
-      "ret_diff": 5.104684319690023e-08
+      "ret_diff": 5.045894613253665e-08
     },
     {
-      "ticker": "CB",
+      "ticker": "CHTR",
       "ok": true,
-      "common_months": 256,
-      "month_diff": 6.985004463722078e-08,
-      "ret_diff": 1.6002819069882435e-09
-    },
-    {
-      "ticker": "CI",
-      "ok": true,
-      "common_months": 286,
-      "month_diff": 9.461118688491865e-08,
-      "ret_diff": 4.7155181981395344e-09
-    },
-    {
-      "ticker": "CINF",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 6.499804305892809e-08,
-      "ret_diff": 1.1691389856238743e-08
+      "common_months": 191,
+      "month_diff": 7.817384051200804e-08,
+      "ret_diff": 1.6916950063006198e-09
     },
     {
       "ticker": "CHD",
       "ok": true,
       "common_months": 279,
       "month_diff": 6.025897758554777e-08,
-      "ret_diff": 5.7060875580106085e-08
+      "ret_diff": 8.302441534269178e-08
     },
     {
-      "ticker": "CTAS",
+      "ticker": "CMG",
+      "ok": true,
+      "common_months": 231,
+      "month_diff": 1.0811485351425176e-07,
+      "ret_diff": 5.358879007211215e-08
+    },
+    {
+      "ticker": "CB",
       "ok": true,
       "common_months": 256,
-      "month_diff": 6.911139582843617e-08,
-      "ret_diff": 1.5962808852520993e-09
+      "month_diff": 6.985004463722078e-08,
+      "ret_diff": 2.7712705241711433e-08
     },
     {
-      "ticker": "CSCO",
+      "ticker": "CIEN",
       "ok": true,
-      "common_months": 312,
-      "month_diff": 5.565970795373687e-08,
-      "ret_diff": 4.737630621143296e-08
+      "common_months": 145,
+      "month_diff": 7.264600321299497e-08,
+      "ret_diff": 5.342184716816689e-08
+    },
+    {
+      "ticker": "CF",
+      "ok": true,
+      "common_months": 231,
+      "month_diff": 1.0048418985775243e-07,
+      "ret_diff": 3.966399897414874e-08
+    },
+    {
+      "ticker": "CINF",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 6.499804305892809e-08,
+      "ret_diff": 3.5872791404045756e-08
     },
     {
       "ticker": "CFG",
       "ok": true,
       "common_months": 147,
       "month_diff": 7.070460017466473e-08,
-      "ret_diff": 7.350970232522513e-08
+      "ret_diff": 7.872315643808747e-08
+    },
+    {
+      "ticker": "CTAS",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 6.911139582843617e-08,
+      "ret_diff": 7.990224482057329e-09
     },
     {
       "ticker": "C",
       "ok": true,
       "common_months": 285,
       "month_diff": 6.720041856311809e-08,
-      "ret_diff": 3.825018657366286e-08
+      "ret_diff": 1.4302058426451936e-08
     },
     {
-      "ticker": "KO",
+      "ticker": "CI",
       "ok": true,
       "common_months": 286,
-      "month_diff": 9.097686981540676e-08,
-      "ret_diff": 5.0985972555039893e-08
+      "month_diff": 9.461118688491865e-08,
+      "ret_diff": 1.7972950905331686e-08
     },
     {
-      "ticker": "COHR",
+      "ticker": "CSCO",
       "ok": true,
-      "common_months": 46,
-      "month_diff": 1.0996477151081763e-07,
-      "ret_diff": 7.255763101454704e-09
-    },
-    {
-      "ticker": "CLX",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 6.665693330631939e-08,
-      "ret_diff": 3.141850224430698e-08
-    },
-    {
-      "ticker": "COIN",
-      "ok": true,
-      "common_months": 68,
-      "month_diff": 3.485170314221353e-05,
-      "ret_diff": 1.8302236879153e-05
+      "common_months": 312,
+      "month_diff": 5.565970795373687e-08,
+      "ret_diff": 8.261211204008134e-08
     },
     {
       "ticker": "CME",
       "ok": true,
       "common_months": 191,
       "month_diff": 3.445173320815176e-05,
-      "ret_diff": 4.017493591668142e-05
+      "ret_diff": 4.033011909787554e-05
     },
     {
-      "ticker": "CMS",
+      "ticker": "CLX",
       "ok": true,
       "common_months": 256,
-      "month_diff": 6.015018527705251e-08,
-      "ret_diff": 6.659908879935728e-08
+      "month_diff": 6.665693330631939e-08,
+      "ret_diff": 4.0049095595406925e-08
+    },
+    {
+      "ticker": "KO",
+      "ok": true,
+      "common_months": 286,
+      "month_diff": 9.097686981540676e-08,
+      "ret_diff": 5.194204844016781e-09
+    },
+    {
+      "ticker": "COIN",
+      "ok": true,
+      "common_months": 68,
+      "month_diff": 5.4283734618465473e-08,
+      "ret_diff": 2.5215800558697765e-08
     },
     {
       "ticker": "CTSH",
       "ok": true,
       "common_months": 286,
       "month_diff": 6.524633566762361e-08,
-      "ret_diff": 1.2046391106856902e-08
+      "ret_diff": 2.1224894619642498e-08
+    },
+    {
+      "ticker": "COHR",
+      "ok": true,
+      "common_months": 46,
+      "month_diff": 1.0996477151081763e-07,
+      "ret_diff": 3.1726292704092884e-09
     },
     {
       "ticker": "CL",
       "ok": true,
       "common_months": 286,
       "month_diff": 6.012698205992706e-08,
-      "ret_diff": 1.3363876449901113e-08
-    },
-    {
-      "ticker": "CEG",
-      "ok": true,
-      "common_months": 58,
-      "month_diff": 7.983234612807255e-05,
-      "ret_diff": 6.337732492089909e-05
-    },
-    {
-      "ticker": "FIX",
-      "ok": true,
-      "common_months": 255,
-      "month_diff": 3.6062762998056996e-08,
-      "ret_diff": 2.8457995959740856e-09
-    },
-    {
-      "ticker": "COP",
-      "ok": true,
-      "common_months": 265,
-      "month_diff": 4.384276319768787e-08,
-      "ret_diff": 5.792426760464764e-08
+      "ret_diff": 1.7035400645681875e-08
     },
     {
       "ticker": "CMCSA",
       "ok": false,
       "common_months": 286,
       "month_diff": 0.0666861920896491,
-      "ret_diff": 0.0631592676650986
+      "ret_diff": 0.06426382321478963
+    },
+    {
+      "ticker": "CEG",
+      "ok": true,
+      "common_months": 58,
+      "month_diff": 7.983234612807255e-05,
+      "ret_diff": 6.282588567796399e-05
+    },
+    {
+      "ticker": "CMS",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 6.015018527705251e-08,
+      "ret_diff": 1.8231634646426187e-08
+    },
+    {
+      "ticker": "FIX",
+      "ok": true,
+      "common_months": 255,
+      "month_diff": 3.6062762998056996e-08,
+      "ret_diff": 5.2273178452466595e-08
     },
     {
       "ticker": "COO",
       "ok": true,
       "common_months": 39,
       "month_diff": 4.6547894982928995e-08,
-      "ret_diff": 1.6431925931037483e-08
+      "ret_diff": 1.0596582167288204e-08
+    },
+    {
+      "ticker": "COP",
+      "ok": true,
+      "common_months": 265,
+      "month_diff": 4.384276319768787e-08,
+      "ret_diff": 4.558674548960084e-09
+    },
+    {
+      "ticker": "CPRT",
+      "ok": true,
+      "common_months": 255,
+      "month_diff": 9.042824311578102e-08,
+      "ret_diff": 5.663899105279313e-08
     },
     {
       "ticker": "ED",
       "ok": true,
       "common_months": 280,
       "month_diff": 3.272129389664258e-08,
-      "ret_diff": 7.332365825618581e-09
-    },
-    {
-      "ticker": "STZ",
-      "ok": true,
-      "common_months": 280,
-      "month_diff": 7.924342959597652e-08,
-      "ret_diff": 3.3750714445446306e-08
-    },
-    {
-      "ticker": "CPRT",
-      "ok": true,
-      "common_months": 255,
-      "month_diff": 5.856357021549741e-08,
-      "ret_diff": 7.632204535035214e-09
+      "ret_diff": 3.4752989819253344e-08
     },
     {
       "ticker": "CPAY",
       "ok": true,
       "common_months": 33,
       "month_diff": 4.684327881143702e-08,
-      "ret_diff": 6.861234447264053e-08
-    },
-    {
-      "ticker": "CTVA",
-      "ok": false,
-      "common_months": 90,
-      "month_diff": 0.8492028664373066,
-      "ret_diff": 0.7917734196646308
+      "ret_diff": 1.0155826801749868e-07
     },
     {
       "ticker": "CSGP",
       "ok": true,
       "common_months": 255,
       "month_diff": 7.440103511058282e-08,
-      "ret_diff": 3.326770725564643e-08
+      "ret_diff": 2.3467917498187774e-08
     },
     {
       "ticker": "CRH",
       "ok": true,
       "common_months": 231,
       "month_diff": 6.990807066564741e-08,
-      "ret_diff": 3.6454658181028776e-08
+      "ret_diff": 2.8772459192971667e-08
     },
     {
-      "ticker": "CRWD",
-      "ok": true,
+      "ticker": "CTVA",
+      "ok": false,
       "common_months": 90,
-      "month_diff": 1.064421784235936e-05,
-      "ret_diff": 8.009507501682833e-09
-    },
-    {
-      "ticker": "COST",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 7.021559800257648e-08,
-      "ret_diff": 7.835039239623143e-08
-    },
-    {
-      "ticker": "CSX",
-      "ok": true,
-      "common_months": 132,
-      "month_diff": 7.642867339008319e-08,
-      "ret_diff": 4.6984680368566956e-08
+      "month_diff": 0.8492028664373066,
+      "ret_diff": 0.7590277206475992
     },
     {
       "ticker": "GLW",
       "ok": true,
       "common_months": 280,
       "month_diff": 6.893177051381372e-08,
-      "ret_diff": 7.08525897952228e-08
+      "ret_diff": 2.3954718209040493e-08
+    },
+    {
+      "ticker": "COST",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 4.752643301131343e-08,
+      "ret_diff": 4.652481866429525e-08
+    },
+    {
+      "ticker": "CRWD",
+      "ok": true,
+      "common_months": 90,
+      "month_diff": 1.064421784235936e-05,
+      "ret_diff": 4.01322941545601e-08
+    },
+    {
+      "ticker": "STZ",
+      "ok": true,
+      "common_months": 280,
+      "month_diff": 7.924342959597652e-08,
+      "ret_diff": 2.6908688610660647e-09
     },
     {
       "ticker": "CCI",
       "ok": true,
       "common_months": 276,
       "month_diff": 5.766088162495464e-08,
-      "ret_diff": 3.336700182821062e-08
-    },
-    {
-      "ticker": "CVS",
-      "ok": true,
-      "common_months": 312,
-      "month_diff": 7.549794278638444e-08,
-      "ret_diff": 2.7432944582628238e-08
-    },
-    {
-      "ticker": "DDOG",
-      "ok": true,
-      "common_months": 87,
-      "month_diff": 0.0003719003969148149,
-      "ret_diff": 0.0005036575260171094
-    },
-    {
-      "ticker": "DHR",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 4.6479078363859117e-08,
-      "ret_diff": 2.4370546469754117e-08
-    },
-    {
-      "ticker": "CMI",
-      "ok": true,
-      "common_months": 280,
-      "month_diff": 4.115749474564723e-08,
-      "ret_diff": 3.474058529739921e-08
-    },
-    {
-      "ticker": "DECK",
-      "ok": true,
-      "common_months": 144,
-      "month_diff": 4.438277656504397e-08,
-      "ret_diff": 1.0209569745178726e-08
-    },
-    {
-      "ticker": "DVA",
-      "ok": true,
-      "common_months": 280,
-      "month_diff": 7.578829519516717e-08,
-      "ret_diff": 2.4118668617845174e-08
-    },
-    {
-      "ticker": "DE",
-      "ok": true,
-      "common_months": 280,
-      "month_diff": 5.211372766655842e-08,
-      "ret_diff": 1.6818187287270803e-08
-    },
-    {
-      "ticker": "DELL",
-      "ok": true,
-      "common_months": 96,
-      "month_diff": 6.380345374257246e-08,
-      "ret_diff": 1.2740954558054796e-07
+      "ret_diff": 1.977846431078234e-08
     },
     {
       "ticker": "DRI",
       "ok": true,
       "common_months": 256,
       "month_diff": 5.7559342403479263e-08,
-      "ret_diff": 1.760139411999262e-08
+      "ret_diff": 5.389717228077018e-08
     },
     {
-      "ticker": "DAL",
+      "ticker": "CSX",
       "ok": true,
-      "common_months": 231,
-      "month_diff": 9.80962346908143e-08,
-      "ret_diff": 3.203045606525734e-08
+      "common_months": 132,
+      "month_diff": 7.642867339008319e-08,
+      "ret_diff": 5.992072260596615e-08
     },
     {
-      "ticker": "DXCM",
+      "ticker": "DDOG",
       "ok": true,
-      "common_months": 207,
-      "month_diff": 3.5460634539852265e-08,
-      "ret_diff": 3.5983771518033336e-09
+      "common_months": 87,
+      "month_diff": 0.0003719003969148149,
+      "ret_diff": 0.00047277092572128865
+    },
+    {
+      "ticker": "CVS",
+      "ok": true,
+      "common_months": 312,
+      "month_diff": 7.549794278638444e-08,
+      "ret_diff": 5.394436941585923e-08
+    },
+    {
+      "ticker": "DHR",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 4.6479078363859117e-08,
+      "ret_diff": 2.1605347066966374e-08
+    },
+    {
+      "ticker": "DELL",
+      "ok": true,
+      "common_months": 96,
+      "month_diff": 6.380345374257246e-08,
+      "ret_diff": 2.015658835397005e-07
     },
     {
       "ticker": "DVN",
       "ok": true,
       "common_months": 234,
       "month_diff": 6.263191187905193e-08,
-      "ret_diff": 2.833018486469996e-09
+      "ret_diff": 3.1913119702409176e-08
+    },
+    {
+      "ticker": "DE",
+      "ok": true,
+      "common_months": 280,
+      "month_diff": 5.211372766655842e-08,
+      "ret_diff": 8.57741722093408e-09
+    },
+    {
+      "ticker": "CMI",
+      "ok": true,
+      "common_months": 280,
+      "month_diff": 4.115749474564723e-08,
+      "ret_diff": 1.6719291284772453e-08
+    },
+    {
+      "ticker": "DXCM",
+      "ok": true,
+      "common_months": 207,
+      "month_diff": 3.5460634539852265e-08,
+      "ret_diff": 1.5113183815529396e-08
+    },
+    {
+      "ticker": "DECK",
+      "ok": true,
+      "common_months": 144,
+      "month_diff": 4.438277656504397e-08,
+      "ret_diff": 2.7468370911165607e-09
     },
     {
       "ticker": "FANG",
       "ok": true,
       "common_months": 161,
       "month_diff": 5.997676488789239e-08,
-      "ret_diff": 1.8913167032508227e-08
+      "ret_diff": 5.190307827973584e-08
     },
     {
-      "ticker": "DG",
-      "ok": true,
-      "common_months": 200,
-      "month_diff": 9.392402633423558e-08,
-      "ret_diff": 1.83287842681068e-08
-    },
-    {
-      "ticker": "DASH",
-      "ok": true,
-      "common_months": 39,
-      "month_diff": 6.009703445997161e-08,
-      "ret_diff": 6.4097478436053734e-09
-    },
-    {
-      "ticker": "DLTR",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 6.204528246733787e-08,
-      "ret_diff": 4.397873465400437e-08
-    },
-    {
-      "ticker": "DOW",
-      "ok": true,
-      "common_months": 92,
-      "month_diff": 6.984413736255135e-08,
-      "ret_diff": 1.6229258159583537e-08
-    },
-    {
-      "ticker": "D",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 5.6146224447495285e-08,
-      "ret_diff": 5.048087170500537e-08
-    },
-    {
-      "ticker": "DOV",
+      "ticker": "DVA",
       "ok": true,
       "common_months": 280,
-      "month_diff": 4.141407305979783e-08,
-      "ret_diff": 9.005387768823425e-09
+      "month_diff": 7.578829519516717e-08,
+      "ret_diff": 6.487751447181722e-09
+    },
+    {
+      "ticker": "DAL",
+      "ok": true,
+      "common_months": 231,
+      "month_diff": 9.80962346908143e-08,
+      "ret_diff": 8.35577118607489e-09
     },
     {
       "ticker": "DLR",
       "ok": true,
       "common_months": 234,
       "month_diff": 7.139460189709013e-08,
-      "ret_diff": 6.858547774157842e-08
+      "ret_diff": 6.072945302193489e-08
+    },
+    {
+      "ticker": "DG",
+      "ok": true,
+      "common_months": 200,
+      "month_diff": 9.392402633423558e-08,
+      "ret_diff": 4.2627151808360964e-08
+    },
+    {
+      "ticker": "DLTR",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 3.7442167925005876e-05,
+      "ret_diff": 4.5215955218003145e-05
+    },
+    {
+      "ticker": "D",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 5.6146224447495285e-08,
+      "ret_diff": 4.074098747253174e-08
+    },
+    {
+      "ticker": "DOW",
+      "ok": true,
+      "common_months": 92,
+      "month_diff": 6.984413736255135e-08,
+      "ret_diff": 5.982024098294403e-08
     },
     {
       "ticker": "DPZ",
       "ok": true,
       "common_months": 213,
       "month_diff": 7.576021909816433e-08,
-      "ret_diff": 6.566615806669063e-09
+      "ret_diff": 8.786684713157911e-10
+    },
+    {
+      "ticker": "DOV",
+      "ok": true,
+      "common_months": 280,
+      "month_diff": 4.974073086749797e-08,
+      "ret_diff": 1.9024215536234124e-08
+    },
+    {
+      "ticker": "DASH",
+      "ok": true,
+      "common_months": 39,
+      "month_diff": 4.11639000663655e-08,
+      "ret_diff": 1.4913424273288456e-08
     },
     {
       "ticker": "DHI",
       "ok": true,
       "common_months": 256,
       "month_diff": 6.076583569658567e-08,
-      "ret_diff": 5.081399023776356e-08
+      "ret_diff": 3.1447945691986945e-08
     },
     {
       "ticker": "DTE",
       "ok": true,
       "common_months": 280,
       "month_diff": 7.236896171214369e-08,
-      "ret_diff": 1.7991458767241397e-08
-    },
-    {
-      "ticker": "DUK",
-      "ok": true,
-      "common_months": 286,
-      "month_diff": 6.385537298925215e-08,
-      "ret_diff": 9.019509583652052e-09
+      "ret_diff": 3.582039287408634e-08
     },
     {
       "ticker": "EBAY",
       "ok": true,
       "common_months": 286,
       "month_diff": 0.00025424280555874645,
-      "ret_diff": 0.00035295910200283664
-    },
-    {
-      "ticker": "DD",
-      "ok": true,
-      "common_months": 312,
-      "month_diff": 3.2642943459393337e-08,
-      "ret_diff": 1.614326472498817e-08
+      "ret_diff": 0.0003528567945003669
     },
     {
       "ticker": "ETN",
       "ok": true,
       "common_months": 280,
       "month_diff": 3.981205798364584e-08,
-      "ret_diff": 3.96876802533086e-08
-    },
-    {
-      "ticker": "ECL",
-      "ok": true,
-      "common_months": 280,
-      "month_diff": 9.397226174989726e-08,
-      "ret_diff": 5.4885913147728616e-08
+      "ret_diff": 2.7130160451527274e-08
     },
     {
       "ticker": "ECHO",
       "ok": false,
       "common_months": 152,
       "month_diff": 1.6043767657459473,
-      "ret_diff": 0.8476090017567741
+      "ret_diff": 0.8431167201291214
     },
     {
-      "ticker": "ELV",
+      "ticker": "DUK",
       "ok": true,
-      "common_months": 54,
-      "month_diff": 6.600682911361844e-08,
-      "ret_diff": 2.945609445248465e-08
+      "common_months": 286,
+      "month_diff": 6.385537298925215e-08,
+      "ret_diff": 5.0302639609256516e-08
     },
     {
       "ticker": "EIX",
       "ok": true,
       "common_months": 280,
       "month_diff": 8.079203794864043e-08,
-      "ret_diff": 1.5773429451471088e-08
+      "ret_diff": 3.1634855623963176e-08
+    },
+    {
+      "ticker": "ECL",
+      "ok": true,
+      "common_months": 280,
+      "month_diff": 9.397226174989726e-08,
+      "ret_diff": 1.6082455367438797e-09
+    },
+    {
+      "ticker": "DD",
+      "ok": true,
+      "common_months": 312,
+      "month_diff": 3.172541029883291e-08,
+      "ret_diff": 7.176570715472508e-08
+    },
+    {
+      "ticker": "ELV",
+      "ok": true,
+      "common_months": 54,
+      "month_diff": 6.600682911361844e-08,
+      "ret_diff": 4.1698349884100594e-08
     },
     {
       "ticker": "EME",
       "ok": true,
       "common_months": 279,
       "month_diff": 4.7568271099862613e-08,
-      "ret_diff": 3.658129776873409e-08
-    },
-    {
-      "ticker": "EOG",
-      "ok": true,
-      "common_months": 280,
-      "month_diff": 8.303287601929554e-08,
-      "ret_diff": 8.86801607702381e-08
-    },
-    {
-      "ticker": "EMR",
-      "ok": true,
-      "common_months": 280,
-      "month_diff": 9.57885095687061e-08,
-      "ret_diff": 9.057379291022016e-09
-    },
-    {
-      "ticker": "EQT",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 5.1734336148356874e-08,
-      "ret_diff": 1.3862489600668937e-08
+      "ret_diff": 5.999758734276384e-08
     },
     {
       "ticker": "EW",
       "ok": true,
       "common_months": 312,
       "month_diff": 2.8516249583887543e-08,
-      "ret_diff": 4.372457973467192e-08
+      "ret_diff": 3.315145846727319e-08
+    },
+    {
+      "ticker": "EOG",
+      "ok": true,
+      "common_months": 280,
+      "month_diff": 8.190921962913933e-08,
+      "ret_diff": 3.171365214882371e-08
     },
     {
       "ticker": "ETR",
       "ok": true,
       "common_months": 286,
       "month_diff": 4.789588825548918e-08,
-      "ret_diff": 5.488103504980302e-08
+      "ret_diff": 5.142339354335945e-08
+    },
+    {
+      "ticker": "EQT",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 5.1734336148356874e-08,
+      "ret_diff": 1.913559133370768e-08
     },
     {
       "ticker": "EQIX",
       "ok": true,
       "common_months": 255,
       "month_diff": 7.610389629597591e-08,
-      "ret_diff": 5.638811861885529e-08
+      "ret_diff": 8.226919678833156e-08
+    },
+    {
+      "ticker": "EMR",
+      "ok": true,
+      "common_months": 280,
+      "month_diff": 9.57885095687061e-08,
+      "ret_diff": 8.985331789723716e-08
+    },
+    {
+      "ticker": "ERIE",
+      "ok": true,
+      "common_months": 255,
+      "month_diff": 1.9064682779790232e-05,
+      "ret_diff": 1.6947773728626103e-05
     },
     {
       "ticker": "EFX",
       "ok": true,
       "common_months": 256,
       "month_diff": 6.477900860168972e-08,
-      "ret_diff": 2.625399897482339e-09
-    },
-    {
-      "ticker": "EG",
-      "ok": true,
-      "common_months": 41,
-      "month_diff": 5.171976313889104e-08,
-      "ret_diff": 2.918655517269997e-08
-    },
-    {
-      "ticker": "EVRG",
-      "ok": true,
-      "common_months": 48,
-      "month_diff": 5.817280810838099e-05,
-      "ret_diff": 6.439431570282039e-05
-    },
-    {
-      "ticker": "EL",
-      "ok": true,
-      "common_months": 286,
-      "month_diff": 7.879143693045876e-08,
-      "ret_diff": 3.853854568802717e-09
+      "ret_diff": 2.0516011778326515e-08
     },
     {
       "ticker": "ESS",
       "ok": true,
       "common_months": 279,
       "month_diff": 8.928041594913338e-08,
-      "ret_diff": 4.698693745197602e-08
+      "ret_diff": 1.3200255333245536e-08
     },
     {
-      "ticker": "EXC",
+      "ticker": "EVRG",
       "ok": true,
-      "common_months": 87,
-      "month_diff": 5.737507269287789e-08,
-      "ret_diff": 2.2249450615241528e-08
-    },
-    {
-      "ticker": "ES",
-      "ok": true,
-      "common_months": 206,
-      "month_diff": 6.871510471739839e-08,
-      "ret_diff": 4.511891504854759e-08
-    },
-    {
-      "ticker": "EXPE",
-      "ok": true,
-      "common_months": 207,
-      "month_diff": 6.014530451459166e-08,
-      "ret_diff": 4.859295410497566e-09
-    },
-    {
-      "ticker": "ERIE",
-      "ok": true,
-      "common_months": 255,
-      "month_diff": 1.0006102679760431e-07,
-      "ret_diff": 6.790706363890564e-08
+      "common_months": 48,
+      "month_diff": 7.750191910460558e-08,
+      "ret_diff": 5.7737451708561593e-08
     },
     {
       "ticker": "EXE",
       "ok": true,
       "common_months": 26,
       "month_diff": 8.318705813081806e-08,
-      "ret_diff": 1.1828777179978545e-08
+      "ret_diff": 3.180683805226181e-08
     },
     {
-      "ticker": "XOM",
+      "ticker": "EXPE",
       "ok": true,
-      "common_months": 285,
-      "month_diff": 4.676088416477597e-08,
-      "ret_diff": 8.346236146650199e-09
+      "common_months": 207,
+      "month_diff": 6.014530451459166e-08,
+      "ret_diff": 1.1202982985736298e-10
+    },
+    {
+      "ticker": "EL",
+      "ok": true,
+      "common_months": 286,
+      "month_diff": 7.879143693045876e-08,
+      "ret_diff": 1.0233837111073285e-08
+    },
+    {
+      "ticker": "ES",
+      "ok": true,
+      "common_months": 206,
+      "month_diff": 6.871510471739839e-08,
+      "ret_diff": 8.705972831535291e-09
+    },
+    {
+      "ticker": "EXC",
+      "ok": true,
+      "common_months": 87,
+      "month_diff": 5.737507269287789e-08,
+      "ret_diff": 2.920777175674516e-09
+    },
+    {
+      "ticker": "EG",
+      "ok": true,
+      "common_months": 41,
+      "month_diff": 5.171976313889104e-08,
+      "ret_diff": 3.745716070646665e-08
     },
     {
       "ticker": "EXPD",
       "ok": true,
       "common_months": 256,
       "month_diff": 6.29098186877286e-08,
-      "ret_diff": 7.587107164752638e-08
+      "ret_diff": 3.032014506132441e-08
     },
     {
-      "ticker": "EXR",
+      "ticker": "XOM",
       "ok": true,
-      "common_months": 236,
-      "month_diff": 1.0375519554628454e-07,
-      "ret_diff": 1.6365066857204624e-08
-    },
-    {
-      "ticker": "FFIV",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 5.999597751937813e-08,
-      "ret_diff": 4.145662924059934e-08
+      "common_months": 285,
+      "month_diff": 4.676088416477597e-08,
+      "ret_diff": 1.9383707750009194e-08
     },
     {
       "ticker": "FDS",
       "ok": true,
       "common_months": 255,
       "month_diff": 1.0163092301063159e-07,
-      "ret_diff": 5.6348156585173115e-08
-    },
-    {
-      "ticker": "FICO",
-      "ok": true,
-      "common_months": 194,
-      "month_diff": 4.9537601798377295e-08,
-      "ret_diff": 1.1057190052454757e-08
+      "ret_diff": 9.58970602926712e-08
     },
     {
       "ticker": "FAST",
       "ok": true,
       "common_months": 256,
       "month_diff": 5.2730097399589226e-08,
-      "ret_diff": 8.558855046914005e-08
+      "ret_diff": 3.641369783480286e-08
+    },
+    {
+      "ticker": "FICO",
+      "ok": true,
+      "common_months": 194,
+      "month_diff": 6.888667081206279e-08,
+      "ret_diff": 2.5889513088905858e-08
+    },
+    {
+      "ticker": "FFIV",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 5.999597751937813e-08,
+      "ret_diff": 5.013210935267409e-08
+    },
+    {
+      "ticker": "EXR",
+      "ok": true,
+      "common_months": 236,
+      "month_diff": 1.0375519554628454e-07,
+      "ret_diff": 1.574556929284654e-08
     },
     {
       "ticker": "FERG",
       "ok": true,
       "common_months": 69,
       "month_diff": 5.4567020790763365e-08,
-      "ret_diff": 1.2264794291283465e-08
-    },
-    {
-      "ticker": "FIS",
-      "ok": true,
-      "common_months": 273,
-      "month_diff": 7.75337773983864e-08,
-      "ret_diff": 3.684451566066116e-08
-    },
-    {
-      "ticker": "FDX",
-      "ok": false,
-      "common_months": 286,
-      "month_diff": 0.18327707757911382,
-      "ret_diff": 0.283363894213688
+      "ret_diff": 4.806180564642659e-09
     },
     {
       "ticker": "FRT",
       "ok": true,
       "common_months": 312,
       "month_diff": 7.210887242870001e-08,
-      "ret_diff": 5.743405662173018e-08
+      "ret_diff": 6.089356219263209e-08
     },
     {
-      "ticker": "FITB",
+      "ticker": "FIS",
       "ok": true,
-      "common_months": 256,
-      "month_diff": 5.967322325162172e-08,
-      "ret_diff": 2.6417297682712615e-08
-    },
-    {
-      "ticker": "FLEX",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 6.823433129632406e-08,
-      "ret_diff": 4.36933393910266e-08
-    },
-    {
-      "ticker": "FOXA",
-      "ok": true,
-      "common_months": 93,
-      "month_diff": 5.766927424488699e-08,
-      "ret_diff": 2.795503339925176e-08
-    },
-    {
-      "ticker": "FE",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 4.927134589216564e-08,
-      "ret_diff": 2.519457487082377e-08
-    },
-    {
-      "ticker": "F",
-      "ok": true,
-      "common_months": 286,
-      "month_diff": 5.614364129158389e-08,
-      "ret_diff": 6.543186659158096e-09
-    },
-    {
-      "ticker": "FTNT",
-      "ok": true,
-      "common_months": 205,
-      "month_diff": 7.827514603153674e-08,
-      "ret_diff": 6.813287534157553e-08
-    },
-    {
-      "ticker": "FSLR",
-      "ok": true,
-      "common_months": 207,
-      "month_diff": 5.56618823255306e-08,
-      "ret_diff": 3.3133457755241125e-08
+      "common_months": 273,
+      "month_diff": 7.75337773983864e-08,
+      "ret_diff": 1.0361968838523694e-08
     },
     {
       "ticker": "FISV",
       "ok": true,
       "common_months": 284,
       "month_diff": 5.148773896124226e-08,
-      "ret_diff": 4.046330537299525e-08
+      "ret_diff": 2.542080901335453e-08
     },
     {
-      "ticker": "FTV",
-      "ok": true,
-      "common_months": 125,
-      "month_diff": 8.165604103993473e-08,
-      "ret_diff": 2.3367453527711746e-08
-    },
-    {
-      "ticker": "GRMN",
-      "ok": true,
-      "common_months": 60,
-      "month_diff": 5.8949011338960133e-08,
-      "ret_diff": 6.058734447478287e-08
-    },
-    {
-      "ticker": "FOX",
-      "ok": true,
-      "common_months": 93,
-      "month_diff": 5.415704662503629e-08,
-      "ret_diff": 4.0695618652719645e-08
-    },
-    {
-      "ticker": "IT",
-      "ok": true,
-      "common_months": 279,
-      "month_diff": 7.685092029419138e-08,
-      "ret_diff": 4.571052769630768e-08
-    },
-    {
-      "ticker": "GEV",
-      "ok": true,
-      "common_months": 32,
-      "month_diff": 7.946579727580172e-08,
-      "ret_diff": 3.546487326033798e-08
-    },
-    {
-      "ticker": "GE",
-      "ok": true,
+      "ticker": "FDX",
+      "ok": false,
       "common_months": 286,
-      "month_diff": 6.553179332513537e-08,
-      "ret_diff": 5.365357180764363e-08
+      "month_diff": 0.18327707757911382,
+      "ret_diff": 0.28643224973006576
     },
     {
-      "ticker": "BEN",
+      "ticker": "FE",
       "ok": true,
       "common_months": 256,
-      "month_diff": 7.41531887005209e-08,
-      "ret_diff": 9.493608565946943e-09
+      "month_diff": 4.927134589216564e-08,
+      "ret_diff": 4.147723875469467e-08
+    },
+    {
+      "ticker": "FSLR",
+      "ok": true,
+      "common_months": 207,
+      "month_diff": 5.56618823255306e-08,
+      "ret_diff": 4.046731327811415e-08
+    },
+    {
+      "ticker": "FLEX",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 6.823433129632406e-08,
+      "ret_diff": 3.856193786511142e-08
+    },
+    {
+      "ticker": "F",
+      "ok": true,
+      "common_months": 286,
+      "month_diff": 5.614364129158389e-08,
+      "ret_diff": 5.4616682287900176e-09
+    },
+    {
+      "ticker": "FOXA",
+      "ok": true,
+      "common_months": 93,
+      "month_diff": 7.677472524392215e-08,
+      "ret_diff": 4.6591722480116005e-08
+    },
+    {
+      "ticker": "FTNT",
+      "ok": true,
+      "common_months": 205,
+      "month_diff": 7.827514603153674e-08,
+      "ret_diff": 1.0061132149630225e-08
+    },
+    {
+      "ticker": "FITB",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 5.967322325162172e-08,
+      "ret_diff": 5.057256324825232e-08
+    },
+    {
+      "ticker": "FCX",
+      "ok": true,
+      "common_months": 280,
+      "month_diff": 5.4733010346197375e-08,
+      "ret_diff": 1.827555329292352e-08
     },
     {
       "ticker": "GEHC",
       "ok": true,
       "common_months": 47,
       "month_diff": 1.0103334235900263e-07,
-      "ret_diff": 1.424907258851249e-08
+      "ret_diff": 1.6252289292140176e-08
+    },
+    {
+      "ticker": "GRMN",
+      "ok": true,
+      "common_months": 60,
+      "month_diff": 5.8949011338960133e-08,
+      "ret_diff": 1.505484314989758e-08
+    },
+    {
+      "ticker": "IT",
+      "ok": true,
+      "common_months": 279,
+      "month_diff": 7.685092029419138e-08,
+      "ret_diff": 2.426232659225036e-08
+    },
+    {
+      "ticker": "FTV",
+      "ok": true,
+      "common_months": 125,
+      "month_diff": 7.199143725600265e-08,
+      "ret_diff": 1.2017166595157391e-08
+    },
+    {
+      "ticker": "BEN",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 7.41531887005209e-08,
+      "ret_diff": 8.476970414506013e-08
+    },
+    {
+      "ticker": "GEV",
+      "ok": true,
+      "common_months": 32,
+      "month_diff": 7.946579727580172e-08,
+      "ret_diff": 2.9246389088299907e-08
+    },
+    {
+      "ticker": "GE",
+      "ok": true,
+      "common_months": 286,
+      "month_diff": 6.553179332513537e-08,
+      "ret_diff": 6.910552641237189e-08
+    },
+    {
+      "ticker": "FOX",
+      "ok": true,
+      "common_months": 93,
+      "month_diff": 5.415704662503629e-08,
+      "ret_diff": 3.004125614936015e-08
+    },
+    {
+      "ticker": "GNRC",
+      "ok": true,
+      "common_months": 191,
+      "month_diff": 6.116348905127467e-08,
+      "ret_diff": 7.162287052331351e-08
+    },
+    {
+      "ticker": "GM",
+      "ok": true,
+      "common_months": 193,
+      "month_diff": 4.6353469507209866e-08,
+      "ret_diff": 2.705834356575565e-08
+    },
+    {
+      "ticker": "GD",
+      "ok": true,
+      "common_months": 286,
+      "month_diff": 6.77444360608348e-08,
+      "ret_diff": 7.901917786767854e-09
+    },
+    {
+      "ticker": "GPC",
+      "ok": true,
+      "common_months": 280,
+      "month_diff": 7.097082277418565e-08,
+      "ret_diff": 4.6195901326484545e-08
+    },
+    {
+      "ticker": "GILD",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 8.607379187175468e-08,
+      "ret_diff": 5.33046178308183e-08
+    },
+    {
+      "ticker": "GPN",
+      "ok": true,
+      "common_months": 254,
+      "month_diff": 6.422369569492048e-08,
+      "ret_diff": 3.7458563362235964e-08
+    },
+    {
+      "ticker": "GDDY",
+      "ok": true,
+      "common_months": 140,
+      "month_diff": 6.538874774975056e-08,
+      "ret_diff": 5.357504662129031e-09
+    },
+    {
+      "ticker": "GIS",
+      "ok": true,
+      "common_months": 280,
+      "month_diff": 6.437273269987998e-08,
+      "ret_diff": 5.943177627809604e-08
+    },
+    {
+      "ticker": "GL",
+      "ok": true,
+      "common_months": 88,
+      "month_diff": 8.959361119664777e-08,
+      "ret_diff": 3.298530182327397e-08
+    },
+    {
+      "ticker": "GS",
+      "ok": true,
+      "common_months": 286,
+      "month_diff": 6.110401706838076e-08,
+      "ret_diff": 2.1092192437066615e-09
+    },
+    {
+      "ticker": "HCA",
+      "ok": true,
+      "common_months": 189,
+      "month_diff": 5.388982970977452e-08,
+      "ret_diff": 1.9328130873574878e-08
     },
     {
       "ticker": "GEN",
@@ -1473,466 +1571,382 @@
       "ret_diff": 5.115506529485003e-08
     },
     {
-      "ticker": "GNRC",
+      "ticker": "DOC",
       "ok": true,
-      "common_months": 191,
-      "month_diff": 6.116348905127467e-08,
-      "ret_diff": 1.2337557198094373e-08
+      "common_months": 161,
+      "month_diff": 6.714923572737064e-08,
+      "ret_diff": 5.262793756344308e-09
     },
     {
-      "ticker": "GIS",
+      "ticker": "HIG",
       "ok": true,
-      "common_months": 280,
-      "month_diff": 6.437273269987998e-08,
-      "ret_diff": 1.6912449440908972e-08
-    },
-    {
-      "ticker": "GD",
-      "ok": true,
-      "common_months": 286,
-      "month_diff": 6.77444360608348e-08,
-      "ret_diff": 4.021819988153652e-08
-    },
-    {
-      "ticker": "FCX",
-      "ok": true,
-      "common_months": 280,
-      "month_diff": 5.4733010346197375e-08,
-      "ret_diff": 5.373219136295404e-08
-    },
-    {
-      "ticker": "GPC",
-      "ok": true,
-      "common_months": 280,
-      "month_diff": 7.097082277418565e-08,
-      "ret_diff": 1.618830725025333e-08
-    },
-    {
-      "ticker": "GM",
-      "ok": true,
-      "common_months": 193,
-      "month_diff": 4.6353469507209866e-08,
-      "ret_diff": 5.3410940337172974e-08
-    },
-    {
-      "ticker": "GILD",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 8.607379187175468e-08,
-      "ret_diff": 5.342024622656538e-08
-    },
-    {
-      "ticker": "GPN",
-      "ok": true,
-      "common_months": 254,
-      "month_diff": 6.422369569492048e-08,
-      "ret_diff": 1.4063576969647329e-08
-    },
-    {
-      "ticker": "GL",
-      "ok": true,
-      "common_months": 88,
-      "month_diff": 8.959361119664777e-08,
-      "ret_diff": 7.86048819367835e-08
-    },
-    {
-      "ticker": "GDDY",
-      "ok": true,
-      "common_months": 140,
-      "month_diff": 6.538874774975056e-08,
-      "ret_diff": 1.7220550763141773e-08
-    },
-    {
-      "ticker": "GS",
-      "ok": true,
-      "common_months": 286,
-      "month_diff": 6.110401706838076e-08,
-      "ret_diff": 2.6559345389642885e-08
-    },
-    {
-      "ticker": "HAL",
-      "ok": true,
-      "common_months": 286,
-      "month_diff": 6.627076598597625e-08,
-      "ret_diff": 1.2817599648329292e-08
+      "common_months": 312,
+      "month_diff": 8.394886497065102e-08,
+      "ret_diff": 6.240939587343064e-08
     },
     {
       "ticker": "HAS",
       "ok": true,
       "common_months": 240,
       "month_diff": 7.999496753896551e-08,
-      "ret_diff": 6.390667484090784e-08
+      "ret_diff": 1.3575276236466038e-08
     },
     {
-      "ticker": "DOC",
+      "ticker": "HAL",
       "ok": true,
-      "common_months": 161,
-      "month_diff": 6.714923572737064e-08,
-      "ret_diff": 3.878450249850118e-08
-    },
-    {
-      "ticker": "HCA",
-      "ok": true,
-      "common_months": 189,
-      "month_diff": 5.388982970977452e-08,
-      "ret_diff": 4.052139146448752e-08
-    },
-    {
-      "ticker": "HIG",
-      "ok": true,
-      "common_months": 312,
-      "month_diff": 5.6127518632820284e-08,
-      "ret_diff": 2.224147332974269e-08
+      "common_months": 286,
+      "month_diff": 6.627076598597625e-08,
+      "ret_diff": 3.2460154342217606e-08
     },
     {
       "ticker": "HSIC",
       "ok": true,
       "common_months": 256,
       "month_diff": 7.495463760776033e-08,
-      "ret_diff": 2.110173302760643e-08
-    },
-    {
-      "ticker": "HSY",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 3.74665631852622e-08,
-      "ret_diff": 1.3695521161594115e-08
+      "ret_diff": 7.61473484267583e-09
     },
     {
       "ticker": "HPE",
       "ok": true,
       "common_months": 133,
       "month_diff": 5.312944129087782e-08,
-      "ret_diff": 4.286876409409501e-08
-    },
-    {
-      "ticker": "HON",
-      "ok": false,
-      "common_months": 67,
-      "month_diff": 0.04377094016038763,
-      "ret_diff": 0.0538237566119919
-    },
-    {
-      "ticker": "HLT",
-      "ok": true,
-      "common_months": 156,
-      "month_diff": 7.114799926988269e-08,
-      "ret_diff": 7.242290767095483e-09
+      "ret_diff": 9.566713066178067e-08
     },
     {
       "ticker": "HD",
       "ok": true,
       "common_months": 286,
       "month_diff": 8.26299952905174e-08,
-      "ret_diff": 2.991344227876169e-08
+      "ret_diff": 9.268447787036393e-09
     },
     {
-      "ticker": "HWM",
-      "ok": true,
-      "common_months": 80,
-      "month_diff": 9.352132313011907e-08,
-      "ret_diff": 5.511922007706005e-08
+      "ticker": "HON",
+      "ok": false,
+      "common_months": 67,
+      "month_diff": 0.04377094016038763,
+      "ret_diff": 0.05273261881440017
     },
     {
-      "ticker": "HUBB",
+      "ticker": "HSY",
       "ok": true,
-      "common_months": 132,
-      "month_diff": 5.99422622649115e-08,
-      "ret_diff": 4.2659915600040677e-08
+      "common_months": 256,
+      "month_diff": 3.74665631852622e-08,
+      "ret_diff": 3.501308498687905e-08
+    },
+    {
+      "ticker": "HLT",
+      "ok": true,
+      "common_months": 156,
+      "month_diff": 7.702465820713655e-08,
+      "ret_diff": 4.14929162140254e-08
     },
     {
       "ticker": "HRL",
       "ok": true,
       "common_months": 280,
-      "month_diff": 7.314929351132093e-08,
-      "ret_diff": 4.411617604560547e-08
-    },
-    {
-      "ticker": "HPQ",
-      "ok": true,
-      "common_months": 286,
-      "month_diff": 8.352504732300758e-08,
-      "ret_diff": 2.1237668734741533e-08
+      "month_diff": 7.745840502337842e-08,
+      "ret_diff": 8.497497150372624e-10
     },
     {
       "ticker": "HST",
       "ok": true,
       "common_months": 73,
       "month_diff": 6.571145427791691e-08,
-      "ret_diff": 6.885228143183042e-08
+      "ret_diff": 3.049873775751166e-08
+    },
+    {
+      "ticker": "HPQ",
+      "ok": true,
+      "common_months": 286,
+      "month_diff": 8.352504732300758e-08,
+      "ret_diff": 1.5096656147406406e-08
+    },
+    {
+      "ticker": "HUBB",
+      "ok": true,
+      "common_months": 132,
+      "month_diff": 5.99422622649115e-08,
+      "ret_diff": 2.754473316102235e-10
+    },
+    {
+      "ticker": "HWM",
+      "ok": true,
+      "common_months": 80,
+      "month_diff": 9.352132313011907e-08,
+      "ret_diff": 4.845533552177983e-08
     },
     {
       "ticker": "HII",
       "ok": true,
       "common_months": 188,
       "month_diff": 5.067547448334153e-08,
-      "ret_diff": 1.5935569419589513e-08
-    },
-    {
-      "ticker": "HBAN",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 0.0005868331769447455,
-      "ret_diff": 2.6705322953013422e-08
-    },
-    {
-      "ticker": "HUM",
-      "ok": true,
-      "common_months": 280,
-      "month_diff": 7.259542900150961e-08,
-      "ret_diff": 3.182972352355762e-08
-    },
-    {
-      "ticker": "IDXX",
-      "ok": true,
-      "common_months": 255,
-      "month_diff": 8.636214365864703e-08,
-      "ret_diff": 3.2008476980038836e-08
+      "ret_diff": 3.319910346633037e-09
     },
     {
       "ticker": "IBM",
       "ok": true,
       "common_months": 312,
       "month_diff": 7.107985600107725e-08,
-      "ret_diff": 5.067267994096625e-08
+      "ret_diff": 1.639627034144553e-08
+    },
+    {
+      "ticker": "HUM",
+      "ok": true,
+      "common_months": 280,
+      "month_diff": 7.259542900150961e-08,
+      "ret_diff": 3.262546655058429e-08
+    },
+    {
+      "ticker": "HBAN",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 0.0005868331769447455,
+      "ret_diff": 5.190308738356464e-08
+    },
+    {
+      "ticker": "IDXX",
+      "ok": true,
+      "common_months": 255,
+      "month_diff": 7.41143570959224e-08,
+      "ret_diff": 2.639197238529789e-08
     },
     {
       "ticker": "INCY",
       "ok": true,
       "common_months": 255,
       "month_diff": 6.520478534888241e-08,
-      "ret_diff": 2.18354436753998e-08
-    },
-    {
-      "ticker": "ITW",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 5.784012080400913e-08,
-      "ret_diff": 3.842412921173377e-08
+      "ret_diff": 2.2045198111442232e-08
     },
     {
       "ticker": "IR",
       "ok": true,
       "common_months": 115,
-      "month_diff": 7.100763044221026e-08,
-      "ret_diff": 1.787220882398799e-08
+      "month_diff": 6.704037447402555e-08,
+      "ret_diff": 5.113437517856312e-08
     },
     {
       "ticker": "IEX",
       "ok": true,
       "common_months": 279,
       "month_diff": 5.711773187755398e-08,
-      "ret_diff": 8.56059827469835e-08
+      "ret_diff": 9.865973482625634e-08
+    },
+    {
+      "ticker": "ITW",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 9.736978978658328e-08,
+      "ret_diff": 6.435452371000849e-08
     },
     {
       "ticker": "PODD",
       "ok": true,
       "common_months": 207,
       "month_diff": 6.687096165691742e-08,
-      "ret_diff": 1.6535428359887305e-08
-    },
-    {
-      "ticker": "INTC",
-      "ok": true,
-      "common_months": 286,
-      "month_diff": 5.725768870146197e-08,
-      "ret_diff": 5.3564388258209306e-08
+      "ret_diff": 2.3833195195166468e-08
     },
     {
       "ticker": "IBKR",
       "ok": true,
       "common_months": 235,
       "month_diff": 6.747649672345091e-08,
-      "ret_diff": 7.902620180466613e-08
-    },
-    {
-      "ticker": "ISRG",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 6.171517585862318e-08,
-      "ret_diff": 1.9957840713402675e-08
+      "ret_diff": 6.697105159325645e-08
     },
     {
       "ticker": "ICE",
       "ok": true,
       "common_months": 231,
-      "month_diff": 7.074838426213148e-08,
-      "ret_diff": 5.693842530796189e-08
+      "month_diff": 7.793079848106288e-08,
+      "ret_diff": 6.467164115342428e-08
     },
     {
-      "ticker": "INTU",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 6.496348459172907e-08,
-      "ret_diff": 4.727271574189729e-09
-    },
-    {
-      "ticker": "IVZ",
-      "ok": true,
-      "common_months": 228,
-      "month_diff": 7.836238635761106e-08,
-      "ret_diff": 3.378845248036555e-08
-    },
-    {
-      "ticker": "IP",
+      "ticker": "INTC",
       "ok": true,
       "common_months": 286,
-      "month_diff": 9.097817232905925e-08,
-      "ret_diff": 1.7841580324251538e-08
-    },
-    {
-      "ticker": "INVH",
-      "ok": true,
-      "common_months": 118,
-      "month_diff": 4.8160122889662205e-08,
-      "ret_diff": 1.2232128532296827e-08
-    },
-    {
-      "ticker": "IQV",
-      "ok": true,
-      "common_months": 109,
-      "month_diff": 7.786643441143326e-08,
-      "ret_diff": 6.299111010577008e-09
+      "month_diff": 5.725768870146197e-08,
+      "ret_diff": 1.620844480854089e-08
     },
     {
       "ticker": "IFF",
       "ok": true,
       "common_months": 280,
       "month_diff": 9.0567365607086e-08,
-      "ret_diff": 3.7297733790353504e-09
+      "ret_diff": 8.636953863216945e-08
     },
     {
-      "ticker": "J",
+      "ticker": "IQV",
       "ok": true,
-      "common_months": 84,
-      "month_diff": 9.322777749787292e-08,
-      "ret_diff": 1.0436310260431014e-08
+      "common_months": 109,
+      "month_diff": 9.083704832768547e-08,
+      "ret_diff": 7.525188228107993e-08
     },
     {
       "ticker": "IRM",
       "ok": true,
       "common_months": 280,
       "month_diff": 5.6399709347232374e-08,
-      "ret_diff": 2.3278060590214977e-08
+      "ret_diff": 1.950241035331146e-08
     },
     {
-      "ticker": "JBL",
+      "ticker": "IVZ",
       "ok": true,
-      "common_months": 312,
-      "month_diff": 7.804961077439998e-08,
-      "ret_diff": 3.84470832948125e-08
+      "common_months": 228,
+      "month_diff": 7.836238635761106e-08,
+      "ret_diff": 4.5721296082490426e-08
+    },
+    {
+      "ticker": "INVH",
+      "ok": true,
+      "common_months": 118,
+      "month_diff": 4.8160122889662205e-08,
+      "ret_diff": 1.247197412013179e-08
+    },
+    {
+      "ticker": "INTU",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 6.496348459172907e-08,
+      "ret_diff": 1.8538676815893496e-08
+    },
+    {
+      "ticker": "ISRG",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 6.171517585862318e-08,
+      "ret_diff": 2.5996785724125004e-08
+    },
+    {
+      "ticker": "IP",
+      "ok": true,
+      "common_months": 286,
+      "month_diff": 9.097817232905925e-08,
+      "ret_diff": 4.0675866563866236e-08
     },
     {
       "ticker": "JKHY",
       "ok": true,
       "common_months": 279,
       "month_diff": 9.334315165254736e-08,
-      "ret_diff": 1.4440160844841898e-08
+      "ret_diff": 4.609724402193649e-08
     },
     {
-      "ticker": "JBHT",
+      "ticker": "JBL",
       "ok": true,
       "common_months": 312,
-      "month_diff": 6.416721265445346e-08,
-      "ret_diff": 1.657375658936644e-08
+      "month_diff": 7.804961077439998e-08,
+      "ret_diff": 6.338424585194957e-08
     },
     {
-      "ticker": "JNJ",
+      "ticker": "J",
       "ok": true,
-      "common_months": 286,
-      "month_diff": 8.417589425491201e-08,
-      "ret_diff": 1.222032097736303e-08
+      "common_months": 84,
+      "month_diff": 9.322777749787292e-08,
+      "ret_diff": 7.579968652748903e-08
     },
     {
       "ticker": "JCI",
       "ok": true,
       "common_months": 256,
       "month_diff": 8.688032004933177e-08,
-      "ret_diff": 4.0887822017054987e-08
+      "ret_diff": 6.668380825303188e-08
     },
     {
-      "ticker": "KEYS",
+      "ticker": "JBHT",
       "ok": true,
-      "common_months": 145,
-      "month_diff": 8.081705504814352e-08,
-      "ret_diff": 1.3816329413884887e-08
+      "common_months": 312,
+      "month_diff": 6.416721265445346e-08,
+      "ret_diff": 6.905815985724928e-08
+    },
+    {
+      "ticker": "KDP",
+      "ok": true,
+      "common_months": 75,
+      "month_diff": 4.68631065064784e-08,
+      "ret_diff": 8.30656330386148e-08
     },
     {
       "ticker": "JPM",
       "ok": true,
       "common_months": 286,
       "month_diff": 8.691939601401799e-08,
-      "ret_diff": 5.52229493244738e-08
+      "ret_diff": 1.9038638665591634e-08
     },
     {
-      "ticker": "KDP",
+      "ticker": "JNJ",
       "ok": true,
-      "common_months": 75,
-      "month_diff": 4.0164685577437353e-08,
-      "ret_diff": 2.327797954393418e-08
-    },
-    {
-      "ticker": "KMI",
-      "ok": true,
-      "common_months": 190,
-      "month_diff": 6.051884682278796e-08,
-      "ret_diff": 1.584383779729137e-08
+      "common_months": 286,
+      "month_diff": 9.089251462590653e-08,
+      "ret_diff": 4.69104950440169e-08
     },
     {
       "ticker": "KEY",
       "ok": true,
       "common_months": 280,
-      "month_diff": 8.372495541308922e-08,
-      "ret_diff": 3.500505663112108e-09
+      "month_diff": 7.240288635301795e-08,
+      "ret_diff": 2.783466568345716e-08
+    },
+    {
+      "ticker": "KEYS",
+      "ok": true,
+      "common_months": 145,
+      "month_diff": 8.081705504814352e-08,
+      "ret_diff": 4.691243482568552e-08
     },
     {
       "ticker": "KMB",
       "ok": true,
       "common_months": 280,
       "month_diff": 0.0003390748666788346,
-      "ret_diff": 0.00036776755294121166
+      "ret_diff": 0.00037422300321576785
     },
     {
       "ticker": "KIM",
       "ok": true,
       "common_months": 280,
       "month_diff": 6.611942904299895e-08,
-      "ret_diff": 2.7794561985317046e-08
+      "ret_diff": 1.2958879302971127e-08
     },
     {
-      "ticker": "KHC",
+      "ticker": "KKR",
       "ok": true,
-      "common_months": 137,
-      "month_diff": 3.909300971827179e-08,
-      "ret_diff": 1.509441871494488e-08
+      "common_months": 191,
+      "month_diff": 5.567082539403856e-08,
+      "ret_diff": 2.5560963012871696e-08
     },
     {
       "ticker": "KLAC",
       "ok": true,
       "common_months": 256,
       "month_diff": 8.734892364969937e-08,
-      "ret_diff": 9.460533090255296e-08
+      "ret_diff": 8.764035164254835e-08
     },
     {
-      "ticker": "LHX",
+      "ticker": "KHC",
       "ok": true,
-      "common_months": 89,
-      "month_diff": 7.375239985396576e-08,
-      "ret_diff": 1.3339730764450053e-08
+      "common_months": 137,
+      "month_diff": 3.909300971827179e-08,
+      "ret_diff": 2.0780471454706628e-08
     },
     {
-      "ticker": "KR",
+      "ticker": "KMI",
       "ok": true,
-      "common_months": 256,
-      "month_diff": 5.719318885155644e-08,
-      "ret_diff": 6.445194089543804e-08
+      "common_months": 190,
+      "month_diff": 6.051884682278796e-08,
+      "ret_diff": 1.563940110749229e-08
     },
     {
       "ticker": "LH",
       "ok": true,
       "common_months": 280,
       "month_diff": 1.0330713462458618e-07,
-      "ret_diff": 4.7134892877664925e-08
+      "ret_diff": 2.549795796724652e-08
+    },
+    {
+      "ticker": "LVS",
+      "ok": true,
+      "common_months": 232,
+      "month_diff": 1.0503628256053332e-07,
+      "ret_diff": 3.586604768734958e-08
     },
     {
       "ticker": "LRCX",
@@ -1942,235 +1956,284 @@
       "ret_diff": 1.1737529836963745e-08
     },
     {
-      "ticker": "KKR",
+      "ticker": "KR",
       "ok": true,
-      "common_months": 191,
-      "month_diff": 5.567082539403856e-08,
-      "ret_diff": 4.095262040593184e-08
+      "common_months": 256,
+      "month_diff": 6.130017626837514e-08,
+      "ret_diff": 8.157620134952026e-09
     },
     {
       "ticker": "LDOS",
       "ok": true,
       "common_months": 158,
       "month_diff": 7.408814384213258e-08,
-      "ret_diff": 2.8203464119691546e-08
+      "ret_diff": 6.267435459506032e-10
     },
     {
-      "ticker": "LVS",
+      "ticker": "LHX",
       "ok": true,
-      "common_months": 232,
-      "month_diff": 1.0503628256053332e-07,
-      "ret_diff": 4.07927025491972e-08
-    },
-    {
-      "ticker": "LII",
-      "ok": true,
-      "common_months": 279,
-      "month_diff": 6.423113230180633e-08,
-      "ret_diff": 1.5115854012925922e-08
-    },
-    {
-      "ticker": "LIN",
-      "ok": true,
-      "common_months": 98,
-      "month_diff": 4.500819217323482e-08,
-      "ret_diff": 2.88350205934762e-08
+      "common_months": 89,
+      "month_diff": 5.5820754241153736e-08,
+      "ret_diff": 8.227804548788242e-09
     },
     {
       "ticker": "LEN",
       "ok": true,
       "common_months": 280,
       "month_diff": 7.89933018996436e-08,
-      "ret_diff": 1.0152056417744859e-08
+      "ret_diff": 7.859656592223985e-09
     },
     {
-      "ticker": "LYV",
+      "ticker": "LIN",
       "ok": true,
-      "common_months": 207,
-      "month_diff": 5.330896613031655e-08,
-      "ret_diff": 8.30092994341669e-09
+      "common_months": 98,
+      "month_diff": 6.205929792280074e-08,
+      "ret_diff": 3.07781398145579e-08
     },
     {
       "ticker": "LLY",
       "ok": true,
       "common_months": 256,
       "month_diff": 8.028827291894913e-08,
-      "ret_diff": 3.656297264953423e-08
+      "ret_diff": 7.712482252841824e-08
     },
     {
-      "ticker": "LYB",
+      "ticker": "LII",
       "ok": true,
-      "common_months": 191,
-      "month_diff": 5.3590577531181793e-08,
-      "ret_diff": 3.8830112680798834e-08
-    },
-    {
-      "ticker": "LITE",
-      "ok": true,
-      "common_months": 136,
-      "month_diff": 5.2349057755307626e-08,
-      "ret_diff": 3.568162032507871e-08
+      "common_months": 279,
+      "month_diff": 6.423113230180633e-08,
+      "ret_diff": 1.881419220417513e-08
     },
     {
       "ticker": "LULU",
       "ok": true,
       "common_months": 207,
       "month_diff": 5.578924600069257e-08,
-      "ret_diff": 3.109579793658668e-08
+      "ret_diff": 1.779922942368728e-08
     },
     {
-      "ticker": "LMT",
+      "ticker": "LYV",
       "ok": true,
-      "common_months": 280,
-      "month_diff": 9.697563330135495e-08,
-      "ret_diff": 6.341215774696707e-09
-    },
-    {
-      "ticker": "L",
-      "ok": true,
-      "common_months": 312,
-      "month_diff": 4.749054893782301e-08,
-      "ret_diff": 1.226768175932591e-08
-    },
-    {
-      "ticker": "MPC",
-      "ok": true,
-      "common_months": 185,
-      "month_diff": 7.868020768242445e-08,
-      "ret_diff": 1.5697342092835243e-08
+      "common_months": 207,
+      "month_diff": 5.330896613031655e-08,
+      "ret_diff": 2.433762058551281e-08
     },
     {
       "ticker": "LOW",
       "ok": true,
       "common_months": 280,
       "month_diff": 8.107247495559022e-08,
-      "ret_diff": 1.071811195352268e-09
+      "ret_diff": 1.386088022137244e-08
+    },
+    {
+      "ticker": "LITE",
+      "ok": true,
+      "common_months": 136,
+      "month_diff": 5.2349057755307626e-08,
+      "ret_diff": 1.891166268030986e-08
+    },
+    {
+      "ticker": "LYB",
+      "ok": true,
+      "common_months": 191,
+      "month_diff": 5.3590577531181793e-08,
+      "ret_diff": 8.050532995795834e-08
+    },
+    {
+      "ticker": "L",
+      "ok": true,
+      "common_months": 312,
+      "month_diff": 4.749054893782301e-08,
+      "ret_diff": 6.034833810453222e-08
+    },
+    {
+      "ticker": "MPC",
+      "ok": true,
+      "common_months": 185,
+      "month_diff": 7.868020768242445e-08,
+      "ret_diff": 5.838630645627063e-08
     },
     {
       "ticker": "MTB",
       "ok": true,
       "common_months": 256,
       "month_diff": 5.967190852551596e-08,
-      "ret_diff": 3.312906571295571e-08
+      "ret_diff": 1.3831890965931848e-08
     },
     {
-      "ticker": "MAR",
+      "ticker": "LMT",
       "ok": true,
-      "common_months": 157,
-      "month_diff": 7.680499147788566e-08,
-      "ret_diff": 2.6908256067770253e-08
-    },
-    {
-      "ticker": "MA",
-      "ok": true,
-      "common_months": 237,
-      "month_diff": 7.992956385649563e-08,
-      "ret_diff": 5.947781889226178e-08
+      "common_months": 280,
+      "month_diff": 9.697563330135495e-08,
+      "ret_diff": 8.888183633537494e-08
     },
     {
       "ticker": "MRVL",
       "ok": true,
       "common_months": 256,
       "month_diff": 1.1299174507151122e-07,
-      "ret_diff": 9.13729649720807e-08
+      "ret_diff": 2.0924523447263255e-08
+    },
+    {
+      "ticker": "MLM",
+      "ok": true,
+      "common_months": 279,
+      "month_diff": 7.404022095425233e-08,
+      "ret_diff": 3.633560452520612e-08
+    },
+    {
+      "ticker": "MAR",
+      "ok": true,
+      "common_months": 157,
+      "month_diff": 7.680499147788566e-08,
+      "ret_diff": 8.935474582472125e-10
     },
     {
       "ticker": "MAS",
       "ok": true,
       "common_months": 280,
       "month_diff": 1.0160560304228738e-07,
-      "ret_diff": 5.0565088782761336e-08
-    },
-    {
-      "ticker": "MCD",
-      "ok": true,
-      "common_months": 285,
-      "month_diff": 6.32341550232951e-08,
-      "ret_diff": 1.6572042849105628e-08
-    },
-    {
-      "ticker": "MLM",
-      "ok": true,
-      "common_months": 279,
-      "month_diff": 6.476373326513851e-08,
-      "ret_diff": 1.0590813670496857e-08
+      "ret_diff": 1.1166381552740745e-07
     },
     {
       "ticker": "MKC",
       "ok": true,
       "common_months": 280,
       "month_diff": 6.692513720985005e-08,
-      "ret_diff": 4.8186877599221134e-08
+      "ret_diff": 1.891619771932085e-08
+    },
+    {
+      "ticker": "MA",
+      "ok": true,
+      "common_months": 237,
+      "month_diff": 7.992956385649563e-08,
+      "ret_diff": 2.405090904211704e-08
+    },
+    {
+      "ticker": "MCD",
+      "ok": true,
+      "common_months": 285,
+      "month_diff": 7.215101782698241e-08,
+      "ret_diff": 2.2372257602043533e-08
     },
     {
       "ticker": "MDT",
       "ok": true,
       "common_months": 143,
       "month_diff": 8.053840883093244e-08,
-      "ret_diff": 1.1181664039128236e-08
-    },
-    {
-      "ticker": "MCK",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 5.39294902068832e-08,
-      "ret_diff": 7.343503694023923e-08
+      "ret_diff": 4.3055595644325706e-08
     },
     {
       "ticker": "META",
       "ok": true,
       "common_months": 54,
       "month_diff": 7.755977082801735e-08,
-      "ret_diff": 1.4889559030173416e-08
+      "ret_diff": 5.966000027335383e-08
     },
     {
       "ticker": "MRK",
       "ok": true,
       "common_months": 286,
-      "month_diff": 6.497681614980877e-08,
-      "ret_diff": 7.702062809755716e-08
-    },
-    {
-      "ticker": "MCHP",
-      "ok": true,
-      "common_months": 312,
-      "month_diff": 5.326333563093755e-08,
-      "ret_diff": 3.3644830699230965e-08
-    },
-    {
-      "ticker": "MU",
-      "ok": true,
-      "common_months": 191,
-      "month_diff": 9.749944318571124e-08,
-      "ret_diff": 4.913838091979983e-08
-    },
-    {
-      "ticker": "MTD",
-      "ok": true,
-      "common_months": 279,
-      "month_diff": 7.460022311001069e-08,
-      "ret_diff": 4.6507253603778054e-08
-    },
-    {
-      "ticker": "MGM",
-      "ok": true,
-      "common_months": 279,
-      "month_diff": 9.018241331482102e-08,
-      "ret_diff": 2.2942385213831074e-08
+      "month_diff": 5.315258300164771e-08,
+      "ret_diff": 3.997519160137131e-08
     },
     {
       "ticker": "MET",
       "ok": true,
       "common_months": 286,
       "month_diff": 7.69642332087983e-08,
-      "ret_diff": 6.268631125294633e-08
+      "ret_diff": 2.3949919825128063e-09
+    },
+    {
+      "ticker": "MCK",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 5.39294902068832e-08,
+      "ret_diff": 5.128267122067598e-08
+    },
+    {
+      "ticker": "MU",
+      "ok": true,
+      "common_months": 191,
+      "month_diff": 9.749944318571124e-08,
+      "ret_diff": 1.3752416405665713e-07
+    },
+    {
+      "ticker": "MGM",
+      "ok": true,
+      "common_months": 279,
+      "month_diff": 7.735134754938144e-08,
+      "ret_diff": 3.7400069818893655e-08
+    },
+    {
+      "ticker": "MTD",
+      "ok": true,
+      "common_months": 279,
+      "month_diff": 7.460022311001069e-08,
+      "ret_diff": 2.9818112201596136e-08
+    },
+    {
+      "ticker": "MCHP",
+      "ok": true,
+      "common_months": 312,
+      "month_diff": 5.326333563093755e-08,
+      "ret_diff": 4.879297721416265e-08
+    },
+    {
+      "ticker": "MRNA",
+      "ok": true,
+      "common_months": 96,
+      "month_diff": 8.79952037902143e-08,
+      "ret_diff": 3.1044980453032167e-07
+    },
+    {
+      "ticker": "MNST",
+      "ok": true,
+      "common_months": 179,
+      "month_diff": 5.7226313687763763e-08,
+      "ret_diff": 1.4448840124359208e-08
     },
     {
       "ticker": "MSFT",
       "ok": true,
       "common_months": 286,
       "month_diff": 1.007962666665918e-07,
-      "ret_diff": 1.1209897676778269e-08
+      "ret_diff": 4.074492743200153e-08
+    },
+    {
+      "ticker": "MPWR",
+      "ok": true,
+      "common_months": 209,
+      "month_diff": 0.00162799592865992,
+      "ret_diff": 0.0023602182222191015
+    },
+    {
+      "ticker": "MAA",
+      "ok": true,
+      "common_months": 279,
+      "month_diff": 1.1334727967327041e-07,
+      "ret_diff": 1.648496228412455e-09
+    },
+    {
+      "ticker": "TAP",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 7.199902007926084e-08,
+      "ret_diff": 1.2291367146310961e-08
+    },
+    {
+      "ticker": "MOS",
+      "ok": true,
+      "common_months": 255,
+      "month_diff": 4.7046504358938535e-08,
+      "ret_diff": 1.0590019305922738e-08
+    },
+    {
+      "ticker": "MCO",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 2.9625448094705575e-08,
+      "ret_diff": 7.855383010735295e-11
     },
     {
       "ticker": "MDLZ",
@@ -2180,1264 +2243,1243 @@
       "ret_diff": 2.21218274809587e-08
     },
     {
-      "ticker": "MRNA",
-      "ok": true,
-      "common_months": 96,
-      "month_diff": 8.79952037902143e-08,
-      "ret_diff": 3.64536898445067e-08
-    },
-    {
-      "ticker": "MNST",
-      "ok": true,
-      "common_months": 179,
-      "month_diff": 5.7226313687763763e-08,
-      "ret_diff": 1.0880722545181243e-08
-    },
-    {
-      "ticker": "MPWR",
-      "ok": true,
-      "common_months": 209,
-      "month_diff": 0.00162799592865992,
-      "ret_diff": 0.0024977421210614636
-    },
-    {
-      "ticker": "TAP",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 7.199902007926084e-08,
-      "ret_diff": 3.496955680581948e-08
-    },
-    {
-      "ticker": "MCO",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 2.9625448094705575e-08,
-      "ret_diff": 2.7448271655572398e-08
-    },
-    {
-      "ticker": "MS",
-      "ok": true,
-      "common_months": 286,
-      "month_diff": 7.659229273038193e-08,
-      "ret_diff": 6.023042375957743e-08
-    },
-    {
-      "ticker": "MOS",
-      "ok": true,
-      "common_months": 255,
-      "month_diff": 4.7046504358938535e-08,
-      "ret_diff": 1.148047124033269e-08
-    },
-    {
-      "ticker": "NDAQ",
-      "ok": true,
-      "common_months": 207,
-      "month_diff": 7.663309586902756e-08,
-      "ret_diff": 3.745271204280698e-08
-    },
-    {
       "ticker": "MSCI",
       "ok": true,
       "common_months": 191,
       "month_diff": 7.318976291692536e-08,
-      "ret_diff": 3.036198248373978e-08
+      "ret_diff": 4.393729202689656e-08
     },
     {
       "ticker": "MSI",
       "ok": true,
       "common_months": 240,
       "month_diff": 4.035565326354629e-08,
-      "ret_diff": 6.14892243788745e-08
+      "ret_diff": 1.76008883023826e-08
     },
     {
-      "ticker": "NFLX",
+      "ticker": "NDAQ",
       "ok": true,
-      "common_months": 239,
-      "month_diff": 5.698688787525441e-08,
-      "ret_diff": 4.35081803917825e-09
+      "common_months": 207,
+      "month_diff": 7.663309586902756e-08,
+      "ret_diff": 1.2884175948357779e-08
     },
     {
       "ticker": "NTAP",
       "ok": true,
       "common_months": 256,
-      "month_diff": 5.096428479234305e-08,
-      "ret_diff": 8.189917632961397e-09
+      "month_diff": 6.34772121532734e-08,
+      "ret_diff": 8.959867914271058e-08
     },
     {
-      "ticker": "NEE",
+      "ticker": "MS",
       "ok": true,
-      "common_months": 198,
-      "month_diff": 6.33470071953468e-08,
-      "ret_diff": 2.1363636970583855e-08
+      "common_months": 286,
+      "month_diff": 7.659229273038193e-08,
+      "ret_diff": 1.956083983678525e-08
     },
     {
-      "ticker": "NKE",
-      "ok": true,
-      "common_months": 285,
-      "month_diff": 9.881026219460409e-08,
-      "ret_diff": 5.0950464181021005e-08
-    },
-    {
-      "ticker": "NWS",
+      "ticker": "NWSA",
       "ok": true,
       "common_months": 161,
-      "month_diff": 0.00015751592983637153,
-      "ret_diff": 0.00016989741801176628
-    },
-    {
-      "ticker": "NI",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 6.455179524245125e-08,
-      "ret_diff": 4.2545343470479224e-08
-    },
-    {
-      "ticker": "NDSN",
-      "ok": true,
-      "common_months": 255,
-      "month_diff": 8.870641987623884e-08,
-      "ret_diff": 6.214572190188505e-08
-    },
-    {
-      "ticker": "NTRS",
-      "ok": true,
-      "common_months": 173,
-      "month_diff": 8.878080914875852e-08,
-      "ret_diff": 7.966324622188381e-08
+      "month_diff": 4.2825867740958756e-08,
+      "ret_diff": 1.827919704489034e-08
     },
     {
       "ticker": "NEM",
       "ok": true,
       "common_months": 280,
       "month_diff": 5.753603682379094e-08,
-      "ret_diff": 5.286494109135731e-08
+      "ret_diff": 7.189224193737687e-08
+    },
+    {
+      "ticker": "NWS",
+      "ok": true,
+      "common_months": 161,
+      "month_diff": 4.260341213147001e-08,
+      "ret_diff": 2.07884232050759e-08
+    },
+    {
+      "ticker": "NEE",
+      "ok": true,
+      "common_months": 198,
+      "month_diff": 6.33470071953468e-08,
+      "ret_diff": 5.2932637273350736e-08
+    },
+    {
+      "ticker": "NFLX",
+      "ok": true,
+      "common_months": 239,
+      "month_diff": 5.698688787525441e-08,
+      "ret_diff": 9.611352713712051e-09
+    },
+    {
+      "ticker": "NKE",
+      "ok": true,
+      "common_months": 285,
+      "month_diff": 9.881026219460409e-08,
+      "ret_diff": 8.127963857518239e-10
+    },
+    {
+      "ticker": "NTRS",
+      "ok": true,
+      "common_months": 173,
+      "month_diff": 8.878080914875852e-08,
+      "ret_diff": 1.4011390492285614e-08
+    },
+    {
+      "ticker": "NDSN",
+      "ok": true,
+      "common_months": 255,
+      "month_diff": 8.870641987623884e-08,
+      "ret_diff": 3.118632463383619e-08
     },
     {
       "ticker": "NSC",
       "ok": true,
       "common_months": 286,
-      "month_diff": 4.74059467236998e-08,
-      "ret_diff": 3.079065669098213e-08
+      "month_diff": 7.314725214424556e-08,
+      "ret_diff": 2.3479306499041286e-08
     },
     {
-      "ticker": "NCLH",
+      "ticker": "NI",
       "ok": true,
-      "common_months": 162,
-      "month_diff": 8.875407098152266e-08,
-      "ret_diff": 1.3433153478459303e-09
-    },
-    {
-      "ticker": "NOC",
-      "ok": true,
-      "common_months": 280,
-      "month_diff": 7.165111548523839e-08,
-      "ret_diff": 1.2798984316830797e-08
-    },
-    {
-      "ticker": "NRG",
-      "ok": true,
-      "common_months": 244,
-      "month_diff": 6.144957565012987e-08,
-      "ret_diff": 2.7570274507837667e-08
-    },
-    {
-      "ticker": "NUE",
-      "ok": true,
-      "common_months": 280,
-      "month_diff": 8.779131199787571e-08,
-      "ret_diff": 8.114966520977873e-08
+      "common_months": 256,
+      "month_diff": 6.455179524245125e-08,
+      "ret_diff": 4.567943867606061e-08
     },
     {
       "ticker": "NVDA",
       "ok": true,
       "common_months": 256,
       "month_diff": 8.204481072304759e-08,
-      "ret_diff": 3.4483139121910256e-08
+      "ret_diff": 3.4483138566798743e-09
     },
     {
-      "ticker": "NXPI",
+      "ticker": "NUE",
       "ok": true,
-      "common_months": 194,
-      "month_diff": 5.605297004329657e-08,
-      "ret_diff": 3.5816487553574916e-08
+      "common_months": 280,
+      "month_diff": 8.779131199787571e-08,
+      "ret_diff": 6.604507785112901e-08
+    },
+    {
+      "ticker": "NCLH",
+      "ok": true,
+      "common_months": 162,
+      "month_diff": 8.875407098152266e-08,
+      "ret_diff": 2.7426020232645953e-08
+    },
+    {
+      "ticker": "NOC",
+      "ok": true,
+      "common_months": 280,
+      "month_diff": 8.235845960768984e-08,
+      "ret_diff": 4.266328101909522e-08
+    },
+    {
+      "ticker": "NRG",
+      "ok": true,
+      "common_months": 244,
+      "month_diff": 6.144957565012987e-08,
+      "ret_diff": 3.057668540584757e-08
     },
     {
       "ticker": "NVR",
       "ok": true,
       "common_months": 227,
       "month_diff": 4.885846394131477e-08,
-      "ret_diff": 1.4463882425097552e-08
+      "ret_diff": 2.2226821938531316e-08
     },
     {
-      "ticker": "ORLY",
+      "ticker": "NXPI",
       "ok": true,
-      "common_months": 256,
-      "month_diff": 6.34093820783832e-08,
-      "ret_diff": 5.1207407647524406e-08
+      "common_months": 194,
+      "month_diff": 6.465090862661782e-08,
+      "ret_diff": 3.806505777248503e-09
     },
     {
       "ticker": "ODFL",
       "ok": true,
       "common_months": 279,
       "month_diff": 8.007299379109156e-08,
-      "ret_diff": 1.4397299352708615e-08
+      "ret_diff": 1.4305596707231416e-08
     },
     {
-      "ticker": "ON",
+      "ticker": "ORLY",
       "ok": true,
-      "common_months": 140,
-      "month_diff": 8.835336950951955e-08,
-      "ret_diff": 9.584887927793773e-08
-    },
-    {
-      "ticker": "OMC",
-      "ok": true,
-      "common_months": 280,
-      "month_diff": 7.018104919431778e-08,
-      "ret_diff": 2.379805241758959e-10
-    },
-    {
-      "ticker": "OKE",
-      "ok": true,
-      "common_months": 280,
-      "month_diff": 7.461434625710694e-08,
-      "ret_diff": 5.165152749952995e-09
-    },
-    {
-      "ticker": "ORCL",
-      "ok": true,
-      "common_months": 161,
-      "month_diff": 5.17722671400378e-08,
-      "ret_diff": 1.82392501102413e-09
-    },
-    {
-      "ticker": "OXY",
-      "ok": true,
-      "common_months": 312,
-      "month_diff": 5.606548580949777e-08,
-      "ret_diff": 0.0
+      "common_months": 256,
+      "month_diff": 6.742047320429378e-08,
+      "ret_diff": 2.6555266874339623e-09
     },
     {
       "ticker": "OTIS",
       "ok": true,
       "common_months": 80,
       "month_diff": 5.963467564207292e-08,
-      "ret_diff": 1.4979831042261083e-08
+      "ret_diff": 2.8761275472355408e-08
     },
     {
-      "ticker": "PCAR",
+      "ticker": "ON",
       "ok": true,
-      "common_months": 256,
-      "month_diff": 8.623034419841247e-08,
-      "ret_diff": 5.2311723397480137e-08
+      "common_months": 140,
+      "month_diff": 8.835336950951955e-08,
+      "ret_diff": 3.5818645827134787e-09
     },
     {
-      "ticker": "PKG",
+      "ticker": "OMC",
       "ok": true,
-      "common_months": 255,
-      "month_diff": 5.878797915137568e-08,
-      "ret_diff": 2.3211774724529732e-08
+      "common_months": 280,
+      "month_diff": 7.018104919431778e-08,
+      "ret_diff": 4.7120142454559755e-08
     },
     {
-      "ticker": "PANW",
+      "ticker": "OXY",
       "ok": true,
-      "common_months": 62,
-      "month_diff": 6.241903660608727e-08,
-      "ret_diff": 9.488882501962337e-08
+      "common_months": 312,
+      "month_diff": 5.606548580949777e-08,
+      "ret_diff": 1.453218012592572e-08
     },
     {
       "ticker": "PLTR",
       "ok": true,
       "common_months": 75,
       "month_diff": 6.972561461537907e-08,
-      "ret_diff": 5.0677283036648646e-08
+      "ret_diff": 1.3626510586561835e-08
+    },
+    {
+      "ticker": "OKE",
+      "ok": true,
+      "common_months": 280,
+      "month_diff": 7.461434625710694e-08,
+      "ret_diff": 3.021398553570975e-08
+    },
+    {
+      "ticker": "PKG",
+      "ok": true,
+      "common_months": 255,
+      "month_diff": 5.878797915137568e-08,
+      "ret_diff": 3.806950887863536e-08
+    },
+    {
+      "ticker": "PANW",
+      "ok": true,
+      "common_months": 62,
+      "month_diff": 6.241903660608727e-08,
+      "ret_diff": 6.195632451522215e-08
+    },
+    {
+      "ticker": "ORCL",
+      "ok": true,
+      "common_months": 161,
+      "month_diff": 5.17722671400378e-08,
+      "ret_diff": 9.222513197570947e-09
+    },
+    {
+      "ticker": "PCAR",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 8.623034419841247e-08,
+      "ret_diff": 5.807836878091166e-09
     },
     {
       "ticker": "PYPL",
       "ok": true,
       "common_months": 137,
       "month_diff": 9.474585681201741e-05,
-      "ret_diff": 1.2424344886241556e-09
-    },
-    {
-      "ticker": "PNR",
-      "ok": true,
-      "common_months": 279,
-      "month_diff": 1.0763815594394543e-07,
-      "ret_diff": 4.217176030607561e-08
+      "ret_diff": 4.9765327414519334e-08
     },
     {
       "ticker": "PH",
       "ok": true,
       "common_months": 280,
       "month_diff": 3.877190368761774e-08,
-      "ret_diff": 2.421096811922041e-08
-    },
-    {
-      "ticker": "PAYX",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 6.728379697840126e-08,
-      "ret_diff": 1.9907305137678577e-08
-    },
-    {
-      "ticker": "PCG",
-      "ok": true,
-      "common_months": 280,
-      "month_diff": 7.083164010879273e-08,
-      "ret_diff": 4.279258658534957e-08
-    },
-    {
-      "ticker": "PEP",
-      "ok": true,
-      "common_months": 286,
-      "month_diff": 7.949888458647081e-08,
-      "ret_diff": 1.9698025766068383e-08
+      "ret_diff": 2.953419153683967e-08
     },
     {
       "ticker": "PFE",
       "ok": true,
       "common_months": 286,
       "month_diff": 4.832119437914173e-08,
-      "ret_diff": 1.373192382025934e-08
+      "ret_diff": 3.36820769053503e-08
+    },
+    {
+      "ticker": "PCG",
+      "ok": true,
+      "common_months": 280,
+      "month_diff": 7.083164010879273e-08,
+      "ret_diff": 2.524982811724641e-08
     },
     {
       "ticker": "PM",
       "ok": true,
       "common_months": 200,
       "month_diff": 7.718177075233257e-08,
-      "ret_diff": 7.690937486870553e-08
+      "ret_diff": 8.859960098916986e-09
     },
     {
-      "ticker": "PNC",
+      "ticker": "PAYX",
       "ok": true,
-      "common_months": 280,
-      "month_diff": 4.5411729487909724e-08,
-      "ret_diff": 4.299831690701694e-08
+      "common_months": 256,
+      "month_diff": 6.728379697840126e-08,
+      "ret_diff": 5.3104495023603704e-08
     },
     {
-      "ticker": "PPG",
+      "ticker": "PNR",
       "ok": true,
-      "common_months": 280,
-      "month_diff": 5.2282007834136834e-08,
-      "ret_diff": 3.5616032345586746e-08
+      "common_months": 279,
+      "month_diff": 1.0763815594394543e-07,
+      "ret_diff": 3.639914747388673e-08
+    },
+    {
+      "ticker": "PEP",
+      "ok": true,
+      "common_months": 286,
+      "month_diff": 7.949888458647081e-08,
+      "ret_diff": 8.559950925857152e-08
     },
     {
       "ticker": "PSX",
       "ok": true,
       "common_months": 173,
       "month_diff": 9.520655830375091e-08,
-      "ret_diff": 1.3937706522249016e-07
+      "ret_diff": 1.2893232681499e-07
     },
     {
-      "ticker": "PFG",
-      "ok": true,
-      "common_months": 108,
-      "month_diff": 5.8213300069276386e-08,
-      "ret_diff": 4.079582560656547e-08
-    },
-    {
-      "ticker": "PNW",
+      "ticker": "PNC",
       "ok": true,
       "common_months": 280,
-      "month_diff": 6.059257695589793e-08,
-      "ret_diff": 7.910762933605042e-09
+      "month_diff": 4.5411729487909724e-08,
+      "ret_diff": 4.505384509911892e-09
     },
     {
-      "ticker": "PPL",
+      "ticker": "PPG",
       "ok": true,
-      "common_months": 312,
-      "month_diff": 9.41876432403177e-08,
-      "ret_diff": 8.959541553110739e-08
-    },
-    {
-      "ticker": "PG",
-      "ok": true,
-      "common_months": 286,
-      "month_diff": 7.19767958567985e-08,
-      "ret_diff": 7.729704876169308e-09
-    },
-    {
-      "ticker": "PGR",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 3.454334240871049e-08,
-      "ret_diff": 2.490618689066082e-08
-    },
-    {
-      "ticker": "PEG",
-      "ok": true,
-      "common_months": 279,
-      "month_diff": 8.326910383438246e-08,
-      "ret_diff": 3.6311752493745075e-09
-    },
-    {
-      "ticker": "PRU",
-      "ok": true,
-      "common_months": 268,
-      "month_diff": 5.401101410562603e-08,
-      "ret_diff": 2.81917580391422e-08
+      "common_months": 280,
+      "month_diff": 5.2282007834136834e-08,
+      "ret_diff": 1.0443912401569833e-09
     },
     {
       "ticker": "PLD",
       "ok": true,
       "common_months": 256,
       "month_diff": 9.900170783172513e-08,
-      "ret_diff": 4.738363923451061e-09
+      "ret_diff": 2.4430746314862972e-09
     },
     {
-      "ticker": "PHM",
+      "ticker": "PPL",
+      "ok": true,
+      "common_months": 312,
+      "month_diff": 6.650802131247247e-08,
+      "ret_diff": 6.079488779064945e-08
+    },
+    {
+      "ticker": "PNW",
       "ok": true,
       "common_months": 280,
-      "month_diff": 5.381240719692926e-08,
-      "ret_diff": 2.3722045439100725e-09
+      "month_diff": 6.059257695589793e-08,
+      "ret_diff": 1.236518776259743e-08
     },
     {
-      "ticker": "PSA",
-      "ok": true,
-      "common_months": 231,
-      "month_diff": 6.935166840804641e-08,
-      "ret_diff": 5.10446869217418e-08
-    },
-    {
-      "ticker": "QCOM",
+      "ticker": "PG",
       "ok": true,
       "common_months": 286,
-      "month_diff": 5.0048357902454654e-08,
-      "ret_diff": 2.961650258370696e-08
+      "month_diff": 7.19767958567985e-08,
+      "ret_diff": 2.780486951792227e-11
     },
     {
-      "ticker": "PWR",
+      "ticker": "PFG",
       "ok": true,
-      "common_months": 280,
-      "month_diff": 6.020886922364355e-08,
-      "ret_diff": 7.405101420943083e-09
+      "common_months": 108,
+      "month_diff": 5.8213300069276386e-08,
+      "ret_diff": 3.4814841454178236e-08
     },
     {
-      "ticker": "Q",
+      "ticker": "PGR",
       "ok": true,
-      "common_months": 13,
-      "month_diff": 6.429003196473104e-08,
-      "ret_diff": 7.344448738066944e-08
+      "common_months": 256,
+      "month_diff": 3.454334240871049e-08,
+      "ret_diff": 3.8443679128974395e-08
     },
     {
       "ticker": "PTC",
       "ok": true,
       "common_months": 145,
       "month_diff": 7.973066984412469e-08,
-      "ret_diff": 4.6645491247332416e-08
+      "ret_diff": 7.45693224946109e-08
+    },
+    {
+      "ticker": "PEG",
+      "ok": true,
+      "common_months": 279,
+      "month_diff": 8.326910383438246e-08,
+      "ret_diff": 7.371723009796938e-09
+    },
+    {
+      "ticker": "PSA",
+      "ok": true,
+      "common_months": 231,
+      "month_diff": 6.935166840804641e-08,
+      "ret_diff": 6.895709248055937e-08
+    },
+    {
+      "ticker": "PRU",
+      "ok": true,
+      "common_months": 268,
+      "month_diff": 5.9108303807065e-08,
+      "ret_diff": 3.3830109824606325e-08
     },
     {
       "ticker": "DGX",
       "ok": true,
       "common_months": 280,
-      "month_diff": 3.740947751573742e-08,
-      "ret_diff": 8.539004192620325e-08
+      "month_diff": 6.421783305121664e-08,
+      "ret_diff": 8.492958114558746e-09
+    },
+    {
+      "ticker": "PWR",
+      "ok": true,
+      "common_months": 280,
+      "month_diff": 6.903063987095948e-08,
+      "ret_diff": 3.927923430957492e-08
+    },
+    {
+      "ticker": "Q",
+      "ok": true,
+      "common_months": 13,
+      "month_diff": 6.429003196473104e-08,
+      "ret_diff": 5.27338381850484e-08
+    },
+    {
+      "ticker": "PHM",
+      "ok": true,
+      "common_months": 280,
+      "month_diff": 5.381240719692926e-08,
+      "ret_diff": 3.5960355693198665e-08
     },
     {
       "ticker": "RDDT",
       "ok": true,
       "common_months": 33,
-      "month_diff": 7.254567746528551e-08,
-      "ret_diff": 1.6662495716524006e-08
-    },
-    {
-      "ticker": "RTX",
-      "ok": true,
-      "common_months": 80,
-      "month_diff": 0.0007799521588789382,
-      "ret_diff": 0.000844460470518893
+      "month_diff": 3.524465552739997e-08,
+      "ret_diff": 1.0268747296926506e-08
     },
     {
       "ticker": "RL",
       "ok": true,
       "common_months": 280,
       "month_diff": 7.218223219140896e-08,
-      "ret_diff": 5.210984088677151e-09
+      "ret_diff": 2.880063920684961e-08
     },
     {
-      "ticker": "REG",
+      "ticker": "QCOM",
       "ok": true,
-      "common_months": 97,
-      "month_diff": 6.997077450776601e-08,
-      "ret_diff": 4.6465706171616716e-08
+      "common_months": 286,
+      "month_diff": 6.759084936192039e-08,
+      "ret_diff": 4.726003166588555e-08
+    },
+    {
+      "ticker": "RTX",
+      "ok": true,
+      "common_months": 80,
+      "month_diff": 0.0007799521588789382,
+      "ret_diff": 0.0008287825272645932
     },
     {
       "ticker": "RJF",
       "ok": true,
       "common_months": 279,
       "month_diff": 1.0128785499219362e-07,
-      "ret_diff": 4.230531880367039e-08
-    },
-    {
-      "ticker": "RF",
-      "ok": true,
-      "common_months": 243,
-      "month_diff": 6.432804333655895e-08,
-      "ret_diff": 1.0012289886063286e-08
-    },
-    {
-      "ticker": "RVTY",
-      "ok": true,
-      "common_months": 43,
-      "month_diff": 4.958975718949432e-08,
-      "ret_diff": 5.770975053387417e-08
-    },
-    {
-      "ticker": "REGN",
-      "ok": true,
-      "common_months": 255,
-      "month_diff": 8.407394513909594e-08,
-      "ret_diff": 4.1383221294211125e-08
-    },
-    {
-      "ticker": "HOOD",
-      "ok": true,
-      "common_months": 65,
-      "month_diff": 5.8613975895127624e-08,
-      "ret_diff": 2.1155689533536304e-08
+      "ret_diff": 8.477253610195135e-08
     },
     {
       "ticker": "O",
       "ok": true,
       "common_months": 279,
       "month_diff": 4.015478927144045e-08,
-      "ret_diff": 1.611433320114486e-08
+      "ret_diff": 2.401058596390726e-08
+    },
+    {
+      "ticker": "RVTY",
+      "ok": true,
+      "common_months": 43,
+      "month_diff": 4.958975718949432e-08,
+      "ret_diff": 8.4542055578396e-09
+    },
+    {
+      "ticker": "RF",
+      "ok": true,
+      "common_months": 243,
+      "month_diff": 6.432804333655895e-08,
+      "ret_diff": 1.8699423787182923e-08
+    },
+    {
+      "ticker": "HOOD",
+      "ok": true,
+      "common_months": 65,
+      "month_diff": 5.8613975895127624e-08,
+      "ret_diff": 4.297682676401848e-08
+    },
+    {
+      "ticker": "REG",
+      "ok": true,
+      "common_months": 97,
+      "month_diff": 7.495463760776033e-08,
+      "ret_diff": 2.9651267885455468e-08
+    },
+    {
+      "ticker": "REGN",
+      "ok": true,
+      "common_months": 255,
+      "month_diff": 8.407394513909594e-08,
+      "ret_diff": 2.7472498720371163e-08
+    },
+    {
+      "ticker": "ROP",
+      "ok": true,
+      "common_months": 41,
+      "month_diff": 7.36696981196161e-08,
+      "ret_diff": 2.2990231940411832e-10
     },
     {
       "ticker": "RMD",
       "ok": true,
       "common_months": 279,
       "month_diff": 5.197493968545075e-08,
-      "ret_diff": 1.1472828131964263e-08
-    },
-    {
-      "ticker": "RSG",
-      "ok": true,
-      "common_months": 312,
-      "month_diff": 5.102957723046586e-08,
-      "ret_diff": 3.8416553271858334e-08
-    },
-    {
-      "ticker": "ROP",
-      "ok": true,
-      "common_months": 41,
-      "month_diff": 1.0716191504833716e-05,
-      "ret_diff": 1.1194499416111725e-05
-    },
-    {
-      "ticker": "CRM",
-      "ok": true,
-      "common_months": 238,
-      "month_diff": 4.934897246400283e-08,
-      "ret_diff": 1.163313956276113e-08
-    },
-    {
-      "ticker": "ROST",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 5.4693368500835504e-08,
-      "ret_diff": 4.607633963260582e-08
-    },
-    {
-      "ticker": "RCL",
-      "ok": true,
-      "common_months": 255,
-      "month_diff": 7.791760103792456e-08,
-      "ret_diff": 4.12632041868477e-08
+      "ret_diff": 2.8792812578615212e-09
     },
     {
       "ticker": "ROL",
       "ok": true,
       "common_months": 279,
       "month_diff": 6.337176472470674e-08,
-      "ret_diff": 2.208206484333175e-08
+      "ret_diff": 1.4664186642754373e-08
     },
     {
-      "ticker": "SNDK",
+      "ticker": "RCL",
       "ok": true,
-      "common_months": 22,
-      "month_diff": 6.532272422976604e-08,
-      "ret_diff": 6.54071077299534e-08
+      "common_months": 255,
+      "month_diff": 7.791760103792456e-08,
+      "ret_diff": 2.75088027912318e-08
     },
     {
       "ticker": "ROK",
       "ok": true,
       "common_months": 312,
       "month_diff": 5.8947468684067417e-08,
-      "ret_diff": 1.603532284732978e-08
-    },
-    {
-      "ticker": "SBAC",
-      "ok": true,
-      "common_months": 250,
-      "month_diff": 6.560929821652906e-08,
-      "ret_diff": 9.982278337261619e-09
+      "ret_diff": 2.056120196325395e-08
     },
     {
       "ticker": "SPGI",
       "ok": false,
       "common_months": 128,
       "month_diff": 0.05765361816970915,
-      "ret_diff": 0.054115878882396995
+      "ret_diff": 0.053887344130217896
+    },
+    {
+      "ticker": "SNDK",
+      "ok": true,
+      "common_months": 22,
+      "month_diff": 6.532272422976604e-08,
+      "ret_diff": 4.5794157799150526e-08
+    },
+    {
+      "ticker": "RSG",
+      "ok": true,
+      "common_months": 312,
+      "month_diff": 2.3904618728920468e-08,
+      "ret_diff": 1.994992171461263e-09
+    },
+    {
+      "ticker": "CRM",
+      "ok": true,
+      "common_months": 238,
+      "month_diff": 4.934897246400283e-08,
+      "ret_diff": 3.508028945109487e-08
+    },
+    {
+      "ticker": "SBAC",
+      "ok": true,
+      "common_months": 250,
+      "month_diff": 6.323417500730955e-08,
+      "ret_diff": 1.7983464273285676e-08
     },
     {
       "ticker": "STX",
       "ok": true,
       "common_months": 216,
       "month_diff": 6.988009837449738e-08,
-      "ret_diff": 9.625965513571089e-08
-    },
-    {
-      "ticker": "NOW",
-      "ok": true,
-      "common_months": 173,
-      "month_diff": 7.07305314318063e-08,
-      "ret_diff": 2.0802501055072753e-08
-    },
-    {
-      "ticker": "SLB",
-      "ok": true,
-      "common_months": 286,
-      "month_diff": 6.410250941168982e-08,
-      "ret_diff": 1.1656088605427328e-07
-    },
-    {
-      "ticker": "SW",
-      "ok": true,
-      "common_months": 29,
-      "month_diff": 8.247457983223683e-08,
-      "ret_diff": 2.9049505023692745e-09
-    },
-    {
-      "ticker": "SWKS",
-      "ok": true,
-      "common_months": 255,
-      "month_diff": 6.500196936265468e-08,
-      "ret_diff": 1.0012544504611753e-07
+      "ret_diff": 1.591305887060912e-08
     },
     {
       "ticker": "SRE",
       "ok": true,
       "common_months": 280,
       "month_diff": 6.626131343612229e-08,
-      "ret_diff": 1.156500006871397e-09
+      "ret_diff": 2.3572189089549056e-08
+    },
+    {
+      "ticker": "NOW",
+      "ok": true,
+      "common_months": 173,
+      "month_diff": 7.07305314318063e-08,
+      "ret_diff": 3.712048857185124e-08
+    },
+    {
+      "ticker": "SWKS",
+      "ok": true,
+      "common_months": 255,
+      "month_diff": 6.500196936265468e-08,
+      "ret_diff": 6.069271907271911e-08
+    },
+    {
+      "ticker": "SW",
+      "ok": true,
+      "common_months": 29,
+      "month_diff": 8.247457983223683e-08,
+      "ret_diff": 4.090889027530409e-08
     },
     {
       "ticker": "SHW",
       "ok": true,
       "common_months": 280,
-      "month_diff": 9.036981074572736e-08,
-      "ret_diff": 3.538941872882617e-08
+      "month_diff": 7.210550911906921e-08,
+      "ret_diff": 1.7617203029729467e-08
+    },
+    {
+      "ticker": "ROST",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 5.4693368500835504e-08,
+      "ret_diff": 2.6771570071915107e-08
     },
     {
       "ticker": "SJM",
       "ok": true,
       "common_months": 256,
       "month_diff": 8.497256120953978e-08,
-      "ret_diff": 1.97035494586828e-08
-    },
-    {
-      "ticker": "SOLV",
-      "ok": true,
-      "common_months": 32,
-      "month_diff": 7.732438600527303e-08,
-      "ret_diff": 4.701943501217443e-09
+      "ret_diff": 6.825596243764664e-08
     },
     {
       "ticker": "SNA",
       "ok": true,
       "common_months": 280,
       "month_diff": 6.132598739938544e-08,
-      "ret_diff": 2.45546769583882e-08
-    },
-    {
-      "ticker": "SBUX",
-      "ok": true,
-      "common_months": 286,
-      "month_diff": 6.8496010419139e-08,
-      "ret_diff": 1.9465223655146247e-08
+      "ret_diff": 9.812369805572985e-09
     },
     {
       "ticker": "SPG",
       "ok": true,
       "common_months": 280,
       "month_diff": 5.849004847124917e-08,
-      "ret_diff": 4.26004813647296e-08
-    },
-    {
-      "ticker": "LUV",
-      "ok": true,
-      "common_months": 280,
-      "month_diff": 7.481222130678589e-08,
-      "ret_diff": 9.038267823058277e-08
-    },
-    {
-      "ticker": "STT",
-      "ok": true,
-      "common_months": 280,
-      "month_diff": 4.7920996060213383e-08,
-      "ret_diff": 1.5462630953422263e-08
+      "ret_diff": 5.566369121190462e-08
     },
     {
       "ticker": "SO",
       "ok": true,
       "common_months": 286,
       "month_diff": 6.233737026573039e-08,
-      "ret_diff": 7.114950739683934e-08
+      "ret_diff": 3.800521275465485e-08
     },
     {
-      "ticker": "STLD",
+      "ticker": "SOLV",
       "ok": true,
-      "common_months": 255,
-      "month_diff": 6.230885674085584e-08,
-      "ret_diff": 5.8555324589093516e-08
+      "common_months": 32,
+      "month_diff": 7.732438600527303e-08,
+      "ret_diff": 8.154933617277038e-09
     },
     {
-      "ticker": "STE",
+      "ticker": "SLB",
       "ok": true,
-      "common_months": 312,
-      "month_diff": 6.671373720124052e-08,
-      "ret_diff": 3.205624421465103e-08
+      "common_months": 286,
+      "month_diff": 4.268888453839992e-08,
+      "ret_diff": 1.3477261529004636e-08
     },
     {
-      "ticker": "SYK",
+      "ticker": "STT",
       "ok": true,
       "common_months": 280,
-      "month_diff": 1.0956439666642837e-07,
-      "ret_diff": 5.592524821018685e-08
-    },
-    {
-      "ticker": "SNPS",
-      "ok": true,
-      "common_months": 255,
-      "month_diff": 5.659996926699051e-08,
-      "ret_diff": 3.762031353105044e-09
+      "month_diff": 4.7920996060213383e-08,
+      "ret_diff": 3.003660475897618e-08
     },
     {
       "ticker": "SWK",
       "ok": true,
       "common_months": 256,
       "month_diff": 8.932522277405042e-08,
-      "ret_diff": 2.739960081044046e-08
+      "ret_diff": 4.8504900762580405e-08
+    },
+    {
+      "ticker": "SBUX",
+      "ok": true,
+      "common_months": 286,
+      "month_diff": 6.8496010419139e-08,
+      "ret_diff": 5.2684798745872286e-09
     },
     {
       "ticker": "SMCI",
       "ok": true,
       "common_months": 191,
-      "month_diff": 0.00015171924350887434,
-      "ret_diff": 0.00014773950161395266
+      "month_diff": 0.00015171590561269266,
+      "ret_diff": 0.00014773254354016885
     },
     {
-      "ticker": "TMUS",
+      "ticker": "STLD",
       "ok": true,
-      "common_months": 134,
-      "month_diff": 6.625636572721305e-08,
-      "ret_diff": 6.769237059778277e-09
+      "common_months": 255,
+      "month_diff": 6.230885674085584e-08,
+      "ret_diff": 5.103614686419178e-08
     },
     {
-      "ticker": "SYY",
+      "ticker": "STE",
+      "ok": true,
+      "common_months": 312,
+      "month_diff": 6.671373720124052e-08,
+      "ret_diff": 1.8261901546523518e-08
+    },
+    {
+      "ticker": "LUV",
       "ok": true,
       "common_months": 280,
-      "month_diff": 7.076956032303627e-08,
-      "ret_diff": 2.049768177414535e-08
+      "month_diff": 7.481222130678589e-08,
+      "ret_diff": 9.208266571469892e-08
+    },
+    {
+      "ticker": "SYK",
+      "ok": true,
+      "common_months": 280,
+      "month_diff": 1.0956439666642837e-07,
+      "ret_diff": 1.9806858597704036e-08
     },
     {
       "ticker": "SYF",
       "ok": true,
       "common_months": 149,
       "month_diff": 6.958700182746469e-08,
-      "ret_diff": 7.36860006345097e-09
+      "ret_diff": 2.029552115256905e-08
     },
     {
-      "ticker": "TPR",
+      "ticker": "TMUS",
       "ok": true,
-      "common_months": 109,
-      "month_diff": 9.271357348517029e-08,
-      "ret_diff": 4.7045976447890325e-08
+      "common_months": 134,
+      "month_diff": 6.625636572721305e-08,
+      "ret_diff": 4.90402929376188e-09
     },
     {
-      "ticker": "TROW",
+      "ticker": "SNPS",
       "ok": true,
-      "common_months": 256,
-      "month_diff": 3.7681078257634226e-08,
-      "ret_diff": 3.1524486354683745e-08
+      "common_months": 255,
+      "month_diff": 3.971404560765279e-08,
+      "ret_diff": 5.6788509450456104e-08
     },
     {
       "ticker": "TRGP",
       "ok": true,
       "common_months": 191,
       "month_diff": 7.879610752770105e-08,
-      "ret_diff": 5.297501814993666e-08
+      "ret_diff": 4.647105367183713e-09
     },
     {
-      "ticker": "TEL",
+      "ticker": "TROW",
       "ok": true,
-      "common_months": 207,
-      "month_diff": 4.2648772291542514e-08,
-      "ret_diff": 9.624789965023695e-09
+      "common_months": 256,
+      "month_diff": 3.7681078257634226e-08,
+      "ret_diff": 1.934705262662817e-08
     },
     {
-      "ticker": "TDY",
+      "ticker": "TPR",
       "ok": true,
-      "common_months": 279,
-      "month_diff": 6.273951258517485e-08,
-      "ret_diff": 1.0756727286675982e-08
+      "common_months": 109,
+      "month_diff": 9.271357348517029e-08,
+      "ret_diff": 1.4336117626356781e-08
     },
     {
       "ticker": "TTWO",
       "ok": true,
       "common_months": 255,
-      "month_diff": 5.004883574244445e-08,
-      "ret_diff": 2.2075310468494536e-09
+      "month_diff": 4.407995390920405e-08,
+      "ret_diff": 2.086066452910984e-08
     },
     {
-      "ticker": "TER",
+      "ticker": "SYY",
       "ok": true,
-      "common_months": 97,
-      "month_diff": 0.0006439616738584952,
-      "ret_diff": 0.0008302027205300266
-    },
-    {
-      "ticker": "TXN",
-      "ok": true,
-      "common_months": 173,
-      "month_diff": 6.46134465931425e-08,
-      "ret_diff": 9.538496659189377e-09
-    },
-    {
-      "ticker": "TPL",
-      "ok": true,
-      "common_months": 279,
-      "month_diff": 6.147212905371902e-08,
-      "ret_diff": 3.308289286962918e-08
-    },
-    {
-      "ticker": "TKO",
-      "ok": true,
-      "common_months": 39,
-      "month_diff": 4.758202964971758e-08,
-      "ret_diff": 6.271013486269794e-09
-    },
-    {
-      "ticker": "TGT",
-      "ok": true,
-      "common_months": 286,
-      "month_diff": 5.284482273992808e-08,
-      "ret_diff": 8.767502501783042e-08
-    },
-    {
-      "ticker": "TXT",
-      "ok": true,
-      "common_months": 312,
-      "month_diff": 6.81788336898137e-08,
-      "ret_diff": 2.5947672899206964e-08
-    },
-    {
-      "ticker": "TMO",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 4.9926990763893286e-08,
-      "ret_diff": 8.386649130720514e-08
+      "common_months": 280,
+      "month_diff": 7.076956032303627e-08,
+      "ret_diff": 1.3086981720533686e-08
     },
     {
       "ticker": "TSLA",
       "ok": true,
       "common_months": 191,
       "month_diff": 7.168750726371798e-08,
-      "ret_diff": 2.547828470422786e-08
+      "ret_diff": 5.025731419916468e-08
+    },
+    {
+      "ticker": "TEL",
+      "ok": true,
+      "common_months": 207,
+      "month_diff": 4.2648772291542514e-08,
+      "ret_diff": 1.1978776193188878e-08
+    },
+    {
+      "ticker": "TGT",
+      "ok": true,
+      "common_months": 286,
+      "month_diff": 3.688806415880208e-08,
+      "ret_diff": 2.720276315315573e-08
+    },
+    {
+      "ticker": "TPL",
+      "ok": true,
+      "common_months": 279,
+      "month_diff": 6.147212905371902e-08,
+      "ret_diff": 3.3122112608197085e-08
+    },
+    {
+      "ticker": "TDY",
+      "ok": true,
+      "common_months": 279,
+      "month_diff": 6.273951258517485e-08,
+      "ret_diff": 5.208604214601564e-08
+    },
+    {
+      "ticker": "TXN",
+      "ok": true,
+      "common_months": 173,
+      "month_diff": 6.46134465931425e-08,
+      "ret_diff": 9.517479671039553e-08
+    },
+    {
+      "ticker": "TER",
+      "ok": true,
+      "common_months": 97,
+      "month_diff": 0.0006439616738584952,
+      "ret_diff": 0.0007715338635088109
+    },
+    {
+      "ticker": "TMO",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 4.9926990763893286e-08,
+      "ret_diff": 4.920158280796727e-09
     },
     {
       "ticker": "TTD",
       "ok": true,
       "common_months": 123,
       "month_diff": 5.6452873486989574e-08,
-      "ret_diff": 6.045040024105219e-09
+      "ret_diff": 1.4941973769388994e-08
     },
     {
       "ticker": "TJX",
       "ok": true,
       "common_months": 256,
       "month_diff": 4.525247854214598e-08,
-      "ret_diff": 2.148027733461788e-08
+      "ret_diff": 1.3705329315882864e-08
+    },
+    {
+      "ticker": "TXT",
+      "ok": true,
+      "common_months": 312,
+      "month_diff": 6.81788336898137e-08,
+      "ret_diff": 8.049073985105792e-08
     },
     {
       "ticker": "TT",
       "ok": true,
       "common_months": 81,
       "month_diff": 6.839409105729999e-08,
-      "ret_diff": 4.90200767755411e-08
+      "ret_diff": 4.840163536634634e-08
+    },
+    {
+      "ticker": "TKO",
+      "ok": true,
+      "common_months": 39,
+      "month_diff": 4.758202964971758e-08,
+      "ret_diff": 9.501904596476152e-09
     },
     {
       "ticker": "TSCO",
       "ok": true,
       "common_months": 255,
       "month_diff": 0.00016669359510435022,
-      "ret_diff": 0.00012145907223359842
-    },
-    {
-      "ticker": "TRV",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 7.649013844535091e-08,
-      "ret_diff": 1.0638296932263813e-07
+      "ret_diff": 0.00012645796110477558
     },
     {
       "ticker": "TDG",
       "ok": true,
       "common_months": 207,
-      "month_diff": 7.801204016111285e-08,
-      "ret_diff": 7.375437038881216e-09
+      "month_diff": 8.766742509713765e-08,
+      "ret_diff": 5.7299188949144764e-08
     },
     {
-      "ticker": "TFC",
+      "ticker": "TYL",
       "ok": true,
-      "common_months": 84,
-      "month_diff": 6.085587678228421e-08,
-      "ret_diff": 2.6251679940969552e-08
+      "common_months": 255,
+      "month_diff": 6.202371016783559e-08,
+      "ret_diff": 3.282526206405123e-08
     },
     {
       "ticker": "TRMB",
       "ok": true,
       "common_months": 255,
       "month_diff": 6.295833343550328e-08,
-      "ret_diff": 7.871980178819626e-09
-    },
-    {
-      "ticker": "UBER",
-      "ok": true,
-      "common_months": 91,
-      "month_diff": 5.8792032020527074e-08,
-      "ret_diff": 1.9563184072701745e-08
+      "ret_diff": 9.494712904789537e-09
     },
     {
       "ticker": "TSN",
       "ok": true,
       "common_months": 256,
       "month_diff": 6.058098256378486e-08,
-      "ret_diff": 8.060010658894612e-09
+      "ret_diff": 2.7621385401133125e-08
     },
     {
       "ticker": "USB",
       "ok": true,
       "common_months": 286,
       "month_diff": 5.8453127449453746e-08,
-      "ret_diff": 5.356014010082788e-08
+      "ret_diff": 2.5384779167580973e-08
     },
     {
-      "ticker": "UAL",
+      "ticker": "TRV",
       "ok": true,
-      "common_months": 99,
-      "month_diff": 3.3908420071782075e-08,
-      "ret_diff": 1.4318175978189629e-08
-    },
-    {
-      "ticker": "UDR",
-      "ok": true,
-      "common_months": 255,
-      "month_diff": 9.435814862790437e-08,
-      "ret_diff": 1.2596628851113678e-08
+      "common_months": 256,
+      "month_diff": 7.649013844535091e-08,
+      "ret_diff": 6.050357925779792e-08
     },
     {
       "ticker": "ULTA",
       "ok": true,
       "common_months": 207,
       "month_diff": 8.250822380873046e-08,
-      "ret_diff": 8.872806178672477e-08
+      "ret_diff": 2.0269528056005015e-08
+    },
+    {
+      "ticker": "TFC",
+      "ok": true,
+      "common_months": 84,
+      "month_diff": 6.085587678228421e-08,
+      "ret_diff": 3.9377520133498933e-08
+    },
+    {
+      "ticker": "UBER",
+      "ok": true,
+      "common_months": 91,
+      "month_diff": 5.8792032020527074e-08,
+      "ret_diff": 3.276459970003032e-08
+    },
+    {
+      "ticker": "UAL",
+      "ok": true,
+      "common_months": 99,
+      "month_diff": 4.2268590627614344e-08,
+      "ret_diff": 3.070591891862762e-08
+    },
+    {
+      "ticker": "UDR",
+      "ok": true,
+      "common_months": 255,
+      "month_diff": 9.435814862790437e-08,
+      "ret_diff": 2.087934358740995e-08
     },
     {
       "ticker": "UPS",
       "ok": true,
       "common_months": 286,
       "month_diff": 6.189516699173225e-08,
-      "ret_diff": 4.714469037381264e-09
-    },
-    {
-      "ticker": "URI",
-      "ok": true,
-      "common_months": 255,
-      "month_diff": 4.6828432687107124e-08,
-      "ret_diff": 8.427302300439976e-08
-    },
-    {
-      "ticker": "VEEV",
-      "ok": true,
-      "common_months": 158,
-      "month_diff": 7.68204391210503e-08,
-      "ret_diff": 2.998148840305248e-08
-    },
-    {
-      "ticker": "VLO",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 8.121449535103409e-08,
-      "ret_diff": 9.186305938158057e-09
-    },
-    {
-      "ticker": "UNH",
-      "ok": true,
-      "common_months": 286,
-      "month_diff": 5.913126255308043e-08,
-      "ret_diff": 1.5252019203160216e-08
+      "ret_diff": 1.434296104108057e-08
     },
     {
       "ticker": "UHS",
       "ok": true,
       "common_months": 255,
       "month_diff": 5.827676807790283e-08,
-      "ret_diff": 1.4097950362668143e-08
+      "ret_diff": 3.745571519608859e-09
     },
     {
-      "ticker": "VRSK",
+      "ticker": "UNH",
       "ok": true,
-      "common_months": 191,
-      "month_diff": 4.137685194471885e-08,
-      "ret_diff": 2.4941074761031246e-09
+      "common_months": 286,
+      "month_diff": 5.913126255308043e-08,
+      "ret_diff": 8.309333665579288e-09
     },
     {
-      "ticker": "VRSN",
+      "ticker": "VEEV",
+      "ok": true,
+      "common_months": 158,
+      "month_diff": 7.68204391210503e-08,
+      "ret_diff": 2.971986057254128e-08
+    },
+    {
+      "ticker": "UNP",
       "ok": true,
       "common_months": 256,
-      "month_diff": 6.802307761510917e-08,
-      "ret_diff": 7.067698315488258e-08
+      "month_diff": 6.76354294792958e-08,
+      "ret_diff": 4.720572688299285e-08
     },
     {
-      "ticker": "VTR",
+      "ticker": "VLO",
       "ok": true,
       "common_months": 256,
-      "month_diff": 7.527646628258111e-08,
-      "ret_diff": 1.4856977648136649e-08
+      "month_diff": 8.121449535103409e-08,
+      "ret_diff": 1.2715781005923077e-07
+    },
+    {
+      "ticker": "URI",
+      "ok": true,
+      "common_months": 255,
+      "month_diff": 8.912180937681313e-08,
+      "ret_diff": 5.981279471711787e-08
     },
     {
       "ticker": "VLTO",
       "ok": true,
       "common_months": 38,
       "month_diff": 7.031890092434878e-08,
-      "ret_diff": 1.4088947120072248e-08
+      "ret_diff": 3.845418716785787e-08
     },
     {
-      "ticker": "VZ",
+      "ticker": "VRSK",
       "ok": true,
-      "common_months": 312,
-      "month_diff": 5.3891376472492425e-08,
-      "ret_diff": 1.8960264469569665e-09
-    },
-    {
-      "ticker": "VTRS",
-      "ok": true,
-      "common_months": 73,
-      "month_diff": 9.330262873419315e-08,
-      "ret_diff": 4.790232410734063e-08
+      "common_months": 191,
+      "month_diff": 4.483349669293091e-08,
+      "ret_diff": 5.516857370935213e-08
     },
     {
       "ticker": "VRT",
       "ok": true,
       "common_months": 82,
       "month_diff": 5.190322505121969e-08,
-      "ret_diff": 6.747752978597532e-08
+      "ret_diff": 1.4766171396729533e-08
+    },
+    {
+      "ticker": "VRSN",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 6.802307761510917e-08,
+      "ret_diff": 5.5747155336405285e-08
+    },
+    {
+      "ticker": "VTR",
+      "ok": true,
+      "common_months": 256,
+      "month_diff": 7.527646628258111e-08,
+      "ret_diff": 3.4854046315757614e-09
+    },
+    {
+      "ticker": "VTRS",
+      "ok": true,
+      "common_months": 73,
+      "month_diff": 9.330262873419315e-08,
+      "ret_diff": 5.47455134558561e-08
+    },
+    {
+      "ticker": "VZ",
+      "ok": true,
+      "common_months": 312,
+      "month_diff": 5.3891376472492425e-08,
+      "ret_diff": 1.302389640578383e-08
     },
     {
       "ticker": "VICI",
       "ok": true,
       "common_months": 106,
-      "month_diff": 4.8766418569989867e-08,
-      "ret_diff": 1.713093078503647e-08
-    },
-    {
-      "ticker": "V",
-      "ok": true,
-      "common_months": 225,
-      "month_diff": 8.702004494764992e-08,
-      "ret_diff": 1.990666276263653e-08
-    },
-    {
-      "ticker": "VRTX",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 5.2103658720881185e-08,
-      "ret_diff": 1.4341917209392818e-08
+      "month_diff": 5.362202171177444e-08,
+      "ret_diff": 2.2366657637107323e-08
     },
     {
       "ticker": "VST",
       "ok": true,
       "common_months": 115,
       "month_diff": 8.022976349941757e-08,
-      "ret_diff": 3.324977393415196e-08
+      "ret_diff": 1.7991414136275807e-08
     },
     {
-      "ticker": "WRB",
+      "ticker": "VRTX",
       "ok": true,
-      "common_months": 244,
-      "month_diff": 7.241345789665843e-08,
-      "ret_diff": 1.0112299886344545e-10
+      "common_months": 256,
+      "month_diff": 4.7722605422961806e-08,
+      "ret_diff": 8.77460415438236e-09
     },
     {
-      "ticker": "WAB",
+      "ticker": "V",
       "ok": true,
-      "common_months": 255,
-      "month_diff": 7.875838670123869e-08,
-      "ret_diff": 6.187981571592616e-08
+      "common_months": 225,
+      "month_diff": 8.702004494764992e-08,
+      "ret_diff": 3.4858487207856115e-08
     },
     {
       "ticker": "VMC",
       "ok": true,
       "common_months": 256,
       "month_diff": 7.737087681647381e-08,
-      "ret_diff": 4.722452784378106e-08
+      "ret_diff": 6.350027204060638e-08
     },
     {
       "ticker": "GWW",
       "ok": true,
       "common_months": 256,
       "month_diff": 7.957107261979957e-08,
-      "ret_diff": 4.3391377158030764e-08
+      "ret_diff": 2.276731492223405e-08
+    },
+    {
+      "ticker": "WAB",
+      "ok": true,
+      "common_months": 255,
+      "month_diff": 7.875838670123869e-08,
+      "ret_diff": 6.729666779392574e-08
+    },
+    {
+      "ticker": "WRB",
+      "ok": true,
+      "common_months": 244,
+      "month_diff": 7.241345789665843e-08,
+      "ret_diff": 7.497003950973635e-08
     },
     {
       "ticker": "DIS",
       "ok": true,
       "common_months": 286,
       "month_diff": 5.607867159529434e-08,
-      "ret_diff": 1.6217909237781214e-09
+      "ret_diff": 4.248812590645912e-08
     },
     {
       "ticker": "WMT",
       "ok": true,
       "common_months": 286,
       "month_diff": 5.058111807176857e-08,
-      "ret_diff": 5.5544046473343656e-08
+      "ret_diff": 1.0676501682738149e-08
     },
     {
       "ticker": "WM",
       "ok": true,
       "common_months": 256,
       "month_diff": 5.341679565340485e-08,
-      "ret_diff": 3.3486355022205316e-08
+      "ret_diff": 3.3537788324267126e-08
     },
     {
       "ticker": "WELL",
       "ok": true,
       "common_months": 106,
       "month_diff": 5.585238382899149e-08,
-      "ret_diff": 2.536117893470191e-08
-    },
-    {
-      "ticker": "WEC",
-      "ok": true,
-      "common_months": 256,
-      "month_diff": 5.91254585291523e-08,
-      "ret_diff": 1.0757959190144106e-08
-    },
-    {
-      "ticker": "WFC",
-      "ok": true,
-      "common_months": 286,
-      "month_diff": 4.4115023301039e-08,
-      "ret_diff": 5.336274355727255e-08
+      "ret_diff": 3.620109456647924e-08
     },
     {
       "ticker": "WDC",
       "ok": true,
       "common_months": 173,
       "month_diff": 1.048860316377187e-07,
-      "ret_diff": 5.7662272290315286e-08
-    },
-    {
-      "ticker": "WAT",
-      "ok": true,
-      "common_months": 312,
-      "month_diff": 7.945562141564722e-08,
-      "ret_diff": 3.7973591382467475e-08
+      "ret_diff": 6.412575515035712e-08
     },
     {
       "ticker": "WST",
       "ok": true,
       "common_months": 255,
       "month_diff": 7.530514101183883e-08,
-      "ret_diff": 4.8431864074771624e-08
+      "ret_diff": 4.4028967582931955e-08
     },
     {
-      "ticker": "WSM",
+      "ticker": "WEC",
       "ok": true,
-      "common_months": 255,
-      "month_diff": 3.521737379497125e-08,
-      "ret_diff": 6.002065533472489e-08
+      "common_months": 256,
+      "month_diff": 5.91254585291523e-08,
+      "ret_diff": 5.31519739332964e-09
     },
     {
-      "ticker": "WTW",
+      "ticker": "WAT",
       "ok": true,
-      "common_months": 66,
-      "month_diff": 7.662507028882715e-08,
-      "ret_diff": 1.1408440192539615e-08
+      "common_months": 312,
+      "month_diff": 7.945562141564722e-08,
+      "ret_diff": 4.125322305981172e-09
     },
     {
-      "ticker": "WYNN",
-      "ok": true,
-      "common_months": 234,
-      "month_diff": 8.858345013074143e-08,
-      "ret_diff": 1.8651273747671837e-08
-    },
-    {
-      "ticker": "WDAY",
-      "ok": true,
-      "common_months": 111,
-      "month_diff": 5.245071543757973e-08,
-      "ret_diff": 6.478719116742582e-09
-    },
-    {
-      "ticker": "WMB",
+      "ticker": "WFC",
       "ok": true,
       "common_months": 286,
-      "month_diff": 5.972160854739172e-08,
-      "ret_diff": 6.578295685955027e-08
-    },
-    {
-      "ticker": "XEL",
-      "ok": true,
-      "common_months": 107,
-      "month_diff": 7.501501930740062e-08,
-      "ret_diff": 4.526445884778241e-11
-    },
-    {
-      "ticker": "XYL",
-      "ok": true,
-      "common_months": 173,
-      "month_diff": 4.5312400165364863e-08,
-      "ret_diff": 1.0884236734121089e-08
-    },
-    {
-      "ticker": "ZBRA",
-      "ok": true,
-      "common_months": 255,
-      "month_diff": 7.154098846662293e-08,
-      "ret_diff": 0.0
+      "month_diff": 6.25219938044097e-08,
+      "ret_diff": 2.5092394273507068e-08
     },
     {
       "ticker": "WY",
       "ok": true,
       "common_months": 312,
       "month_diff": 6.801407925749459e-08,
-      "ret_diff": 1.4577207552157745e-08
+      "ret_diff": 5.2122216542827005e-08
     },
     {
-      "ticker": "ZBH",
+      "ticker": "WDAY",
       "ok": true,
-      "common_months": 138,
-      "month_diff": 6.773700911288927e-08,
-      "ret_diff": 2.704341017789602e-08
+      "common_months": 111,
+      "month_diff": 5.245071543757973e-08,
+      "ret_diff": 9.058391259308962e-09
+    },
+    {
+      "ticker": "WSM",
+      "ok": true,
+      "common_months": 255,
+      "month_diff": 3.521737379497125e-08,
+      "ret_diff": 5.968160876612671e-08
+    },
+    {
+      "ticker": "WTW",
+      "ok": true,
+      "common_months": 66,
+      "month_diff": 7.662507028882715e-08,
+      "ret_diff": 1.5211253812097425e-08
+    },
+    {
+      "ticker": "WMB",
+      "ok": true,
+      "common_months": 286,
+      "month_diff": 5.972160854739172e-08,
+      "ret_diff": 4.459512981114244e-09
+    },
+    {
+      "ticker": "WYNN",
+      "ok": true,
+      "common_months": 234,
+      "month_diff": 6.745421166076682e-08,
+      "ret_diff": 4.5854119834487506e-08
+    },
+    {
+      "ticker": "XEL",
+      "ok": true,
+      "common_months": 107,
+      "month_diff": 7.501501930740062e-08,
+      "ret_diff": 1.85018741438725e-08
+    },
+    {
+      "ticker": "XYL",
+      "ok": true,
+      "common_months": 173,
+      "month_diff": 4.5312400165364863e-08,
+      "ret_diff": 1.104617008973463e-08
     },
     {
       "ticker": "ZTS",
       "ok": true,
       "common_months": 166,
       "month_diff": 5.3707229885624486e-08,
-      "ret_diff": 3.498446055072435e-08
+      "ret_diff": 3.28577173247524e-08
     },
     {
       "ticker": "YUM",
       "ok": true,
       "common_months": 280,
-      "month_diff": 5.255777524304506e-08,
-      "ret_diff": 3.419255611980532e-08
+      "month_diff": 5.123683033403381e-08,
+      "ret_diff": 3.843087292842995e-08
+    },
+    {
+      "ticker": "ZBH",
+      "ok": true,
+      "common_months": 138,
+      "month_diff": 7.684876890401426e-08,
+      "ret_diff": 7.33485314707849e-08
+    },
+    {
+      "ticker": "ZBRA",
+      "ok": true,
+      "common_months": 255,
+      "month_diff": 7.154098846662293e-08,
+      "ret_diff": 1.9318743715857067e-08
     }
   ],
   "quarantine": {
