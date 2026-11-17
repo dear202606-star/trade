@@ -272,19 +272,27 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("--as-of", self.quotes)
         self.assertIn("steps.gate.outputs.as_of || github.event.inputs.as_of", self.quotes)
 
-    def test_no_sync_before_calculations(self):
-        self.assertNotIn("gh workflow run db-sync.yml", self.quotes)
+    def test_sync_only_after_successful_collection(self):
+        """2026-11-17：盘中必须实时更新。采集成功后立即推备库，绝不先同步。
+        08133d2 曾改成「只收盘一次、不同步」，导致 egress freeze 档整日停更。"""
+        self.assertIn("gh workflow run db-sync.yml", self.quotes)
+        self.assertIn("success() && steps.refresh.outcome == 'success'", self.quotes)
 
     def test_all_collection_is_calendar_gated(self):
         self.assertIn('AS_OF_INPUT: ${{ github.event.inputs.as_of }}', self.quotes)
-        self.assertIn('trading_window.py --closing-only --as-of "$AS_OF_INPUT" --gate', self.quotes)
-        self.assertIn('live_quotes.py --write --closing-only', self.quotes)
-        self.assertNotIn('  push:', self.quotes)
+        self.assertIn('python3 trading_window.py --task "$TASK" $EXTRA --gate', self.quotes)
+        self.assertIn('python live_quotes.py --write', self.quotes)
+        # dispatch 分两种：带 as_of = 收盘补跑，不带 = 盘中实时验证。
+        self.assertIn('if [ -n "$AS_OF_INPUT" ]', self.quotes)
+        self.assertIn('TASK=intraday', self.quotes)
 
-    def test_single_routine_close_cron(self):
-        self.assertEqual(self.quotes.count("cron:"), 1)
-        self.assertIn('"45 16 * * 1-5"', self.quotes)
-        self.assertIn('timezone: "America/New_York"', self.quotes)
+    def test_intraday_and_close_crons_present(self):
+        """盘中 30 分钟 + 开盘后关键 + 收盘关键：freeze 档靠对账补采兜底。"""
+        self.assertIn('"*/30 13-20 * * 1-5"', self.quotes)
+        self.assertIn('"0 14 * * 1-5"', self.quotes)
+        self.assertIn('"0 15 * * 1-5"', self.quotes)
+        self.assertIn('"17 21 * * 1-5"', self.quotes)
+        self.assertIn('"50 21 * * 1-5"', self.quotes)
 
     def test_collection_has_enough_timeout_and_one_retry(self):
         # 4 分钟 job 超时实测把 500+ 标的采集腰斩，两次补采都被 canceled

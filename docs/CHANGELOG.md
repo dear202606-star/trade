@@ -1,5 +1,34 @@
 # 变更日志
 
+## v6.19 ｜ 2026-11-17 ｜ 盘中停更根治：恢复被 08133d2 抹掉的新鲜度对账与盘中采集
+
+### 盘中整页没数据（用户 22:54 截图全"—"）
+
+根因不是前端、不是数据缺失，是 08133d2（"Publish strategy results once after close"）
+把 v6.14 的整套盘中自愈回退成了「只收盘一次」：
+- `quotes.yml` 定时从「盘中 30 分钟 + 开盘后关键 + 收盘」砍成单条收盘 cron；
+- `reconcile_sessions.evaluate()` 删掉盘中新鲜度分支，只剩收盘判定；
+- `dispatch_allowed` 删掉盘中/收盘分桶，采集成功后也不再立即推 Turso。
+
+叠加 egress freeze 档，盘中定时采集全被 skip、对账又判「盘前/休市无需补采」，
+于是整个交易日零刷新，页面停在上一收盘日并因前端 settled 快照判定而整页变空。
+
+**诊断铁证**：现网 Turso 数据齐全（equity/preview/quotes 都是 11-16 收盘版）、
+Supabase 402 但降级 Turso 正常（vm 复现 level=healthy）、今日 quotes.yml 只有凌晨两次
+收盘补采、美东 15:04 盘中 `evaluate()` 却返回 `expected_session=""`。
+
+改动：
+- 从 a93a41b 恢复 `reconcile_sessions.py`（盘中按 quotes.ts 年龄判定，>40 分钟补采，
+  盘中桶 12 次/收盘桶 6 次）、`test_reconcile_sessions.py`、`quotes.yml`（盘中 cron +
+  采集成功立即推 Turso + 门禁留痕）。当前 `trading_window.py`/`live_quotes.py` 的
+  `--closing-only` 为可选参数，恢复后的普通 `--task`/`--write` 完全兼容。
+- `test_backfill.py` 三段 08133d2 的「只收盘」契约改为「盘中必须实时更新」契约
+  （采集后才同步、dispatch 分两种、盘中+收盘多 cron）。
+- 前端 v6.15 的盘中呈现修复、v6.17 标签对齐、v6.18 分享图全部保留不动。
+
+回归：Python 349 / Node 64 / YAML 25 全绿。restore 后现网对账判定：
+`盘中应有 2026-11-17 快照，线上为 2026-11-16，实时补采`，dispatch_allowed=true。
+
 ## v6.18 ｜ 2026-11-17 ｜ 微信转发图标改用方形专用图
 
 v6.16 的 og:image 是 1200×630 横图。微信转发卡片右侧缩略图位是**正方形**，
