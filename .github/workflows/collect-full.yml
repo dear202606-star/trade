@@ -13,7 +13,10 @@ concurrency:
 
 on:
   schedule:
-    - cron: "15 */6 * * *"      # 每 6 小时
+    # 2026-11-21「先砍流量」：本作业是历史价格主力（补数 → 重建选源 → 校验 → 锁），
+    # 页面读数完全不经过它，每 6 小时跑一次没有换来任何前端新鲜度，只换来
+    # fill_yahoo_gaps 每轮重打同一批取不到的标的。改成每天收盘后一次。
+    - cron: "15 23 * * *"
   workflow_dispatch:
     inputs:
       av_quota:
@@ -50,6 +53,25 @@ jobs:
           printf '%s' "$SUPABASE_DB_PASSWORD" > output/_supabase_dbpass.txt
           echo "口令长度 ${#SUPABASE_DB_PASSWORD}"
 
+      # 缺席结案台账：fill_yahoo_gaps.targets() 要 join source_absence_acceptance。
+      # 表不在 → 整轮采集抛 relation does not exist → 真实缺口反而一个也补不进。
+      # 本仓库没有自动迁移器（apply_sql.py 不在任何工作流里，DDL 全靠人工执行），
+      # 所以由作业自己幂等地兜住这一步，人工漏跑不再等于全线停摆。
+      - name: 应用缺席结案台账（纯库内 DDL，幂等）
+        run: |
+          python - <<'PY'
+          import db_sources
+          from pathlib import Path
+          f = 'sql/127_source_absence_acceptance.sql'
+          c = db_sources.db(); c.autocommit = True
+          try:
+              with c.cursor() as cur:
+                  cur.execute(Path(f).read_text(encoding='utf-8'))
+                  print('applied', f)
+          finally:
+              c.close()
+          PY
+
       - name: stockanalysis 补缺（免费，10 年全收益）
         if: ${{ github.event.inputs.sa_limit != '0' }}
         continue-on-error: true
@@ -60,7 +82,7 @@ jobs:
           if [ "$N" = "0" ]; then echo "跳过 stockanalysis"; exit 0; fi
           python fetch_stockanalysis.py --symbols "$N"
 
-      # Alpha Vantage 每天 25 次额度：交给 daily-backfill（每天 10:30 UTC）单独跑，
+      # Alpha Vantage 每天 25 次额度：交给 daily-backfill（每天 04:00、16:00 UTC）单独跑，
       # 这里不跑，否则每 6 小时跑一次会 4 倍超量、全部失败。
 
       - name: 给「选源非全收益」的标的补 Yahoo 全收益

@@ -57,17 +57,46 @@ def targets(cur, limit, symbol=None):
              select 1 from data_lock l where l.status='locked'
                and (l.symbol=k.symbol or l.scope='month_range')
                and not exists (select 1 from data_lock x
-                               where x.supersedes_id=l.id and x.status='void'))
+                              where x.supersedes_id=l.id and x.status='void'))
            and not exists (
              select 1 from prices_monthly p
               where p.symbol = k.symbol and p.source = 'yahoo_relay'
                 and p.basis = 'total_return'
                 and p.month between '2012-01' and '2025-12')
+           -- 已按 price_only 结案的权威缺席不再重试。结案只在「退市仍然成立」
+           -- 期间生效：membership_end 必须与当前 members.end_date 完全一致，
+           -- 标的重新上市（或身份被复核改期）就自动回到补采集合，无需删记录。
+           and not exists (
+             select 1 from source_absence_acceptance a
+              where a.symbol = k.symbol and a.source = 'yahoo_relay'
+                and a.basis = 'total_return'
+                and a.membership_end = m.end_date
+                and a.membership_end < current_date)
          group by k.symbol
          order by k.symbol
          limit %s
     """, (symbol, symbol, limit))
     return [r[0] for r in cur.fetchall()]
+
+
+def close_out_absence(conn, symbol):
+    """Yahoo 明确回答 404 时，把这只票按 price_only 结案；返回是否结案成功。
+
+    只对「数据库当前时钟确认已退市」的标的生效。现役成分股出现 404 更可能是
+    代码换号或供应商故障，结案等于把它永久逐出全收益补采，所以一律拒绝，
+    让本轮照常记一次失败。
+    """
+    with conn.cursor() as cur:
+        cur.execute("select max(end_date), max(end_date) < current_date "
+                    "from members where symbol=%s", (symbol,))
+        end_date, delisted = cur.fetchone()
+        if not end_date or not delisted:
+            return False
+        cur.execute("""insert into source_absence_acceptance
+                       (symbol, source, basis, http_status, membership_end, runner)
+                       values (%s, 'yahoo_relay', 'total_return', 404, %s, 'fill_yahoo_gaps')
+                       on conflict do nothing""", (symbol, end_date))
+        return True
 
 
 def main():
@@ -87,7 +116,7 @@ def main():
         c.close()
         return
 
-    ok = bad = rows = skipped = 0
+    ok = bad = rows = skipped = absent = 0
     batch = []
     t0 = time.time()
     deadline = t0 + a.max_seconds
@@ -102,6 +131,15 @@ def main():
                 continue
         try:
             bars = YF.fetch(sym)
+        except YF.SymbolNotFound:
+            if close_out_absence(c, sym):
+                absent += 1
+                print("  ∅ %-6s Yahoo 明确 404 且已退市 → 按 price_only 结案，停止补采" % sym,
+                      flush=True)
+            else:
+                bad += 1
+                print("  ✗ %-6s Yahoo 404，但该标的并未确认退市，不能结案" % sym, flush=True)
+            continue
         except Exception as e:
             bad += 1
             print("  ✗ %-6s %s" % (sym, str(e)[:40]), flush=True)
@@ -143,9 +181,12 @@ def main():
                 batch, page_size=2000)
         rows += len(batch)
     c.close()
-    print("完成：成功 %d / 失败 %d / 保护或资格变化跳过 %d / 写入 %d 行 / %.0fs" %
-          (ok, bad, skipped, rows, time.time() - t0))
-    remaining = len(syms) - ok - bad - skipped
+    print("完成：成功 %d / 失败 %d / 结案缺席 %d / 保护或资格变化跳过 %d / 写入 %d 行 / %.0fs" %
+          (ok, bad, absent, skipped, rows, time.time() - t0))
+    # 结案过的缺席不再算未完成：那是用户 2026-11-21 定的口径（退市票接受
+    # price_only），下一轮 targets() 也不会再取它们。真正的故障只有两种——
+    # 采集失败，以及预算内没跑完。
+    remaining = len(syms) - ok - bad - skipped - absent
     if bad or remaining:
         raise RuntimeError('Yahoo historical backfill incomplete: %d failed, %d unattempted' % (bad, remaining))
 
