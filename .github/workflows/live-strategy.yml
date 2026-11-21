@@ -38,6 +38,8 @@ jobs:
     concurrency:
       group: trade-current-equity
       cancel-in-progress: false
+    outputs:
+      computed: ${{ steps.compute.outcome == 'success' }}
     env:
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
     steps:
@@ -56,6 +58,16 @@ jobs:
         if: steps.egress.outputs.allow == 'true'
         id: compute
         run: python live_strategy.py
+      - name: 门禁拒绝时显式留痕（杜绝「success 但没算」的假健康）
+        # 被 skip 的 step 不算失败，整个 run 仍报 success；原先下游
+        # sync_outputs 只看两个 job 成没成，于是配额拦下计算之后照样派发
+        # 一次备库同步——同步的是根本没重算的数据，全链却全绿。
+        # 结论不改（门禁生效是设计内行为），但拒绝原因必须钉在日志和摘要里，
+        # 且不得再触发下游同步（见 sync_outputs 的 computed 条件）。
+        if: steps.egress.outputs.allow != 'true'
+        run: |
+          echo "::warning::本轮未计算净值：egress.allow=${{ steps.egress.outputs.allow }} mode=${{ steps.egress.outputs.mode }} 预计出口 ${{ steps.egress.outputs.projected_mb }}MB / 预算 ${{ steps.egress.outputs.budget_mb }}MB"
+          echo "本 run 的 success 仅表示门禁按设计生效，净值未刷新；页面继续展示最近一次完整收盘结果。" >> "$GITHUB_STEP_SUMMARY"
   ranking:
     if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
@@ -63,6 +75,8 @@ jobs:
     concurrency:
       group: trade-current-ranking
       cancel-in-progress: false
+    outputs:
+      computed: ${{ steps.compute.outcome == 'success' }}
     env:
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
     steps:
@@ -81,9 +95,17 @@ jobs:
         if: steps.egress.outputs.allow == 'true'
         id: compute
         run: python live_ranking.py
+      - name: 门禁拒绝时显式留痕（杜绝「success 但没算」的假健康）
+        if: steps.egress.outputs.allow != 'true'
+        run: |
+          echo "::warning::本轮未计算排名与次年预览：egress.allow=${{ steps.egress.outputs.allow }} mode=${{ steps.egress.outputs.mode }} 预计出口 ${{ steps.egress.outputs.projected_mb }}MB / 预算 ${{ steps.egress.outputs.budget_mb }}MB"
+          echo "本 run 的 success 仅表示门禁按设计生效，排名与预览未刷新；页面继续展示最近一次完整收盘结果。" >> "$GITHUB_STEP_SUMMARY"
   sync_outputs:
     needs: [equity, ranking]
-    if: ${{ needs.equity.result == 'success' && needs.ranking.result == 'success' }}
+    # computed 只有在 compute step 真的跑过（含场次幂等空跑）时才为 true；
+    # 门禁把计算跳掉的轮次不再派发同步，既避免「同步一份没重算的数据」的
+    # 假健康，也省下这一趟本身要占的出口流量。备库另有每日收盘后兜底同步。
+    if: ${{ needs.equity.result == 'success' && needs.ranking.result == 'success' && needs.equity.outputs.computed == 'true' && needs.ranking.outputs.computed == 'true' }}
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
