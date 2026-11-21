@@ -107,6 +107,41 @@ class PublishedDependencyTests(unittest.TestCase):
         self.assertTrue(published_dependency_problems(None,None,quotes))
         with self.assertRaises(ValueError):published_dependency_problems({}, {}, {})
 
+    # 盘中：净值与次年预览是收盘产物，本场还没收盘，本就不该重算。
+    # 2026-11-21 事故——预览连着两场没产出（停在 11-18，行情已到 11-20），
+    # 而调用方因为「盘中按版本判必然误报」把整条依赖校验丢掉，看门狗全绿。
+    INTRADAY_QUOTES={'version':'live','session':'2026-11-04','previous_session':'2026-11-03',
+                     'ts':'2026-11-04T20:00:00Z','intraday':True}
+    MID_SESSION=dt.datetime(2026,11,4,20,tzinfo=dt.timezone.utc)
+
+    def closed_products(self, session):
+        """上一收盘场（或更旧）的净值与预览：版本落后、时效已过，盘中都是常态。"""
+        dashed=session.replace('-','')
+        stale={'quote_version':'old','fresh_until':'2026-11-04T14:30:00Z'}
+        as_of='2026-11-%sT02:00:00Z'%session[-2:]
+        return (dict(stale,last_session=dashed,source_as_of=as_of),
+                dict(stale,session=session,as_of_ts=as_of,reference_version='ref',top=[{}, {}, {}]))
+
+    def test_intraday_judges_close_products_by_session_not_by_version(self):
+        equity,preview=self.closed_products('2026-11-03')
+        self.assertEqual(published_dependency_problems(equity,preview,self.INTRADAY_QUOTES,self.MID_SESSION),[])
+
+    def test_intraday_cannot_hide_a_close_that_never_produced_anything(self):
+        equity,preview=self.closed_products('2026-11-02')
+        self.assertEqual(published_dependency_problems(equity,preview,self.INTRADAY_QUOTES,self.MID_SESSION),
+                         ['收益基准落后于可衔接报价场次','次年预览未跟随当前报价版本完成核验'])
+
+    def test_intraday_is_not_a_free_pass_for_broken_structure(self):
+        equity,preview=self.closed_products('2026-11-03')
+        self.assertEqual(published_dependency_problems(equity,dict(preview,top=[{}]),
+                                                       self.INTRADAY_QUOTES,self.MID_SESSION),
+                         ['次年预览未跟随当前报价版本完成核验'])
+
+    def test_intraday_without_a_previous_session_cannot_be_vacated(self):
+        with self.assertRaises(ValueError):
+            published_dependency_problems(*self.closed_products('2026-11-03'),
+                dict(self.INTRADAY_QUOTES,previous_session=None),self.MID_SESSION)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -75,10 +75,16 @@ jobs:
 
           可能原因：数据管线停跑 / 镜像发布失败 / 采集失败 / 数据库口令未配置。
           实时层健康检查：${{ steps.realtime.outcome }}"
-          EXIST=$(gh issue list --label watchdog --state open --json number --jq '.[0].number' || true)
+          # 去重按标题查，并且拒绝降级成「无标签建单」。原先查的是
+          # --label watchdog，而仓库里根本没有这个标签：create 的
+          # `|| gh issue create`（不带标签）成功建单，查询却永远为空，
+          # 于是每轮巡检都新开一张——2026-11 累积了 12 张同名未关单。
+          gh label list --limit 300 --json name --jq '.[].name' | grep -qx data-alert || {
+            echo "::error::仓库缺少 data-alert 标签，告警无法去重，拒绝建未标签单"; exit 1; }
+          EXIST=$(gh issue list --state open --label data-alert --limit 100 --json number,title \
+                  --jq ".[] | select(.title==\"$TITLE\") | .number" | head -n1 || true)
           if [ -n "$EXIST" ]; then
             gh issue comment "$EXIST" --body "$BODY"
           else
-            gh issue create --title "$TITLE" --body "$BODY" --label watchdog || \
-            gh issue create --title "$TITLE" --body "$BODY"
+            gh issue create --title "$TITLE" --body "$BODY" --label data-alert
           fi

@@ -113,13 +113,28 @@ def published_dependency_problems(equity, preview, quotes, now=None):
         except (ValueError,TypeError):return False
     settled=str((equity or {}).get('last_session','')).replace('-','')
     allowed={str(quotes.get(k,'')).replace('-','') for k in ('session','previous_session')}
-    if not settled or settled not in allowed or not current(equity):
+    # 盘中快照按设计不重算净值与次年预览（run_guard：「盘中快照，净值/预览只在
+    # 收盘场次计算」），所以拿本场 quote_version / fresh_until 去量收盘产物必然
+    # 不成立——fresh_until 就设在下一次开盘，盘中永远已经过期。收盘产物的正确
+    # 场次是行情自己带回来的「上一收盘场」，与日历无关。
+    # 2026-11-21：原先为了躲开这个必不成立，调用方在盘中把整条依赖校验丢掉，
+    # 于是预览连着两场没产出（停在 11-18、行情已到 11-20）看门狗仍然全绿。
+    # 改成按场次判定之后，盘中既不误报版本落后，也不再放过真正的停更。
+    if quotes.get('intraday') is True:
+        last_closed=str(quotes.get('previous_session') or '').replace('-','')
+        if not last_closed:
+            raise ValueError('盘中报价快照缺少上一收盘场次，无法核验净值与预览')
+        def connected(payload, got):
+            return got == last_closed
+    else:
+        def connected(payload, got):
+            return got in allowed and bool(current(payload))
+    if not settled or not connected(equity, settled):
         problems.append('收益基准落后于可衔接报价场次')
     if isinstance(equity,dict) and equity.get('market_advice_error'):
         problems.append('大盘建议缺少已核验的月末价格')
     if (not isinstance(preview,dict) or not preview.get('reference_version')
-            or not current(preview)
-            or preview.get('session')!=quotes['session']
+            or not connected(preview, str(preview.get('session') or '').replace('-',''))
             or not isinstance(preview.get('top'),list) or len(preview['top'])!=3):
         problems.append('次年预览未跟随当前报价版本完成核验')
     return problems

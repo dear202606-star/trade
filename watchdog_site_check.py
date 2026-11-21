@@ -179,23 +179,14 @@ def snapshot_problems(doc, now=None):
         except Exception as exc:
             problems.append("历史年度校验失败：%s" % str(exc)[:100])
         try:
-            # 盘中快照按设计不重算净值 / 次年预览（run-guard 明确输出
-            # "盘中快照，净值/预览只在收盘场次计算"）。此时 equity / preview
-            # 的 quote_version 必然落后于刚写入的盘中报价，若仍判为 problem，
-            # 看门狗会每小时告警、开 Issue，并派发必定被 SKIP 的
-            # live-strategy.yml，形成「告警 → 无效重算 → 再告警」空转。
-            # 只在 intraday=True 时把两条「版本落后」降级；收盘场次
-            # （intraday=False，含 --as-of 延迟补采）照常严格校验，
-            # 那时净值没跟上就是真故障，必须告警并自愈。
-            intraday_snapshot = bool(q.get("intraday"))
-            version_gap = ("收益基准落后于可衔接报价场次",
-                           "次年预览未跟随当前报价版本完成核验")
+            # 盘中/收盘的口径差异由 published_dependency_problems 自己判定：
+            # 收盘产物在盘中对应「上一收盘场」，过期与否看 fresh_until。
+            # 2026-11-21 之前这里按消息字符串把两条依赖校验在盘中整个丢掉，
+            # 结果预览停更两场（11-18，行情已到 11-20）看门狗仍报健康——
+            # 用字符串匹配来豁免本身也很脆，改一处文案就悄悄失效。
             for prefix in ("", "b/"):
-                deps = published_dependency_problems(
-                    datasets[prefix + "equity"], datasets[prefix + "preview"], q)
-                if intraday_snapshot:
-                    deps = [p for p in deps if p not in version_gap]
-                problems.extend(prefix + p for p in deps)
+                problems.extend(prefix + p for p in published_dependency_problems(
+                    datasets[prefix + "equity"], datasets[prefix + "preview"], q, now))
         except Exception as exc:
             problems.append("收益/预览依赖校验失败：%s" % str(exc)[:100])
     return problems
