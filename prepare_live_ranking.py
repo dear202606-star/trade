@@ -15,6 +15,15 @@ import market_calendar
 from live_strategy import fetch_daily,fetch_daily_yahoo,sha,close_enough
 
 
+# FDXF/HONA/SPY 是收益基准，SKYD_WS 被 SKYD 的权证条款直接索引
+# （live_ranking.calculate 用 contexts[warrant]）。它们缺 context 只会把
+# 故障推迟成 KeyError，所以必须继续整批 fail-closed，绝不隔离放行。
+REQUIRED_RANKING_INPUTS = frozenset({'FDXF', 'HONA', 'SPY', 'SKYD_WS'})
+# 隔离只用于零星故障。超过这个规模说明是系统性问题（供应商换基准、日历
+# 错位、身份污染），整批仍然失败才是正确答案。
+MAX_QUARANTINED_RANKING_INPUTS = 3
+
+
 def normalized(body):
     if 'normalized' in body:return body['normalized']
     dates=sorted(body['adjusted']);first=dates[0]
@@ -42,6 +51,39 @@ def splice_anchor(old,data,begin):
     """
     overlap=sorted(d for d in set(old['raw'])&set(data['raw']) if d<=begin)
     return overlap[-1] if overlap else None
+
+
+SPLIT_MIN_RATIO = 2
+SPLIT_MAX_RATIO = 64
+SPLIT_RATIO_TOL = 2e-3
+# On a split day the provider re-scales history by 1/N, so the only quantity the
+# re-base must leave intact is the session's own total return. Bounding it is what
+# makes accepting an 8x factor change safe: a mismatched symbol has to fake a
+# ordinary-looking session as well. 2026-11-20 SNDK 1:8 printed -16.05%.
+SPLIT_SESSION_RETURN_MIN = 0.6
+SPLIT_SESSION_RETURN_MAX = 1.6
+
+
+def split_factor(ratio):
+    """Return N when `ratio` is a clean 1:N or N:1 share split, else None."""
+    if ratio <= 0:
+        return None
+    for n in range(SPLIT_MIN_RATIO, SPLIT_MAX_RATIO + 1):
+        for candidate in (1.0 / n, float(n)):
+            if abs(ratio - candidate) <= SPLIT_RATIO_TOL * max(ratio, candidate):
+                return n
+    return None
+
+
+def split_session_return(data, days, jump_index):
+    """Adjusted-series return across the re-base day, or None when unavailable."""
+    if jump_index < 1 or jump_index >= len(days):
+        return None
+    before = float(data['adjusted'][days[jump_index - 1]])
+    after = float(data['adjusted'][days[jump_index]])
+    if before <= 0:
+        return None
+    return after / before
 
 
 def factor_rebase_evidence(symbol,old,data,begin,quote,prev_raw,prev_adj,session,
@@ -74,6 +116,17 @@ def factor_rebase_evidence(symbol,old,data,begin,quote,prev_raw,prev_adj,session
          sessions old (incremental splice after a missed collection), so a
          dividend paid on an intermediate session is perfectly legitimate.
       3. The scaling ratio stays within 5%, catching gross mismatches.
+
+    A share split breaks 3 by design: the provider divides every historical bar
+    by N, so the factor legitimately moves by 1/N and no 5% band can admit it.
+    2026-11-20 SNDK 1:8 was rejected on exactly this, which froze all 504 ranking
+    inputs. Such a ratio is accepted only as a *split*, and only when the
+    adjusted series keeps an ordinary single-session return across the re-base
+    day (`split_session_return`) -- the shape checks above already prove the
+    re-base is one clean two-level step, and the return bound is what a wrong
+    symbol or a corrupted series cannot reproduce. Reverse splits stay
+    fail-closed because they make the pre-date cash difference negative, which
+    the dividend shape check rejects; that is acceptable, not an oversight.
 
     2026-11-11: the old guard required `jumps[0] == session`. When the
     2026-11-09 collection was skipped, AMP/GWW/IBM/VMC (all ex-dividend on
@@ -131,8 +184,15 @@ def factor_rebase_evidence(symbol,old,data,begin,quote,prev_raw,prev_adj,session
             # always passes the reviewed online NYSE calendar (see prepare()).
             problems.append('ex-date is not an exchange weekday: %s' % ex_date)
     ratio=f_new/f_old
+    split_n=None
+    split_session=None
     if not 0.95<=ratio<=1.05:
-        problems.append('gross factor ratio %.6f' % ratio)
+        split_n=split_factor(ratio)
+        if split_n is not None and jumps:
+            split_session=split_session_return(data,days,jumps[0])
+        if split_n is None or split_session is None or \
+                not SPLIT_SESSION_RETURN_MIN<=split_session<=SPLIT_SESSION_RETURN_MAX:
+            problems.append('gross factor ratio %.6f' % ratio)
     # Independent evidence from the sealed quote snapshot. When the ex-date IS
     # the current session, `pc` must be the ex-dividend adjusted previous close
     # (adj != raw). When the ex-date is an EARLIER session (a splice spanning
@@ -152,10 +212,16 @@ def factor_rebase_evidence(symbol,old,data,begin,quote,prev_raw,prev_adj,session
     if problems:
         raise ValueError('Incremental source adjustment factor discontinuity: %s (%s)'
                          %(symbol,'; '.join(problems)))
-    return {'begin':begin,'session':session,'ex_date':ex_date,
+    evidence={'kind':'split' if split_n else 'dividend',
+            'begin':begin,'session':session,'ex_date':ex_date,
             'f_old':f_old,'f_new':f_new,'ratio':ratio,'gap':gap,
             'cash_amount':diffs[0] if diffs else None,
-            'ex_dividend_days':ex_days,'verified_by':'sealed_quote_snapshot_pc'}
+            'ex_dividend_days':ex_days,
+            'verified_by':'sealed_quote_snapshot_pc'}
+    if split_n:
+        evidence['split_ratio']=split_n
+        evidence['split_session_return']=split_session
+    return evidence
 
 
 def directory(connection,path=None):
@@ -173,6 +239,19 @@ def directory(connection,path=None):
             values('validation','live_security_directory','current','pass',%s,now())""",
             (Json({'proof':body,'evidence_sha256':sha(body)}),))
     connection.commit();return body
+
+
+def ranking_input_outcome(errors,quarantined):
+    """Decide whether the batch may publish, applying the systemic-failure cap.
+
+    Isolation is only a concession for a handful of symbols. Once the quarantine
+    grows past the cap the failures are treated as systemic (vendor basis change,
+    calendar misalignment, identity contamination) and the whole batch fails
+    closed again, exactly as before 2026-11-21.
+    """
+    if len(quarantined)>MAX_QUARANTINED_RANKING_INPUTS:
+        return False,errors+quarantined,[]
+    return not errors,errors,quarantined
 
 
 def prepare(path=None, *, snapshot=None):
@@ -196,9 +275,9 @@ def prepare(path=None, *, snapshot=None):
         with connection.cursor() as cursor:
             cursor.execute('select symbol from live_ranking_context where base_year=%s and session=%s and phase=%s',(year,session,phase))
             done={r[0] for r in cursor.fetchall()}
-        targets=sorted((pool|{'FDXF','HONA','SPY','SKYD_WS'})-done)
+        targets=sorted((pool|REQUIRED_RANKING_INPUTS)-done)
         if not targets:
-            print('Current ranking evidence already online; no collection',flush=True);return True
+            print('Current ranking evidence already online; no collection',flush=True);return True,[]
         records=directory(connection,path)['records'];mapping={}
         for r in records:mapping.setdefault(r['code'],[]).append(r['market'])
         with connection.cursor() as cursor:
@@ -206,7 +285,7 @@ def prepare(path=None, *, snapshot=None):
                 where base_year=%s and session<%s and phase='close'
                 order by symbol,session desc,created_at desc''',(year,session))
             prior={s:(p,h) for s,p,h in cursor.fetchall()}
-        errors=[];success=0;pending=[]
+        errors=[];quarantined=[];success=0;pending=[]
         def flush():
             nonlocal success
             if not pending:return
@@ -306,26 +385,37 @@ def prepare(path=None, *, snapshot=None):
                 try:
                     body=future.result()
                 except Exception as exc:
-                    errors.append({'symbol':symbol,'error':str(exc)[:160]});continue
+                    entry={'symbol':symbol,'error':str(exc)[:160]}
+                    # 基准与权证缺输入只会把故障推迟成 KeyError，必须整批失败；
+                    # 普通成分股则隔离，让它缺席本场排名而不是冻结全部标的。
+                    (errors if symbol in REQUIRED_RANKING_INPUTS
+                     else quarantined).append(entry)
+                    continue
                 pending.append((symbol,year,session,phase,Json(body),sha(body)))
                 if len(pending)>=25:
                     flush();print('Online ranking inputs',success,'/',len(targets),flush=True)
         flush()
         # targets 里的每个符号都是 calculate 的实际输入：pool 之外还包括
         # FDXF/HONA/SPY 等基准，以及 SKYD 分拆权证 SKYD_WS（calculate 直接
-        # 索引 contexts[warrant]）。因此任何采集失败都必须 fail-closed，
-        # 绝不因「不在 pool」而降级放行——否则只会把故障推迟成 KeyError。
+        # 索引 contexts[warrant]）。这两类失败一律 fail-closed。
+        # 2026-11-21：普通成分股的采集失败改为隔离放行——一只票的复权证据
+        # 存疑曾把 504 只全部扣住，并让备库 preview 冻结三天。隔离规模一旦
+        # 超过阈值即视为系统性故障，重新整批 fail-closed。
+        ok,errors,quarantined=ranking_input_outcome(errors,quarantined)
         summary={'session':session,'requested':len(targets),'stored':success,
-                 'already_online':len(done),'errors':errors}
+                 'already_online':len(done),'errors':errors,
+                 'quarantined':quarantined}
         with connection.cursor() as cursor:
             cursor.execute("""insert into sys_event(kind,source,subject,status,metrics,finished_at)
                 values('fetch','live_ranking_context',%s,%s,%s,now())""",
-                (session,'fail' if errors else 'ok',Json(summary)))
+                (session,'fail' if errors else ('quarantined' if quarantined else 'ok'),
+                 Json(summary)))
         connection.commit();print(json.dumps(summary,ensure_ascii=False),flush=True)
-        return not errors
+        return ok,quarantined
     finally:connection.close()
 
 
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--initialize-directory',type=Path)
-    a=p.parse_args();raise SystemExit(0 if prepare(a.initialize_directory) else 1)
+    a=p.parse_args();ok,_=prepare(a.initialize_directory)
+    raise SystemExit(0 if ok else 1)

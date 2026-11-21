@@ -111,10 +111,15 @@ def read_contexts(cursor,year,session,phase,dates,initial=False):
     return result
 
 
-def calculate(variant,q,pool,sectors,members,reviews,contexts,initial,terms,reference_version):
+def calculate(variant,q,pool,sectors,members,reviews,contexts,initial,terms,reference_version,
+              quarantined=frozenset()):
     rows=[];bounded=[];excluded=[];audit=[]
     session=q['session'];year=int(session[:4]);base=str(year-1)+'-12-31'
-    selected_pool={s for s in pool if variant=='A' or continuous_member(s,session,members,reviews)}
+    # 隔离标的缺席本场排名，但必须留在 excluded 台账里可审计；绝不静默消失。
+    selected_pool={s for s in pool if s not in quarantined and
+                   (variant=='A' or continuous_member(s,session,members,reviews))}
+    for symbol in sorted(pool & set(quarantined)):
+        excluded.append({'ticker':symbol,'reason':'ranking_input_collection_failed'})
     # 观测性：把「跨源精度漂移」与「真正阻断的错价」分开统计。
     # 只看首个标的的报错无法区分零星精度差与整批基准漂移。
     drifts=[];blocking=[]
@@ -213,8 +218,12 @@ def run():
     q=live_quotes.load_snapshot(strict=False)
     if run_guard.should_skip('preview',q):return
     q=live_quotes.load_snapshot(closing_only=True)
-    if not prepare(snapshot=q):
+    verified,quarantined=prepare(snapshot=q)
+    if not verified:
         raise ValueError("Current ranking inputs failed verification; retry the next snapshot")
+    quarantine={entry['symbol'] for entry in quarantined}
+    if quarantine:
+        print('RANKING_INPUT_QUARANTINED',json.dumps(quarantined,ensure_ascii=False),flush=True)
     pool,sectors,version=db_ref.load_market_reference(q['session'])
     phase='intraday' if q['intraday'] else 'close';year=int(q['session'][:4])
     c=db_sources.db()
@@ -241,9 +250,12 @@ def run():
         if sha(proof)!=metrics['evidence_sha256']:raise ValueError('Review evidence hash mismatch')
         if 'terms' in proof:terms[proof['terms']['symbol']]=proof['terms']
         else:reviews[proof['symbol']]=proof
-    if not pool<=set(contexts):raise ValueError('Incomplete current universe context')
+    if not pool - quarantine <= set(contexts):
+        raise ValueError('Incomplete current universe context: %s'
+                         % sorted(pool - quarantine - set(contexts)))
     for variant in ('A','B'):
-        payload,evidence=calculate(variant,q,pool,sectors,members,reviews,contexts,initial,terms,version)
+        payload,evidence=calculate(variant,q,pool,sectors,members,reviews,
+                                   contexts,initial,terms,version,quarantine)
         store(variant,'preview',q,payload,evidence)
         print(variant,'preview',[(r['ticker'],round(100*r['ytd'],3)) for r in payload['top']],
               'pool',payload['universe'],'bounded',len(evidence['bounded_non_winners']),flush=True)

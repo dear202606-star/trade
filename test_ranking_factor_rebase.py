@@ -108,6 +108,87 @@ class FactorRebaseTest(unittest.TestCase):
                 self.assertIsNotNone(ev)
 
 
+class SplitRebaseTest(unittest.TestCase):
+    """2026-11-20 SNDK went 1:8, and the whole 504-symbol ranking froze.
+
+    Measured from push2his 105.SNDK (fqt=0 raw / fqt=1 adjusted):
+
+        2026-11-18  raw 776.22   adj  97.028   adj/raw 0.1250
+        2026-11-19  raw 755.16   adj  94.395   adj/raw 0.1250
+        2026-11-20  raw  79.24   adj  79.240   adj/raw 1.0000   volume x9.9
+
+    The context sealed on 11-19 carried factor 1.0; re-fetching after the split
+    returns 0.125 at the same anchor, so `ratio` is exactly 1/8 and no 5% band
+    can admit it. Raw is not retroactively scaled, which is why `splice_raw_ok`
+    passes and the rejection lands on the ratio alone.
+    """
+
+    SPLIT_DAY = "2026-11-20"
+    ANCHOR = "2026-11-19"
+
+    @staticmethod
+    def sealed():
+        # Fetched while 11-19 was still the latest session: adjusted == raw.
+        return {"raw": {SplitRebaseTest.ANCHOR: 755.16},
+                "adjusted": {SplitRebaseTest.ANCHOR: 755.16},
+                "source_end": SplitRebaseTest.ANCHOR}
+
+    @staticmethod
+    def window(raw_close=79.24, adj_anchor=94.395):
+        return {"raw": {SplitRebaseTest.ANCHOR: 755.16,
+                        SplitRebaseTest.SPLIT_DAY: raw_close},
+                "adjusted": {SplitRebaseTest.ANCHOR: adj_anchor,
+                             SplitRebaseTest.SPLIT_DAY: raw_close}}
+
+    def evidence(self, **kwargs):
+        data = self.window(**kwargs)
+        return factor_rebase_evidence(
+            "SNDK", self.sealed(), data, self.ANCHOR,
+            {"pc": 94.395, "p": float(data["raw"][self.SPLIT_DAY])},
+            755.16, 94.395, self.SPLIT_DAY), data
+
+    def test_forward_split_is_accepted_and_audited(self):
+        ev, _ = self.evidence()
+        self.assertIsNotNone(ev)
+        self.assertEqual(ev["kind"], "split")
+        self.assertEqual(ev["split_ratio"], 8)
+        self.assertEqual(ev["ex_date"], self.SPLIT_DAY)
+        self.assertAlmostEqual(ev["f_old"], 1.0)
+        self.assertAlmostEqual(ev["f_new"], 0.125)
+        # -16.05%: the real session return, which the re-base must not corrupt.
+        self.assertAlmostEqual(ev["split_session_return"], 0.83946, places=4)
+        self.assertEqual(ev["verified_by"], "sealed_quote_snapshot_pc")
+
+    def test_split_splice_restores_the_true_return(self):
+        ev, data = self.evidence()
+        self.assertIsNotNone(ev)
+        values = normalized(self.sealed())
+        spliced = {d: values[self.ANCHOR] * v / data["adjusted"][self.ANCHOR]
+                   for d, v in data["adjusted"].items()}
+        quote = {"pc": 94.395, "p": 79.24}
+        self.assertAlmostEqual(spliced[self.SPLIT_DAY] / values[self.ANCHOR],
+                               quote["p"] / quote["pc"], places=9)
+
+    def test_split_ratio_with_implausible_session_return_is_rejected(self):
+        # Same clean 1/8 factor step, but the adjusted series jumps 2.1x, which
+        # no real 1:8 split day produces. Must stay fail-closed.
+        with self.assertRaisesRegex(ValueError, "gross factor ratio"):
+            self.evidence(raw_close=200.0)
+
+    def test_non_integer_factor_ratio_is_rejected(self):
+        # 0.13 is not 1/N for any plausible N; a wrong-symbol splice looks
+        # exactly like this.
+        with self.assertRaisesRegex(ValueError, "gross factor ratio"):
+            self.evidence(raw_close=88.35, adj_anchor=98.17)
+
+    def test_dividend_path_is_labelled_as_such(self):
+        data = new_window(adj_begin=99.0)
+        ev = factor_rebase_evidence("JBHT", old_context(), data, BEGIN,
+                                    {"pc": 99.0, "p": 98.0}, 100.0, 99.0, SESSION)
+        self.assertEqual(ev["kind"], "dividend")
+        self.assertNotIn("split_ratio", ev)
+
+
 class SpliceAnchorTest(unittest.TestCase):
     """A thinly traded warrant can have no bar on the nominal splice day."""
 
