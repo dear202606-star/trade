@@ -37,13 +37,21 @@ jobs:
       - name: 回填一批
         env:
           ALPHAVANTAGE_API_KEY: ${{ secrets.ALPHAVANTAGE_API_KEY }}
+          LIMIT: ${{ github.event.inputs.limit }}
+        run: python fetch_prices.py --limit "${LIMIT:-22}"
+
+      - name: 写入数据库口令
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
-          LIMIT="${{ github.event.inputs.limit }}"
-          python fetch_prices.py --limit "${LIMIT:-22}"
+          mkdir -p output
+          printf '%s' "$SUPABASE_DB_PASSWORD" > output/_supabase_dbpass.txt
 
       - name: 数据质量验收
         id: qa
-        continue-on-error: true
+        # 2026-11-21：去掉 continue-on-error。验收已改读库内 series_selected，
+        # 是真的会判出结果的门禁；daily-backfill.yml 在 2026-11-07 就写过
+        # 「质量门禁不得静默降级」，这里留着兜底等于同一道检查一处阻断一处吞掉。
         run: python validate_prices.py
 
       - name: 提交行情快照
