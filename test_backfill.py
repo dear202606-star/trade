@@ -330,6 +330,19 @@ class HealthSnapshotAgeTests(unittest.TestCase):
         self.assertTrue(any("health 体检快照已" in w for w in warnings),
                         "静音必须留下可见痕迹，否则就是一条无人知晓的门禁：%r" % warnings)
 
+    def test_a_week_without_any_snapshot_names_the_missing_producer(self):
+        _problems, warnings = self.problems(
+            {"status": "ok", "issues": [], "checked_at": "2026-11-03T13:00:00Z"})
+        self.assertTrue(any("无人核验" in w for w in warnings),
+                        "含糊的 warning 与静默没有区别：%r" % warnings)
+
+    def test_a_few_hours_stale_does_not_yet_blame_the_producer(self):
+        # 刚过 26 小时只是「本轮没有体检数据可引用」，还不是产出链断了。
+        _problems, warnings = self.problems(
+            {"status": "ok", "issues": [], "checked_at": "2026-11-21T18:00:00Z"})
+        self.assertTrue(any("health 体检快照已" in w for w in warnings), "%r" % warnings)
+        self.assertEqual([w for w in warnings if "无人核验" in w], [], "%r" % warnings)
+
     def test_missing_checked_at_is_treated_as_fresh_not_silenced(self):
         problems, warnings = self.problems({"status": "degraded", "issues": [self.ISSUE]})
         self.assertIn(self.ISSUE, problems, "缺时间戳不得静默报警：%r" % problems)

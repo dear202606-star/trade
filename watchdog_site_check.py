@@ -34,6 +34,12 @@ RESULT_MAX_AGE_H = 96       # 净值/预览为日更计算结果
 # 却全是行情停更、净值末点过期这类有时效的事实，照单全收等于把一条早已修好的旧
 # 问题永久钉成恒红。超过一天它就只是历史，现在的时效由上面的场次判据负责。
 HEALTH_MAX_AGE_H = 26
+# 体检快照的产出方是 BUILD 层（site_build.py → export_site_snapshot.py →
+# publish_site_dataset.py），而这条路目前只在人工操作里跑：export_site_snapshot.py
+# 在 ui-publish.yml 里只作为 paths 出现，没有任何工作流执行它，monthly-pick 也只
+# 构建 docs/ 不写在线库。超过一周没刷新，说明「页面健康状况」这条信息实际无人核验，
+# 这必须说得出名字，否则一条含糊的 warning 和静默没有区别。
+HEALTH_PRODUCER_H = 168
 
 
 def _parse(ts):
@@ -188,7 +194,10 @@ def snapshot_problems(doc, now=None, warnings=None):
             h_age = _age_hours(h.get("checked_at"), now)
             if h_age is not None and h_age > HEALTH_MAX_AGE_H:
                 # 过期：只报「体检快照多久没刷新」，不替它转述一条可能早已修好的旧问题。
-                warnings.append("health 体检快照已 %.0f 小时未刷新，其 issues 不参与判定" % h_age)
+                note = "health 体检快照已 %.0f 小时未刷新，其 issues 不参与判定" % h_age
+                if h_age > HEALTH_PRODUCER_H:
+                    note += "（超过一周：BUILD 产出链上没有作业在跑，页面健康状况实际无人核验）"
+                warnings.append(note)
             else:
                 if h_age is None and issues:
                     warnings.append("health 体检快照缺 checked_at，按新鲜处理并报警")
