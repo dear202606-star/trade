@@ -1,6 +1,7 @@
 import io
 import json
 import unittest
+import urllib.error
 from unittest.mock import patch
 
 import fetch_stockanalysis as source
@@ -31,6 +32,17 @@ class StockanalysisHistoryTests(unittest.TestCase):
              patch.object(source.time,'sleep') as sleep:
             with self.assertRaises(ValueError):source.fetch('TEST')
         request.assert_called_once();sleep.assert_not_called()
+
+
+class FetchRetryPolicyTests(unittest.TestCase):
+    def test_not_found_is_terminal_but_rate_limiting_still_backs_off(self):
+        for code,calls,sleeps in ((400,1,0),(404,1,0),(429,3,2)):
+            error=urllib.error.HTTPError('https://stockanalysis.com/api/x',code,'nope',{},None)
+            with self.subTest(code=code), \
+                 patch.object(source.urllib.request,'urlopen',side_effect=error) as request, \
+                 patch.object(source.time,'sleep') as sleep:
+                with self.assertRaises(urllib.error.HTTPError):source.fetch('GONE')
+            self.assertEqual(request.call_count,calls);self.assertEqual(sleep.call_count,sleeps)
 
 
 if __name__=='__main__':unittest.main()

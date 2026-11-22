@@ -3,8 +3,11 @@ import decimal
 import io
 import sqlite3
 import unittest
+import urllib.error
 from unittest.mock import MagicMock, patch
 
+import db_prices
+import fetch_stockanalysis as stockanalysis
 import fill_yahoo_gaps as backfill
 import lock_symbols
 import lock_stage
@@ -42,10 +45,13 @@ class Connection:
     def cursor(self):
         return Cursor(self.connection)
 
+    def close(self):
+        """故意不真关：内存库由 addCleanup 统一关，测试还要在 main() 之后回读台账。"""
+
 
 SCHEMA = '''
             create table series_pick(symbol text, basis text, frozen boolean);
-            create table members(symbol text, end_date text);
+            create table members(symbol text, start_date text, end_date text);
             create table prices_monthly(symbol text, source text, basis text, month text);
             create table locked_symbols(symbol text);
             create table series_quarantine(symbol text);
@@ -77,8 +83,8 @@ class HistoricalBackfillGuards(unittest.TestCase):
         self.connection.executescript(SCHEMA)
         self.connection.executemany('insert into series_pick values(?,?,?)',
             [(s, 'total_return' if s == 'TR' else 'price_only', s == 'FROZEN') for s in SYMBOLS])
-        self.connection.executemany('insert into members values(?,?)',
-                                    [(s, '2099-12-31') for s in SYMBOLS])
+        self.connection.executemany('insert into members values(?,?,?)',
+                                    [(s, '1996-01-01', '2099-12-31') for s in SYMBOLS])
         self.connection.execute("insert into locked_symbols values('LEGACY')")
         self.connection.execute("insert into series_quarantine values('QUARANTINED')")
         self.connection.execute("insert into prices_monthly values('EXISTING','yahoo_relay','total_return','2025-12')")
@@ -103,8 +109,9 @@ class HistoricalBackfillGuards(unittest.TestCase):
         # 2026-11-21 口径：退市票 Yahoo 明确 404 → 接受 price_only 并结案。
         # 现役成分股的 404 更可能是换号或供应商故障，结案等于把它永久逐出
         # 全收益补采，所以必须拒绝。库里没有的成员同样拒绝。
-        self.connection.executemany('insert into members values(?,?)',
-                                    [('GONE', '2020-06-30'), ('NOENTRY', '2020-06-30')])
+        self.connection.executemany('insert into members values(?,?,?)',
+                                    [('GONE', '1996-01-01', '2020-06-30'),
+                                     ('NOENTRY', '1996-01-01', '2020-06-30')])
         self.connection.execute("delete from members where symbol='NOENTRY'")
         self.connection.execute("insert into series_pick values('GONE','price_only',0)")
         self.connection.execute("insert into series_pick values('NOENTRY','price_only',0)")
@@ -123,7 +130,7 @@ class HistoricalBackfillGuards(unittest.TestCase):
 
     def test_closed_out_absence_stops_retrying_without_shielding_a_live_member(self):
         cursor = self.cursor()
-        self.connection.execute("insert into members values('GONE','2020-06-30')")
+        self.connection.execute("insert into members values('GONE','1996-01-01','2020-06-30')")
         self.connection.execute("insert into series_pick values('GONE','price_only',0)")
         self.assertIn('GONE', backfill.targets(cursor, 100))
         backfill.close_out_absence(Connection(self.connection), 'GONE')
@@ -152,22 +159,26 @@ class HistoricalBackfillGuards(unittest.TestCase):
                     backfill.main()
                 fetch.assert_not_called()
 
-    def test_failed_collection_and_time_budget_do_not_report_success(self):
+    def test_genuine_failure_is_fatal_but_the_time_budget_is_not(self):
         with patch('sys.argv', ['fill_yahoo_gaps.py']), \
              patch.object(backfill, 'db', return_value=MagicMock()), \
              patch.object(backfill, 'targets', return_value=['OPEN']), \
              patch.object(yahoo_fetch, 'fetch', side_effect=RuntimeError('offline')), \
              contextlib.redirect_stdout(io.StringIO()):
-            with self.assertRaisesRegex(RuntimeError, '1 failed, 0 unattempted'):
+            with self.assertRaisesRegex(RuntimeError, '1 只真故障'):
                 backfill.main()
+        # 预算用完是设计内的续跑，不是故障。过去它和真故障共用同一句
+        # RuntimeError，174 只 × 每只十几秒必超 900s，于是这条门禁永远红着。
         with patch('sys.argv', ['fill_yahoo_gaps.py', '--max-seconds', '1']), \
              patch.object(backfill, 'db', return_value=MagicMock()), \
              patch.object(backfill, 'targets', return_value=['OPEN']), \
              patch.object(backfill.time, 'time', side_effect=[0, 2, 3]), \
-             patch.object(yahoo_fetch, 'fetch') as fetch, contextlib.redirect_stdout(io.StringIO()):
-            with self.assertRaisesRegex(RuntimeError, '0 failed, 1 unattempted'):
-                backfill.main()
+             patch.object(yahoo_fetch, 'fetch') as fetch, \
+             contextlib.redirect_stdout(io.StringIO()) as out:
+            backfill.main()
             fetch.assert_not_called()
+        self.assertIn('剩余 1 只未跑', out.getvalue())
+        self.assertNotIn('真故障', out.getvalue())
 
     def test_closed_out_absence_does_not_keep_the_backfill_red(self):
         # 结案的全部意义：退市票的权威缺席不是故障，作业必须能变绿，
@@ -182,6 +193,55 @@ class HistoricalBackfillGuards(unittest.TestCase):
         closed.assert_called_once()
         self.assertIn('结案缺席 1', out.getvalue())
 
+    def test_targets_exclude_membership_too_short_to_be_fillable(self):
+        # 需要窗口（2012-01..2025-12）内成员月份不足 12 个月的，任何源都补不出
+        # 12 个月的窗口内历史：2026-11-22 实测这类票占 Yahoo 队列的 11/117、
+        # stockanalysis 队列的 9/53，过去每轮白打一次。
+        cursor = self.cursor()
+        self.connection.execute("insert into members values('PRE2012','1996-01-01','2011-06-30')")
+        self.connection.execute("insert into series_pick values('PRE2012','price_only',0)")
+        self.assertNotIn('PRE2012', backfill.targets(cursor, 100))
+        # 身份复核把离场时间推进窗口后，它自己回到补采集合，不靠删记录。
+        self.connection.execute("update members set end_date='2013-06-30' where symbol='PRE2012'")
+        self.assertIn('PRE2012', backfill.targets(cursor, 100))
+
+    def _collect_one(self, symbol, months):
+        """用真实 sqlite 台账跑一遍主循环，返回 (stdout, 异常文案)。"""
+        self.connection.execute("insert into members values(?,?,?)",
+                                (symbol, '1996-01-01', '2019-08-09'))
+        self.connection.execute("insert into series_pick values(?, 'price_only', 0)", (symbol,))
+        bars = dict.fromkeys(months, (10.0, 10.0))
+        with patch('sys.argv', ['fill_yahoo_gaps.py']), \
+             patch.object(backfill, 'db', return_value=Connection(self.connection)), \
+             patch.object(backfill, 'targets', return_value=[symbol]), \
+             patch.object(backfill.time, 'sleep'), \
+             patch.object(yahoo_fetch, 'fetch', return_value=bars), \
+             contextlib.redirect_stdout(io.StringIO()) as out:
+            try:
+                backfill.main()
+                return out.getvalue(), ''
+            except RuntimeError as exc:
+                return out.getvalue(), str(exc)
+
+    def test_source_only_after_relisting_is_closed_out_as_absent(self):
+        # 2026-11-22 实测 APC(2019-08 退市) 只回 [2026-02..2026-11]：代码已被
+        # 重新上市占用，本标的那段历史不在这个源里，重试多少次都不会多一根。
+        printed, error = self._collect_one('RELIST', ['2026-0%d' % i for i in range(2, 7)])
+        self.assertEqual(error, '', printed)
+        self.assertIn('结案身份不匹配 1', printed)
+        self.assertIn('全部晚于最后交易日 2019-08-09', printed)
+        # 这条裁决不写台账：证据每轮重取，成本只是几只票的几秒；写台账要放宽
+        # sql/127 的 reason 约束，而那里的 append-only 承诺不该为省几次请求让路。
+        self.assertEqual(self.connection.execute(
+            "select count(*) from source_absence_acceptance").fetchone()[0], 0)
+
+    def test_truncation_inside_the_identity_lifetime_stays_fatal(self):
+        # 同一只票若回到的月份落在它自己的生命周期内却仍然不足，那是通道截断，
+        # 结案等于永久放弃一次本可以补上的历史——必须继续报红。
+        printed, error = self._collect_one('CHOPPED', ['2016-0%d' % i for i in range(1, 6)])
+        self.assertIn('1 只真故障', error, printed)
+        self.assertIn('✗ CHOPPED 月份不足（5）', printed)
+
     def test_absence_404_on_a_still_listed_member_stays_fatal(self):
         with patch('sys.argv', ['fill_yahoo_gaps.py']), \
              patch.object(backfill, 'db', return_value=MagicMock()), \
@@ -189,8 +249,48 @@ class HistoricalBackfillGuards(unittest.TestCase):
              patch.object(backfill, 'close_out_absence', return_value=False), \
              patch.object(yahoo_fetch, 'fetch', side_effect=yahoo_fetch.SymbolNotFound('OPEN')), \
              contextlib.redirect_stdout(io.StringIO()):
-            with self.assertRaisesRegex(RuntimeError, '1 failed, 0 unattempted'):
+            with self.assertRaisesRegex(RuntimeError, '1 只真故障'):
                 backfill.main()
+
+    def test_stockanalysis_400_closes_only_a_confirmed_delisting(self):
+        # stockanalysis 对退市代码回 400，那就是它的 Not Found。这个步骤过去挂着
+        # continue-on-error：2026-11-22 成功 0 / 失败 67 仍然报绿，门禁等于不存在。
+        # 现在 400 走同一张结案台账（能结案就绿），现役标的的 400 必须报红。
+        error = urllib.error.HTTPError('https://stockanalysis.com/api/x', 400,
+                                       'Bad Request', {}, None)
+        self.connection.execute("insert into members values('GONE','1996-01-01','2020-06-30')")
+        self.connection.execute("insert into series_pick values('GONE','price_only',0)")
+        printed = io.StringIO()
+        for symbol, closable in (('GONE', True), ('OPEN', False)):
+            with self.subTest(symbol=symbol), \
+                 patch('sys.argv', ['fetch_stockanalysis.py', '--ticker', symbol]), \
+                 patch.object(stockanalysis, 'db', return_value=Connection(self.connection)), \
+                 patch.object(stockanalysis, 'fetch', side_effect=error), \
+                 patch.object(db_prices, 'log_run'), \
+                 contextlib.redirect_stdout(printed):
+                if closable:
+                    stockanalysis.main()
+                else:
+                    with self.assertRaisesRegex(RuntimeError, '1 只真故障'):
+                        stockanalysis.main()
+        text = printed.getvalue()
+        self.assertIn('∅ GONE', text)
+        self.assertIn('✗ OPEN', text)
+        self.assertEqual(self.connection.execute(
+            "select source, reason, http_status, membership_end, runner"
+            " from source_absence_acceptance where symbol='GONE'").fetchone(),
+            ('stockanalysis', 'provider_not_found', 400, '2020-06-30', 'fetch_stockanalysis'))
+        self.assertEqual(self.connection.execute(
+            "select count(*) from source_absence_acceptance where symbol='OPEN'").fetchone()[0], 0)
+
+    def test_rate_limiting_is_never_mistaken_for_a_not_found_verdict(self):
+        self.assertEqual(stockanalysis._not_found_status(
+            urllib.error.HTTPError('u', 404, 'Not Found', {}, None)), 404)
+        self.assertEqual(stockanalysis._not_found_status(
+            urllib.error.HTTPError('u', 429, 'Too Many Requests', {}, None)), None)
+        self.assertEqual(stockanalysis._not_found_status(
+            urllib.error.HTTPError('u', 403, 'Forbidden', {}, None)), None)
+        self.assertEqual(stockanalysis._not_found_status(RuntimeError('timed out')), None)
 
     def test_legacy_coverage_lock_refuses_before_any_database_access(self):
         with patch('sys.argv', ['lock_symbols.py', '--lock']), \

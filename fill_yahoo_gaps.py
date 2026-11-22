@@ -19,6 +19,8 @@ import time
 import psycopg2
 import psycopg2.extras
 
+import source_absence as absence
+
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 except Exception:
@@ -41,13 +43,16 @@ def db():
     return c
 
 
-def targets(cur, limit, symbol=None):
-    """选源不是全收益、且在指数里的标的"""
-    cur.execute("""
+TARGET_SQL = """
         select k.symbol
           from series_pick k
           join members m on m.symbol = k.symbol
          where m.end_date >= '2009-01-01'
+           -- 所需窗口（2012-01..2025-12）内当过至少 12 个月成员才值得补全收益：
+           -- 2026-11-22 数过，199 只候选里 25 只的窗口内成员月份是 0（NE/MWW/MER
+           -- 这类 2012 年前就离场的），任何源都给不出它们 12 个月的窗口内历史，
+           -- 过去每轮照样打一次 Yahoo。
+           and {months} >= {minimum}
            and k.basis <> 'total_return'
            and not k.frozen
            and (cast(%s as text) is null or k.symbol = %s)
@@ -75,33 +80,34 @@ def targets(cur, limit, symbol=None):
          group by k.symbol
          order by k.symbol
          limit %s
-    """, (symbol, symbol, limit))
+"""
+
+
+def targets(cur, limit, symbol=None):
+    """选源不是全收益、且在指数里的标的"""
+    sql = TARGET_SQL.format(months=absence.months_in_window('m.start_date', 'm.end_date'),
+                            minimum=absence.MIN_MEMBERSHIP_MONTHS)
+    cur.execute(sql, (symbol, symbol, limit))
     return [r[0] for r in cur.fetchall()]
 
 
 def close_out_absence(conn, symbol):
-    """Yahoo 明确回答 404 时，把这只票按 price_only 结案；返回是否结案成功。
-
-    只对「数据库当前时钟确认已退市」的标的生效。现役成分股出现 404 更可能是
-    代码换号或供应商故障，结案等于把它永久逐出全收益补采，所以一律拒绝，
-    让本轮照常记一次失败。
+    """Yahoo 明确回答没有这个代码时，把这只票按 price_only 结案。
 
     http_status 记的是供应商的 Not Found 裁决，不是传输层状态码：经代理通道取证
     （2026-11-22 WFM），同一句缺席也可能是 HTTP 200 + chart.error 送回来的，那时
     没有 404 可记，但 yahoo_fetch 已把它归成同一种权威缺席。
     """
+    return absence.close_absence(conn, symbol, 'yahoo_relay', 404, 'fill_yahoo_gaps')
+
+
+def membership(conn, symbol):
+    """(start_date, end_date)；库内没有成员记录时返回 (None, None)。"""
     with conn.cursor() as cur:
-        cur.execute("select max(end_date), max(end_date) < current_date "
-                    "from members where symbol=%s", (symbol,))
-        end_date, delisted = cur.fetchone()
-        if not end_date or not delisted:
-            return False
-        cur.execute("""insert into source_absence_acceptance
-                       (symbol, source, basis, reason, http_status, membership_end, runner)
-                       values (%s, 'yahoo_relay', 'total_return', 'provider_not_found',
-                               404, %s, 'fill_yahoo_gaps')
-                       on conflict do nothing""", (symbol, end_date))
-        return True
+        cur.execute("select min(start_date), max(end_date) from members where symbol=%s",
+                    (symbol,))
+        row = cur.fetchone()
+    return (row[0], row[1]) if row and row[0] else (None, None)
 
 
 def main():
@@ -121,7 +127,7 @@ def main():
         c.close()
         return
 
-    ok = bad = rows = skipped = absent = 0
+    ok = bad = rows = skipped = absent = unmatched = 0
     batch = []
     t0 = time.time()
     deadline = t0 + a.max_seconds
@@ -146,16 +152,27 @@ def main():
                 print("  ✗ %-6s Yahoo 判无此代码，但该标的并未确认退市，不能结案" % sym, flush=True)
             continue
         except Exception as e:
+            # 通道故障不是权威缺席：这里绝不结案，本轮照常计一次失败。
             bad += 1
-            print("  ✗ %-6s %s" % (sym, str(e)[:40]), flush=True)
+            print("  ✗ %-6s 抓取失败 %s" % (sym, str(e)[:60]), flush=True)
             continue
         if not bars:
             bad += 1
+            print("  ✗ %-6s 全部通道回空，无法判断是源没有还是通道断了" % sym, flush=True)
             continue
         good, why, _ = IV.check_payload(sym, bars, "total_return", allow_stale=True)
         if not good:
+            months = sorted(bars)
+            end_date = absence.delisted_end(c, sym)
+            if end_date and absence.belongs_to_later_identity(months, end_date):
+                unmatched += 1
+                print("  ⊘ %-6s %s｜源回 %d 根 [%s..%s] 全部晚于最后交易日 %s"
+                      "→ 代码已被重新上市占用，本标的历史不在这个源里"
+                      % (sym, why, len(months), months[0], months[-1], end_date), flush=True)
+                continue
             bad += 1
-            print("  ✗ %-6s %s" % (sym, why), flush=True)
+            print("  ✗ %-6s %s｜源回 %d 根 [%s..%s]、最后交易日 %s"
+                  % (sym, why, len(months), months[0], months[-1], end_date or '现役'), flush=True)
             continue
         for m, (adj, raw) in bars.items():
             batch.append((sym, m, adj, raw, "yahoo_relay", "ok", "total_return"))
@@ -186,14 +203,18 @@ def main():
                 batch, page_size=2000)
         rows += len(batch)
     c.close()
-    print("完成：成功 %d / 失败 %d / 结案缺席 %d / 保护或资格变化跳过 %d / 写入 %d 行 / %.0fs" %
-          (ok, bad, absent, skipped, rows, time.time() - t0))
-    # 结案过的缺席不再算未完成：那是用户 2026-11-21 定的口径（退市票接受
-    # price_only），下一轮 targets() 也不会再取它们。真正的故障只有两种——
-    # 采集失败，以及预算内没跑完。
-    remaining = len(syms) - ok - bad - skipped - absent
-    if bad or remaining:
-        raise RuntimeError('Yahoo historical backfill incomplete: %d failed, %d unattempted' % (bad, remaining))
+    print("完成：成功 %d / 失败 %d / 结案缺席 %d / 结案身份不匹配 %d / 保护或资格变化跳过 %d / 写入 %d 行 / %.0fs" %
+          (ok, bad, absent, unmatched, skipped, rows, time.time() - t0))
+    # 只有「真故障」才让作业变红。用户 2026-11-21 定的口径是退市票接受
+    # price_only：权威缺席与「代码被重新上市占用」都不是故障，下一轮 targets()
+    # 也不会再取它们。预算没跑完同样不是故障——它是设计内的续跑，过去把它
+    # 计成失败，等于每周给一条永不变绿的门禁添一条永不变红的噪音。
+    remaining = len(syms) - ok - bad - skipped - absent - unmatched
+    if bad:
+        raise RuntimeError('Yahoo historical backfill failed: %d 只真故障' % bad)
+    if remaining:
+        print("⚠ 剩余 %d 只未跑（时间预算 %ds 已用完），下次继续；本轮无故障" %
+              (remaining, a.max_seconds))
 
 
 if __name__ == "__main__":
