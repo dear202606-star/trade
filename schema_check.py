@@ -134,14 +134,17 @@ def check_grants(cur):
     arr = ",".join("'%s'" % o for o in REST_READABLE)
     cur.execute("""select r, has_table_privilege('anon', 'public.' || r, 'SELECT')
                    from unnest(ARRAY[%s]::text[]) r""" % arr)
-    lost = [r for r, can in cur.fetchall() if not can]
-    ok(not lost, "anon 可选 %d 个 CI 依赖对象" % len(REST_READABLE), "丢权限：%s" % lost)
+    rows = cur.fetchall()
+    lost = [r for r, can in rows if not can]
+    ok(not lost, "anon 可选 %d 个 CI 依赖对象" % len(REST_READABLE),
+       "丢权限：%s" % lost if lost else "%d/%d 有 GRANT" % (len(rows) - len(lost), len(rows)))
     cur.execute("""select coalesce(string_agg(p, ','), '') from (
                      select p, has_table_privilege('anon', 'public.prices_monthly', p) granted
                      from unnest(ARRAY['INSERT','UPDATE','DELETE','TRUNCATE']) p) t
                    where granted""")
     got = cur.fetchone()[0]
-    ok(got == "", "anon 不可写 prices_monthly", "已授予：%s" % got if got else "")
+    ok(got == "", "anon 不可写 prices_monthly",
+       "已授予：%s" % got if got else "INSERT/UPDATE/DELETE/TRUNCATE 全无")
 
 
 def check_rest():
@@ -160,11 +163,14 @@ def check_rest():
             (restricted if e.code == 402 else bad).append((obj, e.code))
         except Exception as e:
             bad.append((obj, str(e)[:30]))
-    ok(not bad, "全部可读(%d 个)" % len(REST_READABLE), str(bad))
-    if restricted:
-        warn(False, "REST 网关被出口配额拒答（402）",
-             "%d/%d 个对象无法实测，anon 权限以 [C2] 库内断言为准"
+    if restricted and not bad:
+        # 网关一个对象都没答话时，"✅ 全部可读" 是假安慰（恒绿和恒红一样失真），
+        # 而判失败又是拿账户欠费当结构缺陷。所以只点名，把权限结论交给 [C2]。
+        warn(False, "REST 实测未答话（网关被出口配额拒答 402）",
+             "%d/%d 个对象无法实测，anon 权限以 [C2] 库内断言为准；配额重置后自动恢复实测"
              % (len(restricted), len(REST_READABLE)))
+    else:
+        ok(not bad, "全部可读(%d 个)" % len(REST_READABLE), str(bad))
 
     # 写权限必须关闭
     if restricted:
