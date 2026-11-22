@@ -34,12 +34,15 @@ RESULT_MAX_AGE_H = 96       # 净值/预览为日更计算结果
 # 却全是行情停更、净值末点过期这类有时效的事实，照单全收等于把一条早已修好的旧
 # 问题永久钉成恒红。超过一天它就只是历史，现在的时效由上面的场次判据负责。
 HEALTH_MAX_AGE_H = 26
-# 体检快照的产出方是 UI 全量发布本身：publish_ui.py（内含 site_build.py 的构建末
-# 尾自检）写出 _site_release/data/health.json，再由 ui-publish.yml:94 的
-# publish_site_dataset.py --install --prune 写进在线库。这条路只在 UI 路径 push 或
-# 手动发布时跑，没有日更定时——所以「一周没刷新」通常意味着这段时间没人重发页面，
-# 而不是产出链断了。判成 warning 而不是 problem：它的时效已由上面的 26 小时闸门
-# 和场次判据兜住，但必须说得出名字，否则一条含糊的 warning 和静默没有区别。
+# 体检快照由 site_build.py 在「全量构建 data」时写出（读本地 docs/data 的
+# quotes/equity/signal 三份 JSON）。CI 里没有人跑这一段：publish_ui.py 只调
+# write_cloud_config / copy_site / bust_cache，_site_release/data 因此只有
+# cloud.json，ui-publish.yml:94 的 publish_site_dataset --install 也就无 key 可装
+# （实测 run 45017851625：online_keys 16、pruned 0、kept ["cloud.json"]）。库内这份
+# health 停在 2026-11-05 22:32，即上一次人工全量构建。所以超过一周只说明
+# 「页面健康状况自那次人工构建起无人核验」，不代表页面读数停了——实时新旧由上面的
+# 场次判据负责。判成 warning 而不是 problem，但必须说得出名字，
+# 否则一条含糊的 warning 和静默没有区别。
 HEALTH_PRODUCER_H = 168
 
 
@@ -197,7 +200,7 @@ def snapshot_problems(doc, now=None, warnings=None):
                 # 过期：只报「体检快照多久没刷新」，不替它转述一条可能早已修好的旧问题。
                 note = "health 体检快照已 %.0f 小时未刷新，其 issues 不参与判定" % h_age
                 if h_age > HEALTH_PRODUCER_H:
-                    note += "（超过一周：期间没有 UI 全量发布，页面健康状况实际无人核验）"
+                    note += "（超过一周：CI 不产出体检快照，只有人工全量构建会刷新，页面健康状况实际无人核验）"
                 warnings.append(note)
             else:
                 if h_age is None and issues:
