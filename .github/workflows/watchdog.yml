@@ -88,3 +88,23 @@ jobs:
           else
             gh issue create --title "$TITLE" --body "$BODY" --label data-alert
           fi
+
+      # 告警必须反映当前状态：只开不关，就等于把一次已修好的故障永久钉成「在册」。
+      # 实测 2026-11-22 11:02 那轮 PROBLEMS=0（作业 success），而 #48 仍 OPEN，
+      # 读的人只能靠翻注释才知道它其实已经不成立了。
+      # 关单后去重锚点消失，下次真故障会重新开一张——这正是「开着的单 = 当前有问题」
+      # 想要的语义，2026-11-21「合并到一张」决策合并的是重复单，不是一张贴死的封条。
+      - name: 检查通过则关闭在册告警
+        if: always() && steps.check.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TITLE="看门狗：页面数据不新鲜或不完整"
+          OPEN=$(gh issue list --state open --label data-alert --limit 100 --json number,title \
+                 --jq ".[] | select(.title==\"$TITLE\") | .number" | head -n1 || true)
+          if [ -z "$OPEN" ]; then
+            echo "无在册告警需关闭"
+          else
+            gh issue comment "$OPEN" --body "$(date -u '+%Y-%m-%d %H:%M UTC') 本轮页面数据源检查通过（PROBLEMS=0），按当前状态关闭本单。后续若再次失败会重新开单或追加同名单。"
+            gh issue close "$OPEN"
+          fi
