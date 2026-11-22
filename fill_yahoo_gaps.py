@@ -85,6 +85,10 @@ def close_out_absence(conn, symbol):
     只对「数据库当前时钟确认已退市」的标的生效。现役成分股出现 404 更可能是
     代码换号或供应商故障，结案等于把它永久逐出全收益补采，所以一律拒绝，
     让本轮照常记一次失败。
+
+    http_status 记的是供应商的 Not Found 裁决，不是传输层状态码：经代理通道取证
+    （2026-11-22 WFM），同一句缺席也可能是 HTTP 200 + chart.error 送回来的，那时
+    没有 404 可记，但 yahoo_fetch 已把它归成同一种权威缺席。
     """
     with conn.cursor() as cur:
         cur.execute("select max(end_date), max(end_date) < current_date "
@@ -93,8 +97,9 @@ def close_out_absence(conn, symbol):
         if not end_date or not delisted:
             return False
         cur.execute("""insert into source_absence_acceptance
-                       (symbol, source, basis, http_status, membership_end, runner)
-                       values (%s, 'yahoo_relay', 'total_return', 404, %s, 'fill_yahoo_gaps')
+                       (symbol, source, basis, reason, http_status, membership_end, runner)
+                       values (%s, 'yahoo_relay', 'total_return', 'provider_not_found',
+                               404, %s, 'fill_yahoo_gaps')
                        on conflict do nothing""", (symbol, end_date))
         return True
 
@@ -134,11 +139,11 @@ def main():
         except YF.SymbolNotFound:
             if close_out_absence(c, sym):
                 absent += 1
-                print("  ∅ %-6s Yahoo 明确 404 且已退市 → 按 price_only 结案，停止补采" % sym,
+                print("  ∅ %-6s Yahoo 判无此代码（Not Found）且已退市 → 按 price_only 结案，停止补采" % sym,
                       flush=True)
             else:
                 bad += 1
-                print("  ✗ %-6s Yahoo 404，但该标的并未确认退市，不能结案" % sym, flush=True)
+                print("  ✗ %-6s Yahoo 判无此代码，但该标的并未确认退市，不能结案" % sym, flush=True)
             continue
         except Exception as e:
             bad += 1

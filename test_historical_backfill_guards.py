@@ -49,11 +49,22 @@ SCHEMA = '''
             create table locked_symbols(symbol text);
             create table series_quarantine(symbol text);
             create table data_lock(id integer, symbol text, scope text, status text, supersedes_id integer);
-            create table source_absence_acceptance(symbol text, source text, basis text,
-                                                   http_status integer, membership_end text,
-                                                   runner text,
+            create table source_absence_acceptance(symbol text not null, source text not null,
+                                                   basis text not null,
+                                                   accepted_basis text not null default 'price_only'
+                                                     check(accepted_basis = 'price_only'),
+                                                   reason text not null
+                                                     check(reason = 'provider_not_found'),
+                                                   http_status integer not null
+                                                     check(http_status between 400 and 499),
+                                                   membership_end text not null,
+                                                   observed_on text not null default '1970-01-01',
+                                                   runner text not null,
                                                    primary key(symbol, source, basis));
 '''
+# source_absence_acceptance 的列、not null 与 check 逐条照抄 sql/127：2026-11-22 的
+# CI 现场就是夹具少写一列 reason，close_out_absence 的 insert 缺 NOT NULL 直接把整轮
+# 补采炸掉，而这道题在本地一直是「绿」的。
 
 SYMBOLS = ['OPEN', 'TR', 'FROZEN', 'LEGACY', 'LOCKED', 'VOIDED', 'QUARANTINED', 'EXISTING']
 
@@ -102,6 +113,12 @@ class HistoricalBackfillGuards(unittest.TestCase):
         self.assertFalse(backfill.close_out_absence(connection, 'NOENTRY'))
         self.assertEqual([r[0] for r in self.connection.execute(
             "select symbol from source_absence_acceptance")], ['GONE'])
+        # 结案的整条裁决必须逐列落进 sql/127 要求的形状：缺席原因写成自由文本，
+        # 台账就退化成一句日志，事后无从区分「404」与「起点晚于窗口」。
+        self.assertEqual(self.connection.execute(
+            "select accepted_basis, reason, http_status, membership_end, runner"
+            " from source_absence_acceptance where symbol='GONE'").fetchone(),
+            ('price_only', 'provider_not_found', 404, '2020-06-30', 'fill_yahoo_gaps'))
 
     def test_closed_out_absence_stops_retrying_without_shielding_a_live_member(self):
         cursor = self.cursor()
@@ -112,8 +129,10 @@ class HistoricalBackfillGuards(unittest.TestCase):
         self.assertNotIn('GONE', backfill.targets(cursor, 100))
         # 结案不删任何东西：OPEN 若被误插一条缺席记录，因为退市并不成立，
         # 它必须照样出现在补采集合里（记录不需要撤销）。
-        self.connection.execute("insert into source_absence_acceptance values"
-                                "('OPEN','yahoo_relay','total_return',404,'2099-12-31','test')")
+        self.connection.execute(
+            "insert into source_absence_acceptance(symbol, source, basis, reason, http_status,"
+            " membership_end, runner) values"
+            "('OPEN','yahoo_relay','total_return','provider_not_found',404,'2099-12-31','test')")
         self.assertIn('OPEN', backfill.targets(cursor, 100))
         # 成员重新上市（end_date 被复核改期）同样自动回到补采集合。
         self.connection.execute("update members set end_date='2030-12-31' where symbol='GONE'")
