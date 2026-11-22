@@ -60,17 +60,19 @@ jobs:
       # 表不在 → 整轮采集抛 relation does not exist → 真实缺口反而一个也补不进。
       # 本仓库没有自动迁移器（apply_sql.py 不在任何工作流里，DDL 全靠人工执行），
       # 所以由作业自己幂等地兜住这一步，人工漏跑不再等于全线停摆。
+      # 128 放宽台账的 reason/http_status 形状（判据在 source_absence.close_covered_absence）。
       - name: 应用缺席结案台账（纯库内 DDL，幂等）
         run: |
           python - <<'PY'
           import db_sources
           from pathlib import Path
-          f = 'sql/127_source_absence_acceptance.sql'
           c = db_sources.db(); c.autocommit = True
           try:
               with c.cursor() as cur:
-                  cur.execute(Path(f).read_text(encoding='utf-8'))
-                  print('applied', f)
+                  for f in ('sql/127_source_absence_acceptance.sql',
+                            'sql/128_source_absence_covered_history.sql'):
+                      cur.execute(Path(f).read_text(encoding='utf-8'))
+                      print('applied', f)
           finally:
               c.close()
           PY

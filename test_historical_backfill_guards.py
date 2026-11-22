@@ -53,6 +53,7 @@ SCHEMA = '''
             create table series_pick(symbol text, basis text, frozen boolean);
             create table members(symbol text, start_date text, end_date text);
             create table prices_monthly(symbol text, source text, basis text, month text);
+            create table series_selected(symbol text, month text);
             create table locked_symbols(symbol text);
             create table series_quarantine(symbol text);
             create table data_lock(id integer, symbol text, scope text, status text, supersedes_id integer);
@@ -60,16 +61,18 @@ SCHEMA = '''
                                                    basis text not null,
                                                    accepted_basis text not null default 'price_only'
                                                      check(accepted_basis = 'price_only'),
-                                                   reason text not null
-                                                     check(reason = 'provider_not_found'),
-                                                   http_status integer not null
-                                                     check(http_status between 400 and 499),
+                                                   reason text not null,
+                                                   http_status integer not null,
                                                    membership_end text not null,
                                                    observed_on text not null default '1970-01-01',
                                                    runner text not null,
+                                                   check((reason = 'provider_not_found'
+                                                          and http_status between 400 and 499)
+                                                     or (reason = 'provider_no_window_history'
+                                                          and http_status = 200)),
                                                    primary key(symbol, source, basis));
 '''
-# source_absence_acceptance 的列、not null 与 check 逐条照抄 sql/127：2026-11-22 的
+# source_absence_acceptance 的列、not null 与 check 逐条照抄 sql/127 + sql/128：2026-11-22 的
 # CI 现场就是夹具少写一列 reason，close_out_absence 的 insert 缺 NOT NULL 直接把整轮
 # 补采炸掉，而这道题在本地一直是「绿」的。
 
@@ -251,6 +254,106 @@ class HistoricalBackfillGuards(unittest.TestCase):
              contextlib.redirect_stdout(io.StringIO()):
             with self.assertRaisesRegex(RuntimeError, '1 只真故障'):
                 backfill.main()
+
+    def _fill_window(self, symbol, start='1996-01-01', end='2019-08-09'):
+        """把「窗口 ∩ 在册区间」的月份铺进 series_selected，返回铺出的月份。"""
+        first, last = max('2012-01', start[:7]), min('2025-12', end[:7])
+        months, y, m = [], int(first[:4]), int(first[5:7])
+        while '%04d-%02d' % (y, m) <= last:
+            months.append('%04d-%02d' % (y, m))
+            y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+        self.connection.executemany('insert into series_selected values(?,?)',
+                                    [(symbol, x) for x in months])
+        self.connection.execute('insert into members values(?,?,?)', (symbol, start, end))
+        self.connection.execute("insert into series_pick values(?, 'price_only', 0)", (symbol,))
+        return months
+
+    def test_covered_window_closes_without_a_provider_verdict(self):
+        # 2026-11-22 现场：补采集合 43 只全部已退市，其中 41 只窗口内一个月都不缺。
+        # CA/CTRA/FI 是整群通道回空、EQR 只回重新上市后的两根——它们缺的从来不是
+        # 数据，而是「再试一次也拿不到的口径升级」。
+        connection = Connection(self.connection)
+        self._fill_window('COVERED')
+        self.assertIn('COVERED', backfill.targets(self.cursor(), 100))
+        self.assertTrue(backfill.absence.close_covered_absence(
+            connection, 'COVERED', 'yahoo_relay', 'fill_yahoo_gaps'))
+        self.assertEqual(self.connection.execute(
+            "select accepted_basis, reason, http_status, membership_end, runner"
+            " from source_absence_acceptance where symbol='COVERED'").fetchone(),
+            ('price_only', 'provider_no_window_history', 200, '2019-08-09', 'fill_yahoo_gaps'))
+        # 结案必须真的停止重试，否则这条判据只是把红换成白烧流量。
+        self.assertNotIn('COVERED', backfill.targets(self.cursor(), 100))
+
+    def test_a_real_hole_or_a_live_member_refuses_the_coverage_closure(self):
+        # LIFE 窗口内 0 个月、TGNA 66 个月只有 25 个：真有缺月的票绝不能顺着这条
+        # 判据结案，否则门禁最该响的那一类被永久消音。现役成分股同理。
+        connection = Connection(self.connection)
+        self._fill_window('HOLEY')
+        self.connection.execute("delete from series_selected where symbol='HOLEY' and month='2015-06'")
+        self.assertFalse(backfill.absence.close_covered_absence(
+            connection, 'HOLEY', 'yahoo_relay', 'fill_yahoo_gaps'))
+        self._fill_window('LIVE', end='2099-12-31')
+        self.assertFalse(backfill.absence.close_covered_absence(
+            connection, 'LIVE', 'yahoo_relay', 'fill_yahoo_gaps'))
+        self.assertEqual(self.connection.execute(
+            "select count(*) from source_absence_acceptance").fetchone()[0], 0)
+
+    def test_the_ledger_still_refuses_to_launder_a_relay_outage(self):
+        # 结案形状由 sql/128 钉死：200 只能配「窗口已完整」，4xx 只能配 Not Found。
+        # 通道 403/429 想借结案躲开重试，会先把约束撞断。
+        for reason, status in (('provider_no_window_history', 403),
+                               ('provider_not_found', 200),
+                               ('我懒得再看第二眼', 200)):
+            with self.subTest(reason=reason, status=status), self.assertRaises(sqlite3.IntegrityError):
+                self.connection.execute(
+                    "insert into source_absence_acceptance(symbol, source, basis, reason,"
+                    " http_status, membership_end, runner) values"
+                    "('X','yahoo_relay','total_return',?,?, '2020-06-30','test')",
+                    (reason, status))
+
+    def _empty_relay_group(self, symbol):
+        """整群通道回空（Yahoo 没回答过、也没给出一根）跑一遍主循环。"""
+        with patch('sys.argv', ['fill_yahoo_gaps.py']), \
+             patch.object(backfill, 'db', return_value=Connection(self.connection)), \
+             patch.object(backfill, 'targets', return_value=[symbol]), \
+             patch.object(backfill.time, 'sleep'), \
+             patch.object(yahoo_fetch, 'fetch', return_value={}), \
+             contextlib.redirect_stdout(io.StringIO()) as out:
+            try:
+                backfill.main()
+                return out.getvalue(), ''
+            except RuntimeError as exc:
+                return out.getvalue(), str(exc)
+
+    def test_empty_relay_group_on_a_complete_window_does_not_keep_the_job_red(self):
+        self._fill_window('COVERED')
+        printed, error = self._empty_relay_group('COVERED')
+        self.assertEqual(error, '', printed)
+        self.assertIn('结案窗口已完整 1', printed)
+
+    def test_empty_relay_group_with_a_real_hole_stays_fatal(self):
+        self._fill_window('HOLEY')
+        self.connection.execute("delete from series_selected where symbol='HOLEY' and month='2015-06'")
+        printed, error = self._empty_relay_group('HOLEY')
+        self.assertIn('1 只真故障', error, printed)
+        self.assertIn('✗ HOLEY', printed)
+
+    def test_truncated_source_on_a_complete_window_does_not_keep_the_job_red(self):
+        # EQR 的形状：源回 2026-07..08（晚于窗口末月、又不晚于最后交易日），
+        # 校验按「月份不足」拒绝——窗口内一个月都不缺，所以是结案而不是故障。
+        self._fill_window('COVERED')
+        bars = {m: (10.0, 10.0) for m in ('2026-07', '2026-08')}
+        with patch('sys.argv', ['fill_yahoo_gaps.py']), \
+             patch.object(backfill, 'db', return_value=Connection(self.connection)), \
+             patch.object(backfill, 'targets', return_value=['COVERED']), \
+             patch.object(backfill.time, 'sleep'), \
+             patch.object(yahoo_fetch, 'fetch', return_value=bars), \
+             patch.object(backfill.absence, 'belongs_to_later_identity', return_value=False), \
+             contextlib.redirect_stdout(io.StringIO()) as out:
+            backfill.main()
+        printed = out.getvalue()
+        self.assertIn('结案窗口已完整 1', printed)
+        self.assertNotIn('真故障', printed)
 
     def test_stockanalysis_400_closes_only_a_confirmed_delisting(self):
         # stockanalysis 对退市代码回 400，那就是它的 Not Found。这个步骤过去挂着

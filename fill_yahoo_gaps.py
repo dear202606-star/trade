@@ -101,6 +101,16 @@ def close_out_absence(conn, symbol):
     return absence.close_absence(conn, symbol, 'yahoo_relay', 404, 'fill_yahoo_gaps')
 
 
+def close_covered_history(conn, symbol):
+    """窗口内的历史在库内已经完整、Yahoo 这一轮又给不出全收益 → 结案。
+
+    通道回空时无法区分「源没有」与「通道断了」，这条判据让这种区分不再决定
+    作业颜色：真要缺月的票结不了案、照样报红；一个月都不缺的票，无论通道是
+    坏了还是懒得回答，升级口径都取不到新数据，重试只是每晚白烧流量。
+    """
+    return absence.close_covered_absence(conn, symbol, 'yahoo_relay', 'fill_yahoo_gaps')
+
+
 def membership(conn, symbol):
     """(start_date, end_date)；库内没有成员记录时返回 (None, None)。"""
     with conn.cursor() as cur:
@@ -127,7 +137,7 @@ def main():
         c.close()
         return
 
-    ok = bad = rows = skipped = absent = unmatched = 0
+    ok = bad = rows = skipped = absent = unmatched = covered = 0
     batch = []
     t0 = time.time()
     deadline = t0 + a.max_seconds
@@ -157,8 +167,14 @@ def main():
             print("  ✗ %-6s 抓取失败 %s" % (sym, str(e)[:60]), flush=True)
             continue
         if not bars:
-            bad += 1
-            print("  ✗ %-6s 全部通道回空，无法判断是源没有还是通道断了" % sym, flush=True)
+            if close_covered_history(c, sym):
+                covered += 1
+                print("  ∅ %-6s 全部通道回空，但窗口内历史库内已完整 → 按 price_only 结案，停止补采"
+                      % sym, flush=True)
+            else:
+                bad += 1
+                print("  ✗ %-6s 全部通道回空，窗口内还缺月份，无法判断是源没有还是通道断了" % sym,
+                      flush=True)
             continue
         good, why, _ = IV.check_payload(sym, bars, "total_return", allow_stale=True)
         if not good:
@@ -169,6 +185,11 @@ def main():
                 print("  ⊘ %-6s %s｜源回 %d 根 [%s..%s] 全部晚于最后交易日 %s"
                       "→ 代码已被重新上市占用，本标的历史不在这个源里"
                       % (sym, why, len(months), months[0], months[-1], end_date), flush=True)
+                continue
+            if close_covered_history(c, sym):
+                covered += 1
+                print("  ∅ %-6s %s｜源回 %d 根 [%s..%s] 不含窗口月份，库内已完整 → 按 price_only 结案"
+                      % (sym, why, len(months), months[0], months[-1]), flush=True)
                 continue
             bad += 1
             print("  ✗ %-6s %s｜源回 %d 根 [%s..%s]、最后交易日 %s"
@@ -203,13 +224,14 @@ def main():
                 batch, page_size=2000)
         rows += len(batch)
     c.close()
-    print("完成：成功 %d / 失败 %d / 结案缺席 %d / 结案身份不匹配 %d / 保护或资格变化跳过 %d / 写入 %d 行 / %.0fs" %
-          (ok, bad, absent, unmatched, skipped, rows, time.time() - t0))
+    print("完成：成功 %d / 失败 %d / 结案缺席 %d / 结案窗口已完整 %d / 结案身份不匹配 %d / "
+          "保护或资格变化跳过 %d / 写入 %d 行 / %.0fs" %
+          (ok, bad, absent, covered, unmatched, skipped, rows, time.time() - t0))
     # 只有「真故障」才让作业变红。用户 2026-11-21 定的口径是退市票接受
     # price_only：权威缺席与「代码被重新上市占用」都不是故障，下一轮 targets()
     # 也不会再取它们。预算没跑完同样不是故障——它是设计内的续跑，过去把它
     # 计成失败，等于每周给一条永不变绿的门禁添一条永不变红的噪音。
-    remaining = len(syms) - ok - bad - skipped - absent - unmatched
+    remaining = len(syms) - ok - bad - skipped - absent - unmatched - covered
     if bad:
         raise RuntimeError('Yahoo historical backfill failed: %d 只真故障' % bad)
     if remaining:

@@ -9,6 +9,9 @@ source_absence_acceptance，而这张表的价值全在于「什么才算权威�
 口径（用户 2026-11-21 / 2026-11-22 拍板）
   · 只有 members.end_date 已过期（库内当前时钟确认退市）才允许结案；
   · 供应商权威 Not Found（404/400）→ 落台账，不再重打；
+  · 源给不出窗口内的全收益、但 series_selected 已把该窗口铺满 → 同样落台账
+    （provider_no_window_history）：结案不改任何已复核过的数字，缺的只是口径升级；
+    窗口里真有缺月的（LIFE/TGNA）不在此列，必须继续报红。
   · 源回的数据全部晚于该身份的最后交易日（代码被重新上市占用）→ 本轮按
     缺席处理，但不落台账：证据每轮重取一次，成本是每天几只票的几秒。
   · 需要窗口（2012-01..2025-12）内成员月份不足 12 个月的，本来就不该进
@@ -84,4 +87,56 @@ def close_absence(conn, symbol, source, http_status, runner, basis='total_return
                        values (%s, %s, %s, 'provider_not_found', %s, %s, %s)
                        on conflict do nothing""",
                     (symbol, source, basis, http_status, end_date, runner))
+    return True
+
+
+def window_months(conn, symbol):
+    """(已有月份, 应有月份)：窗口 ∩ 该身份的在册区间，数 series_selected 的实际月份。
+
+    「应有」用 months_in_window 同一套月份算术，两边共用一个 WINDOW_END，
+    免得窗口口径在两个函数里各漂移一次。
+    """
+    with conn.cursor() as cur:
+        cur.execute("select min(start_date), max(end_date) from members where symbol=%s",
+                    (symbol,))
+        start, end = cur.fetchone()
+    if not start or not end:
+        return 0, 0
+    first = max(WINDOW_START, str(start)[:7])
+    last = min(WINDOW_END, str(end)[:7])
+    need = _index(last) - _index(first) + 1
+    if need <= 0:
+        return 0, 0
+    with conn.cursor() as cur:
+        cur.execute("select count(distinct month) from series_selected "
+                    "where symbol=%s and month between %s and %s", (symbol, first, last))
+        have = cur.fetchone()[0]
+    return have, need
+
+
+def close_covered_absence(conn, symbol, source, runner, basis='total_return'):
+    """源给不出窗口内的全收益，但选中序列已把这段窗口铺满 → 按 price_only 结案。
+
+    2026-11-22 现场：补采集合 43 只全部已退市，其中 41 只在窗口内一个月都不缺，
+    缺的只是口径升级；Yahoo 对它们要么权威 Not Found，要么只回重新上市后的
+    最近几根，要么整群通道回空。CA/CTRA/FI/EQR 就这样每晚计一次「真故障」，
+    一道永远红着的门禁和永远绿着一样没有信息量。
+
+    与 close_absence 的区别只在取证强度：这里不要求供应商回答过「没有这个代码」，
+    而是要求库内证据已经完整——所以通道故障也造不成损失（一个数都不会因此少算），
+    而真有缺口的（LIFE 窗口内 0 个月、TGNA 66 个月只有 25 个）一律拒绝结案，
+    照旧报红。现役票同样拒绝：退市判据仍由 delisted_end 单独把住。
+    """
+    end_date = delisted_end(conn, symbol)
+    if not end_date:
+        return False
+    have, need = window_months(conn, symbol)
+    if need <= 0 or have < need:
+        return False
+    with conn.cursor() as cur:
+        cur.execute("""insert into source_absence_acceptance
+                       (symbol, source, basis, reason, http_status, membership_end, runner)
+                       values (%s, %s, %s, 'provider_no_window_history', 200, %s, %s)
+                       on conflict do nothing""",
+                    (symbol, source, basis, end_date, runner))
     return True
