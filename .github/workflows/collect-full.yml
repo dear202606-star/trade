@@ -76,7 +76,6 @@ jobs:
 
       - name: stockanalysis 补缺（免费，10 年全收益）
         if: ${{ github.event.inputs.sa_limit != '0' }}
-        continue-on-error: true
         env:
           SA_LIMIT: ${{ github.event.inputs.sa_limit }}
         run: |
