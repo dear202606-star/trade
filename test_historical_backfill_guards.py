@@ -238,6 +238,14 @@ class HistoricalBackfillGuards(unittest.TestCase):
         self.assertEqual(self.connection.execute(
             "select count(*) from source_absence_acceptance").fetchone()[0], 0)
 
+    def test_silence_never_reads_as_a_later_identity(self):
+        # belongs_to_later_identity 用字典序比月份，None 会被判成 'None' > '2017-06' 为真：
+        # 「源没说话」就这样冒充「源说这段历史属于别的发行主体」，替人把结案判据放宽了。
+        self.assertFalse(backfill.absence.belongs_to_later_identity([None], '2017-06-02'))
+        self.assertFalse(backfill.absence.belongs_to_later_identity(['2026-03', None], '2017-06-02'))
+        self.assertFalse(backfill.absence.belongs_to_later_identity(['2026-3'], '2017-06-02'))
+        self.assertTrue(backfill.absence.belongs_to_later_identity(['2026-03'], '2017-06-02'))
+
     def test_truncation_inside_the_identity_lifetime_stays_fatal(self):
         # 同一只票若回到的月份落在它自己的生命周期内却仍然不足，那是通道截断，
         # 结案等于永久放弃一次本可以补上的历史——必须继续报红。
@@ -354,6 +362,75 @@ class HistoricalBackfillGuards(unittest.TestCase):
         printed = out.getvalue()
         self.assertIn('结案窗口已完整 1', printed)
         self.assertNotIn('真故障', printed)
+
+    def _group_answer(self, symbols, bars, hole=True):
+        """整群通道对每只票给出同一个 `bars`，返回 (stdout, 异常文案, 请求次数)。
+
+        夹具：身份 1996-01-01..2017-06-02，窗口内月份铺满后按 `hole` 决定是否挖掉
+        2015-06——挖掉时「窗口已完整」那条结案判据不成立，走的全是本轮新分支。
+        """
+        for symbol in symbols:
+            self.connection.execute("insert into members values(?,?,?)",
+                                    (symbol, '1996-01-01', '2017-06-02'))
+            self.connection.execute("insert into series_pick values(?, 'price_only', 0)", (symbol,))
+            self._fill_window(symbol, end='2017-06-02')
+            if hole:
+                self.connection.execute(
+                    "delete from series_selected where symbol=? and month='2015-06'", (symbol,))
+        with patch('sys.argv', ['fill_yahoo_gaps.py']), \
+             patch.object(backfill, 'db', return_value=Connection(self.connection)), \
+             patch.object(backfill, 'targets', return_value=list(symbols)), \
+             patch.object(backfill.time, 'sleep'), \
+             patch.object(yahoo_fetch, 'fetch', return_value=bars) as fetch, \
+             contextlib.redirect_stdout(io.StringIO()) as out:
+            try:
+                backfill.main()
+                return out.getvalue(), '', fetch.call_count
+            except RuntimeError as exc:
+                return out.getvalue(), str(exc), fetch.call_count
+
+    def test_an_empty_answer_naming_a_later_first_trade_is_an_identity_clash(self):
+        # TGNA 的形状：3 条通道答话、一根没回，meta.firstTradeDate=2026-03，而库内
+        # 这个身份 2017-06 就离场了。「回空」不再等于说不清——源自述的首个交易日就是
+        # 肯定式证据，和「回了 5 根全在 2026 年」是同一件事，只是更硬。
+        bars = yahoo_fetch.Bars()
+        bars.attempts, bars.answered, bars.first_trade = 5, 3, '2026-03'
+        printed, error, _ = self._group_answer(['CLASH'], bars)
+        self.assertEqual(error, '', printed)
+        self.assertIn('结案身份不匹配 1', printed)
+        self.assertIn('首个交易日 2026-03', printed)
+        self.assertEqual(self.connection.execute(
+            "select count(*) from source_absence_acceptance").fetchone()[0], 0)
+
+    def test_an_answered_empty_without_evidence_still_stays_fatal(self):
+        # 反向护栏：光「有通道答话」不算证据。答话也可能是半截响应或空壳，
+        # 只有源自己报出的首个交易日能定性，否则一律按故障继续重试。
+        bars = yahoo_fetch.Bars()
+        bars.attempts, bars.answered = 5, 5
+        printed, error, _ = self._group_answer(['SILENT'], bars)
+        self.assertIn('1 只真故障', error, printed)
+        self.assertIn('✗ SILENT', printed)
+
+    def test_a_fully_cooled_fleet_is_fatal_and_stops_the_round(self):
+        # 一次请求都没发出的轮次没有资格解释源里有没有数据：计故障，但立刻收手，
+        # 因为同一进程里剩下的票必然同状态——继续跑只是把日志刷成一堆假故障。
+        bars = yahoo_fetch.Bars()
+        bars.attempts = bars.answered = 0
+        printed, error, calls = self._group_answer(['COOLED', 'LATER'], bars)
+        self.assertIn('1 只真故障', error, printed)
+        self.assertIn('一次请求都没发出', printed)
+        self.assertEqual(calls, 1)
+        self.assertNotIn('LATER', printed)
+        self.assertEqual(self.connection.execute(
+            "select count(*) from source_absence_acceptance").fetchone()[0], 0)
+
+    def test_a_cooled_fleet_still_closes_a_window_the_database_proves_complete(self):
+        # 结案证据在库内，与通道此刻死没死无关：整群冷却不该把已经能定的案拖成故障。
+        bars = yahoo_fetch.Bars()
+        bars.attempts = bars.answered = 0
+        printed, error, _ = self._group_answer(['DONE'], bars, hole=False)
+        self.assertEqual(error, '', printed)
+        self.assertIn('结案窗口已完整 1', printed)
 
     def test_stockanalysis_400_closes_only_a_confirmed_delisting(self):
         # stockanalysis 对退市代码回 400，那就是它的 Not Found。这个步骤过去挂着

@@ -104,9 +104,10 @@ def close_out_absence(conn, symbol):
 def close_covered_history(conn, symbol):
     """窗口内的历史在库内已经完整、Yahoo 这一轮又给不出全收益 → 结案。
 
-    通道回空时无法区分「源没有」与「通道断了」，这条判据让这种区分不再决定
-    作业颜色：真要缺月的票结不了案、照样报红；一个月都不缺的票，无论通道是
-    坏了还是懒得回答，升级口径都取不到新数据，重试只是每晚白烧流量。
+    这条判据的依据全在库内，所以它不依赖机群此刻是死是活：yahoo_fetch.Bars 现在
+    会自述尝试与答话次数，把「一次没问」和「问了且答了空」分开（前者照样报红），
+    但对一个月都不缺的票，无论通道是断了还是懒得回答，升级口径都取不到新数据，
+    重试只是每晚白烧流量。
     """
     return absence.close_covered_absence(conn, symbol, 'yahoo_relay', 'fill_yahoo_gaps')
 
@@ -138,6 +139,7 @@ def main():
         return
 
     ok = bad = rows = skipped = absent = unmatched = covered = 0
+    halted = False
     batch = []
     t0 = time.time()
     deadline = t0 + a.max_seconds
@@ -167,14 +169,40 @@ def main():
             print("  ✗ %-6s 抓取失败 %s" % (sym, str(e)[:60]), flush=True)
             continue
         if not bars:
+            # 「回空」有三层相反的含义，混在一起就会既报不准也修不完：
+            # ① 库内证据已经把窗口铺满了——结案依据在库里，与通道此刻死没死无关；
+            # ② 一次请求都没发出（整群在冷却）——本轮根本没资格解释源里有没有；
+            # ③ 答过话且源自述的首个交易日晚于本身份的最后交易日——代码被重新上市
+            #    占用（2026-11-22 取证 TGNA：3 条通道回 200 + 空 timestamp +
+            #    firstTradeDate=2026-03，而该身份 2017-06 已离场）。
             if close_covered_history(c, sym):
                 covered += 1
                 print("  ∅ %-6s 全部通道回空，但窗口内历史库内已完整 → 按 price_only 结案，停止补采"
                       % sym, flush=True)
-            else:
+                continue
+            attempts = getattr(bars, "attempts", -1)
+            if attempts == 0:
                 bad += 1
-                print("  ✗ %-6s 全部通道回空，窗口内还缺月份，无法判断是源没有还是通道断了" % sym,
-                      flush=True)
+                print("  ✗ %-6s 机群全部处于冷却，一次请求都没发出 → 本轮没有问过源，"
+                      "无权判断源里有没有；余下标的同状态，提前收手留待下次" % sym, flush=True)
+                halted = True
+                break
+            end_date = absence.delisted_end(c, sym)
+            first_trade = getattr(bars, "first_trade", None)
+            # first_trade 必须真的有值：None 走 belongs_to_later_identity 的字典序比较
+            # 会被判成「晚于 2017-06」，沉默就冒充成否认了。
+            if attempts > 0 and getattr(bars, "answered", 0) and first_trade and end_date and \
+                    absence.belongs_to_later_identity([first_trade], end_date):
+                unmatched += 1
+                print("  ⊘ %-6s %d 次请求 %d 次答话、一根没回，而源自己给出首个交易日 %s"
+                      "晚于最后交易日 %s → 代码已被重新上市占用，本标的历史不在这个源里"
+                      % (sym, attempts, bars.answered, first_trade, end_date), flush=True)
+                continue
+            bad += 1
+            print("  ✗ %-6s 回空（%s），窗口内还缺月份 → 无法判断是源没有还是通道断了"
+                  % (sym, "调用方未报计数" if attempts < 0
+                     else "%d 次请求 %d 次答话、无肯定式缺席证据" % (attempts, getattr(bars, "answered", 0))),
+                  flush=True)
             continue
         good, why, _ = IV.check_payload(sym, bars, "total_return", allow_stale=True)
         if not good:
@@ -233,6 +261,9 @@ def main():
     # 计成失败，等于每周给一条永不变绿的门禁添一条永不变红的噪音。
     remaining = len(syms) - ok - bad - skipped - absent - unmatched - covered
     if bad:
+        if halted:
+            print("⚠ 机群整体冷却，本轮提前收手：剩余 %d 只未跑，冷却过去后自续" % remaining,
+                  flush=True)
         raise RuntimeError('Yahoo historical backfill failed: %d 只真故障' % bad)
     if remaining:
         print("⚠ 剩余 %d 只未跑（时间预算 %ds 已用完），下次继续；本轮无故障" %

@@ -68,6 +68,18 @@ def not_found_body():
         "code": "Not Found", "description": "No data found, symbol may be delisted"}}})
 
 
+def empty_answer_body(first_trade="2026-03"):
+    """HTTP 200 + error=null + result 里只有 meta、一根时间戳都没有。
+
+    2026-11-22 取证 TGNA：translate / jina / allorigins 三条通道都回这个 781 字节的
+    形状，meta.firstTradeDate=2026-03-20。它既不是 chart.error 那种权威缺席，也不是
+    通道断了——源答了话，并顺手自述了这个代码的首个交易日。
+    """
+    ts = int(dt.datetime.fromisoformat(first_trade + "-01T00:00:00+00:00").timestamp())
+    return json.dumps({"chart": {"result": [{"timestamp": [], "meta": {"firstTradeDate": ts},
+                                             "indicators": {}}], "error": None}})
+
+
 class RelaySelection(unittest.TestCase):
     def setUp(self):
         YF._cooldown.clear()
@@ -239,6 +251,44 @@ class RelaySelection(unittest.TestCase):
         with handler:
             got = YF.fetch("WFM")
         self.assertEqual(len(got), 5)                  # 交给校验判「月份不足（5）」
+
+    def test_a_fully_cooled_fleet_asks_nothing_and_says_so(self):
+        # 冷却命中的通道是被 continue 跳过的，所以整群冷却时一次请求都发不出去，
+        # 返回值和「源答了话、答案就是空」在调用方完全同形：限流被写成了源的问题。
+        now = YF.time.time()
+        for name, _ in YF.CHANNELS:
+            YF._cooldown[name] = now + 900
+        handler, seen = self.serve(self.fleet(
+            **{name: bars_json(month_range("2010-01", 40)) for name, _ in YF.CHANNELS}))
+        with handler:
+            got = YF.fetch("TGNA")
+        self.assertEqual(seen, [])                     # 一个包都没发出去
+        self.assertEqual((len(got), got.attempts, got.answered), (0, 0, 0))
+
+    def test_an_outage_counts_as_asking_but_not_as_answering(self):
+        handler, _ = self.serve(self.fleet())          # 5 条通道全部抛异常
+        with handler:
+            got = YF.fetch("TGNA")
+        self.assertEqual((got.attempts, got.answered), (len(YF.CHANNELS), 0))
+        self.assertIsNone(got.first_trade)
+
+    def test_an_empty_answer_still_carries_the_sources_own_first_trade_date(self):
+        handler, _ = self.serve(self.fleet(**{FIRST: empty_answer_body()}))
+        with handler:
+            got = YF.fetch("TGNA")
+        self.assertEqual(len(got), 0)
+        self.assertGreaterEqual(got.answered, 1)       # 确实答过话，不是机群断了
+        self.assertEqual(got.first_trade, "2026-03")
+
+    def test_a_relay_answering_a_page_is_not_an_answer(self):
+        # jina 挂了但正文里没有 JSON 时，旧代码 `return {}` 把它写成「源说没有」。
+        # 那是通道故障，必须计入 attempts 而不计入 answered，否则限流页面能洗成缺席。
+        handler, _ = self.serve(self.fleet(**{SECOND: "# Relay down\nRate limited, retry later"}))
+        with handler:
+            got = YF.fetch("TGNA")
+        self.assertEqual(got.attempts, len(YF.CHANNELS))
+        self.assertEqual(got.answered, 0)
+        self.assertIsNone(got.first_trade)
 
 
 if __name__ == "__main__":

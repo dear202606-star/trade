@@ -11,9 +11,12 @@ source_absence_acceptance，而这张表的价值全在于「什么才算权威�
   · 供应商权威 Not Found（404/400）→ 落台账，不再重打；
   · 源给不出窗口内的全收益、但 series_selected 已把该窗口铺满 → 同样落台账
     （provider_no_window_history）：结案不改任何已复核过的数字，缺的只是口径升级；
-    窗口里真有缺月的（LIFE/TGNA）不在此列，必须继续报红。
+    窗口里真有缺月的不在此列——结案等于永久放弃一段本可以补上的历史。
   · 源回的数据全部晚于该身份的最后交易日（代码被重新上市占用）→ 本轮按
     缺席处理，但不落台账：证据每轮重取一次，成本是每天几只票的几秒。
+    「全部晚于」也接受源自述的 meta.firstTradeDate：2026-11-22 深夜取证 TGNA，
+    机群答话时回的是 200 + 空 timestamp + firstTradeDate=2026-03，一根都没回，
+    而这正是「历史属于另一个发行主体」最硬的那种说法（沉默不算，见该函数）。
   · 需要窗口（2012-01..2025-12）内成员月份不足 12 个月的，本来就不该进
     补采集合：任何源都给不出它 12 个月的窗口内历史，重试是纯粹的浪费。
 """
@@ -55,7 +58,13 @@ def belongs_to_later_identity(months, membership_end):
     if not months or not membership_end:
         return False
     end_month = str(membership_end)[:7]
-    return all(str(m) > end_month for m in months)
+    # 每个月份都得先是个月份：None 走字符串比较是 'None' > '2017-06'，为真。
+    # 这条判据负责「源里的历史属于另一个发行主体」，沉默永远不能被读成晚于。
+    def _later(month):
+        text = str(month or '')
+        return (len(text) == 7 and text[:4].isdigit() and text[4] == '-'
+                and text[5:].isdigit() and text > end_month)
+    return all(_later(m) for m in months)
 
 
 def delisted_end(conn, symbol):

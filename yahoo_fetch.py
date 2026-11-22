@@ -64,26 +64,61 @@ class _NoData(Exception):
     """
 
 
+class _Malformed(Exception):
+    """通道答了话，正文里却没有可解析的 chart 形状（限流页、代理错误页）。
+
+    它必须记成「问过但没答上」而不是「答了个空」：后者会被调用方读成源里没有
+    这段历史，于是限流页面有机会洗成权威缺席。result 为 null 而 error 也没说话
+    的同一种响应，同样归到这里——沉默不是否认。
+    """
+
+
+class Bars(dict):
+    """{YYYY-MM: (adj, raw)} + 这一轮机群到底有没有被真正问过。
+
+    调用方原来只看「有没有根」，于是两种相反的形状完全同形：5 条通道都在冷却
+    （一次请求都没发出去）与源答了话、答案就是空。前者过 90 秒就能重问，后者
+    重试一万次也不多一根。计数跟着结果走，红和绿才说得出自己的依据。
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.attempts = 0         # 真正发出的请求数（被冷却跳过的通道不算问过）
+        self.answered = 0         # 其中答回可解析 chart 正文的次数
+        self.first_trade = None   # 源自述的首个交易日 'YYYY-MM'，空答案也带着它
+
+
 def _q(sym):
     return ("?period1=%d&period2=%d&interval=1mo&events=div%%2Csplit"
             % (PERIOD1_EPOCH, int(time.time())))
 
 
 def _parse(text, channel):
-    """返回 {YYYY-MM: (adj, raw)}；jina 通道会包一层 markdown，需要截取 JSON"""
+    """返回 Bars({YYYY-MM: (adj, raw)})；jina 通道会包一层 markdown，需要截取 JSON"""
+    out = Bars()
     if channel == "jina":
         m = re.search(r"\{.*\}", text, re.S)
         if not m:
-            return {}
+            raise _Malformed("%s 正文里没有 JSON（%d 字节）" % (channel, len(text)))
         text = m.group(0)
     d = json.loads(text)["chart"]
     if d.get("error"):
         raise _NoData(d["error"].get("code") or "error")
-    d = d["result"][0]
+    result = d.get("result")
+    if not result:
+        raise _Malformed("result 为空而 error 也没说话")
+    d = result[0]
+    first = (d.get("meta") or {}).get("firstTradeDate")
+    if first:
+        # 一根没回时也留得下这句话：TGNA（2026-11-22 取证）三条通道齐刷刷回 200 +
+        # 空 timestamp + firstTradeDate=2026-03，而库内那个身份 2017-06 就离场了。
+        # 源自述的首个交易日就是肯定式证据，不必等它先吐几根出来。
+        out.first_trade = dt.datetime.fromtimestamp(
+            first, dt.timezone.utc).strftime("%Y-%m")
     ts = d.get("timestamp") or []
-    adj = (d["indicators"].get("adjclose") or [{}])[0].get("adjclose") or []
-    close = (d["indicators"].get("quote") or [{}])[0].get("close") or []
-    out = {}
+    ind = d.get("indicators") or {}
+    adj = (ind.get("adjclose") or [{}])[0].get("adjclose") or []
+    close = (ind.get("quote") or [{}])[0].get("close") or []
     for i, x in enumerate(ts):
         ym = dt.datetime.fromtimestamp(x, dt.timezone.utc).strftime("%Y-%m")
         a = adj[i] if i < len(adj) else None
@@ -99,7 +134,7 @@ def _sym(s):
 
 
 def fetch(sym, tries=SWEEP_TRIES):
-    """轮换取历史，返回覆盖最完整的一次；机群全部失败才返回 {}；
+    """轮换取历史，返回覆盖最完整的一次；机群全部失败才返回空 Bars；
     Yahoo 权威判定不存在且一无所获时抛 SymbolNotFound。
 
     旧逻辑 `if out: return out` 把任何非空响应当成终点：某条通道 400、超时或只回
@@ -111,10 +146,16 @@ def fetch(sym, tries=SWEEP_TRIES):
     「只回几根」还有第二种含义，必须与通道故障分开：2026-11-22 实测 SATS 回 3 根、
     BBBY 回 5 根，meta.firstTradeDate 分别是 2026-10 与 2026-07——重新上市后的历史
     本来就这么长，源里没有，换任何通道都不会更多，靠重试永远补不出来。
+
+    「一根都没回」同样有两种相反的含义，所以结果必须自带 attempts/answered/first_trade
+    才交得出手：冷却命中的通道是被 continue 跳过的，整群冷却时一次请求都没发出去，
+    那种「空」我们根本没资格解释；而 2026-11-22 取证 TGNA 有 3 条通道答话、回的是
+    200 + 空 timestamp + firstTradeDate=2026-03，那种空是源在说话。
     """
     tail = _q(sym)
-    best = {}
+    best = Bars()
     absent = False
+    answered = 0
     for attempt in range(tries):
         name, tpl = CHANNELS[_idx["i"] % len(CHANNELS)]
         _idx["i"] += 1
@@ -132,16 +173,14 @@ def fetch(sym, tries=SWEEP_TRIES):
             url = (tpl % _sym(sym)) + tail
         if name == "translate":
             url += "&_x_tr_sl=en&_x_tr_tl=zh-CN&_x_tr_hl=en"
+        best.attempts += 1
         try:
             raw = urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=45) \
                 .read().decode("utf-8", "replace")
             out = _parse(raw, name)
-            if reaches_window_start(out):
-                return out                  # 历史已取全，换通道不可能更好
-            if len(out) > len(best):
-                best = out                  # 截断响应留着，好过空手而归
         except _NoData:
             absent = True
+            answered += 1                 # 答话了，而且答的是「查无此码」
             break
         except Exception as e:
             s = str(e)
@@ -154,7 +193,20 @@ def fetch(sym, tries=SWEEP_TRIES):
                 break
             else:
                 _cooldown[name] = time.time() + 15
+        else:
+            answered += 1
+            if out.first_trade and not best.first_trade:
+                best.first_trade = out.first_trade    # 空答案里那句自述也是证据
+            if reaches_window_start(out):
+                # 历史已取全，换通道不可能更好
+                out.attempts, out.answered = best.attempts, answered
+                return out
+            if len(out) > len(best):
+                # 整份换上，不做跨通道拼接：一份响应是自洽的，拼出来的「更长」来路不明。
+                best.clear()
+                best.update(out)                       # 截断响应留着，好过空手而归
         time.sleep(1.2)
+    best.answered = answered
     if absent and not best:
         raise SymbolNotFound(sym)
     return best
@@ -165,4 +217,5 @@ if __name__ == "__main__":
     for s in sys.argv[1:] or ["AAPL"]:
         t0 = time.time()
         d = fetch(s)
-        print("%-6s %d 个月 %.1fs" % (s, len(d), time.time() - t0))
+        print("%-6s %d 个月｜尝试 %d 答话 %d 源自述首交易日 %s｜%.1fs"
+              % (s, len(d), d.attempts, d.answered, d.first_trade, time.time() - t0))
