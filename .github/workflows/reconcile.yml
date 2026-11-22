@@ -161,10 +161,15 @@ jobs:
           TRIGGER_EVENT: ${{ github.event_name }}
           UPSTREAM_RUN: ${{ github.event.workflow_run.name }}
         run: |
-          if python3 watchdog_site_check.py; then
-            echo "页面读数复核通过"
+          OUT=$(python3 watchdog_site_check.py 2>&1); RC=$?
+          if [ "$RC" = 0 ]; then
+            # 成功只留一行：本作业 50 次/天，每次把两条常驻 warning（health 由人工
+            # 全量构建才刷新、备库一致性回执只在看门狗作业里落）刷 50 遍，读的人
+            # 只会把它们当成背景噪音，真出问题时反而看不见。
+            echo "页面读数复核通过（$(printf '%s\n' "$OUT" | grep -Eo 'PROBLEMS=[0-9]+ WARNINGS=[0-9]+' | tail -1)；常驻 warning 明细见看门狗作业）"
             exit 0
           fi
+          printf '%s\n' "$OUT"
           # 闸一：本轮如果就是看门狗刚跑完触发的对账，绝不再回派——本作业的
           # workflow_run 触发源里列着看门狗，回派会形成 对账→看门狗→对账 的自激环。
           # 事件字段一律走 env，不插值进 shell（上游运行名是可写出来的字符串）。
