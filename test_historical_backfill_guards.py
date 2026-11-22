@@ -1,4 +1,5 @@
 import contextlib
+import decimal
 import io
 import sqlite3
 import unittest
@@ -316,6 +317,59 @@ class PriceAcceptanceGuards(unittest.TestCase):
         bad, printed = self.run_accept()
         self.assertEqual(bad, 1, printed)
         self.assertIn('疑似反向拆股未处理', printed)
+
+
+class DecimalSpotRegression(unittest.TestCase):
+    """生产列类型是 numeric 时验收必须照样算得完。
+
+    2026-11-22 拿生产库真跑 validate_prices 才暴露：psycopg2 把 adj_close 回成
+    Decimal，与 float 阈值相减直接 TypeError，验收连一条判定都没打印就崩。
+    sqlite 夹具的列是 real，永远复现不出来——所以这里不接 sqlite，直接用假游标
+    按 psycopg2 的形状喂 Decimal，把「值类型」这条边界钉住。
+    """
+
+    D = decimal.Decimal
+
+    class Cur:
+        def __init__(self, answers):
+            self.answers = answers
+            self.rows = None
+
+        def execute(self, sql):
+            self.rows = self.answers[sql]
+
+        def fetchall(self):
+            return self.rows
+
+        def fetchone(self):
+            return self.rows
+
+    def answers(self, spot, have=10, need=10, auth=1, total=1000, jumps=0):
+        return {validate.SPOT_SQL: spot, validate.COVERAGE_SQL: (have, need),
+                validate.AUTHORITATIVE_SQL: (auth,), validate.CONTINUITY_SQL: (total, jumps)}
+
+    def healthy_spot(self):
+        return [('NVDA', '2020-12', self.D('10.00')), ('NVDA', '2021-12', self.D('22.50')),
+                ('NVDA', '2023-12', self.D('10.00')), ('NVDA', '2024-12', self.D('27.10')),
+                ('DUK', '2012-06', self.D('10.00')), ('DUK', '2012-07', self.D('10.02')),
+                ('AMCR', '2025-12', self.D('10.00')), ('AMCR', '2026-10', self.D('12.00'))]
+
+    def test_acceptance_completes_when_driver_returns_decimal(self):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            bad = validate.accept(self.Cur(self.answers(self.healthy_spot())))
+        printed = out.getvalue()
+        self.assertEqual(bad, 0, printed)
+        self.assertIn('+125%', printed)
+
+    def test_decimal_thresholds_still_reject_a_bad_gain(self):
+        spot = self.healthy_spot()
+        spot[1] = ('NVDA', '2021-12', self.D('90.00'))      # +800%，远超 1.25±0.12
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            bad = validate.accept(self.Cur(self.answers(spot)))
+        self.assertEqual(bad, 1, out.getvalue())
+        self.assertIn('偏差过大', out.getvalue())
 
 
 if __name__ == '__main__':

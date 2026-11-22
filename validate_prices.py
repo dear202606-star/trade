@@ -92,7 +92,10 @@ def accept(cur):
 
     def gain(sym, a, b):
         x, y = spot.get((sym, a)), spot.get((sym, b))
-        return y / x - 1 if x and y else None
+        # 必须转 float：库里 adj_close 是 numeric，psycopg2 回的是 Decimal，
+        # 与阈值（float）相减直接 TypeError。sqlite 夹具永远复现不出来，
+        # 2026-11-22 是拿生产库跑才炸出来的（见 DecimalSpotRegression）。
+        return float(y) / float(x) - 1 if x and y else None
 
     for label, months, target, tol in (
             ("NVDA 2021", ("2020-12", "2021-12"), 1.25, 0.12),
