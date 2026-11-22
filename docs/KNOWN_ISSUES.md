@@ -148,3 +148,43 @@
 1. 用权威复权序列（或拆股事件表 + 连续性校验）重建 static/bars_monthly.json；
 2. 补全 1209 只历史成分的 point-in-time GICS；
 3. 重建后重跑 variant_b.py，用 BASELINE_UPDATE=1 提升基线，并复核 A/B 同持仓同年收益一致。
+
+## G11 「代码被重新上市占用」的 9 只：验收边界而非待修 bug（2026-11-22 定）
+
+`TGNA / SATS / BBBY` 这类代码在 Yahoo 仍有货，但 `meta.firstTradeDate` 落在 2026-03／2026-10／2026-07——
+那是**重新上市后的新身份**，不是通道截断。补采要的 2010–2020 那段历史源里根本没有，换任何通道、重试多少次都不会多一根。
+`fill_yahoo_gaps` 每月都会把它们算进缺口，`verify_locks` 则因窗口铺不满而持续举红。
+
+**决定：不为此新增第四条结案判据，让它们继续每晚举红。** 理由不是没得选，而是选了解释更贵：
+
+| 若结案 | 后果 |
+|---|---|
+| 写进 `source_absence_acceptance` | 它们离开补采集合，连每晚那条具名的 `⊘` 陈情一起消失——红变绿，但绿里没有依据（`lock_symbols.py --check` 只打印不失败，不构成替它们守着的第二道闸） |
+| 保持现状 | 代价是每晚 9 只 × 约 50s 的 Yahoo 侧请求，不占 Supabase 出口配额；红字里写着自己的原因 |
+
+**读这段的人必须知道的两个口径**：
+
+1. `members.end_date` 是**指数成员区间的终点**，不是退市日。MMC 的 2026-01-14、DNB 的 2017-04-05、
+   SWN 的 2017-04-04、BIG 的 2013-02-14 都能对上真实的离指日期。结案判据因此是「退市锚点仍等于
+   当前 `end_date`」这条**库内自洽**判据（`source_absence.closed_by_ledger`），不是退市证明。
+2. `provider_not_found` 只说「这个源给不出这个代码」，不说「这家公司不在了」。MMC 至今是标普 100
+   成分，Yahoo 的 chart 与 search 都不再给 `MMC`——供应商目录里的缺席可能是改名、并购或代码迁移。
+
+**边界之外（本轮不擅动）**：库内有 30,886 行价格落在成员区间之外、其中 15,182 个月进入选源
+（涉及 239–258 只）。这是身份复用问题域，归 IR→TT 历史成员修复流程处理，不由补采侧改数。
+
+**取证入口**：`python probe_absence.py WPX MMC DNB ALTR AAPL`，或 Actions → `probe-yahoo.yml`
+（`symbols` 入参走 env，不插值进 shell）。判读口径：只要有一条通道回「Yahoo 答话」且根数 > 0，
+任何 `provider_not_found` 结案都不成立。
+
+**残留的 10 只仍会每晚 404**（2026-11-22 现网实测，run 45030684123：`⊘` 抑制 41 只、仍有 10 只打到 Yahoo）：
+`ALXN ANSS ATVI AYE GAS HSH MIL NSM PGN STR`。它们不在结案器的视野里，原因各不相同且都是口径本身：
+
+| 为什么结不了案 | 涉及 |
+|---|---|
+| 选源已是 `total_return`，`fill_yahoo_gaps` 只挑口径待升级的（`basis <> 'total_return'`） | ALXN ANSS ATVI |
+| 窗口内成员月份不足 12 个月，被 `MIN_MEMBERSHIP_MONTHS` 挡在补采集合外 | AYE MIL STR NSM（2010–2011 离场） |
+
+它们仍留在 relay 的**月级**缺口计划里，所以每晚照打一次 Yahoo；`yahoo_denies` 命中后立刻短路，
+代价约 10 请求/轮，不占 Supabase 出口。要消掉它们得给 relay 加一条写台账的路径，为 10 个请求
+在新作业里开写库面不值当——留红字与 `⊘` 同类的具名 `! … 失败 HTTP Error 404` 即可自查。
