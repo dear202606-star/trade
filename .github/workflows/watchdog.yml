@@ -1,5 +1,9 @@
 name: 看门狗（停更告警）
 
+# 运行标题带上触发来源：2026-11-22 起场次对账会在「页面读数复核不通过」时转派本作业，
+# 标题里没有来源就分不清是定时到的还是被证据叫起来的（后者正是补上调度盲区的那一发）。
+run-name: "看门狗 · ${{ github.event.inputs.reason || github.event_name }}"
+
 # 覆盖「压根没跑」这个盲区：定时检查页面真正读到的数据是否新鲜完整，
 # 超时就在 Issue 里喊，不再依赖「失败才告警」。
 #
@@ -17,6 +21,12 @@ on:
     # 140 分钟 / EDT 收盘后 200 分钟），单独钉一次，让最要紧的窗口多一次机会。
     - cron: "20 22 * * 1-5"
   workflow_dispatch:
+    inputs:
+      reason:
+        description: 触发来源（留空 = 定时或人工点跑）
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: read

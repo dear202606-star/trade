@@ -53,6 +53,8 @@ on:
       - external_heartbeat.py
       - trading_window.py
       - research/exchange_calendar.json
+      - watchdog_site_check.py
+      - watchdog_checks.py
       - test_reconcile_sessions.py
       - test_reconcile_outputs.py
       - test_external_heartbeat.py
@@ -141,3 +143,52 @@ jobs:
           [ "$DONE" = "0" ] || exit 0
           gh workflow run quotes.yml -f critical=true -f as_of="$AS_OF" || \
             echo "::warning::收盘结算复核派发失败"
+
+      # 2026-11-22：把「页面读数新不新鲜、全不全」这套判据也搭进本作业。
+      # 动因是共模故障：看门狗声明每小时一次，实测只交付 3~4 次/天（GitHub 免费档
+      # scheduled events 是尽力而为，11-22 连 12:05 那一 tick 都没落地），而它自己
+      # 也是 schedule 触发的——被兜底者（页面读数）和兜底者（看门狗）踩同一条腿。
+      # 本作业有三条互相独立的触发源（workflow_run / 平台外心跳 / 错峰 cron），实测
+      # 48~52 次/天，同一份判据搭在这里几乎不花钱：watchdog_site_check 只用标准库、
+      # 只读浏览器同源的公开端点，不连主库、不占 Supabase 出口。
+      # 口径仍然只有一份：这里不复制判据、也不开单——发现问题就转派看门狗，
+      # 开单 / 关单 / 自愈仍归它，否则会出现第二个告警生命周期。
+      - name: 页面读数复核（借用本作业的触发源覆盖看门狗的调度盲区）
+        id: site
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TRIGGER_EVENT: ${{ github.event_name }}
+          UPSTREAM_RUN: ${{ github.event.workflow_run.name }}
+        run: |
+          if python3 watchdog_site_check.py; then
+            echo "页面读数复核通过"
+            exit 0
+          fi
+          # 闸一：本轮如果就是看门狗刚跑完触发的对账，绝不再回派——本作业的
+          # workflow_run 触发源里列着看门狗，回派会形成 对账→看门狗→对账 的自激环。
+          # 事件字段一律走 env，不插值进 shell（上游运行名是可写出来的字符串）。
+          if [ "$TRIGGER_EVENT" = "workflow_run" ] && \
+             [ "$UPSTREAM_RUN" = "看门狗（停更告警）" ]; then
+            echo "::warning::页面读数复核不通过，但本轮由看门狗自身触发，不再回派（开单归它）"
+            exit 0
+          fi
+          # 闸二：45 分钟冷却。看门狗可能只是被 schedule 挤晚了几分钟而不是没跑；
+          # 没有冷却，每个对账 tick 都会派一发，3~4 次/天会变成 50 次/天。
+          # 读不到时刻时按「无人核验」处理（继续转派）：反过来判成「刚跑过」就等于把
+          # 整个盲区补票押在 gh 可用上，gh 一抖就又没人核验页面读数了。
+          AGE_MIN=9999
+          PREV=$(gh run list --workflow watchdog.yml --limit 6 --json startedAt,status \
+                 --jq '[.[]|select(.status=="completed")][0].startedAt // empty')
+          PREV_EPOCH=$(date -u -d "$PREV" +%s 2>/dev/null || true)
+          case "$PREV_EPOCH" in
+            ''|*[!0-9]*) echo "读不到上一次看门狗的运行时刻（PREV='${PREV}'），不做冷却" ;;
+            *) AGE_MIN=$(( ( $(date -u +%s) - PREV_EPOCH ) / 60 )) ;;
+          esac
+          if [ "$AGE_MIN" -lt 45 ]; then
+            echo "::warning::页面读数复核不通过，但看门狗 ${AGE_MIN} 分钟前刚跑过，本轮不回派"
+            exit 0
+          fi
+          echo "::error::页面读数复核不通过（明细见上），转派看门狗按现有口径开单与自愈"
+          gh workflow run watchdog.yml -f reason="reconcile 页面读数复核" || \
+            echo "::warning::看门狗派发失败，下一轮对账重试"
