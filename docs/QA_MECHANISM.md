@@ -33,8 +33,10 @@ L3 数值复算    verify_tr：原始价+分红 独立重算 vs 复权价，差�
 L4 完整性      coverage_pit：按「标的-年」算缺口，不看笼统比例
                v_collect_summary：每个标的卡在哪个阶段
 
-L5 发布闸门    audit_b（158 项）+ selftest（84 项）+ schema_check（25 项）
+L5 发布闸门    audit_b（158 项）+ selftest（84 项）+ schema_check（结构/一致/权限/不变量）
                任一项失败则构建中断，不发布
+               注：anon 权限有两条守门人——REST 实测（网关答话时）与 [C2] 库内
+               has_table_privilege 断言；出口配额被限时前者只记 warning，不得报绿。
 
 L6 运行监控    verify_locks 每 6 小时校验锁是否被篡改
                watchdog：页面新鲜度、质量快照失败数 → 自动开 Issue

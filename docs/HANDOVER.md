@@ -173,7 +173,7 @@ python coverage_pit.py                    # 按年份的缺口
 # 3. 全量验收（7 项，必须全绿）
 python selftest.py            # 85 项
 python audit_b.py             # 158 项
-python schema_check.py        # 25 项
+python schema_check.py        # 结构/一致/权限/不变量；出口配额被限（REST 402）时 anon 权限看 [C2] 库内断言
 python verify_locks.py        # 961 只锁指纹
 python verify_tr.py           # 全收益独立复算
 python realtime_check.py      # 5 分钟实时层
