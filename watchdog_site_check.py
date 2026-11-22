@@ -12,7 +12,7 @@ import datetime as dt
 import json
 import urllib.request
 
-from watchdog_checks import history_problems, published_dependency_problems
+from watchdog_checks import history_problems, published_dependency_problems, settlement_gap
 
 SITE_CLOUD = "https://dear202606-star.github.io/trade/data/cloud.json"
 
@@ -130,15 +130,16 @@ def snapshot_problems(doc, now=None):
         # 72 小时阈值只用于兜底，太慢：11-09 收盘数据没采到时，直到 11-12
         # 才会告警。按已复核 NYSE 日历算出「最近一个已收盘交易日」，收盘后
         # 90 分钟仍没有该场次数据就立即告警，让 selfheal 当场补采。
-        # 周末/节假日 latest 仍是上一个交易日且 q.session 已匹配，不误报。
+        # 判据是「场次」不是「是不是盘中版」：周末 latest 仍是上一交易日且
+        # q.session 已匹配，不误报；工作日盘中行情已盖到当日，也不误报。
         try:
             import trading_window as tw
             latest = tw.latest_closed_session(now, tw.load_calendar())
             if latest and now >= latest["close"] + dt.timedelta(minutes=90):
-                expected, got = latest["session"], str(q.get("session") or "")
-                if got < expected or q.get("intraday") is True:
-                    problems.append("行情停更：%s 收盘数据缺失（当前 %s）"
-                                   % (expected, got))
+                gap = settlement_gap("行情停更", q.get("session"), latest["session"],
+                                     intraday=q.get("intraday") is True)
+                if gap:
+                    problems.append(gap)
         except Exception:
             pass  # 日历不可用时不额外告警，保留 72 小时兜底
         if not q.get("ok") or not (q.get("quotes") or {}).get("SPY"):
@@ -179,23 +180,14 @@ def snapshot_problems(doc, now=None):
         except Exception as exc:
             problems.append("历史年度校验失败：%s" % str(exc)[:100])
         try:
-            # 盘中快照按设计不重算净值 / 次年预览（run-guard 明确输出
-            # "盘中快照，净值/预览只在收盘场次计算"）。此时 equity / preview
-            # 的 quote_version 必然落后于刚写入的盘中报价，若仍判为 problem，
-            # 看门狗会每小时告警、开 Issue，并派发必定被 SKIP 的
-            # live-strategy.yml，形成「告警 → 无效重算 → 再告警」空转。
-            # 只在 intraday=True 时把两条「版本落后」降级；收盘场次
-            # （intraday=False，含 --as-of 延迟补采）照常严格校验，
-            # 那时净值没跟上就是真故障，必须告警并自愈。
-            intraday_snapshot = bool(q.get("intraday"))
-            version_gap = ("收益基准落后于可衔接报价场次",
-                           "次年预览未跟随当前报价版本完成核验")
+            # 盘中/收盘的口径差异由 published_dependency_problems 自己判定：
+            # 收盘产物在盘中对应「上一收盘场」，过期与否看 fresh_until。
+            # 2026-11-21 之前这里按消息字符串把两条依赖校验在盘中整个丢掉，
+            # 结果预览停更两场（11-18，行情已到 11-20）看门狗仍报健康——
+            # 用字符串匹配来豁免本身也很脆，改一处文案就悄悄失效。
             for prefix in ("", "b/"):
-                deps = published_dependency_problems(
-                    datasets[prefix + "equity"], datasets[prefix + "preview"], q)
-                if intraday_snapshot:
-                    deps = [p for p in deps if p not in version_gap]
-                problems.extend(prefix + p for p in deps)
+                problems.extend(prefix + p for p in published_dependency_problems(
+                    datasets[prefix + "equity"], datasets[prefix + "preview"], q, now))
         except Exception as exc:
             problems.append("收益/预览依赖校验失败：%s" % str(exc)[:100])
     return problems

@@ -4,7 +4,9 @@ import unittest
 
 from live_ranking import (select,joined_interval,continuous_member,calculate,
                           independent_close_ok)
-from prepare_live_ranking import normalized
+from prepare_live_ranking import (normalized, ranking_input_outcome,
+                                 REQUIRED_RANKING_INPUTS,
+                                 MAX_QUARANTINED_RANKING_INPUTS)
 
 
 class IndependentRankingTests(unittest.TestCase):
@@ -129,6 +131,73 @@ class IndependentCloseToleranceTests(unittest.TestCase):
     def test_tolerance_scales_with_price(self):
         self.assertTrue(independent_close_ok(500.4,500.))    # 0.08%
         self.assertFalse(independent_close_ok(502.0,500.))  # 0.4%
+
+
+class RankingInputQuarantineTests(unittest.TestCase):
+    """2026-11-20: SNDK's 1:8 split made one symbol's context fail, and because
+    `prepare()` returned `not errors` the whole 504-symbol batch was withheld —
+    the preview froze while the SPY header kept ticking. Isolation lets a single
+    symbol sit out one session instead of freezing everyone, but only while the
+    failures look incidental."""
+
+    def fixture(self):
+        pool = {'A', 'B', 'C', 'D'}
+        sectors = {'A': 'IT', 'B': 'IT', 'C': 'Health', 'D': 'Energy'}
+        bodies = {s: {'raw': {'2025-12-31': 10., '2026-11-04': v},
+                      'adjusted': {'2025-12-31': 10., '2026-11-04': v}}
+                  for s, v in [('A', 80.), ('B', 40.), ('C', 30.), ('D', 20.)]}
+        q = {'session': '2026-11-04', 'previous_session': '2026-11-03', 'intraday': False,
+             'fresh_until': '2026-11-05T14:50:00Z',
+             'ts_local': '2026-11-05 05:00', 'ts': '2026-11-04T21:00:00Z', 'version': 'v',
+             'quotes': {s: {'p': b['raw']['2026-11-04']} for s, b in bodies.items()}}
+        return q, pool, sectors, bodies
+
+    def test_quarantined_symbol_sits_out_and_is_ledged_not_silent(self):
+        q, pool, sectors, bodies = self.fixture()
+        contexts = copy.deepcopy(bodies)
+        del contexts['A']                       # the collection that just failed
+        payload, evidence = calculate('A', q, pool, sectors, [], {},
+                                      contexts, bodies, {}, 'ref', {'A'})
+        self.assertEqual([r['ticker'] for r in payload['top']], ['B', 'C', 'D'])
+        self.assertNotIn('A', evidence['context_sha256'])
+        self.assertEqual(payload['universe'], 3)
+        self.assertEqual([e for e in payload['excluded'] if e['ticker'] == 'A'],
+                         [{'ticker': 'A', 'reason': 'ranking_input_collection_failed'}])
+
+    def test_missing_context_without_quarantine_still_fails_loudly(self):
+        # Isolation is an explicit declaration, never an inference from absence:
+        # dropping a symbol from the pool silently is what makes a stale board
+        # look like a healthy one.
+        q, pool, sectors, bodies = self.fixture()
+        contexts = copy.deepcopy(bodies)
+        del contexts['A']
+        with self.assertRaises(KeyError):
+            calculate('A', q, pool, sectors, [], {}, contexts, bodies, {}, 'ref')
+
+    def test_benchmark_input_failure_blocks_even_with_room_to_quarantine(self):
+        # prepare() routes REQUIRED_RANKING_INPUTS into `errors`, not `quarantine`:
+        # FDXF/HONA/SPY are return benchmarks and SKYD_WS is indexed directly by
+        # SKYD's warrant terms, so its absence only defers the fault into a
+        # KeyError inside calculate().
+        for symbol in REQUIRED_RANKING_INPUTS:
+            with self.subTest(symbol=symbol):
+                ok, hard, soft = ranking_input_outcome([{'symbol': symbol, 'error': 'x'}], [])
+                self.assertFalse(ok)
+                self.assertEqual([e['symbol'] for e in hard], [symbol])
+                self.assertEqual(soft, [])
+
+    def test_incidental_quarantine_publishes_but_systemic_one_does_not(self):
+        entry = lambda s: [{'symbol': s, 'error': 'unstable factor shape'}]
+        ok, hard, soft = ranking_input_outcome([], entry('JBHT'))
+        self.assertTrue(ok)
+        self.assertEqual(hard, [])
+        self.assertEqual([e['symbol'] for e in soft], ['JBHT'])
+        over = entry('JBHT') + entry('CMS') + entry('NSC') + entry('PFE')
+        ok, hard, soft = ranking_input_outcome([], over)
+        self.assertFalse(ok)
+        self.assertEqual(soft, [])
+        self.assertEqual(len(hard), len(over))
+        self.assertGreater(len(over), MAX_QUARANTINED_RANKING_INPUTS)
 
 
 if __name__=='__main__':unittest.main()

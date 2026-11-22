@@ -110,3 +110,13 @@ jobs:
           path: output/backups/*.tar.gz
           retention-days: 90
           if-no-files-found: warn
+
+      - name: 门禁拒绝时显式留痕（杜绝「success 但没备份」的假健康）
+        # 备份被跳过不会报错，upload 步骤的 if-no-files-found 也只给 warn，
+        # 于是整个周期可以一路绿着把「最近可用恢复点」越拖越旧。结论不改
+        # （freeze 只在预算耗尽时生效，且备份本身是 --critical），但缺口必须
+        # 显式留痕：这轮没备份，能恢复到的最新时刻就是上一次成功备份。
+        if: steps.egress.outputs.allow != 'true'
+        run: |
+          echo "::warning::本轮未备份：egress.allow=${{ steps.egress.outputs.allow }} mode=${{ steps.egress.outputs.mode }} 预计出口 ${{ steps.egress.outputs.projected_mb }}MB / 预算 ${{ steps.egress.outputs.budget_mb }}MB"
+          echo "本 run 未产出新备份，最近可用恢复点仍是上一次成功归档。" >> "$GITHUB_STEP_SUMMARY"

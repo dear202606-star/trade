@@ -3,7 +3,9 @@ import datetime as dt
 import json
 import hashlib
 
-from watchdog_checks import quality_problems,quote_problems,history_problems,published_dependency_problems
+import e2e_check
+from watchdog_checks import (quality_problems, quote_problems, history_problems,
+                             published_dependency_problems, settlement_gap)
 from market_calendar import Calendar,fingerprint
 from research.install_exchange_calendar import CALENDAR
 
@@ -106,6 +108,96 @@ class PublishedDependencyTests(unittest.TestCase):
         self.assertEqual(len(published_dependency_problems({'last_session':'20261102','quote_version':'new'},dict(preview,quote_version='old'),quotes)),2)
         self.assertTrue(published_dependency_problems(None,None,quotes))
         with self.assertRaises(ValueError):published_dependency_problems({}, {}, {})
+
+    # 盘中：净值与次年预览是收盘产物，本场还没收盘，本就不该重算。
+    # 2026-11-21 事故——预览连着两场没产出（停在 11-18，行情已到 11-20），
+    # 而调用方因为「盘中按版本判必然误报」把整条依赖校验丢掉，看门狗全绿。
+    INTRADAY_QUOTES={'version':'live','session':'2026-11-04','previous_session':'2026-11-03',
+                     'ts':'2026-11-04T20:00:00Z','intraday':True}
+    MID_SESSION=dt.datetime(2026,11,4,20,tzinfo=dt.timezone.utc)
+
+    def closed_products(self, session):
+        """上一收盘场（或更旧）的净值与预览：版本落后、时效已过，盘中都是常态。"""
+        dashed=session.replace('-','')
+        stale={'quote_version':'old','fresh_until':'2026-11-04T14:30:00Z'}
+        as_of='2026-11-%sT02:00:00Z'%session[-2:]
+        return (dict(stale,last_session=dashed,source_as_of=as_of),
+                dict(stale,session=session,as_of_ts=as_of,reference_version='ref',top=[{}, {}, {}]))
+
+    def test_intraday_judges_close_products_by_session_not_by_version(self):
+        equity,preview=self.closed_products('2026-11-03')
+        self.assertEqual(published_dependency_problems(equity,preview,self.INTRADAY_QUOTES,self.MID_SESSION),[])
+
+    def test_intraday_cannot_hide_a_close_that_never_produced_anything(self):
+        equity,preview=self.closed_products('2026-11-02')
+        self.assertEqual(published_dependency_problems(equity,preview,self.INTRADAY_QUOTES,self.MID_SESSION),
+                         ['收益基准落后于可衔接报价场次','次年预览未跟随当前报价版本完成核验'])
+
+    def test_intraday_is_not_a_free_pass_for_broken_structure(self):
+        equity,preview=self.closed_products('2026-11-03')
+        self.assertEqual(published_dependency_problems(equity,dict(preview,top=[{}]),
+                                                       self.INTRADAY_QUOTES,self.MID_SESSION),
+                         ['次年预览未跟随当前报价版本完成核验'])
+
+    def test_intraday_without_a_previous_session_cannot_be_vacated(self):
+        with self.assertRaises(ValueError):
+            published_dependency_problems(*self.closed_products('2026-11-03'),
+                dict(self.INTRADAY_QUOTES,previous_session=None),self.MID_SESSION)
+
+
+class SettlementGapTests(unittest.TestCase):
+    """新鲜度按「日历要求的收盘场」判，不按墙钟。两种误报都是现场踩出来的。"""
+
+    def test_an_old_but_matching_close_is_not_stale(self):
+        # 周五 20:40 的收盘快照挂到周日已经 37 小时：e2e 原来的 age<=26
+        # 在周末必红，而恒红的门禁和恒绿一样没有信息量。
+        self.assertIsNone(settlement_gap("行情停更", "2026-11-20", "2026-11-20"))
+
+    def test_a_live_session_row_is_not_a_missing_previous_close(self):
+        # 2026-11-20T19:57 UTC 看门狗现场：行情已是当日盘中版，旧判据只看
+        # intraday is True，于是喊「11-19 收盘数据缺失」并白派一次收盘补采。
+        self.assertIsNone(settlement_gap("行情停更", "2026-11-20", "2026-11-19", intraday=True))
+
+    def test_the_due_session_must_have_landed_as_a_close(self):
+        self.assertEqual(
+            settlement_gap("行情停更", "2026-11-20", "2026-11-20", intraday=True),
+            "行情停更：2026-11-20 收盘快照未落地（仍是盘中版）")
+
+    def test_a_product_older_than_the_due_session_is_stale(self):
+        # 预览停在 11-18、应收盘场已到 11-20：文案必须带「预览停更」，
+        # selfheal 靠它把重算派发到 live-strategy.yml。
+        message = settlement_gap("预览停更", "2026-11-18", "2026-11-20")
+        self.assertIn("预览停更", message)
+        self.assertIn("缺 2026-11-20 收盘场", message)
+
+    def test_without_a_due_session_the_rule_stays_silent(self):
+        # 日历不可用时返回 None 不等于放行：调用方必须自己退回墙钟兜底
+        # 并把判据打印出来（见 DueSessionTests）。
+        self.assertIsNone(settlement_gap("行情停更", "2026-11-20", ""))
+
+
+class DueSessionTests(unittest.TestCase):
+    """用仓库里那份已复核日历跑真日期，判据边界不靠假数据支撑。"""
+
+    def test_weekend_reports_the_last_real_session(self):
+        self.assertEqual(e2e_check.due_session(dt.datetime(2026, 11, 22, 9, tzinfo=dt.timezone.utc)),
+                         ("2026-11-20", ""))
+
+    def test_a_session_inside_the_settlement_grace_is_not_yet_due(self):
+        # 2026-11-20 收盘 21:00 UTC，宽限到 22:30；22:00 时收盘补采还在路上，
+        # 这时判「停更」就是拿门禁去追一个还没来得及到的产物。
+        due, note = e2e_check.due_session(dt.datetime(2026, 11, 20, 22, tzinfo=dt.timezone.utc))
+        self.assertEqual(due, "")
+        self.assertIn("结算宽限", note)
+
+    def test_midweek_afternoon_still_demands_yesterday(self):
+        self.assertEqual(e2e_check.due_session(dt.datetime(2026, 11, 20, 15, tzinfo=dt.timezone.utc)),
+                         ("2026-11-19", ""))
+
+    def test_an_unusable_calendar_says_so_instead_of_passing(self):
+        due, note = e2e_check.due_session(dt.datetime(2031, 6, 4, 15, tzinfo=dt.timezone.utc))
+        self.assertEqual(due, "")
+        self.assertTrue(note)
 
 
 if __name__ == '__main__':

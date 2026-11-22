@@ -221,14 +221,25 @@ class WatchdogEarlyDetectionTests(unittest.TestCase):
         self.assertFalse(any("盘中快照缺失" in p for p in problems),
                          "开盘宽限期内误报: %r" % problems)
 
-    def _dependency_doc(self, intraday):
+    def _dependency_doc(self, intraday, last_closed=True):
         q = {"ts": "2026-11-10T14:33:00Z", "session": "2026-11-10",
              "previous_session": "2026-11-09", "version": "v-test",
              "ok": True, "intraday": intraday,
              "quotes": {"SPY": {"as_of": "2026-11-10T14:33:00+00:00"}}}
         datasets = {k: {"ok": True} for k in watchdog_site_check.REQUIRED}
-        datasets.update({"quotes": q, "equity": {}, "b/equity": {},
-                         "preview": {}, "b/preview": {}})
+        # 收盘产物的真实形状：上一已收盘场次的结果，版本落后于盘中报价、
+        # fresh_until 按下一开盘设定。原先这里图省事填 {}（＝根本没有数据），
+        # 于是「盘中不报版本差」被写成了「盘中什么都不看」，预览连停两场也照样绿。
+        products = ({
+            "last_session": "20261109", "session": "2026-11-09",
+            "quote_version": "v-old", "reference_version": "ref",
+            "top": [{}, {}, {}],
+            "source_as_of": "2026-11-09T21:30:00Z",
+            "as_of_ts": "2026-11-09T21:30:00Z",
+            "fresh_until": "2026-11-10T14:30:00Z"} if last_closed else {})
+        for key in ("equity", "b/equity", "preview", "b/preview"):
+            datasets[key] = dict(products)
+        datasets["quotes"] = q
         meta = {k: {"updated_at": "2026-11-10T14:33:00+00:00"}
                 for k in ("equity", "b/equity", "preview", "b/preview")}
         return {"schema": 1, "source": "turso-http",
@@ -236,12 +247,24 @@ class WatchdogEarlyDetectionTests(unittest.TestCase):
                 "datasets": datasets, "meta": meta}
 
     def test_intraday_snapshot_does_not_flag_equity_version_gap(self):
-        # 盘中 run-guard 明确跳过净值/预览，版本落后是设计而非故障
+        # 盘中 run-guard 明确跳过净值/预览，版本落后是设计而非故障；
+        # 判据换成「场次是否等于上一收盘场」之后，这条依然必须成立。
         problems = watchdog_site_check.snapshot_problems(
             self._dependency_doc(True), at("2026-11-10T15:00:00+00:00"))
         self.assertFalse(any("收益基准落后" in p or "次年预览未跟随" in p
                              for p in problems),
                          "盘中误判净值停更会触发告警+无效自愈空转: %r" % problems)
+
+    def test_intraday_snapshot_still_flags_a_missing_close_result(self):
+        # 但盘中也不是免检：上一收盘场压根没产出（2026-11-21 预览停在 11-18）
+        # 必须当场报出来，否则停更要等到 96 小时时效阈值才被发现。
+        problems = watchdog_site_check.snapshot_problems(
+            self._dependency_doc(True, last_closed=False),
+            at("2026-11-10T15:00:00+00:00"))
+        self.assertTrue(any("收益基准落后" in p for p in problems),
+                        "盘中放过净值缺场，停更就只剩 96 小时兜底: %r" % problems)
+        self.assertTrue(any("次年预览未跟随" in p for p in problems),
+                        "盘中放过预览缺场: %r" % problems)
 
     def test_closed_snapshot_still_flags_equity_version_gap(self):
         # 收盘后净值没跟上就是真故障，必须保留告警与自愈能力

@@ -147,4 +147,4 @@
 **待办（需外部数据源）**：
 1. 用权威复权序列（或拆股事件表 + 连续性校验）重建 static/bars_monthly.json；
 2. 补全 1209 只历史成分的 point-in-time GICS；
-3. 重建后重跑 ariant_b.py，用 BASELINE_UPDATE=1 提升基线，并复核 A/B 同持仓同年收益一致。
+3. 重建后重跑 variant_b.py，用 BASELINE_UPDATE=1 提升基线，并复核 A/B 同持仓同年收益一致。

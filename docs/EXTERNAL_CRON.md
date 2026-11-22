@@ -139,5 +139,8 @@ background worker 停用、GitHub API 全局不可达。任一情况下，前 3 
 - GitHub cron 仍不保证字面准点；可靠性来自
   「任意一次运行都对账 → 缺什么补什么 → 幂等去重 → 失败重试」，
   而不是某一条定时器更准。
-- `collect-full.yml` / `collect-ci.yml` / `backfill-prices.yml` 的周期失败
-  属历史回填链路（数据源限流 / 付费墙 / 完整历史门禁），与日更和心跳无关。
+- `collect-full.yml` / `collect-ci.yml` 的周期失败属历史回填链路（数据源限流 /
+  付费墙 / 完整历史门禁），与日更和心跳无关。`backfill-prices.yml` 自 2026-11-22
+  起没有定时（每天 22 次 Alpha Vantage 调用与 daily-backfill 抢同一把 key，且 6/6
+  全红、产物 0 文件），只剩手动派发；库内心跳 `trade-reconcile-tick` 的投递目标是
+  `reconcile.yml`（`external_heartbeat.py:54`），另有测试禁止把采集工作流写进安装 SQL。

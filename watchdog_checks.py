@@ -97,6 +97,28 @@ def history_problems(report, now, *, frozen=False):
     return problems
 
 
+def settlement_gap(label, got, due, intraday=False):
+    """按「日历要求的最近收盘场」判新鲜度，不看墙钟。返回问题文案或 None。
+
+    墙钟判据两头都错，两头都实测过：
+    · 周五 20:40 的收盘快照到周日已 37 小时，任何 ≤26h 的阈值在周末/长假
+      必然假红——一条天天红着的门禁和天天绿着一样没有信息量。
+    · 反过来「服务中的是盘中版就是停更」在每个交易日下午假红：11-20 19:57
+      UTC 行情已是当日盘中版，看门狗却喊「11-19 收盘数据缺失」并白派一次
+      收盘补采（11-19 那场早已采过，只是被新行覆盖了 singleton）。
+    got>due 是正在进行、尚未到结算时点的场次，不属于停更；是否卡住由调用方
+    按盘中时效单独判，不能混进这条按场次的判据里。
+    """
+    got, due = str(got or ''), str(due or '')
+    if not due:
+        return None
+    if got < due:
+        return '%s：缺 %s 收盘场（当前 %s）' % (label, due, got or '无')
+    if got == due and intraday:
+        return '%s：%s 收盘快照未落地（仍是盘中版）' % (label, due)
+    return None
+
+
 def published_dependency_problems(equity, preview, quotes, now=None):
     """A healthy quote worker does not prove dependent calculations advanced."""
     if not isinstance(quotes,dict) or not quotes.get('version') or not quotes.get('session'):
@@ -113,13 +135,28 @@ def published_dependency_problems(equity, preview, quotes, now=None):
         except (ValueError,TypeError):return False
     settled=str((equity or {}).get('last_session','')).replace('-','')
     allowed={str(quotes.get(k,'')).replace('-','') for k in ('session','previous_session')}
-    if not settled or settled not in allowed or not current(equity):
+    # 盘中快照按设计不重算净值与次年预览（run_guard：「盘中快照，净值/预览只在
+    # 收盘场次计算」），所以拿本场 quote_version / fresh_until 去量收盘产物必然
+    # 不成立——fresh_until 就设在下一次开盘，盘中永远已经过期。收盘产物的正确
+    # 场次是行情自己带回来的「上一收盘场」，与日历无关。
+    # 2026-11-21：原先为了躲开这个必不成立，调用方在盘中把整条依赖校验丢掉，
+    # 于是预览连着两场没产出（停在 11-18、行情已到 11-20）看门狗仍然全绿。
+    # 改成按场次判定之后，盘中既不误报版本落后，也不再放过真正的停更。
+    if quotes.get('intraday') is True:
+        last_closed=str(quotes.get('previous_session') or '').replace('-','')
+        if not last_closed:
+            raise ValueError('盘中报价快照缺少上一收盘场次，无法核验净值与预览')
+        def connected(payload, got):
+            return got == last_closed
+    else:
+        def connected(payload, got):
+            return got in allowed and bool(current(payload))
+    if not settled or not connected(equity, settled):
         problems.append('收益基准落后于可衔接报价场次')
     if isinstance(equity,dict) and equity.get('market_advice_error'):
         problems.append('大盘建议缺少已核验的月末价格')
     if (not isinstance(preview,dict) or not preview.get('reference_version')
-            or not current(preview)
-            or preview.get('session')!=quotes['session']
+            or not connected(preview, str(preview.get('session') or '').replace('-',''))
             or not isinstance(preview.get('top'),list) or len(preview['top'])!=3):
         problems.append('次年预览未跟随当前报价版本完成核验')
     return problems
