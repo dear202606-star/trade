@@ -42,8 +42,10 @@ jobs:
       - name: 安装依赖
         run: pip install -q -r requirements.txt
 
-      - name: 档案隔离与选源口径回归
-        run: python -m unittest test_source_selection test_historical_backfill_guards
+      - name: 档案隔离、选源口径与中继选择回归
+        # test_yahoo_relay_selection 押的是下面 fill_yahoo_gaps 的两条不变量
+        # （最完整的响应胜出、一轮扫完机群）；CI 用显式模块列表，不列就等于不跑。
+        run: python -m unittest test_source_selection test_historical_backfill_guards test_yahoo_relay_selection
 
       - name: 写入数据库口令
         env:

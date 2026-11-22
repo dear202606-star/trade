@@ -16,6 +16,15 @@ These tests pin the two invariants the fix rests on: the *most complete* respons
 wins, and one sweep covers every channel exactly once — stopping early as soon as
 a response already reaches the start of the requested window, so traffic cannot
 grow for symbols that were served correctly on the first try.
+
+The next round of evidence (dispatch 44914876045) took failures 135→67 but renamed
+what was left: `HTTP 400` from codetabs plus 「月份不足（2/11）」. Both come from the
+inner query being hung on the proxy's *own* URL, so Yahoo receives a parameter-less
+chart request; and the delisted case answers HTTP 200 with the verdict inside
+`chart.error`, which the old code hit as a TypeError and mistook for a dead channel.
+So a sweep must also emit one correctly encoded URL per channel, and an authoritative
+"no data" must stop rotating and reach the absence branch — otherwise 65 delisted
+symbols keep paying for a sweep that can never produce anything.
 """
 import datetime as dt
 import json
@@ -46,6 +55,16 @@ def month_range(start, count):
     return out
 
 
+def not_found_body():
+    """Yahoo's own verdict for a delisted code, carried in an HTTP 200 body.
+
+    2026-11-21 取证（WFM 经 allorigins）：状态码是 200，缺席写在 chart.error 里，
+    result 为 null。旧代码对 result 下标抛 TypeError，被当成通道故障继续轮换。
+    """
+    return json.dumps({"chart": {"result": None, "error": {
+        "code": "Not Found", "description": "No data found, symbol may be delisted"}}})
+
+
 class RelaySelection(unittest.TestCase):
     def setUp(self):
         YF._cooldown.clear()
@@ -60,8 +79,13 @@ class RelaySelection(unittest.TestCase):
         base.update(overrides)
         return base
 
-    def serve(self, by_channel):
-        """Patch urlopen so each named channel answers with text or an exception."""
+    def serve(self, by_channel, urls=None):
+        """Patch urlopen so each named channel answers with text or an exception.
+
+        `urls` collects the full request URL of every call, in the same order as
+        `seen`, so a test can assert on how the query was assembled rather than
+        only on which channel answered.
+        """
         seen = []
 
         class Response:
@@ -80,6 +104,8 @@ class RelaySelection(unittest.TestCase):
                 raise AssertionError("url matches no channel: " + url[:70])
             self.assertIn(channel, by_channel, "unexpected channel in rotation")
             seen.append(channel)
+            if urls is not None:
+                urls.append(url)
             payload = by_channel[channel]
             if isinstance(payload, Exception):
                 raise payload
@@ -161,6 +187,55 @@ class RelaySelection(unittest.TestCase):
         self.assertTrue(YF.reaches_window_start({"2009-06": (1., 1.)}))
         self.assertFalse(YF.reaches_window_start({"2025-08": (1., 1.)}))
         self.assertFalse(YF.reaches_window_start({}))
+
+    def test_proxy_receivers_get_their_inner_query_encoded_whole(self):
+        # 一次全机群扫挂，就能同时看到 5 条通道各自拼出的 URL。
+        # 旧写法 `tpl % sym + "&" + qs` 把 period1/period2 挂在代理自己的 query 上，
+        # Yahoo 收到的是无参 chart 请求——codetabs 稳定 400，偶尔只回两三根月线。
+        urls = []
+        handler, seen = self.serve(self.fleet(), urls)
+        with handler:
+            YF.fetch("AAPL")
+        proxied = {name: url for name, url in zip(seen, urls)
+                   if "?quest=" in url or "?url=" in url}
+        self.assertEqual(sorted(proxied), ["allorigins", "codetabs"])
+        for name, url in proxied.items():
+            self.assertIn("%3Fperiod1%3D", url, name)
+            self.assertNotIn("&period2=", url, "%s 把区间参数漏在了外层" % name)
+        plain = [url for name, url in zip(seen, urls) if name not in proxied]
+        self.assertEqual(len(plain), len(YF.CHANNELS) - 2)
+        for url in plain:
+            self.assertIn("?period1=", url)
+
+    def test_yahoo_symbol_spelling_reaches_every_channel(self):
+        # _sym 只在下标处生效过一次；代理通道的 %s 同样得吃 BRK-B，否则退市 B 股查无此人。
+        urls = []
+        handler, _ = self.serve(self.fleet(), urls)
+        with handler:
+            YF.fetch("BRK.B")
+        self.assertEqual(len(urls), len(YF.CHANNELS))
+        for url in urls:
+            self.assertIn("BRK-B", url)
+            self.assertNotIn("BRK.B", url)
+
+    def test_absence_in_a_200_body_is_the_authoritative_kind(self):
+        # 状态码 200 不代表拿到了数据：result 为 null + chart.error 必须是缺席，
+        # 而不是「通道故障、冷却 15 秒再试」——后者让退市票每 6 小时白烧一轮流量。
+        fourth = YF.CHANNELS[3][0]
+        handler, seen = self.serve(self.fleet(
+            **{FIRST: OSError("down"), fourth: not_found_body()}))
+        with handler:
+            with self.assertRaises(YF.SymbolNotFound):
+                YF.fetch("WFM")
+        self.assertEqual(len(seen), 4)                 # 扫到缺席即止，不在余下通道续烧
+
+    def test_absence_in_a_200_body_keeps_the_partial_evidence(self):
+        fourth = YF.CHANNELS[3][0]
+        handler, _ = self.serve(self.fleet(
+            **{FIRST: bars_json(month_range("2025-08", 5)), fourth: not_found_body()}))
+        with handler:
+            got = YF.fetch("WFM")
+        self.assertEqual(len(got), 5)                  # 交给校验判「月份不足（5）」
 
 
 if __name__ == "__main__":

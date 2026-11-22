@@ -9,6 +9,7 @@ import datetime as dt
 import json
 import re
 import time
+import urllib.parse
 import urllib.request
 
 UA = {"User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -52,6 +53,17 @@ class SymbolNotFound(Exception):
     """
 
 
+class _NoData(Exception):
+    """Yahoo 在响应体里判定该代码无数据，与通道故障是两种性质。
+
+    状态码指望不上：经 allorigins 实测（2026-11-21 取证 WFM）回的是 HTTP 200 +
+    {"chart":{"result":null,"error":{"code":"Not Found",
+     "description":"No data found, symbol may be delisted"}}}。旧代码直接对
+    result 下标，抛的是 TypeError，被当成通道故障冷却 15 秒继续轮换，于是
+    退市票既补不出东西、也永远进不了结案分支。
+    """
+
+
 def _q(sym):
     return ("?period1=%d&period2=%d&interval=1mo&events=div%%2Csplit"
             % (PERIOD1_EPOCH, int(time.time())))
@@ -64,7 +76,10 @@ def _parse(text, channel):
         if not m:
             return {}
         text = m.group(0)
-    d = json.loads(text)["chart"]["result"][0]
+    d = json.loads(text)["chart"]
+    if d.get("error"):
+        raise _NoData(d["error"].get("code") or "error")
+    d = d["result"][0]
     ts = d.get("timestamp") or []
     adj = (d["indicators"].get("adjclose") or [{}])[0].get("adjclose") or []
     close = (d["indicators"].get("quote") or [{}])[0].get("close") or []
@@ -92,6 +107,9 @@ def fetch(sym, tries=SWEEP_TRIES):
     把这种截断当成成功并立刻返回，于是补历史作业每 6 小时取回同样的 5 个月、
     被校验整批判成「月份不足」、下次原样重演，0 行入库。只有先识别「这不是
     完整窗口」，才谈得上判断某只票到底是拿不到还是被截断。
+
+    「截断」有两个来源：代理自己把 period1/period2 丢了，以及我们把参数拼到了
+    代理的外层 query 上（Yahoo 因此收到无参请求）——后者见下面拼 URL 处的注释。
     """
     tail = _q(sym)
     best = {}
@@ -103,9 +121,11 @@ def fetch(sym, tries=SWEEP_TRIES):
             continue
         qs = tail[1:] if tail.startswith("?") else tail
         if "?quest=" in tpl or "?url=" in tpl:
-            import urllib.parse as _up
-            url = (tpl % sym) + "&" + qs if "?quest=" in tpl else \
-                  (tpl % sym) + _up.quote("?" + qs, safe="")
+            # 内层查询必须整体编码。旧写法把 period1/period2/interval 直接拼在
+            # 代理自己的 query 上，Yahoo 收到的是无参 /v8/finance/chart/SYM：
+            # codetabs 稳定 400 Bad Request，偶尔也只回默认区间的两三根月线
+            # （实测 SATS 2 根、SPLS 11 根，正是 CI 里的「月份不足（2/11）」）。
+            url = (tpl % _sym(sym)) + urllib.parse.quote("?" + qs, safe="")
         else:
             url = (tpl % _sym(sym)) + tail
         if name == "translate":
@@ -118,6 +138,9 @@ def fetch(sym, tries=SWEEP_TRIES):
                 return out                  # 历史已取全，换通道不可能更好
             if len(out) > len(best):
                 best = out                  # 截断响应留着，好过空手而归
+        except _NoData:
+            absent = True
+            break
         except Exception as e:
             s = str(e)
             if "429" in s:
