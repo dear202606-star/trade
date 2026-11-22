@@ -11,7 +11,11 @@ name: 看门狗（停更告警）
 
 on:
   schedule:
-    - cron: "5 * * * *"      # 每小时一次
+    - cron: "5 * * * *"      # 声明每小时一次；实测交付只有 3~4 次/天（见下方盲区步骤）
+    # 收盘后 90 分钟是最关键的一刻（snapshot_problems 的场次判据靠它当场发现停更），
+    # 而随机挤掉的定时很可能正好错过这个窗口。22:20 UTC = 美东 17:20（EST 收盘后
+    # 140 分钟 / EDT 收盘后 200 分钟），单独钉一次，让最要紧的窗口多一次机会。
+    - cron: "20 22 * * 1-5"
   workflow_dispatch:
 
 permissions:
@@ -54,6 +58,27 @@ jobs:
         if: always()
         id: check
         run: python watchdog_site_check.py
+
+      - name: 监控盲区自陈（看门狗自己多久没跑）
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 这个作业存在的理由是「覆盖压根没跑这个盲区」，可它自己也是被调度的：
+          # 实测 cron 声明每小时，GitHub 队列挤掉后只交付 3~4 次/天（2026-11-15~22
+          # 每天 2~4 条运行记录）。盲区本身不是页面数据故障，所以绝不判失败——
+          # 按当前交付率那样做只会得到恒红；但超过半天无人核验必须留得下名字。
+          PREV=$(gh run list --workflow watchdog.yml --limit 8 --json createdAt,status \
+                 --jq '[.[]|select(.status=="completed")][0].createdAt // empty')
+          if [ -z "$PREV" ]; then
+            echo "::warning::读不到上一次看门狗运行记录，监控盲区无法评估"
+            exit 0
+          fi
+          GAP_H=$(( ( $(date -u +%s) - $(date -u -d "$PREV" +%s) ) / 3600 ))
+          echo "距上一次看门狗运行 ${GAP_H} 小时（cron 声明：每小时）"
+          if [ "$GAP_H" -gt 8 ]; then
+            echo "::warning::看门狗已 ${GAP_H} 小时未运行，期间页面读数无人核验（场次停更由 场次对账 / 在线净值 兜住）"
+          fi
 
       - name: 自动自愈（仅白名单幂等动作，带冷却）
         if: always()
