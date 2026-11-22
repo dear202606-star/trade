@@ -1517,9 +1517,22 @@
        在严格模式、模块化和测试沙箱里都一致。 */
     var api = window.DSH;
     if (!api) return;
+    /* health 数据集的有效期（小时）：它是站点全量构建时的体检快照，超过一天
+       就说不清现在的状况。与 watchdog_site_check.HEALTH_MAX_AGE_H 同一条口径。 */
+    var HEALTH_MAX_AGE_H = 26;
     api.json("health", null)
       .then(function (h) {
-        if (!h || h.status === "ok") { api.clearNotice("health"); return; }
+        /* health 是「站点全量构建那一刻」的体检快照：由 site_build.py 产出，只有
+           手动派发的全量更新作业会刷新（2026-11-22 线上这份 checked_at 停在 11-03）。
+           它记的却全是行情停更、净值末点过期这类有时效的事实，过期之后既不能报警，
+           也不能用来宣布一切正常。页面此刻新旧与否由 dataStatus 的场次判据负责。
+           读不出 checked_at 时照旧报警：时间戳是产出方必写字段，缺了就当它是
+           刚产出的，宁可吵也不静默——判据与 watchdog_site_check 同一条。 */
+        const age = h && api.ageHours(h.checked_at);
+        if (!h || h.status === "ok" || (age !== null && age > HEALTH_MAX_AGE_H)) {
+          api.clearNotice("health");
+          return;
+        }
         api.reportNotice("health", "warn",
           "数据异常：" + (h.issues || []).join("；") +
           (h.quotes_ts ? "（行情 " + h.quotes_ts + " UTC）" : ""));

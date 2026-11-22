@@ -29,6 +29,11 @@ REQUIRED = {
 MIRROR_MAX_AGE_H = 72
 QUOTE_MAX_AGE_H = 72        # 覆盖周末与节假日
 RESULT_MAX_AGE_H = 96       # 净值/预览为日更计算结果
+# health 是「站点全量构建那一刻」的体检快照：site_build.py 产出，只有手动派发的
+# 每日全量更新作业会刷新（2026-11-22 线上这份 checked_at=2026-11-03）。它记的内容
+# 却全是行情停更、净值末点过期这类有时效的事实，照单全收等于把一条早已修好的旧
+# 问题永久钉成恒红。超过一天它就只是历史，现在的时效由上面的场次判据负责。
+HEALTH_MAX_AGE_H = 26
 
 
 def _parse(ts):
@@ -92,10 +97,15 @@ def load(url=None, timeout=25):
             "datasets": datasets, "meta": meta}
 
 
-def snapshot_problems(doc, now=None):
-    """返回问题列表；空列表代表数据链路健康。"""
+def snapshot_problems(doc, now=None, warnings=None):
+    """返回问题列表；空列表代表数据链路健康。
+
+    warnings 由调用方给一个列表：只有时效性不足以报警、但运维需要看见的
+    事项走这里，绝不混进 problems（恒红与恒绿一样是没有门禁）。
+    """
     now = now or dt.datetime.now(dt.timezone.utc)
     problems = []
+    warnings = warnings if warnings is not None else []
     if not isinstance(doc, dict) or doc.get("schema") != 1:
         return ["展示数据格式无效（schema 缺失或版本不符）"]
     if doc.get("source") not in ("postgres-direct", "turso-http"):
@@ -172,7 +182,17 @@ def snapshot_problems(doc, now=None):
         if not isinstance(issues, list) or any(not isinstance(x, str) for x in issues):
             problems.append("health.issues 无效")
         else:
-            problems.extend(x for x in issues if not x.startswith("行情"))
+            # 只有一份还说得出现状的体检才有资格报警。反过来，读不出 checked_at
+            # 不能当成「无发言权」——产出方漏一个字段就静默关掉报警，等于把门禁
+            # 的开关交给被门禁的那段代码，所以缺时间戳按新鲜处理、照常报警。
+            h_age = _age_hours(h.get("checked_at"), now)
+            if h_age is not None and h_age > HEALTH_MAX_AGE_H:
+                # 过期：只报「体检快照多久没刷新」，不替它转述一条可能早已修好的旧问题。
+                warnings.append("health 体检快照已 %.0f 小时未刷新，其 issues 不参与判定" % h_age)
+            else:
+                if h_age is None and issues:
+                    warnings.append("health 体检快照缺 checked_at，按新鲜处理并报警")
+                problems.extend(x for x in issues if not x.startswith("行情"))
         if h.get("status") not in ("ok", "degraded"):
             problems.append("health.status=%s" % h.get("status"))
         try:
@@ -197,7 +217,7 @@ def main():
     problems, warnings = [], []
     # ① 页面实际读到的备库数据
     try:
-        problems = snapshot_problems(load())
+        problems = snapshot_problems(load(), warnings=warnings)
     except Exception as exc:
         # 主库正常时页面仍可服务，备库短暂不可达只记 warning；
         # 真正的「备库不可达」由 ② 三库一致性回执判为 problem。

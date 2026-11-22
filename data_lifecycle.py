@@ -22,6 +22,7 @@
   FROZEN     历史冻结：2026-01-01 之前的已验收历史，不走采集管线；
              保留只读复核能力（可复核 ≠ 重新采集）
   MONTHLY    月频：月末基准收盘、成分股边界、市场建议
+  BUILD      随站点全量构建：不单独排期，产出方与消费方对时效各管一段
   DAILY      日频：收盘后一次性计算当日日线/净值/排名/预览
   INTRADAY   日内：仅交易时段，行情快照
   DERIVED    前端派生：由已加载数据即时计算，不落库、不抓取
@@ -63,6 +64,16 @@ LAYERS = {
         "completeness": "九个已核验月末 + 当月最新",
         "validity": "交易日历 sha256 绑定",
         "necessity": "市场建议/成分股边界按月变化，日更无意义",
+    },
+    "BUILD": {
+        "cadence": "随站点全量构建（当前只有手动派发的「每日全量更新」作业会跑）",
+        "fetch": "不单独抓取；site_build.py 产出时顺带刷新",
+        "display_ttl_h": 24,
+        "accuracy": "只描述构建那一刻的状态，过期即无发言权",
+        "timeliness": "无固定节律，消费方必须自带时效闸门",
+        "completeness": "构建产物齐全即可",
+        "validity": "checked_at 必须可解析且不超过 HEALTH_MAX_AGE_H",
+        "necessity": "运维留痕用；页面实时新旧一律由场次判据负责，不看这里",
     },
     "DAILY": {
         "cadence": "日频（收盘后）",
@@ -157,9 +168,12 @@ DATASETS = {
     "site_dataset": ("DAILY", "页面历史/静态展示数据集",
         "CI 构建产物 → 在线库单一写入口", "store",
         "site_dataset", "内容 sha256 相同则不更新"),
-    "health": ("DAILY", "数据体检与停更标记",
-        "质量核对结果", "analyze",
-        "site_dataset.health", "日更"),
+    "health": ("BUILD", "站点全量构建时的数据体检标记",
+        "site_build.py 在构建末尾核对行情/净值/持仓后写出", "analyze",
+        "site_dataset.health", "只有全量构建会刷新：2026-11-22 线上这份"
+        " checked_at 停在 11-03，而它记的全是行情停更这类有时效的事实。"
+        " 消费方（app.js 横幅、watchdog_site_check）超过 26 小时一律不采信，"
+        " 页面实时新旧由场次判据负责"),
 
     # ── INTRADAY：仅交易时段 ───────────────────────────────────────
     "quotes": ("INTRADAY", "实时行情快照（SPY + 持仓）",

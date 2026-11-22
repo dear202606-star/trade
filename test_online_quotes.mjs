@@ -381,6 +381,26 @@ test('genuine data-health issues still surface a warning instead of being silenc
   assert.match(nodes.serviceBanner.textContent,/数据异常/);
 });
 
+test('a stale health snapshot stops speaking for the page instead of a permanent red bar',async()=>{
+  // 2026-11-22 线上这份体检快照的 checked_at 停在 11-03（只有手动全量构建才刷新），
+  // 里面记的「净值末点过期」早在 11-09 就修好了。照单全收等于挂一条永不消失的红条，
+  // 而一条恒红的门禁和恒绿一样没有信息量。时效口径与 watchdog_site_check 一致。
+  const {document,nodes}=noticeDom();
+  const cfg={url:'https://example.supabase.co',key:'public-test-key',endpoints:[
+    {type:'supabase',url:'https://example.supabase.co',key:'public-test-key'}]};
+  const stale=new Date(Date.now()-72*3600*1000).toISOString();
+  const {dsh}=reader(async(url)=>{
+    if (url.includes('v_site_dataset?key=eq.health'))
+      return {ok:true,json:async()=>[{payload:{status:'degraded',
+        issues:['净值末点与已收盘日不一致'],checked_at:stale,
+        quotes_ts:'2026-11-03T13:00:00Z'}}]};
+    throw Error('unexpected call: '+url);
+  },async()=>({ok:true,json:async()=>cfg}),{document,pathname:'/index.html'});
+  await new Promise(r=>setTimeout(r,10));
+  assert.equal(nodes.serviceBanner,undefined,'过期体检快照仍在报警：%s'%JSON.stringify(nodes));
+  assert.equal(dsh.notices().health,undefined,'过期体检快照不得登记访客提示');
+});
+
 test('a missing auxiliary health key never marks the whole page offline',async()=>{
   const {dsh}=reader(async()=>({ok:false,status:503}),null,{pathname:'/index.html'});
   await new Promise(r=>setTimeout(r,10));

@@ -280,6 +280,74 @@ class WatchdogEarlyDetectionTests(unittest.TestCase):
                         "收盘后漏报预览未更新: %r" % problems)
 
 
+class HealthSnapshotAgeTests(unittest.TestCase):
+    """health 体检快照只有新鲜时才有发言权。
+
+    它是「站点全量构建那一刻」的快照，只由手动派发的全量更新作业刷新（2026-11-22
+    线上这份 checked_at 停在 11-03），记的却全是行情停更、净值末点过期这类有
+    时效的事实。照单全收会把一条早已修好的旧问题永久钉成恒红；反过来「读不出
+    checked_at 就不采信」又是另一头的坑——产出方丢一个字段就能静默关掉报警。
+    所以：确证过期才静音，缺时间戳按新鲜处理并另记一条 warning。
+    """
+
+    NOW = at("2026-11-22T22:00:00+00:00")
+    ISSUE = "净值末点与已收盘日不一致"
+
+    def _doc(self, health):
+        q = {"ts": "2026-11-20T21:00:00Z", "session": "2026-11-20", "ok": True,
+             "intraday": False, "previous_session": "2026-11-19",
+             "quotes": {"SPY": {"as_of": "2026-11-20T21:00:00+00:00"}}}
+        datasets = {k: {"ok": True} for k in watchdog_site_check.REQUIRED}
+        datasets.update(quotes=q, health=health,
+                        equity={"last_session": "20261119", "session": "2026-11-19",
+                                "quote_version": "v1", "position": [{"ticker": "SPY"}],
+                                "stats": {"strategy": 1.0}},
+                        preview={"session": "2026-11-19", "quote_version": "v1",
+                                 "top": [{}, {}, {}]})
+        for key in ("b/equity", "b/preview"):
+            datasets[key] = dict(datasets[key[len("b/"):]])
+        return {"schema": 1, "source": "turso-http",
+                "generated_at": "2026-11-20T21:00:00+00:00",
+                "datasets": datasets, "meta": {}}
+
+    def problems(self, health):
+        warnings = []
+        return (watchdog_site_check.snapshot_problems(self._doc(health), self.NOW,
+                                                     warnings), warnings)
+
+    def test_fresh_degraded_snapshot_still_alerts(self):
+        problems, warnings = self.problems(
+            {"status": "degraded", "issues": [self.ISSUE],
+             "checked_at": "2026-11-22T21:00:00Z"})
+        self.assertIn(self.ISSUE, problems, "新鲜体检快照的报警被吞掉了：%r" % problems)
+        self.assertEqual(warnings, [])
+
+    def test_stale_snapshot_is_muted_and_reported_as_a_warning(self):
+        problems, warnings = self.problems(
+            {"status": "degraded", "issues": [self.ISSUE],
+             "checked_at": "2026-11-03T13:00:00Z"})
+        self.assertNotIn(self.ISSUE, problems, "过期快照仍在替现状报警：%r" % problems)
+        self.assertTrue(any("health 体检快照已" in w for w in warnings),
+                        "静音必须留下可见痕迹，否则就是一条无人知晓的门禁：%r" % warnings)
+
+    def test_missing_checked_at_is_treated_as_fresh_not_silenced(self):
+        problems, warnings = self.problems({"status": "degraded", "issues": [self.ISSUE]})
+        self.assertIn(self.ISSUE, problems, "缺时间戳不得静默报警：%r" % problems)
+        self.assertTrue(any("缺 checked_at" in w for w in warnings), "%r" % warnings)
+
+    def test_unparseable_checked_at_is_treated_as_fresh(self):
+        problems, _warnings = self.problems(
+            {"status": "degraded", "issues": [self.ISSUE], "checked_at": "昨天下午"})
+        self.assertIn(self.ISSUE, problems, "%r" % problems)
+
+    def test_quote_issues_are_still_excluded_by_the_quote_gate(self):
+        # 行情时效由场次判据单独负责，体检快照里那条重复项不参与判定。
+        problems, _warnings = self.problems(
+            {"status": "degraded", "issues": ["行情 30 小时未更新"],
+             "checked_at": "2026-11-22T21:30:00Z"})
+        self.assertNotIn("行情 30 小时未更新", problems, "%r" % problems)
+
+
 class WorkflowContractTests(unittest.TestCase):
     """防止工作流层面的三处断点回退（纯文本解析，不依赖 PyYAML）。"""
 
