@@ -3,6 +3,8 @@ name: 采集与锁定（CI 主力，写库）
 # 目标：采集全部在 GitHub Actions（美国出口）完成，直接写库。
 # 依赖：仓库 secret SUPABASE_DB_PASSWORD（已验证可用）
 # 顺序：补数 → 重建选源 → 校验 → 锁新达标的标的
+# 补数步（stockanalysis / Yahoo）的失败不中断链路，改由末尾「采集故障收口」举红：
+# 缺月是两只票的事，不该让每晚的选源重建和锁校验一起 skipped。
 # 2026-11-07：加入 trade-pipeline 互斥组。此前本工作流与 collect-ci 无并发
 # 保护，而两者最终都写 prices_monthly（collect-ci 经 pg_cron promote_staging
 # 合并），存在并发 upsert 覆盖与锁判定竞态。
@@ -77,8 +79,15 @@ jobs:
               c.close()
           PY
 
+      # 采集类步骤的红是「已知补不出」（LIFE/TGNA 这类真缺月），不是链路坏了。
+      # 若在这里直接让作业终止，后面 重建选源/校验/初筛/事件/锁校验/结构冒烟 会被
+      # 整批 skipped（2026-11-22 run 45017902155、45007701439 实测），等于让两只票
+      # 冻结每晚的选源重建——正是单符号隔离决策要消灭的形态。所以这两步只记 outcome，
+      # 红由作业末尾的「采集故障收口」统一举：既不变绿，也不冻结下游。
       - name: stockanalysis 补缺（免费，10 年全收益）
+        id: stockanalysis
         if: ${{ github.event.inputs.sa_limit != '0' }}
+        continue-on-error: true
         env:
           SA_LIMIT: ${{ github.event.inputs.sa_limit }}
         run: |
@@ -90,6 +99,8 @@ jobs:
       # 这里不跑，否则每 6 小时跑一次会 4 倍超量、全部失败。
 
       - name: 给「选源非全收益」的标的补 Yahoo 全收益
+        id: yahoo
+        continue-on-error: true
         run: python fill_yahoo_gaps.py --limit 400 --max-seconds 900
 
       - name: 重建选源（每票单源）
@@ -127,3 +138,11 @@ jobs:
           print("series_selected %d 行 / %d 只 / 全收益 %.1f%% ｜ 已锁 %d 只 ｜ 校验失败 %d 条"
                 % (n, s, 100.0 * tr / max(1, n), lk, bad))
           PY
+
+      # 必须放在末尾：上面全跑完才有意义。红是真的（窗口内真缺月的票要人处置，
+      # 预演下一轮剩 LIFE、TGNA 两只），但红的位置不能挡住 nightly 重建选源。
+      - name: 采集故障收口（真缺口举红，但不冻结下游）
+        if: ${{ steps.stockanalysis.outcome == 'failure' || steps.yahoo.outcome == 'failure' }}
+        run: |
+          echo "::error::采集有未结案的真故障：stockanalysis outcome=${{ steps.stockanalysis.outcome }} yahoo outcome=${{ steps.yahoo.outcome }}（各步日志给了票名；已结案的可查 source_absence_acceptance）"
+          exit 1
