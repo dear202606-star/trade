@@ -102,14 +102,15 @@ def fetch(sym, tries=SWEEP_TRIES):
     """轮换取历史，返回覆盖最完整的一次；机群全部失败才返回 {}；
     Yahoo 权威判定不存在且一无所获时抛 SymbolNotFound。
 
-    代理通道经常把 period1/period2 丢掉，只回最近几根月线（实测同一请求
-    allorigins 回 203 根、translate 只回 5 根）。旧逻辑 `if out: return out`
-    把这种截断当成成功并立刻返回，于是补历史作业每 6 小时取回同样的 5 个月、
-    被校验整批判成「月份不足」、下次原样重演，0 行入库。只有先识别「这不是
-    完整窗口」，才谈得上判断某只票到底是拿不到还是被截断。
+    旧逻辑 `if out: return out` 把任何非空响应当成终点：某条通道 400、超时或只回
+    最近几根月线时，更好的通道根本不会被问起，补历史作业于是每轮取回同样的几个月、
+    被校验整批判成「月份不足」，0 行入库。现在只在覆盖回窗口起点时才提前返回，否则
+    一轮扫完机群取最完整的（通道差异是真的：同一请求 translate 回 AAPL 204 根，而
+    本机实测 codetabs 超时、allorigins 500、direct 403）。
 
-    「截断」有两个来源：代理自己把 period1/period2 丢了，以及我们把参数拼到了
-    代理的外层 query 上（Yahoo 因此收到无参请求）——后者见下面拼 URL 处的注释。
+    「只回几根」还有第二种含义，必须与通道故障分开：2026-11-22 实测 SATS 回 3 根、
+    BBBY 回 5 根，meta.firstTradeDate 分别是 2026-10 与 2026-07——重新上市后的历史
+    本来就这么长，源里没有，换任何通道都不会更多，靠重试永远补不出来。
     """
     tail = _q(sym)
     best = {}
@@ -122,9 +123,10 @@ def fetch(sym, tries=SWEEP_TRIES):
         qs = tail[1:] if tail.startswith("?") else tail
         if "?quest=" in tpl or "?url=" in tpl:
             # 内层查询必须整体编码。旧写法把 period1/period2/interval 直接拼在
-            # 代理自己的 query 上，Yahoo 收到的是无参 /v8/finance/chart/SYM：
-            # codetabs 稳定 400 Bad Request，偶尔也只回默认区间的两三根月线
-            # （实测 SATS 2 根、SPLS 11 根，正是 CI 里的「月份不足（2/11）」）。
+            # 代理自己的 query 上，Yahoo 收到的是无参 /v8/finance/chart/SYM，
+            # codetabs 因此稳定 400 Bad Request。但「只回几根月线」不能一律归给它：
+            # 2026-11-22 实测 SATS 回 3 根、BBBY 回 5 根，meta.firstTradeDate 分别是
+            # 2026-10 与 2026-07——重新上市的那段历史本来就只这么长，源里没有。
             url = (tpl % _sym(sym)) + urllib.parse.quote("?" + qs, safe="")
         else:
             url = (tpl % _sym(sym)) + tail

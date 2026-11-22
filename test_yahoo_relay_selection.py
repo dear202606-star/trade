@@ -1,30 +1,33 @@
 """Relay selection for the historical Yahoo backfill.
 
-2026-11-21: `fill_yahoo_gaps.py` runs every 6 hours and writes 0 rows. Measured
-against the live endpoints, the proxies regularly drop `period1/period2` and
-answer with the last few monthly bars (BBBY 5, EQR 2, APC 11 — the same numbers
-the CI job logs as "月份不足（5/2/11）"), while the identical request through
-another channel returns the whole window (SPY/T/AAPL: 203 bars). The old
-`if out: return out` treated a truncation as success and returned immediately, so
-a better channel was never consulted, `check_payload` rejected the stub, the job
-stayed red, and the next cycle paid the same egress for the same nothing.
+2026-11-21: `fill_yahoo_gaps.py` runs every 6 hours and writes 0 rows. The old
+`if out: return out` treated *any* non-empty response as the end of the search, so
+whichever channel answered first decided the result — a 400, a timeout or a partial
+window included — and a better channel was never consulted. `check_payload` then
+rejected the stub, the job stayed red, and the next cycle paid the same egress for
+the same nothing. Separately, `tries=4` over a 5-channel fleet with a global
+rotating cursor meant the channel that could answer went untried in a given call.
 
-Separately, `tries=4` over a 5-channel fleet with a global rotating cursor meant
-the channel holding the complete answer could go untried in a given call.
+Those two defects were real; the story told about them the first time was not. See
+the paragraph below, and keep the distinction: a sweep that returns the longest
+answer is only correct behaviour if a longer answer exists somewhere.
 
-These tests pin the two invariants the fix rests on: the *most complete* response
-wins, and one sweep covers every channel exactly once — stopping early as soon as
-a response already reaches the start of the requested window, so traffic cannot
-grow for symbols that were served correctly on the first try.
+These tests pin the invariants the fix rests on: the *most complete* response wins,
+and one sweep covers every channel exactly once — stopping early as soon as a
+response already reaches the start of the requested window, so traffic cannot grow
+for symbols that were served correctly on the first try.
 
 The next round of evidence (dispatch 44914876045) took failures 135→67 but renamed
-what was left: `HTTP 400` from codetabs plus 「月份不足（2/11）」. Both come from the
-inner query being hung on the proxy's *own* URL, so Yahoo receives a parameter-less
-chart request; and the delisted case answers HTTP 200 with the verdict inside
-`chart.error`, which the old code hit as a TypeError and mistook for a dead channel.
-So a sweep must also emit one correctly encoded URL per channel, and an authoritative
-"no data" must stop rotating and reach the absence branch — otherwise 65 delisted
-symbols keep paying for a sweep that can never produce anything.
+what was left: `HTTP 400` from codetabs plus 「月份不足」. They turned out to have
+different causes. The 400 is ours: the inner query was hung on the proxy's *own* URL,
+so Yahoo received a parameter-less chart request. The short answers are Yahoo's — SATS
+and BBBY report meta.firstTradeDate 2026-10 / 2026-07, i.e. relisted tickers whose
+history really does start after the window, so no channel can add months. And a
+delisted code answers HTTP 200 with the verdict inside `chart.error`, which the old
+code hit as a TypeError and mistook for a dead channel. So a sweep must emit one
+correctly encoded URL per channel, and an authoritative "no data" must stop rotating
+and reach the absence branch — otherwise 65 delisted symbols keep paying for a sweep
+that can never produce anything.
 """
 import datetime as dt
 import json
@@ -191,7 +194,7 @@ class RelaySelection(unittest.TestCase):
     def test_proxy_receivers_get_their_inner_query_encoded_whole(self):
         # 一次全机群扫挂，就能同时看到 5 条通道各自拼出的 URL。
         # 旧写法 `tpl % sym + "&" + qs` 把 period1/period2 挂在代理自己的 query 上，
-        # Yahoo 收到的是无参 chart 请求——codetabs 稳定 400，偶尔只回两三根月线。
+        # Yahoo 收到的是无参 chart 请求——codetabs 因此稳定 400 Bad Request。
         urls = []
         handler, seen = self.serve(self.fleet(), urls)
         with handler:
