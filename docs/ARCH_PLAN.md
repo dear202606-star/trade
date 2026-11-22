@@ -36,8 +36,8 @@
 2. 排名池覆盖 ≥98%，隔离票不得进入前 15 或正式持仓。
 3. official 恰 3 只、权重和 =1、行业 ≤60%、行业不得为空/Unknown/NaN。
 4. month 必须是最近完整自然月，趋势只用完整月计算。
-5. 锁定记录存在、hash 可重算、locked_at ≤ 排名月末+3天、alid_from ≤ today ≤ valid_to。
-6. 成分表 s_of ≥ today-35天，且 splits/members 双指纹一致。
+5. 锁定记录存在、hash 可重算、locked_at ≤ 排名月末+3天、valid_from ≤ today ≤ valid_to。
+6. 成分表 as_of ≥ today-35天，且 splits/members 双指纹一致。
 
 ## 二、目标架构
 

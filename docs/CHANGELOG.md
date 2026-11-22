@@ -1069,7 +1069,7 @@ EODHD 账号可用（凭据已改为环境变量注入，禁止写入文档；�
 B 全期由 +2687% 修正为 **+2893%**，年化 23.67%；2013+ 区间 **+3021%**。
 基线已显式提升（数据修正）。
 
-**仍待**：Alpha Vantage 覆盖 5/869，每日回填 22 只；alidate_prices.py 的覆盖率项在补齐前保持红。
+**仍待**：Alpha Vantage 覆盖 5/869，每日回填 22 只；validate_prices.py 的覆盖率项在补齐前保持红。
 
 ## v6.0 ｜ 2026-10-31 ｜ 接入权威复权数据源（Alpha Vantage）
 
@@ -1083,23 +1083,23 @@ B 全期由 +2687% 修正为 **+2893%**，年化 23.67%；2013+ 区间 **+3021%*
 - 试算证明修复有效：仅换 5 只票，2024 年收益即由 23.57% 修正为 **104.94%**，与口径 A 的 104.89% 吻合。
 
 **通道设计（历史异步）**
-- etch_prices.py：断点续传，每次补 22 只，产物 static/prices/<TICKER>.json 提交入库 → 可离线复现。
+- fetch_prices.py：断点续传，每次补 22 只，产物 static/prices/<TICKER>.json 提交入库 → 可离线复现。
 - .github/workflows/backfill-prices.yml：每天 03:10 UTC 自动回填 + 质量验收 + 提交。
-- alidate_prices.py：5 条验收（NVDA×2 / DUK / AMCR / 覆盖率 / 连续性）。
+- validate_prices.py：5 条验收（NVDA×2 / DUK / AMCR / 覆盖率 / 连续性）。
 - **覆盖率闸门**：新源 <95% 时整体回退旧快照，避免新旧混算导致数字漂移；约 40 天后自动切换。
 
 **待办**：在仓库 Secrets 添加 ALPHAVANTAGE_API_KEY（回填工作流需要）。
 
 ## v5.2 ｜ 2026-10-31 ｜ 第三轮整改（数据管线 P0）
 
-- **Windows 编码崩溃**：ariant_b / udit_b / reeze_* 在 cp936 下打印 emoji 会抛
-  UnicodeEncodeError（冻结落后时 ariant_b 直接崩溃、udit_b 全过却 rc=1）。统一改为 UTF-8 输出。
+- **Windows 编码崩溃**：variant_b / audit_b / freeze_* 在 cp936 下打印 emoji 会抛
+  UnicodeEncodeError（冻结落后时 variant_b 直接崩溃、audit_b 全过却 rc=1）。统一改为 UTF-8 输出。
 - **缺数据不再静默给错值**：year_perf 在无持仓或年末缺价时原来返回 -1.0 / 当作全年，
   现在抛错并终止，避免把 10 月价格当成 12 月。
 - **preview.as_of 对齐数据**：原来写行情时间（10-31），实际用的是冻结月线（2026-10），改为写 2026-10。
 
 **仍待处理（需数据源改造，已记入 KNOWN_ISSUES G10）**：
-reeze_bars 在干净环境不可复现（631/840 只，退市票唯一来源是本地被忽略的 data/sina2）；
+freeze_bars 在干净环境不可复现（631/840 只，退市票唯一来源是本地被忽略的 data/sina2）；
 datafeed.load_bars 无 TTL，panel/cache 会压过 live，跨年结转取不到新月份；
 拆股复权方向歧义导致的 A/B 同持仓收益矛盾。
 
@@ -1107,7 +1107,7 @@ datafeed.load_bars 无 TTL，panel/cache 会压过 live，跨年结转取不到�
 
 **修复**
 - **冬令时炸弹**：quotes.py 用固定 UTC-4，11-02 起与 equity.py（zoneinfo）每日分叉 → selftest 硬失败、收盘前后 70 分钟无法部署。改用 America/New_York。
-- **部署失败无告警**：lert 从 
+- **部署失败无告警**：alert 从 
 eeds: refresh 改为 
 eeds: [refresh, deploy]，并覆盖 cancelled()。
 - **新硬门禁 3 条**：当期收益必须由持仓权重独立复算（不再只与 stats 自证）、基线年份集合双向一致（删年即失败）、行情停更 >26h 直接失败（原来只警告）。门禁 82 → 85 项。
