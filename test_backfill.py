@@ -180,8 +180,8 @@ def self_heal_now():
 
 
 class WatchdogEarlyDetectionTests(unittest.TestCase):
-    def _doc(self, session):
-        q = {"ts": "2026-11-06T21:00:00Z", "session": session, "ok": True,
+    def _doc(self, session, ts="2026-11-06T21:00:00Z"):
+        q = {"ts": ts, "session": session, "ok": True,
              "quotes": {"SPY": {"as_of": "2026-11-06T21:00:00+00:00"}}}
         datasets = {k: {"ok": True} for k in watchdog_site_check.REQUIRED}
         datasets["quotes"] = q
@@ -192,33 +192,37 @@ class WatchdogEarlyDetectionTests(unittest.TestCase):
     def test_missing_last_close_is_reported_within_90_minutes(self):
         now = at("2026-11-10T13:00:00+00:00")
         problems = watchdog_site_check.snapshot_problems(self._doc("2026-11-06"), now)
-        self.assertTrue(any("2026-11-09 收盘数据缺失" in p for p in problems),
+        self.assertTrue(any("缺 2026-11-09 收盘场" in p for p in problems),
                         "未及早发现停更: %r" % problems)
         self.assertTrue(any("行情停更" in p for p in problems),
                         "自愈关键词未命中: %r" % problems)
 
     def test_matching_session_is_not_reported(self):
         now = at("2026-11-10T13:00:00+00:00")
-        problems = watchdog_site_check.snapshot_problems(self._doc("2026-11-09"), now)
-        self.assertFalse(any("收盘数据缺失" in p for p in problems),
+        problems = watchdog_site_check.snapshot_problems(
+            self._doc("2026-11-09", "2026-11-09T21:00:00Z"), now)
+        self.assertFalse(any("行情停更" in p for p in problems),
                          "数据已到位仍误报: %r" % problems)
 
     def test_no_intraday_gap_alert_for_latest_settled_close(self):
         problems = watchdog_site_check.snapshot_problems(
-            self._doc("2026-11-09"), at("2026-11-10T15:10:00+00:00"))
-        self.assertFalse(any("盘中快照缺失" in problem for problem in problems))
+            self._doc("2026-11-09", "2026-11-09T21:00:00Z"), at("2026-11-10T15:10:00+00:00"))
+        self.assertFalse(any("行情停更" in p for p in problems),
+                         "上一收盘场已结算仍误报: %r" % problems)
 
     def test_current_intraday_snapshot_is_not_flagged(self):
+        # 2026-11-20 19:57 UTC 实测：行情已是当日盘中版，旧判据却喊
+        # 「11-19 收盘数据缺失」并白派一次收盘补采。
         problems = watchdog_site_check.snapshot_problems(
-            self._doc("2026-11-10"), at("2026-11-10T15:10:00+00:00"))
-        self.assertFalse(any("盘中快照缺失" in p for p in problems),
+            self._doc("2026-11-10", "2026-11-10T14:33:00Z"), at("2026-11-10T15:10:00+00:00"))
+        self.assertFalse(any("行情停更" in p for p in problems),
                          "当日快照已到位仍误报: %r" % problems)
 
     def test_opening_grace_period_is_not_flagged(self):
         # 开盘后 35 分钟宽限，避免采集排队延迟被误判成故障
         problems = watchdog_site_check.snapshot_problems(
-            self._doc("2026-11-06"), at("2026-11-10T14:35:00+00:00"))
-        self.assertFalse(any("盘中快照缺失" in p for p in problems),
+            self._doc("2026-11-10", "2026-11-10T14:33:00Z"), at("2026-11-10T14:35:00+00:00"))
+        self.assertFalse(any("行情停更" in p for p in problems),
                          "开盘宽限期内误报: %r" % problems)
 
     def _dependency_doc(self, intraday, last_closed=True):
