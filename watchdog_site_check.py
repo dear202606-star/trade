@@ -12,7 +12,7 @@ import datetime as dt
 import json
 import urllib.request
 
-from watchdog_checks import history_problems, published_dependency_problems
+from watchdog_checks import history_problems, published_dependency_problems, settlement_gap
 
 SITE_CLOUD = "https://dear202606-star.github.io/trade/data/cloud.json"
 
@@ -130,15 +130,16 @@ def snapshot_problems(doc, now=None):
         # 72 小时阈值只用于兜底，太慢：11-09 收盘数据没采到时，直到 11-12
         # 才会告警。按已复核 NYSE 日历算出「最近一个已收盘交易日」，收盘后
         # 90 分钟仍没有该场次数据就立即告警，让 selfheal 当场补采。
-        # 周末/节假日 latest 仍是上一个交易日且 q.session 已匹配，不误报。
+        # 判据是「场次」不是「是不是盘中版」：周末 latest 仍是上一交易日且
+        # q.session 已匹配，不误报；工作日盘中行情已盖到当日，也不误报。
         try:
             import trading_window as tw
             latest = tw.latest_closed_session(now, tw.load_calendar())
             if latest and now >= latest["close"] + dt.timedelta(minutes=90):
-                expected, got = latest["session"], str(q.get("session") or "")
-                if got < expected or q.get("intraday") is True:
-                    problems.append("行情停更：%s 收盘数据缺失（当前 %s）"
-                                   % (expected, got))
+                gap = settlement_gap("行情停更", q.get("session"), latest["session"],
+                                     intraday=q.get("intraday") is True)
+                if gap:
+                    problems.append(gap)
         except Exception:
             pass  # 日历不可用时不额外告警，保留 72 小时兜底
         if not q.get("ok") or not (q.get("quotes") or {}).get("SPY"):

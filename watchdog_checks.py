@@ -97,6 +97,28 @@ def history_problems(report, now, *, frozen=False):
     return problems
 
 
+def settlement_gap(label, got, due, intraday=False):
+    """按「日历要求的最近收盘场」判新鲜度，不看墙钟。返回问题文案或 None。
+
+    墙钟判据两头都错，两头都实测过：
+    · 周五 20:40 的收盘快照到周日已 37 小时，任何 ≤26h 的阈值在周末/长假
+      必然假红——一条天天红着的门禁和天天绿着一样没有信息量。
+    · 反过来「服务中的是盘中版就是停更」在每个交易日下午假红：11-20 19:57
+      UTC 行情已是当日盘中版，看门狗却喊「11-19 收盘数据缺失」并白派一次
+      收盘补采（11-19 那场早已采过，只是被新行覆盖了 singleton）。
+    got>due 是正在进行、尚未到结算时点的场次，不属于停更；是否卡住由调用方
+    按盘中时效单独判，不能混进这条按场次的判据里。
+    """
+    got, due = str(got or ''), str(due or '')
+    if not due:
+        return None
+    if got < due:
+        return '%s：缺 %s 收盘场（当前 %s）' % (label, due, got or '无')
+    if got == due and intraday:
+        return '%s：%s 收盘快照未落地（仍是盘中版）' % (label, due)
+    return None
+
+
 def published_dependency_problems(equity, preview, quotes, now=None):
     """A healthy quote worker does not prove dependent calculations advanced."""
     if not isinstance(quotes,dict) or not quotes.get('version') or not quotes.get('session'):

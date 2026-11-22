@@ -19,8 +19,11 @@ import subprocess
 import sys
 import time
 import calendar
+import datetime as dt
 
 import requests
+
+from watchdog_checks import settlement_gap
 
 BASE = (sys.argv[1] if len(sys.argv) > 1 else
         "https://dear202606-star.github.io/trade/").rstrip("/") + "/"
@@ -28,6 +31,29 @@ H = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)", "Cache-Control":
 CB = str(int(time.time()))
 
 fails, oks, skips = [], [], []
+
+SETTLE_GRACE_MIN = 90   # 与 watchdog_site_check 同一条收盘结算宽限
+
+
+def due_session(now=None):
+    """返回 (日历要求的最近收盘场, 判据说明)。拿不到场次时场次为空、只回原因。
+
+    新鲜度必须按场次判：`age<=26` 的墙钟阈值把周五 20:40 的收盘快照算到周日
+    就成了「过期 37 小时」，周末/长假天天假红；而一条恒红的门禁和恒绿一样
+    没有信息量。日历不可用（覆盖不足/文件缺失）时退回墙钟，但必须把「按什么
+    判的」打印出来——判据本身不能是隐形的。
+    """
+    now = now or dt.datetime.now(dt.timezone.utc)
+    try:
+        import trading_window as tw
+        latest = tw.latest_closed_session(now, tw.load_calendar())
+    except Exception as exc:
+        return "", "交易日历不可用（%s）" % type(exc).__name__
+    if not latest:
+        return "", "交易日历未覆盖当前日期"
+    if now < latest["close"] + dt.timedelta(minutes=SETTLE_GRACE_MIN):
+        return "", "%s 仍在 %d 分钟结算宽限内" % (latest["session"], SETTLE_GRACE_MIN)
+    return latest["session"], ""
 
 
 def ok(msg):
@@ -277,13 +303,27 @@ def main():
                 # ts 是 UTC（带 Z），必须按 UTC 解析；此前用 mktime 当成本地时间
                 # 又多加了时区偏移，导致「更新于」虚高 8 小时
                 age = (time.time() - calendar.timegm(time.strptime(ts, "%Y-%m-%dT%H:%M:%SZ"))) / 3600
-                if age <= 26:
-                    ok("行情 %.1f 小时前更新" % age)
-                else:
-                    bad("行情已过期 %.0f 小时" % age)
             except Exception as exc:
                 # 时间戳解析不了就是「无法判断新鲜度」，不能静默当成通过。
                 bad("行情时间戳无法解析：%s（%s）" % (ts, type(exc).__name__))
+            else:
+                due, note = due_session()
+                gap = settlement_gap("行情停更", q.get("session"), due,
+                                     intraday=q.get("intraday") is True) if due else None
+                if gap:
+                    bad(gap)
+                elif due and str(q.get("session") or "") > due and age > 3:
+                    # 场次比应收盘场新＝正在进行、还没到结算时点，这不构成停更；
+                    # 但盘中一拍 30 分钟，停在 3 小时以上就是真断了，不能借
+                    # 「场次更新」一路放行。
+                    bad("盘中行情 %.1f 小时未更新（场次 %s）" % (age, q.get("session")))
+                elif due:
+                    ok("行情已到应收盘场 %s（场次 %s · %s 小时前）"
+                       % (due, q.get("session"), "%.1f" % age))
+                elif age <= 72:
+                    ok("行情 %.1f 小时前更新（按墙钟兜底：%s）" % (age, note))
+                else:
+                    bad("行情已过期 %.0f 小时（阈值 72，%s）" % (age, note))
         else:
             bad("行情快照缺少 ts，无法校验新鲜度")
 
