@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
-# DEPRECATED: 站点已改为单页结构，本脚本针对旧的多页结构，暂停使用。
-# 现行校验：selftest.py（数据）+ consistency_check.py（页面口径）
 """e2e_check.py — 上线后对「真实线上站点」做端到端校验
 
 不信任构建产物，只检查用户真正打开的那个 URL：
   · 页面可达、内容非空、关键区块存在
   · JSON 数据可解析、字段齐全、新鲜
   · 数字自洽（净值末值 = 1 + 收益；回撤为负；持仓数 = 3）
+  · 分年持仓与仓库里已提交的冻结快照逐字一致
   · 无「加载中…」「尚未生成」这类残留占位
+
+由 e2e.yml 在「网页发布」成功后与每天北京 07:00 各跑一次，是线上门禁。
 
 用法：python e2e_check.py [base_url]
 退出码 1 = 线上有问题。
 """
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -27,6 +29,7 @@ from watchdog_checks import settlement_gap
 
 BASE = (sys.argv[1] if len(sys.argv) > 1 else
         "https://dear202606-star.github.io/trade/").rstrip("/") + "/"
+SOURCE_ROOT = os.path.dirname(os.path.abspath(__file__))
 H = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)", "Cache-Control": "no-store"}
 CB = str(int(time.time()))
 
@@ -263,6 +266,49 @@ def data(name, optional=False):
             bad('在线数据 %s 读取失败：%s' % (name,type(exc).__name__))
         return None
 
+def frozen_picks(path=None):
+    """读仓库里已提交的冻结选股快照，返回 {年份字符串: [代码, …]}。
+
+    快照本来是 data("backtest_picks.json", optional=True) 从在线库读的，而在线
+    库里根本没有这个 key：Turso 只镜像前端会读的 14 个 key（export_site_snapshot
+    .STATIC_KEYS/RUNTIME_KEYS），主库 REST 又因出口配额整月 402。于是这条校验
+    每次都走 optional 跳过——「分年持仓被人改动」这个不变量一次都没真跑过。
+
+    读文件才对：output/backtest_picks.json 本来就随仓库提交，是 strategy_history.py
+    的唯一事实来源（读不到它该脚本直接 FATAL），checkout 之后无需任何出口流量，
+    而且校验的是「已复核、已提交的那一份」，不是线上副本。
+    """
+    path = path or os.path.join(SOURCE_ROOT, "output", "backtest_picks.json")
+    with open(path, encoding="utf-8") as handle:
+        payload = json.load(handle)
+    years = payload.get("years")
+    if not isinstance(years, dict) or not years:
+        raise ValueError('冻结选股快照缺少 years：%s' % path)
+    for year, holdings in years.items():
+        if not re.fullmatch(r'\d{4}', str(year)) or not isinstance(holdings, list) or not holdings:
+            raise ValueError('冻结选股快照形状异常：%s 年 → %r' % (year, holdings))
+    return years
+
+
+def picks_consistency(history, picks):
+    """已发布分年表的每一年都必须在冻结快照里，且持仓逐字相同（含顺序）。
+
+    缺一年也算不一致：快照才是基准，线上多出一段没有冻结依据的历史，
+    等于回测结果绕过了「已复核」这道关。
+    """
+    problems = []
+    for row in (history.get("years") or []):
+        year = str(row.get("year"))
+        frozen = picks.get(year)
+        if not frozen:
+            problems.append('%s 年不在冻结选股快照里（快照共 %d 年）' % (year, len(picks)))
+            continue
+        live = [p.get("ticker") for p in (row.get("holdings") or [])]
+        if list(frozen) != live:
+            problems.append('%s 年持仓与冻结快照不一致：%s vs %s' % (year, live, list(frozen)))
+    return problems
+
+
 def main():
     # 1. 单页结构
     page("", ["本期策略", "单日策略表现", "当年策略表现", "策略历年效果", "次年策略预览", "LEADER"])
@@ -423,16 +469,18 @@ def main():
             if abs(r.get("ret", 0)) > 5:
                 bad("%s 年收益异常：%.0f%%" % (r.get("year"), r["ret"] * 100))
 
-    # 分年表与曲线必须用同一批持仓
+    # 分年表与曲线必须用同一批持仓，且这批持仓必须就是冻结快照那一版
     if sh and cv:
-        picks = (data("backtest_picks.json", optional=True) or {}).get("years") or {}
-        if picks:
-            ok("选股快照已冻结（%d 年）" % len(picks))
-            for r in (sh.get("years") or []):
-                frozen = picks.get(str(r["year"]))
-                now = [p["ticker"] for p in r["holdings"]]
-                if frozen and list(frozen) != now:
-                    bad("%d 年持仓与冻结快照不一致：%s vs %s" % (r["year"], now, frozen))
+        try:
+            picks = frozen_picks()
+        except Exception as exc:
+            bad('分年持仓无法校验：%s' % exc)
+        else:
+            problems = picks_consistency(sh, picks)
+            for problem in problems:
+                bad(problem)
+            if not problems:
+                ok("分年持仓与冻结快照逐字一致（%d 年）" % len(sh.get("years") or []))
 
     print("=== 线上 E2E 校验 · %s ===" % BASE)
     for m in oks:
