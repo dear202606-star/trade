@@ -11,6 +11,7 @@
   A. 对象存在性：12 张表 + 关键视图
   B. 兼容视图与底层表行数一致
   C. anon 可读所有 CI 依赖对象（用 REST 实测）
+     C2. 同一件事的库内断言（has_table_privilege）——REST 被配额挡下时由它把关
   D. 无 legacy 残留
   E. 关键不变量：锁定 430、series 行数、选源覆盖
 
@@ -119,11 +120,35 @@ def check_consistency(cur):
         ok(a == b, "视图 %s 行数" % name, "%d vs %d" % (a, b))
 
 
+def check_grants(cur):
+    """anon 权限的库内断言——与 REST 实测同口径，但不受出口配额影响。
+
+    为什么要单独有这一条：REST 实测是这条不变量唯一的守门人，而网关一旦被
+    出口配额挡下（HTTP 402），它对「权限丢了」和「账户欠费」给出同一个拒答，
+    于是每晚必红、还把「汇总」和末尾的故障收口一起冻结——恒红等于没有门禁。
+    权限本身在 pg_class/pg_auth 里就能问出来，直连查一次零出口流量。
+    """
+    print("\n[C2] anon 权限（库内断言）")
+    cur.execute("select has_schema_privilege('anon', 'public', 'USAGE')")
+    ok(cur.fetchone()[0] is True, "anon 有 public USAGE")
+    arr = ",".join("'%s'" % o for o in REST_READABLE)
+    cur.execute("""select r, has_table_privilege('anon', 'public.' || r, 'SELECT')
+                   from unnest(ARRAY[%s]::text[]) r""" % arr)
+    lost = [r for r, can in cur.fetchall() if not can]
+    ok(not lost, "anon 可选 %d 个 CI 依赖对象" % len(REST_READABLE), "丢权限：%s" % lost)
+    cur.execute("""select coalesce(string_agg(p, ','), '') from (
+                     select p, has_table_privilege('anon', 'public.prices_monthly', p) granted
+                     from unnest(ARRAY['INSERT','UPDATE','DELETE','TRUNCATE']) p) t
+                   where granted""")
+    got = cur.fetchone()[0]
+    ok(got == "", "anon 不可写 prices_monthly", "已授予：%s" % got if got else "")
+
+
 def check_rest():
     print("\n[C] anon 可读（REST 实测）")
     cfg = json.load(io.open(os.path.join(BASE, "static", "cloud.json"), encoding="utf-8"))
     url, key = cfg["url"].rstrip("/"), cfg["key"]
-    bad = []
+    bad, restricted = [], []
     for obj in REST_READABLE:
         try:
             r = urllib.request.urlopen(urllib.request.Request(
@@ -132,12 +157,19 @@ def check_rest():
             if r.status != 200:
                 bad.append((obj, r.status))
         except urllib.error.HTTPError as e:
-            bad.append((obj, e.code))
+            (restricted if e.code == 402 else bad).append((obj, e.code))
         except Exception as e:
             bad.append((obj, str(e)[:30]))
     ok(not bad, "全部可读(%d 个)" % len(REST_READABLE), str(bad))
+    if restricted:
+        warn(False, "REST 网关被出口配额拒答（402）",
+             "%d/%d 个对象无法实测，anon 权限以 [C2] 库内断言为准"
+             % (len(restricted), len(REST_READABLE)))
 
     # 写权限必须关闭
+    if restricted:
+        warn(False, "anon 写探针无法核验", "网关 402 时拒答来自配额而非授权，改看 [C2]")
+        return
     try:
         req = urllib.request.Request(
             url + "/rest/v1/prices_monthly?symbol=eq.__probe__", method="PATCH",
@@ -150,6 +182,7 @@ def check_rest():
         ok(e.code in (401, 403), "anon 不能写 prices_monthly", "HTTP %d" % e.code)
     except Exception as e:
         warn(False, "anon 写测试异常", str(e)[:60])
+
 
 
 def check_invariants(cur):
@@ -185,6 +218,7 @@ def main():
     with c.cursor() as cur:
         check_structure(cur)
         check_consistency(cur)
+        check_grants(cur)
         if not a.quick:
             check_invariants(cur)
     c.close()
