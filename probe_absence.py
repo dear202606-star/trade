@@ -31,8 +31,9 @@ def _ym(epoch, fmt="%Y-%m"):
 
 def classify(text):
     """把正文分成三档：Yahoo 答话 / Yahoo 权威缺席 / 不是 Yahoo 在说话。"""
+    m = re.search(r"\{.*\}", text or "", re.S)      # jina 把 JSON 包在 markdown 里
     try:
-        chart = json.loads(text)["chart"]
+        chart = json.loads(m.group(0) if m else text)["chart"]
     except Exception:
         return "非 Yahoo 正文", " ".join((text or "").split())[:90]
     if chart.get("error"):

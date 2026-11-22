@@ -9,6 +9,7 @@ import datetime as dt
 import json
 import re
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 
@@ -150,6 +151,25 @@ def build_url(name, tpl, sym, tail):
     return url
 
 
+def yahoo_denies(exc):
+    """这条 404 是不是 Yahoo 亲口说的「查无此码」。
+
+    只有正文是 Yahoo 自己的 chart 信封、且 error 说话时才算裁决。代理自己回的 404
+    （Google 翻译拒绝转发、codetabs 的错误页）是通道故障：结案是 append-only 的，
+    拿一条网关的错误页去永久逐出一只票，等于让网关替供应商说话。
+
+    2026-11-22 逐通道取证（CI run 45029255176）：WPX/MMC/DNB/IGT/SWN/BIG 的 404
+    正文确实出自 Yahoo——direct 与 translate 同形回 "No data found, symbol may be
+    delisted"，同一时刻 AAPL 在两条通道都回 204 根。所以现有台账站得住，这条判据
+    守的是将来那种「只有代理在说话」的 404。读不出正文就按故障处理，结案不许取这种证据。
+    """
+    try:
+        chart = json.loads(exc.read().decode("utf-8", "replace"))["chart"]
+    except Exception:
+        return False
+    return bool(chart.get("error"))
+
+
 def fetch(sym, tries=SWEEP_TRIES):
     """轮换取历史，返回覆盖最完整的一次；机群全部失败才返回空 Bars；
     Yahoo 权威判定不存在且一无所获时抛 SymbolNotFound。
@@ -188,15 +208,17 @@ def fetch(sym, tries=SWEEP_TRIES):
             absent = True
             answered += 1                 # 答话了，而且答的是「查无此码」
             break
-        except Exception as e:
-            s = str(e)
-            if "429" in s:
-                _cooldown[name] = time.time() + 90
-            elif "404" in s:
-                # Yahoo 自己回答 Not Found（退市票），换通道也不会有；但更早通道
+        except urllib.error.HTTPError as e:
+            if e.code == 404 and yahoo_denies(e):
+                # Yahoo 亲口回答 Not Found（退市票），换通道也不会有；但更早通道
                 # 取到的片段仍要交给校验判断，不能退化成「空数据」丢掉证据。
                 absent = True
+                answered += 1
                 break
+            _cooldown[name] = time.time() + (90 if e.code == 429 else 15)
+        except Exception as e:
+            if "429" in str(e):
+                _cooldown[name] = time.time() + 90
             else:
                 _cooldown[name] = time.time() + 15
         else:

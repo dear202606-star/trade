@@ -30,8 +30,10 @@ and reach the absence branch — otherwise 65 delisted symbols keep paying for a
 that can never produce anything.
 """
 import datetime as dt
+import io
 import json
 import unittest
+import urllib.error
 from unittest.mock import patch
 
 import yahoo_fetch as YF
@@ -78,6 +80,16 @@ def empty_answer_body(first_trade="2026-03"):
     ts = int(dt.datetime.fromisoformat(first_trade + "-01T00:00:00+00:00").timestamp())
     return json.dumps({"chart": {"result": [{"timestamp": [], "meta": {"firstTradeDate": ts},
                                              "indicators": {}}], "error": None}})
+
+
+def proxy_404(body="<html>Google Translate has encountered an error</html>", url="https://x"):
+    """中转自己回的 404：状态码像裁决，正文却不是 Yahoo 在说话。
+
+    这种 404 永远不许写进结案台账。2026-11-22 逐通道取证（CI run 45029255176）
+    确认现有 136 条 provider_not_found 的正文确实出自 Yahoo（direct 与 translate
+    同形），台账成立；这条判据守的是网关替供应商说话的那种情形。
+    """
+    return urllib.error.HTTPError(url, 404, "Not Found", None, io.BytesIO(body.encode()))
 
 
 class RelaySelection(unittest.TestCase):
@@ -176,10 +188,11 @@ class RelaySelection(unittest.TestCase):
         # Yahoo's own "Not Found" (delisted symbol) means no relay can do better,
         # so the rotation must stop — but a partial taken earlier must survive for
         # check_payload to reject as "月份不足（5）" instead of degrading to "空数据".
+        # 状态码 404 本身不算裁决，正文必须是 Yahoo 自己的 chart.error（见 proxy_404）。
         fourth = YF.CHANNELS[3][0]
         handler, seen = self.serve(self.fleet(
             **{FIRST: bars_json(month_range("2025-08", 5)),
-               fourth: OSError("HTTP Error 404: Not Found")}))
+               fourth: proxy_404(not_found_body())}))
         with handler:
             got = YF.fetch("ATVI")
         self.assertEqual(len(got), 5)
@@ -190,11 +203,33 @@ class RelaySelection(unittest.TestCase):
         # 每 6 小时重试一次只是白烧流量；后者必须继续重试。
         fourth = YF.CHANNELS[3][0]
         handler, seen = self.serve(self.fleet(
-            **{FIRST: OSError("down"), fourth: OSError("HTTP Error 404: Not Found")}))
+            **{FIRST: OSError("down"), fourth: proxy_404(not_found_body())}))
         with handler:
             with self.assertRaises(YF.SymbolNotFound):
                 YF.fetch("BBY")
         self.assertEqual(len(seen), 4)                 # rotated on, then stopped at the 404
+
+    def test_a_relay_404_that_is_not_yahoos_answer_keeps_rotating(self):
+        # 中转自己回的 404（Google 翻译拒绝转发、codetabs 的错误页）不是「源里没有」：
+        # 下一条通道有整窗历史，必须照取。旧代码只看状态码就 break，等于让网关
+        # 替供应商说话：一只票就这样被记成权威缺席、永久逐出全收益补采。
+        third = YF.CHANNELS[2][0]
+        handler, seen = self.serve(self.fleet(
+            **{FIRST: proxy_404(), third: bars_json(month_range("2010-01", 200))}))
+        with handler:
+            got = YF.fetch("WPX")
+        self.assertEqual(len(got), 200)
+        self.assertEqual(len(seen), 3)                 # 没有把第一条通道的 404 当成裁决
+
+    def test_a_fleet_of_proxy_404s_is_an_outage_and_closes_nothing(self):
+        # 整群都回代理 404：一次「Yahoo 说了没有」的证据都没有，
+        # 那就只能是通道故障——结案判据不许从这里取证。
+        handler, seen = self.serve({name: proxy_404() for name, _ in YF.CHANNELS})
+        with handler:
+            got = YF.fetch("NEWCOMER")
+        self.assertEqual(len(seen), len(YF.CHANNELS))
+        self.assertEqual(len(got), 0)
+        self.assertEqual((got.attempts, got.answered), (len(YF.CHANNELS), 0))
 
     def test_requested_window_start_is_the_reach_reference(self):
         self.assertEqual(YF.WINDOW_START_MONTH, "2010-01")
