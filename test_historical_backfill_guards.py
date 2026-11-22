@@ -11,6 +11,8 @@ import fetch_stockanalysis as stockanalysis
 import fill_yahoo_gaps as backfill
 import lock_symbols
 import lock_stage
+import relay_source
+import source_absence as absence
 import validate_prices as validate
 import verify_locks
 import yahoo_fetch
@@ -650,6 +652,135 @@ class DecimalSpotRegression(unittest.TestCase):
             bad = validate.accept(self.Cur(self.answers(spot)))
         self.assertEqual(bad, 1, out.getvalue())
         self.assertIn('偏差过大', out.getvalue())
+
+
+class RelayChannelSuppression(unittest.TestCase):
+    """接力采集读结案台账：只停 Yahoo 这一条通道，绝不停整只票。
+
+    2026-11-22 取证：daily-backfill 单轮 65 条 `! SYM/yahoo_relay 失败 HTTP Error 404`，
+    而当日计划并集 91 只里 43 只早已按 price_only 结案。补采集合认得这张台账，
+    relay_source 一概不认得，于是同一批注定补不出的缺席每晚再打两轮。
+    放在本文件：CI 用显式模块列表跑测试（collect-full.yml:51），新文件等于没有测试。
+    """
+
+    def setUp(self):
+        self.connection = sqlite3.connect(':memory:')
+        self.addCleanup(self.connection.close)
+        self.connection.executescript(SCHEMA)
+
+    def member(self, symbol, end='2099-12-31'):
+        self.connection.execute('insert into members values(?,?,?)',
+                                (symbol, '1996-01-01', end))
+
+    def ledger(self, symbol, end='2019-08-09', source='yahoo_relay',
+               reason='provider_not_found', basis='total_return'):
+        self.member(symbol, end)
+        self.connection.execute(
+            'insert into source_absence_acceptance'
+            '(symbol,source,basis,reason,http_status,membership_end,runner)'
+            ' values(?,?,?,?,?,?,?)',
+            (symbol, source, basis, reason,
+             200 if reason == 'provider_no_window_history' else 404, end, 'test'))
+
+    def test_both_closure_reasons_suppress_and_a_live_member_never_does(self):
+        self.ledger('AET')                                            # 权威 Not Found
+        self.ledger('CTRA', reason='provider_no_window_history')      # 窗口已铺满
+        self.member('AAPL')                                           # 现役，没有台账
+        self.assertEqual(
+            absence.closed_by_ledger(Connection(self.connection), 'yahoo_relay'),
+            {'AET': ('provider_not_found', '2019-08-09'),
+             'CTRA': ('provider_no_window_history', '2019-08-09')})
+
+    def test_a_reanchor_or_foreign_source_row_suppresses_nothing(self):
+        self.ledger('ALTR')
+        self.ledger('WFM', source='stockanalysis')      # 别的源的结案管不着 Yahoo 通道
+        # members 是按证据重建的投影：身份复核改了 end_date，锚点就对不上，自动回到采集合。
+        self.connection.execute("update members set end_date='2019-07-31' where symbol='ALTR'")
+        self.assertEqual(
+            absence.closed_by_ledger(Connection(self.connection), 'yahoo_relay'), {})
+        self.assertEqual(
+            sorted(absence.closed_by_ledger(Connection(self.connection), 'stockanalysis')),
+            ['WFM'])
+
+    def test_the_relay_read_and_the_backfill_query_agree_on_one_fixture(self):
+        """两个采集器共用一条判据：台账说结案的，补采集合同样不该要。
+
+        判据分叉一次，「为什么这只没打」就再没有单一答案了。
+        """
+        self.ledger('CLOSED')
+        self.member('OPEN')
+        for symbol in ('CLOSED', 'OPEN'):
+            self.connection.execute("insert into series_pick values(?,?,?)",
+                                    (symbol, 'price_only', False))
+        self.connection.commit()
+        cursor = Cursor(self.connection)
+        self.assertEqual(backfill.targets(cursor, 100), ['OPEN'])
+        self.assertEqual(sorted(absence.closed_by_ledger(Connection(self.connection),
+                                                        'yahoo_relay')), ['CLOSED'])
+
+    def _probe(self, symbol, closed):
+        """跑一次真实 relay()，记录哪些通道真的被打过，返回 (通道名, 入库行, 月份数, stdout)。"""
+        calls = []
+        fetched = {}
+
+        def make(name, payload):
+            def fetch(*args, **kwargs):
+                calls.append(name)
+                return dict(payload)
+            return fetch
+
+        order = [('alphavantage', 'fetch_av'), ('yahoo_relay', 'fetch_yahoo_relay'),
+                 ('eodhd', 'fetch_eodhd'), ('hf_ayushkhaire', 'fetch_hf'),
+                 ('sina_repaired', 'sina_local')]
+        payloads = {'hf_ayushkhaire': {'2015-06': (10.0, 10.0)}}
+        output = io.StringIO()
+        saved = {attr: getattr(relay_source, attr) for _, attr in order}
+        with contextlib.redirect_stdout(output):
+            for name, attr in order:
+                setattr(relay_source, attr, make(name, payloads.get(name, {})))
+            try:
+                with patch.object(relay_source, 'has_protected_history', return_value=False), \
+                     patch.object(relay_source.ingest_validate, 'check_payload',
+                                  return_value=(True, 'ok', None)):
+                    rows, used_av, months = relay_source.relay(symbol, {}, 0, closed)
+            finally:
+                for attr, original in saved.items():
+                    setattr(relay_source, attr, original)
+        return calls, rows, used_av, months, output.getvalue()
+
+    def test_a_closed_absence_skips_the_yahoo_channel_and_keeps_the_other_sources(self):
+        calls, rows, used_av, months, printed = self._probe(
+            'AET', {'AET': ('provider_not_found', '2019-08-09')})
+        self.assertNotIn('yahoo_relay', calls)
+        self.assertEqual(months, 1, '其余源照打，不能整票抑制')
+        self.assertEqual([r[4] for r in rows], ['hf_ayushkhaire'])
+        self.assertIn('AET/yahoo_relay', printed)
+        self.assertIn('provider_not_found', printed)       # 抑制必须说得出依据
+
+    def test_a_symbol_without_a_ledger_row_still_probes_yahoo(self):
+        calls, rows, used_av, months, printed = self._probe('AAPL', {})
+        self.assertIn('yahoo_relay', calls)
+        self.assertNotIn('yahoo_relay 已在结案台账', printed)
+
+
+class RelayLedgerFailure(unittest.TestCase):
+    """台账读不到时必须什么都不抑制：读失败不是「台账说不用打」。"""
+
+    def test_an_unreadable_ledger_probes_every_channel(self):
+        out = io.StringIO()
+        with patch.object(relay_source, 'db', side_effect=RuntimeError('connection reset')), \
+             contextlib.redirect_stdout(out):
+            self.assertEqual(relay_source.closed_yahoo_symbols(), {})
+        self.assertIn('结案台账', out.getvalue())
+
+    def test_a_ledger_query_that_dies_midway_suppresses_nothing(self):
+        out = io.StringIO()
+        broken = MagicMock()
+        broken.cursor.side_effect = RuntimeError('no such table')
+        with patch.object(relay_source, 'db', return_value=broken), \
+             contextlib.redirect_stdout(out):
+            self.assertEqual(relay_source.closed_yahoo_symbols(), {})
+        self.assertIn('不抑制', out.getvalue())
 
 
 if __name__ == '__main__':

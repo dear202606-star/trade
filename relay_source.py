@@ -33,6 +33,8 @@ import urllib.request
 import psycopg2
 import psycopg2.extras
 
+import source_absence as absence
+
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 except Exception:
@@ -265,11 +267,36 @@ def has_protected_history(sym):
         return row[0]
 
 
-def relay(sym, k, av_left):
-    """按优先级逐源取数，返回该标的的候选行 [(sym,month,adj,raw,source,quality,basis)]"""
+def closed_yahoo_symbols():
+    """已被结案台账判过「Yahoo 给不出这个身份的全收益」的标的，整轮只查一次。
+
+    读不到一律返回空集：宁可贵打一次 404，也不能把「读不到台账」洗成
+    「台账说不用打」——那正是恒绿门禁的成因。
+    """
+    try:
+        connection = db()
+    except Exception as e:
+        print("  ! 结案台账连不上（%s）→ 本轮不抑制任何通道" % str(e)[:60], flush=True)
+        return {}
+    try:
+        return absence.closed_by_ledger(connection, "yahoo_relay")
+    except Exception as e:
+        print("  ! 结案台账读不到（%s）→ 本轮不抑制任何通道" % str(e)[:60], flush=True)
+        return {}
+    finally:
+        connection.close()
+
+
+def relay(sym, k, av_left, closed_absences=None):
+    """按优先级逐源取数，返回该标的的候选行 [(sym,month,adj,raw,source,quality,basis)]
+
+    closed_absences 只关掉已结案的那一条通道（Yahoo），其余源照打：台账说的是
+    「这个源给不出这个身份的全收益」，从没说过这只票在别的源里也没有。
+    """
     if has_protected_history(sym):
         print("    跳过 %s：存在已保护历史；新增月份须使用有日期边界的采集路径" % sym, flush=True)
         return [], False, 0
+    closed = closed_absences or {}
     rows, used_av = [], False
     got = {}
     for src, fn in (("alphavantage", lambda: fetch_av(sym, k.get("alphavantage_key", ""))),
@@ -280,6 +307,11 @@ def relay(sym, k, av_left):
         if src == "alphavantage" and av_left <= 0:
             continue
         if src == "alphavantage" and not k.get("alphavantage_key"):
+            continue
+        if src == "yahoo_relay" and sym in closed:
+            reason, anchor = closed[sym]
+            print("    ⊘ %s/yahoo_relay 已在结案台账（%s，退市锚点 %s）"
+                  "→ 本轮不打 Yahoo，其余源照打" % (sym, reason, anchor), flush=True)
             continue
         try:
             data = fn()
@@ -390,6 +422,11 @@ def main():
         targets = (missing + thin) if a.gaps else (missing + thin)[:a.symbols]
         targets = targets[:a.symbols]
     print("待处理 %d 只（完全缺失 %d / 12 月不足 %d）" % (len(targets), len(missing), len(thin)))
+    closed = closed_yahoo_symbols()
+    hits = [t for t in targets if t in closed]
+    if hits:
+        print("Yahoo 结案台账命中 %d/%d 只：这些标的本轮不再打 Yahoo（其余源照打）"
+              % (len(hits), len(targets)), flush=True)
 
     _t0 = time.time()
     # 跨运行累计：今天已用掉的要从额度里扣掉，避免一天跑多次把额度重复算
@@ -400,7 +437,7 @@ def main():
     done, stats = 0, {}
     all_rows = []
     for t in targets:
-        rows, used, n = relay(t, k, av_left)
+        rows, used, n = relay(t, k, av_left, closed)
         if used:
             av_left -= 1
         all_rows += rows

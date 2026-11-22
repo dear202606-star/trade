@@ -80,6 +80,27 @@ def delisted_end(conn, symbol):
     return row[0] if row else None
 
 
+def closed_by_ledger(conn, source, basis='total_return'):
+    """结案台账里「这个源给不出这个身份的全收益、且退市今天仍成立」的标的。
+
+    返回 {symbol: (reason, 退市锚点)}，给 relay_source 的接力循环按通道跳过用。
+    判据与 fill_yahoo_gaps.TARGET_SQL 的 not exists 子句一字不差：membership_end
+    必须等于当前 members.end_date 且已过期——标的重新上市或身份被复核改期，
+    锚点就对不上，自动回到采集合，不靠删记录（台账 append-only）。
+
+    查不到（表缺失、网络故障）由调用方按「谁都不抑」处理：读不到台账不等于
+    台账说不用打。
+    """
+    with conn.cursor() as cur:
+        cur.execute("""select a.symbol, a.reason, a.membership_end
+                         from source_absence_acceptance a
+                         join members m on m.symbol = a.symbol
+                        where a.source = %s and a.basis = %s
+                          and a.membership_end = m.end_date
+                          and a.membership_end < current_date""", (source, basis))
+        return {symbol: (reason, str(end)[:10]) for symbol, reason, end in cur.fetchall()}
+
+
 def close_absence(conn, symbol, source, http_status, runner, basis='total_return'):
     """供应商权威 Not Found → 按 price_only 结案；返回是否真的结案。
 

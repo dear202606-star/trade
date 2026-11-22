@@ -5,6 +5,11 @@ name: 探测 Yahoo 可达性
 
 on:
   workflow_dispatch:
+    inputs:
+      symbols:
+        description: "逐通道取证的标的（空格分隔，留空只跑可达性探测）"
+        required: false
+        default: ""
 
 jobs:
   probe:
@@ -54,3 +59,12 @@ jobs:
           except Exception as e:
               print("curl_cffi ERR:", str(e)[:90])
           PY
+
+      # 结案台账把 404 当成 Yahoo 的权威缺席，但中转自己也会回 404。这个步骤逐通道
+      # 打印正文形状，用来判定某条 provider_not_found 到底是源说的还是代理说的。
+      # 传参走 env：github.event.inputs.* 是可控字段，不进 shell 插值。
+      - name: 缺席取证（谁在说「没有这个代码」）
+        if: ${{ github.event.inputs.symbols != '' }}
+        env:
+          SYMBOLS: ${{ github.event.inputs.symbols }}
+        run: python probe_absence.py

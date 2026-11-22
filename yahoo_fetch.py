@@ -133,6 +133,23 @@ def _sym(s):
     return s.replace(".", "-")
 
 
+def build_url(name, tpl, sym, tail):
+    """一条通道实际会被打到的 URL（fetch 与逐通道取证脚本共用，避免探针自创口径）。
+
+    代理型通道必须把内层查询整体编码。旧写法把 period1/period2/interval 直接拼在
+    代理自己的 query 上，Yahoo 收到的是无参 /v8/finance/chart/SYM，codetabs 因此
+    稳定 400 Bad Request。
+    """
+    qs = tail[1:] if tail.startswith("?") else tail
+    if "?quest=" in tpl or "?url=" in tpl:
+        url = (tpl % _sym(sym)) + urllib.parse.quote("?" + qs, safe="")
+    else:
+        url = (tpl % _sym(sym)) + tail
+    if name == "translate":
+        url += "&_x_tr_sl=en&_x_tr_tl=zh-CN&_x_tr_hl=en"
+    return url
+
+
 def fetch(sym, tries=SWEEP_TRIES):
     """轮换取历史，返回覆盖最完整的一次；机群全部失败才返回空 Bars；
     Yahoo 权威判定不存在且一无所获时抛 SymbolNotFound。
@@ -161,18 +178,7 @@ def fetch(sym, tries=SWEEP_TRIES):
         _idx["i"] += 1
         if _cooldown.get(name, 0) > time.time():
             continue
-        qs = tail[1:] if tail.startswith("?") else tail
-        if "?quest=" in tpl or "?url=" in tpl:
-            # 内层查询必须整体编码。旧写法把 period1/period2/interval 直接拼在
-            # 代理自己的 query 上，Yahoo 收到的是无参 /v8/finance/chart/SYM，
-            # codetabs 因此稳定 400 Bad Request。但「只回几根月线」不能一律归给它：
-            # 2026-11-22 实测 SATS 回 3 根、BBBY 回 5 根，meta.firstTradeDate 分别是
-            # 2026-10 与 2026-07——重新上市的那段历史本来就只这么长，源里没有。
-            url = (tpl % _sym(sym)) + urllib.parse.quote("?" + qs, safe="")
-        else:
-            url = (tpl % _sym(sym)) + tail
-        if name == "translate":
-            url += "&_x_tr_sl=en&_x_tr_tl=zh-CN&_x_tr_hl=en"
+        url = build_url(name, tpl, sym, tail)
         best.attempts += 1
         try:
             raw = urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=45) \
