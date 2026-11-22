@@ -4,7 +4,9 @@
 检查分四组
   A. 数据覆盖：12 月在册覆盖、全收益占比、完全缺失标的
   B. 数据质量：连续性（单月跳变）、价格合理性、口径自证
-  C. 产物一致：signal == equity 持仓、逐年复利 == 累计、曲线末点 == 累计
+  C. 产物一致：读在线库 site_dataset 的 b/equity、b/signal、b/strategy_history、
+     b/curve（页面真正取用的那份），验 signal == equity 持仓、逐年复利 == 累计、
+     曲线末点 == 累计
   D. 锁定就绪：是否达到 100% 全收益 + 覆盖门槛
 
 用法：python db_validate.py [--dataset NAME]
@@ -45,25 +47,6 @@ def db():
                             dbname="postgres", connect_timeout=20, sslmode="require")
 
 
-def _reason_text(ratio, cov):
-    """把「缺多少」说清楚：缺口里多少是源限制（退市票），多少是还没轮到"""
-    need = cov.get("need") or 0
-    full = cov.get("full") or 0
-    miss = cov.get("missing") or 0
-    head = "全收益口径 %.1f%%" % (100.0 * ratio)
-    if not need:
-        return head
-    tail = "已覆盖 %d/%d 只" % (full, need)
-    if miss:
-        tail += "，缺 %d 只" % miss
-        dl = cov.get("delisted_gap")
-        if dl is not None and miss:
-            share = 100.0 * dl / miss
-            if share >= 50:
-                tail += "（%.0f%% 为退市票，仅 Alpha Vantage 有数据）" % share
-    return head + " · " + tail
-
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dataset", default="")
@@ -73,7 +56,7 @@ def main():
         c = db()
         cur = c.cursor()
     except Exception as _e:
-        print("⚠ 数据库不可用（%s），本次只做校验与质量快照" % str(_e)[:60])
+        print("⚠ 数据库不可用（%s），价格类校验照做，产物一致按失败处理" % str(_e)[:60])
         c, cur = None, None
 
     # ---------- A 覆盖（数据来源：db_prices，DB 或 REST 均可）----------
@@ -133,15 +116,26 @@ def main():
             rec("抽查 %s %s→%s" % (ticker, m0, m1), "fail", "缺数据")
 
     # ---------- C 产物一致 ----------
+    # 读在线库里页面真正取用的那份载荷。此前读的是 docs/data/*.json——那只是本地
+    # 全量构建的中间产物，CI 从来不产（publish_ui.py 不跑 site_build 的 data 段），
+    # 于是这三条不变量每晚必然 fail（run 45020960684），并把事件采集与锁校验连带
+    # skip 掉。校验器该盯的是发出去的数据本身。
     try:
-        e = json.load(open(os.path.join(BASE, "docs/data/b/equity.json"), encoding="utf-8"))
-        s = json.load(open(os.path.join(BASE, "docs/data/b/signal.json"), encoding="utf-8"))
+        if c is None:
+            raise RuntimeError("数据库不可用，产物一致性无法核验")
+        payloads = {}
+        with c.cursor() as _pc:
+            _pc.execute("""select key, payload from site_dataset
+                           where key in ('b/equity', 'b/signal',
+                                         'b/strategy_history', 'b/curve')""")
+            for key, payload in _pc.fetchall():
+                payloads[key] = payload if isinstance(payload, dict) else json.loads(payload)
+        e, s = payloads["b/equity"], payloads["b/signal"]
         same = sorted(p["ticker"] for p in e["position"]) == sorted(
             x["ticker"] for x in s["official"])
         rec("signal 与 equity 持仓一致", "pass" if same else "fail", str(
             [p["ticker"] for p in e["position"]]))
-        h = json.load(open(os.path.join(BASE, "docs/data/b/strategy_history.json"), encoding="utf-8"))
-        cv = json.load(open(os.path.join(BASE, "docs/data/b/curve.json"), encoding="utf-8"))
+        h, cv = payloads["b/strategy_history"], payloads["b/curve"]
         comp = 1.0
         for r in h["years"]:
             comp *= (1 + r["ret"])
@@ -157,69 +151,12 @@ def main():
     rec("锁定就绪（100% 全收益 + 全检查通过）", "pass" if ready else "warn",
         "全收益 %.1f%%" % (100.0 * (_tr_ratio or 0)))
 
-    # ---------- 覆盖率明细（供页面显示进度）----------
-    coverage_detail = {}
-    try:
-        _c = db()
-        with _c.cursor() as _cur:
-            _cur.execute("""
-              with need as (
-                select distinct symbol from members
-                 where end_date >= '2009-01-01'
-              ), have as (
-                select symbol,
-                       count(*) filter (where basis='total_return') tr,
-                       count(*) n
-                  from series_selected where month between '2012-01' and '2025-12'
-                 group by symbol
-              )
-              select count(*) as need_total,
-                     count(*) filter (where coalesce(h.tr,0) = 0) as missing_all,
-                     count(*) filter (where coalesce(h.tr,0) > 0 and coalesce(h.tr,0) < coalesce(h.n,1)) as partial,
-                     count(*) filter (where coalesce(h.tr,0) > 0 and coalesce(h.tr,0) = coalesce(h.n,0)) as full
-                from need left join have h on h.symbol = need.symbol""")
-            _row = _cur.fetchone()
-            coverage_detail = {"need": _row[0], "missing": _row[1],
-                               "partial": _row[2], "full": _row[3]}
-            _cur.execute("""
-              select count(*) from members m
-               where m.symbol in (
-                 select symbol from members where end_date >= '2009-06-30'
-                 except
-                 select symbol from series_selected
-                  where month between '2012-01' and '2025-12' and basis='total_return')
-                 and m.end_date < '2099-01-01'""")
-            coverage_detail["delisted_gap"] = _cur.fetchone()[0]
-        _c.close()
-    except Exception as _e:
-        print("覆盖率明细失败：%s" % str(_e)[:60])
-
-    # ---------- 写站点质量快照（CI 无 DB 写权限时也可用）----------
-    try:
-        import json as _json
-        _q = {
-            "generated_at": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "total_return_ratio": round(_tr_ratio or 0, 4),
-            "degraded": (_tr_ratio or 0) < 0.999,
-            "reason": _reason_text(_tr_ratio or 0, coverage_detail),
-            "checks": [{"name": n, "status": st, "detail": d} for n, st, d in ROWS],
-            "coverage": coverage_detail,
-            "summary": {"pass": sum(1 for r in ROWS if r[1] == "pass"),
-                        "warn": sum(1 for r in ROWS if r[1] == "warn"),
-                        "fail": sum(1 for r in ROWS if r[1] == "fail")},
-        }
-        _json.dump(_q, open(os.path.join(BASE, "docs/data/quality.json"), "w", encoding="utf-8"),
-                   ensure_ascii=False, indent=1)
-        print("质量快照已写 docs/data/quality.json")
-    except Exception as _e:
-        print("质量快照写入失败：%s" % _e)
-
     # ---------- 写库 ----------
     try:
         c = db()
         c.autocommit = True
     except Exception as _e:
-        print("\n⚠ 无法写入 validations（%s），质量快照已生成" % str(_e)[:60])
+        print("\n⚠ 无法写入 validations（%s），校验结论只留在日志" % str(_e)[:60])
         return 0 if all(r[1] != "fail" for r in ROWS) else 1
     with c.cursor() as cur:
         cur.execute("select id from datasets where name=%s", (a.dataset,)) if a.dataset else None
