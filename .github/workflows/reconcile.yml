@@ -161,7 +161,10 @@ jobs:
           TRIGGER_EVENT: ${{ github.event_name }}
           UPSTREAM_RUN: ${{ github.event.workflow_run.name }}
         run: |
-          OUT=$(python3 watchdog_site_check.py 2>&1); RC=$?
+          # `OUT=$(cmd); RC=$?` 在 GitHub 的 bash -e 下，命令替换一非零就触发
+          # errexit：明细与下面所有分支全被吞掉，本步骤照样 success。11-23 夜里
+          # 页面真停更，这一步 11 次真红无一行输出、也没转派看门狗。
+          RC=0; OUT=$(python3 watchdog_site_check.py 2>&1) || RC=$?
           if [ "$RC" = 0 ]; then
             # 成功只留一行：本作业 50 次/天，每次把两条常驻 warning（health 由人工
             # 全量构建才刷新、备库一致性回执只在看门狗作业里落）刷 50 遍，读的人

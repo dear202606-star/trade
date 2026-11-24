@@ -5,6 +5,12 @@ on:
     workflows: [行情快照]
     types: [completed]
   workflow_dispatch:
+    inputs:
+      source:
+        description: 派发来源（留空 = 对账 / 人工；quotes = 行情快照采集成功后的接力）
+        required: false
+        default: ''
+        type: string
   push:
     branches: [main]
     paths:
@@ -23,6 +29,11 @@ on:
       - test_live_ranking.py
       - test_live_cash_dividends.py
       - .github/workflows/live-strategy.yml
+
+# 接力派发的运行在标题里留痕：reconcile_outputs 靠它把这类运行排除在
+# 「重算冷却 / 当日上限」之外（在途判定仍然计入）。
+run-name: >-
+  在线净值与动态排名${{ github.event_name == 'workflow_dispatch' && github.event.inputs.source == 'quotes' && ' · quotes' || '' }}
 
 permissions:
   contents: read

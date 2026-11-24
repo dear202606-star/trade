@@ -34,6 +34,9 @@ import reconcile_sessions as rs
 UTC = dt.timezone.utc
 MAX_RECOMPUTE_PER_DAY = 6
 RECOMPUTE_COOLDOWN_MIN = 30
+CLOSE_SETTLE_MIN = 90
+# 行情快照（workflow_dispatch 触发）采集成功后显式接力派发的运行，标题带此后缀。
+RELAYED_TITLE = " · quotes"
 OUTPUT_KEYS = ("quotes", "preview", "b/preview", "equity", "b/equity")
 
 
@@ -73,6 +76,20 @@ def read_outputs(cloud_url=rs.SITE_CLOUD, timeout=20):
     return out
 
 
+def closed_session_passed(quotes, now):
+    """备库这份盘中报价所属场次已经收盘并过了结算宽限。"""
+    target = str((quotes or {}).get("session") or "")
+    if not target:
+        return False
+    try:
+        import trading_window as tw
+        latest = tw.latest_closed_session(now, tw.load_calendar())
+    except Exception:                        # noqa: BLE001
+        return False
+    return bool(latest and latest["session"] == target
+                and now >= latest["close"] + dt.timedelta(minutes=CLOSE_SETTLE_MIN))
+
+
 def evaluate(quotes, outputs, now=None):
     """Detect missing/outdated A/B consumer outputs for a usable snapshot."""
     q = quotes or {}
@@ -86,6 +103,12 @@ def evaluate(quotes, outputs, now=None):
     if not target or not version:
         return {**result, "reason": "行情场次或版本未知"}
     if intraday:
+        # 备库同步只在收盘行情与净值/排名对齐时才放行收盘报价；主库已有收盘报价
+        # 而净值没算出来时，备库会一直停在该场次的盘中版。此时若判「等待收盘报价」，
+        # 就与备库闸门互相等到下一次偶然的定时运行为止。
+        if closed_session_passed(q, now or dt.datetime.now(UTC)):
+            return {**result, "need_recompute": True,
+                    "reason": "场次已收盘结算，备库仍是盘中报价，净值/排名未按收盘报价重算"}
         return {**result, "reason": "等待收盘报价"}
     missing = []
     for key in OUTPUT_KEYS[1:]:
@@ -115,6 +138,10 @@ def dispatch_allowed(runs, now, cooldown_min=RECOMPUTE_COOLDOWN_MIN,
         if created is None:
             continue
         age_min = (now - created).total_seconds() / 60
+        # 接力派发不算本机制的重试：否则每 20 分钟一次的补采会把当日上限吃光，
+        # 真正失败的那次收盘重算反而没有重试额度。
+        if str(r.get("displayTitle") or "").endswith(RELAYED_TITLE):
+            continue
         if 0 <= age_min < cooldown_min:
             return False, "重算冷却期内（%.0f 分钟 < %d）" % (age_min, cooldown_min)
         if created.astimezone(UTC) >= day_start:
@@ -129,7 +156,7 @@ def _recent_runs():
     try:
         out = subprocess.run(
             ["gh", "run", "list", "--workflow", "live-strategy.yml", "--event",
-             "workflow_dispatch", "--limit", "30", "--json", "status,createdAt"],
+             "workflow_dispatch", "--limit", "30", "--json", "status,createdAt,displayTitle"],
             check=False, capture_output=True, text=True, timeout=30).stdout.strip()
         return json.loads(out or "[]")
     except Exception:                        # noqa: BLE001
@@ -199,6 +226,7 @@ def self_test():
         ("四项收盘结果齐全", close, current, False),
         ("盘中版不重算", live, {}, False),
         ("过期盘中版等待下次行情", {**live, "fresh_until": "2026-11-10T21:59:00Z"}, {}, False),
+        ("收盘未结算的盘中版不重算", {**live, "ts": "2026-11-10T20:55:00Z"}, {}, False),
         ("行情缺场次不误判", {}, current, False),
     ]
     failed = []

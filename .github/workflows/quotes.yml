@@ -177,6 +177,17 @@ jobs:
           TASK: ${{ steps.gate.outputs.task }}
           EVENT: ${{ github.event_name }}
         run: |
+          # 2026-11-24：workflow_dispatch 触发的本工作流跑完后，GitHub 不会带起
+          # live-strategy.yml 的 workflow_run（一周实测：push 9/9、schedule 24/24、
+          # workflow_dispatch 4/130）。而 GitHub 定时这周大面积没交付，实际在干活的
+          # 全是对账派发的补采：主库报价更新了，净值没人按新报价重算，备库同步又因
+          # 「收盘行情、净值和排名尚未对齐」扣住报价，页面于是不动（11-23 全天盘中
+          # 零更新、收盘版迟到 4.5 小时，靠一次偶然交付的定时运行才恢复）。
+          # 这里显式接力：在线净值算完后会自己派发备库同步。
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            gh workflow run live-strategy.yml -f source=quotes || \
+              echo "::warning::在线净值接力派发失败，由场次对账的输出对账兜底重算"
+          fi
           if [ "$TASK" = "closing" ] && [ "$EVENT" = "schedule" ]; then
             gh workflow run db-sync.yml -f targets=turso,neon || \
               echo "::warning::备库同步派发失败，场次对账将在下一轮兜底"

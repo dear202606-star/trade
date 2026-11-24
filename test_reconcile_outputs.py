@@ -37,6 +37,26 @@ class EvaluateTests(unittest.TestCase):
         self.assertFalse(ro.evaluate(self.live, {}, NOW)["need_recompute"])
         self.assertFalse(ro.evaluate(self.live, {}, NOW + dt.timedelta(minutes=15))["need_recompute"])
 
+    def test_intraday_quote_of_closed_session_requires_recompute(self):
+        stuck = {**self.live, "ts": "2026-11-10T20:55:00Z"}
+        after = NOW + dt.timedelta(minutes=31)
+        with patch.object(ro, "closed_session_passed", return_value=True):
+            self.assertTrue(ro.evaluate(stuck, {}, after)["need_recompute"])
+
+    def test_intraday_quote_of_live_session_still_waits(self):
+        with patch.object(ro, "closed_session_passed", return_value=False):
+            self.assertFalse(ro.evaluate(self.live, {}, NOW + dt.timedelta(hours=5))["need_recompute"])
+
+    def test_closed_session_needs_settlement_grace_and_matching_session(self):
+        tuesday = {"session": "2026-11-10"}
+        self.assertFalse(ro.closed_session_passed(tuesday, dt.datetime.fromisoformat("2026-11-10T22:29:00+00:00")))
+        self.assertTrue(ro.closed_session_passed(tuesday, dt.datetime.fromisoformat("2026-11-10T22:30:00+00:00")))
+        self.assertFalse(ro.closed_session_passed({"session": "2026-11-11"},
+                                                  dt.datetime.fromisoformat("2026-11-11T15:00:00+00:00")))
+        self.assertFalse(ro.closed_session_passed({}, NOW))
+        with patch("trading_window.load_calendar", side_effect=OSError("no calendar")):
+            self.assertFalse(ro.closed_session_passed(tuesday, dt.datetime.fromisoformat("2026-11-10T23:00:00+00:00")))
+
     def test_missing_quotes_session_never_recomputes(self):
         self.assertFalse(ro.evaluate({}, self.current, NOW)["need_recompute"])
 
@@ -63,6 +83,20 @@ class DispatchGuardTests(unittest.TestCase):
 
     def test_clean_history_allows(self):
         self.assertTrue(ro.dispatch_allowed([], NOW)[0])
+
+    def test_relayed_runs_do_not_consume_cooldown_or_cap(self):
+        relayed = {"status": "completed", "createdAt": "2026-11-10T21:50:00Z",
+                   "displayTitle": "在线净值与动态排名 · quotes"}
+        self.assertTrue(ro.dispatch_allowed([relayed], NOW)[0])
+        cap = [{**relayed, "createdAt": "2026-11-10T%02d:00:00Z" % h}
+               for h in (1, 3, 5, 7, 9, 11, 13)]
+        self.assertTrue(ro.dispatch_allowed(cap, NOW)[0])
+        self.assertFalse(ro.dispatch_allowed(
+            [{**relayed, "status": "in_progress"}], NOW)[0])
+
+    def test_unmarked_runs_still_consume_cooldown(self):
+        self.assertFalse(ro.dispatch_allowed(
+            [{"status": "completed", "createdAt": "2026-11-10T21:50:00Z"}], NOW)[0])
 
     def test_missing_history_defaults_to_allow(self):
         self.assertTrue(ro.dispatch_allowed(None, NOW)[0])
@@ -119,6 +153,16 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertEqual(self.strategy.count("db-sync.yml"), 2)  # comment and command
         self.assertIn("needs: [equity, ranking]", self.strategy)
         self.assertIn("needs.equity.result == 'success' && needs.ranking.result == 'success'", self.strategy)
+
+    def test_dispatched_snapshot_relays_to_strategy(self):
+        root = Path(__file__).resolve().parent / ".github" / "workflows"
+        quotes = (root / "quotes.yml").read_text(encoding="utf-8")
+        self.assertIn('gh workflow run live-strategy.yml -f source=quotes', quotes)
+        self.assertIn('github.event_name == \'workflow_dispatch\'', quotes)
+        self.assertIn("inputs.source == 'quotes'", self.strategy)
+
+    def test_site_review_failure_survives_errexit(self):
+        self.assertIn('RC=0; OUT=$(python3 watchdog_site_check.py 2>&1) || RC=$?', self.reconcile)
 
     def test_settlement_review_is_bounded_to_exchange_close(self):
         self.assertIn("收盘结算复核（每日一次", self.reconcile)
